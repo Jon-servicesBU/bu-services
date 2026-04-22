@@ -1874,7 +1874,7 @@ async function extractDocxText(file) {
   });
 }
 
-var RATE_PROMPT = 'This is a rate sheet for a field NDT / inspection services company. Extract all pricing and return ONLY valid JSON in this exact format: {"name":"<sheet name>","customer":"<client name or empty>","effective":"<YYYY-MM-DD or today>","currency":"CAD","labour":[{"name":"<category>","stRate":<number>,"otRate":<number>,"dtRate":<number>}],"equipment":[{"name":"<item>","rate":<number>,"unit":"<day/trip/km>"}]} Extract ALL labour categories. If only one rate listed, set OT=ST*1.5, DT=ST*2. Return ONLY the JSON object.';
+var RATE_PROMPT = 'You are a data extraction assistant. Extract rate sheet pricing data and return ONLY a valid JSON object. No markdown, no explanation, no code blocks. Just the raw JSON. Use this exact structure: {"name":"rate sheet name","customer":"client name or empty string","effective":"YYYY-MM-DD","currency":"CAD","labour":[{"name":"category name","stRate":0,"otRate":0,"dtRate":0}],"equipment":[{"name":"item name","rate":0,"unit":"day"}]} Rules: all rate values must be numbers not strings. Extract every labour category. If only ST rate shown set OT=ST*1.5 and DT=ST*2. Return ONLY the JSON object starting with { and ending with }.';
 
 async function parseRateSheetText(text) {
   var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
@@ -1889,11 +1889,26 @@ async function parseRateSheetText(text) {
   if (!res.ok) throw new Error('API error ' + res.status);
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-  console.log('AI response:', txt.slice(0, 200));
+  console.log('AI response:', txt.slice(0, 300));
   var clean = txt.replace(/```json|```/g,'').trim();
   var match = clean.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
-  return JSON.parse(match[0]);
+  var jsonStr = match[0];
+  // Fix common AI JSON issues: trailing commas, unescaped quotes in values
+  jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');  // remove trailing commas
+  jsonStr = jsonStr.replace(/([\w])\s*\n\s*([\w])/g, '$1 $2'); // fix broken strings
+  try {
+    return JSON.parse(jsonStr);
+  } catch(parseErr) {
+    // Try more aggressive cleanup
+    console.log('Parse failed, trying cleanup. Error at:', parseErr.message);
+    // Remove any control characters
+    jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ');
+    // Fix single quotes used instead of double quotes (rough fix)
+    try { return JSON.parse(jsonStr); } catch(e2) {
+      throw new Error('Could not parse AI response as JSON: ' + parseErr.message);
+    }
+  }
 }
 
 async function parseRateSheetPDF(file) {
@@ -1921,11 +1936,26 @@ async function parseRateSheetPDF(file) {
   if (!res.ok) throw new Error('API error ' + res.status);
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-  console.log('AI response:', txt.slice(0, 200));
+  console.log('AI response:', txt.slice(0, 300));
   var clean = txt.replace(/```json|```/g,'').trim();
   var match = clean.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
-  return JSON.parse(match[0]);
+  var jsonStr = match[0];
+  // Fix common AI JSON issues: trailing commas, unescaped quotes in values
+  jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');  // remove trailing commas
+  jsonStr = jsonStr.replace(/([\w])\s*\n\s*([\w])/g, '$1 $2'); // fix broken strings
+  try {
+    return JSON.parse(jsonStr);
+  } catch(parseErr) {
+    // Try more aggressive cleanup
+    console.log('Parse failed, trying cleanup. Error at:', parseErr.message);
+    // Remove any control characters
+    jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ');
+    // Fix single quotes used instead of double quotes (rough fix)
+    try { return JSON.parse(jsonStr); } catch(e2) {
+      throw new Error('Could not parse AI response as JSON: ' + parseErr.message);
+    }
+  }
 }
 
 function showImportPreview(data) {
