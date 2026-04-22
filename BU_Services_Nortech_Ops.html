@@ -1805,55 +1805,19 @@ function renderCSList(){
   }).join('');
 }
 
-function viewCS(id){
-  var c=_chargeSheets.find(function(c){return c.id===id;}); if(!c)return;
-  var job=_jobs.find(function(j){return j.id===c.jobId;})||{};
-  var rs=_rateSheets.find(function(r){return r.id===c.rateSheetId;})||{};
-  var stRate=(rs.labour&&rs.labour[0])?rs.labour[0].stRate||0:0;
-  var otRate=(rs.labour&&rs.labour[0])?rs.labour[0].otRate||stRate*1.5:0;
-  var dtRate=(rs.labour&&rs.labour[0])?rs.labour[0].dtRate||stRate*2:0;
-
-  document.getElementById('cs-view-title').textContent=c.csNum+' — '+c.client;
-  var body=document.getElementById('cs-view-body');
-  body.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem .75rem;font-size:.78rem;margin-bottom:1rem">'
-    +'<div><div style="color:var(--muted);font-size:.65rem;text-transform:uppercase;font-weight:700;margin-bottom:.15rem">Technician</div><div style="font-weight:600">'+c.technician+'</div></div>'
-    +'<div><div style="color:var(--muted);font-size:.65rem;text-transform:uppercase;font-weight:700;margin-bottom:.15rem">Week Of</div><div>'+fmtDate(c.weekStart)+'</div></div>'
-    +'<div><div style="color:var(--muted);font-size:.65rem;text-transform:uppercase;font-weight:700;margin-bottom:.15rem">Job</div><div style="font-size:.72rem">'+(c.site||'—').slice(0,40)+'</div></div>'
-    +'</div>'
-    +'<table class="data-table" style="margin-bottom:.75rem">'
-    +'<thead><tr><th>Date</th><th>Description</th><th>ST</th><th>OT</th><th>DT</th><th>Equipment</th><th style="text-align:right">Amount</th></tr></thead>'
-    +'<tbody>'+(c.days||[]).map(function(d){
-      var amt=d.st*stRate+d.ot*otRate+d.dt*dtRate;
-      return '<tr>'
-        +'<td style="white-space:nowrap;font-size:.72rem">'+d.day+' '+fmtDate(d.date)+'</td>'
-        +'<td style="font-size:.72rem">'+d.description+'</td>'
-        +'<td style="text-align:center;font-family:var(--mono);font-size:.72rem">'+d.st+'</td>'
-        +'<td style="text-align:center;font-family:var(--mono);font-size:.72rem">'+d.ot+'</td>'
-        +'<td style="text-align:center;font-family:var(--mono);font-size:.72rem">'+d.dt+'</td>'
-        +'<td style="font-size:.72rem">'+d.equipment+'</td>'
-        +'<td style="text-align:right;font-family:var(--mono);font-size:.75rem">'+fmtMoney(amt)+'</td>'
-      +'</tr>';
-    }).join('') +'</tbody></table>'
-    +((c.extras&&c.extras.length)?
-      '<div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Additional Items</div>'
-      +'<table class="data-table" style="margin-bottom:.75rem"><tbody>'
-      +c.extras.map(function(e){return'<tr><td>'+e.description+'</td><td style="text-align:right;font-family:var(--mono)">'+fmtMoney(e.amount)+'</td></tr>';}).join('')
-      +'</tbody></table>':''
-    )
-    +'<div style="display:flex;justify-content:flex-end;gap:1.5rem;padding:.6rem 0;border-top:1px solid var(--border);font-size:.8rem">'
-    +'<span><span style="color:var(--muted)">Labour:</span> <span style="font-family:var(--mono);font-weight:700">'+fmtMoney(c.labour)+'</span></span>'
-    +'<span><span style="color:var(--muted)">Expenses:</span> <span style="font-family:var(--mono);font-weight:700">'+fmtMoney(c.expenses)+'</span></span>'
-    +'<span><span style="color:var(--muted)">Total:</span> <span style="font-family:var(--mono);font-weight:700;color:var(--nor-accent)">'+fmtMoney(c.total)+'</span></span>'
-    +'</div>'
-    +(c.notes?'<div style="font-size:.72rem;color:var(--muted);margin-top:.3rem">Notes: '+c.notes+'</div>':'');
-
-  var footer=document.getElementById('cs-view-footer');
-  footer.innerHTML='<button class="btn btn-ghost" onclick="closeModal(\'cs-view-modal\')">Close</button>';
-  if(c.status==='draft') footer.innerHTML+=' <button class="btn btn-secondary" onclick="editCS(\''+id+'\')">Edit</button> <button class="btn btn-primary" onclick="submitCS(\''+id+'\')">Submit for Approval</button>';
-  if(c.status==='pending') footer.innerHTML+=' <button class="btn btn-success" onclick="approveCS(\''+id+'\')">✓ Approve</button>';
-  if(c.status==='approved') footer.innerHTML+=' <button class="btn btn-secondary" onclick="openInvoiceModal(\''+c.client+'\');closeModal(\'cs-view-modal\')">Generate Invoice</button>';
-
-  document.getElementById('cs-view-modal').classList.add('open');
+function viewCS(id) {
+  // In the new WO system, charge sheet views open the WO modal
+  var cs = _chargeSheets.find(function(c){ return c.id === id; });
+  if (cs) {
+    // Old charge sheet — show in a simple toast and log
+    var jobId = cs.jobId;
+    var wo = _jobs.find(function(j){ return j.id === jobId; });
+    if (wo) { openWOModal(wo.id); return; }
+  }
+  // Fallback: try treating id as a WO id
+  var wo = _jobs.find(function(j){ return j.id === id; });
+  if (wo) { openWOModal(wo.id); return; }
+  toast('Work order not found', 'error');
 }
 
 async function approveCS(id){
@@ -2700,372 +2664,8 @@ function openWOModal(editId) {
   document.getElementById('job-modal').classList.add('open');
 }
 
-// Also expose as openJobModal for legacy callers
-function openJobModal(id) { openWOModal(id); }
-function openNewJobFlow() { openWOModal(); }
-
-// ── Save Work Order ───────────────────────────────────────────────────────────
-async function saveWO(status) {
-  var client = document.getElementById('job-client').value.trim();
-  var site   = document.getElementById('job-site').value.trim();
-  var date   = document.getElementById('wo-date').value;
-  if (!client || !site) { toast('Client and location are required', 'error'); return; }
-
-  // Collect labour rows
-  var labourRows = [];
-  for (var i = 1; i <= _csLabourRowCount; i++) {
-    var techEl = document.getElementById('cs-lb-tech-' + i);
-    var catEl  = document.getElementById('cs-lb-cat-' + i);
-    var regEl  = document.getElementById('cs-lb-st-' + i);
-    var otEl   = document.getElementById('cs-lb-ot-' + i);
-    var dtEl   = document.getElementById('cs-lb-dt-' + i);
-    var nsEl   = document.getElementById('cs-lb-ns-' + i);
-    var startEl= document.getElementById('cs-lb-start-' + i);
-    var endEl  = document.getElementById('cs-lb-end-' + i);
-    var dateEl = document.getElementById('cs-lb-date-' + i);
-    if (!techEl) continue;
-    var reg = parseFloat(regEl ? regEl.value : 0) || 0;
-    var ot  = parseFloat(otEl  ? otEl.value  : 0) || 0;
-    var dt  = parseFloat(dtEl  ? dtEl.value  : 0) || 0;
-    var ns  = parseFloat(nsEl  ? nsEl.value  : 0) || 0;
-    if (!techEl.value && !reg && !ot && !dt && !ns) continue;
-    labourRows.push({
-      technician: techEl ? techEl.value : '',
-      category:   catEl  ? catEl.value  : '',
-      regHrs: reg, otHrs: ot, dtHrs: dt, nightHrs: ns,
-      startTime:  startEl ? startEl.value : '',
-      endTime:    endEl   ? endEl.value   : '',
-      date:       dateEl  ? dateEl.value  : date,
-    });
-  }
-
-  // Equipment rows
-  var equipRows = [];
-  document.querySelectorAll('[id^=cs-eq-row-]').forEach(function(row) {
-    var idx  = row.id.replace('cs-eq-row-', '');
-    var item = (document.getElementById('cs-eq-item-' + idx)  || {}).value || (document.getElementById('cs-eq-manual-' + idx) || {}).value || '';
-    var qty  = parseFloat((document.getElementById('cs-eq-qty-'   + idx) || {}).value) || 0;
-    var unit = (document.getElementById('cs-eq-unit-'  + idx) || {}).value || '';
-    var note = (document.getElementById('cs-eq-notes-' + idx) || {}).value || '';
-    if (item || qty) equipRows.push({ item, qty, unit, notes: note });
-  });
-
-  // Consumable rows
-  var consumables = [];
-  document.querySelectorAll('[id^=cs-con-row-]').forEach(function(row) {
-    var idx  = row.id.replace('cs-con-row-', '');
-    var item = (document.getElementById('cs-con-item-' + idx) || {}).value || (document.getElementById('cs-con-manual-' + idx) || {}).value || '';
-    var qty  = parseFloat((document.getElementById('cs-con-qty-' + idx) || {}).value) || 0;
-    var unit = (document.getElementById('cs-con-unit-' + idx) || {}).value || '';
-    if (item || qty) consumables.push({ item, qty, unit });
-  });
-
-  // Film rows
-  var film = [];
-  document.querySelectorAll('[id^=cs-film-row-]').forEach(function(row) {
-    var idx  = row.id.replace('cs-film-row-', '');
-    var type = (document.getElementById('cs-film-type-' + idx) || {}).value || '';
-    var size = (document.getElementById('cs-film-size-' + idx) || {}).value || '';
-    var qty  = parseFloat((document.getElementById('cs-film-qty-' + idx) || {}).value) || 0;
-    if (type || qty) film.push({ type, pipeSize: size, qty });
-  });
-
-  // Travel
-  var travel = {
-    km:      parseFloat((document.getElementById('cs-travel-km')       || {}).value) || 0,
-    kmRate:  parseFloat((document.getElementById('cs-travel-km-rate')  || {}).value) || 1.20,
-    hotels:  parseFloat((document.getElementById('cs-travel-hotels')   || {}).value) || 0,
-    camp:    parseFloat((document.getElementById('wo-travel-camp')     || {}).value) || 0,
-    flights: parseFloat((document.getElementById('cs-travel-flights')  || {}).value) || 0,
-    loaTechs:parseFloat((document.getElementById('cs-travel-loa-techs')|| {}).value) || 0,
-    loaDays: parseFloat((document.getElementById('cs-travel-loa-days') || {}).value) || 0,
-    loaRate: parseFloat((document.getElementById('cs-travel-loa-rate') || {}).value) || 70,
-    misc:    parseFloat((document.getElementById('wo-travel-misc')     || {}).value) || 0,
-    miscDesc:(document.getElementById('wo-travel-misc-desc') || {}).value || '',
-    customerContact: (document.getElementById('wo-customer-contact') || {}).value || '',
-  };
-
-  // Total hours summary
-  var totalReg = labourRows.reduce(function(s,r){ return s + (r.regHrs||0); }, 0);
-  var totalOT  = labourRows.reduce(function(s,r){ return s + (r.otHrs||0); }, 0);
-  var totalDT  = labourRows.reduce(function(s,r){ return s + (r.dtHrs||0); }, 0);
-
-  var id = _editWOId || uid();
-  var existing = _editWOId ? (_jobs.find(function(j){ return j.id === _editWOId; }) || {}) : {};
-
-  var data = {
-    id,
-    woNum:  document.getElementById('job-number').value.trim() || nextNum('W-', _jobs, 'woNum'),
-    // Keep number = woNum for backward compat
-    number: document.getElementById('job-number').value.trim() || nextNum('W-', _jobs, 'woNum'),
-    client,
-    site,
-    date,
-    location: site,
-    equipOwner:   (document.getElementById('wo-equip-owner') || {}).value || '',
-    province:     (document.getElementById('job-province')   || {}).value || 'AB',
-    po:           (document.getElementById('job-po')         || {}).value || '',
-    jobNum:       (document.getElementById('job-client-wo')  || {}).value || '',
-    afe:          (document.getElementById('wo-afe')         || {}).value || '',
-    rig:          (document.getElementById('wo-rig')         || {}).value || '',
-    notes:        (document.getElementById('cs-notes')       || {}).value || '',
-    fieldReports: (document.getElementById('wo-field-reports')|| {}).value || '',
-    labourRows, equipRows, consumables, film, travel,
-    totalReg, totalOT, totalDT,
-    status: existing.status === 'approved' || existing.status === 'invoiced' || existing.status === 'paid'
-      ? existing.status  // don't downgrade
-      : status,
-    rateSheetId: existing.rateSheetId || '',
-    created:  existing.created || today(),
-    modified: today(),
-  };
-
-  try {
-    await sbUpsert('jobs', id, data);
-    if (_editWOId) { _jobs = _jobs.map(function(j){ return j.id === id ? data : j; }); }
-    else { _jobs.unshift(data); }
-    closeModal('job-modal');
-    renderJobs(); renderDashboard(); updatePendingBadge();
-    toast(status === 'submitted' ? 'Work order submitted' : 'Draft saved', 'success');
-  } catch(e) { toast('Save failed: ' + e.message, 'error'); }
-}
-
-// ── Render Work Orders ────────────────────────────────────────────────────────
-function renderJobs() {
-  var q      = (document.getElementById('job-search')        || {}).value || '';
-  var filter = (document.getElementById('job-filter-status') || {}).value || '';
-
-  var filtered = _jobs.filter(function(j) {
-    if (filter && j.status !== filter) return false;
-    if (!q) return true;
-    return ((j.client||'') + (j.site||'') + (j.woNum||j.number||'') + (j.po||'') + (j.jobNum||'')).toLowerCase().includes(q.toLowerCase());
-  });
-
-  var grid  = document.getElementById('jobs-grid');
-  var empty = document.getElementById('jobs-empty');
-  if (!grid) return;
-
-  if (!filtered.length) {
-    grid.innerHTML = '';
-    if (empty) empty.style.display = 'block';
-    return;
-  }
-  if (empty) empty.style.display = 'none';
-
-  grid.innerHTML = filtered.map(function(j) {
-    var woNum    = j.woNum || j.number || '—';
-    var totalReg = j.totalReg || (j.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0);},0);
-    var totalOT  = j.totalOT  || (j.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0);},0);
-    var techs    = [...new Set((j.labourRows||[]).map(function(r){ return r.technician; }).filter(Boolean))];
-    var province = (CANADA_TAX_RATES[j.province] || {}).name || j.province || '';
-
-    return '<div class="card" style="padding:0;overflow:hidden" id="job-card-' + j.id + '">'
-      // Header — clickable
-      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer" data-toggle-job="' + j.id + '">'
-        + '<div style="flex:1;min-width:0">'
-          + '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;flex-wrap:wrap">'
-            + '<span style="font-family:var(--ffc);font-size:.95rem;font-weight:800">' + j.client + '</span>'
-            + '<span style="font-family:var(--mono);font-size:.72rem;color:var(--nor-accent)">' + woNum + '</span>'
-            + chipHtml(j.status)
-          + '</div>'
-          + '<div style="font-size:.78rem;color:var(--muted);margin-bottom:.15rem">' + (j.site||j.location||'') + '</div>'
-          + '<div style="display:flex;gap:.75rem;font-size:.68rem;color:var(--faint);flex-wrap:wrap">'
-            + (j.po     ? '<span>PO: '  + j.po     + '</span>' : '')
-            + (j.jobNum ? '<span>Job: ' + j.jobNum + '</span>' : '')
-            + (j.afe    ? '<span>AFE: ' + j.afe    + '</span>' : '')
-            + (j.date   ? '<span>' + fmtDate(j.date) + '</span>' : '')
-            + (province ? '<span>' + province + '</span>' : '')
-          + '</div>'
-        + '</div>'
-        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;margin-left:.75rem">'
-          + '<span style="font-size:.62rem;color:var(--muted)">'
-            + (totalReg ? totalReg + ' reg' : '')
-            + (totalOT  ? ' · ' + totalOT + ' OT' : '')
-            + ' hrs'
-          + '</span>'
-          + '<span style="font-size:.62rem;color:var(--faint)">' + (techs.length ? techs.join(', ').slice(0,30) : 'No techs') + '</span>'
-          + '<span style="font-size:.8rem;color:var(--faint)" id="job-expand-icon-' + j.id + '">▼</span>'
-        + '</div>'
-      + '</div>'
-      // Detail panel
-      + '<div id="job-detail-' + j.id + '" style="display:none;border-top:1px solid var(--border);background:var(--surface2)">'
-        + '<div style="padding:.85rem 1.1rem">'
-          // Details grid
-          + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem .75rem;font-size:.74rem;margin-bottom:.85rem">'
-            + _woDetailField('WO #',           woNum)
-            + _woDetailField('Client',          j.client)
-            + _woDetailField('Date',            fmtDate(j.date))
-            + _woDetailField('Status',          chipHtml(j.status))
-            + _woDetailField('Location',        j.site||j.location||'—', 2)
-            + _woDetailField('Equipment Owner', j.equipOwner||'—')
-            + _woDetailField('Province',        province||'—')
-            + _woDetailField('P.O. #',          j.po||'—')
-            + _woDetailField('Job #',           j.jobNum||'—')
-            + _woDetailField('AFE #',           j.afe||'—')
-            + _woDetailField('RIG #',           j.rig||'—')
-          + '</div>'
-          // Labour summary
-          + ((j.labourRows||[]).length ? '<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.35rem">Labour</div>'
-            + '<table style="width:100%;border-collapse:collapse;font-size:.73rem;margin-bottom:.75rem">'
-            + '<thead><tr style="border-bottom:1px solid var(--border)">'
-              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Date</th>'
-              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Technician</th>'
-              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Category</th>'
-              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:center;text-transform:uppercase;letter-spacing:1.5px">Reg</th>'
-              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:center;text-transform:uppercase;letter-spacing:1.5px">OT</th>'
-              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Start</th>'
-              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">End</th>'
-            + '</tr></thead>'
-            + '<tbody>' + (j.labourRows||[]).map(function(r) {
-                return '<tr style="border-bottom:1px solid rgba(255,255,255,.03)">'
-                  + '<td style="padding:.25rem .4rem;font-size:.7rem">' + (fmtDate(r.date)||'—') + '</td>'
-                  + '<td style="padding:.25rem .4rem;font-weight:600">' + (r.technician||'—') + '</td>'
-                  + '<td style="padding:.25rem .4rem;font-size:.7rem;color:var(--muted)">' + (r.category||'—') + '</td>'
-                  + '<td style="padding:.25rem .4rem;text-align:center;font-family:var(--mono)">' + (r.regHrs||0) + '</td>'
-                  + '<td style="padding:.25rem .4rem;text-align:center;font-family:var(--mono)">' + (r.otHrs||0) + '</td>'
-                  + '<td style="padding:.25rem .4rem;font-size:.7rem;color:var(--muted)">' + (r.startTime||'—') + '</td>'
-                  + '<td style="padding:.25rem .4rem;font-size:.7rem;color:var(--muted)">' + (r.endTime||'—') + '</td>'
-                + '</tr>';
-              }).join('')
-            + '</tbody></table>' : '')
-          // Consumables
-          + ((j.consumables||[]).length ? '<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.3rem">Consumables</div>'
-            + (j.consumables||[]).map(function(c){ return '<span style="font-size:.74rem;margin-right:.75rem">' + c.item + ' × ' + c.qty + '</span>'; }).join('') + '<br><br>' : '')
-          // Notes
-          + (j.notes ? '<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.25rem">Description of Service</div>'
-            + '<div style="font-size:.74rem;color:var(--muted);white-space:pre-line;margin-bottom:.75rem">' + j.notes + '</div>' : '')
-          // Field reports
-          + (j.fieldReports ? '<div style="font-size:.74rem;color:var(--muted)">Field Reports: ' + j.fieldReports + '</div>' : '')
-        + '</div>'
-      + '</div>'
-      // Action buttons
-      + '<div style="padding:.55rem 1.1rem;display:flex;gap:.4rem;flex-wrap:wrap">'
-        + '<button class="btn btn-primary btn-sm" data-open-wo="' + j.id + '">Edit / Add Work</button>'
-        + '<button class="btn btn-secondary btn-sm" data-export-wo="' + j.id + '">⬇ Export</button>'
-        + (j.status === 'submitted' && isAdmin() ? '<button class="btn btn-success btn-sm" data-approve-wo="' + j.id + '">✓ Approve</button>' : '')
-        + (j.status === 'approved'  && isAdmin() ? '<button class="btn btn-secondary btn-sm" data-invoice-wo="' + j.id + '">🧾 Generate Invoice</button>' : '')
-        + (j.status === 'approved'  && isAdmin() ? '<button class="btn btn-ghost btn-sm" data-unapprove-wo="' + j.id + '">↩ Unapprove</button>' : '')
-        + (j.status === 'submitted' ? '<button class="btn btn-ghost btn-sm" data-unapprove-wo="' + j.id + '">↩ Back to Draft</button>' : '')
-        + (isAdmin() && j.status !== 'invoiced' && j.status !== 'paid'
-          ? '<button class="btn btn-ghost btn-sm" data-delete-wo="' + j.id + '" style="color:#EF4444;border-color:rgba(185,28,28,.3)">🗑 Delete</button>'
-          : '')
-      + '</div>'
-    + '</div>';
-  }).join('');
-}
-
-function _woDetailField(label, value, span) {
-  return '<div' + (span ? ' style="grid-column:span ' + span + '"' : '') + '>'
-    + '<div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.1rem">' + label + '</div>'
-    + '<div>' + (value||'—') + '</div>'
-  + '</div>';
-}
-
-// ── WO Status Actions ─────────────────────────────────────────────────────────
-async function approveWO(id) {
-  var wo = _jobs.find(function(j){ return j.id === id; }); if (!wo) return;
-  if (!confirm('Approve Work Order ' + (wo.woNum||wo.number) + '?\n\nThis will mark it ready for invoicing.')) return;
-  wo.status = 'approved'; wo.approvedDate = today(); wo.modified = today();
-  try {
-    await sbUpsert('jobs', id, wo);
-    renderJobs(); renderDashboard();
-    toast('Work order approved', 'success');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-async function unapproveWO(id) {
-  var wo = _jobs.find(function(j){ return j.id === id; }); if (!wo) return;
-  var prev = wo.status === 'approved' ? 'submitted' : 'draft';
-  if (!confirm('Return Work Order ' + (wo.woNum||wo.number) + ' to ' + prev + '?')) return;
-  wo.status = prev; wo.approvedDate = null; wo.modified = today();
-  try {
-    await sbUpsert('jobs', id, wo);
-    renderJobs(); renderDashboard();
-    toast('Work order returned to ' + prev, 'info');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-function updatePendingBadge() {
-  var pending = _jobs.filter(function(j){ return j.status === 'submitted'; }).length;
-  var badge = document.getElementById('pending-badge');
-  if (badge) { badge.textContent = pending + ' Pending'; badge.style.display = pending ? 'inline' : 'none'; }
-}
-
-// ── Labour row — updated for WO (date + start/end time) ──────────────────────
-function addLabourRow(dayLabel, labOpts, prefill) {
-  _csLabourRowCount++;
-  var idx = _csLabourRowCount;
-  var p   = prefill || {};
-  var lo  = labOpts || getLabourOptions({});
-  var to  = getTechOptions();
-  var defaultDate = (document.getElementById('wo-date') || {}).value || today();
-
-  var tbody = document.getElementById('cs-labour-body');
-  if (!tbody) return;
-
-  var tr = document.createElement('tr');
-  tr.id = 'cs-lb-row-' + idx;
-  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
-  tr.innerHTML =
-    '<td style="padding:.2rem .25rem"><input class="cs-input" type="date" id="cs-lb-date-' + idx + '" value="' + (p.date||defaultDate) + '" style="width:110px"></td>'
-    + '<td style="padding:.2rem .25rem"><input class="cs-input" id="cs-lb-tech-' + idx + '" list="tech-list-' + idx + '" placeholder="Technician" value="' + (p.technician||'') + '" style="width:130px">'
-      + '<datalist id="tech-list-' + idx + '">' + (window.VIEWER_PEOPLE||[]).map(function(p){ return '<option value="'+p.name+'">'; }).join('') + '</datalist></td>'
-    + '<td style="padding:.2rem .25rem"><select class="cs-input cs-lb-cat" id="cs-lb-cat-' + idx + '" style="width:170px">' + lo + '</select></td>'
-    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-st-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.regHrs||'') + '" style="width:58px"></td>'
-    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-ot-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.otHrs||'') + '" style="width:58px"></td>'
-    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-dt-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.dtHrs||'') + '" style="width:58px"></td>'
-    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-ns-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.nightHrs||'') + '" style="width:58px" title="Night shift hrs"></td>'
-    + '<td style="padding:.2rem .25rem"><input class="cs-input" type="time" id="cs-lb-start-' + idx + '" value="' + (p.startTime||'') + '" style="width:85px"></td>'
-    + '<td style="padding:.2rem .25rem"><input class="cs-input" type="time" id="cs-lb-end-' + idx + '" value="' + (p.endTime||'') + '" style="width:85px"></td>'
-    + '<td style="padding:.2rem .25rem"><button class="btn btn-ghost btn-sm" onclick="this.closest(\'tr\').remove()" style="padding:.15rem .35rem">✕</button></td>';
-
-  tbody.appendChild(tr);
-  tr.querySelectorAll('.cs-input').forEach(function(el) {
-    if (!el.style.width) el.style.width = '100%';
-    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
-  });
-  // Set category if prefill
-  if (p.category) {
-    var catEl = document.getElementById('cs-lb-cat-' + idx);
-    if (catEl) catEl.value = p.category;
-  }
-}
-
-// ── WO Event Delegation ───────────────────────────────────────────────────────
-document.addEventListener('click', function(e) {
-  var el;
-  el = e.target.closest('[data-open-wo]');
-  if (el) { openWOModal(el.getAttribute('data-open-wo')); return; }
-  el = e.target.closest('[data-approve-wo]');
-  if (el) { approveWO(el.getAttribute('data-approve-wo')); return; }
-  el = e.target.closest('[data-unapprove-wo]');
-  if (el) { unapproveWO(el.getAttribute('data-unapprove-wo')); return; }
-  el = e.target.closest('[data-invoice-wo]');
-  if (el) { openInvoiceModal(null, el.getAttribute('data-invoice-wo')); return; }
-  el = e.target.closest('[data-export-wo]');
-  if (el) { exportWO('pdf', el.getAttribute('data-export-wo')); return; }
-  el = e.target.closest('[data-delete-wo]');
-  if (el) { deleteWO(el.getAttribute('data-delete-wo')); return; }
-});
-
-// ── openInvoiceModal — updated to accept WO id ────────────────────────────────
-// patch the existing openInvoiceModal to also accept a WO id
-var _origOpenInvoiceModal = openInvoiceModal;
-function openInvoiceModal(preClient, preWOId) {
-  // If called with a WO id, pre-select that WO's approved status
-  if (preWOId) {
-    var wo = _jobs.find(function(j){ return j.id === preWOId; });
-    if (wo) preClient = wo.client;
-  }
-  _origOpenInvoiceModal(preClient);
-  // After modal opens, pre-check this WO in the CS selector (treated as work order)
-  if (preWOId) {
-    setTimeout(function() {
-      var chk = document.querySelector('.inv-cs-check[value="' + preWOId + '"]');
-      if (chk) { chk.checked = true; updateInvTotals(); }
-    }, 100);
-  }
-}
+// openInvoiceModal — also accepts WO id (preWOId)
+// The real openInvoiceModal is defined earlier; preWOId handled via loadApprovedCS
 
 // ── Export Work Order as PDF or Word ─────────────────────────────────────────
 function exportWO(format, woId) {
@@ -3295,6 +2895,36 @@ async function deleteWO(id) {
     renderJobs(); renderDashboard(); updatePendingBadge();
     toast('Work order ' + woNum + ' deleted', 'info');
   } catch(e) { toast('Delete failed: ' + e.message, 'error'); }
+}
+
+
+// ── Dropdown option builders (used by WO modal) ───────────────────────────────
+function getLabourOptions(rs) {
+  return '<option value="">— Select category —</option>'
+    + NORTECH_LABOUR_CATEGORIES.map(function(name) {
+        return '<option value="' + name + '">' + name + '</option>';
+      }).join('');
+}
+
+function getTechOptions() {
+  return '<option value="">— Select technician —</option>'
+    + (window.VIEWER_PEOPLE || []).map(function(p) {
+        return '<option value="' + p.name + '">' + p.name + '</option>';
+      }).join('');
+}
+
+function getEquipmentOptions(rs) {
+  return '<option value="">— Select equipment —</option>'
+    + NORTECH_EQUIPMENT_LIST.map(function(name) {
+        return '<option value="' + name + '">' + name + '</option>';
+      }).join('');
+}
+
+function getConsumableOptions(rs) {
+  return '<option value="">— Select consumable —</option>'
+    + NORTECH_CONSUMABLES_LIST.map(function(name) {
+        return '<option value="' + name + '">' + name + '</option>';
+      }).join('');
 }
 
 </script>
