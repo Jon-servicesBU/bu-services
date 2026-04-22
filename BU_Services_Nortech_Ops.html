@@ -283,6 +283,27 @@ body.tech-view #cs-tot-other,
 body.tech-view #cs-tot-all          { display: none !important; }
 body.tech-view .cs-lb-tot           { display: none !important; }
 
+
+/* ── Searchable customer dropdown ──────────────────────────────────────── */
+.cust-dropdown { position:relative; width:100%; }
+.cust-input { width:100%; }
+.cust-list {
+  position:absolute; top:100%; left:0; right:0; z-index:600;
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:5px; max-height:220px; overflow-y:auto;
+  box-shadow:0 8px 24px rgba(0,0,0,.4); display:none;
+}
+.cust-list.open { display:block; }
+.cust-item {
+  padding:.4rem .75rem; cursor:pointer; font-size:.78rem;
+  display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.cust-item:hover, .cust-item.selected { background:rgba(232,64,64,.12); }
+.cust-item-name { font-weight:600; color:var(--text); }
+.cust-item-loc { font-size:.68rem; color:var(--muted); }
+.cust-no-results { padding:.6rem .75rem; color:var(--muted); font-size:.75rem; }
+
 </style>
 </head>
 <body>
@@ -523,7 +544,11 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="form-grid" style="grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem">
         <div class="form-group" style="grid-column:1/3">
           <label class="form-label">Client / Company <span style="color:var(--nor-accent)">*</span></label>
-          <input class="form-input" id="job-client" placeholder="e.g. YANDA CANADA LTD">
+          <div class="cust-dropdown">
+            <input class="form-input cust-input" id="job-client" placeholder="Search customers…" autocomplete="off"
+              oninput="filterCustomers(this.value)" onfocus="filterCustomers(this.value)" onblur="setTimeout(function(){closeCustList()},200)">
+            <div class="cust-list" id="cust-list"></div>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">WO # (auto if blank)</label>
@@ -783,7 +808,11 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="form-grid" style="grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem">
         <div class="form-group" style="grid-column:1/3">
           <label class="form-label">Client / Company <span style="color:var(--nor-accent)">*</span></label>
-          <input class="form-input" id="job-client" placeholder="e.g. YANDA CANADA LTD">
+          <div class="cust-dropdown">
+            <input class="form-input cust-input" id="job-client" placeholder="Search customers…" autocomplete="off"
+              oninput="filterCustomers(this.value)" onfocus="filterCustomers(this.value)" onblur="setTimeout(function(){closeCustList()},200)">
+            <div class="cust-list" id="cust-list"></div>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">WO # (auto if blank)</label>
@@ -1121,9 +1150,11 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-secondary" onclick="printInvoice()">🖨 Print / PDF</button>
       <button class="btn btn-secondary" id="inv-mark-sent-btn" onclick="markInvoiceSent()" style="display:none">Mark Sent</button>
       <button class="btn btn-success" id="inv-mark-paid-btn" onclick="markInvoicePaid()" style="display:none">✓ Mark Paid</button>
-      <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)" style="display:none">↩ Reverse Payment</button>
-      <button class="btn btn-secondary" id="inv-reverse-inv-btn" onclick="reverseInvoiceToApproved(_currentInvId)" style="display:none">↩ Back to Draft</button>
-      <button class="btn btn-sm" id="inv-void-btn" onclick="markInvoiceVoid()" style="display:none;background:rgba(185,28,28,.15);color:#EF4444;border:1px solid rgba(185,28,28,.3)">Void Invoice</button>
+      <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)" style="display:none">↩ Unpay</button>
+      <button class="btn btn-secondary" id="inv-reverse-sent-btn" onclick="reverseInvoiceToApproved(_currentInvId)" style="display:none">↩ Back to Draft</button>
+      <button class="btn btn-secondary" id="inv-reverse-draft-btn" onclick="reverseInvoiceToApproved(_currentInvId)" style="display:none">↩ Release WOs</button>
+      <button class="btn btn-sm" id="inv-void-btn" onclick="markInvoiceVoid()" style="display:none;background:rgba(185,28,28,.15);color:#EF4444;border:1px solid rgba(185,28,28,.3)">Void</button>
+      <button class="btn btn-sm" id="inv-delete-btn" onclick="deleteInvoice(_currentInvId)" style="display:none;background:rgba(185,28,28,.15);color:#EF4444;border:1px solid rgba(185,28,28,.3)">🗑 Delete</button>
     </div>
   </div>
 </div>
@@ -1500,34 +1531,123 @@ function updatePendingBadge(){
 }
 
 // ── Jobs ──────────────────────────────────────────────────────────────────────
-function renderJobs(){
-  var q=(document.getElementById('job-search')||{}).value||'';
-  var filtered=_jobs.filter(function(j){
-    if(!q) return true;
-    return (j.client+j.site+j.number+j.po).toLowerCase().includes(q.toLowerCase());
+function renderJobs() {
+  var q      = (document.getElementById('job-search')        || {}).value || '';
+  var filter = (document.getElementById('job-filter-status') || {}).value || '';
+
+  var filtered = _jobs.filter(function(j) {
+    if (filter && j.status !== filter) return false;
+    if (!q) return true;
+    return ((j.client||'')+(j.site||'')+(j.woNum||j.number||'')+(j.po||'')+(j.jobNum||'')).toLowerCase().includes(q.toLowerCase());
   });
-  var tbody=document.getElementById('jobs-tbody');
-  var empty=document.getElementById('jobs-empty');
-  if(!tbody)return;
-  if(!filtered.length){tbody.innerHTML='';if(empty)empty.style.display='block';return;}
-  if(empty)empty.style.display='none';
-  tbody.innerHTML=filtered.map(function(j){
-    var cs=_chargeSheets.filter(function(c){return c.jobId===j.id;});
-    var rs=_rateSheets.find(function(r){return r.id===j.rateSheetId;})||{};
-    var billingLbl={tm:'T&M',fixed:'Fixed Price',mixed:'Mixed'};
-    return '<tr>'
-      +'<td style="font-family:var(--mono);font-size:.72rem;color:var(--muted)">'+j.number+'</td>'
-      +'<td><span style="font-weight:600">'+j.client+'</span>'+(j.po?'<br><span style="font-size:.65rem;color:var(--muted)">PO: '+j.po+'</span>':'')+'</td>'
-      +'<td style="max-width:220px">'+j.site+'</td>'
-      +'<td><span class="chip chip-draft" style="font-size:.62rem">'+(billingLbl[j.billing]||j.billing)+'</span></td>'
-      +'<td style="font-size:.72rem;color:var(--muted)">'+(rs.name||'—')+'</td>'
-      +'<td>'+chipHtml(j.status)+'</td>'
-      +'<td style="font-size:.72rem">'+cs.length+' sheets'+(cs.filter(function(c){return c.status==='pending';}).length?' · <span style="color:#F59E0B">'+cs.filter(function(c){return c.status==='pending';}).length+' pending</span>':'')+'</td>'
-      +'<td>'
-        +'<button class="btn btn-ghost btn-sm" onclick="openJobModal(\''+j.id+'\')">Edit</button> '
-        +'<button class="btn btn-sm btn-secondary" onclick="openCSModal(\''+j.id+'\')">+ CS</button>'
-      +'</td>'
-    +'</tr>';
+
+  var grid  = document.getElementById('jobs-grid');
+  var empty = document.getElementById('jobs-empty');
+  if (!grid) return;
+
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map(function(j) {
+    var woNum    = j.woNum || j.number || '—';
+    var totalReg = j.totalReg || (j.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0);},0);
+    var totalOT  = j.totalOT  || (j.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0);},0);
+    var techs    = [...new Set((j.labourRows||[]).map(function(r){ return r.technician; }).filter(Boolean))];
+    var province = (CANADA_TAX_RATES[j.province]||{}).name || j.province || '';
+
+    return '<div class="card" style="padding:0;overflow:hidden" id="job-card-'+j.id+'">'
+      // Header — clickable to expand
+      +'<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer" data-toggle-job="'+j.id+'">'
+        +'<div style="flex:1;min-width:0">'
+          +'<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;flex-wrap:wrap">'
+            +'<span style="font-family:var(--ffc);font-size:.95rem;font-weight:800">'+j.client+'</span>'
+            +'<span style="font-family:var(--mono);font-size:.72rem;color:var(--nor-accent)">'+woNum+'</span>'
+            +chipHtml(j.status)
+          +'</div>'
+          +'<div style="font-size:.78rem;color:var(--muted);margin-bottom:.15rem">'+(j.site||j.location||'')+'</div>'
+          +'<div style="display:flex;gap:.75rem;font-size:.68rem;color:var(--faint);flex-wrap:wrap">'
+            +(j.po     ?'<span>PO: '+j.po+'</span>':'')
+            +(j.jobNum ?'<span>Job: '+j.jobNum+'</span>':'')
+            +(j.afe    ?'<span>AFE: '+j.afe+'</span>':'')
+            +(j.date   ?'<span>'+fmtDate(j.date)+'</span>':'')
+            +(province ?'<span>'+province+'</span>':'')
+          +'</div>'
+        +'</div>'
+        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;margin-left:.75rem">'
+          +'<span style="font-size:.62rem;color:var(--muted)">'
+            +(totalReg?totalReg+' reg':'')+( totalOT?' · '+totalOT+' OT':'')+' hrs'
+          +'</span>'
+          +'<span style="font-size:.62rem;color:var(--faint)">'+(techs.length?techs.join(', ').slice(0,30):'No techs')+'</span>'
+          +'<span style="font-size:.8rem;color:var(--faint)" id="job-expand-icon-'+j.id+'">▼</span>'
+        +'</div>'
+      +'</div>'
+      // Collapsible detail panel
+      +'<div id="job-detail-'+j.id+'" style="display:none;border-top:1px solid var(--border);background:var(--surface2)">'
+        +'<div style="padding:.85rem 1.1rem">'
+          +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem .75rem;font-size:.74rem;margin-bottom:.85rem">'
+            +_woDetailField('WO #',woNum)
+            +_woDetailField('Client',j.client)
+            +_woDetailField('Date',fmtDate(j.date))
+            +_woDetailField('Status',chipHtml(j.status))
+            +_woDetailField('Location',j.site||j.location||'—',2)
+            +_woDetailField('Equipment Owner',j.equipOwner||'—')
+            +_woDetailField('Province',province||'—')
+            +_woDetailField('P.O. #',j.po||'—')
+            +_woDetailField('Job #',j.jobNum||'—')
+            +_woDetailField('AFE #',j.afe||'—')
+            +_woDetailField('RIG #',j.rig||'—')
+          +'</div>'
+          +((j.labourRows||[]).length
+            ?'<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.35rem">Labour</div>'
+            +'<table style="width:100%;border-collapse:collapse;font-size:.73rem;margin-bottom:.75rem">'
+            +'<thead><tr style="border-bottom:1px solid var(--border)">'
+              +'<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Date</th>'
+              +'<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Technician</th>'
+              +'<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Category</th>'
+              +'<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:center;text-transform:uppercase;letter-spacing:1.5px">Reg</th>'
+              +'<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:center;text-transform:uppercase;letter-spacing:1.5px">OT</th>'
+              +'<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Start</th>'
+              +'<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">End</th>'
+            +'</tr></thead>'
+            +'<tbody>'+(j.labourRows||[]).map(function(r){
+              return '<tr style="border-bottom:1px solid rgba(255,255,255,.03)">'
+                +'<td style="padding:.25rem .4rem;font-size:.7rem">'+(fmtDate(r.date)||'—')+'</td>'
+                +'<td style="padding:.25rem .4rem;font-weight:600">'+(r.technician||'—')+'</td>'
+                +'<td style="padding:.25rem .4rem;font-size:.7rem;color:var(--muted)">'+(r.category||'—')+'</td>'
+                +'<td style="padding:.25rem .4rem;text-align:center;font-family:var(--mono)">'+(r.regHrs||0)+'</td>'
+                +'<td style="padding:.25rem .4rem;text-align:center;font-family:var(--mono)">'+(r.otHrs||0)+'</td>'
+                +'<td style="padding:.25rem .4rem;font-size:.7rem;color:var(--muted)">'+(r.startTime||'—')+'</td>'
+                +'<td style="padding:.25rem .4rem;font-size:.7rem;color:var(--muted)">'+(r.endTime||'—')+'</td>'
+              +'</tr>';
+            }).join('')+'</tbody></table>'
+            :'')
+          +((j.consumables||[]).length
+            ?'<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.3rem">Consumables</div>'
+            +(j.consumables||[]).map(function(con){ return '<span style="font-size:.74rem;margin-right:.75rem">'+con.item+' \u00d7 '+con.qty+'</span>'; }).join('')+'<br><br>'
+            :'')
+          +(j.notes?'<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.25rem">Description</div>'
+            +'<div style="font-size:.74rem;color:var(--muted);white-space:pre-line;margin-bottom:.75rem">'+j.notes+'</div>':'')
+          +(j.fieldReports?'<div style="font-size:.74rem;color:var(--muted)">Field Reports: '+j.fieldReports+'</div>':'')
+        +'</div>'
+      +'</div>'
+      // Action buttons
+      +'<div style="padding:.55rem 1.1rem;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">'
+        +'<button class="btn btn-primary btn-sm" data-open-wo="'+j.id+'">✏ Edit / Add Work</button>'
+        +'<button class="btn btn-secondary btn-sm" data-export-wo="'+j.id+'">⬇ Export PDF</button>'
+        +(j.status==='submitted'&&isAdmin()?'<button class="btn btn-success btn-sm" data-approve-wo="'+j.id+'">✓ Approve</button>':'')
+        +(j.status==='approved'&&isAdmin()?'<button class="btn btn-secondary btn-sm" data-invoice-wo="'+j.id+'">🧾 Invoice</button>':'')
+        +(j.status==='approved'&&isAdmin()?'<button class="btn btn-ghost btn-sm" data-reverse-cs-approved="'+j.id+'">↩ Unapprove</button>':'')
+        +(j.status==='submitted'?'<button class="btn btn-ghost btn-sm" data-unapprove-wo="'+j.id+'">↩ Back to Draft</button>':'')
+        +(j.status==='invoiced'&&isAdmin()?'<button class="btn btn-ghost btn-sm" data-reverse-cs-invoiced="'+j.id+'">↩ Back to Approved</button>':'')
+        +(isAdmin()&&j.status!=='invoiced'&&j.status!=='paid'
+          ?'<button class="btn btn-ghost btn-sm" data-delete-wo="'+j.id+'" style="color:#EF4444;border-color:rgba(185,28,28,.3);margin-left:auto">🗑 Delete</button>'
+          :'')
+      +'</div>'
+    +'</div>';
   }).join('');
 }
 
@@ -2096,7 +2216,11 @@ function renderInvoices(){
       +'<td>'+chipHtml(i.status)+'</td>'
       +'<td style="white-space:nowrap">'
         +'<button class="btn btn-ghost btn-sm" onclick="viewInvoice(\''+i.id+'\')">View</button>'
-        +(i.status==='sent'?' <button class="btn btn-sm btn-success" onclick="markPaid(\''+i.id+'\')">✓ Paid</button>':'')
+        +(i.status==='draft' ?' <button class="btn btn-sm btn-secondary" onclick="markInvSent(\''+i.id+'\')">Mark Sent</button>':'')
+        +(i.status==='sent'  ?' <button class="btn btn-sm btn-success"   onclick="markPaid(\''+i.id+'\')">✓ Paid</button>':'')
+        +(i.status==='paid'  ?' <button class="btn btn-sm btn-secondary" onclick="reverseInvoicePayment(\''+i.id+'\')">↩ Reverse</button>':'')
+        +(i.status!=='void'&&i.status!=='paid'&&isAdmin()?' <button class="btn btn-sm" style="color:#EF4444;border:1px solid rgba(185,28,28,.3);background:rgba(185,28,28,.1)" onclick="markVoid(\''+i.id+'\')">Void</button>':'')
+        +(isAdmin()?' <button class="btn btn-ghost btn-sm" style="color:#EF4444" onclick="deleteInvoice(\''+i.id+'\')">🗑</button>':'')
       +'</td>'
     +'</tr>';
   }).join('');
@@ -2673,34 +2797,29 @@ function openWOModal(editId) {
 // ── Export Work Order as PDF or Word ─────────────────────────────────────────
 function exportWO(format, woId) {
   var id = woId || _editWOId;
-  if (!id) { toast('Save the work order first before exporting', 'error'); return; }
+  if (!id) { toast('Save the work order first', 'error'); return; }
   var wo = _jobs.find(function(j){ return j.id === id; });
   if (!wo) { toast('Work order not found', 'error'); return; }
-
   var woNum = wo.woNum || wo.number || 'WO';
   var html  = buildWOPrintHTML(wo);
-
-  if (format === 'pdf') {
+  if (format === 'word') {
+    var blob = new Blob(['﻿' + html], { type: 'application/msword' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url; a.download = 'WorkOrder-' + woNum + '.doc';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+    toast('Word document downloaded', 'success');
+  } else {
     var win = window.open('', '_blank');
     win.document.write(html);
     win.document.close();
     win.focus();
     setTimeout(function(){ win.print(); }, 600);
     toast('Print dialog opened — choose Save as PDF', 'info');
-  } else {
-    // Word export via data URI
-    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
-    var url  = URL.createObjectURL(blob);
-    var a    = document.createElement('a');
-    a.href = url;
-    a.download = 'WorkOrder-' + woNum + '.doc';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast('Word document downloaded', 'success');
   }
 }
+
 
 function buildWOPrintHTML(wo) {
   var woNum  = wo.woNum || wo.number || '—';
@@ -3236,6 +3355,1455 @@ async function reverseCSToApproved(id) {
     renderJobs(); renderDashboard(); updatePendingBadge();
     toast('Work order returned to Approved', 'info');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+
+async function deleteInvoice(id) {
+  var inv = _invoices.find(function(i){ return i.id === id; });
+  if (!inv) return;
+  if (inv.status === 'paid') {
+    if (!confirm(
+      'WARNING: Invoice ' + inv.invNum + ' is marked PAID.\n\n' +
+      'Deleting a paid invoice will:\n' +
+      '  • Permanently remove the invoice\n' +
+      '  • Return all linked work orders to Approved\n' +
+      '  • Reverse the actuals pushed to Command Centre\n\n' +
+      'This cannot be undone. Type OK to confirm deletion of a PAID invoice.'
+    )) return;
+  } else {
+    if (!confirm(
+      'Delete invoice ' + inv.invNum + '?\n\n' +
+      'Client: ' + (inv.client||'—') + '\n' +
+      'Total: ' + _fmtMoneyImpl(inv.total||0) + '\n' +
+      'Status: ' + inv.status + '\n\n' +
+      'This will return all linked work orders to Approved status.\n' +
+      'This cannot be undone. Continue?'
+    )) return;
+  }
+  try {
+    // Return linked WOs to approved
+    await Promise.all((inv.chargeSheetIds||[]).map(async function(woId) {
+      var wo = _jobs.find(function(j){ return j.id === woId; });
+      if (wo && (wo.status === 'invoiced' || wo.status === 'paid')) {
+        wo.status = 'approved'; wo.invoiceId = null; wo.modified = today();
+        await sbUpsert('jobs', woId, wo);
+      }
+    }));
+    await sbDelete('invoices', id);
+    _invoices = _invoices.filter(function(i){ return i.id !== id; });
+    if (inv.status === 'paid') pushActualsToCC();
+    renderInvoices(); renderDashboard(); renderJobs();
+    closeModal('inv-view-modal');
+    toast('Invoice ' + inv.invNum + ' deleted — work orders returned to Approved', 'info');
+  } catch(e) { toast('Delete failed: ' + e.message, 'error'); }
+}
+
+
+document.addEventListener('click', function(e) {
+  var el;
+  // Toggle job detail
+  el = e.target.closest('[data-toggle-job]');
+  if (el && !e.target.closest('button') && !e.target.closest('a')) {
+    toggleJobDetail(el.getAttribute('data-toggle-job')); return;
+  }
+  // WO actions
+  el = e.target.closest('[data-open-wo]');
+  if (el) { openWOModal(el.getAttribute('data-open-wo')); return; }
+  el = e.target.closest('[data-approve-wo]');
+  if (el) { approveWO(el.getAttribute('data-approve-wo')); return; }
+  el = e.target.closest('[data-unapprove-wo]');
+  if (el) { unapproveWO(el.getAttribute('data-unapprove-wo')); return; }
+  el = e.target.closest('[data-invoice-wo]');
+  if (el) {
+    var wo = _jobs.find(function(j){ return j.id === el.getAttribute('data-invoice-wo'); });
+    if (wo) openInvoiceModal(wo.client);
+    return;
+  }
+  el = e.target.closest('[data-export-wo]');
+  if (el) { exportWO('pdf', el.getAttribute('data-export-wo')); return; }
+  el = e.target.closest('[data-delete-wo]');
+  if (el) { deleteWO(el.getAttribute('data-delete-wo')); return; }
+  el = e.target.closest('[data-reverse-cs-approved]');
+  if (el) { reverseCSFromApproved(el.getAttribute('data-reverse-cs-approved')); return; }
+  el = e.target.closest('[data-reverse-cs-invoiced]');
+  if (el) { reverseCSToApproved(el.getAttribute('data-reverse-cs-invoiced')); return; }
+  // Legacy CS actions
+  el = e.target.closest('[data-view-cs]');
+  if (el) { viewCS(el.getAttribute('data-view-cs')); return; }
+  el = e.target.closest('[data-approve-cs]');
+  if (el) { approveCS(el.getAttribute('data-approve-cs')); return; }
+});
+
+var NORTECH_CUSTOMERS = [
+  {id:"CN000000004",name:"1231691 ALBERTA LTD.",loc:"Tofield, AB"},
+  {id:"CN000000005",name:"1272797 ALBERTA LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000000271",name:"1684769 Alberta OA XCALIBER",loc:"Spruce Grove, AB"},
+  {id:"CN000000006",name:"1733337 AB Ltd.",loc:"Sylvan Lake, AB"},
+  {id:"CN000000007",name:"1852371 ALBERTA LTD.",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000272",name:"1927056 Alberta Ltd o/a Titan Oil",loc:"Nisku, AB"},
+  {id:"CN000000273",name:"2471321 AB LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000000008",name:"2505707 ALBERTA LTD. O/A DENICHE PILING",loc:"Stony Plain, AB T7Z 1 X7, AB"},
+  {id:"CN000000009",name:"31 STICKS PIPE & SUPPLY LTD.",loc:"Calgary, AB"},
+  {id:"CN000000010",name:"3D DRILLING TOOLS INC.",loc:"Nisku, AB"},
+  {id:"CN000000274",name:"4-WAY ELECTRICAL SERVICES",loc:"Edmonton, AB"},
+  {id:"CN000000011",name:"5M PFF INC.",loc:"Edmonton, AB"},
+  {id:"CN000000012",name:"6S INDUSTRIES INC.",loc:"Nisku, AB"},
+  {id:"CN000000013",name:"737149 AB LTD.",loc:"Lacombe, AB"},
+  {id:"CN000000015",name:"A PLUS WELDING INC.",loc:"Nisku, AB"},
+  {id:"CN000000014",name:"A-1 QUALITY BELTING LTD.",loc:"Redwater, AB"},
+  {id:"CN000000017",name:"ABS PIPE & SUPPLY INC.",loc:"RPO Brentwood, AB"},
+  {id:"CN000000018",name:"ABSOLUTE COMPLETION TECHNOLOGIES",loc:"Edmonton, AB"},
+  {id:"CN000000019",name:"ACADEMY PETROLEUM INDUSTRIES",loc:"Edmonton, AB"},
+  {id:"CN000000020",name:"ACCESS BRIDGEWORKS INC.",loc:"St. Albert, AB"},
+  {id:"CN000000022",name:"ACCESS PRECISION MACHINING LTD.",loc:"Slamon Arm, BC"},
+  {id:"CN000000023",name:"ACCIONA PACER JOINT VENTURE",loc:"Edmonton, AB"},
+  {id:"CN000000024",name:"ACE ENERGY SERVICES INC.",loc:"Grande Prairie, AB"},
+  {id:"CN000000275",name:"ACE EQUIPMENT",loc:"Sherwood Park, AB"},
+  {id:"CN000000276",name:"ACQBUILT INC.",loc:"Edmonton, AB"},
+  {id:"CN000000277",name:"ACRON ROOFING SYSTEMS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000026",name:"ADVANCE DRILLING LTD.",loc:"Calgary, AB"},
+  {id:"CN000000027",name:"ADVANCED FOUNDATIONS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000029",name:"ADVANTAGE TOWER LTD.",loc:"Aldersyde, AB"},
+  {id:"CN000000278",name:"ADVANTAGE WELDING & FAB",loc:"Parkland County, AB"},
+  {id:"CN000000031",name:"AECOM CANADA LTD.",loc:"Richmond Hill, ON"},
+  {id:"CN000000032",name:"AERO RENTALS",loc:"Calgary, AB"},
+  {id:"CN000000033",name:"AES Projects",loc:"Sexsmith, AB"},
+  {id:"CN000000034",name:"AGABET MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000279",name:"AGI RENTALS LIMITED",loc:"Sherwood Park, AB"},
+  {id:"CN000000280",name:"AIR LIQUIDE PROCESS AND PIPELINE",loc:"Edmonton, AB"},
+  {id:"CN000000035",name:"AIRCOM INSTRUMENTATION LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000036",name:"AKITA DRILLING LTD.",loc:"Calgary, AB"},
+  {id:"CN000000038",name:"ALBERTA ENERGY RENTALS LTD.",loc:"Nisku, AB"},
+  {id:"CN000000039",name:"ALBERTA ENVIRONMENTAL RUBBER",loc:"Edmonton, AB"},
+  {id:"CN000000040",name:"ALBERTA EXCHANGER LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001219",name:"ALBERTA HEALTH SERVICES (Cross Cancer)",loc:"Edmonton, AB"},
+  {id:"CN000000041",name:"ALBERTA HEALTH SERVICES.",loc:"St. Albert, AB"},
+  {id:"CN000000042",name:"ALBERTA INNOVATES - TECHNOLOGY FUTURES",loc:"Edmonton, AB"},
+  {id:"CN000000043",name:"ALBERTA PETROLEUM INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000044",name:"ALBERTA PIPE FITTINGS LTD.",loc:"Nisku, AB"},
+  {id:"CN000000045",name:"ALBERTA PLYWOOD, A DIV. OF WEST FRASER",loc:"Edmonton, AB"},
+  {id:"CN000000046",name:"ALBERTA PRECISION TOOL",loc:"Edmonton, AB"},
+  {id:"CN000000047",name:"ALBERTA SPRING & TRAILER",loc:"Edmonton, AB"},
+  {id:"CN000000048",name:"ALBERTA STEEL AND FAB INC",loc:"Edmonton, AB"},
+  {id:"CN000000049",name:"ALBERTA TANK FABRICATION & COATING LTD.",loc:"Ryley, AB"},
+  {id:"CN000000037",name:"ALBERTA-PACIFIC FOREST - ALPAC",loc:"Boyle, AB"},
+  {id:"CN000000052",name:"ALCO INC.",loc:"Edmonton, AB"},
+  {id:"CN000000053",name:"ALCO INDUSTRIAL INC.",loc:"Nisku, AB"},
+  {id:"CN000000054",name:"ALEXANDER VALVE & SUPPLY",loc:"Edmonton, AB"},
+  {id:"CN000000055",name:"ALFA LAVAL INC.",loc:"Scarborough, ON"},
+  {id:"CN000000056",name:"ALL CLASS FABRICATION LTD.",loc:"Grande Prairie, AB"},
+  {id:"CN000000058",name:"ALL PIPE SERVICES",loc:"St. Albert, AB"},
+  {id:"CN000000282",name:"ALL-VIK PRODUCTS INC.",loc:"Nisku, AB"},
+  {id:"CN000000059",name:"ALLAN R. NELSON ENGINEERING - 2020 INC",loc:"Edmonton, AB"},
+  {id:"CN000000060",name:"ALLIED FITTING CANADA",loc:"Sherwood Park, AB"},
+  {id:"CN000000061",name:"ALLREDI BLAST & ABRASIVES",loc:"Leduc, AB"},
+  {id:"CN000000062",name:"ALLTEC MANUFACTURING INC.",loc:"Edmonton, AB"},
+  {id:"CN000000064",name:"ALMITA PILING INC.",loc:"Edmonton, AB"},
+  {id:"CN000000065",name:"ALPHA CONSTRUCTION INC.",loc:"Morinville, AB"},
+  {id:"CN000000066",name:"ALPINE ENERGY SERVICES GROUP INC.",loc:"Nisku, AB"},
+  {id:"CN000001197",name:"ALSCO CANADA CORP.",loc:"Edmonton, AB"},
+  {id:"CN000000069",name:"ALTA NORTH FABRICATORS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000068",name:"ALTA-FAB STRUCTURES LTD.",loc:"Nisku, AB"},
+  {id:"CN000000071",name:"ALTEK INDUSTRIAL SUPPLY LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000072",name:"ALTEX INDUSTRIES INC.",loc:"Edmonton, AB"},
+  {id:"CN000001221",name:"ALUMASAFWAY INC.",loc:"Edmonton, AB"},
+  {id:"CN000000073",name:"AMACON CONSTRUCTION LTD",loc:"Vancouver, BC"},
+  {id:"CN000000283",name:"AMALGAMATED MINING",loc:"Edmonton, AB"},
+  {id:"CN000000074",name:"AMERICAN BRIDGE CANADA COMPANY",loc:"Edmonton, AB"},
+  {id:"CN000000075",name:"AMNOR GROUP INC.",loc:"Edmonton, AB"},
+  {id:"CN000000076",name:"AMP WORKS",loc:"Leduc, AB"},
+  {id:"CN000000077",name:"AMPED ENERGY SERVICES LTD.",loc:"Sedgewick, AB"},
+  {id:"CN000000078",name:"AMRIZE CANADA",loc:"Edmonton, AB"},
+  {id:"CN000000079",name:"ANTELOPE OIL TOOL CANADA INC.",loc:"Edmonton, AB"},
+  {id:"CN000000081",name:"APEX DISTRIBUTION INC.",loc:"Calgary, AB"},
+  {id:"CN000000082",name:"APEX UTILITIES INC.",loc:"Leduc, AB"},
+  {id:"CN000000084",name:"APTIM SERVICES CANADA CORP.",loc:"Sherwood Park, AB"},
+  {id:"CN000000085",name:"ARC FORCE OILFIELD MANUFACTURING",loc:"Devon, AB"},
+  {id:"CN000000086",name:"ARC RESOURCES LTD.",loc:"Calgary, AB"},
+  {id:"CN000000087",name:"ARCANITE INC",loc:"Oakville, ON"},
+  {id:"CN000001232",name:"ARDY RIGGING LTD.",loc:"Valleyview, AB"},
+  {id:"CN000000089",name:"ARGO Sales LP",loc:"Calgary, AB"},
+  {id:"CN000000090",name:"ARGUS MACHINE CO. LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000091",name:"ASA ALLOYS INC.",loc:"Sherwood Park, AB"},
+  {id:"CN000000092",name:"ASPEN CUSTOM TRAILERS",loc:"Leduc, AB"},
+  {id:"CN000000093",name:"ASSET TRACKER INC.",loc:"Calgary, AB"},
+  {id:"CN000001217",name:"ASTORIA LIGHTING CO",loc:"Sherwood Park, AB"},
+  {id:"CN000000095",name:"ATCO ELECTRIC TRANSMISSION",loc:"Edmonton, AB"},
+  {id:"CN000000096",name:"ATCO GAS",loc:"Edmonton, AB"},
+  {id:"CN000000097",name:"ATHABASCA OIL CORPORATION - AOC",loc:"Calgary, AB"},
+  {id:"CN000000284",name:"ATTACHMENTS & MORE INC.",loc:"Acheson, AB"},
+  {id:"CN000000098",name:"AURORA MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000099",name:"AUTOMATED RIG TECHNOLOGIES LTD.",loc:"Calgary, AB"},
+  {id:"CN000000021",name:"Access Manufacturing",loc:"Fort St.John, BC"},
+  {id:"CN000000025",name:"Aduro Resources Ltd. - R",loc:"Calgary, AB"},
+  {id:"CN000000028",name:"Advantage Oil and Gas - R",loc:"Calgary, AB"},
+  {id:"CN000000030",name:"Aecom",loc:"Fort St.John, BC"},
+  {id:"CN000000050",name:"Albright Flush Systems Ltd. - X",loc:"Fort St. John, BC"},
+  {id:"CN000000051",name:"Alco Gas & Oil - D",loc:"Edmonton, AB"},
+  {id:"CN000000057",name:"All Peace Industrial Contractors ltd.",loc:"Pouce Coupe, BC"},
+  {id:"CN000000063",name:"Allteck Limited Partnership",loc:"Burnaby, BC"},
+  {id:"CN000000067",name:"Alstar",loc:"Hinton, AB"},
+  {id:"CN000000070",name:"AltaGas NW Processing LP",loc:"Calgary, AB"},
+  {id:"CN000001228",name:"AltaGas NW Processing LP FG&P (Northwest)",loc:"Calgary, AB"},
+  {id:"CN000001229",name:"AltaGas NW Processing LP Townsend Facility",loc:"Calgary, AB"},
+  {id:"CN000000080",name:"Apache Canada Ltd.",loc:"Calgary, AB"},
+  {id:"CN000000083",name:"Apollo Energy Services Corp - R",loc:"Crossfield, AB"},
+  {id:"CN000000088",name:"Arctic Arrow Powerline Group Ltd",loc:"Surrey, BC"},
+  {id:"CN000000094",name:"Astara Energy Corp.",loc:"Calgary, AB"},
+  {id:"CN000000100",name:"B.S.L. MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000101",name:"B.W. RIG SUPPLY",loc:"Nisku, AB"},
+  {id:"CN000000102",name:"B4 Welding - X",loc:""},
+  {id:"CN000000103",name:"BACCALIEU ENERGY INC.",loc:"Calgary, AB"},
+  {id:"CN000000106",name:"BC Hydro - D",loc:"Ft. Nelson, BC"},
+  {id:"CN000000107",name:"BEAR DRILLING CORP.",loc:"Nisku, ab"},
+  {id:"CN000000108",name:"BEARSPAW ENGINEERING - 2016 LTD.",loc:""},
+  {id:"CN000000109",name:"BEAVER DRILLING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000110",name:"BELL IN SCONA INC.",loc:"Edmonton, AB"},
+  {id:"CN000000111",name:"BENCHMARK INSTRUMENTATION",loc:"Edmonton, AB"},
+  {id:"CN000000112",name:"BERJA METER & CONTROLS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000114",name:"BEYOND ENERGY SERVICES & TECHNOLOGY CORP",loc:"Calgary, AB"},
+  {id:"CN000000115",name:"BFL FABRICATORS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000285",name:"BIDELL GAS COMPRESSION",loc:"Calgary, AB"},
+  {id:"CN000000120",name:"BIRD CONSTRUCTION GROUP",loc:"Winnipeg, MB"},
+  {id:"CN000000121",name:"BIRD INDUSTRIAL SERVICES",loc:"Edmonton, AB"},
+  {id:"CN000000122",name:"BLACK ARROW MACHINE AND WELDING",loc:"Edmonton, AB"},
+  {id:"CN000000123",name:"BLACK GOLD INSULATION",loc:"Westlock, AB"},
+  {id:"CN000000126",name:"BLACK SWAN ENERGY",loc:"Calgary, AB"},
+  {id:"CN000000127",name:"BLACKSTONE REPAIR SERVICES",loc:"Sherwood Park, AB"},
+  {id:"CN000000128",name:"BLUE SKIES BLAST & PAINT LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000129",name:"BMS HEAVY CRANES LTD.",loc:"Calgary, AB"},
+  {id:"CN000000130",name:"BNA REMANUFACTURING LP",loc:"Acheson, AB"},
+  {id:"CN000000132",name:"BOON-TEK IND. LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000133",name:"BOREALIS INDUSTRIAL SUPPLY",loc:"Edmonton, AB"},
+  {id:"CN000000134",name:"BOUNDARY EQUIPMENT CO LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000286",name:"BOYD DISTRIBUTORS LTD.",loc:"Langley, BC"},
+  {id:"CN000000135",name:"BP MECHANICAL AND CONSULTING LTD",loc:"Innisfail, AB"},
+  {id:"CN000000136",name:"BP PRECISION MACHINING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000137",name:"BRACE TOOL INC.",loc:"Edmonton, AB"},
+  {id:"CN000000138",name:"BRADKEN CANADA LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000140",name:"BRANDETTE WELL SERVICING LTD.",loc:"Drayton Valley, AB"},
+  {id:"CN000000142",name:"BRAZZO CONTRACTORS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001225",name:"BRENT GRAHAM",loc:"Edmonton, AB"},
+  {id:"CN000000143",name:"BRUCE STEEL FABRICATORS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000144",name:"BRYTEX BUILDING SYSTEMS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000145",name:"BS&B BLACK, SIVALLS & BRYSON - CANADA",loc:"Nisku, AB"},
+  {id:"CN000000146",name:"BUILDING PRODUCTS OF CANADA CORP.",loc:"Edmonton, AB"},
+  {id:"CN000000148",name:"BUNGE CANADA",loc:"Sturgeon County, AB"},
+  {id:"CN000001226",name:"BW MECHANICAL INC.",loc:"Beaumont, AB"},
+  {id:"CN000000104",name:"BakosNDT Ltd - 2077029 AB Ltd",loc:"Whitecourt, AB"},
+  {id:"CN000000105",name:"Baytex Energy Ltd. - R",loc:"Calgary, AB"},
+  {id:"CN000000113",name:"Bestway Oilfield Canada, ULC",loc:"Clairmont, AB"},
+  {id:"CN000000116",name:"Bid Group Technologies Ltd",loc:"Mirabel, QC"},
+  {id:"CN000000117",name:"Big Stick Rentals Inc.",loc:"Grande Prairie, AB"},
+  {id:"CN000000118",name:"Birchcliff Energy",loc:"Calary, AB"},
+  {id:"CN000000119",name:"Bird Construction",loc:"Richmond, BC"},
+  {id:"CN000000124",name:"Black Swan Energy - C/O ABC - R",loc:"Calgary, AB"},
+  {id:"CN000000125",name:"Black Swan Energy - C/O Status - R",loc:"Calgary, AB"},
+  {id:"CN000000131",name:"Bonavista Energy - R",loc:"Calgary, AB"},
+  {id:"CN000000139",name:"Branded Iron Field Services Inc",loc:"Fort Nelson, BC"},
+  {id:"CN000000141",name:"Braymar Manufacturing Ltd",loc:"Fort St. John, BC"},
+  {id:"CN000000147",name:"Bunch Projects",loc:"Alhambra, AB"},
+  {id:"CN000000149",name:"Burstall NGL Storage Limited Partnership",loc:"Calgary, AB"},
+  {id:"CN000000151",name:"C&J ENERGY SERVICES",loc:"Sylvan Lake, AB"},
+  {id:"CN000000287",name:"CALNASH TRUCKING LTD.",loc:"Lac La Biche, AB"},
+  {id:"CN000000152",name:"CAMERON CANADA CORP",loc:"Edmonton, AB"},
+  {id:"CN000000168",name:"CANA WEST VALVE INC.",loc:"Nisku, AB"},
+  {id:"CN000000169",name:"CANADA PUMP & POWER",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000288",name:"CANADIAN CUSTOM ELECTRICAL",loc:"Edmonton, AB"},
+  {id:"CN000000170",name:"CANADIAN HEAT EXCHANGERS LTD.",loc:"Parkland County, AB"},
+  {id:"CN000000171",name:"CANADIAN HEAT EXCHANGERS LTD.:R",loc:"Parkland County, AB"},
+  {id:"CN000000172",name:"CANADIAN MAT SYSTEMS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000173",name:"CANADIAN NATURAL - ALBIAN",loc:"Calgary, AB"},
+  {id:"CN000000174",name:"CANADIAN NATURAL - HORIZON",loc:""},
+  {id:"CN000000175",name:"CANADIAN NATURAL RESOURCES LIMITED",loc:"St Albert, AB"},
+  {id:"CN000000176",name:"CANADIAN NATURAL RESOURCES.",loc:"Calgary, AB"},
+  {id:"CN000000289",name:"CANADIAN TANK & VESSEL",loc:"Saskatoon, SK"},
+  {id:"CN000000177",name:"CANADOIL FORGE LTD",loc:"Becancour, QC"},
+  {id:"CN000000178",name:"CANADOIL FORGE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000189",name:"CANFISH SERVICES INC.",loc:"Nisku, AB"},
+  {id:"CN000000193",name:"CANOCO ENERGY LTD.",loc:"Spruce Grove, AB"},
+  {id:"CN000000194",name:"CANRIG DRILLING TECHNOLOGY CANADA",loc:"Calgary, AB"},
+  {id:"CN000000290",name:"CANUCK CONCRETE PUMPING & CRANE",loc:"Yellowknife, NT"},
+  {id:"CN000000195",name:"CAPITAL RIG REPAIR",loc:"Edmonton, AB"},
+  {id:"CN000000196",name:"CAPITOL STEEL CORP.",loc:"Winnipeg, MB"},
+  {id:"CN000000197",name:"CARBONEX CONTRACTORS LTD.",loc:"Whitecourt, AB"},
+  {id:"CN000000198",name:"CARIBOU ELECTRIC INC.",loc:"Edmonton, AB"},
+  {id:"CN000000199",name:"CARLAN SERVICES LTD.",loc:"Whitecourt, AB"},
+  {id:"CN000000201",name:"CARMACKS ENTERPRISES LTD.",loc:"Nisku, AB"},
+  {id:"CN000000202",name:"CARRY STEEL",loc:"Edmonton, AB"},
+  {id:"CN000000291",name:"CARTER'S PILING LTD.",loc:"Calmar, AB"},
+  {id:"CN000000203",name:"CASCADE CARRIERS LP",loc:"Calgary, AB"},
+  {id:"CN000000204",name:"CASSADY ENGINEERING LTD.",loc:"Nisku, AB"},
+  {id:"CN000000205",name:"CAST STEEL PRODUCTS",loc:"Edmonton, AB"},
+  {id:"CN000000292",name:"CASTLE RENTALS & WELDING SUPPLIES",loc:"Edson, AB"},
+  {id:"CN000000208",name:"CCT Controls - R",loc:"Fort St. John, BC"},
+  {id:"CN000000209",name:"CE Franklin a div of NOV Wilson",loc:"Calgary, AB"},
+  {id:"CN000000210",name:"CEDA GROUP OF COMPANIES",loc:"Calgary, AB"},
+  {id:"CN000000214",name:"CENTRAL STEEL ERECTORS LP",loc:"Cochrane, AB"},
+  {id:"CN000000215",name:"CESSCO FABRICATION & ENGINEERING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000216",name:"CFP INDUSTRIES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000217",name:"CH2M HILL ENERGY CANADA LTD.",loc:"Toronto, ON"},
+  {id:"CN000000218",name:"CHAMCO INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000219",name:"CHAMPION PETFOODS NORTHSTAR KITCHEN",loc:"Edmonton, AB"},
+  {id:"CN000000221",name:"CHEETA MACHINING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000222",name:"CHEETAH OILFIELD SUPPLY LTD.",loc:"Bon Accord, AB"},
+  {id:"CN000000223",name:"CHEMCO ELECTRICAL CONTRACTORS LTD.",loc:"Nisku, AB"},
+  {id:"CN000000225",name:"CHINOOK DRILLING.",loc:"Calgary, AB"},
+  {id:"CN000000227",name:"CHIPS 2002 INC.",loc:"Edmonton, AB"},
+  {id:"CN000000228",name:"CIMS LIMITED PARTNERSHIP.",loc:"Port Coquitlam, BC"},
+  {id:"CN000000229",name:"CIOC-R",loc:"Calgary, AB"},
+  {id:"CN000000230",name:"CIP",loc:"Prince Geoge, BC"},
+  {id:"CN000000231",name:"CITADEL DRILLING",loc:"Calgary, AB"},
+  {id:"CN000000232",name:"CITY OF CAMROSE",loc:"Camrose, AB"},
+  {id:"CN000000293",name:"CJM CRANE SERVICES LTD.",loc:"Beaumont, AB"},
+  {id:"CN000000233",name:"CLARK BUILDERS",loc:"Edmonton, AB"},
+  {id:"CN000000234",name:"CLASSIC LANDSCAPES",loc:"Edmonton, AB"},
+  {id:"CN000000235",name:"CLAY'S INDUSTRIAL SUPPLY",loc:"Edmonton, AB"},
+  {id:"CN000000236",name:"CLEANTEK INDUSTRIES INC.",loc:"Calgary, AB"},
+  {id:"CN000000238",name:"CLEARSTREAM TRANSPORTATION SERVICES",loc:"Sturgeon County, AB"},
+  {id:"CN000000239",name:"CNC INDUSTRIES LTD.",loc:"Nisku, AB"},
+  {id:"CN000000240",name:"CNRL - Calgary",loc:"Calgary, AB"},
+  {id:"CN000000242",name:"COEN ESP INC.",loc:"Edmonton, AB"},
+  {id:"CN000000243",name:"COLLINS STEEL",loc:"Edmonton, AB"},
+  {id:"CN000000245",name:"COMBO ENERGY SERVICE INC.",loc:"Stony Plain, AB"},
+  {id:"CN000000246",name:"COMCO PIPE & SUPPLY COMPANY",loc:"Edmonton, AB"},
+  {id:"CN000000247",name:"COMMAND DRILLING PRODUCTS LTD.",loc:"Nisku, AB"},
+  {id:"CN000000248",name:"COMMAND ENERGY RENTALS LTD.",loc:"Nisku, AB"},
+  {id:"CN000000249",name:"COMMAND FISHING & PIPE RECOVERY LTD.",loc:"Leduc County, AB"},
+  {id:"CN000000250",name:"COMMERCIAL SOLUTIONS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000294",name:"COMPLETE PROJECTS",loc:"Whitecourt, AB"},
+  {id:"CN000000252",name:"CON'S ENERGY SERVICE",loc:"Nisku, AB"},
+  {id:"CN000000253",name:"CONCORD WELL SERVICING",loc:"Calgary, AB"},
+  {id:"CN000000254",name:"CONCRETE INC.",loc:"Edmonton, AB"},
+  {id:"CN000000255",name:"CONESTOGA PIPE & SUPPLY CANADA CORP.",loc:"Bow Island, AB"},
+  {id:"CN000000256",name:"CONNECT ENERGY COMPANY",loc:"Nisku, AB"},
+  {id:"CN000000258",name:"CONTACT CHEMICALS INC.",loc:"Wetaskiwin, AB"},
+  {id:"CN000000259",name:"CONTINENTAL ELECTRICAL MOTOR SERVICES",loc:"Calgary, AB"},
+  {id:"CN000000295",name:"CONTRAC EQUIPMENT LTD.",loc:"Spruce Grove, AB"},
+  {id:"CN000000263",name:"COOPER EQUIPMENT RENTALS LIMITED",loc:"Edmonton, AB"},
+  {id:"CN000000264",name:"CORNERSTONE MACHINING & REPAIR INC.",loc:"Nisku, AB"},
+  {id:"CN000000265",name:"CORROSION SERVICE COMPANY LIMITED",loc:"Markham, ON"},
+  {id:"CN000000266",name:"COUGAR MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000267",name:"COVAX TANK COMPANY INC.",loc:"Edmonton, AB"},
+  {id:"CN000000268",name:"CPC Resources ULC - Quicksilver-D",loc:"Calgary, AB"},
+  {id:"CN000000269",name:"CQ Energy Canada Resources",loc:"Calgary, AB"},
+  {id:"CN000000270",name:"CRAIGS WELDING LTD.",loc:"Morinville, AB"},
+  {id:"CN000000296",name:"CRANE TECH SERVICE & REPAIR LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000368",name:"CRANEIUM INC.",loc:"Delta, BC"},
+  {id:"CN000000369",name:"CRB WELDING & FAB",loc:"Edmonton, AB"},
+  {id:"CN000000371",name:"CRC WELLHEAD SUPPLY CO. LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000372",name:"CREATIVE CARBIDE WORKS LTD.",loc:"Leduc, AB"},
+  {id:"CN000000373",name:"CREATIVE DOOR SERVICES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000376",name:"CRIZMIC INDUSTRIES INC.",loc:"Leduc, AB"},
+  {id:"CN000000297",name:"CROPAC EQUIPMENT INC.",loc:"Oakville, ON"},
+  {id:"CN000000377",name:"CROSS COUNTRY CANADA SUPPLIES",loc:"Spruce Grove, AB"},
+  {id:"CN000000378",name:"CROSSBOW MACHINE CORP.",loc:"Edmonton, AB"},
+  {id:"CN000000380",name:"CS ENGINEERING",loc:"Armena, AB"},
+  {id:"CN000000381",name:"CSC VALVES CANADA",loc:"Edmonton, AB"},
+  {id:"CN000000382",name:"CSM PUMP PACKAGING INC.",loc:"Nisku, AB"},
+  {id:"CN000001205",name:"CUMMINS",loc:"Edmonton, AB"},
+  {id:"CN000000384",name:"CUSTOM ENERGIZED AIR LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000385",name:"CVS CONTROLS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000386",name:"CW MANUFACTURING LTD.",loc:"Acheson, AB"},
+  {id:"CN000000387",name:"CWA DESIGN & FABRICATION LTD.",loc:"Leduc, AB"},
+  {id:"CN000000388",name:"CWC IRONHAND DRILLING",loc:"Sylvan Lake, AB"},
+  {id:"CN000000389",name:"CWC WELL SERVICES",loc:"Provost, AB"},
+  {id:"CN000000390",name:"CWF WELDING & FABRICATING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000155",name:"Can Tire - CANADIAN TIRE #478",loc:"Edmonton, AB"},
+  {id:"CN000000156",name:"Can Tire - CANADIAN TIRE RED DEER NORTH",loc:"Red Deer, AB"},
+  {id:"CN000000157",name:"Can Tire - CANADIAN TIRE SHERWOOD PARK.",loc:"Sherwood Park, AB"},
+  {id:"CN000000158",name:"Can Tire - DS WALDIE HOLDINGS INC",loc:"Edmonton, AB"},
+  {id:"CN000000159",name:"Can Tire - EJK AUTOMOTIVE LTD.",loc:"Spruce Grove, AB"},
+  {id:"CN000000160",name:"Can Tire - FEIST ENTERPRISES LTD",loc:"Edmonton, AB"},
+  {id:"CN000000161",name:"Can Tire - G & O YOUNG ENTERPRISES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000162",name:"Can Tire - J & M KAVANAGH SALES LTD",loc:"Edmonton, AB"},
+  {id:"CN000000163",name:"Can Tire - J&K GAMBLE ENT.",loc:"Edmonton, AB"},
+  {id:"CN000000164",name:"Can Tire - KJ MACKINTOSH SALES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000165",name:"Can Tire - P&M SIGURDSON SALES LTD",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000166",name:"Can Tire - R&J JOHNSON RETAIL LTD.",loc:"Red Deer, AB"},
+  {id:"CN000000167",name:"Can Tire - RANDALIS SALES LTD.",loc:"Sylvan Lake, AB"},
+  {id:"CN000000154",name:"Can Tire- CANADIAN TIRE 334, STEVEN K LE",loc:"St. Albert, AB"},
+  {id:"CN000000192",name:"CanMine Contracting Ltd",loc:"Langley, BC"},
+  {id:"CN000000179",name:"Canbriam Energy - C/O Aximus - R",loc:"Calgary, AB"},
+  {id:"CN000000181",name:"Canbriam Energy Inc (BC Partnership) - R",loc:"Calgary, AB"},
+  {id:"CN000000180",name:"Canbriam Energy Inc-R",loc:"Calgary, AB"},
+  {id:"CN000000182",name:"Canbriam Energy Inc. - C/O Excelsior",loc:"Calgary, AB"},
+  {id:"CN000000184",name:"Canbriam Energy Inc. - WSP Canada 4th ave",loc:"Calgary, AB"},
+  {id:"CN000000185",name:"Canbriam Energy Inc. C/O ABC Consulting R",loc:"Calgary, AB"},
+  {id:"CN000000186",name:"Canbriam Energy Ltd. - WSP Canada 7th Ave",loc:"Calgary, AB"},
+  {id:"CN000000187",name:"Canbriam Enery C/O Highmark Oilfield  - R",loc:"Charlie Lake, BC"},
+  {id:"CN000000188",name:"Candoo Oilfield Services Inc.",loc:"Fort Saint John, BC"},
+  {id:"CN000000190",name:"Canfor Pulp Ltd - R",loc:"Prince George BC"},
+  {id:"CN000000191",name:"Canlin Resources Partnership",loc:"Calgary, AB"},
+  {id:"CN000000206",name:"Cat the Rental Store",loc:"Fort St. John, BC"},
+  {id:"CN000000207",name:"Cavvy Energy Ltd.",loc:"Calgary, AB, AB"},
+  {id:"CN000000213",name:"Cenovus Energy Inc.",loc:"Calgary, AB"},
+  {id:"CN000000224",name:"Chevron Canada Limited",loc:"Calgary, AB"},
+  {id:"CN000000226",name:"Chinook Energy - R",loc:"Calgary, AB"},
+  {id:"CN000000237",name:"Clearstream Energy Services",loc:"Fort St. John, BC"},
+  {id:"CN000000241",name:"Coelacanth Energy Inc.",loc:"Calgary, AB"},
+  {id:"CN000000244",name:"Colter Energy LP",loc:"Grande Prairie, AB"},
+  {id:"CN000000251",name:"Compass Energy Systems Ltd",loc:"Rocky View County, AB"},
+  {id:"CN000000257",name:"ConocoPhillips Canada (BRC) Partnership",loc:"Calgary, AB"},
+  {id:"CN000000260",name:"Continental Energy Corporation - R",loc:"Calgary, AB"},
+  {id:"CN000000261",name:"Continental Pipeline & Facility Ltd.",loc:"Calgary, AB"},
+  {id:"CN000000262",name:"Control Tech",loc:"Grande Prairie, AB"},
+  {id:"CN000000367",name:"Craneium Inc - R",loc:"Delta, BC"},
+  {id:"CN000000374",name:"Crescent Point - D",loc:"Calgary, AB"},
+  {id:"CN000000375",name:"Crew Energy Inc.",loc:"Calgary, AB"},
+  {id:"CN000000379",name:"Crystal Clear Testing Ltd.",loc:"Stettler, AB"},
+  {id:"CN000000383",name:"Cutting Edge Consulting",loc:"Kamloops, BC"},
+  {id:"CN000000392",name:"D & L SERVICE & SUPPLY LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001235",name:"D & L TRADING INC.",loc:"Edmonton, AB"},
+  {id:"CN000000391",name:"D-W Wilson Services Ltd.",loc:"Fort St.John, BC"},
+  {id:"CN000000393",name:"D.B. MATTIE MILLWRIGHT SERVICES LTD.",loc:"Alix, AB"},
+  {id:"CN000000394",name:"DAEMAR INC.",loc:"Oakville, ON"},
+  {id:"CN000000397",name:"DBR TECH - SCHLUMBERGER",loc:"Edmonton, AB"},
+  {id:"CN000000398",name:"DCM INTEGRATED SOLUTIONS",loc:"Sherwood Park, AB"},
+  {id:"CN000000399",name:"DDS CONSULTING LTD.",loc:"Calgary, AB"},
+  {id:"CN000000401",name:"DEREK CASING SERVICE LTD.",loc:"Red Deer County, AB"},
+  {id:"CN000000403",name:"DFA Contracting Ltd.",loc:"Fort St John, BC"},
+  {id:"CN000000298",name:"DFI CORPORATION",loc:"Edmonton, AB"},
+  {id:"CN000000404",name:"DHC WELL SERVICING INC.",loc:"Camrose, AB"},
+  {id:"CN000000405",name:"DIGITAL MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000406",name:"DILLON CONSULTING LIMITED",loc:"Yellowknife, NT"},
+  {id:"CN000000407",name:"DINAMO MACHINE AND MANUFACTURING INC.",loc:"Edmonton, AB"},
+  {id:"CN000000408",name:"DINO'S MACHINE SHOP",loc:"Edmonton, AB"},
+  {id:"CN000000409",name:"DISTRIBUTION NOW - DNOW",loc:"Calgary, AB"},
+  {id:"CN000000410",name:"DJ Mac Maintenance Ltd.",loc:"Taylor, BC"},
+  {id:"CN000000411",name:"DO ALL INDUSTRIES LTD.",loc:"Nisku, AB"},
+  {id:"CN000001233",name:"DO-IT SANDBLASTING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000412",name:"DOMINO HIGHVOLTAGE SUPPLY INC.",loc:"Maple Ridge, BC"},
+  {id:"CN000000413",name:"DOMINO MACHINE INC",loc:"Edmonton, AB"},
+  {id:"CN000000414",name:"DOMTAR INC.",loc:"Windsor, QC"},
+  {id:"CN000000418",name:"DRADER MANUFACTURING INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000419",name:"DREAMSCO LTD.",loc:"Nisku, AB"},
+  {id:"CN000000420",name:"DRECO ENERGY SERVICES ULC RIG SYSTEMS",loc:"Nisku, AB"},
+  {id:"CN000000422",name:"DREW INSPECTIONS LTD.",loc:"Stony Plain, AB"},
+  {id:"CN000000423",name:"DYNA-FLO CONTROL VALVE SERVICES",loc:"1911 66 Ave, AB"},
+  {id:"CN000000424",name:"DYNAMIC MACHINING AND PORTABLE MILLING",loc:"Edmonton, AB"},
+  {id:"CN000000395",name:"Dahlen Contracting - R",loc:"Dawson Creek, BC"},
+  {id:"CN000000396",name:"Davey Tree Expert - D",loc:"Nanaimo, BC"},
+  {id:"CN000000400",name:"Denali Energy Services Ltd",loc:"Pouce Coupe, BC"},
+  {id:"CN000000402",name:"Devon Canada Corporation - D",loc:"Calgary, AB"},
+  {id:"CN000000415",name:"Double Star Drilling 2021 Ltd.",loc:"Acheson, AB"},
+  {id:"CN000000417",name:"Draagyn Inspection Services Ltd.",loc:"Kamloops, BC"},
+  {id:"CN000000425",name:"EARLE M. JORGENSEN - CANADA",loc:"Edmonton, AB"},
+  {id:"CN000000426",name:"ED-LAM INDUSTRIAL CONTRACTING",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000427",name:"EDDY RITE LTD.",loc:"Calgary, AB"},
+  {id:"CN000000428",name:"EDMONTON FABRICATION CENTRE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000429",name:"EDMONTON VALVE & FITTING INC.",loc:"Edmonton, AB"},
+  {id:"CN000000299",name:"ELEMENT FLEET MANAGEMENT",loc:""},
+  {id:"CN000000430",name:"ELITE INTEGRITY SERVICES",loc:"Calgary, AB"},
+  {id:"CN000000431",name:"ELITE MACHINING & FABRICATION",loc:"Edmonton, AB"},
+  {id:"CN000000432",name:"EMCEE CONSTRUCTION & MGMT LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000433",name:"EMERALD METAL FABRICATORS (2000) LTD.",loc:"Tofield, AB"},
+  {id:"CN000000434",name:"EMKADE DISTRIBUTION INC.",loc:"Edmonton, AB"},
+  {id:"CN000000435",name:"EMPIRE MECHANICAL CONTRACTORS INC.",loc:"Sherwood Park, AB"},
+  {id:"CN000000437",name:"ENBRIDGE PIPELINES",loc:"Edmonton, AB"},
+  {id:"CN000000439",name:"ENBRIDGE PIPELINES  - WOODLAND INC.",loc:"Edmonton, AB"},
+  {id:"CN000000438",name:"ENBRIDGE PIPELINES - ATHABASCA INC.",loc:"Edmonton, AB"},
+  {id:"CN000000440",name:"ENBRIDGE PIPELINES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000442",name:"ENCORE CORING & DRILLING",loc:"Calgary, AB"},
+  {id:"CN000000443",name:"ENCORE METALS",loc:"Edmonton, AB"},
+  {id:"CN000000446",name:"ENERKEM ALBERTA BIOFUELS LP",loc:"Edmonton, AB"},
+  {id:"CN000000447",name:"ENERPLUS CORPORATION",loc:"Calgary, AB"},
+  {id:"CN000000449",name:"ENG ENGINEERING CONSULTANTS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000451",name:"ENSIGN DRILLING INC.",loc:"Calgary, AB"},
+  {id:"CN000000452",name:"EOG Resources - D",loc:"Calgary, AB"},
+  {id:"CN000000453",name:"EPC A DIV. OF ENSIGN DRILLING PARTNERSHIP",loc:"Calgary, AB"},
+  {id:"CN000000454",name:"EPCOR Water Services Inc.",loc:"Edmonton, AB"},
+  {id:"CN000000455",name:"EPFC Corp",loc:"Calgary, AB"},
+  {id:"CN000000458",name:"ESSENTIAL ENERGY SERVICES",loc:"Calgary, AB"},
+  {id:"CN000000459",name:"ESSENTIAL WELL SERVICE - CENTRAL",loc:"Nisku, AB"},
+  {id:"CN000000460",name:"EUROPEAN CUTTERS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000461",name:"EXAKT INDUSTRIES",loc:"Edmonton, AB"},
+  {id:"CN000000462",name:"EXP SERVICES INC.",loc:"Ottawa, ON"},
+  {id:"CN000000463",name:"EXPLORE EDMONTON CORPORATION",loc:"9990 Jasper Ave, AB"},
+  {id:"CN000000464",name:"EXPORT METAL SALVAGE",loc:"Sherwood Park, AB"},
+  {id:"CN000000465",name:"EZ STEEL",loc:"Leduc, AB"},
+  {id:"CN000000436",name:"Enbridge",loc:"Chatham, ON"},
+  {id:"CN000000441",name:"Encana Corporation",loc:"Calgary, AB"},
+  {id:"CN000000444",name:"Endurance Energy Ltd - D",loc:"Fort Nelson, BC"},
+  {id:"CN000000445",name:"Enercapita Energy",loc:"Calgary, AB"},
+  {id:"CN000000448",name:"Enertek Energy Services Ltd.",loc:"Fort St. John, BC"},
+  {id:"CN000000450",name:"Enhance Energy Inc.",loc:"Calgary, AB"},
+  {id:"CN000000456",name:"Equinox Engineering Canada Ltd.",loc:"CALGARY, AB"},
+  {id:"CN000000457",name:"Essential Coil Well Services",loc:"Grande Prairie, AB"},
+  {id:"CN000000466",name:"F. S. WELDING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000467",name:"FABCO INC.",loc:"Calgary, AB"},
+  {id:"CN000000468",name:"FAIRMONT JASPER PARK LODGE",loc:"Jasper, AB"},
+  {id:"CN000000469",name:"FAST INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000470",name:"FASTENAL CANADA LTD.",loc:"Kitchener, ON"},
+  {id:"CN000000471",name:"FEEHAN LAW OFFICE",loc:"Edmonton, AB"},
+  {id:"CN000000473",name:"FILTRUM INC.",loc:"Quebec City, QC"},
+  {id:"CN000000474",name:"FINNING - CANADA",loc:"Edmonton, AB"},
+  {id:"CN000000475",name:"FIREBALL EQUIPMENT LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000476",name:"FIRST CLASS CLEANERS",loc:"Edmonton, AB"},
+  {id:"CN000000477",name:"FIRST CLASS PAINTING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000478",name:"FLATIRON-DRAGADOS-AECON-LAFARGE",loc:"Edmonton, AB"},
+  {id:"CN000000479",name:"FLEXTECH INDUSTRIES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000481",name:"FLINT ENERGY SERVICES",loc:"Fort St John, BC"},
+  {id:"CN000000483",name:"FLINT ENERGY SERVICES LTD.",loc:"Nisku, AB"},
+  {id:"CN000000484",name:"FLINT ENERGY SERVICES LTD...",loc:"Sherwood Park, AB"},
+  {id:"CN000000486",name:"FLOWPOINT ENVIRONMENTAL SYSTEMS",loc:"Morinville, AB"},
+  {id:"CN000000487",name:"FLSMIDTH LTD.",loc:"Vancouver, BC"},
+  {id:"CN000000489",name:"FLYNN BROS. PROJECTS INC.",loc:"Morinville, AB"},
+  {id:"CN000000490",name:"FMC Technologies Canada Ltd -D",loc:"Edmonton, AB"},
+  {id:"CN000000491",name:"FMT Oilfield Services",loc:""},
+  {id:"CN000000492",name:"FORENTECH CONSULTING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000493",name:"FORMULA ALBERTA LTD.",loc:"Stony Plain, AB"},
+  {id:"CN000000494",name:"FORMULA CONTRACTORS LTD.",loc:"Prince George, BC"},
+  {id:"CN000000300",name:"FORTIS ALBERTA INC.",loc:"Calgary, AB"},
+  {id:"CN000000496",name:"FORUM CANADA ULC",loc:"Leduc, AB"},
+  {id:"CN000000301",name:"FOUNTAIN TIRE EDSON",loc:"Edson, AB"},
+  {id:"CN000000302",name:"FOUNTAIN TIRE LAC LA BICHE",loc:"Lac La Biche, AB"},
+  {id:"CN000000303",name:"FOUNTAIN TIRE WHITECOURT",loc:"Whitecourt, AB"},
+  {id:"CN000000497",name:"FOX DRILLING INC.",loc:"Lethbridge, AB"},
+  {id:"CN000000304",name:"FOXX CANADA LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000498",name:"FRONTIER MECHANICAL SERVICES INC.",loc:"Leduc, AB"},
+  {id:"CN000000472",name:"Ferus Natural Gas Fuels Inc",loc:"Calgary, AB"},
+  {id:"CN000000480",name:"Flint Energy A Division of Clearstream En",loc:"Red Deer, AB"},
+  {id:"CN000000482",name:"Flint Energy Services Limited Partnership",loc:"Calgary, AB"},
+  {id:"CN000000485",name:"Flo-Rite Oilfield Services Ltd.",loc:"Ft. Nelson, BC"},
+  {id:"CN000000488",name:"Flying R Holdings - D",loc:"Ft. Nelson, BC"},
+  {id:"CN000000495",name:"FortisBC Energy Inc.  - D",loc:"Surrey, BC"},
+  {id:"CN000000499",name:"G. WRIGHT'S WELDING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000500",name:"GALLOWAY CONSTRUCTION GROUP",loc:"Ponoka, AB"},
+  {id:"CN000000501",name:"GALPERTI CANADA ULC",loc:"Edmonton, AB"},
+  {id:"CN000000502",name:"GAMBIT PRODUCTS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000503",name:"GAR-DON STEEL INDUSTRIES LTD.",loc:"Nisku, AB"},
+  {id:"CN000000504",name:"GARDNER DENVER CANADA CORP",loc:"Oakville, ON"},
+  {id:"CN000000505",name:"GARNEAU INDUSTRIES",loc:"Edmonton, AB"},
+  {id:"CN000000506",name:"GARNEAU MANUFACTURING INC.",loc:"Morinville, AB"},
+  {id:"CN000000510",name:"GATEWAY BOP & CONTROLS INC.",loc:"Ponoka, AB"},
+  {id:"CN000000511",name:"GCM MODIFICATIONS CANADA INC",loc:"Nisku, AB"},
+  {id:"CN000000512",name:"GEMINI MACHINE WORKS INC.",loc:"Nisku, AB"},
+  {id:"CN000000305",name:"GENERAL BODY & EQUIPMENT LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000306",name:"GENERAL RECYCLING INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000514",name:"GGOSCO ENGINEERING INC.",loc:"Oakville, ON"},
+  {id:"CN000000515",name:"GIR DEL HYDRAULIC SERVICES",loc:"Edmonton, AB"},
+  {id:"CN000000516",name:"GLADIATOR EQUIPMENT INC.",loc:"Leduc, AB"},
+  {id:"CN000000517",name:"GLOBAL FUSION COATING INC.",loc:"Leduc, AB"},
+  {id:"CN000000518",name:"GLOBAL INTEGRITY & SPECIALTY SERVICES",loc:"Edmonton, AB"},
+  {id:"CN000000519",name:"GLOBAL SERVICE RIG & REPAIR 2005 LTD.",loc:"Leduc, AB"},
+  {id:"CN000000520",name:"GLOBAL TECH GROUP",loc:"Edmonton, AB"},
+  {id:"CN000000521",name:"GLV WELDING",loc:"Thorsby, AB"},
+  {id:"CN000000522",name:"GMC Contractors Ltd. - D",loc:"Edmonton, AB"},
+  {id:"CN000000523",name:"GOLDBAR CONTRACTORS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000524",name:"GOLDWING CONSTRUCTION INC.",loc:"Edmonton, AB"},
+  {id:"CN000000526",name:"GORALTA OILFIELD SUPPLY LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000527",name:"GOSCO VALVES",loc:"Oakville, ON"},
+  {id:"CN000000528",name:"GOSSELIN PIPE & STEEL LTD.",loc:"Wainwright, AB"},
+  {id:"CN000000529",name:"GRAHAM CONSTRUCTION RESOURCES LP",loc:"Calgary, AB"},
+  {id:"CN000000530",name:"GRAHAM INFRASTRUCTURE LP",loc:"Edmonton, AB"},
+  {id:"CN000000531",name:"GREENFIELD CONSTRUCTION LTD.",loc:"Miramichi, NB"},
+  {id:"CN000001206",name:"GRIT IRON FIELD SERVICES LTD.",loc:"Lloydminster, AB"},
+  {id:"CN000000532",name:"GRIZZLY INC.",loc:"Edmonton, AB"},
+  {id:"CN000000534",name:"GROUP SIX TECHNOLOGIES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000537",name:"GRYPHON PETROLEUM CORP.",loc:"Calgary, AB"},
+  {id:"CN000001207",name:"GS HOLDINGS COMPANY",loc:"Acheson, AB"},
+  {id:"CN000000538",name:"GSE & R Canada Inc.  - formerly STX- D",loc:"Calgary, AB"},
+  {id:"CN000000539",name:"GT DRILLING LP",loc:"Nisku, AB"},
+  {id:"CN000000507",name:"Gas Liquids Engineering - R",loc:"Calgary, AB"},
+  {id:"CN000000508",name:"Gasfield Plumbing & Heating - D",loc:"Fort Nelson, BC"},
+  {id:"CN000000509",name:"Gaslink Industries Ltd.",loc:"Fort St. John, BC"},
+  {id:"CN000000513",name:"Gerry\u2019s Well Services",loc:"Bonanza, AB"},
+  {id:"CN000000525",name:"Good to Go Oilfield Services Ltd.",loc:"Grande Prairie, AB"},
+  {id:"CN000000533",name:"Group 10 Engineering Ltd",loc:"Calgary, AB"},
+  {id:"CN000000535",name:"Groupe Lar Inc",loc:"Metabetchouan- Lac-a-la-Croix, QC"},
+  {id:"CN000000536",name:"Gryphon Petroleum Corp",loc:"Calgary, AB"},
+  {id:"CN000000541",name:"HALLMARK TUBULARS LTD.",loc:"Calgary, AB"},
+  {id:"CN000000543",name:"HAMILTON METALS",loc:"Edmonton, AB"},
+  {id:"CN000000544",name:"HAND IN HAND TECHNOLOGIES",loc:"Edmonton, AB"},
+  {id:"CN000000545",name:"HARLEY'S WELDING INC.",loc:"Nisku, AB"},
+  {id:"CN000000547",name:"HARVIE INSTRUMENTS LTD.",loc:"Red Deer, AB"},
+  {id:"CN000000549",name:"HAWK HYDRAULICS",loc:"Edmonton, AB"},
+  {id:"CN000000307",name:"HAYDUK PICKER SERVICE LTD.",loc:"Drayton Valley, AB"},
+  {id:"CN000000550",name:"HEADWATER ENGINEERING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001222",name:"HEARTLAND INDUSTRIAL SERVICES INC.",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000551",name:"HELICAL PIER SYSTEMS LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000000553",name:"HELICAL PILE SOLUTIONS LTD.",loc:"Nisku, AB"},
+  {id:"CN000000554",name:"HERZOG RAIL ROAD SERVICES",loc:"Leduc, AB"},
+  {id:"CN000000556",name:"HI QUALITY MACHINE & OILFIELD REPAIR LTD.",loc:"Nisku, AB"},
+  {id:"CN000000555",name:"HI-KALIBRE EQUIPMENT LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000557",name:"HIGH ARCTIC ENERGY SERVICES INC.",loc:"Calgary, AB"},
+  {id:"CN000000558",name:"HIGH MARK MECHANICAL INC.",loc:"Lac La Biche, AB"},
+  {id:"CN000000563",name:"HOISTING LTD.",loc:"Nisku, AB"},
+  {id:"CN000000308",name:"HOLMAN FLEET MANAGEMENT",loc:""},
+  {id:"CN000000309",name:"HOMESTEAD CONSUMERS CO-OP LTD.",loc:"Portage la Prairie, MB"},
+  {id:"CN000000565",name:"HORIZON DRILLING INC.",loc:"Calgary, AB"},
+  {id:"CN000000566",name:"HOTROD WELDING & PIPEFITTING",loc:"Beaumont, AB"},
+  {id:"CN000000567",name:"HRC TOOL & DIE MANUFACTURING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000310",name:"HUBS LIGHT OILFIELD HAULING INC.",loc:"Sherwood Park, AB"},
+  {id:"CN000000568",name:"HULK ENERGY SERVICES",loc:"Grande Prairie, AB"},
+  {id:"CN000000569",name:"HULKSTER DRAWWORKS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000570",name:"HURRICANE MACHINING",loc:"Edmonton, AB"},
+  {id:"CN000000572",name:"HYDUKE DRILLING SOLUTIONS INC.",loc:"Nisku, AB"},
+  {id:"CN000000573",name:"HYDUKE WELL SERVICE SOLUTIONS",loc:"Edmonton, AB"},
+  {id:"CN000000542",name:"Haltech Testing - R",loc:"Baytree, AB"},
+  {id:"CN000000546",name:"Harvest Operations Corp. - R",loc:"Calgary, AB"},
+  {id:"CN000000552",name:"Helical Pile Solutions Ltd - R",loc:"Sherwood Park, AB"},
+  {id:"CN000000559",name:"Highmark Oilfield Services Ltd. - R",loc:"Charlie Lake"},
+  {id:"CN000000560",name:"Hightech Oilfiled Services Ltd.",loc:"Fort St John, BC"},
+  {id:"CN000000561",name:"Hoek Iron Welder Testing",loc:"Fort St John, BC"},
+  {id:"CN000000562",name:"Hoekiron Ltd - R",loc:"Fort St. John, BC"},
+  {id:"CN000000564",name:"Horizon Drilling - R",loc:"Calgary, AB"},
+  {id:"CN000000571",name:"Husky Oil Operations Ltd.",loc:"Calgary, AB"},
+  {id:"CN000000574",name:"ICON MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000575",name:"ICONIC ELECTRIC AND CONTROLS LTD.",loc:"Calgary, AB"},
+  {id:"CN000000576",name:"ICS GREAT WESTERN LP",loc:"Edmonton, AB"},
+  {id:"CN000000578",name:"IMPACT INDUSTRIAL LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000000579",name:"IMPREGLON CANADA LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000580",name:"IN-LINE CONTRACTING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000581",name:"INLINE WELDING & MECHANICAL",loc:"Leduc, AB"},
+  {id:"CN000000582",name:"INNERTECH VALVE LIMITED",loc:"Edmonton, AB"},
+  {id:"CN000000583",name:"INNERVISION METAL MANUFACTURING LTD.",loc:"Nisku, AB"},
+  {id:"CN000000585",name:"INNOVATIVE WELDING & MANUFACTURIN",loc:"Edmonton, AB"},
+  {id:"CN000000586",name:"INNOVATOR INDUSTRIAL SERVICES INC.",loc:"Spruce Grove, AB"},
+  {id:"CN000000587",name:"INOTEC COATINGS AND HYDRAULICS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000589",name:"INTERNATIONAL FLOW CONTROL LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000590",name:"INTERNATIONAL PAPER CANADA",loc:"Grande Prairie, AB"},
+  {id:"CN000000591",name:"INTERNATIONAL QUALITY CONSULTANTS LTD.",loc:"Calgary, AB"},
+  {id:"CN000000592",name:"INTERNATIONAL RUBBER PRODUCTS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000593",name:"INTERNATIONAL SERVICE AND SUPPLY LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000311",name:"INTERPROVINCIAL WELDING LTD.",loc:"Edson, AB"},
+  {id:"CN000000594",name:"INTERTEK TESTING SERVICES NA LTD.",loc:"Coquitlam, BC"},
+  {id:"CN000000595",name:"ION ENGINEERING INC.",loc:"Edmonton, AB"},
+  {id:"CN000000596",name:"IPAC Services Corp. - R",loc:"Clairmont, AB"},
+  {id:"CN000000597",name:"IPAC Services Corp. - R:2077029 AB Ltd",loc:"Clairmont, AB"},
+  {id:"CN000000598",name:"IPAC Services Corp. - R:M",loc:"Clairmont, AB"},
+  {id:"CN000000599",name:"IPEX INC.",loc:"Verdun, QC"},
+  {id:"CN000000600",name:"IRACORE INTERNATIONAL CANADA INC.",loc:"Nisku, AB"},
+  {id:"CN000000601",name:"IRED Thermal Group Ltd.",loc:"Edmonton, AB"},
+  {id:"CN000000602",name:"IRON BROTHERS LTD.",loc:"Nisku, AB"},
+  {id:"CN000000603",name:"IRONHAND DRILLING INC.",loc:"Calgary, AB"},
+  {id:"CN000000604",name:"IRONLINE COMPRESSION LP",loc:"Leduc, AB"},
+  {id:"CN000000605",name:"IRONTECH RIG REPAIR & MANUFACTURING",loc:"Acheson, AB"},
+  {id:"CN000000607",name:"ISH Energy Ltd. - D",loc:"Calgary, AB"},
+  {id:"CN000000608",name:"ISL ENGINEERING & LAND SERVICES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001208",name:"ISLAM101 INC OA MADINA PRINTING",loc:"Edmonton, AB"},
+  {id:"CN000000577",name:"Ideal Coatings & Fabrication",loc:"Grande Prairie, AB"},
+  {id:"CN000000584",name:"Innovative Material Testing Inc - IMT",loc:"1612459, AB"},
+  {id:"CN000000588",name:"Integrity Group Of Companies Corp",loc:"Foothills, AB"},
+  {id:"CN000000610",name:"J-ROD STEELWORKS",loc:"Sherwood Park, AB"},
+  {id:"CN000000611",name:"JA-CO WELDING",loc:"Nisku, AB"},
+  {id:"CN000000612",name:"JACKPOT WELDING LTD.",loc:"Leduc County, AB"},
+  {id:"CN000000613",name:"JAG FLOCOMPONENTS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000614",name:"JATEC ELECTRIC LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000615",name:"JCP OILFIELD SUPPLY CORP.",loc:"Calgary, AB"},
+  {id:"CN000000616",name:"JEDCO ENERGY SERVICES",loc:"Red Deer County, AB"},
+  {id:"CN000000617",name:"JIM DENT CONSTRUCTION LTD.",loc:"Hope, BC"},
+  {id:"CN000000312",name:"JLG INDUSTRIES INC.",loc:"Legal, AB"},
+  {id:"CN000000618",name:"JOE VERBEEK CONTRACTING LTD. - JVC LTD.",loc:"Sturgeon County, AB"},
+  {id:"CN000000619",name:"JOHN BROOKS COMPANY",loc:"Mississauga, ON"},
+  {id:"CN000000620",name:"JOMAX DRILLING - 1988 LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000621",name:"JONES TRANSPORTATION INC.",loc:"Acheson, AB"},
+  {id:"CN000000622",name:"JONNY'S OILFIELD HAULING",loc:"Nisku, AB"},
+  {id:"CN000000623",name:"Jupiter Resources Inc",loc:"Calgary, AB"},
+  {id:"CN000000625",name:"K&S POWER TONGS LTD.",loc:"Lloydminster, SK"},
+  {id:"CN000000624",name:"K-BRO LINEN SYSTEMS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000313",name:"K-LINE MAINTENANCE & CONSTRUCTION",loc:"Lethbridge, AB"},
+  {id:"CN000000627",name:"KAL TIRE.",loc:"Sherwood Park, AB"},
+  {id:"CN000000628",name:"KALLAR WELDING & FABRICATION",loc:"Nisku, AB"},
+  {id:"CN000000631",name:"KARMA MACHINING & MANUFACTURING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000632",name:"KAYOS PIPEFITTING SERVICES LTD.",loc:"Parkland County, AB"},
+  {id:"CN000000633",name:"KDM MACHINE WORKS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000634",name:"KEDDCO MFG LTD.",loc:"Sarnia, ON"},
+  {id:"CN000000314",name:"KENSKI INDUSTRIES",loc:"Onoway, AB"},
+  {id:"CN000000637",name:"KETEK GROUP INC",loc:"Edmonton, AB"},
+  {id:"CN000000638",name:"KEY/K2 Leduc",loc:"Leduc, AB"},
+  {id:"CN000000639",name:"KEY/K2 Red Deer",loc:"Red Deer, AB"},
+  {id:"CN000000643",name:"KEYERA PARTNERSHIP.",loc:"144 4th Ave SW Calgary, AB"},
+  {id:"CN000000645",name:"KICHTON CONTRACTING LTD.",loc:"Acheson, AB"},
+  {id:"CN000000646",name:"KICKSTART SERVICES",loc:"Dunmore, AB"},
+  {id:"CN000000647",name:"KINDER MORGAN CANADA - KMC-ETCP",loc:"Calgary, AB"},
+  {id:"CN000000648",name:"KINGSTON MIDSTREAM WESTSPUR LTD.",loc:"Estevan, SK"},
+  {id:"CN000000649",name:"KMC OILFIELD MAINTENANCE LTD.",loc:"Spruce Grove, AB"},
+  {id:"CN000000650",name:"KN VENTURES",loc:"Leduc, AB"},
+  {id:"CN000000315",name:"KNDS CANADA INC.",loc:"Ottawa, ON"},
+  {id:"CN000000316",name:"KOCH FORD LINCOLN SALES (2003) LT",loc:"Edmonton, AB"},
+  {id:"CN000000652",name:"KODIAK METAL WORKS LTD",loc:"Ardrossan, AB"},
+  {id:"CN000000653",name:"KRAMERS TECHNICAL SERVICES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000654",name:"KS MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000655",name:"KS MANUFACTURING ENTERPRISES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000656",name:"KSM INC.",loc:"Nisku, AB"},
+  {id:"CN000000657",name:"KUCHER STEELS - 1992 INC.",loc:"Edmonton, AB"},
+  {id:"CN000000626",name:"Kaden Energy Ltd.",loc:"Calgary, AB"},
+  {id:"CN000000629",name:"Kalmar Construction Ltd.",loc:"Fort St John, BC"},
+  {id:"CN000000630",name:"Karach Welding",loc:"Drayton Valley, AB"},
+  {id:"CN000000635",name:"Kelt - R",loc:"Calgary, AB"},
+  {id:"CN000000640",name:"Keyera Partnership",loc:"Calgary, AB"},
+  {id:"CN000000641",name:"Keyera Partnership:Routing Code C26",loc:"Calgary, AB"},
+  {id:"CN000000642",name:"Keyera Partnership:Routing Code W02",loc:"Calgary, AB"},
+  {id:"CN000000651",name:"Koch Exploration c/o Great Plains- R",loc:"Calgary, AB"},
+  {id:"CN000000658",name:"L.A. BRAYER INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000317",name:"LAC LA BICHE TRANSPORT LTD.",loc:"Lac La Biche, AB"},
+  {id:"CN000000659",name:"LAFARGE CANADA/ALBERTA PRECAST",loc:"Edmonton, AB"},
+  {id:"CN000000660",name:"LANDAIR CONTRACTORS",loc:"Nestow, AB"},
+  {id:"CN000000661",name:"LAYFIELD CANADA LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000662",name:"LCR MECHANICAL CONTRACTORS CORP.",loc:"Edmonton, AB"},
+  {id:"CN000000663",name:"LEDCOR FABRICATION INC.",loc:"Nisku, AB"},
+  {id:"CN000000664",name:"LEDCOR FABRICATION INC.:8602B-1920-N",loc:"Calgary, AB"},
+  {id:"CN000001198",name:"LEDCOR PROJECTS INC.",loc:"Nisku, AB"},
+  {id:"CN000000665",name:"LEDER INVESTMENTS LTD.",loc:"Acheson, AB"},
+  {id:"CN000000666",name:"LEDER STEEL LTD.",loc:"Acheson, AB"},
+  {id:"CN000000667",name:"LEGION PIPING FABRICATORS INC.",loc:"Nisku, AB"},
+  {id:"CN000000669",name:"LESKO RIG COMPONENTS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000318",name:"LIFTEX EQUIPMENT RENTALS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000319",name:"LIFTING SOLUTIONS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000673",name:"LIGHT-WEIGHT BUILDING SYSTEMS INC.",loc:"High River, AB"},
+  {id:"CN000000674",name:"LINCOLN COUNTY OILFIELD SERVICES LTD.",loc:"Athabasca, AB"},
+  {id:"CN000000675",name:"LISTER INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000676",name:"LJ WELDING AUTOMATION",loc:"Edmonton, AB"},
+  {id:"CN000000677",name:"LMV Energy Service - R",loc:"5100 56th Ave, Pouce Coupe, BC"},
+  {id:"CN000000680",name:"LORY OILFIELD RENTALS",loc:"Nisku, AB"},
+  {id:"CN000000320",name:"LTD OILFIELD SERVICES INC.",loc:"Redwater, AB"},
+  {id:"CN000000668",name:"Lehigh Manson Materials - D",loc:"Fort St. John, BC"},
+  {id:"CN000000670",name:"Leucrotta C/O TNT - R",loc:"Calgary, AB"},
+  {id:"CN000000671",name:"Leucrotta C/O WSP - R",loc:"Calgary, AB"},
+  {id:"CN000000672",name:"Leucrotta Exploration",loc:"Calgary, AB"},
+  {id:"CN000000679",name:"LongBow Pipe & Tap Ltd",loc:"Fort Nelson, BC"},
+  {id:"CN000000682",name:"Louisiana Pacific",loc:"Kelowna, BC"},
+  {id:"CN000000683",name:"M & M VALVE SERVICES INC.",loc:"Nisku, AB"},
+  {id:"CN000000684",name:"M.A. STEWART & SONS LTD.",loc:"Surrey, BC"},
+  {id:"CN000000685",name:"M.A.P. WATER & SEWER SERVICES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000686",name:"MACHINE CONNECTS & MANUFACTURING INC.",loc:"Edmonton, AB"},
+  {id:"CN000000688",name:"MAINLAND MACHINERY LTD.",loc:"Abbotsford, BC"},
+  {id:"CN000000689",name:"MAINLINE EQUIPMENT LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000690",name:"MAJOR PIPE & SUPPLY LTD.",loc:"Nisku, AB"},
+  {id:"CN000000691",name:"MAKLOC BUILDINGS INC.",loc:"Nisku, AB"},
+  {id:"CN000000321",name:"MAMMOET CANADA WESTERN LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000692",name:"MANLUK INDUSTRIES 2008 INC.",loc:"Wetaskiwin, AB"},
+  {id:"CN000000693",name:"MANUS ABRASIVE SYSTEMS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000694",name:"MAP OILFIELD LTD.",loc:"Okotoks, AB"},
+  {id:"CN000001231",name:"MARCEM INVESTMENTS  LTD.",loc:"Nisku, AB"},
+  {id:"CN000000695",name:"MARCOTT MECHANICAL CONSTRUCTION INC.",loc:"Stony Plain, AB"},
+  {id:"CN000000696",name:"MARK'S RENOVATIONS AND REPAIR INC.",loc:"Sturgeon County, AB"},
+  {id:"CN000000698",name:"MARUBENI-ITOCHU TUBULARS CANADA LTD.",loc:"Calgary, AB"},
+  {id:"CN000000699",name:"MASCO STEEL INDUSTRIES LTD.",loc:"Wetaskiwin, AB"},
+  {id:"CN000000701",name:"MASTER FLO VALVE INC.",loc:"Edmonton, AB"},
+  {id:"CN000000702",name:"MATERIAL RESOURCE MANAGEMENT INC.",loc:"Calgary, AB"},
+  {id:"CN000000703",name:"MAVERICK METAL DESIGN",loc:""},
+  {id:"CN000000704",name:"MAXX NORTH AMERICA SERVICES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000706",name:"MAYOR INDUSTRIES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000707",name:"MAYTEX MACHINE",loc:"Edmonton, AB"},
+  {id:"CN000000709",name:"MCKINNEY MACHINE CO. LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000711",name:"MELLOY INDUSTRIAL",loc:"NISKU, AB"},
+  {id:"CN000000712",name:"MERIT MACHINING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000713",name:"METAL RIVER WELDING INC.",loc:"Morinville, AB"},
+  {id:"CN000000714",name:"MGM TRANSPORT",loc:"Edmonton, AB"},
+  {id:"CN000000715",name:"MI SWACO",loc:"Calgary, AB"},
+  {id:"CN000000717",name:"MIDFIELD VALVE & SUPPLY",loc:"London, ON"},
+  {id:"CN000000323",name:"MIDWEST CAISSONS - 2014 INC.",loc:"Acheson, AB"},
+  {id:"CN000000718",name:"MIDWEST CONSTRUCTORS LP",loc:"Edmonton, AB"},
+  {id:"CN000000719",name:"MIDWEST FABRICATORS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000720",name:"MIDWEST STRUCTURAL LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000721",name:"MILCO MACHINING & MFG LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000723",name:"MMD MINERAL SIZING - CANADA INC.",loc:"Edmonton, AB"},
+  {id:"CN000000324",name:"MOBILE CRANES CANADA",loc:"Nisku, AB"},
+  {id:"CN000000724",name:"MODERN WELLBORE SOLUTIONS LTD.",loc:"Calgary, AB"},
+  {id:"CN000000725",name:"MOJO PORTABLE WELDING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000726",name:"MOORE PIPE - 2015 INC.",loc:"Nisku, AB"},
+  {id:"CN000000727",name:"MORGUARD",loc:"Calgary, AB"},
+  {id:"CN000000325",name:"MULLEN OILFIELD SERVICES-TUBULARS",loc:"Edmonton, AB"},
+  {id:"CN000000731",name:"MULTI INSTRUMENTS INC.",loc:"St. Albert, AB"},
+  {id:"CN000000730",name:"MULTI-TASK INDUSTRIAL LTD.",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000326",name:"MYSHAK SALES & RENTALS LTD.",loc:"Acheson, AB"},
+  {id:"CN000000687",name:"Macro Industries",loc:"Fort St. John, BC"},
+  {id:"CN000000697",name:"Martin Mrazik",loc:"Edmonton, AB"},
+  {id:"CN000000700",name:"MasTec Canada Inc",loc:"Calgary, AB"},
+  {id:"CN000000708",name:"McCOY INOTEC COATINGS & HYDRAULICS",loc:"Edmonton, AB"},
+  {id:"CN000000710",name:"Mectal Inspection Inc. - R",loc:"Alma, QC"},
+  {id:"CN000000716",name:"Mick Rozycki",loc:"Edmonton, AB"},
+  {id:"CN000000722",name:"Mitchell Installations Ltd - R",loc:"Burnaby, BC"},
+  {id:"CN000000732",name:"Murphy Oil Company - R",loc:"Calgary, AB"},
+  {id:"CN000000733",name:"NABORS DRILLING LTD.",loc:"Nisku, AB"},
+  {id:"CN000000734",name:"NABORS PRODUCTION SERVICES",loc:"Nisku, AB"},
+  {id:"CN000000735",name:"NAL RESOURCES LTD.",loc:"Calgary, AB"},
+  {id:"CN000000736",name:"NAMCO MACHINE & GEAR WORKS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000737",name:"NATIONAL PROCESS EQUIPMENT INC.",loc:"Edmonton, AB"},
+  {id:"CN000000327",name:"NCSG CRANE & HEAVY HAUL SERVICES",loc:"Acheson, AB"},
+  {id:"CN000000738",name:"NELSEN TECHNOLOGIES INC.",loc:"Leduc, AB"},
+  {id:"CN000000739",name:"NEW STAR FLOW CONTROL LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000742",name:"NEWGEN FABRICATION",loc:"Nisku, AB"},
+  {id:"CN000000744",name:"NEWPORT MANUFACTURING & DESIGN LTD.",loc:"Calmar, AB"},
+  {id:"CN000000745",name:"NEWTON'S LAW",loc:"Millet, AB"},
+  {id:"CN000000749",name:"NEXTGEN INDUSTRIES INC.",loc:"Calmar, AB"},
+  {id:"CN000000750",name:"NEXUS CNC MACHINING SERVICES",loc:"Edmonton, AB"},
+  {id:"CN000000328",name:"NEXUS RIGGING SOLUTIONS",loc:"Spruce Grove, AB"},
+  {id:"CN000000751",name:"NISKU SUPPLY LTD.",loc:"Nisku, AB"},
+  {id:"CN000000752",name:"NOETIC ENGINEERING 2008 INC.",loc:"Edmonton, AB"},
+  {id:"CN000000329",name:"NOREMAC INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000753",name:"NORFAB MFG - 1993 INC.",loc:"Edmonton, AB"},
+  {id:"CN000000330",name:"NORM NEUFELD ENTERPRISES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000755",name:"NORPOINT IND. - was JAY-VEE IND",loc:"Spruce Grove, AB"},
+  {id:"CN000000756",name:"NORQUEST INDUSTRIES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000757",name:"NORSEARCH INDUSTRIES - 2002 LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000000758",name:"NORTH AMERICAN STEEL ERECTORS",loc:"Cochrane, AB"},
+  {id:"CN000000759",name:"NORTH AMERICAN TUNGSTEN CORPORATION",loc:"Vancouver, BC"},
+  {id:"CN000000331",name:"NORTH WEST CRANE ENTERPRISES LTD.",loc:"Leduc, AB"},
+  {id:"CN000000763",name:"NORTHERN WELDARC LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000000764",name:"NORTHLAND FORGE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000332",name:"NORTHPOINT CRANE & RIGGING",loc:"Bittern Lake, AB"},
+  {id:"CN000000766",name:"NORTHSTAR DRILLSTEM TESTERS INC.",loc:"Calgary, AB"},
+  {id:"CN000001118",name:"NOV CANADA ULC",loc:"Leduc, AB"},
+  {id:"CN000000768",name:"NOV-T3 RIG SOLUTIONS  - now Varco",loc:"Nisku, AB"},
+  {id:"CN000000333",name:"NOVA CHEMICALS",loc:"Calgary, AB"},
+  {id:"CN000000769",name:"NSR NISKU SUPPLY & RENTALS LTD.",loc:"Nisku, AB"},
+  {id:"CN000000770",name:"NTE Energy Canada Ltd",loc:"Calgary, AB"},
+  {id:"CN000000771",name:"NTE Energy Canada Ltd:New Times Energy LP3 Limited Partnership",loc:"Calgary, AB"},
+  {id:"CN000000772",name:"NUCLEOM INC.",loc:"Quebec, QC"},
+  {id:"CN000000773",name:"NWR STURGEON REFINERY",loc:"GIBBONS, AB"},
+  {id:"CN000000740",name:"Newalta",loc:"Grande Prairie, AB"},
+  {id:"CN000000741",name:"Newalta:Newalta -R",loc:"Gordondale, AB"},
+  {id:"CN000000743",name:"Newmark Farms & Argo Ltd",loc:"Peace River Regional District, BC"},
+  {id:"CN000000746",name:"Nexen Energy ULC - D",loc:"Calgary, AB"},
+  {id:"CN000000747",name:"Nexen Inc.",loc:"Calgary, AB"},
+  {id:"CN000000748",name:"Next Compression",loc:"Rocky View County, AB"},
+  {id:"CN000000754",name:"Normandeau Rentals -D",loc:""},
+  {id:"CN000000760",name:"North Country Projects - D",loc:"Fort Nelson, BC"},
+  {id:"CN000000765",name:"NorthRiver Midstream Inc.",loc:"CALGARY, AB"},
+  {id:"CN000000761",name:"Northern Cross Oilfield Services -R",loc:"Peace River, AB"},
+  {id:"CN000000762",name:"Northern Rockies Regional Municipality-D",loc:"Fort Nelson, BC"},
+  {id:"CN000000767",name:"Norweld Stress",loc:"Fort St.John, BC"},
+  {id:"CN000000774",name:"OCL SERVICES LP",loc:"Edmonton, AB"},
+  {id:"CN000000775",name:"OCTO MECHANICAL INC.",loc:"Leduc, AB"},
+  {id:"CN000000776",name:"OEM REMANUFACTURING COMPANY INC.",loc:"Edmonton, AB"},
+  {id:"CN000000777",name:"OERLIKON METCO (CANADA) INC.",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000778",name:"OFS CANADA INC.",loc:"Calgary, AB"},
+  {id:"CN000000780",name:"OIL COUNTRY ENGINEERING",loc:"Edmonton, AB"},
+  {id:"CN000000781",name:"OIL COUNTRY SANDBLASTING LTD",loc:"Nisku, AB"},
+  {id:"CN000000782",name:"ONCORE SERVICES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000783",name:"ONEC CONSTRUCTION INC.",loc:"Edmonton, AB"},
+  {id:"CN000000784",name:"ONEC CONSTRUCTION INC.:207",loc:"Edmonton, AB"},
+  {id:"CN000000785",name:"OPTIC QA INC",loc:"Beaumont, AB"},
+  {id:"CN000000786",name:"ORIGIN AND CAUSE",loc:""},
+  {id:"CN000000787",name:"ORLEN Upstream Canada Ltd. - R",loc:"Calgary, AB"},
+  {id:"CN000000788",name:"OTR ENGINEERED SOLUTIONS",loc:"Sault Ste Marie, ON"},
+  {id:"CN000000789",name:"OTX",loc:""},
+  {id:"CN000000790",name:"OUTRIDER STEELWORKS LTD.",loc:"Stony Plain, AB"},
+  {id:"CN000000334",name:"OVER THE TOP CONCRETE PUMPING",loc:"Acheson, AB"},
+  {id:"CN000000792",name:"OWENS CORNING CANADA",loc:"Scarborough, ON"},
+  {id:"CN000000791",name:"Ovintiv Canada ULC",loc:"Calgary, AB"},
+  {id:"CN000000795",name:"PACIFIC ROPES.",loc:"Burnaby, BC"},
+  {id:"CN000000796",name:"PACIFIC VALVE SERVICES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000335",name:"PACIFIC WEST SYSTEMS SUPPLY LTD.",loc:"Langley, BC"},
+  {id:"CN000000797",name:"PACKERS PLUS ENERGY SERVICES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000336",name:"PAGNOTTA INC.",loc:"Edmonton, AB"},
+  {id:"CN000000800",name:"PARSONS INC.",loc:"Markham, ON"},
+  {id:"CN000000802",name:"PATRA MACHINING & SERVICES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000803",name:"PATTERSON-UTI DRILLING CO CANADA",loc:"Nisku, AB"},
+  {id:"CN000000804",name:"PAVILION STRUCTURES",loc:"Edmonton, AB"},
+  {id:"CN000000806",name:"PCL CONSTRUCTION - Edmonton:PCL CONSTRUCTION - WINNIPEG",loc:"Winnipeg, MB"},
+  {id:"CN000000807",name:"PCL CONSTRUCTION - Edmonton:PCL CONSTRUCTION CALGARY",loc:"Calgary, AB"},
+  {id:"CN000000805",name:"PCL CONSTRUCTION MANAGEMENT INC.",loc:"Edmonton, AB"},
+  {id:"CN000000808",name:"PCL CONSTRUCTORS - Winnipeg",loc:"Winnipeg, MB"},
+  {id:"CN000000809",name:"PCL INDUSTRIAL MANAGEMENT INC",loc:"Edmonton, AB"},
+  {id:"CN000000810",name:"PE BEN OILFIELD SERVICES L.P.",loc:"Nisku, AB"},
+  {id:"CN000001199",name:"PEMBINA INFRASTRUCTURE & LOGISTICS LP",loc:"Calgary, AB"},
+  {id:"CN000000813",name:"PENN-CO CONSTRUCTION CANADA",loc:"Blumenort, MB"},
+  {id:"CN000000815",name:"PERMA PIPE CANADA LTD.",loc:"Camrose, AB"},
+  {id:"CN000000816",name:"PETER KIEWIT SONS ULC",loc:"Burnaby, BC"},
+  {id:"CN000000818",name:"PETROSPEC ENGINEERING INC.",loc:"Sherwood Park, AB"},
+  {id:"CN000000821",name:"PGI Processing ULC",loc:"Calgary, AB"},
+  {id:"CN000000822",name:"PHOENIX PETROLEUM LTD.",loc:"Fredericton, NB"},
+  {id:"CN000000823",name:"PIERCE CO. MANUFACTURERS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000337",name:"PILLAR RESOURCE SERVICES INC.",loc:"Calgary, AB"},
+  {id:"CN000000825",name:"PIPETECH RENTALS LIMITED PARTNERSHIP",loc:"Spruce Grove, AB"},
+  {id:"CN000000827",name:"PIPEWORX LTD.",loc:"Spruce Grove, AB"},
+  {id:"CN000000829",name:"PJ VALVE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000830",name:"PLAINSMAN MFG. INC.",loc:"Edmonton, AB"},
+  {id:"CN000000831",name:"PLASMA-TEC INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000832",name:"PME INC.",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000834",name:"POLYLEVEL ALBERTA CORP.",loc:"Sherwood Park, AB"},
+  {id:"CN000000835",name:"POWELL CANADA INC.",loc:"Acheson, AB"},
+  {id:"CN000000836",name:"PRECISION COATINGS & HYDRAULICS",loc:"Edmonton, AB"},
+  {id:"CN000000838",name:"PRECISION DRLG DSC",loc:"Calgary, AB"},
+  {id:"CN000000839",name:"PRECISION DRLG YD4",loc:"Calgary, AB"},
+  {id:"CN000000840",name:"PRECISION WELL SERVICING",loc:"Acheson, AB"},
+  {id:"CN000000842",name:"PREMAY EQUIPMENT LP",loc:"Calgary, AB"},
+  {id:"CN000000843",name:"PREMIER STEEL - 1990 INC.",loc:"Edmonton, AB"},
+  {id:"CN000000844",name:"PRESSURE CONTROL SOLUTIONS LTD.",loc:"Red Deer, AB"},
+  {id:"CN000000846",name:"PRIME PUMP INDUSTRIES",loc:"Calgary, AB"},
+  {id:"CN000000847",name:"PRIMORIS CONSTRUCTION & MAINTENANCE",loc:"Acheson, AB"},
+  {id:"CN000000848",name:"PRIMORIS FABRICATION - CANADA LP",loc:"Acheson, AB"},
+  {id:"CN000000849",name:"PRIORITY MECHANICAL LTD",loc:"Edmonton, AB"},
+  {id:"CN000000850",name:"PRISM INTEGRATED SOLUTIONS INC.",loc:"Forestburg, AB"},
+  {id:"CN000000851",name:"PRO INSPECTION LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000852",name:"PRO TORQUE CONNECTION TECHNOLOGIES",loc:"Edmonton, AB"},
+  {id:"CN000000853",name:"PROCESS & STEAM SPECIALTIES",loc:"Oakville, ON"},
+  {id:"CN000000338",name:"PROCON MINING & TUNNELLING",loc:"Burnaby, BC"},
+  {id:"CN000000854",name:"PROCOR LIMITED",loc:"Oakville, ON"},
+  {id:"CN000000855",name:"PROGRESSIVE MACHINE WORKS",loc:"Edmonton, AB"},
+  {id:"CN000000856",name:"PROGRESSIVE OILFIELD SUPPLY & REPAIR LTD.",loc:"Leduc, AB"},
+  {id:"CN000000857",name:"PROPAK SYSTEMS LTD",loc:"Airdrie, AB"},
+  {id:"CN000000858",name:"PROPIPE GROUP LTD",loc:"Calgary, AB"},
+  {id:"CN000000859",name:"PROSPEC CHEMICALS",loc:"Sturgeon County, AB"},
+  {id:"CN000001203",name:"PROVEO",loc:"Edmonton, AB"},
+  {id:"CN000000860",name:"PROWEST MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000339",name:"PROWEST SHIPPING & PACKAGING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000861",name:"PSI INDUSTRIAL",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000862",name:"PTW Canada Ltd.",loc:"Calgary, AB"},
+  {id:"CN000000863",name:"PTW Structural Solutions Ltd.",loc:"Rocky View County, AB"},
+  {id:"CN000000793",name:"Pacific Canbriam Energy Limited",loc:"Calgary, AB"},
+  {id:"CN000000794",name:"Pacific Northern Gas Ltd",loc:"Terrace, BC"},
+  {id:"CN000000798",name:"Painted Pony Energy Ltd.",loc:"Calgary, AB"},
+  {id:"CN000000799",name:"Paramount Resources Ltd",loc:"Calgary, AB"},
+  {id:"CN000000801",name:"Patch Point Energy Services",loc:"Fort St. John, BC"},
+  {id:"CN000000811",name:"Pembina Gas Services LP Partnership",loc:"Calgary, AB"},
+  {id:"CN000000812",name:"Pengrowth Energy Corporation - R",loc:"Calgary, AB"},
+  {id:"CN000000817",name:"Petronas Energy Canada Ltd.",loc:"Calgary, AB"},
+  {id:"CN000000819",name:"Petrus Resources Ltd. - D",loc:"Calgary, AB"},
+  {id:"CN000000820",name:"Peyto Exploration & Development Corp.",loc:"Calgary, AB"},
+  {id:"CN000000824",name:"Pieridae Energy Limited- D",loc:"Calgary, AB"},
+  {id:"CN000000826",name:"Pipeworx - R",loc:"Spruce Grove, AB"},
+  {id:"CN000000828",name:"Pipeworx Ltd. - D",loc:"Spruce Grove, AB"},
+  {id:"CN000000833",name:"Polar Star Canadian Oil & Gas",loc:"Calgary, AB"},
+  {id:"CN000000841",name:"Predator Oil BC Ltd. - T",loc:"Fort St. John, BC"},
+  {id:"CN000000845",name:"Primavera Resources Corp.",loc:"Calgary, AB"},
+  {id:"CN000000864",name:"QIF METALWORKS INC.",loc:"Sherwood Park, AB"},
+  {id:"CN000000865",name:"QUALIMET INC.",loc:"Edmonton, AB"},
+  {id:"CN000000866",name:"QUALITY FABRICATING & SUPPLY LP",loc:"Edmonton, AB"},
+  {id:"CN000000867",name:"QUALITY WEST GROUP INC.",loc:"Edmonton, AB"},
+  {id:"CN000000868",name:"QUANTIAM TECHNOLOGIES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000869",name:"QUANTUM SUPPLY LTD.",loc:"North Vancouver"},
+  {id:"CN000000870",name:"R.A. HODGSON INDUSTRIAL DESIGN LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000000871",name:"R.O.Y. INDUSTRIES LTD.",loc:"Leduc, AB"},
+  {id:"CN000000872",name:"R.S. MACHINE & MANUFACTURING LTD.",loc:"Nisku, AB"},
+  {id:"CN000001214",name:"RADIUM NORTH INC.",loc:"Fort McMurray, AB"},
+  {id:"CN000000873",name:"RADIUM TECHNOLOGIES INC",loc:"County of Grande Prairie, AB"},
+  {id:"CN000000340",name:"RADIUS CRANE & RIGGING INC.",loc:"Nisku, AB"},
+  {id:"CN000000875",name:"RAE ENGINEERING & INSPECTION LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000874",name:"RAE'S INDUSTRIAL REPAIR",loc:"Slave Lake, AB"},
+  {id:"CN000000876",name:"RAIL SHOP SERVICES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000880",name:"RAYBERN METER & CONTROLS LTD.",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000000881",name:"REACTION SCREW PILING INC.",loc:"Nisku, AB"},
+  {id:"CN000000882",name:"RECON HEAVY DUTY REPAIR INC.",loc:"Bruderheim, AB"},
+  {id:"CN000000883",name:"RED DEER PILING INC.",loc:"Red Deer County, AB"},
+  {id:"CN000000884",name:"RED DEER PUBLIC SCHOOL DISTRICT",loc:"Red Deer, AB"},
+  {id:"CN000000885",name:"RED DEER WELL CONTROL",loc:"Edmonton, AB"},
+  {id:"CN000000886",name:"RED FLAME INDUSTRIES INC.",loc:"Red Deer, AB"},
+  {id:"CN000000887",name:"RED WILLOW MACHINE",loc:"St. Albert, AB"},
+  {id:"CN000000888",name:"REDBAND MECHANICAL LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000000889",name:"REDCO PROCESS & PRODUCTION",loc:"Sherwood Park, AB"},
+  {id:"CN000000891",name:"REFORGED RECYCLING INC.",loc:"Calgary, AB"},
+  {id:"CN000000892",name:"RELIABLE WELDING SERVICE LTD.",loc:"Nisku, AB"},
+  {id:"CN000000893",name:"RELIANCE DESIGN & MFG",loc:"Nisku, AB"},
+  {id:"CN000000896",name:"RESFLUID SOLUTIONS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000897",name:"RESOURCE EQUIPMENT",loc:"Calgary, AB"},
+  {id:"CN000000898",name:"REVTECH INTERNATIONAL",loc:"Edmonton, AB"},
+  {id:"CN000000899",name:"RFS WELDING AND FABRICATION INC.",loc:"Stony Plain, AB"},
+  {id:"CN000000900",name:"RHINO FABRICATION LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000902",name:"RIG-SPEC WELDING & FABRICATION LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000903",name:"RIGHT CHOICE ENERGY SERVICES INC.",loc:"Moose Jaw, SK"},
+  {id:"CN000000904",name:"RIGID OILFIELD SERVICES LTD.",loc:"Devon, AB"},
+  {id:"CN000000905",name:"RIGMASTER MACHINERY LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000906",name:"RIGWORKS OILFIELD SOLUTIONS INC.",loc:"Nisku, AB"},
+  {id:"CN000000908",name:"RIO TINTO ALCAN INC.",loc:"Montreal, QC"},
+  {id:"CN000000907",name:"RIO-TEK CANADA INC.",loc:"Edmonton, AB"},
+  {id:"CN000000909",name:"RJ Fabrication Ltd.  - R",loc:"Cecil Lake, BC"},
+  {id:"CN000000910",name:"RKO STEEL LIMITED",loc:"Halifax, NS"},
+  {id:"CN000001227",name:"ROAD TO RAIL CONSTRUCTION GROUP INC.",loc:"Camrose, AB"},
+  {id:"CN000000911",name:"ROADSIDE FABRICATING & WELDING LTD.",loc:"Ardrossan, AB"},
+  {id:"CN000000341",name:"ROBERT B. SOMERVILLE CO. LTD",loc:"King City, ON"},
+  {id:"CN000000912",name:"ROBERT B. SOMERVILLE CO. LTD.",loc:"King City, ON"},
+  {id:"CN000000913",name:"ROCKWELL SERVICING",loc:"Calgary, AB"},
+  {id:"CN000000342",name:"ROCKWOOD STEEL MFG INC.",loc:"Westlock, AB"},
+  {id:"CN000000343",name:"ROFS CANADA LTD.",loc:"Calgary, AB"},
+  {id:"CN000000916",name:"ROGUE RENTALS INC.",loc:"Red Deer, AB"},
+  {id:"CN000000917",name:"ROLARK STAINLESS STEEL",loc:"Edmonton, AB"},
+  {id:"CN000000918",name:"ROLLED ALLOYS CANADA",loc:"Edmonton, AB"},
+  {id:"CN000000919",name:"ROTAFLOW CONTROLS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000920",name:"ROYAL ALEXANDRA HOSPITAL",loc:"Edmonton, AB"},
+  {id:"CN000000925",name:"RUSSEL METALS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000926",name:"RYKAR INDUSTRIES LTD.",loc:"Red Deer, AB"},
+  {id:"CN000000877",name:"Ramshorn Canada",loc:"Clairmont, AB"},
+  {id:"CN000000878",name:"Ramshorn Canada:Ramshorn Canada - D",loc:"Grande Prairie, AB"},
+  {id:"CN000000879",name:"Raven Oilfield Rentals - D",loc:"Fort St. John, BC"},
+  {id:"CN000000890",name:"Reed Energy Group Inc - R",loc:"Grande Prairie, AB"},
+  {id:"CN000000894",name:"Remco Insulation Ltd. -R",loc:"Prince George, BC"},
+  {id:"CN000000895",name:"Repsol Oil - formerlyTalisman Energy Inc.",loc:"Calgary, AB"},
+  {id:"CN000000901",name:"Rhyason Contracting",loc:"Fort St. John, BC"},
+  {id:"CN000000914",name:"Rockx Inspection Services Ltd",loc:"Fort St. John, BC"},
+  {id:"CN000000915",name:"Rocky View Resources - D",loc:"Calgary, AB"},
+  {id:"CN000000921",name:"Rumble Industries Ltd.",loc:"Fort St. John, BC"},
+  {id:"CN000000922",name:"Rumble Industries Ltd.:207",loc:"Fort St. John, BC"},
+  {id:"CN000000923",name:"Rumble Industries Ltd.:R",loc:"Fort St John, BC"},
+  {id:"CN000000924",name:"Rumble Industries Ltd.:T",loc:"Fort St John, BC"},
+  {id:"CN000000927",name:"S2 Mechanical Ltd. - R",loc:"Prince George, BC"},
+  {id:"CN000000344",name:"SAFETY COORDINATION SERVICES",loc:"Edmonton, AB"},
+  {id:"CN000000930",name:"SAIPEM CANADA INC.",loc:"Calgary, AB"},
+  {id:"CN000000931",name:"SAJAC OILFIELD SERVICES LTD.",loc:"Jarvis Bay, AB"},
+  {id:"CN000001204",name:"SALCO GROUP DEMOLITION",loc:"Edmonton, AB"},
+  {id:"CN000000932",name:"SAM'S CRAFT IRON LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000933",name:"SAMUEL & SON COMPANY LTD.",loc:"Nisku, AB"},
+  {id:"CN000000934",name:"SAPPHIRE CONTROLS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000345",name:"SARENS CANADA INC.",loc:"Leduc, AB"},
+  {id:"CN000000935",name:"SAVAILIN ENTERPRISES LTD.",loc:"Lac La Biche, AB"},
+  {id:"CN000000936",name:"SAVANNA DRILLING",loc:"Calgary, AB"},
+  {id:"CN000000937",name:"SAVANNA WELL SERVICING INC.",loc:"Calgary, AB"},
+  {id:"CN000000938",name:"SAXON DRILLING CANADA LP",loc:"Calgary, AB"},
+  {id:"CN000000939",name:"SAXON ENERGY SERVICES INC.",loc:"Calgary, AB"},
+  {id:"CN000000940",name:"SCHENDEL MECHANICAL CONTRACTING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000941",name:"SCHLUMBERGER CANADA LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000943",name:"SCHLUMBERGER CANADA LTD.  - Calgary",loc:"Calgary, AB"},
+  {id:"CN000000944",name:"SCONA ELECTRIC INC.",loc:"Edmonton, AB"},
+  {id:"CN000000945",name:"SCORE - CANADA LIMITED",loc:"Edmonton, AB"},
+  {id:"CN000000947",name:"SEA-CAN CONTAINERS LTD.",loc:"Nisku, AB"},
+  {id:"CN000000953",name:"SECURE ENERGY SERVICES",loc:"Calgary, AB"},
+  {id:"CN000000346",name:"SECURITAS TECHNOLOGY",loc:"Edmonton, AB"},
+  {id:"CN000000954",name:"SEMCAMS ULC",loc:"Calgary, AB"},
+  {id:"CN000000955",name:"SENTRIMAX CENTRIFUGES INC.",loc:"Edmonton, AB"},
+  {id:"CN000000956",name:"SERVCO CANADA INC. - was DMS Ind",loc:"Sunnyside, MB"},
+  {id:"CN000000957",name:"SERVCO OILFIELD SUPPLY CANADA LTD.",loc:"Nisku, AB"},
+  {id:"CN000000959",name:"SGS CANADA",loc:"Edmonton, AB"},
+  {id:"CN000000961",name:"SHAWCOR",loc:"Nisku, AB"},
+  {id:"CN000000962",name:"SHEFFIELD WELDING & MACHINING",loc:"Edmonton, AB"},
+  {id:"CN000000347",name:"SHEFFIELD WELDING & MACHINING LTD",loc:"Edmonton, AB"},
+  {id:"CN000000963",name:"SHIELD INDUSTRIES LTD.",loc:"Taber, AB"},
+  {id:"CN000000964",name:"SHOAL CREEK PRECAST",loc:""},
+  {id:"CN000000966",name:"SIERRA FABRICATION & MANUFACTURING INC.",loc:"Devon, AB"},
+  {id:"CN000000967",name:"SILENT-AIRE LIMITED PARTNERSHIP NISKU",loc:"Nisku, AB"},
+  {id:"CN000000968",name:"SIRIUS INSTRUMENTATION & CONTROLS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000969",name:"SKILLS MECHANICAL SOLUTIONS",loc:"Sherwood Park, AB"},
+  {id:"CN000000970",name:"SKY EYE MEASUREMENT INC.",loc:"Acheson, AB"},
+  {id:"CN000000972",name:"SKYWAY CANADA LIMITED",loc:"Edmonton, AB"},
+  {id:"CN000000973",name:"SLURRYFLO-SPECIAL ALLOY FABRICATORS",loc:"Edmonton, AB"},
+  {id:"CN000000974",name:"SMC 2.0 LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000975",name:"SMC Mechanical",loc:"Penticton, BC"},
+  {id:"CN000000976",name:"SMF SPECIAL METAL FABRICATING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000977",name:"SMITH CAMERON PUMP SOLUTIONS INC.",loc:"Surrey"},
+  {id:"CN000000978",name:"SMS EQUIPMENT INC.",loc:"Acheson, AB"},
+  {id:"CN000000979",name:"SOLUTION SERVICES INC.",loc:"Sexsmith, AB"},
+  {id:"CN000000980",name:"SONIC COATING SOLUTIONS INC.",loc:"Leduc, AB"},
+  {id:"CN000000981",name:"SONIC ONSITE SERVICES",loc:"St. Albert, AB"},
+  {id:"CN000000983",name:"SOURCE MACHINE",loc:"Edmonton, AB"},
+  {id:"CN000000985",name:"SPECIAL METALS CANADA",loc:"Edmonton, AB"},
+  {id:"CN000001218",name:"SPECTRUM MECHANICAL LTD.",loc:"Sherwood Park,, Alberta"},
+  {id:"CN000000987",name:"SPECTRUM NDT",loc:"Calgary, AB"},
+  {id:"CN000000988",name:"SPIRIT MACHINING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000989",name:"SPM OIL & GAS PC CANADA LTD",loc:"Mississauga, ON"},
+  {id:"CN000000991",name:"SRS INDUSTRIAL",loc:"Edmonton, AB"},
+  {id:"CN000000992",name:"SS Automotive",loc:"Taylor, BC"},
+  {id:"CN000000993",name:"SS RIG & VAC LTD.",loc:"Nisku, AB"},
+  {id:"CN000000994",name:"SS WELDING INSPECTION.",loc:"Edmonton, AB"},
+  {id:"CN000000995",name:"STAC MANUFACTURING INC.",loc:"Edmonton, AB"},
+  {id:"CN000000996",name:"STAG ENERGY SOLUTIONS INC.",loc:"Calgary, AB"},
+  {id:"CN000000997",name:"STAMCO SPECIALTY TOOL & MFG. CO.",loc:"Edmonton, AB"},
+  {id:"CN000000998",name:"STAMPEDE DRILLING INC.",loc:"Calgary, AB"},
+  {id:"CN000000999",name:"STANFOS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000348",name:"STARKES MECHANICAL SERVICES",loc:"Edmonton, AB"},
+  {id:"CN000001001",name:"STATS GROUP INTERNATIONAL",loc:"Edmonton, AB"},
+  {id:"CN000001002",name:"STEEL WORKS MANUFACTURING LTD.",loc:"Yellowhead County, AB"},
+  {id:"CN000001003",name:"STEELHEAD FABRICATIONS CORP.",loc:"Nisku, AB"},
+  {id:"CN000000349",name:"STERLING CRANE",loc:"Edmonton, AB"},
+  {id:"CN000001004",name:"STERLING STEWART INDUSTRIES INC.",loc:"Athabasca, AB"},
+  {id:"CN000001005",name:"STEWART & STEVENSON CANADA INC.",loc:"Calgary, AB"},
+  {id:"CN000001006",name:"STOKE INDUSTRIAL LTD.",loc:"Sturgeon County, AB"},
+  {id:"CN000000350",name:"STONE COLD CRANE SERVICES LTD.",loc:"Stony Plain, AB"},
+  {id:"CN000001007",name:"STORAGE TANK SOLUTIONS INC.",loc:"Devon, AB"},
+  {id:"CN000001009",name:"STRAIT MECHANICAL LTD.",loc:"Calgary, AB"},
+  {id:"CN000001010",name:"STRAIT Mechanical Ltd .",loc:"Calgary, AB"},
+  {id:"CN000001011",name:"STRATHCONA COUNTY",loc:"Sherwood Park, AB"},
+  {id:"CN000001013",name:"STRATHCONA SANDBLASTING",loc:"Edmonton, AB"},
+  {id:"CN000001014",name:"STREAM-FLO INDUSTRIES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001017",name:"STRONGHOLD  - was Gord Jones Oilfield",loc:"Nisku, AB"},
+  {id:"CN000001018",name:"STURGEON COUNTY",loc:"Morinville, AB"},
+  {id:"CN000001019",name:"STURGEON REWIND 2013 LTD.",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000001020",name:"SUBCOE",loc:"Edmonton, AB"},
+  {id:"CN000001021",name:"SUEZ CANADA WASTE SERVICES INC.",loc:"Paramus"},
+  {id:"CN000001022",name:"SUKUNKA NATURAL RESOURCES",loc:"Chetwynd, BC"},
+  {id:"CN000001023",name:"SUMMIT MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001024",name:"SUMMIT VALVE AND CONTROLS INC.",loc:"Edmonton, AB"},
+  {id:"CN000001200",name:"SUNDOWN OILFIELD SERVICES LTD.",loc:"Clairmont, AB"},
+  {id:"CN000001026",name:"SUPERIOR PUMP & MOTOR SERVICE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001027",name:"SUPREME - BRIDGE DIVISION",loc:"Edmonton, AB"},
+  {id:"CN000001028",name:"SUPREME INTERNATIONAL LTD.",loc:"Wetaskiwin, AB"},
+  {id:"CN000001029",name:"SUPREME STEEL LP",loc:"Acheson, AB"},
+  {id:"CN000001031",name:"SUREWAY INDUSTRIAL SERVICES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001032",name:"SURTEK SOLUTIONS INC.",loc:"Edmonton, AB"},
+  {id:"CN000001033",name:"SWIFT OILFIELD SUPPLY INC.",loc:"Nisku, AB"},
+  {id:"CN000000928",name:"Sage Creek Oilfield Services",loc:"Fort St.John, BC"},
+  {id:"CN000000929",name:"Saguaro",loc:"Calgary, AB"},
+  {id:"CN000000942",name:"Schlumberger Canada Ltd. - D",loc:"Calgary, AB"},
+  {id:"CN000000946",name:"Scovan Engineering Crew Energy- R",loc:"Calgary, AB"},
+  {id:"CN000000948",name:"Secta Technical Services Inc - D",loc:"Calgary, AB"},
+  {id:"CN000000949",name:"Secure Energy",loc:"Calgary, AB"},
+  {id:"CN000000950",name:"Secure Energy:Secure Energy - R",loc:"Calgary, AB"},
+  {id:"CN000000951",name:"Secure Energy:Secure Energy - R:2077029 Ab Ltd",loc:"Calgary, AB"},
+  {id:"CN000000952",name:"Secure Energy:T",loc:"Calgary, AB"},
+  {id:"CN000001212",name:"Sensor Network",loc:"Calgary, AB"},
+  {id:"CN000001209",name:"Sensor Network Nortech & 2077029",loc:"Calgary, AB"},
+  {id:"CN000000958",name:"Seven Generations Energy",loc:"Calgary, AB"},
+  {id:"CN000000960",name:"Shanghai Energy Corp - D",loc:"Calgary, AB"},
+  {id:"CN000000965",name:"Shocker Concepts",loc:"Drayton Valley AB"},
+  {id:"CN000000971",name:"Skystone International LP",loc:"Calgary, AB"},
+  {id:"CN000000982",name:"Source Energy Services",loc:"Calgary, AB"},
+  {id:"CN000000984",name:"Southern Plains Energy Inc",loc:"Redcliff, AB"},
+  {id:"CN000000990",name:"Spoke Resources Ltd",loc:"Calgary, AB"},
+  {id:"CN000001000",name:"Stanley Technical Services",loc:"Olds, AB"},
+  {id:"CN000001008",name:"Storm Resources Ltd - D",loc:"Calgary, AB"},
+  {id:"CN000001012",name:"Strathcona Resources Ltd.",loc:"Calgary, AB"},
+  {id:"CN000001015",name:"Streamline Inspection - R",loc:"Rockyview County, AB"},
+  {id:"CN000001016",name:"Strike Group Ltd Partnership",loc:"Grande Prairie, AB"},
+  {id:"CN000001030",name:"SureLine Projects Inc",loc:"Fort St John, BC"},
+  {id:"CN000001034",name:"T.D. WILLIAMSON CANADA ULC",loc:"Edmonton, AB"},
+  {id:"CN000001035",name:"TA Cogen LP o/a Ft Sask Cogen",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000001036",name:"TACK WELDING LTD.",loc:"Leduc, AB"},
+  {id:"CN000000351",name:"TADANO AMERICA CORPORATION",loc:"Leduc, AB"},
+  {id:"CN000001037",name:"TAHK PROJECTS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001041",name:"TARTAN COMPLETIONS SYSTEMS INC.",loc:"Edmonton, AB"},
+  {id:"CN000001042",name:"TDE Construction Company Ltd.",loc:"Edmonton, AB"},
+  {id:"CN000001043",name:"TECHNICAL COATING SYSTEMS LTD.",loc:"Nisku, AB"},
+  {id:"CN000001044",name:"TECHNIPFMC CANADA LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001045",name:"TECHTREE ENGINEERING LTD.",loc:"Lloydminster, AB"},
+  {id:"CN000001211",name:"TENARIS GLOBAL SERVICES CANADA",loc:"Calgary, AB"},
+  {id:"CN000001046",name:"TERR-EL OILFIELD WELDING & REPAIR LTD",loc:"Edmonton, AB"},
+  {id:"CN000001049",name:"TERRAFIX GEOSYNTHETICS INC.",loc:"Toronto, ON"},
+  {id:"CN000001050",name:"TERRICK ENTERPRISES LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000001051",name:"TERVITA - now owned by High Arctic",loc:"Calgary, AB"},
+  {id:"CN000001054",name:"TFL INDUSTRIAL LTD.",loc:"Acheson, AB"},
+  {id:"CN000001055",name:"TGB WELDING INC.",loc:"Morinville, AB"},
+  {id:"CN000001056",name:"THE CROSSING COMPANY INCORPORATED",loc:"Nisku, AB"},
+  {id:"CN000001057",name:"THE GROUNDWORX CO.",loc:"Leduc, AB"},
+  {id:"CN000001220",name:"THE KYA SUPPLY COMPANY",loc:"Edmonton, AB"},
+  {id:"CN000001058",name:"THE RIG SHOP LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000352",name:"THERMO DESIGN INSULATION LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001059",name:"THUNDER & LIGHTNING WELDING LTD.",loc:"Leduc, AB"},
+  {id:"CN000001060",name:"THYSSENKRUPP INDUSTRIAL SOLUTIONS",loc:"Calgary, AB"},
+  {id:"CN000001061",name:"TIW Steel Platework Inc.",loc:"St. Catherines, ON"},
+  {id:"CN000001062",name:"TLICHO-KIEWIT, A PARTNERSHIP",loc:"Yellowknife, NT"},
+  {id:"CN000001063",name:"TNB ENTERPRISES LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001064",name:"TNT Engineering Ltd.",loc:"Calgary, AB"},
+  {id:"CN000001067",name:"TOP GUN MACHINE",loc:"Nisku, AB"},
+  {id:"CN000001066",name:"TOP-CO LP",loc:"Edmonton, AB"},
+  {id:"CN000001068",name:"TOPCO OILSITE PRODUCTS",loc:"Edmonton, AB"},
+  {id:"CN000001202",name:"TOPCO OILSITE PRODUCTS USA INC.",loc:"Edmonton, AB"},
+  {id:"CN000001069",name:"TORCANA VALVE SERVICES INC.",loc:"Edmonton, AB"},
+  {id:"CN000001071",name:"TOTAL OILFIELD RENTALS",loc:"Leduc, AB"},
+  {id:"CN000001073",name:"TOTAL VALVE SOLUTIONS",loc:"Calgary, AB"},
+  {id:"CN000001078",name:"TRANS MOUNTAIN PIPELINE L.P.",loc:"Calgary, AB"},
+  {id:"CN000001079",name:"TRANSALTA GENERATION PARTNERSHIP",loc:"DUFFIELD, AB"},
+  {id:"CN000001080",name:"TRANSGAS LIMITED",loc:"Regina, SK"},
+  {id:"CN000001081",name:"TREELINE WELL SERVICES LP",loc:"Calgary, AB"},
+  {id:"CN000001085",name:"TRI WEST INDUSTRIES INC.",loc:"Edmonton, AB"},
+  {id:"CN000001082",name:"TRI-FAB METALS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001083",name:"TRI-LAD FLANGES & FITTINGS CANADA",loc:"Sherwood Park, AB"},
+  {id:"CN000001084",name:"TRI-SERVICE OILFIELD MANUFACTURING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001087",name:"TRIDON COMMUNICATIONS.",loc:"Edmonton, AB"},
+  {id:"CN000001089",name:"TRIMAY WEAR PLATE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001090",name:"TRINIDAD DESIGN & MFG  - was Victory Rig",loc:"Nisku, AB"},
+  {id:"CN000001091",name:"TRINIDAD DRILLING LTD.",loc:"Nisku, AB"},
+  {id:"CN000001094",name:"TRIPLE RANDOM INC.",loc:"Stony Plain, AB"},
+  {id:"CN000001095",name:"TRIUMPH INDUSTRIAL PROCESS LTD.",loc:"Nisku, AB"},
+  {id:"CN000001096",name:"TRU-ARC HOLDINGS LTD.",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000001097",name:"TRUEBORE MACHINING INC.",loc:"Leduc, AB"},
+  {id:"CN000001098",name:"TRYLON TSF INC.",loc:"Elmira, ON"},
+  {id:"CN000001099",name:"TRYTON - WAS DECARSON RENTALS",loc:"Nisku, AB"},
+  {id:"CN000000353",name:"TUNDRA DRILLING SERVICES",loc:"Leduc, AB"},
+  {id:"CN000001103",name:"TWILIGHT DRILLING LTD.",loc:"Nisku, AB"},
+  {id:"CN000001104",name:"TWIN CITY EQUIPMENT LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001105",name:"TWISTER PILING INC.",loc:"Nisku, AB"},
+  {id:"CN000001038",name:"Taqa North Ltd",loc:"Calgary, AB"},
+  {id:"CN000001039",name:"Taqa North Ltd:Taqa North Ltd - R",loc:"Calgary, AB"},
+  {id:"CN000001040",name:"Tarpon Energy Services",loc:"Whitecourt, AB"},
+  {id:"CN000001047",name:"Terra Energy",loc:"Calgary, AB"},
+  {id:"CN000001048",name:"Terra Firma Resources - R",loc:"Eckville, AB"},
+  {id:"CN000001052",name:"Tes Group Inc.",loc:"Edmonton, AB"},
+  {id:"CN000001065",name:"Todd Energy Canada Limited",loc:"Calgary, AB"},
+  {id:"CN000001070",name:"Torque Industrial Ltd. - D",loc:"GrandePrairie, AB"},
+  {id:"CN000001072",name:"Total Oilfield Rentals - D",loc:"Fort Nelson, BC"},
+  {id:"CN000001074",name:"Touchstone Exploration Inc.  - RockX",loc:"Calgary, AB"},
+  {id:"CN000001075",name:"Tourmaline Oil Corp.",loc:"Calgary, AB"},
+  {id:"CN000001077",name:"Trahan Oilfield Services Ltd.",loc:"Charlie Lake, BC"},
+  {id:"CN000001086",name:"Trialta Projects - R",loc:"Calgary, AB"},
+  {id:"CN000001088",name:"Trimac Transportation Services - R",loc:"Kamloops, BC"},
+  {id:"CN000001092",name:"Trinidad Drilling Ltd.",loc:"Nisku, AB"},
+  {id:"CN000001093",name:"Triple J Pipelines - 2019 Inc.",loc:"Dawson, BC"},
+  {id:"CN000001100",name:"Tsunami Water Solutions Ltd",loc:"Lacombe County, AB"},
+  {id:"CN000001101",name:"Tu Casa Group",loc:"Grande Prairie, AB"},
+  {id:"CN000001102",name:"Tu Casa Group:T",loc:"Grande Prairie, AB"},
+  {id:"CN000001106",name:"UGR Blair Creek Ltd.  - B.C. - R",loc:"Calgary, AB"},
+  {id:"CN000001107",name:"ULTIMATE FABRICATION",loc:"Edmonton, AB"},
+  {id:"CN000001108",name:"ULTRATEST N.D.T SERVICES - 2010 INC.",loc:"Edmonton, AB"},
+  {id:"CN000001110",name:"UNDERPRESSURE WELDING",loc:"Edmonton, AB"},
+  {id:"CN000001111",name:"UNITED FABRICATION & WELDING LTD.",loc:"Two Hills, AB"},
+  {id:"CN000001112",name:"UNITED PIPELINE SYSTEMS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000354",name:"UNITED ROOFING (EDMONTON) INC.",loc:"Edmonton, AB"},
+  {id:"CN000001114",name:"UNIVERSAL TECHNICAL SERVICES",loc:"Leduc, AB"},
+  {id:"CN000001115",name:"UNIVERSAL WELLHEAD SYSTEMS INC.",loc:"Calgary, AB"},
+  {id:"CN000001116",name:"UNIVERSE MACHINE CORPORATION",loc:"Edmonton, AB"},
+  {id:"CN000001109",name:"Unconventional Gas Limited - Alberta - R",loc:"Calgary, AB"},
+  {id:"CN000000355",name:"V.D.M. TRUCKING SERVICE",loc:"Edmonton, AB"},
+  {id:"CN000000356",name:"VALARD CONSTRUCTION LP",loc:"Edmonton, AB"},
+  {id:"CN000000357",name:"VALARD EQUIPMENT LP",loc:"Edmonton, AB"},
+  {id:"CN000001117",name:"VALSEAL LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001224",name:"VALWELL TECHNOLOGIES",loc:"Bonnyville, AB"},
+  {id:"CN000000358",name:"VANDERWELL CONTRACTORS - 1971",loc:"Slave Lake, AB"},
+  {id:"CN000000359",name:"VANGENDEREN CANADA INC.",loc:"Fort McMurray, AB"},
+  {id:"CN000001119",name:"VARCON INC.",loc:"Fredericton, NB"},
+  {id:"CN000001120",name:"VEOLIA WASTE SERVICES ALBERTA INC.",loc:"Levis, QC"},
+  {id:"CN000000360",name:"VERSALIFT CANADA INDUSTRIES",loc:"Edmonton, AB"},
+  {id:"CN000001124",name:"VERTICAL ACCESS LIMITED",loc:"Edmonton, AB"},
+  {id:"CN000001126",name:"VETS SHEET METAL LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001127",name:"VIBRANT INTERNATIONAL LTD.",loc:"Nisku, AB"},
+  {id:"CN000001128",name:"VICTORY SPRING",loc:"Edmonton, AB"},
+  {id:"CN000001129",name:"VIKING FIRE PROTECTION LTD.",loc:"Boisbriand, QC"},
+  {id:"CN000001132",name:"VIVID WELDING AND REPAIR",loc:"Athabasca, AB"},
+  {id:"CN000001133",name:"VJDS INTERNATIONAL INC.",loc:"Edmonton, AB"},
+  {id:"CN000001134",name:"VOLANT OIL TOOLS INC.",loc:"Edmonton, AB"},
+  {id:"CN000001135",name:"VOLKER STEVIN HIGHWAYS LTD.",loc:"Calgary, AB"},
+  {id:"CN000001136",name:"VORTEX ENERGY SERVICES",loc:"Edmonton, AB"},
+  {id:"CN000001121",name:"Veresen Midstream LP",loc:"Calgay, AB"},
+  {id:"CN000001122",name:"Vermilion Energy Inc.",loc:"Calgary, AB"},
+  {id:"CN000001123",name:"Vermilion Energy Inc.:T",loc:"Calgary, AB"},
+  {id:"CN000001130",name:"Viking Projects",loc:"Lacombe, AB"},
+  {id:"CN000001131",name:"Viper Innovation",loc:"Fort St. John, BC"},
+  {id:"CN000001137",name:"WAIWARD INDUSTRIAL LP",loc:"Edmonton, AB"},
+  {id:"CN000001230",name:"WAJAX LIMITED",loc:"Lachine, Quebec"},
+  {id:"CN000001138",name:"WALKER'S RIG WELDING LTD.",loc:"Leduc, AB"},
+  {id:"CN000001139",name:"WARREN ALLOY",loc:"Edmonton, AB"},
+  {id:"CN000001140",name:"WASCHUK PIPE LINE CONSTRUCTION LTD.",loc:"Red Deer, AB"},
+  {id:"CN000000281",name:"WATERSTONE UNDERGROUND SOLUTIONS",loc:"Edmonton, AB"},
+  {id:"CN000001142",name:"WAV INSPECTION LTD.",loc:"Brooks, AB"},
+  {id:"CN000001143",name:"WAVE CONTROL SYSTEMS",loc:"Edmonton, AB"},
+  {id:"CN000001144",name:"WEATHERFORD ARTIFICIAL LIFT SYSTEMS COROD",loc:"Edmonton, AB"},
+  {id:"CN000001145",name:"WEATHERFORD BONNYVILLE",loc:"Bonnyville, AB"},
+  {id:"CN000001146",name:"WEATHERFORD CANADA - CLAIRMONT",loc:"CLAIRMONT, AB"},
+  {id:"CN000001148",name:"WEATHERFORD NISKU",loc:"Nisku, AB"},
+  {id:"CN000001149",name:"WEATHERFORD RCD",loc:"Nisku, AB"},
+  {id:"CN000001150",name:"WEATHERFORD RED DEER",loc:"Red Deer, AB"},
+  {id:"CN000001152",name:"WEIR SEABOARD CANADA LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001237",name:"WELDCO-BEALES MFG. ALBERTA LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001154",name:"WENZEL DOWNHOLE TOOLS ULC",loc:"Edmonton, AB"},
+  {id:"CN000001155",name:"WEST COUNTRY FABRICATION",loc:"Leduc, AB"},
+  {id:"CN000001156",name:"WEST MET TOOLS & MACHINERY LTD",loc:"Edmonton, AB"},
+  {id:"CN000001157",name:"WESTCOAST ENERGY INC.",loc:"Edmonton, AB"},
+  {id:"CN000000361",name:"WESTCON PRECAST INC.",loc:"St. Albert, AB"},
+  {id:"CN000001158",name:"WESTERN FIELD SERVICES, A DIVISION",loc:"Calgary, AB"},
+  {id:"CN000001159",name:"WESTERN HARD CHROME PLATING",loc:"Edmonton, AB"},
+  {id:"CN000001160",name:"WESTERN INTERNATIONAL COATINGS",loc:"Foothills, AB"},
+  {id:"CN000000362",name:"WESTERN MATERIALS HANDLING",loc:"Calgary, AB"},
+  {id:"CN000001162",name:"WESTERN PACIFIC MARINE LTD.",loc:"Vancouver, BC"},
+  {id:"CN000001164",name:"WESTOWER COMMUNICATIONS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001165",name:"WESTRON ROTATING SOLUTIONS",loc:"Edmonton, AB"},
+  {id:"CN000001166",name:"WETASKIWIN COOPERATIVE ASSOCIATION",loc:"Wetaskiwin, AB"},
+  {id:"CN000001167",name:"WHALER INDUSTRIAL CONTRACTING INC.",loc:"Calgary, AB"},
+  {id:"CN000001171",name:"WHITELAW OILFIELD LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000363",name:"WHITEMUD IRONWORKS LIMITED",loc:"Nisku, AB"},
+  {id:"CN000001172",name:"WHITEMUD IRONWORKS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001173",name:"WHITESTAR TUBULARS LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001176",name:"WILLIAMS ENGINEERING CANADA INC.",loc:"Edmonton, AB"},
+  {id:"CN000001177",name:"WILLY D BOILERS AND FABRICATING LTD.",loc:"Nisku, AB"},
+  {id:"CN000001178",name:"WOLF CARBON SOLUTIONS INC.",loc:"Calgary, AB"},
+  {id:"CN000001179",name:"WOLSELEY INDUSTRIAL CANADA INC",loc:"Calgary, AB"},
+  {id:"CN000001180",name:"WOLVERINE GROUP INC.",loc:"Edmonton, AB"},
+  {id:"CN000001182",name:"WORLEY PARSONSCORD LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001183",name:"WSP E&I CANADA LIMITED",loc:"Edmonton, AB"},
+  {id:"CN000001141",name:"Watts Projects Inc.",loc:"Red Deer, AB"},
+  {id:"CN000001147",name:"Weatherford Canada Ltd - 2077029",loc:"LLOYDMINSTER, AB"},
+  {id:"CN000001153",name:"Wellons Canada Corp - R",loc:"Surrey, BC"},
+  {id:"CN000001161",name:"Western Manufacturing Ltd. - R",loc:"Hythe, AB"},
+  {id:"CN000001163",name:"Westower Communications ltd - X",loc:"Surrey, BC"},
+  {id:"CN000001168",name:"White Owl Energy Services Ltd.",loc:"Calgary, AB"},
+  {id:"CN000001169",name:"Whitecap Resources - 2077029",loc:"Calgary, AB"},
+  {id:"CN000001170",name:"Whitecap Resources - R",loc:"Calgary, AB"},
+  {id:"CN000001174",name:"Wild Horse Oilfield Services Ltd. - R",loc:"Fort St. John, BC"},
+  {id:"CN000001181",name:"Worley Parsonscord ltd - 2077029 Ab Ltd",loc:"Edmonton, AB"},
+  {id:"CN000001213",name:"XCEED MACHINE WORKS INC.",loc:"Edmonton, AB"},
+  {id:"CN000000364",name:"XCGM CANADA INC.",loc:"Stony Plain, AB"},
+  {id:"CN000000365",name:"XERXES, a div of Mattr Corp.",loc:"Edmonton, AB"},
+  {id:"CN000001184",name:"XOMOX CANADA LIMITED",loc:"Edmonton, Alberta"},
+  {id:"CN000001185",name:"XTREME OILFIELD TECHNOLOGY LTD.",loc:"St. Paul, AB"},
+  {id:"CN000001186",name:"Y WELDING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001201",name:"YANDA CANADA LTD.",loc:"Fort Saskatchewan, AB"},
+  {id:"CN000001187",name:"YELLOWHEAD ROAD & BRIDGE LTD",loc:"Fort St. John, BC"},
+  {id:"CN000001188",name:"YELLOWSTONE PIPE, FLANGE & FITTING LTD.",loc:"Sherwood Park, AB"},
+  {id:"CN000001189",name:"YOHO Resources - R",loc:"Calgary, AB"},
+  {id:"CN000000366",name:"Z.A.C.K'S CRANE & RIGGING LTD.",loc:"Edmonton, AB"},
+  {id:"CN000000609",name:"iTOWER COMMUNICATIONS LTD.",loc:"Wetaskwin, AB"},
+  {id:"CN000000016",name:"ABS OILFIELD SUPPLY INC.",loc:"Scottsdale, AZ"},
+  {id:"CN000001223",name:"ARCANITE NDT.",loc:"Fulshear, TX"},
+  {id:"CN000000001",name:"Actemium Non Destructive Testing",loc:"Bourg de P\u00e9age"},
+  {id:"CN000000002",name:"Advanced Mechanical Systems",loc:"Bristol"},
+  {id:"CN000000003",name:"Advanced OEM Solutions",loc:"West Chester"},
+  {id:"CN000000150",name:"C & R INDUSTRIES, INC.",loc:"Littleton, CO"},
+  {id:"CN000000153",name:"CAMERON INTL CORP - USA",loc:"HOUSTON, TX"},
+  {id:"CN000000200",name:"CARLSON TESTING INC.",loc:"Tigard, OR"},
+  {id:"CN000000211",name:"CELANESE EVA PERFORMANCE POLYMERS",loc:"Dallas, TX"},
+  {id:"CN000000212",name:"CENERGY INTERNATIONAL",loc:"Houston, TX"},
+  {id:"CN000000220",name:"CHART INDUSTRIES,E&C FINFANS",loc:"Tulsa, OK"},
+  {id:"CN000001234",name:"CORTEST INCORPORATED",loc:"Willoughby, OH"},
+  {id:"CN000000370",name:"CRC-EVANS CANADA LTD.",loc:"Indianapolis, IN"},
+  {id:"CN000000183",name:"Canbriam Energy Inc. - C/O K'Nowbe",loc:"Salt Lake City, UT"},
+  {id:"CN000000416",name:"DOYON DRILLING",loc:"Anchorage, AK"},
+  {id:"CN000000421",name:"DRESSER-RAND",loc:"Olean, NY"},
+  {id:"CN000001238",name:"ERIKS CNC FLOW CONTROL",loc:"Huston, TX"},
+  {id:"CN000000540",name:"GUNNEBO JOHNSON CORPORATION",loc:"Tulsa, OK"},
+  {id:"CN000000548",name:"HASKELL-DAVIS JV",loc:"Anchorage, AK"},
+  {id:"CN000000606",name:"ISCO CANADA INC.",loc:"Louisville, KY"},
+  {id:"CN000000636",name:"KENNAMETAL LTD.",loc:"Jersey City, NJ"},
+  {id:"CN000000644",name:"KF INDUSTRIES CANADA",loc:"Oklahoma City, OK"},
+  {id:"CN000000678",name:"LOCKWOOD INTERNATIONAL INC.",loc:"Houston, TX"},
+  {id:"CN000000681",name:"Louisiana-Pacific Canada, Ltd.",loc:"NASHVILLE, TN"},
+  {id:"CN000000705",name:"MAYES TESTING ENGINEERS INC.",loc:"Lynnwood, WA"},
+  {id:"CN000000322",name:"MI-JACK CANADA INC.",loc:"Hazelcrest, IL"},
+  {id:"CN000000728",name:"MRC GLOBAL - CANADA LTD.",loc:"Charleston, WV"},
+  {id:"CN000000729",name:"MRC Global - R",loc:"Charelston, WV"},
+  {id:"CN000001196",name:"My new Customer",loc:""},
+  {id:"CN000000779",name:"OFS GLOBAL INC.",loc:"Houston, TX"},
+  {id:"CN000000814",name:"PENN UNITED TECHNOLOGIES INC.",loc:"Saxonburg, PA"},
+  {id:"CN000000837",name:"PRECISION DRILLING COMPANY, LP",loc:"Houston, TX"},
+  {id:"CN000001210",name:"Remcan Projects LP",loc:""},
+  {id:"CN000000986",name:"SPECTRA ENERGY OPERATING COMPANY, LLC",loc:"HOUSTON, TX"},
+  {id:"CN000001025",name:"SUNBELT SUPPLY AND MAJOR INC.",loc:"Pasadena, TX"},
+  {id:"CN000001053",name:"TESCO CORPORATION",loc:"Houston, TX"},
+  {id:"CN000001076",name:"TOWN OIL COMPANY",loc:"Paola, KS"},
+  {id:"CN000001113",name:"UNITED STATES TUBING & CASING",loc:"Wheat Ridge, CO"},
+  {id:"CN000001125",name:"Vestas Canadian Wind Technology Inc.",loc:"Aarhus N"},
+  {id:"CN000001151",name:"WEATHERFORD U.S., L.P.",loc:"WILLISTON, ND"},
+  {id:"CN000001175",name:"WILLIAM HARE UAE LLC",loc:"Abu Dhabi"},
+  {id:"CN000001190",name:"Young Living Northern Lights AromaticFarm",loc:"Lehi, UT"},
+  {id:"CN000001191",name:"Yuuse Industries Limited",loc:""},
+  {id:"CN000001192",name:"ZCL COMPOSITES is a division of Shawcor",loc:"Edmonton, AB"},
+  {id:"CN000001193",name:"ZERO TOLERANCE MACHINE LTD.",loc:"Edmonton, AB"},
+  {id:"CN000001194",name:"ZOOM EXPRESS",loc:"Edmonton, AB"},
+  {id:"CN000001195",name:"ZRP METAL FUSION TECHNOLOGIES",loc:"Sherwood Park, AB"}
+];
+
+var NORTECH_EMPLOYEES = [
+  {name:"Adrian Ferg",status:"Active"},
+  {name:"Bradley Churchill",status:"Active"},
+  {name:"Bradley Shaw",status:"Active"},
+  {name:"Brody Markin",status:"Active"},
+  {name:"Bryce Schram",status:"Active"},
+  {name:"Cailyn Larison",status:"Active"},
+  {name:"Caitlin Borza",status:"Active"},
+  {name:"Chantal Chesterman",status:"Active"},
+  {name:"Charles (Cj) Holst",status:"Active"},
+  {name:"Christopher Moses",status:"Active"},
+  {name:"Clint Hickey",status:"Active"},
+  {name:"Cody Tondreau",status:"Active"},
+  {name:"Cole Feschuk",status:"Active"},
+  {name:"Cole Wiebe",status:"Active"},
+  {name:"Colton Sinclair",status:"Active"},
+  {name:"Corey O'Donoghue",status:"Active"},
+  {name:"Dalton Mabbutt",status:"Active"},
+  {name:"Dana R Draper",status:"Active"},
+  {name:"David Jolivette",status:"Active"},
+  {name:"Denise Saunders",status:"Active"},
+  {name:"Ethan Sarafinchan",status:"Active"},
+  {name:"Fasil Teffera",status:"Active"},
+  {name:"Francis Audet",status:"Active"},
+  {name:"Frank Ouellette",status:"Active"},
+  {name:"Ian Kerfoot",status:"Active"},
+  {name:"Jason Borza",status:"Active"},
+  {name:"Jeongho (Sam) Shin",status:"Active"},
+  {name:"Jeremy Irwin",status:"Active"},
+  {name:"Jessica Saunders",status:"Active"},
+  {name:"Joel Carlton",status:"Active"},
+  {name:"Justin Ford",status:"Active"},
+  {name:"Kelly Leitch",status:"Active"},
+  {name:"Ken Brunlees",status:"Active"},
+  {name:"Kortney Adam",status:"Active"},
+  {name:"Kyle Farmer",status:"Active"},
+  {name:"Kyle Stevenson",status:"Active"},
+  {name:"Leo Novak",status:"Active"},
+  {name:"Lyonal Struthers",status:"Active"},
+  {name:"Marc Ropivia",status:"Active"},
+  {name:"Matthew Chwyl",status:"Active"},
+  {name:"Matthew Isnor",status:"Active"},
+  {name:"Maxx Taylor",status:"Active"},
+  {name:"Michael Carreiro",status:"Active"},
+  {name:"Michel Cadieux",status:"Active"},
+  {name:"Mike Parsons",status:"Active"},
+  {name:"Murray Nethery",status:"Active"},
+  {name:"Nancy Gullberg",status:"Active"},
+  {name:"Nicholas Cunningham",status:"Active"},
+  {name:"Noel Patterson",status:"Active"},
+  {name:"Nolan Leduc",status:"Active"},
+  {name:"Peter Dutka",status:"Active"},
+  {name:"Raelene Beaudoin",status:"Active"},
+  {name:"Randy (Evan) Chislett",status:"Active"},
+  {name:"Rose Fedoruk",status:"Active"},
+  {name:"Ryan Borza",status:"Active"},
+  {name:"Ryan Ouellette",status:"Active"},
+  {name:"Ryan S Cherwoniak",status:"Active"},
+  {name:"Samho Ngai",status:"Active"},
+  {name:"Samuel Plowright",status:"Active"},
+  {name:"Scott Saunders",status:"Active"},
+  {name:"Shan Switzer",status:"Active"},
+  {name:"Shannon Russell",status:"Active"},
+  {name:"Steven Jones",status:"Active"},
+  {name:"Steven Lomond",status:"Active"},
+  {name:"Tanner Gilpin",status:"Active"},
+  {name:"Taylor Bertoia",status:"Active"},
+  {name:"Taylor Wright",status:"Active"},
+  {name:"Teena Brown",status:"Active"},
+  {name:"Torin Keoughan",status:"Active"},
+  {name:"Tyler Hotte",status:"Active"},
+  {name:"Tyson Skinner",status:"Active"},
+  {name:"Adam Vitt",status:"Terminated"},
+  {name:"Amanda Murphy",status:"On Leave"},
+  {name:"Andrew Seaward",status:"Terminated"},
+  {name:"Cole Mcgowan",status:"On Leave"},
+  {name:"Dylan Wilford",status:"Terminated"},
+  {name:"Jordan Mancini",status:"On Leave"},
+  {name:"Natasha Bayrack",status:"On Leave"},
+  {name:"Sheldon Schwer",status:"On Leave"}
+];
+
+// ── Customer searchable dropdown ──────────────────────────────────────────────
+function filterCustomers(q) {
+  var list = document.getElementById('cust-list');
+  if (!list) return;
+  var val = q.toLowerCase().trim();
+  var matches = val.length === 0
+    ? NORTECH_CUSTOMERS.slice(0, 50)   // show first 50 when empty
+    : NORTECH_CUSTOMERS.filter(function(c) {
+        return c.name.toLowerCase().includes(val) || (c.loc||'').toLowerCase().includes(val);
+      }).slice(0, 80);
+  if (!matches.length) {
+    list.innerHTML = '<div class="cust-no-results">No customers found</div>';
+  } else {
+    list.innerHTML = matches.map(function(cust) {
+      return '<div class="cust-item" onmousedown="selectCustomer(' + JSON.stringify(cust.name) + ')">'
+        + '<span class="cust-item-name">' + cust.name + '</span>'
+        + (cust.loc ? '<span class="cust-item-loc">' + cust.loc + '</span>' : '')
+      + '</div>';
+    }).join('');
+  }
+  list.classList.add('open');
+}
+
+function selectCustomer(name) {
+  var input = document.getElementById('job-client');
+  if (input) input.value = name;
+  closeCustList();
+}
+
+function closeCustList() {
+  var list = document.getElementById('cust-list');
+  if (list) list.classList.remove('open');
+}
+
+// ── Employee dropdown for labour rows ─────────────────────────────────────────
+function getTechOptions() {
+  var active   = NORTECH_EMPLOYEES.filter(function(e){ return e.status === 'Active'; });
+  var inactive = NORTECH_EMPLOYEES.filter(function(e){ return e.status !== 'Active'; });
+  var opts = '<option value="">— Select technician —</option>';
+  if (active.length) {
+    opts += '<optgroup label="Active">' + active.map(function(e){
+      return '<option value="' + e.name + '">' + e.name + '</option>';
+    }).join('') + '</optgroup>';
+  }
+  if (inactive.length) {
+    opts += '<optgroup label="Inactive / On Leave">' + inactive.map(function(e){
+      return '<option value="' + e.name + '">' + e.name + ' (' + e.status + ')</option>';
+    }).join('') + '</optgroup>';
+  }
+  return opts;
 }
 
 </script>
