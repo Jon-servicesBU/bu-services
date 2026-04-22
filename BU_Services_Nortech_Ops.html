@@ -649,12 +649,20 @@ document.addEventListener('DOMContentLoaded', function() {
           <input class="form-input" id="job-site" placeholder="e.g. NGTL Line 100-3 — PAUT inline inspection">
         </div>
         <div class="form-group">
-          <label class="form-label">PO / Reference #</label>
-          <input class="form-input" id="job-po" placeholder="Customer PO #">
+          <label class="form-label">Customer PO #</label>
+          <input class="form-input" id="job-po" placeholder="e.g. HQ245658">
         </div>
         <div class="form-group">
-          <label class="form-label">Job # (auto if blank)</label>
-          <input class="form-input" id="job-number" placeholder="NOR-1001">
+          <label class="form-label">Nortech WO #</label>
+          <input class="form-input" id="job-number" placeholder="e.g. 99339">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Client WO / Job #</label>
+          <input class="form-input" id="job-client-wo" placeholder="e.g. 702246">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Customer ID</label>
+          <input class="form-input" id="job-customer-id" placeholder="e.g. CN000000305">
         </div>
         <div class="form-group">
           <label class="form-label">Billing Type <span style="color:var(--nor-accent)">*</span></label>
@@ -994,6 +1002,16 @@ document.addEventListener('DOMContentLoaded', function() {
         <span><span style="color:var(--muted)">Tax:</span> <span id="inv-tax" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
         <span><span style="color:var(--muted)">Total:</span> <span id="inv-total" style="font-family:var(--mono);font-weight:700;color:var(--nor-accent)">$0.00</span></span>
       </div>
+      <div class="form-grid form-grid-2" style="gap:.65rem;margin-bottom:.5rem">
+        <div class="form-group">
+          <label class="form-label">Discount Amount ($)</label>
+          <input class="form-input" id="inv-discount" type="number" placeholder="0.00" value="0" step="0.01" oninput="updateInvTotals()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Salesperson</label>
+          <input class="form-input" id="inv-salesperson" placeholder="Name">
+        </div>
+      </div>
       <div class="form-group">
         <label class="form-label">Notes / Payment Instructions</label>
         <textarea class="form-textarea" id="inv-notes" placeholder="e.g. Please remit to Nortech Advanced NDT · Bank: TD Bank · Transit: 12345…" style="min-height:60px"></textarea>
@@ -1052,11 +1070,13 @@ var _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 // ── Nortech company info (fill in later) ──────────────────────────────────────
 var NORTECH = {
   name:    'Nortech Advanced NDT',
-  address: '— Address pending —',
-  phone:   '— Phone pending —',
-  email:   '— Email pending —',
-  gst:     '— GST/HST # pending —',
-  logo:    '', // base64 or URL
+  address: '7108 8th Street, Edmonton, Alberta T6P 1V1, Canada',
+  phone:   '(780) 449-5013',
+  fax:     '(780) 449-5036',
+  email:   'info@nortechadvanced.com',
+  web:     'www.nortechadvanced.com',
+  gst:     '801560228 RT0001',
+  logo:    'https://jon-servicesbu.github.io/bu-services/nortech_logo.png',
 };
 
 // ── State ──────────────────────────────────────────────────────────────────────
@@ -1393,6 +1413,8 @@ async function saveJobAndReturn() {
   var data = {
     id, client, site,
     number:      document.getElementById('job-number').value.trim() || nextNum('NOR-', _jobs, 'number'),
+    clientWO:    (document.getElementById('job-client-wo')||{}).value || '',
+    customerId:  (document.getElementById('job-customer-id')||{}).value || '',
     billing:     document.getElementById('job-billing').value,
     rateSheetId: document.getElementById('job-rate-sheet').value,
     fixedPrice:  parseFloat(document.getElementById('job-fixed-price').value) || 0,
@@ -1782,9 +1804,11 @@ function updateInvTotals(){
   var subtotal = selected.reduce(function(sum, cs) {
     return sum + priceChargeSheet(cs, rs);
   }, 0);
-  var taxRate = (parseFloat((document.getElementById('inv-tax-rate')||{}).value)||0)/100;
-  var tax   = subtotal * taxRate;
-  var total = subtotal + tax;
+  var discount = parseFloat((document.getElementById('inv-discount')||{}).value)||0;
+  var taxable  = subtotal - discount;
+  var taxRate  = (parseFloat((document.getElementById('inv-tax-rate')||{}).value)||0)/100;
+  var tax      = taxable * taxRate;
+  var total    = taxable + tax;
   var els = {subtotal:document.getElementById('inv-subtotal'),tax:document.getElementById('inv-tax'),total:document.getElementById('inv-total')};
   if(els.subtotal) els.subtotal.textContent = fmtMoney(subtotal);
   if(els.tax)      els.tax.textContent      = fmtMoney(tax);
@@ -1862,6 +1886,8 @@ async function saveInvoice(status){
     chargeSheets:selectedCS.map(function(c){return{id:c.id,csNum:c.csNum,technician:c.technician,weekStart:c.weekStart,total:c.total};}),
     subtotal, tax, total,
     notes:document.getElementById('inv-notes').value.trim(),
+    discount: parseFloat((document.getElementById('inv-discount')||{}).value)||0,
+    salesperson: (document.getElementById('inv-salesperson')||{}).value||'',
     created:today(), modified:today(),
   };
   try{
@@ -1927,28 +1953,163 @@ function viewInvoice(id){
     d.setDate(d.getDate()+days);
     dueDate=d.toISOString().slice(0,10);
   }
-  var html='<div class="inv-preview">'
-    +'<div class="inv-preview-hdr">'
-      +'<div><div class="inv-company">'+NORTECH.name+'</div>'
-        +'<div class="inv-details">'+NORTECH.address+'<br>'+NORTECH.phone+' · '+NORTECH.email+'<br>GST/HST: '+NORTECH.gst+'</div>'
-      +'</div>'
-      +'<div><div class="inv-title">INVOICE</div>'
-        +'<div class="inv-num" style="color:#666">'+inv.invNum+'<br>Date: '+fmtDate(inv.invDate)+'<br>Due: '+fmtDate(dueDate)+'<br>Terms: '+inv.terms+'</div>'
-      +'</div>'
-    +'</div>'
-    +'<div style="margin-bottom:1rem"><strong>Bill To:</strong><br>'+inv.client+'</div>'
-    +'<table class="inv-table">'
-    +'<thead><tr><th>CS #</th><th>Technician</th><th>Period</th><th class="amt">Amount</th></tr></thead>'
-    +'<tbody>'+(inv.chargeSheets||[]).map(function(c){
-      return '<tr><td>'+c.csNum+'</td><td>'+c.technician+'</td><td>Week of '+fmtDate(c.weekStart)+'</td><td class="amt">'+fmtMoney(c.total)+'</td></tr>';
-    }).join('')+'</tbody></table>'
-    +'<table class="inv-totals"><tbody>'
-    +'<tr><td>Subtotal</td><td>'+fmtMoney(inv.subtotal)+'</td></tr>'
-    +'<tr><td>'+(inv.taxLabel||('HST/GST ('+inv.taxRate+'%)'))+' </td><td>'+fmtMoney(inv.tax)+'</td></tr>'
-    +'<tr class="total-row"><td>TOTAL DUE</td><td>'+fmtMoney(inv.total)+' '+((inv.currency||'CAD'))+'</td></tr>'
-    +'</tbody></table>'
-    +(inv.notes?'<div class="inv-footer">'+inv.notes+'</div>':'')
-  +'</div>';
+  // Find the job for this invoice to get WO numbers
+  var invJob = _jobs.find(function(j){
+    var cs = _chargeSheets.find(function(cs){ return (inv.chargeSheetIds||[]).indexOf(cs.id)>-1 && cs.jobId===j.id; });
+    return !!cs;
+  }) || {};
+
+  // Build line items from charge sheets with full detail
+  var lineItems = '';
+  (inv.chargeSheets||[]).forEach(function(cs) {
+    var fullCS = _chargeSheets.find(function(s){ return s.id===cs.id; }) || cs;
+    var rs = _rateSheets.find(function(r){ return r.id===inv.rateSheetId; }) || {};
+    // Labour rows
+    (fullCS.labourRows||[]).forEach(function(row) {
+      if (!row.st && !row.ot && !row.dt && !row.ns) return;
+      var cat = (rs.labour||[]).find(function(l){ return l.name===row.category; }) || {};
+      var hrs = [];
+      if (row.st) hrs.push(row.st+' ST');
+      if (row.ot) hrs.push(row.ot+' OT');
+      if (row.dt) hrs.push(row.dt+' DT');
+      if (row.ns) hrs.push(row.ns+' Night');
+      var hrsStr = hrs.join(', ');
+      var rowAmt = (row.st||0)*(cat.stRate||0)+(row.ot||0)*(cat.otRate||0)+(row.dt||0)*(cat.dtRate||0)+(row.ns||0)*((cat.stRate||0)*1.15);
+      lineItems += '<tr>'
+        +'<td style="padding:.35rem .5rem;font-size:10px">'+(row.category||'')+'<br><span style="color:#666;font-size:9px">'+row.dayLabel+' — '+row.technician+'</span></td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">1</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+hrsStr+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(cat.stRate||0)+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(rowAmt)+'</td>'
+        +'</tr>';
+    });
+    // Equipment
+    (fullCS.equipRows||[]).forEach(function(row) {
+      if (!row.item && !row.qty) return;
+      var item = (rs.equipment||[]).find(function(e){ return e.name===row.item; })||{};
+      var amt = (row.qty||0)*(item.rate||0);
+      lineItems += '<tr>'
+        +'<td style="padding:.35rem .5rem;font-size:10px">'+row.item+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+row.qty+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+row.unit+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(item.rate||0)+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(amt)+'</td>'
+        +'</tr>';
+    });
+    // Consumables
+    (fullCS.conRows||[]).forEach(function(row) {
+      if (!row.item && !row.qty) return;
+      var item = (rs.equipment||[]).find(function(e){ return e.name===row.item; })||{};
+      var amt = (row.qty||0)*(item.rate||0);
+      lineItems += '<tr>'
+        +'<td style="padding:.35rem .5rem;font-size:10px">'+row.item+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+row.qty+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+row.unit+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(item.rate||0)+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(amt)+'</td>'
+        +'</tr>';
+    });
+    // Travel
+    var travel = fullCS.travel || {};
+    if (travel.km) {
+      lineItems += '<tr><td style="padding:.35rem .5rem;font-size:10px">MOB/DEMOB — Kilometres</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+travel.km+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">km</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(travel.kmRate||1.20)+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl((travel.km||0)*(travel.kmRate||1.20))+'</td>'
+        +'</tr>';
+    }
+    if (travel.loaTechs && travel.loaDays) {
+      lineItems += '<tr><td style="padding:.35rem .5rem;font-size:10px">LOA — '+travel.loaTechs+' tech(s) × '+travel.loaDays+' day(s)</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">1</td>'
+        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">lump</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl((travel.loaTechs||0)*(travel.loaDays||0)*(travel.loaRate||70))+'</td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl((travel.loaTechs||0)*(travel.loaDays||0)*(travel.loaRate||70))+'</td>'
+        +'</tr>';
+    }
+    // Other
+    (fullCS.otherRows||[]).forEach(function(row) {
+      if (!row.desc && !row.amt) return;
+      lineItems += '<tr>'
+        +'<td style="padding:.35rem .5rem;font-size:10px">'+row.desc+'</td>'
+        +'<td colspan="3"></td>'
+        +'<td></td>'
+        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(row.amt||0)+'</td>'
+        +'</tr>';
+    });
+  });
+
+  var discount = inv.discount || 0;
+  var taxable  = inv.subtotal - discount;
+
+  var html = '<div class="inv-preview">'
+    // Header — logo left, INVOICE right
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem">'
+      + '<div>'
+        + (NORTECH.logo ? '<img src="'+NORTECH.logo+'" style="max-height:60px;margin-bottom:.4rem">' : '')
+        + '<div style="font-size:18px;font-weight:900;color:#C0392B;line-height:1">'+(NORTECH.logo?'':'NORTECH ADVANCED NDT')+'</div>'
+        + '<div style="font-size:9px;color:#666;margin-top:.2rem">'+NORTECH.address+'</div>'
+        + '<div style="font-size:9px;color:#666">Phone: '+NORTECH.phone+' · Fax: '+NORTECH.fax+'</div>'
+        + '<div style="font-size:9px;color:#666">'+NORTECH.web+'</div>'
+      + '</div>'
+      + '<div style="text-align:right">'
+        + '<div style="font-size:22px;font-weight:900;letter-spacing:2px">INVOICE</div>'
+        + '<div style="font-size:9px;color:#666;margin-top:.4rem">Page: 1</div>'
+        + '<div style="font-size:10px;margin-top:.5rem"><span style="color:#666">Invoice Number: </span><strong>'+inv.invNum+'</strong></div>'
+        + '<div style="font-size:10px"><span style="color:#666">Invoice Date: </span>'+inv.invDate+'</div>'
+      + '</div>'
+    + '</div>'
+    // Bill To / Ship To
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;font-size:10px">'
+      + '<div><div style="font-size:9px;color:#666;font-weight:700;margin-bottom:.2rem">Bill To:</div><strong>'+inv.client+'</strong><br>'+(invJob.site||'')+'</div>'
+      + '<div><div style="font-size:9px;color:#666;font-weight:700;margin-bottom:.2rem">Ship To:</div><strong>'+inv.client+'</strong><br>'+(invJob.site||'')+'</div>'
+    + '</div>'
+    // Reference grid
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem .75rem;font-size:9px;border:1px solid #ddd;padding:.5rem;margin-bottom:1rem">'
+      + '<div><span style="color:#666">Tax Ident. Type</span><br><strong>Legal Entity</strong></div>'
+      + '<div><span style="color:#666">Customer ID</span><br><strong>'+(invJob.customerId||'—')+'</strong></div>'
+      + '<div><span style="color:#666">GST/HST Registration No.</span><br><strong>'+NORTECH.gst+'</strong></div>'
+      + '<div><span style="color:#666">P.O. Number</span><br><strong>'+(invJob.po||'—')+'</strong></div>'
+      + '<div><span style="color:#666">P.O. Date</span><br><strong>'+inv.invDate+'</strong></div>'
+      + '<div><span style="color:#666">Our Order No. (Nortech WO)</span><br><strong>'+(invJob.number||'—')+'</strong></div>'
+      + '<div><span style="color:#666">Ship Date</span><br><strong>'+inv.invDate+'</strong></div>'
+      + '<div><span style="color:#666">Due Date</span><br><strong>'+fmtDate(dueDate)+'</strong></div>'
+      + '<div><span style="color:#666">Terms</span><br><strong>'+({net30:'NET30 Days',net15:'NET15 Days',net60:'NET60 Days',due_receipt:'Due on Receipt'}[inv.terms]||inv.terms)+'</strong></div>'
+      + '<div><span style="color:#666">SalesPerson</span><br><strong>'+(inv.salesperson||'—')+'</strong></div>'
+      + '<div><span style="color:#666">Client WO No./Job No.</span><br><strong>'+(invJob.clientWO||'—')+'</strong></div>'
+      + '<div><span style="color:#666">Your Reference</span><br><strong>'+(inv.client||'—')+'</strong></div>'
+    + '</div>'
+    // Line items table
+    + '<table style="width:100%;border-collapse:collapse;margin-bottom:.75rem">'
+    + '<thead><tr style="background:#f4f4f4;border-bottom:2px solid #ddd">'
+      + '<th style="padding:.35rem .5rem;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase">Item / Description</th>'
+      + '<th style="padding:.35rem .5rem;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:40px">Unit</th>'
+      + '<th style="padding:.35rem .5rem;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:60px">Order Qty</th>'
+      + '<th style="padding:.35rem .5rem;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:80px">Quantity</th>'
+      + '<th style="padding:.35rem .5rem;text-align:right;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:80px">Unit Price</th>'
+      + '<th style="padding:.35rem .5rem;text-align:right;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:80px">Total Price</th>'
+    + '</tr></thead>'
+    + '<tbody>'+lineItems+'</tbody>'
+    + '</table>'
+    // Totals — left side tax note, right side amounts
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:.5rem">'
+      + '<div style="font-size:9px;color:#666">'
+        + '<div>Amount Subject to Sales Tax CAD '+_fmtMoneyImpl(taxable)+'</div>'
+        + '<div>Amount Exempt from Sales Tax CAD 0.00</div>'
+      + '</div>'
+      + '<table style="font-size:10px;border-collapse:collapse;min-width:220px">'
+      + '<tr><td style="padding:.2rem .5rem;color:#666">Subtotal:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace"><strong>'+_fmtMoneyImpl(inv.subtotal)+'</strong></td></tr>'
+      + '<tr><td style="padding:.2rem .5rem;color:#666">Invoice Discount:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">'+_fmtMoneyImpl(discount)+'</td></tr>'
+      + '<tr><td style="padding:.2rem .5rem;color:#666">Total Tax:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">'+_fmtMoneyImpl(inv.tax)+'</td></tr>'
+      + '<tr style="border-top:2px solid #111"><td style="padding:.3rem .5rem;font-weight:900;font-size:12px">Total CAD:</td><td style="padding:.3rem .5rem;text-align:right;font-family:monospace;font-weight:900;font-size:12px">'+_fmtMoneyImpl(inv.total)+'</td></tr>'
+    + '</table></div>'
+    + (inv.notes ? '<div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid #ddd;font-size:9px;color:#999">'+inv.notes+'</div>' : '')
+  + '</div>';
   document.getElementById('inv-view-body').innerHTML=html;
   var paidBtn = document.getElementById('inv-mark-paid-btn');
   var sentBtn = document.getElementById('inv-mark-sent-btn');
