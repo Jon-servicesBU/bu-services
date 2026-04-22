@@ -2185,19 +2185,7 @@ function loadApprovedCS() {
 }
 
 
-function updateInvTotals(){
-  var selected=Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){
-    return _chargeSheets.find(function(c){return c.id===el.value;})||{};
-  });
-  var subtotal=selected.reduce(function(s,c){return s+(c.total||0);},0);
-  var taxRate=(parseFloat((document.getElementById('inv-tax-rate')||{}).value)||0)/100;
-  var tax=subtotal*taxRate;
-  var total=subtotal+tax;
-  var els={subtotal:document.getElementById('inv-subtotal'),tax:document.getElementById('inv-tax'),total:document.getElementById('inv-total')};
-  if(els.subtotal)els.subtotal.textContent=fmtMoney(subtotal);
-  if(els.tax)els.tax.textContent=fmtMoney(tax);
-  if(els.total)els.total.textContent=fmtMoney(total);
-}
+// updateInvTotals: replaced by version below that uses _jobs + priceChargeSheet
 
 async function saveInvoice(status){
   var client=document.getElementById('inv-client').value;
@@ -4949,6 +4937,41 @@ async function reopenJob(id) {
   j.status = 'draft'; j.modified = today();
   try { await sbUpsert('jobs', id, j); renderJobs(); renderDashboard(); toast('Work order reopened', 'success'); }
   catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+
+function updateInvTotals() {
+  var rsId = (document.getElementById('inv-rate-sheet') || {}).value || '';
+  var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || {};
+
+  var selected = Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el) {
+    return _jobs.find(function(j){ return j.id === el.value; })
+        || _chargeSheets.find(function(c){ return c.id === el.value; }) || {};
+  });
+
+  // Price each selected WO using the chosen rate sheet
+  var subtotal = selected.reduce(function(sum, wo) {
+    var priced = priceChargeSheet(wo, rs);
+    return sum + (priced > 0 ? priced : (wo.total || 0));
+  }, 0);
+
+  var discount = parseFloat((document.getElementById('inv-discount') || {}).value) || 0;
+  var taxable  = subtotal - discount;
+  var taxRate  = (parseFloat((document.getElementById('inv-tax-rate') || {}).value) || 0) / 100;
+  var tax      = taxable * taxRate;
+  var total    = taxable + tax;
+
+  var set = function(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = fmtMoney(val);
+  };
+  set('inv-subtotal', subtotal);
+  set('inv-tax',      tax);
+  set('inv-total',    total);
+
+  // Show rate sheet preview notice
+  var preview = document.getElementById('inv-rate-preview');
+  if (preview) preview.style.display = (rsId && selected.length) ? 'block' : 'none';
 }
 
 </script>
