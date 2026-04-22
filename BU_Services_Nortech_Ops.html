@@ -2996,7 +2996,12 @@ function priceChargeSheet(cs, rs) {
   if (hasNewFormat) {
     if (rs && rs.labour) {
       (cs.labourRows || []).forEach(function(row) {
-        var cat = (rs.labour || []).find(function(l){ return l.name === row.category; }) || {};
+        // Match: exact first, then strip abbreviations like "(ECT)" → "Eddy Current Testing"
+        var cat = (rs.labour || []).find(function(l){ return l.name === row.category; })
+          || (rs.labour || []).find(function(l){
+               var base = (row.category||'').replace(/\s*\([^)]*\)/g,'').trim().toLowerCase();
+               return l.name.toLowerCase().indexOf(base) > -1 || base.indexOf(l.name.toLowerCase()) > -1;
+             }) || {};
         var stRate = cat.stRate || 0;
         var otRate = cat.otRate || stRate * 1.5;
         var dtRate = cat.dtRate || stRate * 2;
