@@ -294,6 +294,38 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .cs-tab:hover{color:var(--text)}
 .cs-tab.active{color:var(--nor-accent);border-bottom-color:var(--nor-accent)}
 
+
+/* ── Technician view — hide financials ─────────────────────────────── */
+body.tech-view .hide-from-tech { display: none !important; }
+body.tech-view .inv-nav-btn { display: none !important; }
+body.tech-view [data-admin-only] { display: none !important; }
+body.tech-view #cs-tot-labour,
+body.tech-view #cs-tot-equipment,
+body.tech-view #cs-tot-consumables,
+body.tech-view #cs-tot-film,
+body.tech-view #cs-tot-travel,
+body.tech-view #cs-tot-other,
+body.tech-view #cs-tot-all { visibility: hidden !important; }
+body.tech-view .inv-preview { display: none !important; }
+
+
+/* ── Tech view — hide all financial UI ─────────────────────────────── */
+body.tech-view #inv-nav-btn          { display: none !important; }
+body.tech-view #dash-kpis            { display: none !important; }
+body.tech-view #dash-inv-table       { display: none !important; }
+body.tech-view .cs-totals-bar        { display: none !important; }
+body.tech-view .inv-col              { display: none !important; }
+body.tech-view [data-admin-only]     { display: none !important; }
+body.tech-view .rate-sheet-price     { display: none !important; }
+body.tech-view #cs-tot-labour,
+body.tech-view #cs-tot-equipment,
+body.tech-view #cs-tot-consumables,
+body.tech-view #cs-tot-film,
+body.tech-view #cs-tot-travel,
+body.tech-view #cs-tot-other,
+body.tech-view #cs-tot-all          { display: none !important; }
+body.tech-view .cs-lb-tot           { display: none !important; }
+
 </style>
 </head>
 <body>
@@ -444,11 +476,11 @@ document.addEventListener('DOMContentLoaded', function() {
     <span class="unav-brand-page">Field Operations</span>
   </div>
   <div class="unav-links">
-    <button class="active" onclick="showView('dashboard',this)">📊 Dashboard</button>
-    <button onclick="showView('jobs',this)">🔧 Jobs</button>
-    <button onclick="showView('charge-sheets',this)">📋 Charge Sheets</button>
-    <button onclick="showView('invoices',this)">🧾 Invoices</button>
-    <button onclick="showView('rate-sheets',this)">💲 Rate Sheets</button>
+    <button class="active" onclick="showView('dashboard',this)" id="nav-dashboard">📊 Dashboard</button>
+    <button onclick="showView('jobs',this)" id="nav-jobs">🔧 Jobs</button>
+    <button onclick="showView('charge-sheets',this)" id="nav-cs">📋 Charge Sheets</button>
+    <button onclick="showView('invoices',this)" id="nav-invoices" data-admin-only>🧾 Invoices</button>
+    <button onclick="showView('rate-sheets',this)" id="nav-rates" data-admin-only>💲 Rate Sheets</button>
   </div>
   <div class="unav-right">
     <span class="nav-badge" id="pending-badge" style="display:none">0 Pending</span>
@@ -482,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="card" style="padding:0"><table class="data-table" id="dash-cs-table"><tbody></tbody></table></div>
       </div>
-      <div class="section">
+      <div class="section" data-admin-only>
         <div class="sec-hdr">
           <div><h2>Outstanding Invoices</h2><div class="sec-sub">Sent but unpaid</div></div>
           <div class="sec-actions"><button class="btn btn-sm btn-secondary" onclick="showView('invoices',null)">View All</button></div>
@@ -533,7 +565,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <table class="data-table">
         <thead><tr>
           <th>CS #</th><th>Job</th><th>Client</th><th>Technician</th>
-          <th>Week Of</th><th>Days</th><th>Total</th><th>Status</th><th></th>
+          <th>Week Of</th><th>Days</th><th data-admin-only>Total</th><th>Status</th><th></th>
         </tr></thead>
         <tbody id="cs-tbody"></tbody>
       </table>
@@ -564,7 +596,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <table class="data-table">
         <thead><tr>
           <th>Invoice #</th><th>Client</th><th>Period</th>
-          <th>Charge Sheets</th><th>Subtotal</th><th>Tax</th><th>Total</th>
+          <th>Charge Sheets</th><th class="hide-from-tech">Subtotal</th><th class="hide-from-tech">Tax</th><th class="hide-from-tech">Total</th>
           <th>Status</th><th></th>
         </tr></thead>
         <tbody id="inv-tbody"></tbody>
@@ -632,19 +664,20 @@ document.addEventListener('DOMContentLoaded', function() {
             <option value="mixed">Mixed (T&M + Fixed items)</option>
           </select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Rate Sheet</label>
-          <select class="form-select" id="job-rate-sheet">
-            <option value="">— Select rate sheet —</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Fixed Price (if applicable)</label>
-          <input class="form-input" id="job-fixed-price" type="number" placeholder="0.00">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label" style="color:var(--muted)">Rate sheet is selected at invoice time by admin</label>
+          <input type="hidden" id="job-rate-sheet" value="">
+          <input type="hidden" id="job-fixed-price" value="0">
         </div>
         <div class="form-group">
           <label class="form-label">Start Date</label>
           <input class="form-input" id="job-start" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Province / Territory</label>
+          <select class="form-select" id="job-province">
+            <option value="">— Select province —</option>
+          </select>
         </div>
         <div class="form-group" style="grid-column:1/-1">
           <label class="form-label">Notes</label>
@@ -710,7 +743,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">OT</th>
                 <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">DT</th>
                 <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">Night</th>
-                <th style="padding:.3rem .4rem;text-align:right;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:70px">Total</th>
+                <th style="padding:.3rem .4rem;text-align:right;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:70px" data-admin-only>Total</th>
               </tr>
             </thead>
             <tbody id="cs-labour-body"></tbody>
@@ -832,7 +865,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
 
       <!-- Totals bar -->
-      <div style="display:flex;flex-wrap:wrap;gap:1rem;padding:.75rem 0;border-top:1px solid var(--border);margin-top:.75rem;font-size:.75rem">
+      <div class="cs-totals-bar" style="display:flex;flex-wrap:wrap;gap:1rem;padding:.75rem 0;border-top:1px solid var(--border);margin-top:.75rem;font-size:.75rem">
         <span><span style="color:var(--muted)">Labour:</span> <span id="cs-tot-labour" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
         <span><span style="color:var(--muted)">Equipment:</span> <span id="cs-tot-equipment" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
         <span><span style="color:var(--muted)">Consumables:</span> <span id="cs-tot-consumables" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
@@ -933,8 +966,17 @@ document.addEventListener('DOMContentLoaded', function() {
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">HST/GST Rate (%)</label>
-          <input class="form-input" id="inv-tax-rate" type="number" value="13" placeholder="13">
+          <label class="form-label">Province / Territory <span style="color:var(--nor-accent)">*</span></label>
+          <select class="form-select" id="inv-province" onchange="onProvinceChange()">
+            <option value="">— Select province —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tax Rate</label>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <input class="form-input" id="inv-tax-rate" type="number" value="5" placeholder="5" style="width:70px" oninput="updateInvTotals()">
+            <span id="inv-tax-label" style="font-size:.72rem;color:var(--muted)">GST 5%</span>
+          </div>
         </div>
       </div>
       <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.5rem">Select Approved Charge Sheets</div>
@@ -1089,7 +1131,8 @@ async function loadAll(){
     if(results[2].status==='fulfilled') _invoices     = results[2].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[3].status==='fulfilled') _rateSheets   = results[3].value.map(function(r){return Object.assign({id:r.id},r.data);});
     renderAll();
-  }catch(e){ console.warn('loadAll failed:', e.message); renderAll(); }
+    applyAdminVisibility();
+  }catch(e){ console.warn('loadAll failed:', e.message); renderAll(); applyAdminVisibility(); }
 }
 
 // ── View switching ─────────────────────────────────────────────────────────────
@@ -1155,7 +1198,7 @@ function renderDashboard(){
         +'<td style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">'+c.csNum+'</td>'
         +'<td><span style="font-weight:600">'+c.technician+'</span><br><span style="font-size:.68rem;color:var(--muted)">'+c.weekStart+'</span></td>'
         +'<td style="font-size:.72rem">'+((job.client||'—').slice(0,20))+'</td>'
-        +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(c.total)+'</td>'
+        +'<td class="inv-col" style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(c.total)+'</td>'
         +'<td>'+chipHtml(c.status)+'</td>'
       +'</tr>';
     }).join('')
@@ -1217,9 +1260,9 @@ function renderJobs() {
     // Recent charge sheets (last 3)
     var recentSheets = sheets.slice(0, 3);
 
-    return '<div class="card" style="padding:0;overflow:hidden">'
-      // Job header
-      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border)">'
+    return '<div class="card" style="padding:0;overflow:hidden" id="job-card-' + j.id + '">'
+      // Job header — clickable to expand
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer" data-toggle-job="' + j.id + '">'
         + '<div style="flex:1;min-width:0">'
           + '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem">'
             + '<span style="font-family:var(--ffc);font-size:.95rem;font-weight:800">' + j.client + '</span>'
@@ -1235,8 +1278,9 @@ function renderJobs() {
           + '</div>'
         + '</div>'
         + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;margin-left:.75rem">'
-          + '<span style="font-family:var(--ffc);font-size:1.1rem;font-weight:900;color:var(--nor-accent)">' + fmtMoneyShort(totalBilled) + '</span>'
+          + (isAdmin() ? '<span style="font-family:var(--ffc);font-size:1.1rem;font-weight:900;color:var(--nor-accent)">' + fmtMoneyShort(totalBilled) + '</span>' : '')
           + '<span style="font-size:.62rem;color:var(--muted)">' + sheets.length + ' sheet' + (sheets.length !== 1 ? 's' : '') + '</span>'
+          + '<span style="font-size:.8rem;color:var(--faint)" id="job-expand-icon-' + j.id + '">▼</span>'
         + '</div>'
       + '</div>'
       // Charge sheet history strip
@@ -1262,6 +1306,46 @@ function renderJobs() {
           : '<button class="btn btn-ghost btn-sm" onclick="reopenJob(\'' + j.id + '\')">Reopen</button>')
         + (approved > 0 ? '<button class="btn btn-secondary btn-sm" onclick="openInvoiceModal(\'' + j.client + '\')">Invoice (' + approved + ' approved)</button>' : '')
       + '</div>'
+      // Collapsible detail panel — hidden by default
+      + '<div id="job-detail-' + j.id + '" style="display:none;border-top:1px solid var(--border);background:var(--surface2)">'
+        + '<div style="padding:.85rem 1.1rem">'
+          // Job details grid
+          + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem .75rem;font-size:.76rem;margin-bottom:1rem">'
+            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Job #</div><div style="font-weight:600">' + j.number + '</div></div>'
+            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Client</div><div style="font-weight:600">' + j.client + '</div></div>'
+            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Status</div>' + chipHtml(j.status) + '</div>'
+            + '<div style="grid-column:1/-1"><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Site / Scope</div><div>' + j.site + '</div></div>'
+            + (j.po ? '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">PO Number</div><div>' + j.po + '</div></div>' : '')
+            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Billing Type</div><div>' + ({tm:'T&M',fixed:'Fixed Price',mixed:'Mixed'}[j.billing]||j.billing) + '</div></div>'
+            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Province</div><div>' + ((CANADA_TAX_RATES[j.province]||{}).name||j.province||'—') + '</div></div>'
+            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Start Date</div><div>' + (j.startDate ? fmtDate(j.startDate) : '—') + '</div></div>'
+            + (j.notes ? '<div style="grid-column:1/-1"><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Notes</div><div style="font-size:.74rem;color:var(--muted)">' + j.notes + '</div></div>' : '')
+          + '</div>'
+          // Full charge sheet history
+          + (sheets.length ? '<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.4rem">All Charge Sheets (' + sheets.length + ')</div>'
+            + '<table style="width:100%;border-collapse:collapse;font-size:.73rem">'
+            + '<thead><tr style="border-bottom:1px solid var(--border)">'
+              + '<th style="padding:.25rem .4rem;text-align:left;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase">CS #</th>'
+              + '<th style="padding:.25rem .4rem;text-align:left;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase">Week Of</th>'
+              + '<th style="padding:.25rem .4rem;text-align:left;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase">Status</th>'
+              + (isAdmin() ? '<th style="padding:.25rem .4rem;text-align:right;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase">Total</th>' : '')
+              + '<th></th>'
+            + '</tr></thead>'
+            + '<tbody>' + sheets.map(function(cs) {
+                return '<tr style="border-bottom:1px solid rgba(255,255,255,.03)">'
+                  + '<td style="padding:.3rem .4rem;font-family:var(--mono);font-size:.7rem;color:var(--muted)">' + cs.csNum + '</td>'
+                  + '<td style="padding:.3rem .4rem">' + fmtDate(cs.weekStart) + '</td>'
+                  + '<td style="padding:.3rem .4rem">' + chipHtml(cs.status) + '</td>'
+                  + (isAdmin() ? '<td style="padding:.3rem .4rem;text-align:right;font-family:var(--mono);font-size:.73rem">' + fmtMoney(cs.total) + '</td>' : '')
+                  + '<td style="padding:.3rem .4rem">'
+                    + '<button class="btn btn-ghost btn-sm" data-view-cs="' + cs.id + '" onclick="event.stopPropagation()">View</button>'
+                    + (cs.status === 'pending' && isAdmin() ? ' <button class="btn btn-sm btn-success" data-approve-cs="' + cs.id + '" onclick="event.stopPropagation()">✓</button>' : '')
+                  + '</td>'
+                + '</tr>';
+              }).join('')
+            + '</tbody></table>' : '<div style="font-size:.75rem;color:var(--faint);padding:.5rem 0">No charge sheets yet</div>')
+        + '</div>'
+      + '</div>'
     + '</div>';
   }).join('');
 }
@@ -1279,6 +1363,8 @@ function openNewJobFlow() {
   document.getElementById('job-billing').value = 'tm';
   document.getElementById('job-rate-sheet').value = '';
   document.getElementById('job-start').value = today();
+  var jpSel = document.getElementById('job-province');
+  if (jpSel) jpSel.innerHTML = '<option value="">— Select province —</option>' + getProvinceOptions('AB');
   modal.classList.add('open');
 }
 
@@ -1303,6 +1389,7 @@ async function saveJobAndReturn() {
     rateSheetId: document.getElementById('job-rate-sheet').value,
     fixedPrice:  parseFloat(document.getElementById('job-fixed-price').value) || 0,
     startDate:   document.getElementById('job-start').value,
+    province:    (document.getElementById('job-province')||{}).value || 'AB',
     po:          document.getElementById('job-po').value.trim(),
     notes:       document.getElementById('job-notes').value.trim(),
     status:      'active',
@@ -1398,11 +1485,11 @@ function renderCSList(){
       +'<td style="font-weight:600">'+c.technician+'</td>'
       +'<td style="font-size:.72rem">'+fmtDate(c.weekStart)+'</td>'
       +'<td style="text-align:center;font-size:.72rem">'+daysWorked+'</td>'
-      +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(c.total)+'</td>'
+      +'<td class="inv-col" style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(c.total)+'</td>'
       +'<td>'+chipHtml(c.status)+'</td>'
       +'<td style="white-space:nowrap">'
         +'<button class="btn btn-ghost btn-sm" onclick="viewCS(\''+c.id+'\')">View</button>'
-        +(c.status==='pending'?' <button class="btn btn-sm btn-success" onclick="approveCS(\''+c.id+'\')">✓ Approve</button>':'')
+        +(c.status==='pending'&&isAdmin()?' <button class="btn btn-sm btn-success" onclick="approveCS(\''+c.id+'\')">✓ Approve</button>':'')
         +(c.status==='approved'?' <button class="btn btn-sm btn-secondary" onclick="openInvoiceModal(\''+c.client+'\')">Invoice</button>':'')
       +'</td>'
     +'</tr>';
@@ -1454,7 +1541,7 @@ function viewCS(id){
   var footer=document.getElementById('cs-view-footer');
   footer.innerHTML='<button class="btn btn-ghost" onclick="closeModal(\'cs-view-modal\')">Close</button>';
   if(c.status==='draft') footer.innerHTML+=' <button class="btn btn-secondary" onclick="editCS(\''+id+'\')">Edit</button> <button class="btn btn-primary" onclick="submitCS(\''+id+'\')">Submit for Approval</button>';
-  if(c.status==='pending') footer.innerHTML+=' <button class="btn btn-success" onclick="approveCS(\''+id+'\')">✓ Approve</button>';
+  if(c.status==='pending'&&isAdmin()) footer.innerHTML+=' <button class="btn btn-success" onclick="approveCS(\''+id+'\')">✓ Approve</button>';
   if(c.status==='approved') footer.innerHTML+=' <button class="btn btn-secondary" onclick="openInvoiceModal(\''+c.client+'\');closeModal(\'cs-view-modal\')">Generate Invoice</button>';
 
   document.getElementById('cs-view-modal').classList.add('open');
@@ -1630,10 +1717,30 @@ function openInvoiceModal(preClient){
   if(preClient) sel.value=preClient;
   document.getElementById('inv-date').value=today();
   document.getElementById('inv-notes').value='';
-  document.getElementById('inv-tax-rate').value='13';
+  // Populate province dropdown — default to AB (where Nortech is based)
+  var provSel = document.getElementById('inv-province');
+  if (provSel) {
+    provSel.innerHTML = '<option value="">— Select province —</option>' + getProvinceOptions('AB');
+    provSel.value = 'AB';
+  }
+  document.getElementById('inv-tax-rate').value = '5';
+  var taxLabel = document.getElementById('inv-tax-label');
+  if (taxLabel) taxLabel.textContent = 'GST 5%';
   document.getElementById('inv-cs-selector').innerHTML='<div style="color:var(--muted);font-size:.75rem;padding:.5rem">Select a client first</div>';
+  // Populate rate sheet dropdown
+  var rsSel = document.getElementById('inv-rate-sheet');
+  rsSel.innerHTML = '<option value="">— Select rate sheet —</option>'
+    + _rateSheets.map(function(r){ return '<option value="'+r.id+'">'+r.name+(r.customer?' ('+r.customer+')':'')+'</option>'; }).join('');
   updateInvTotals();
-  if(preClient) loadApprovedCS();
+  if(preClient) {
+    loadApprovedCS();
+    // Pre-select province from job if available
+    var clientJob = _jobs.find(function(j){ return j.client === preClient && j.status === 'active'; });
+    if (clientJob && clientJob.province) {
+      var provSel2 = document.getElementById('inv-province');
+      if (provSel2) { provSel2.value = clientJob.province; onProvinceChange(); }
+    }
+  }
   document.getElementById('inv-modal').classList.add('open');
 }
 
@@ -1656,17 +1763,65 @@ function loadApprovedCS(){
 }
 
 function updateInvTotals(){
-  var selected=Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){
-    return _chargeSheets.find(function(c){return c.id===el.value;})||{};
+  var rsId = (document.getElementById('inv-rate-sheet')||{}).value || '';
+  var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || {};
+  var selected = Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){
+    return _chargeSheets.find(function(c){ return c.id === el.value; }) || {};
   });
-  var subtotal=selected.reduce(function(s,c){return s+(c.total||0);},0);
-  var taxRate=(parseFloat((document.getElementById('inv-tax-rate')||{}).value)||0)/100;
-  var tax=subtotal*taxRate;
-  var total=subtotal+tax;
-  var els={subtotal:document.getElementById('inv-subtotal'),tax:document.getElementById('inv-tax'),total:document.getElementById('inv-total')};
-  if(els.subtotal)els.subtotal.textContent=fmtMoney(subtotal);
-  if(els.tax)els.tax.textContent=fmtMoney(tax);
-  if(els.total)els.total.textContent=fmtMoney(total);
+  // Price each charge sheet using selected rate sheet
+  var subtotal = selected.reduce(function(sum, cs) {
+    return sum + priceChargeSheet(cs, rs);
+  }, 0);
+  var taxRate = (parseFloat((document.getElementById('inv-tax-rate')||{}).value)||0)/100;
+  var tax   = subtotal * taxRate;
+  var total = subtotal + tax;
+  var els = {subtotal:document.getElementById('inv-subtotal'),tax:document.getElementById('inv-tax'),total:document.getElementById('inv-total')};
+  if(els.subtotal) els.subtotal.textContent = fmtMoney(subtotal);
+  if(els.tax)      els.tax.textContent      = fmtMoney(tax);
+  if(els.total)    els.total.textContent    = fmtMoney(total);
+  // Show rate preview
+  var preview = document.getElementById('inv-rate-preview');
+  if (preview) preview.style.display = (rsId && selected.length) ? 'block' : 'none';
+}
+
+// Price a charge sheet using a rate sheet — called at invoice time
+function priceChargeSheet(cs, rs) {
+  if (!rs || !rs.labour) return cs.total || 0; // fallback to saved total
+  var total = 0;
+  // Labour rows
+  (cs.labourRows || []).forEach(function(row) {
+    var cat = (rs.labour || []).find(function(l){ return l.name === row.category; }) || {};
+    var stRate = cat.stRate || 0;
+    var otRate = cat.otRate || stRate * 1.5;
+    var dtRate = cat.dtRate || stRate * 2;
+    var nsRate = stRate * 1.15;
+    total += (row.st||0)*stRate + (row.ot||0)*otRate + (row.dt||0)*dtRate + (row.ns||0)*nsRate;
+  });
+  // Equipment rows
+  (cs.equipRows || []).forEach(function(row) {
+    var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
+    total += (row.qty||0) * (item.rate||0);
+  });
+  // Consumable rows
+  (cs.conRows || []).forEach(function(row) {
+    var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
+    total += (row.qty||0) * (item.rate||0);
+  });
+  // Film rows
+  (cs.filmRows || []).forEach(function(row) {
+    var item = (rs.equipment || []).find(function(e){
+      return row.type && e.name && row.type.toLowerCase().includes(e.name.toLowerCase().slice(0,12));
+    }) || {};
+    total += (row.qty||0) * (item.rate||0);
+  });
+  // Travel
+  var travel = cs.travel || {};
+  total += (travel.km||0) * (travel.kmRate||1.20);
+  total += (travel.loaTechs||0) * (travel.loaDays||0) * (travel.loaRate||70);
+  total += (travel.flights||0) + (travel.hotels||0);
+  // Other
+  (cs.otherRows || []).forEach(function(row){ total += row.amt||0; });
+  return total;
 }
 
 async function saveInvoice(status){
@@ -1675,7 +1830,9 @@ async function saveInvoice(status){
   var selectedCSIds=Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){return el.value;});
   if(!selectedCSIds.length){toast('Select at least one charge sheet','error');return;}
   var selectedCS=selectedCSIds.map(function(id){return _chargeSheets.find(function(c){return c.id===id;})||{};});
-  var subtotal=selectedCS.reduce(function(s,c){return s+(c.total||0);},0);
+  var rsId = (document.getElementById('inv-rate-sheet')||{}).value || '';
+  var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || {};
+  var subtotal = selectedCS.reduce(function(s,c){ return s + priceChargeSheet(c, rs); }, 0);
   var taxRate=parseFloat(document.getElementById('inv-tax-rate').value)||0;
   var tax=subtotal*taxRate/100;
   var total=subtotal+tax;
@@ -1684,6 +1841,11 @@ async function saveInvoice(status){
     id, client, status,
     invNum:nextNum('INV-',_invoices,'invNum'),
     invDate:document.getElementById('inv-date').value,
+    province: (document.getElementById('inv-province')||{}).value || 'AB',
+    provinceName: (CANADA_TAX_RATES[(document.getElementById('inv-province')||{}).value]||{}).name || '',
+    taxLabel: (CANADA_TAX_RATES[(document.getElementById('inv-province')||{}).value]||{}).label || '',
+    rateSheetId: rsId,
+    rateSheetName: rs.name || '',
     terms:document.getElementById('inv-terms').value,
     taxRate,
     chargeSheetIds:selectedCSIds,
@@ -1730,7 +1892,7 @@ function renderInvoices(){
       +'<td style="font-weight:600">'+i.client+'</td>'
       +'<td style="font-size:.72rem;color:var(--muted)">'+dateRange+'</td>'
       +'<td style="text-align:center;font-size:.72rem">'+((i.chargeSheetIds||[]).length)+'</td>'
-      +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.subtotal)+'</td>'
+      +(isAdmin()?'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.subtotal)+'</td>':'')
       +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.tax)+'</td>'
       +'<td style="font-family:var(--mono);font-size:.75rem;font-weight:700">'+fmtMoney(i.total)+'</td>'
       +'<td>'+chipHtml(i.status)+'</td>'
@@ -1772,7 +1934,7 @@ function viewInvoice(id){
     }).join('')+'</tbody></table>'
     +'<table class="inv-totals"><tbody>'
     +'<tr><td>Subtotal</td><td>'+fmtMoney(inv.subtotal)+'</td></tr>'
-    +'<tr><td>HST/GST ('+inv.taxRate+'%)</td><td>'+fmtMoney(inv.tax)+'</td></tr>'
+    +'<tr><td>'+(inv.taxLabel||('HST/GST ('+inv.taxRate+'%)'))+' </td><td>'+fmtMoney(inv.tax)+'</td></tr>'
     +'<tr class="total-row"><td>TOTAL DUE</td><td>'+fmtMoney(inv.total)+' '+((inv.currency||'CAD'))+'</td></tr>'
     +'</tbody></table>'
     +(inv.notes?'<div class="inv-footer">'+inv.notes+'</div>':'')
@@ -1847,6 +2009,7 @@ document.addEventListener('click',function(e){
 document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('nav-date').textContent=
     new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+  applyAdminVisibility();
   loadAll();
 });
 
@@ -2157,11 +2320,10 @@ function getCSRateSheet() {
 }
 
 function getLabourOptions(rs) {
-  var cats = rs.labour || [];
-  // Technicians see names only — NO rates shown
+  // Always use standard Nortech list — rate sheet applied at invoice time
   return '<option value="">— Select category —</option>'
-    + cats.map(function(l) {
-      return '<option value="' + l.name + '">' + l.name + '</option>';
+    + NORTECH_LABOUR_CATEGORIES.map(function(name) {
+      return '<option value="' + name + '">' + name + '</option>';
     }).join('');
 }
 
@@ -2174,22 +2336,18 @@ function getTechOptions() {
 }
 
 function getEquipmentOptions(rs) {
-  var items = (rs.equipment || []).filter(function(e) {
-    return ['hour','shift'].some(function(u){ return e.unit === u; });
-  });
+  // Standard Nortech equipment list — pricing applied at invoice time
   return '<option value="">— Select equipment —</option>'
-    + items.map(function(e) {
-      return '<option value="' + e.name + '" data-unit="' + e.unit + '">' + e.name + '</option>';
+    + NORTECH_EQUIPMENT_LIST.map(function(name) {
+      return '<option value="' + name + '">' + name + '</option>';
     }).join('');
 }
 
 function getConsumableOptions(rs) {
-  var items = (rs.equipment || []).filter(function(e) {
-    return !['hour','shift'].some(function(u){ return e.unit === u; });
-  });
+  // Standard Nortech consumables list — pricing applied at invoice time
   return '<option value="">— Select consumable —</option>'
-    + items.map(function(e) {
-      return '<option value="' + e.name + '" data-unit="' + e.unit + '">' + e.name + '</option>';
+    + NORTECH_CONSUMABLES_LIST.map(function(name) {
+      return '<option value="' + name + '">' + name + '</option>';
     }).join('');
 }
 
@@ -2205,7 +2363,9 @@ var PIPE_SIZES = ['< 2"', '2"-3"', '4"-5"', '6"', '8"-12"', '14"+', 'Sheet', 'N/
 
 function getFilmTypeOptions() {
   return '<option value="">— Film type —</option>'
-    + FILM_TYPES.map(function(t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
+    + NORTECH_FILM_TYPES.map(function(f) {
+      return '<option value="' + f.name + '">' + f.name + '</option>';
+    }).join('');
 }
 
 function getPipeSizeOptions() {
@@ -2312,7 +2472,7 @@ function addLabourRow(dayLabel, labOpts, techOpts) {
     + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-ot-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
     + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-dt-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
     + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-ns-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()" title="Night shift hours"></td>'
-    + '<td style="padding:.2rem .3rem;text-align:right;font-family:var(--mono);font-size:.72rem;color:var(--muted)" id="cs-lb-tot-' + idx + '">$0.00</td>';
+    + '<td class="cs-lb-tot" style="padding:.2rem .3rem;text-align:right;font-family:var(--mono);font-size:.72rem;color:var(--muted)" id="cs-lb-tot-' + idx + '">$0.00</td>';
   tbody.appendChild(tr);
 
   // Style inputs
@@ -2703,6 +2863,246 @@ async function markInvoiceVoid() {
   if (!_currentInvId) return;
   await markVoid(_currentInvId);
   closeModal('inv-view-modal');
+}
+
+
+
+// ── NORTECH STANDARD LISTS ────────────────────────────────────────────────────
+// These are fixed company lists independent of any customer rate sheet.
+// Techs select from these when logging charge sheets.
+// Pricing is applied later at invoice creation by admin.
+
+var NORTECH_LABOUR_CATEGORIES = [
+  // NDT Disciplines
+  'Magnetic Particle Testing (MT)',
+  'Liquid Penetrant Testing (PT)',
+  'Ultrasonic Testing Level 1 (UT1)',
+  'Ultrasonic Testing Level 2 (UT2)',
+  'Phased Array UT / TOFD (PAUT)',
+  'Automated UT Corrosion (AUT)',
+  'Radiographic Testing (RT)',
+  'Eddy Current Testing (ECT)',
+  'Guided Wave Testing (GWT)',
+  'Hardness Testing',
+  'Ferrite Testing',
+  'Positive Material Identification (PMI)',
+  'Spectrographic Analysis',
+  'Visual Inspection CWB Level 2',
+  'Visual Inspection CWB Level 3',
+  'NACE Level 2 Inspection',
+  'API 510 Pressure Vessel Inspection',
+  'API 570 Piping Inspection',
+  'API 653 Tank Inspection',
+  'Rope Access Level 3',
+  'UAV / Drone Inspection',
+  'MFL Tank Floor Inspection',
+  'CGSB Level 3',
+  'Data Analysis',
+  // Roles
+  'Supervisor / Project Coordinator',
+  'HSE Supervisor',
+  'NDT Assistant / CEDO',
+  'Engineering',
+  'Inspection ISO / PID Drafter',
+  'Office Clerical',
+];
+
+var NORTECH_EQUIPMENT_LIST = [
+  // UT / PAUT
+  'PAUT/TOFD Unit (Omniscan, Focus LT)',
+  'AUT Unit',
+  'Ultrasonic Unit (Epoch, DMS Go)',
+  'PAUT Scanners & Cables',
+  'UT Probes & Calibration Blocks',
+  // RT
+  'Radiographic Exposure Device',
+  'Dark Room / Processing Equipment',
+  'NorScan Digital Imaging Acquisition (DDA)',
+  // MT / PT
+  'Magnetic Particle Yoke',
+  'Light Meter & Power Supply',
+  'Liquid Penetrant Kit',
+  // Specialty
+  'Optical Emission Spectrometer (OES)',
+  'LIPPS Unit',
+  'XRF (PMI) Unit',
+  'Hardness Tester (UCI)',
+  'Hardness Tester (Telebrineller)',
+  'Hardness Tester (King Tester)',
+  'Ferrite Tester',
+  'Coating Thickness Tester',
+  'Airal Robot (UT Drone)',
+  // Measurement / Safety
+  'Digital Pit Gauge',
+  'Voltmeter',
+  'Gas Monitor',
+  'Safety Equipment Kit',
+  // Vehicles / Field
+  'Service Vehicle',
+  '5-Ton Flat Deck Truck',
+  'Rope Access Equipment Set',
+  'UAV / Drone Unit',
+];
+
+var NORTECH_CONSUMABLES_LIST = [
+  // UT
+  'Ultrasonic Couplant (standard)',
+  'Ultrasonic Couplant (high/low temp)',
+  'PAUT Antifreeze',
+  // MT
+  'MT Contrast Paint',
+  'Wet Magnetic Particles',
+  'Dry Magnetic Particles',
+  // PT
+  'PT Penetrant',
+  'PT Developer',
+  'PT Cleaner',
+  // RT / Film
+  'Film (per weld)',
+  'Film Sheet',
+  'Film Digitizing',
+  // Grinding / Surface
+  'Grinding Discs',
+  'Surface Preparation Supplies',
+  // Chemistry
+  'Nital Acid Etchant',
+  'Methanol Neutralizer',
+  'NDT Cleaner',
+  // Other
+  'Temp Sticks',
+  'Calibration Blocks (consumable)',
+  'PPE (project-specific)',
+];
+
+var NORTECH_FILM_TYPES = [
+  { name: 'Film Per Weld — < 2"',        pipeSizes: ['< 2"'] },
+  { name: 'Film Per Weld — 2" & 3"',     pipeSizes: ['2"-3"'] },
+  { name: 'Film Per Weld — 4" & 5"',     pipeSizes: ['4"-5"'] },
+  { name: 'Film Per Weld — 6"',          pipeSizes: ['6"'] },
+  { name: 'Film Per Weld — 8"-12"',      pipeSizes: ['8"-12"'] },
+  { name: 'Film Per Weld — 14"+ ',       pipeSizes: ['14"+'] },
+  { name: 'Film Sheet 2.75" x 8.5"',     pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 2.75" x 17"',      pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 3.5" x 17"',       pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 4.5" x 17"',       pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 7" x 17"',         pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 14" x 17"',        pipeSizes: ['N/A'] },
+  { name: 'Film Digitizing per 17"',     pipeSizes: ['N/A'] },
+  { name: 'Film Digitizing per 17" Stapled', pipeSizes: ['N/A'] },
+];
+
+
+// ── Price visibility guard ────────────────────────────────────────────────────
+var _ADMIN_IDS = ['jon','jason','joel_c','renee','jeremy'];
+
+function isAdmin() {
+  var viewer = (window.CURRENT_VIEWER || localStorage.getItem('hub_viewer') || 'tech');
+  return _ADMIN_IDS.indexOf(viewer) > -1;
+}
+
+// Wrap fmtMoney — non-admins see '—' instead of prices
+var _fmtMoneyReal = fmtMoney;
+var _fmtMoneyShortReal = fmtMoneyShort;
+
+function fmtMoney(n) {
+  return isAdmin() ? _fmtMoneyReal(n) : '—';
+}
+function fmtMoneyShort(n) {
+  return isAdmin() ? _fmtMoneyShortReal(n) : '—';
+}
+
+// Hide entire sections from non-admins
+function applyAdminVisibility() {
+  var admin = isAdmin();
+
+  // Apply body class — CSS hides all .hide-from-tech elements
+  document.body.classList.toggle('tech-view', !admin);
+
+  // data-admin-only elements
+  document.querySelectorAll('[data-admin-only]').forEach(function(el) {
+    el.style.display = admin ? '' : 'none';
+  });
+
+  // If tech, redirect to Jobs view (their home base) and relabel dashboard
+  if (!admin) {
+    // Change dashboard nav label to "My Work"
+    var dashBtn = document.getElementById('nav-dashboard');
+    if (dashBtn) dashBtn.textContent = '🏠 My Work';
+    // Show jobs by default for techs
+    showView('jobs', document.getElementById('nav-jobs'));
+    // Simplify dashboard to just show active jobs + pending CS
+    renderTechDashboard();
+  }
+}
+
+function renderTechDashboard() {
+  // Simplified dashboard for technicians — no financials
+  var kpiEl = document.getElementById('dash-kpis');
+  if (!kpiEl) return;
+  var activeJobs   = _jobs.filter(function(j){ return j.status === 'active'; }).length;
+  var myPending    = _chargeSheets.filter(function(c){ return c.status === 'draft' || c.status === 'pending'; }).length;
+  var myApproved   = _chargeSheets.filter(function(c){ return c.status === 'approved'; }).length;
+  kpiEl.innerHTML = [
+    { val: activeJobs,  lbl: 'Active Jobs',        sub: 'Currently open' },
+    { val: myPending,   lbl: 'Charge Sheets',       sub: 'Draft or pending' },
+    { val: myApproved,  lbl: 'Approved',            sub: 'Ready to invoice' },
+  ].map(function(k) {
+    return '<div class="kpi-tile"><div class="kpi-tile-val">' + k.val + '</div>'
+      + '<div class="kpi-tile-lbl">' + k.lbl + '</div>'
+      + '<div class="kpi-tile-sub">' + k.sub + '</div></div>';
+  }).join('');
+}
+
+
+
+
+// ── Canadian provincial tax rates ────────────────────────────────────────────
+var CANADA_TAX_RATES = {
+  'AB': { name: 'Alberta',                   gst: 5,   pst: 0,   hst: 0,  total: 5,   label: 'GST 5%' },
+  'BC': { name: 'British Columbia',          gst: 5,   pst: 7,   hst: 0,  total: 12,  label: 'GST 5% + PST 7%' },
+  'SK': { name: 'Saskatchewan',              gst: 5,   pst: 6,   hst: 0,  total: 11,  label: 'GST 5% + PST 6%' },
+  'MB': { name: 'Manitoba',                  gst: 5,   pst: 7,   hst: 0,  total: 12,  label: 'GST 5% + PST 7%' },
+  'ON': { name: 'Ontario',                   gst: 0,   pst: 0,   hst: 13, total: 13,  label: 'HST 13%' },
+  'QC': { name: 'Quebec',                    gst: 5,   pst: 9.975, hst: 0, total: 14.975, label: 'GST 5% + QST 9.975%' },
+  'NB': { name: 'New Brunswick',             gst: 0,   pst: 0,   hst: 15, total: 15,  label: 'HST 15%' },
+  'NS': { name: 'Nova Scotia',               gst: 0,   pst: 0,   hst: 15, total: 15,  label: 'HST 15%' },
+  'PE': { name: 'Prince Edward Island',      gst: 0,   pst: 0,   hst: 15, total: 15,  label: 'HST 15%' },
+  'NL': { name: 'Newfoundland & Labrador',   gst: 0,   pst: 0,   hst: 15, total: 15,  label: 'HST 15%' },
+  'NT': { name: 'Northwest Territories',     gst: 5,   pst: 0,   hst: 0,  total: 5,   label: 'GST 5%' },
+  'NU': { name: 'Nunavut',                   gst: 5,   pst: 0,   hst: 0,  total: 5,   label: 'GST 5%' },
+  'YT': { name: 'Yukon',                     gst: 5,   pst: 0,   hst: 0,  total: 5,   label: 'GST 5%' },
+  'EXEMPT': { name: 'Tax Exempt',            gst: 0,   pst: 0,   hst: 0,  total: 0,   label: 'Exempt (Federal/First Nations)' },
+};
+
+function getProvinceOptions(selected) {
+  return Object.entries(CANADA_TAX_RATES).map(function(kv) {
+    var code = kv[0], p = kv[1];
+    return '<option value="' + code + '" ' + (code === selected ? 'selected' : '') + '>'
+      + p.name + ' — ' + p.label
+    + '</option>';
+  }).join('');
+}
+
+function onProvinceChange() {
+  var sel = document.getElementById('inv-province');
+  if (!sel) return;
+  var province = CANADA_TAX_RATES[sel.value];
+  if (!province) return;
+  var taxInput = document.getElementById('inv-tax-rate');
+  var taxLabel = document.getElementById('inv-tax-label');
+  if (taxInput) taxInput.value = province.total;
+  if (taxLabel) taxLabel.textContent = province.label;
+  updateInvTotals();
+}
+
+
+function toggleJobDetail(jobId) {
+  var detail = document.getElementById('job-detail-' + jobId);
+  var icon   = document.getElementById('job-expand-icon-' + jobId);
+  if (!detail) return;
+  var open = detail.style.display === 'none' || detail.style.display === '';
+  detail.style.display = open ? 'block' : 'none';
+  if (icon) icon.textContent = open ? '▲' : '▼';
 }
 
 </script>
