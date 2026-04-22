@@ -199,51 +199,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .modal-body{padding:1.25rem}
 .modal-footer{padding:.85rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:.5rem;justify-content:flex-end}
 
-/* ── Charge sheet specific ───────────────────────────────────────────────── */
-.cs-day-grid{
-  display:grid;
-  grid-template-columns:auto 1fr 80px 80px 80px 80px 60px;
-  gap:.3rem;align-items:center;
-  font-size:.75rem;margin:.75rem 0;
-}
-.cs-day-grid .col-hdr{
-  font-family:var(--ffc);font-size:.6rem;font-weight:700;
-  letter-spacing:2px;text-transform:uppercase;color:var(--muted);
-  padding:.2rem .4rem;
-}
-.cs-day-row{display:contents}
-.cs-day-row input,.cs-day-row select{
-  background:var(--surface2);border:1px solid var(--border);
-  border-radius:4px;color:var(--text);font-size:.75rem;
-  padding:.3rem .45rem;width:100%;font-family:var(--ff);
-}
-.cs-day-row input:focus,.cs-day-row select:focus{outline:none;border-color:var(--nor-accent)}
-.cs-total-row{
-  display:flex;justify-content:flex-end;gap:1.5rem;
-  padding:.75rem 0;border-top:1px solid var(--border);
-  font-size:.8rem;margin-top:.3rem;
-}
-.cs-total-lbl{color:var(--muted)}
-.cs-total-val{font-weight:700;color:var(--text);font-family:var(--mono);min-width:80px;text-align:right}
-.cs-total-val.grand{color:var(--nor-accent);font-size:.95rem}
 
-/* ── Rate sheet items ─────────────────────────────────────────────────────── */
-.rate-item{
-  display:grid;grid-template-columns:1fr 120px 120px 80px;
-  gap:.5rem;align-items:center;padding:.5rem .6rem;
-  background:var(--surface2);border-radius:5px;margin-bottom:.3rem;
-  font-size:.78rem;
-}
-.rate-item-name{font-weight:600}
-.rate-item-type{font-size:.65rem;color:var(--muted)}
-.rate-item input{
-  background:var(--surface3);border:1px solid var(--border);
-  border-radius:4px;color:var(--text);font-size:.75rem;
-  padding:.25rem .4rem;font-family:var(--mono);width:100%;
-}
-.rate-item input:focus{outline:none;border-color:var(--nor-accent)}
-
-/* ── Empty state ─────────────────────────────────────────────────────────── */
+/* ── Empty state/* ── Empty state ─────────────────────────────────────────────────────────── */
 .empty-state{
   text-align:center;padding:3rem 1rem;color:var(--muted);
 }
@@ -478,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="unav-links">
     <button class="active" onclick="showView('dashboard',this)" id="nav-dashboard">📊 Dashboard</button>
     <button onclick="showView('jobs',this)" id="nav-jobs">🔧 Work Orders</button>
-    <button onclick="showView('charge-sheets',this)" id="nav-cs" data-admin-only style="display:none">📋 Charge Sheets</button>
+    
     <button onclick="showView('invoices',this)" id="nav-invoices" data-admin-only>🧾 Invoices</button>
     <button onclick="showView('rate-sheets',this)" id="nav-rates" data-admin-only>💲 Rate Sheets</button>
   </div>
@@ -506,22 +463,8 @@ document.addEventListener('DOMContentLoaded', function() {
   <!-- ══ DASHBOARD ══════════════════════════════════════════════════════════ -->
   <div id="view-dashboard" class="view active">
     <div class="kpi-row" id="dash-kpis"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
-      <div class="section">
-        <div class="sec-hdr">
-          <div><h2>Recent Charge Sheets</h2><div class="sec-sub">Last 10 submitted</div></div>
-          <div class="sec-actions"><button class="btn btn-sm btn-primary" onclick="showView('charge-sheets',null);openCSModal()">+ New</button></div>
-        </div>
-        <div class="card" style="padding:0"><table class="data-table" id="dash-cs-table"><tbody></tbody></table></div>
-      </div>
-      <div class="section" data-admin-only>
-        <div class="sec-hdr">
-          <div><h2>Outstanding Invoices</h2><div class="sec-sub">Sent but unpaid</div></div>
-          <div class="sec-actions"><button class="btn btn-sm btn-secondary" onclick="showView('invoices',null)">View All</button></div>
-        </div>
-        <div class="card" style="padding:0"><table class="data-table" id="dash-inv-table"><tbody></tbody></table></div>
-      </div>
-    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:1.25rem;max-width:600px">
+      
   </div>
 
   <!-- ══ WORK ORDERS VIEW ══════════════════════════════════════════════════════ -->
@@ -755,41 +698,10 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 
-  <!-- ══ CHARGE SHEETS ══════════════════════════════════════════════════════ -->
-  <div id="view-charge-sheets" class="view" style="display:none">
-    <div class="sec-hdr">
-      <div><h2>Charge Sheets</h2><div class="sec-sub">Field time records — one per week per job</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:140px;font-size:.72rem" id="cs-filter-status" onchange="renderCSList()">
-          <option value="">All Status</option>
-          <option value="draft">Draft</option>
-          <option value="pending">Pending Approval</option>
-          <option value="approved">Approved</option>
-          <option value="invoiced">Invoiced</option>
-        </select>
-        <button class="btn btn-primary" onclick="openCSModal()">+ New Charge Sheet</button>
-      </div>
-    </div>
-    <div class="card" style="padding:0">
-      <table class="data-table">
-        <thead><tr>
-          <th>CS #</th><th>Job</th><th>Client</th><th>Technician</th>
-          <th>Week Of</th><th>Days</th><th data-admin-only>Total</th><th>Status</th><th></th>
-        </tr></thead>
-        <tbody id="cs-tbody"></tbody>
-      </table>
-      <div class="empty-state" id="cs-empty" style="display:none">
-        <div class="empty-state-icon">📋</div>
-        <div class="empty-state-title">No Charge Sheets</div>
-        <div class="empty-state-sub">Submit a new charge sheet after completing field work</div>
-      </div>
-    </div>
-  </div>
-
   <!-- ══ INVOICES ════════════════════════════════════════════════════════════ -->
   <div id="view-invoices" class="view" style="display:none">
     <div class="sec-hdr">
-      <div><h2>Invoices</h2><div class="sec-sub">Generated from approved charge sheets</div></div>
+      <div><h2>Invoices</h2><div class="sec-sub">Generated from approved work orders</div></div>
       <div class="sec-actions">
         <select class="form-select" style="width:140px;font-size:.72rem" id="inv-filter-status" onchange="renderInvoices()">
           <option value="">All Status</option>
@@ -805,7 +717,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <table class="data-table">
         <thead><tr>
           <th>Invoice #</th><th>Client</th><th>Period</th>
-          <th>Charge Sheets</th><th class="hide-from-tech">Subtotal</th><th class="hide-from-tech">Tax</th><th class="hide-from-tech">Total</th>
+          <th>Work Orders</th><th class="hide-from-tech">Subtotal</th><th class="hide-from-tech">Tax</th><th class="hide-from-tech">Total</th>
           <th>Status</th><th></th>
         </tr></thead>
         <tbody id="inv-tbody"></tbody>
@@ -813,7 +725,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="empty-state" id="inv-empty" style="display:none">
         <div class="empty-state-icon">🧾</div>
         <div class="empty-state-title">No Invoices</div>
-        <div class="empty-state-sub">Approve charge sheets first, then generate an invoice</div>
+        <div class="empty-state-sub">Approve work orders first, then generate an invoice</div>
       </div>
     </div>
   </div>
@@ -832,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="empty-state" id="rates-empty" style="display:none">
       <div class="empty-state-icon">💲</div>
       <div class="empty-state-title">No Rate Sheets</div>
-      <div class="empty-state-sub">Add your standard rate sheet to start auto-calculating charge sheets</div>
+      <div class="empty-state-sub">Add a rate sheet to start pricing work orders</div>
     </div>
   </div>
 
@@ -1046,198 +958,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 
-<!-- Charge Sheet Modal -->
-<div class="modal-overlay" id="cs-modal">
-  <div class="modal" style="max-width:960px;width:96vw">
-    <div class="modal-hdr">
-      <span class="modal-title" id="cs-modal-title">New Charge Sheet</span>
-      <button class="modal-close" onclick="closeModal('cs-modal')">✕</button>
-    </div>
-    <div class="modal-body" style="padding:1rem 1.25rem">
-
-      <!-- Header info -->
-      <div class="form-grid form-grid-3" style="gap:.6rem;margin-bottom:1rem">
-        <div class="form-group">
-          <label class="form-label">Job <span style="color:var(--nor-accent)">*</span></label>
-          <select class="form-select" id="cs-job" onchange="onCSJobChange()">
-            <option value="">— Select job —</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Week Starting (Monday) <span style="color:var(--nor-accent)">*</span></label>
-          <input class="form-input" id="cs-week-start" type="date" onchange="onCSWeekChange()">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Notes / Reference</label>
-          <input class="form-input" id="cs-notes" placeholder="PO #, field notes…">
-        </div>
-      </div>
-
-      <!-- Tab nav -->
-      <div style="display:flex;gap:.2rem;border-bottom:1px solid var(--border);margin-bottom:.75rem">
-        <button class="cs-tab active" onclick="switchCSTab('labour',this)" id="cs-tab-labour">⏱ Labour</button>
-        <button class="cs-tab" onclick="switchCSTab('equipment',this)" id="cs-tab-equipment">🔧 Equipment</button>
-        <button class="cs-tab" onclick="switchCSTab('consumables',this)" id="cs-tab-consumables">🧪 Consumables</button>
-        <button class="cs-tab" onclick="switchCSTab('film',this)" id="cs-tab-film">🎞 Film</button>
-        <button class="cs-tab" onclick="switchCSTab('travel',this)" id="cs-tab-travel">🚗 Travel</button>
-        <button class="cs-tab" onclick="switchCSTab('other',this)" id="cs-tab-other">+ Other</button>
-      </div>
-
-      <!-- LABOUR TAB -->
-      <div id="cs-panel-labour" class="cs-panel">
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:.73rem" id="cs-labour-table">
-            <thead>
-              <tr style="border-bottom:1px solid var(--border)">
-                <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Day</th>
-                <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:160px">Technician</th>
-                <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:180px">Category</th>
-                <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">ST</th>
-                <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">OT</th>
-                <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">DT</th>
-                <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">Night</th>
-                <th style="padding:.3rem .4rem;text-align:right;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:70px" data-admin-only>Total</th>
-              </tr>
-            </thead>
-            <tbody id="cs-labour-body"></tbody>
-          </table>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="addLabourRow()" style="margin-top:.5rem">+ Add Row</button>
-      </div>
-
-      <!-- EQUIPMENT TAB -->
-      <div id="cs-panel-equipment" class="cs-panel" style="display:none">
-        <table style="width:100%;border-collapse:collapse;font-size:.73rem" id="cs-equipment-table">
-          <thead>
-            <tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Equipment Item</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty / Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
-              <th style="width:30px"></th>
-            </tr>
-          </thead>
-          <tbody id="cs-equipment-body"></tbody>
-        </table>
-        <button class="btn btn-ghost btn-sm" onclick="addEquipmentRow()" style="margin-top:.5rem">+ Add Equipment</button>
-      </div>
-
-      <!-- CONSUMABLES TAB -->
-      <div id="cs-panel-consumables" class="cs-panel" style="display:none">
-        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-          <thead>
-            <tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Consumable</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Quantity</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
-              <th style="width:30px"></th>
-            </tr>
-          </thead>
-          <tbody id="cs-consumables-body"></tbody>
-        </table>
-        <button class="btn btn-ghost btn-sm" onclick="addConsumableRow()" style="margin-top:.5rem">+ Add Consumable</button>
-      </div>
-
-      <!-- FILM TAB -->
-      <div id="cs-panel-film" class="cs-panel" style="display:none">
-        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-          <thead>
-            <tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Film Type</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:120px">Pipe Size</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Quantity</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
-              <th style="width:30px"></th>
-            </tr>
-          </thead>
-          <tbody id="cs-film-body"></tbody>
-        </table>
-        <button class="btn btn-ghost btn-sm" onclick="addFilmRow()" style="margin-top:.5rem">+ Add Film</button>
-      </div>
-
-      <!-- TRAVEL TAB -->
-      <div id="cs-panel-travel" class="cs-panel" style="display:none">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
-          <div class="form-group">
-            <label class="form-label">Travel Hours (ST)</label>
-            <input class="form-input" id="cs-travel-hrs-st" type="number" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Travel Hours (OT)</label>
-            <input class="form-input" id="cs-travel-hrs-ot" type="number" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mileage (km)</label>
-            <input class="form-input" id="cs-travel-km" type="number" placeholder="0" min="0" oninput="calcCSTotal()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Rate/km</label>
-            <input class="form-input" id="cs-travel-km-rate" type="number" placeholder="1.20" value="1.20" step="0.01" oninput="calcCSTotal()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">LOA — # Technicians</label>
-            <input class="form-input" id="cs-travel-loa-techs" type="number" placeholder="0" min="0" oninput="calcCSTotal()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">LOA — # Days</label>
-            <input class="form-input" id="cs-travel-loa-days" type="number" placeholder="0" min="0" oninput="calcCSTotal()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">LOA Rate ($/tech/day)</label>
-            <input class="form-input" id="cs-travel-loa-rate" type="number" placeholder="70.00" value="70.00" step="0.01" oninput="calcCSTotal()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Flights (total cost)</label>
-            <input class="form-input" id="cs-travel-flights" type="number" placeholder="0.00" min="0" step="0.01" oninput="calcCSTotal()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Hotels / Camp (total cost)</label>
-            <input class="form-input" id="cs-travel-hotels" type="number" placeholder="0.00" min="0" step="0.01" oninput="calcCSTotal()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Travel Notes</label>
-            <input class="form-input" id="cs-travel-notes" placeholder="Origin, destination, airline…">
-          </div>
-        </div>
-      </div>
-
-      <!-- OTHER TAB -->
-      <div id="cs-panel-other" class="cs-panel" style="display:none">
-        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-          <thead>
-            <tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Description</th>
-              <th style="padding:.3rem .4rem;text-align:right;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:100px">Amount</th>
-              <th style="width:30px"></th>
-            </tr>
-          </thead>
-          <tbody id="cs-other-body"></tbody>
-        </table>
-        <button class="btn btn-ghost btn-sm" onclick="addOtherRow()" style="margin-top:.5rem">+ Add Item</button>
-      </div>
-
-      <!-- Totals bar -->
-      <div class="cs-totals-bar" style="display:flex;flex-wrap:wrap;gap:1rem;padding:.75rem 0;border-top:1px solid var(--border);margin-top:.75rem;font-size:.75rem">
-        <span><span style="color:var(--muted)">Labour:</span> <span id="cs-tot-labour" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
-        <span><span style="color:var(--muted)">Equipment:</span> <span id="cs-tot-equipment" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
-        <span><span style="color:var(--muted)">Consumables:</span> <span id="cs-tot-consumables" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
-        <span><span style="color:var(--muted)">Film:</span> <span id="cs-tot-film" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
-        <span><span style="color:var(--muted)">Travel:</span> <span id="cs-tot-travel" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
-        <span><span style="color:var(--muted)">Other:</span> <span id="cs-tot-other" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
-        <span style="margin-left:auto"><span style="color:var(--muted)">TOTAL:</span> <span id="cs-tot-all" style="font-family:var(--mono);font-weight:800;font-size:.95rem;color:var(--nor-accent)">$0.00</span></span>
-      </div>
-
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('cs-modal')">Cancel</button>
-      <button class="btn btn-secondary" onclick="saveCS('draft')">Save Draft</button>
-      <button class="btn btn-primary" onclick="saveCS('pending')">Submit for Approval</button>
-    </div>
-  </div>
-</div>
-
-
 <!-- Rate Sheet Modal -->
 <div class="modal-overlay" id="rate-modal">
   <div class="modal" style="max-width:700px">
@@ -1338,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
       </div>
-      <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.5rem">Select Approved Charge Sheets</div>
+      <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.5rem">Select Approved Work Orders</div>
       <div id="inv-cs-selector" style="max-height:200px;overflow-y:auto;background:var(--surface2);border-radius:6px;padding:.5rem">
         <div style="color:var(--muted);font-size:.75rem;padding:.5rem">Select a client first</div>
       </div>
@@ -1391,20 +1111,184 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- CS View / Approve Modal -->
-<div class="modal-overlay" id="cs-view-modal">
-  <div class="modal" style="max-width:700px">
+
+<!-- Rate Sheet Import Modal -->
+<div class="modal-overlay" id="import-rate-modal">
+  <div class="modal" style="max-width:600px">
     <div class="modal-hdr">
-      <span class="modal-title" id="cs-view-title">Charge Sheet</span>
-      <button class="modal-close" onclick="closeModal('cs-view-modal')">✕</button>
+      <span class="modal-title">Import Rate Sheet</span>
+      <button class="modal-close" onclick="closeModal('import-rate-modal')">✕</button>
     </div>
-    <div class="modal-body" id="cs-view-body"></div>
-    <div class="modal-footer" id="cs-view-footer">
-      <button class="btn btn-ghost" onclick="closeModal('cs-view-modal')">Close</button>
+    <div class="modal-body">
+      <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">
+        Upload a Word (.docx) or PDF rate sheet. Claude will read it and extract labour categories, day rates, and equipment items automatically.
+      </p>
+
+      <!-- Drop zone -->
+      <div id="import-dropzone" onclick="document.getElementById('import-file-input').click()"
+           style="border:2px dashed var(--border2);border-radius:8px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1rem"
+           ondragover="event.preventDefault();this.style.borderColor='var(--nor-accent)'"
+           ondragleave="this.style.borderColor='var(--border2)'"
+           ondrop="handleImportDrop(event)">
+        <div style="font-size:2rem;margin-bottom:.5rem;opacity:.5">📄</div>
+        <div style="font-size:.82rem;font-weight:600;color:var(--text)">Drop file here or click to browse</div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">.docx or .pdf — max 10MB</div>
+        <input type="file" id="import-file-input" accept=".docx,.pdf" style="display:none" onchange="handleImportFile(this.files[0])">
+      </div>
+
+      <!-- Status -->
+      <div id="import-status" style="display:none;padding:.75rem;border-radius:6px;font-size:.78rem;margin-bottom:1rem"></div>
+
+      <!-- Preview -->
+      <div id="import-preview" style="display:none">
+        <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.5rem">Extracted Data — Review Before Importing</div>
+        <div class="form-grid form-grid-2" style="gap:.5rem;margin-bottom:.75rem">
+          <div class="form-group">
+            <label class="form-label">Rate Sheet Name</label>
+            <input class="form-input" id="import-rs-name" placeholder="Rate sheet name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Customer (if client-specific)</label>
+            <input class="form-input" id="import-rs-customer" placeholder="Leave blank for standard">
+          </div>
+        </div>
+        <div id="import-labour-preview" style="margin-bottom:.75rem"></div>
+        <div id="import-equipment-preview"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('import-rate-modal')">Cancel</button>
+      <button class="btn btn-primary" id="import-confirm-btn" style="display:none" onclick="confirmImport()">Import Rate Sheet</button>
     </div>
   </div>
 </div>
 
 <script>
+// ── NORTECH STANDARD LISTS ────────────────────────────────────────────────────
+// These are fixed company lists independent of any customer rate sheet.
+// Techs select from these when logging work orders.
+// Pricing is applied later at invoice creation by admin.
+
+var NORTECH_LABOUR_CATEGORIES = [
+  // NDT Disciplines
+  'Magnetic Particle Testing (MT)',
+  'Liquid Penetrant Testing (PT)',
+  'Ultrasonic Testing Level 1 (UT1)',
+  'Ultrasonic Testing Level 2 (UT2)',
+  'Phased Array UT / TOFD (PAUT)',
+  'Automated UT Corrosion (AUT)',
+  'Radiographic Testing (RT)',
+  'Eddy Current Testing (ECT)',
+  'Guided Wave Testing (GWT)',
+  'Hardness Testing',
+  'Ferrite Testing',
+  'Positive Material Identification (PMI)',
+  'Spectrographic Analysis',
+  'Visual Inspection CWB Level 2',
+  'Visual Inspection CWB Level 3',
+  'NACE Level 2 Inspection',
+  'API 510 Pressure Vessel Inspection',
+  'API 570 Piping Inspection',
+  'API 653 Tank Inspection',
+  'Rope Access Level 3',
+  'UAV / Drone Inspection',
+  'MFL Tank Floor Inspection',
+  'CGSB Level 3',
+  'Data Analysis',
+  // Roles
+  'Supervisor / Project Coordinator',
+  'HSE Supervisor',
+  'NDT Assistant / CEDO',
+  'Engineering',
+  'Inspection ISO / PID Drafter',
+  'Office Clerical',
+];
+
+var NORTECH_EQUIPMENT_LIST = [
+  // UT / PAUT
+  'PAUT/TOFD Unit (Omniscan, Focus LT)',
+  'AUT Unit',
+  'Ultrasonic Unit (Epoch, DMS Go)',
+  'PAUT Scanners & Cables',
+  'UT Probes & Calibration Blocks',
+  // RT
+  'Radiographic Exposure Device',
+  'Dark Room / Processing Equipment',
+  'NorScan Digital Imaging Acquisition (DDA)',
+  // MT / PT
+  'Magnetic Particle Yoke',
+  'Light Meter & Power Supply',
+  'Liquid Penetrant Kit',
+  // Specialty
+  'Optical Emission Spectrometer (OES)',
+  'LIPPS Unit',
+  'XRF (PMI) Unit',
+  'Hardness Tester (UCI)',
+  'Hardness Tester (Telebrineller)',
+  'Hardness Tester (King Tester)',
+  'Ferrite Tester',
+  'Coating Thickness Tester',
+  'Airal Robot (UT Drone)',
+  // Measurement / Safety
+  'Digital Pit Gauge',
+  'Voltmeter',
+  'Gas Monitor',
+  'Safety Equipment Kit',
+  // Vehicles / Field
+  'Service Vehicle',
+  '5-Ton Flat Deck Truck',
+  'Rope Access Equipment Set',
+  'UAV / Drone Unit',
+];
+
+var NORTECH_CONSUMABLES_LIST = [
+  // UT
+  'Ultrasonic Couplant (standard)',
+  'Ultrasonic Couplant (high/low temp)',
+  'PAUT Antifreeze',
+  // MT
+  'MT Contrast Paint',
+  'Wet Magnetic Particles',
+  'Dry Magnetic Particles',
+  // PT
+  'PT Penetrant',
+  'PT Developer',
+  'PT Cleaner',
+  // RT / Film
+  'Film (per weld)',
+  'Film Sheet',
+  'Film Digitizing',
+  // Grinding / Surface
+  'Grinding Discs',
+  'Surface Preparation Supplies',
+  // Chemistry
+  'Nital Acid Etchant',
+  'Methanol Neutralizer',
+  'NDT Cleaner',
+  // Other
+  'Temp Sticks',
+  'Calibration Blocks (consumable)',
+  'PPE (project-specific)',
+];
+
+var NORTECH_FILM_TYPES = [
+  { name: 'Film Per Weld — < 2"',        pipeSizes: ['< 2"'] },
+  { name: 'Film Per Weld — 2" & 3"',     pipeSizes: ['2"-3"'] },
+  { name: 'Film Per Weld — 4" & 5"',     pipeSizes: ['4"-5"'] },
+  { name: 'Film Per Weld — 6"',          pipeSizes: ['6"'] },
+  { name: 'Film Per Weld — 8"-12"',      pipeSizes: ['8"-12"'] },
+  { name: 'Film Per Weld — 14"+ ',       pipeSizes: ['14"+'] },
+  { name: 'Film Sheet 2.75" x 8.5"',     pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 2.75" x 17"',      pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 3.5" x 17"',       pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 4.5" x 17"',       pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 7" x 17"',         pipeSizes: ['N/A'] },
+  { name: 'Film Sheet 14" x 17"',        pipeSizes: ['N/A'] },
+  { name: 'Film Digitizing per 17"',     pipeSizes: ['N/A'] },
+  { name: 'Film Digitizing per 17" Stapled', pipeSizes: ['N/A'] },
+];
+
+
 // ══════════════════════════════════════════════════════════════════════════════
 // NORTECH FIELD OPERATIONS — CORE JS
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1415,13 +1299,11 @@ var _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 // ── Nortech company info (fill in later) ──────────────────────────────────────
 var NORTECH = {
   name:    'Nortech Advanced NDT',
-  address: '7108 8th Street, Edmonton, Alberta T6P 1V1, Canada',
-  phone:   '(780) 449-5013',
-  fax:     '(780) 449-5036',
-  email:   'info@nortechadvanced.com',
-  web:     'www.nortechadvanced.com',
-  gst:     '801560228 RT0001',
-  logo:    'https://jon-servicesbu.github.io/bu-services/nortech_logo.png',
+  address: '— Address pending —',
+  phone:   '— Phone pending —',
+  email:   '— Email pending —',
+  gst:     '— GST/HST # pending —',
+  logo:    '', // base64 or URL
 };
 
 // ── State ──────────────────────────────────────────────────────────────────────
@@ -1443,8 +1325,8 @@ var _rateEqCount  = 0;
 function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function today(){ return new Date().toISOString().slice(0,10); }
 function fmtDate(s){ if(!s)return'—'; var d=new Date(s+'T00:00:00'); return d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'}); }
-function _fmtMoneyImpl(n){ return '$'+Number(n||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function _fmtMoneyShortImpl(n){ var v=Number(n||0); if(v>=1000000)return'$'+(v/1e6).toFixed(2)+'M'; if(v>=1000)return'$'+(v/1000).toFixed(1)+'k'; return fmtMoney(v); }
+function fmtMoney(n){ return '$'+Number(n||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtMoneyShort(n){ var v=Number(n||0); if(v>=1000000)return'$'+(v/1e6).toFixed(2)+'M'; if(v>=1000)return'$'+(v/1000).toFixed(1)+'k'; return fmtMoney(v); }
 function chipHtml(status){
   var map={draft:'chip-draft',pending:'chip-pending',approved:'chip-approved',invoiced:'chip-invoiced',paid:'chip-paid',void:'chip-void',sent:'chip-invoiced',active:'chip-active',closed:'chip-closed'};
   var lbl={draft:'Draft',pending:'Pending',approved:'Approved',invoiced:'Invoiced',paid:'Paid',void:'Void',sent:'Sent',active:'Active',closed:'Closed'};
@@ -1504,8 +1386,7 @@ async function loadAll(){
     if(results[2].status==='fulfilled') _invoices     = results[2].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[3].status==='fulfilled') _rateSheets   = results[3].value.map(function(r){return Object.assign({id:r.id},r.data);});
     renderAll();
-    applyAdminVisibility();
-  }catch(e){ console.warn('loadAll failed:', e.message); renderAll(); applyAdminVisibility(); }
+  }catch(e){ console.warn('loadAll failed:', e.message); renderAll(); }
 }
 
 // ── View switching ─────────────────────────────────────────────────────────────
@@ -1538,9 +1419,9 @@ function renderAll(){
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function renderDashboard(){
   // KPIs
-  var openJobs    = _jobs.filter(function(j){return j.status==='draft'||j.status==='submitted'||j.status==='approved';}).length;
-  var pendingCS   = _jobs.filter(function(j){return j.status==='submitted';}).length;
-  var approvedCS  = _jobs.filter(function(j){return j.status==='approved';}).length;
+  var openJobs    = _jobs.filter(function(j){return j.status==='active';}).length;
+  var pendingCS   = _chargeSheets.filter(function(c){return c.status==='pending';}).length;
+  var approvedCS  = _chargeSheets.filter(function(c){return c.status==='approved';}).length;
   var outstanding = _invoices.filter(function(i){return i.status==='sent';})
                              .reduce(function(s,i){return s+(i.total||0);},0);
   var paidMTD     = _invoices.filter(function(i){return i.status==='paid'&&(i.paidDate||'').startsWith(today().slice(0,7));})
@@ -1561,7 +1442,7 @@ function renderDashboard(){
     +'</div>';
   }).join('');
 
-  // Recent charge sheets
+  // Recent work orders
   var csEl=document.getElementById('dash-cs-table');
   if(csEl){
     var recent=_chargeSheets.slice(0,8);
@@ -1571,11 +1452,11 @@ function renderDashboard(){
         +'<td style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">'+c.csNum+'</td>'
         +'<td><span style="font-weight:600">'+c.technician+'</span><br><span style="font-size:.68rem;color:var(--muted)">'+c.weekStart+'</span></td>'
         +'<td style="font-size:.72rem">'+((job.client||'—').slice(0,20))+'</td>'
-        +'<td class="inv-col" style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(c.total)+'</td>'
+        +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(c.total)+'</td>'
         +'<td>'+chipHtml(c.status)+'</td>'
       +'</tr>';
     }).join('')
-    :'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.75rem">No charge sheets yet</td></tr>';
+    :'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.75rem">No work orders yet</td></tr>';
   }
 
   // Outstanding invoices
@@ -1601,206 +1482,36 @@ function updatePendingBadge(){
 }
 
 // ── Jobs ──────────────────────────────────────────────────────────────────────
-
-function renderJobs() {
-  var q      = (document.getElementById('job-search')||{}).value || '';
-  var filter = (document.getElementById('job-filter-status')||{}).value || '';
-  var filtered = _jobs.filter(function(j) {
-    if (filter && j.status !== filter) return false;
-    if (!q) return true;
+function renderJobs(){
+  var q=(document.getElementById('job-search')||{}).value||'';
+  var filtered=_jobs.filter(function(j){
+    if(!q) return true;
     return (j.client+j.site+j.number+j.po).toLowerCase().includes(q.toLowerCase());
   });
-
-  var grid  = document.getElementById('jobs-grid');
-  var empty = document.getElementById('jobs-empty');
-  if (!grid) return;
-
-  if (!filtered.length) {
-    grid.innerHTML = '';
-    if (empty) empty.style.display = 'block';
-    return;
-  }
-  if (empty) empty.style.display = 'none';
-
-  grid.innerHTML = filtered.map(function(j) {
-    var sheets = _chargeSheets.filter(function(c){ return c.jobId === j.id; });
-    var pending = sheets.filter(function(c){ return c.status === 'pending'; }).length;
-    var approved = sheets.filter(function(c){ return c.status === 'approved'; }).length;
-    var totalBilled = sheets.reduce(function(s,c){ return s + (c.total||0); }, 0);
-    var rs = _rateSheets.find(function(r){ return r.id === j.rateSheetId; }) || {};
-    var billingLbl = {tm:'T&M', fixed:'Fixed', mixed:'Mixed'}[j.billing] || j.billing;
-
-    // Recent charge sheets (last 3)
-    var recentSheets = sheets.slice(0, 3);
-
-    return '<div class="card" style="padding:0;overflow:hidden" id="job-card-' + j.id + '">'
-      // Job header — clickable to expand
-      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer" data-toggle-job="' + j.id + '">'
-        + '<div style="flex:1;min-width:0">'
-          + '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem">'
-            + '<span style="font-family:var(--ffc);font-size:.95rem;font-weight:800">' + j.client + '</span>'
-            + chipHtml(j.status)
-            + (pending ? '<span class="chip chip-pending">' + pending + ' pending</span>' : '')
-          + '</div>'
-          + '<div style="font-size:.78rem;color:var(--muted);margin-bottom:.2rem">' + j.site + '</div>'
-          + '<div style="display:flex;gap:1rem;font-size:.68rem;color:var(--faint)">'
-            + '<span>' + j.number + '</span>'
-            + (j.po ? '<span>PO: ' + j.po + '</span>' : '')
-            + '<span>' + billingLbl + '</span>'
-            + (rs.name ? '<span>' + rs.name + '</span>' : '')
-          + '</div>'
-        + '</div>'
-        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;margin-left:.75rem">'
-          + (isAdmin() ? '<span style="font-family:var(--ffc);font-size:1.1rem;font-weight:900;color:var(--nor-accent)">' + fmtMoneyShort(totalBilled) + '</span>' : '')
-          + '<span style="font-size:.62rem;color:var(--muted)">' + sheets.length + ' sheet' + (sheets.length !== 1 ? 's' : '') + '</span>'
-          + '<span style="font-size:.8rem;color:var(--faint)" id="job-expand-icon-' + j.id + '">▼</span>'
-        + '</div>'
-      + '</div>'
-      // Charge sheet history strip
-      + (recentSheets.length
-        ? '<div style="padding:.5rem 1.1rem;border-bottom:1px solid var(--border);display:flex;gap:.4rem;flex-wrap:wrap">'
-          + recentSheets.map(function(cs) {
-            return '<div onclick="viewCS(\'' + cs.id + '\')" style="display:flex;align-items:center;gap:.35rem;background:var(--surface2);border-radius:4px;padding:.25rem .55rem;cursor:pointer;font-size:.68rem;border:1px solid var(--border)">'
-              + '<span style="color:var(--muted)">' + cs.csNum + '</span>'
-              + '<span>w/o ' + cs.weekStart.slice(5) + '</span>'
-              + chipHtml(cs.status)
-              + '<span style="font-family:var(--mono);color:var(--muted)">' + fmtMoneyShort(cs.total) + '</span>'
-            + '</div>';
-          }).join('')
-          + (sheets.length > 3 ? '<span style="font-size:.68rem;color:var(--muted);padding:.25rem .4rem">+' + (sheets.length - 3) + ' more</span>' : '')
-        + '</div>'
-        : '')
-      // Action buttons
-      + '<div style="padding:.55rem 1.1rem;display:flex;gap:.4rem;flex-wrap:wrap">'
-        + '<button class="btn btn-primary btn-sm" onclick="openCSModal(\'' + j.id + '\')">+ Log This Week</button>'
-        + '<button class="btn btn-ghost btn-sm" onclick="openJobModal(\'' + j.id + '\')">Edit Job</button>'
-        + (j.status === 'active'
-          ? '<button class="btn btn-ghost btn-sm" onclick="closeJob(\'' + j.id + '\')">Close Job</button>'
-          : '<button class="btn btn-ghost btn-sm" onclick="reopenJob(\'' + j.id + '\')">Reopen</button>')
-        + (approved > 0 ? '<button class="btn btn-secondary btn-sm" onclick="openInvoiceModal(\'' + j.client + '\')">Invoice (' + approved + ' approved)</button>' : '')
-      + '</div>'
-      // Collapsible detail panel — hidden by default
-      + '<div id="job-detail-' + j.id + '" style="display:none;border-top:1px solid var(--border);background:var(--surface2)">'
-        + '<div style="padding:.85rem 1.1rem">'
-          // Job details grid
-          + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem .75rem;font-size:.76rem;margin-bottom:1rem">'
-            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Job #</div><div style="font-weight:600">' + j.number + '</div></div>'
-            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Client</div><div style="font-weight:600">' + j.client + '</div></div>'
-            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Status</div>' + chipHtml(j.status) + '</div>'
-            + '<div style="grid-column:1/-1"><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Site / Scope</div><div>' + j.site + '</div></div>'
-            + (j.po ? '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">PO Number</div><div>' + j.po + '</div></div>' : '')
-            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Billing Type</div><div>' + ({tm:'T&M',fixed:'Fixed Price',mixed:'Mixed'}[j.billing]||j.billing) + '</div></div>'
-            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Province</div><div>' + ((CANADA_TAX_RATES[j.province]||{}).name||j.province||'—') + '</div></div>'
-            + '<div><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Start Date</div><div>' + (j.startDate ? fmtDate(j.startDate) : '—') + '</div></div>'
-            + (j.notes ? '<div style="grid-column:1/-1"><div style="color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.15rem">Notes</div><div style="font-size:.74rem;color:var(--muted)">' + j.notes + '</div></div>' : '')
-          + '</div>'
-          // Full charge sheet history
-          + (sheets.length ? '<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.4rem">All Charge Sheets (' + sheets.length + ')</div>'
-            + '<table style="width:100%;border-collapse:collapse;font-size:.73rem">'
-            + '<thead><tr style="border-bottom:1px solid var(--border)">'
-              + '<th style="padding:.25rem .4rem;text-align:left;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase">CS #</th>'
-              + '<th style="padding:.25rem .4rem;text-align:left;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase">Week Of</th>'
-              + '<th style="padding:.25rem .4rem;text-align:left;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase">Status</th>'
-              + (isAdmin() ? '<th style="padding:.25rem .4rem;text-align:right;color:var(--muted);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase">Total</th>' : '')
-              + '<th></th>'
-            + '</tr></thead>'
-            + '<tbody>' + sheets.map(function(cs) {
-                return '<tr style="border-bottom:1px solid rgba(255,255,255,.03)">'
-                  + '<td style="padding:.3rem .4rem;font-family:var(--mono);font-size:.7rem;color:var(--muted)">' + cs.csNum + '</td>'
-                  + '<td style="padding:.3rem .4rem">' + fmtDate(cs.weekStart) + '</td>'
-                  + '<td style="padding:.3rem .4rem">' + chipHtml(cs.status) + '</td>'
-                  + (isAdmin() ? '<td style="padding:.3rem .4rem;text-align:right;font-family:var(--mono);font-size:.73rem">' + fmtMoney(cs.total) + '</td>' : '')
-                  + '<td style="padding:.3rem .4rem">'
-                    + '<button class="btn btn-ghost btn-sm" data-view-cs="' + cs.id + '" onclick="event.stopPropagation()">View</button>'
-                    + (cs.status === 'pending' && isAdmin() ? ' <button class="btn btn-sm btn-success" data-approve-cs="' + cs.id + '" onclick="event.stopPropagation()">✓</button>' : '')
-                  + '</td>'
-                + '</tr>';
-              }).join('')
-            + '</tbody></table>' : '<div style="font-size:.75rem;color:var(--faint);padding:.5rem 0">No charge sheets yet</div>')
-        + '</div>'
-      + '</div>'
-    + '</div>';
+  var tbody=document.getElementById('jobs-tbody');
+  var empty=document.getElementById('jobs-empty');
+  if(!tbody)return;
+  if(!filtered.length){tbody.innerHTML='';if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  tbody.innerHTML=filtered.map(function(j){
+    var cs=_chargeSheets.filter(function(c){return c.jobId===j.id;});
+    var rs=_rateSheets.find(function(r){return r.id===j.rateSheetId;})||{};
+    var billingLbl={tm:'T&M',fixed:'Fixed Price',mixed:'Mixed'};
+    return '<tr>'
+      +'<td style="font-family:var(--mono);font-size:.72rem;color:var(--muted)">'+j.number+'</td>'
+      +'<td><span style="font-weight:600">'+j.client+'</span>'+(j.po?'<br><span style="font-size:.65rem;color:var(--muted)">PO: '+j.po+'</span>':'')+'</td>'
+      +'<td style="max-width:220px">'+j.site+'</td>'
+      +'<td><span class="chip chip-draft" style="font-size:.62rem">'+(billingLbl[j.billing]||j.billing)+'</span></td>'
+      +'<td style="font-size:.72rem;color:var(--muted)">'+(rs.name||'—')+'</td>'
+      +'<td>'+chipHtml(j.status)+'</td>'
+      +'<td style="font-size:.72rem">'+cs.length+' sheets'+(cs.filter(function(c){return c.status==='pending';}).length?' · <span style="color:#F59E0B">'+cs.filter(function(c){return c.status==='pending';}).length+' pending</span>':'')+'</td>'
+      +'<td>'
+        +'<button class="btn btn-ghost btn-sm" onclick="openJobModal(\''+j.id+'\')">Edit</button> '
+        +'<button class="btn btn-sm btn-secondary" onclick="openCSModal(\''+j.id+'\')">+ CS</button>'
+      +'</td>'
+    +'</tr>';
   }).join('');
 }
-
-function openNewJobFlow() {
-  _editJobId = null;
-  var modal = document.getElementById('job-modal');
-  document.getElementById('job-modal-title').textContent = 'New Job';
-  var rsSel = document.getElementById('job-rate-sheet');
-  rsSel.innerHTML = '<option value="">— Select rate sheet —</option>'
-    + _rateSheets.map(function(r){ return '<option value="' + r.id + '">' + r.name + (r.customer ? ' (' + r.customer + ')' : '') + '</option>'; }).join('');
-  ['job-client','job-number','job-site','job-fixed-price','job-po','job-notes'].forEach(function(id){
-    var el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.getElementById('job-billing').value = 'tm';
-  document.getElementById('job-rate-sheet').value = '';
-  document.getElementById('job-start').value = today();
-  var jpSel = document.getElementById('job-province');
-  if (jpSel) jpSel.innerHTML = '<option value="">— Select province —</option>' + getProvinceOptions('AB');
-  modal.classList.add('open');
-}
-
-async function saveJobAndStartCS() {
-  // Save job first, then open charge sheet
-  var id = await saveJobAndReturn();
-  if (!id) return;
-  closeModal('job-modal');
-  // Small delay to let job render
-  setTimeout(function(){ openCSModal(id); }, 150);
-}
-
-async function saveJobAndReturn() {
-  var client = document.getElementById('job-client').value.trim();
-  var site   = document.getElementById('job-site').value.trim();
-  if (!client || !site) { toast('Client and site are required', 'error'); return null; }
-  var id = _editJobId || uid();
-  var data = {
-    id, client, site,
-    number:      document.getElementById('job-number').value.trim() || nextNum('NOR-', _jobs, 'number'),
-    clientWO:    (document.getElementById('job-client-wo')||{}).value || '',
-    customerId:  (document.getElementById('job-customer-id')||{}).value || '',
-    billing:     document.getElementById('job-billing').value,
-    rateSheetId: document.getElementById('job-rate-sheet').value,
-    fixedPrice:  parseFloat(document.getElementById('job-fixed-price').value) || 0,
-    startDate:   document.getElementById('job-start').value,
-    province:    (document.getElementById('job-province')||{}).value || 'AB',
-    po:          document.getElementById('job-po').value.trim(),
-    notes:       document.getElementById('job-notes').value.trim(),
-    status:      'active',
-    created:     _editJobId ? (_jobs.find(function(j){ return j.id === _editJobId; }) || {}).created || today() : today(),
-    modified:    today(),
-  };
-  try {
-    await sbUpsert('jobs', id, data);
-    if (_editJobId) { _jobs = _jobs.map(function(j){ return j.id === id ? data : j; }); }
-    else { _jobs.unshift(data); }
-    renderJobs(); renderDashboard();
-    toast('Job saved', 'success');
-    return id;
-  } catch(e) { toast('Save failed: ' + e.message, 'error'); return null; }
-}
-
-async function closeJob(id) {
-  var j = _jobs.find(function(j){ return j.id === id; }); if (!j) return;
-  j.status = 'closed'; j.closedDate = today(); j.modified = today();
-  try {
-    await sbUpsert('jobs', id, j);
-    renderJobs(); renderDashboard();
-    toast('Job closed', 'success');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-async function reopenJob(id) {
-  var j = _jobs.find(function(j){ return j.id === id; }); if (!j) return;
-  j.status = 'active'; j.modified = today();
-  try {
-    await sbUpsert('jobs', id, j);
-    renderJobs(); renderDashboard();
-    toast('Job reopened', 'success');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
 
 function openJobModal(editId){
   _editJobId=editId||null;
@@ -1831,17 +1542,222 @@ function openJobModal(editId){
   modal.classList.add('open');
 }
 
-async function saveJob() {
-  await saveJobAndReturn();
-  closeModal('job-modal');
+async function saveJob(){
+  var client=document.getElementById('job-client').value.trim();
+  var site  =document.getElementById('job-site').value.trim();
+  if(!client||!site){toast('Client and site are required','error');return;}
+  var id=_editJobId||uid();
+  var data={
+    id,client,site,
+    number: document.getElementById('job-number').value.trim() || nextNum('NOR-',_jobs,'number'),
+    billing: document.getElementById('job-billing').value,
+    rateSheetId: document.getElementById('job-rate-sheet').value,
+    fixedPrice: parseFloat(document.getElementById('job-fixed-price').value)||0,
+    startDate: document.getElementById('job-start').value,
+    po: document.getElementById('job-po').value.trim(),
+    notes: document.getElementById('job-notes').value.trim(),
+    status: 'active',
+    created: _editJobId ? (_jobs.find(function(j){return j.id===_editJobId;})||{}).created||today() : today(),
+    modified: today(),
+  };
+  try{
+    await sbUpsert('jobs', id, data);
+    if(_editJobId){ _jobs=_jobs.map(function(j){return j.id===id?data:j;}); }
+    else { _jobs.unshift(data); }
+    closeModal('job-modal');
+    renderJobs();
+    renderDashboard();
+    toast('Job saved','success');
+  }catch(e){ toast('Save failed: '+e.message,'error'); }
 }
 
+// ── Work Orders ─────────────────────────────────────────────────────────────
+function openCSModal(preJobId){
+  _editCSId=null;
+  _csExtraCount=0;
+  document.getElementById('cs-modal-title').textContent='New Work Order';
+  // Populate job select
+  var jobSel=document.getElementById('cs-job');
+  jobSel.innerHTML='<option value="">— Select job —</option>'
+    +_jobs.filter(function(j){return j.status==='active';})
+          .map(function(j){return'<option value="'+j.id+'">'+(j.client?j.client+' — ':'')+j.site.slice(0,40)+'</option>';}).join('');
+  if(preJobId) jobSel.value=preJobId;
+  document.getElementById('cs-technician').value='';
+  document.getElementById('cs-week-start').value=today();
+  document.getElementById('cs-notes').value='';
+  document.getElementById('cs-extras-list').innerHTML='';
+  buildCSDayGrid();
+  document.getElementById('cs-modal').classList.add('open');
+}
+
+function buildCSDayGrid(){
+  var weekStart=document.getElementById('cs-week-start').value||today();
+  var days=getWeekDays(weekStart);
+  var jobId=document.getElementById('cs-job').value;
+  var job=_jobs.find(function(j){return j.id===jobId;})||{};
+  var rs=_rateSheets.find(function(r){return r.id===job.rateSheetId;})||{};
+  var labourCats=(rs.labour||[]);
+  var labourOptions='<option value="">— Select category —</option>'
+    +labourCats.map(function(l){return'<option value="'+l.name+'">'+l.name+' ('+fmtMoney(l.stRate)+'/day)</option>';}).join('');
+
+  var grid=document.getElementById('cs-day-grid');
+  // Keep the header row (first 7 children)
+  var headerCols=[];
+  for(var i=0;i<7;i++) headerCols.push(grid.children[i]);
+  grid.innerHTML='';
+  headerCols.forEach(function(c){grid.appendChild(c);});
+
+  days.forEach(function(day,idx){
+    // Day label
+    var d=document.createElement('div');
+    d.style.cssText='font-size:.72rem;font-weight:600;padding:.2rem .3rem;white-space:nowrap';
+    d.textContent=day.name+' '+day.date.slice(5);
+    grid.appendChild(d);
+    // Description
+    var desc=document.createElement('input');
+    desc.type='text'; desc.id='cs-day-desc-'+idx; desc.placeholder='Work performed…';
+    desc.addEventListener('input',calcCSTotal);
+    grid.appendChild(desc);
+    // ST hours
+    var st=document.createElement('input');
+    st.type='number'; st.id='cs-day-st-'+idx; st.placeholder='0'; st.min='0'; st.step='0.5';
+    st.addEventListener('input',calcCSTotal);
+    grid.appendChild(st);
+    // OT hours
+    var ot=document.createElement('input');
+    ot.type='number'; ot.id='cs-day-ot-'+idx; ot.placeholder='0'; ot.min='0'; ot.step='0.5';
+    ot.addEventListener('input',calcCSTotal);
+    grid.appendChild(ot);
+    // DT hours
+    var dt=document.createElement('input');
+    dt.type='number'; dt.id='cs-day-dt-'+idx; dt.placeholder='0'; dt.min='0'; dt.step='0.5';
+    dt.addEventListener('input',calcCSTotal);
+    grid.appendChild(dt);
+    // Equipment
+    var eq=document.createElement('input');
+    eq.type='text'; eq.id='cs-day-eq-'+idx; eq.placeholder='Equipment…';
+    grid.appendChild(eq);
+    // Row total
+    var total=document.createElement('div');
+    total.id='cs-day-total-'+idx;
+    total.style.cssText='font-family:var(--mono);font-size:.72rem;text-align:right;padding:.2rem .3rem;color:var(--muted)';
+    total.textContent='$0.00';
+    grid.appendChild(total);
+  });
+  calcCSTotal();
+}
 
 function onCSJobChange(){ buildCSDayGrid(); }
 
-// calcCSTotal replaced above
+function calcCSTotal(){
+  var jobId=document.getElementById('cs-job').value;
+  var job=_jobs.find(function(j){return j.id===jobId;})||{};
+  var rs=_rateSheets.find(function(r){return r.id===job.rateSheetId;})||{};
+  var stRate=(rs.labour&&rs.labour[0])?rs.labour[0].stRate||0:0;
+  var otRate=(rs.labour&&rs.labour[0])?rs.labour[0].otRate||stRate*1.5:0;
+  var dtRate=(rs.labour&&rs.labour[0])?rs.labour[0].dtRate||stRate*2:0;
 
-// saveCS replaced above
+  var labourTotal=0;
+  for(var i=0;i<7;i++){
+    var stEl=document.getElementById('cs-day-st-'+i);
+    var otEl=document.getElementById('cs-day-ot-'+i);
+    var dtEl=document.getElementById('cs-day-dt-'+i);
+    var totEl=document.getElementById('cs-day-total-'+i);
+    if(!stEl)continue;
+    var st=parseFloat(stEl.value)||0;
+    var ot=parseFloat(otEl.value)||0;
+    var dt=parseFloat(dtEl.value)||0;
+    var rowTotal=st*stRate+ot*otRate+dt*dtRate;
+    labourTotal+=rowTotal;
+    if(totEl)totEl.textContent=fmtMoney(rowTotal);
+  }
+
+  // Extras
+  var extrasTotal=0;
+  document.querySelectorAll('.cs-extra-amount').forEach(function(el){
+    extrasTotal+=parseFloat(el.value)||0;
+  });
+
+  var grandTotal=labourTotal+extrasTotal;
+  var ltEl=document.getElementById('cs-total-labour');
+  var etEl=document.getElementById('cs-total-expenses');
+  var atEl=document.getElementById('cs-total-all');
+  if(ltEl)ltEl.textContent=fmtMoney(labourTotal);
+  if(etEl)etEl.textContent=fmtMoney(extrasTotal);
+  if(atEl)atEl.textContent=fmtMoney(grandTotal);
+  return{labour:labourTotal,expenses:extrasTotal,total:grandTotal};
+}
+
+function addCSExtra(){
+  _csExtraCount++;
+  var idx=_csExtraCount;
+  var list=document.getElementById('cs-extras-list');
+  var row=document.createElement('div');
+  row.id='cs-extra-'+idx;
+  row.style.cssText='display:grid;grid-template-columns:1fr 100px 24px;gap:.4rem;align-items:center;margin-bottom:.3rem';
+  row.innerHTML='<input class="form-input" placeholder="Description (e.g. Fuel, mileage, PPE)" style="font-size:.75rem;padding:.3rem .5rem">'
+    +'<input class="form-input cs-extra-amount" type="number" placeholder="0.00" style="font-size:.75rem;padding:.3rem .5rem;font-family:var(--mono)" oninput="calcCSTotal()">'
+    +'<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-extra-'+idx+'\').remove();calcCSTotal()" style="padding:.2rem .4rem">✕</button>';
+  list.appendChild(row);
+}
+
+async function saveCS(status){
+  var jobId=document.getElementById('cs-job').value;
+  var tech =document.getElementById('cs-technician').value.trim();
+  var weekStart=document.getElementById('cs-week-start').value;
+  if(!jobId||!tech||!weekStart){toast('Job, technician, and week are required','error');return;}
+  var job=_jobs.find(function(j){return j.id===jobId;})||{};
+
+  var days=[];
+  for(var i=0;i<7;i++){
+    var stEl=document.getElementById('cs-day-st-'+i);
+    if(!stEl)continue;
+    var d=getWeekDays(weekStart)[i];
+    var st=parseFloat(document.getElementById('cs-day-st-'+i).value)||0;
+    var ot=parseFloat(document.getElementById('cs-day-ot-'+i).value)||0;
+    var dt=parseFloat(document.getElementById('cs-day-dt-'+i).value)||0;
+    if(st||ot||dt){
+      days.push({
+        date:d.date, day:d.name,
+        description:(document.getElementById('cs-day-desc-'+i)||{}).value||'',
+        st,ot,dt,
+        equipment:(document.getElementById('cs-day-eq-'+i)||{}).value||'',
+      });
+    }
+  }
+
+  var extras=[];
+  document.querySelectorAll('#cs-extras-list > div').forEach(function(row){
+    var inputs=row.querySelectorAll('input');
+    if(inputs[0]&&inputs[1]&&(parseFloat(inputs[1].value)||0)>0){
+      extras.push({description:inputs[0].value,amount:parseFloat(inputs[1].value)||0});
+    }
+  });
+
+  var totals=calcCSTotal();
+  var id=_editCSId||uid();
+  var data={
+    id, jobId, client:job.client||'', site:job.site||'',
+    csNum: _editCSId ? (_chargeSheets.find(function(c){return c.id===_editCSId;})||{}).csNum||nextNum('CS-',_chargeSheets,'csNum')
+                     : nextNum('CS-',_chargeSheets,'csNum'),
+    technician:tech, weekStart,
+    days, extras,
+    labour:totals.labour, expenses:totals.expenses, total:totals.total,
+    notes:document.getElementById('cs-notes').value.trim(),
+    status,
+    created: _editCSId?(_chargeSheets.find(function(c){return c.id===_editCSId;})||{}).created||today():today(),
+    modified:today(),
+    rateSheetId:job.rateSheetId||'',
+  };
+  try{
+    await sbUpsert('charge_sheets',id,data);
+    if(_editCSId){_chargeSheets=_chargeSheets.map(function(c){return c.id===id?data:c;});}
+    else{_chargeSheets.unshift(data);}
+    closeModal('cs-modal');
+    renderCSList(); renderDashboard(); updatePendingBadge();
+    toast(status==='pending'?'Charge sheet submitted for approval':'Draft saved','success');
+  }catch(e){toast('Save failed: '+e.message,'error');}
+}
 
 function renderCSList(){
   var filter=(document.getElementById('cs-filter-status')||{}).value||'';
@@ -1860,11 +1776,11 @@ function renderCSList(){
       +'<td style="font-weight:600">'+c.technician+'</td>'
       +'<td style="font-size:.72rem">'+fmtDate(c.weekStart)+'</td>'
       +'<td style="text-align:center;font-size:.72rem">'+daysWorked+'</td>'
-      +'<td class="inv-col" style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(c.total)+'</td>'
+      +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(c.total)+'</td>'
       +'<td>'+chipHtml(c.status)+'</td>'
       +'<td style="white-space:nowrap">'
         +'<button class="btn btn-ghost btn-sm" onclick="viewCS(\''+c.id+'\')">View</button>'
-        +(c.status==='pending'&&isAdmin()?' <button class="btn btn-sm btn-success" onclick="approveCS(\''+c.id+'\')">✓ Approve</button>':'')
+        +(c.status==='pending'?' <button class="btn btn-sm btn-success" onclick="approveCS(\''+c.id+'\')">✓ Approve</button>':'')
         +(c.status==='approved'?' <button class="btn btn-sm btn-secondary" onclick="openInvoiceModal(\''+c.client+'\')">Invoice</button>':'')
       +'</td>'
     +'</tr>';
@@ -1892,7 +1808,7 @@ function viewCS(id){
       var amt=d.st*stRate+d.ot*otRate+d.dt*dtRate;
       return '<tr>'
         +'<td style="white-space:nowrap;font-size:.72rem">'+d.day+' '+fmtDate(d.date)+'</td>'
-        +'<td style="font-size:.72rem">'+(d.category||d.description||'—')+'</td>'
+        +'<td style="font-size:.72rem">'+d.description+'</td>'
         +'<td style="text-align:center;font-family:var(--mono);font-size:.72rem">'+d.st+'</td>'
         +'<td style="text-align:center;font-family:var(--mono);font-size:.72rem">'+d.ot+'</td>'
         +'<td style="text-align:center;font-family:var(--mono);font-size:.72rem">'+d.dt+'</td>'
@@ -1916,10 +1832,8 @@ function viewCS(id){
   var footer=document.getElementById('cs-view-footer');
   footer.innerHTML='<button class="btn btn-ghost" onclick="closeModal(\'cs-view-modal\')">Close</button>';
   if(c.status==='draft') footer.innerHTML+=' <button class="btn btn-secondary" onclick="editCS(\''+id+'\')">Edit</button> <button class="btn btn-primary" onclick="submitCS(\''+id+'\')">Submit for Approval</button>';
-  if(c.status==='pending'&&isAdmin()) footer.innerHTML+=' <button class="btn btn-success" onclick="approveCS(\''+id+'\')">✓ Approve</button>';
+  if(c.status==='pending') footer.innerHTML+=' <button class="btn btn-success" onclick="approveCS(\''+id+'\')">✓ Approve</button>';
   if(c.status==='approved') footer.innerHTML+=' <button class="btn btn-secondary" onclick="openInvoiceModal(\''+c.client+'\');closeModal(\'cs-view-modal\')">Generate Invoice</button>';
-  if(c.status==='invoiced') footer.innerHTML+=' <button class="btn btn-secondary" onclick="reverseCSToApproved(\''+id+'\')">↩ Return to Approved</button>';
-  if(c.status==='approved') footer.innerHTML+=' <button class="btn btn-secondary" onclick="reverseCSFromApproved(\''+id+'\')">↩ Back to Pending</button>';
 
   document.getElementById('cs-view-modal').classList.add('open');
 }
@@ -2094,30 +2008,10 @@ function openInvoiceModal(preClient){
   if(preClient) sel.value=preClient;
   document.getElementById('inv-date').value=today();
   document.getElementById('inv-notes').value='';
-  // Populate province dropdown — default to AB (where Nortech is based)
-  var provSel = document.getElementById('inv-province');
-  if (provSel) {
-    provSel.innerHTML = '<option value="">— Select province —</option>' + getProvinceOptions('AB');
-    provSel.value = 'AB';
-  }
-  document.getElementById('inv-tax-rate').value = '5';
-  var taxLabel = document.getElementById('inv-tax-label');
-  if (taxLabel) taxLabel.textContent = 'GST 5%';
+  document.getElementById('inv-tax-rate').value='13';
   document.getElementById('inv-cs-selector').innerHTML='<div style="color:var(--muted);font-size:.75rem;padding:.5rem">Select a client first</div>';
-  // Populate rate sheet dropdown
-  var rsSel = document.getElementById('inv-rate-sheet');
-  if (rsSel) rsSel.innerHTML = '<option value="">— Select rate sheet —</option>'
-    + _rateSheets.map(function(r){ return '<option value="'+r.id+'">'+r.name+(r.customer?' ('+r.customer+')':'')+'</option>'; }).join('');
   updateInvTotals();
-  if(preClient) {
-    loadApprovedCS();
-    // Pre-select province from job if available
-    var clientJob = _jobs.find(function(j){ return j.client === preClient && j.status === 'active'; });
-    if (clientJob && clientJob.province) {
-      var provSel2 = document.getElementById('inv-province');
-      if (provSel2) { provSel2.value = clientJob.province; onProvinceChange(); }
-    }
-  }
+  if(preClient) loadApprovedCS();
   document.getElementById('inv-modal').classList.add('open');
 }
 
@@ -2127,7 +2021,7 @@ function loadApprovedCS(){
   if(!client){sel.innerHTML='<div style="color:var(--muted);font-size:.75rem;padding:.5rem">Select a client first</div>';return;}
   var approved=_chargeSheets.filter(function(c){return c.client===client&&c.status==='approved';});
   if(!approved.length){
-    sel.innerHTML='<div style="color:var(--muted);font-size:.75rem;padding:.5rem">No approved charge sheets for this client</div>';
+    sel.innerHTML='<div style="color:var(--muted);font-size:.75rem;padding:.5rem">No approved work orders for this client</div>';
     return;
   }
   sel.innerHTML=approved.map(function(c){
@@ -2140,154 +2034,26 @@ function loadApprovedCS(){
 }
 
 function updateInvTotals(){
-  var rsId = (document.getElementById('inv-rate-sheet')||{}).value || '';
-  var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || {};
-  var selected = Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){
-    // Try work orders first, fall back to charge sheets
-    return _jobs.find(function(j){ return j.id === el.value; })
-        || _chargeSheets.find(function(c){ return c.id === el.value; }) || {};
+  var selected=Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){
+    return _chargeSheets.find(function(c){return c.id===el.value;})||{};
   });
-  // Price each charge sheet using selected rate sheet
-  var subtotal = selected.reduce(function(sum, cs) {
-    var priced = priceChargeSheet(cs, rs);
-    return sum + (priced > 0 ? priced : (cs.total || 0));
-  }, 0);
-  var discount = parseFloat((document.getElementById('inv-discount')||{}).value)||0;
-  var taxable  = subtotal - discount;
-  var taxRate  = (parseFloat((document.getElementById('inv-tax-rate')||{}).value)||0)/100;
-  var tax      = taxable * taxRate;
-  var total    = taxable + tax;
-  var els = {subtotal:document.getElementById('inv-subtotal'),tax:document.getElementById('inv-tax'),total:document.getElementById('inv-total')};
-  if(els.subtotal) els.subtotal.textContent = fmtMoney(subtotal);
-  if(els.tax)      els.tax.textContent      = fmtMoney(tax);
-  if(els.total)    els.total.textContent    = fmtMoney(total);
-  // Show rate preview
-  var preview = document.getElementById('inv-rate-preview');
-  if (preview) preview.style.display = (rsId && selected.length) ? 'block' : 'none';
-}
-
-// Price a charge sheet using a rate sheet — handles both old and new CS formats
-function priceChargeSheet(cs, rs) {
-  if (!cs) return 0;
-  var total = 0;
-  var hasNewFormat = cs.labourRows && cs.labourRows.length > 0;
-  var hasOldFormat = cs.days && cs.days.length > 0;
-
-  if (hasNewFormat) {
-    // NEW tabbed format — price each section
-    if (rs && rs.labour) {
-      (cs.labourRows || []).forEach(function(row) {
-        var cat = (rs.labour || []).find(function(l){ return l.name === row.category; }) || {};
-        var stRate = cat.stRate || 0;
-        var otRate = cat.otRate || stRate * 1.5;
-        var dtRate = cat.dtRate || stRate * 2;
-        var nsRate = stRate * 1.15;
-        // Support both old (st/ot/dt/ns) and new WO (regHrs/otHrs/dtHrs/nightHrs) formats
-        var reg = row.regHrs !== undefined ? row.regHrs : (row.st||0);
-        var ot  = row.otHrs  !== undefined ? row.otHrs  : (row.ot||0);
-        var dt  = row.dtHrs  !== undefined ? row.dtHrs  : (row.dt||0);
-        var ns  = row.nightHrs!== undefined ? row.nightHrs : (row.ns||0);
-        total += reg*stRate + ot*otRate + dt*dtRate + ns*nsRate;
-      });
-      (cs.equipRows || []).forEach(function(row) {
-        var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
-        total += (row.qty||0) * (item.rate||0);
-      });
-      (cs.conRows || []).forEach(function(row) {
-        var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
-        total += (row.qty||0) * (item.rate||0);
-      });
-      (cs.filmRows || []).forEach(function(row) {
-        var item = (rs.equipment || []).find(function(e){
-          return row.type && e.name && row.type.toLowerCase().includes(e.name.toLowerCase().slice(0,12));
-        }) || {};
-        total += (row.qty||0) * (item.rate||0);
-      });
-    }
-    var travel = cs.travel || {};
-    total += (travel.km||0) * (travel.kmRate||1.20);
-    total += (travel.loaTechs||0) * (travel.loaDays||0) * (travel.loaRate||70);
-    total += (travel.flights||0) + (travel.hotels||0);
-    (cs.otherRows || []).forEach(function(row){ total += row.amt||0; });
-    // If pricing produced 0 (no rate sheet match), fall back to saved total
-    return total > 0 ? total : (cs.total || 0);
-
-  } else if (hasOldFormat) {
-    // OLD day-grid format
-    var hasCategories = (cs.days || []).some(function(d){ return d.category; });
-    if (rs && rs.labour && hasCategories) {
-      // Has categories — price from rate sheet
-      (cs.days || []).forEach(function(day) {
-        var cat = (rs.labour || []).find(function(l){ return l.name === (day.category || day.description); }) || {};
-        var stRate = cat.stRate || day.stRate || 0;
-        var otRate = cat.otRate || day.otRate || stRate * 1.5;
-        var dtRate = cat.dtRate || day.dtRate || stRate * 2;
-        total += (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
-      });
-      (cs.extras || []).forEach(function(e){ total += e.amount||0; });
-      return total > 0 ? total : (cs.total || 0);
-    } else {
-      // No categories or no rate sheet — use saved total
-      return cs.total || 0;
-    }
-  }
-
-  // No row data at all — use saved total
-  return cs.total || 0;
-}
-
-
-
-function priceChargeSheet(cs, rs) {
-  if (!rs || !rs.labour) return cs.total || 0; // fallback to saved total
-  var total = 0;
-  // Labour rows
-  (cs.labourRows || []).forEach(function(row) {
-    var cat = (rs.labour || []).find(function(l){ return l.name === row.category; }) || {};
-    var stRate = cat.stRate || 0;
-    var otRate = cat.otRate || stRate * 1.5;
-    var dtRate = cat.dtRate || stRate * 2;
-    var nsRate = stRate * 1.15;
-    total += (row.st||0)*stRate + (row.ot||0)*otRate + (row.dt||0)*dtRate + (row.ns||0)*nsRate;
-  });
-  // Equipment rows
-  (cs.equipRows || []).forEach(function(row) {
-    var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
-    total += (row.qty||0) * (item.rate||0);
-  });
-  // Consumable rows
-  (cs.conRows || []).forEach(function(row) {
-    var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
-    total += (row.qty||0) * (item.rate||0);
-  });
-  // Film rows
-  (cs.filmRows || []).forEach(function(row) {
-    var item = (rs.equipment || []).find(function(e){
-      return row.type && e.name && row.type.toLowerCase().includes(e.name.toLowerCase().slice(0,12));
-    }) || {};
-    total += (row.qty||0) * (item.rate||0);
-  });
-  // Travel
-  var travel = cs.travel || {};
-  total += (travel.km||0) * (travel.kmRate||1.20);
-  total += (travel.loaTechs||0) * (travel.loaDays||0) * (travel.loaRate||70);
-  total += (travel.flights||0) + (travel.hotels||0);
-  // Other
-  (cs.otherRows || []).forEach(function(row){ total += row.amt||0; });
-  return total;
+  var subtotal=selected.reduce(function(s,c){return s+(c.total||0);},0);
+  var taxRate=(parseFloat((document.getElementById('inv-tax-rate')||{}).value)||0)/100;
+  var tax=subtotal*taxRate;
+  var total=subtotal+tax;
+  var els={subtotal:document.getElementById('inv-subtotal'),tax:document.getElementById('inv-tax'),total:document.getElementById('inv-total')};
+  if(els.subtotal)els.subtotal.textContent=fmtMoney(subtotal);
+  if(els.tax)els.tax.textContent=fmtMoney(tax);
+  if(els.total)els.total.textContent=fmtMoney(total);
 }
 
 async function saveInvoice(status){
   var client=document.getElementById('inv-client').value;
   if(!client){toast('Select a client','error');return;}
   var selectedCSIds=Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){return el.value;});
-  if(!selectedCSIds.length){toast('Select at least one charge sheet','error');return;}
-  var selectedCS=selectedCSIds.map(function(id){
-    return _jobs.find(function(j){return j.id===id;}) || _chargeSheets.find(function(c){return c.id===id;}) || {};
-  });
-  var rsId = (document.getElementById('inv-rate-sheet')||{}).value || '';
-  var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || {};
-  var subtotal = selectedCS.reduce(function(s,c){ return s + priceChargeSheet(c, rs); }, 0);
+  if(!selectedCSIds.length){toast('Select at least one work order','error');return;}
+  var selectedCS=selectedCSIds.map(function(id){return _chargeSheets.find(function(c){return c.id===id;})||{};});
+  var subtotal=selectedCS.reduce(function(s,c){return s+(c.total||0);},0);
   var taxRate=parseFloat(document.getElementById('inv-tax-rate').value)||0;
   var tax=subtotal*taxRate/100;
   var total=subtotal+tax;
@@ -2296,31 +2062,21 @@ async function saveInvoice(status){
     id, client, status,
     invNum:nextNum('INV-',_invoices,'invNum'),
     invDate:document.getElementById('inv-date').value,
-    province: (document.getElementById('inv-province')||{}).value || 'AB',
-    provinceName: (CANADA_TAX_RATES[(document.getElementById('inv-province')||{}).value]||{}).name || '',
-    taxLabel: (CANADA_TAX_RATES[(document.getElementById('inv-province')||{}).value]||{}).label || '',
-    rateSheetId: rsId,
-    rateSheetName: rs.name || '',
     terms:document.getElementById('inv-terms').value,
     taxRate,
     chargeSheetIds:selectedCSIds,
     chargeSheets:selectedCS.map(function(c){return{id:c.id,csNum:c.csNum,technician:c.technician,weekStart:c.weekStart,total:c.total};}),
     subtotal, tax, total,
     notes:document.getElementById('inv-notes').value.trim(),
-    discount: parseFloat((document.getElementById('inv-discount')||{}).value)||0,
-    salesperson: (document.getElementById('inv-salesperson')||{}).value||'',
     created:today(), modified:today(),
   };
   try{
     await sbUpsert('invoices',id,data);
     // Mark work orders as invoiced
-    await Promise.all(selectedCSIds.map(async function(woId){
-      // Try jobs (work orders) first
-      var wo = _jobs.find(function(j){ return j.id === woId; });
-      if (wo) { wo.status='invoiced'; wo.invoiceId=id; wo.modified=today(); await sbUpsert('jobs',woId,wo); return; }
-      // Fall back to charge sheets
-      var cs = _chargeSheets.find(function(c){ return c.id === woId; });
-      if (cs) { cs.status='invoiced'; cs.invoiceId=id; cs.modified=today(); await sbUpsert('charge_sheets',woId,cs); }
+    await Promise.all(selectedCSIds.map(async function(csId){
+      var cs=_chargeSheets.find(function(c){return c.id===csId;}); if(!cs)return;
+      cs.status='invoiced'; cs.invoiceId=id; cs.modified=today();
+      await sbUpsert('charge_sheets',csId,cs);
     }));
     _invoices.unshift(data);
     closeModal('inv-modal');
@@ -2352,15 +2108,13 @@ function renderInvoices(){
       +'<td style="font-weight:600">'+i.client+'</td>'
       +'<td style="font-size:.72rem;color:var(--muted)">'+dateRange+'</td>'
       +'<td style="text-align:center;font-size:.72rem">'+((i.chargeSheetIds||[]).length)+'</td>'
-      +(isAdmin()?'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.subtotal)+'</td>':'')
+      +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.subtotal)+'</td>'
       +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.tax)+'</td>'
       +'<td style="font-family:var(--mono);font-size:.75rem;font-weight:700">'+fmtMoney(i.total)+'</td>'
       +'<td>'+chipHtml(i.status)+'</td>'
       +'<td style="white-space:nowrap">'
         +'<button class="btn btn-ghost btn-sm" onclick="viewInvoice(\''+i.id+'\')">View</button>'
-        +(i.status==='draft'?' <button class="btn btn-sm btn-secondary" onclick="markInvSent(\''+i.id+'\')">Mark Sent</button>':'')
         +(i.status==='sent'?' <button class="btn btn-sm btn-success" onclick="markPaid(\''+i.id+'\')">✓ Paid</button>':'')
-        +(i.status!=='void'&&i.status!=='paid'?' <button class="btn btn-sm" style="background:rgba(185,28,28,.15);color:#EF4444;border-color:rgba(185,28,28,.3)" onclick="markVoid(\''+i.id+'\')">Void</button>':'')
       +'</td>'
     +'</tr>';
   }).join('');
@@ -2377,241 +2131,31 @@ function viewInvoice(id){
     d.setDate(d.getDate()+days);
     dueDate=d.toISOString().slice(0,10);
   }
-  // Find the job for this invoice to get WO numbers
-  var invJob = _jobs.find(function(j){
-    var cs = _chargeSheets.find(function(cs){ return (inv.chargeSheetIds||[]).indexOf(cs.id)>-1 && cs.jobId===j.id; });
-    return !!cs;
-  }) || {};
-
-  // Build line items from charge sheets with full detail
-  var lineItems = '';
-  var invRS = _rateSheets.find(function(r){ return r.id===inv.rateSheetId; }) || {};
-  (inv.chargeSheets||[]).forEach(function(cs) {
-    var fullCS = _chargeSheets.find(function(s){ return s.id===cs.id; }) || cs;
-    var rs = invRS;
-    var hasNewFormat = fullCS.labourRows && fullCS.labourRows.length > 0;
-
-    // OLD format fallback — days array
-    if (!hasNewFormat && (fullCS.days || []).length > 0) {
-      // Check if days have categories for rate-sheet pricing
-      var daysHaveCats = (fullCS.days||[]).some(function(d){ return d.category; });
-      if (daysHaveCats) {
-        (fullCS.days || []).forEach(function(day) {
-          if (!day.st && !day.ot && !day.dt) return;
-          var cat = (rs.labour||[]).find(function(l){ return l.name===(day.category||day.description); }) || {};
-          var stRate = cat.stRate || day.stRate || 0;
-          var otRate = cat.otRate || day.otRate || stRate*1.5;
-          var dtRate = cat.dtRate || day.dtRate || stRate*2;
-          var hrs = [];
-          if (day.st) hrs.push(day.st+' ST');
-          if (day.ot) hrs.push(day.ot+' OT');
-          if (day.dt) hrs.push(day.dt+' DT');
-          var rowAmt = (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
-          var desc = day.category || day.description || 'NDT Services';
-          lineItems += '<tr>'
-            +'<td style="padding:.35rem .5rem;font-size:10px">'+desc
-              +(fullCS.technician ? '<br><span style="color:#666;font-size:9px">'+day.day+' '+day.date+' — '+fullCS.technician+'</span>' : '')
-            +'</td>'
-            +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
-            +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">1</td>'
-            +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+hrs.join(', ')+'</td>'
-            +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(stRate)+'</td>'
-            +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(rowAmt)+'</td>'
-            +'</tr>';
-        });
-      } else {
-        // No categories — show a summary line per CS using saved total
-        var csDesc = fullCS.site || fullCS.client || 'NDT Services';
-        var techLine = fullCS.technician ? ' — '+fullCS.technician : '';
-        var wkLine = fullCS.weekStart ? ' (w/o '+fullCS.weekStart+')' : '';
-        lineItems += '<tr>'
-          +'<td style="padding:.35rem .5rem;font-size:10px">'+csDesc+techLine+wkLine+'</td>'
-          +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
-          +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">1</td>'
-          +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">As quoted</td>'
-          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">—</td>'
-          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(fullCS.total||0)+'</td>'
-          +'</tr>';
-      }
-      (fullCS.extras || []).forEach(function(e) {
-        lineItems += '<tr>'
-          +'<td style="padding:.35rem .5rem;font-size:10px">'+e.description+'</td>'
-          +'<td colspan="3"></td><td></td>'
-          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(e.amount||0)+'</td>'
-          +'</tr>';
-      });
-    }
-
-    // NEW format — labour rows
-    (fullCS.labourRows||[]).forEach(function(row) {
-      if (!row.st && !row.ot && !row.dt && !row.ns) return;
-      var cat = (rs.labour||[]).find(function(l){ return l.name===row.category; }) || {};
-      var hrs = [];
-      if (row.st) hrs.push(row.st+' ST');
-      if (row.ot) hrs.push(row.ot+' OT');
-      if (row.dt) hrs.push(row.dt+' DT');
-      if (row.ns) hrs.push(row.ns+' Night');
-      var hrsStr = hrs.join(', ');
-      var rowAmt = (row.st||0)*(cat.stRate||0)+(row.ot||0)*(cat.otRate||0)+(row.dt||0)*(cat.dtRate||0)+(row.ns||0)*((cat.stRate||0)*1.15);
-      lineItems += '<tr>'
-        +'<td style="padding:.35rem .5rem;font-size:10px">'+(row.category||'')+'<br><span style="color:#666;font-size:9px">'+row.dayLabel+' — '+row.technician+'</span></td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">1</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+hrsStr+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(cat.stRate||0)+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(rowAmt)+'</td>'
-        +'</tr>';
-    });
-    // Equipment
-    (fullCS.equipRows||[]).forEach(function(row) {
-      if (!row.item && !row.qty) return;
-      var item = (rs.equipment||[]).find(function(e){ return e.name===row.item; })||{};
-      var amt = (row.qty||0)*(item.rate||0);
-      lineItems += '<tr>'
-        +'<td style="padding:.35rem .5rem;font-size:10px">'+row.item+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+row.qty+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+row.unit+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(item.rate||0)+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(amt)+'</td>'
-        +'</tr>';
-    });
-    // Consumables
-    (fullCS.conRows||[]).forEach(function(row) {
-      if (!row.item && !row.qty) return;
-      var item = (rs.equipment||[]).find(function(e){ return e.name===row.item; })||{};
-      var amt = (row.qty||0)*(item.rate||0);
-      lineItems += '<tr>'
-        +'<td style="padding:.35rem .5rem;font-size:10px">'+row.item+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+row.qty+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+row.unit+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(item.rate||0)+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(amt)+'</td>'
-        +'</tr>';
-    });
-    // Travel
-    var travel = fullCS.travel || {};
-    if (travel.km) {
-      lineItems += '<tr><td style="padding:.35rem .5rem;font-size:10px">MOB/DEMOB — Kilometres</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+travel.km+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">km</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(travel.kmRate||1.20)+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl((travel.km||0)*(travel.kmRate||1.20))+'</td>'
-        +'</tr>';
-    }
-    if (travel.loaTechs && travel.loaDays) {
-      lineItems += '<tr><td style="padding:.35rem .5rem;font-size:10px">LOA — '+travel.loaTechs+' tech(s) × '+travel.loaDays+' day(s)</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">1</td>'
-        +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">lump</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl((travel.loaTechs||0)*(travel.loaDays||0)*(travel.loaRate||70))+'</td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl((travel.loaTechs||0)*(travel.loaDays||0)*(travel.loaRate||70))+'</td>'
-        +'</tr>';
-    }
-    // Other
-    (fullCS.otherRows||[]).forEach(function(row) {
-      if (!row.desc && !row.amt) return;
-      lineItems += '<tr>'
-        +'<td style="padding:.35rem .5rem;font-size:10px">'+row.desc+'</td>'
-        +'<td colspan="3"></td>'
-        +'<td></td>'
-        +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(row.amt||0)+'</td>'
-        +'</tr>';
-    });
-  });
-
-  // Recalculate subtotal using rate sheet if available, else use saved value
-  var invSubtotal = inv.subtotal || 0;
-  if ((inv.chargeSheetIds||[]).length > 0) {
-    var recalc = (inv.chargeSheets||[]).reduce(function(sum, cs) {
-      var fullCS = _chargeSheets.find(function(s){ return s.id===cs.id; }) || cs;
-      return sum + priceChargeSheet(fullCS, invRS);
-    }, 0);
-    // Use recalc if it produced a value, otherwise keep saved subtotal
-    if (recalc > 0) invSubtotal = recalc;
-  }
-  var discount = inv.discount || 0;
-  var taxable  = invSubtotal - discount;
-  var invTax   = taxable * ((inv.taxRate||0)/100);
-  var invTotal = taxable + invTax;
-
-  var html = '<div class="inv-preview">'
-    // Header — logo left, INVOICE right
-    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem">'
-      + '<div>'
-        + '<div style="font-size:22px;font-weight:900;color:#C0392B;line-height:1;margin-bottom:.2rem">N<span style="border-radius:50%;background:#C0392B;color:#fff;padding:0 3px;font-size:16px">O</span>RTECH</div>'
-        + '<div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#333;margin-bottom:.15rem">ADVANCED NDT</div>'
-        + '<div style="font-size:8px;color:#999;font-style:italic">Your Advanced NDT and Engineering Specialists</div>'
-        + '<div style="font-size:9px;color:#666;margin-top:.2rem">'+NORTECH.address+'</div>'
-        + '<div style="font-size:9px;color:#666">Phone: '+NORTECH.phone+' · Fax: '+NORTECH.fax+'</div>'
-        + '<div style="font-size:9px;color:#666">'+NORTECH.web+'</div>'
-      + '</div>'
-      + '<div style="text-align:right">'
-        + '<div style="font-size:22px;font-weight:900;letter-spacing:2px">INVOICE</div>'
-        + '<div style="font-size:9px;color:#666;margin-top:.4rem">Page: 1</div>'
-        + '<div style="font-size:10px;margin-top:.5rem"><span style="color:#666">Invoice Number: </span><strong>'+inv.invNum+'</strong></div>'
-        + '<div style="font-size:10px"><span style="color:#666">Invoice Date: </span>'+inv.invDate+'</div>'
-      + '</div>'
-    + '</div>'
-    // Bill To / Ship To
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;font-size:10px">'
-      + '<div><div style="font-size:9px;color:#666;font-weight:700;margin-bottom:.2rem">Bill To:</div><strong>'+inv.client+'</strong><br>'+(invJob.site||'')+'</div>'
-      + '<div><div style="font-size:9px;color:#666;font-weight:700;margin-bottom:.2rem">Ship To:</div><strong>'+inv.client+'</strong><br>'+(invJob.site||'')+'</div>'
-    + '</div>'
-    // Reference grid
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem .75rem;font-size:9px;border:1px solid #ddd;padding:.5rem;margin-bottom:1rem">'
-      + '<div><span style="color:#666">Tax Ident. Type</span><br><strong>Legal Entity</strong></div>'
-      + '<div><span style="color:#666">Customer ID</span><br><strong>'+(invJob.customerId||'—')+'</strong></div>'
-      + '<div><span style="color:#666">GST/HST Registration No.</span><br><strong>'+NORTECH.gst+'</strong></div>'
-      + '<div><span style="color:#666">P.O. Number</span><br><strong>'+(invJob.po||'—')+'</strong></div>'
-      + '<div><span style="color:#666">P.O. Date</span><br><strong>'+inv.invDate+'</strong></div>'
-      + '<div><span style="color:#666">Our Order No. (Nortech WO)</span><br><strong>'+(invJob.number||'—')+'</strong></div>'
-      + '<div><span style="color:#666">Ship Date</span><br><strong>'+inv.invDate+'</strong></div>'
-      + '<div><span style="color:#666">Due Date</span><br><strong>'+fmtDate(dueDate)+'</strong></div>'
-      + '<div><span style="color:#666">Terms</span><br><strong>'+({net30:'NET30 Days',net15:'NET15 Days',net60:'NET60 Days',due_receipt:'Due on Receipt'}[inv.terms]||inv.terms)+'</strong></div>'
-      + '<div><span style="color:#666">SalesPerson</span><br><strong>'+(inv.salesperson||'—')+'</strong></div>'
-      + '<div><span style="color:#666">Client WO No./Job No.</span><br><strong>'+(invJob.clientWO||'—')+'</strong></div>'
-      + '<div><span style="color:#666">Your Reference</span><br><strong>'+(inv.client||'—')+'</strong></div>'
-    + '</div>'
-    // Line items table
-    + '<table style="width:100%;border-collapse:collapse;margin-bottom:.75rem">'
-    + '<thead><tr style="background:#f4f4f4;border-bottom:2px solid #ddd">'
-      + '<th style="padding:.35rem .5rem;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase">Item / Description</th>'
-      + '<th style="padding:.35rem .5rem;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:40px">Unit</th>'
-      + '<th style="padding:.35rem .5rem;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:60px">Order Qty</th>'
-      + '<th style="padding:.35rem .5rem;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:80px">Quantity</th>'
-      + '<th style="padding:.35rem .5rem;text-align:right;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:80px">Unit Price</th>'
-      + '<th style="padding:.35rem .5rem;text-align:right;font-size:9px;letter-spacing:1px;text-transform:uppercase;width:80px">Total Price</th>'
-    + '</tr></thead>'
-    + '<tbody>'+lineItems+'</tbody>'
-    + '</table>'
-    // Totals — left side tax note, right side amounts
-    + '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:.5rem">'
-      + '<div style="font-size:9px;color:#666">'
-        + '<div>Amount Subject to Sales Tax CAD '+_fmtMoneyImpl(taxable)+'</div>'
-        + '<div>Amount Exempt from Sales Tax CAD 0.00</div>'
-      + '</div>'
-      + '<table style="font-size:10px;border-collapse:collapse;min-width:220px">'
-      + '<tr><td style="padding:.2rem .5rem;color:#666">Subtotal:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace"><strong>'+_fmtMoneyImpl(invSubtotal)+'</strong></td></tr>'
-      + '<tr><td style="padding:.2rem .5rem;color:#666">Invoice Discount:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">'+_fmtMoneyImpl(discount)+'</td></tr>'
-      + '<tr><td style="padding:.2rem .5rem;color:#666">Total Tax:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">'+_fmtMoneyImpl(invTax)+'</td></tr>'
-      + '<tr style="border-top:2px solid #111"><td style="padding:.3rem .5rem;font-weight:900;font-size:12px">Total CAD:</td><td style="padding:.3rem .5rem;text-align:right;font-family:monospace;font-weight:900;font-size:12px">'+_fmtMoneyImpl(invTotal)+'</td></tr>'
-    + '</table></div>'
-    + (inv.notes ? '<div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid #ddd;font-size:9px;color:#999">'+inv.notes+'</div>' : '')
-  + '</div>';
+  var html='<div class="inv-preview">'
+    +'<div class="inv-preview-hdr">'
+      +'<div><div class="inv-company">'+NORTECH.name+'</div>'
+        +'<div class="inv-details">'+NORTECH.address+'<br>'+NORTECH.phone+' · '+NORTECH.email+'<br>GST/HST: '+NORTECH.gst+'</div>'
+      +'</div>'
+      +'<div><div class="inv-title">INVOICE</div>'
+        +'<div class="inv-num" style="color:#666">'+inv.invNum+'<br>Date: '+fmtDate(inv.invDate)+'<br>Due: '+fmtDate(dueDate)+'<br>Terms: '+inv.terms+'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="margin-bottom:1rem"><strong>Bill To:</strong><br>'+inv.client+'</div>'
+    +'<table class="inv-table">'
+    +'<thead><tr><th>CS #</th><th>Technician</th><th>Period</th><th class="amt">Amount</th></tr></thead>'
+    +'<tbody>'+(inv.chargeSheets||[]).map(function(c){
+      return '<tr><td>'+c.csNum+'</td><td>'+c.technician+'</td><td>Week of '+fmtDate(c.weekStart)+'</td><td class="amt">'+fmtMoney(c.total)+'</td></tr>';
+    }).join('')+'</tbody></table>'
+    +'<table class="inv-totals"><tbody>'
+    +'<tr><td>Subtotal</td><td>'+fmtMoney(inv.subtotal)+'</td></tr>'
+    +'<tr><td>HST/GST ('+inv.taxRate+'%)</td><td>'+fmtMoney(inv.tax)+'</td></tr>'
+    +'<tr class="total-row"><td>TOTAL DUE</td><td>'+fmtMoney(inv.total)+' '+((inv.currency||'CAD'))+'</td></tr>'
+    +'</tbody></table>'
+    +(inv.notes?'<div class="inv-footer">'+inv.notes+'</div>':'')
+  +'</div>';
   document.getElementById('inv-view-body').innerHTML=html;
-  var paidBtn = document.getElementById('inv-mark-paid-btn');
-  var sentBtn = document.getElementById('inv-mark-sent-btn');
-  var voidBtn = document.getElementById('inv-void-btn');
-  if (paidBtn)       paidBtn.style.display       = inv.status === 'sent'  ? 'inline-flex' : 'none';
-  if (sentBtn)       sentBtn.style.display       = inv.status === 'draft' ? 'inline-flex' : 'none';
-  if (voidBtn)       voidBtn.style.display       = (inv.status !== 'void' && inv.status !== 'paid') ? 'inline-flex' : 'none';
-  var revPaidBtn = document.getElementById('inv-reverse-paid-btn');
-  var revInvBtn  = document.getElementById('inv-reverse-inv-btn');
-  if (revPaidBtn) revPaidBtn.style.display = inv.status === 'paid' ? 'inline-flex' : 'none';
-  if (revInvBtn)  revInvBtn.style.display  = (inv.status === 'sent' || inv.status === 'draft') ? 'inline-flex' : 'none';
+  var paidBtn=document.getElementById('inv-mark-paid-btn');
+  if(paidBtn) paidBtn.style.display=inv.status==='sent'?'inline-flex':'none';
   document.getElementById('inv-view-modal').classList.add('open');
 }
 
@@ -2632,13 +2176,11 @@ async function markPaid(id){
   }catch(e){toast('Update failed: '+e.message,'error');}
 }
 
-function printInvoice() {
-  var content = document.getElementById('inv-view-body').innerHTML;
-  var win = window.open('', '_blank');
-  win.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px}</style></head><body>' + content + '</body></html>');
+function printInvoice(){
+  var content=document.getElementById('inv-view-body').innerHTML;
+  var win=window.open('','_blank');
+  win.document.write('<html><head><title>Invoice</title></head><body>'+content+'<script>window.print();<\/script></body></html>');
   win.document.close();
-  win.focus();
-  setTimeout(function(){ win.print(); }, 500);
 }
 
 // ── Push actuals to Command Centre via Supabase ───────────────────────────────
@@ -2675,9 +2217,9 @@ document.addEventListener('click',function(e){
 document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('nav-date').textContent=
     new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
-  applyAdminVisibility();
   loadAll();
 });
+
 
 
 // ── RATE SHEET IMPORT ────────────────────────────────────────────────────────
@@ -2775,7 +2317,7 @@ async function parseRateSheetText(text) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 4000,
+      max_tokens: 1000,
       messages: [{ role: 'user', content: RATE_PROMPT + ' Document text: ' + text.slice(0, 8000) }]
     })
   });
@@ -2787,21 +2329,10 @@ async function parseRateSheetText(text) {
   var match = clean.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
   var jsonStr = match[0];
-  // Fix common AI JSON issues: trailing commas, unescaped quotes in values
-  jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');  // remove trailing commas
-  jsonStr = jsonStr.replace(/([\w])\s*\n\s*([\w])/g, '$1 $2'); // fix broken strings
-  try {
-    return JSON.parse(jsonStr);
-  } catch(parseErr) {
-    // Try more aggressive cleanup
-    console.log('Parse failed, trying cleanup. Error at:', parseErr.message);
-    // Remove any control characters
-    jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ');
-    // Fix single quotes used instead of double quotes (rough fix)
-    try { return JSON.parse(jsonStr); } catch(e2) {
-      throw new Error('Could not parse AI response as JSON: ' + parseErr.message);
-    }
-  }
+  jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+  jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ');
+  try { return JSON.parse(jsonStr); }
+  catch(e2) { throw new Error('Could not parse AI response as JSON: ' + e2.message); }
 }
 
 async function parseRateSheetPDF(file) {
@@ -2816,7 +2347,7 @@ async function parseRateSheetPDF(file) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 4000,
+      max_tokens: 1000,
       messages: [{
         role: 'user',
         content: [
@@ -2829,26 +2360,10 @@ async function parseRateSheetPDF(file) {
   if (!res.ok) throw new Error('API error ' + res.status);
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-  console.log('AI response:', txt.slice(0, 300));
   var clean = txt.replace(/```json|```/g,'').trim();
   var match = clean.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
-  var jsonStr = match[0];
-  // Fix common AI JSON issues: trailing commas, unescaped quotes in values
-  jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');  // remove trailing commas
-  jsonStr = jsonStr.replace(/([\w])\s*\n\s*([\w])/g, '$1 $2'); // fix broken strings
-  try {
-    return JSON.parse(jsonStr);
-  } catch(parseErr) {
-    // Try more aggressive cleanup
-    console.log('Parse failed, trying cleanup. Error at:', parseErr.message);
-    // Remove any control characters
-    jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ');
-    // Fix single quotes used instead of double quotes (rough fix)
-    try { return JSON.parse(jsonStr); } catch(e2) {
-      throw new Error('Could not parse AI response as JSON: ' + parseErr.message);
-    }
-  }
+  if (!match) throw new Error('No JSON in response');
+  return JSON.parse(match[0]);
 }
 
 function showImportPreview(data) {
@@ -2911,8 +2426,9 @@ function showImportStatus(msg, type) {
   el.textContent = msg;
 }
 
+// ── Pre-built EllisDon rate sheet ─────────────────────────────────────────────
 
-// ── Pre-built rate sheets ────────────────────────────────────────────────────
+
 var SEED_RATE_SHEETS = {
   'ellisdon_march_2026': {"id": "ellisdon_march_2026", "name": "EllisDon NDT Rates \u2014 March 2026", "customer": "EllisDon", "effective": "2026-03-01", "currency": "CAD", "notes": "Quote #26-117. March 2026 \u2013 March 2027. FOB Edmonton, AB. Rates portal to portal. Regular time Mon-Fri 7:30am-4:00pm. 15% night shift differential. RT/PAUT/TOFD/AUT min 4hr callout, all others 2hr min. Remote: LOA $70/tech/day, MOB/DEMOB $1.20/km.", "labour": [{"name": "Magnetic Particle Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Liquid Penetrant Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Hardness Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Ferrite Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Manual UT Level 1", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Manual UT Level 2", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "Visual CWB Level 2", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "Visual CWB Level 3", "stRate": 135.0, "otRate": 202.5, "dtRate": 202.5}, {"name": "NACE Level 2", "stRate": 130.0, "otRate": 195.0, "dtRate": 195.0}, {"name": "Positive Material Identification", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Spectrographic Analysis", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Radiographic Testing (2 person)", "stRate": 165.0, "otRate": 247.5, "dtRate": 247.5}, {"name": "PAUT / TOFD (2 person)", "stRate": 225.0, "otRate": 337.5, "dtRate": 337.5}, {"name": "AUT Corrosion Testing (2 person)", "stRate": 215.0, "otRate": 322.5, "dtRate": 322.5}, {"name": "Data Analysis", "stRate": 135.0, "otRate": 202.5, "dtRate": 202.5}, {"name": "NDT Assistant / CEDO", "stRate": 85.0, "otRate": 127.5, "dtRate": 127.5}, {"name": "Supervisor / Project Coordinator", "stRate": 135.0, "otRate": 202.0, "dtRate": 202.0}, {"name": "HSE Supervisor", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "API 510 ISI-PVPP Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "API 653 Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "API 570 Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "Rope Access Level 3", "stRate": 145.0, "otRate": 217.5, "dtRate": 217.5}, {"name": "UAV UT/Visual Drone (2 person)", "stRate": 255.0, "otRate": 382.5, "dtRate": 382.5}, {"name": "CGSB Level 3", "stRate": 150.0, "otRate": 225.0, "dtRate": 225.0}, {"name": "Engineering", "stRate": 215.0, "otRate": 322.5, "dtRate": 322.5}, {"name": "Inspection ISO / PID Drafter", "stRate": 87.0, "otRate": 130.5, "dtRate": 130.5}, {"name": "Office Clerical", "stRate": 59.0, "otRate": 88.5, "dtRate": 88.5}, {"name": "MFL Tank Floor Inspection", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}, {"name": "Guided Wave Testing", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}, {"name": "Eddy Current Testing", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}], "equipment": [{"name": "MP Yoke, calibration block, light meter", "rate": 5.0, "unit": "hour"}, {"name": "Liquid Penetrant testing kit", "rate": 5.0, "unit": "hour"}, {"name": "Ultrasonic unit, calibration blocks, probes", "rate": 20.0, "unit": "hour"}, {"name": "Radiographic exposure device, dark room", "rate": 25.0, "unit": "hour"}, {"name": "NorScan Digital Imaging Acquisition (DDA)", "rate": 75.0, "unit": "hour"}, {"name": "Optical Emission Spectrometry unit", "rate": 99.0, "unit": "hour"}, {"name": "LIPPS unit, argon, calibration blocks", "rate": 55.0, "unit": "hour"}, {"name": "PMI (XRF) unit & calibration blocks", "rate": 35.0, "unit": "hour"}, {"name": "Hardness Tester (UCI)", "rate": 15.0, "unit": "hour"}, {"name": "Hardness Tester (Telebrineller)", "rate": 15.0, "unit": "hour"}, {"name": "Hardness Tester (King Tester)", "rate": 20.0, "unit": "hour"}, {"name": "Ferrite Tester unit", "rate": 15.0, "unit": "hour"}, {"name": "PAUT/TOFD unit, scanners, cables, probes", "rate": 1250.0, "unit": "shift"}, {"name": "AUT unit, cables, probes, calibration blocks", "rate": 1250.0, "unit": "shift"}, {"name": "Coating Tester unit", "rate": 150.0, "unit": "shift"}, {"name": "Voltmeter", "rate": 50.0, "unit": "shift"}, {"name": "Digital Pit Gauge", "rate": 85.0, "unit": "shift"}, {"name": "Airal Robot, UT Thickness unit", "rate": 2625.0, "unit": "shift"}, {"name": "Ultrasonic Couplant", "rate": 33.0, "unit": "liter"}, {"name": "Ultrasonic Couplant High/Low temp", "rate": 3.5, "unit": "oz"}, {"name": "MT Contrast Paint / Wet Particles", "rate": 32.0, "unit": "can"}, {"name": "Dry Magnetic Particle", "rate": 15.0, "unit": "can"}, {"name": "PT Penetrant, Developer, Cleaner", "rate": 35.0, "unit": "can"}, {"name": "Grinding Discs", "rate": 22.0, "unit": "disc"}, {"name": "Temp Sticks", "rate": 25.0, "unit": "stick"}, {"name": "NDT Cleaner", "rate": 15.0, "unit": "can"}, {"name": "Nital Acid Etchant", "rate": 12.5, "unit": "oz"}, {"name": "Methanol Neutralizer", "rate": 35.75, "unit": "liter"}, {"name": "PAUT Antifreeze", "rate": 20.0, "unit": "liter"}, {"name": "Film < 2\" per weld", "rate": 9.0, "unit": "weld"}, {"name": "Film 2\"-3\" per weld (4 exposures)", "rate": 12.0, "unit": "weld"}, {"name": "Film 4\"-5\" per weld", "rate": 12.0, "unit": "weld"}, {"name": "Film 6\" per weld", "rate": 15.0, "unit": "weld"}, {"name": "Film 8\"-12\" per weld", "rate": 21.0, "unit": "weld"}, {"name": "Film 14\"+ per weld", "rate": 1.75, "unit": "diameter inch"}, {"name": "Film 2.75\"x8.5\" sheet", "rate": 4.5, "unit": "sheet"}, {"name": "Film 2.75\"x17\" sheet", "rate": 8.0, "unit": "sheet"}, {"name": "Film 3.5\"x17\" sheet", "rate": 13.0, "unit": "sheet"}, {"name": "Film 4.5\"x17\" sheet", "rate": 15.0, "unit": "sheet"}, {"name": "Film 7\"x17\" sheet", "rate": 19.0, "unit": "sheet"}, {"name": "Film 14\"x17\" sheet", "rate": 24.0, "unit": "sheet"}, {"name": "Film Digitizing per 17\" length", "rate": 5.0, "unit": "length"}, {"name": "Film Digitizing per 17\" stapled", "rate": 7.5, "unit": "length"}, {"name": "Film Minimum digitizing charge", "rate": 85.0, "unit": "job"}, {"name": "Service Vehicle & Fuel", "rate": 10.0, "unit": "hour"}, {"name": "Environmental Fee (MT/PT/RT)", "rate": 10.0, "unit": "shift"}, {"name": "LOA (Remote)", "rate": 70.0, "unit": "tech/day"}, {"name": "MOB/DEMOB Kilometers (Remote)", "rate": 1.2, "unit": "km"}, {"name": "Remote Service Vehicle (onsite)", "rate": 120.0, "unit": "shift"}], "created": "2026-04-22", "modified": "2026-04-22"}
 };
@@ -2920,9 +2436,7 @@ var SEED_RATE_SHEETS = {
 async function importSeedRateSheet(key) {
   var rs = SEED_RATE_SHEETS[key];
   if (!rs) return;
-  rs.id = uid();
-  rs.created = today();
-  rs.modified = today();
+  rs = Object.assign({}, rs, { id: uid(), created: today(), modified: today() });
   try {
     await sbUpsert('rate_sheets', rs.id, rs);
     _rateSheets.unshift(rs);
@@ -2932,817 +2446,28 @@ async function importSeedRateSheet(key) {
 }
 
 
-
-// ── CHARGE SHEET — REBUILT ────────────────────────────────────────────────────
-
-var _csLabourRowCount = 0;
-var _csEquipmentRowCount = 0;
-var _csConsumableRowCount = 0;
-var _csFilmRowCount = 0;
-var _csOtherRowCount = 0;
-
-// ── Tab switching ─────────────────────────────────────────────────────────────
-function switchCSTab(tab, btn) {
-  document.querySelectorAll('.cs-panel').forEach(function(p){ p.style.display='none'; });
-  document.querySelectorAll('.cs-tab').forEach(function(b){ b.classList.remove('active'); });
-  var panel = document.getElementById('cs-panel-'+tab);
-  if (panel) panel.style.display = 'block';
-  if (btn) btn.classList.add('active');
-}
-
-// ── Week start — always snap to Monday ───────────────────────────────────────
-function snapToMonday(dateStr) {
-  if (!dateStr) return today();
-  var d = new Date(dateStr + 'T00:00:00');
-  var day = d.getDay(); // 0=Sun, 1=Mon
-  var diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().slice(0, 10);
-}
-
-function onCSWeekChange() {
-  var input = document.getElementById('cs-week-start');
-  if (!input) return;
-  var snapped = snapToMonday(input.value);
-  input.value = snapped;
-  rebuildLabourRows();
-}
-
-function getWeekDaysFromMonday(mondayStr) {
-  var d = new Date(mondayStr + 'T00:00:00');
-  var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  return days.map(function(name, i) {
-    var dd = new Date(d);
-    dd.setDate(dd.getDate() + i);
-    return { name: name, date: dd.toISOString().slice(0, 10) };
-  });
-}
-
-// ── Get rate sheet for current job ───────────────────────────────────────────
-function getCSRateSheet() {
-  var jobId = (document.getElementById('cs-job')||{}).value || '';
-  var job = _jobs.find(function(j){ return j.id === jobId; }) || {};
-  return _rateSheets.find(function(r){ return r.id === job.rateSheetId; }) || {};
-}
-
-function getLabourOptions(rs) {
-  // Always use standard Nortech list — rate sheet applied at invoice time
-  return '<option value="">— Select category —</option>'
-    + NORTECH_LABOUR_CATEGORIES.map(function(name) {
-      return '<option value="' + name + '">' + name + '</option>';
-    }).join('');
-}
-
-function getTechOptions() {
-  // Build from VIEWER_PEOPLE
-  return '<option value="">— Select technician —</option>'
-    + (window.VIEWER_PEOPLE || []).map(function(p) {
-      return '<option value="' + p.name + '">' + p.name + '</option>';
-    }).join('');
-}
-
-function getEquipmentOptions(rs) {
-  // Standard Nortech equipment list — pricing applied at invoice time
-  return '<option value="">— Select equipment —</option>'
-    + NORTECH_EQUIPMENT_LIST.map(function(name) {
-      return '<option value="' + name + '">' + name + '</option>';
-    }).join('');
-}
-
-function getConsumableOptions(rs) {
-  // Standard Nortech consumables list — pricing applied at invoice time
-  return '<option value="">— Select consumable —</option>'
-    + NORTECH_CONSUMABLES_LIST.map(function(name) {
-      return '<option value="' + name + '">' + name + '</option>';
-    }).join('');
-}
-
-var FILM_TYPES = [
-  'Film Per Weld < 2"', 'Film Per Weld 2"-3"', 'Film Per Weld 4"-5"',
-  'Film Per Weld 6"', 'Film Per Weld 8"-12"', 'Film Per Weld 14"+',
-  'Film Sheet 2.75"x8.5"', 'Film Sheet 2.75"x17"', 'Film Sheet 3.5"x17"',
-  'Film Sheet 4.5"x17"', 'Film Sheet 7"x17"', 'Film Sheet 14"x17"',
-  'Film Digitizing per 17"', 'Film Digitizing per 17" Stapled',
-];
-
-var PIPE_SIZES = ['< 2"', '2"-3"', '4"-5"', '6"', '8"-12"', '14"+', 'Sheet', 'N/A'];
-
-function getFilmTypeOptions() {
-  return '<option value="">— Film type —</option>'
-    + NORTECH_FILM_TYPES.map(function(f) {
-      return '<option value="' + f.name + '">' + f.name + '</option>';
-    }).join('');
-}
-
-function getPipeSizeOptions() {
-  return '<option value="">— Pipe size —</option>'
-    + PIPE_SIZES.map(function(s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
-}
-
-// ── Open CS Modal ─────────────────────────────────────────────────────────────
-function openCSModal(preJobId) {
-  _editCSId = null;
-  _csLabourRowCount = 0;
-  _csEquipmentRowCount = 0;
-  _csConsumableRowCount = 0;
-  _csFilmRowCount = 0;
-  _csOtherRowCount = 0;
-
-  document.getElementById('cs-modal-title').textContent = 'New Charge Sheet';
-
-  // Populate job select
-  var jobSel = document.getElementById('cs-job');
-  jobSel.innerHTML = '<option value="">— Select job —</option>'
-    + _jobs.filter(function(j){ return j.status === 'active'; })
-           .map(function(j){ return '<option value="' + j.id + '">' + (j.client ? j.client + ' — ' : '') + j.site.slice(0, 40) + '</option>'; }).join('');
-  if (preJobId) jobSel.value = preJobId;
-
-  // Set week start to current Monday
-  document.getElementById('cs-week-start').value = snapToMonday(today());
-  document.getElementById('cs-notes').value = '';
-
-  // Clear all sections
-  ['cs-labour-body','cs-equipment-body','cs-consumables-body','cs-film-body','cs-other-body'].forEach(function(id) {
-    var el = document.getElementById(id); if (el) el.innerHTML = '';
-  });
-  ['cs-travel-hrs-st','cs-travel-hrs-ot','cs-travel-km','cs-travel-loa-techs','cs-travel-loa-days','cs-travel-flights','cs-travel-hotels'].forEach(function(id) {
-    var el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.getElementById('cs-travel-km-rate').value = '1.20';
-  document.getElementById('cs-travel-loa-rate').value = '70.00';
-  document.getElementById('cs-travel-notes').value = '';
-
-  // Build initial 7 labour rows (one per day)
-  rebuildLabourRows();
-
-  // Switch to labour tab
-  switchCSTab('labour', document.getElementById('cs-tab-labour'));
-
-  // Reset totals
-  calcCSTotal();
-
-  document.getElementById('cs-modal').classList.add('open');
-}
-
-function onCSJobChange() {
-  rebuildLabourRows();
-  // Also update equipment/consumable dropdowns
-  var rs = getCSRateSheet();
-  var eqOpts = getEquipmentOptions(rs);
-  var conOpts = getConsumableOptions(rs);
-  document.querySelectorAll('.cs-eq-select').forEach(function(sel) { sel.innerHTML = eqOpts; });
-  document.querySelectorAll('.cs-con-select').forEach(function(sel) { sel.innerHTML = conOpts; });
-}
-
-// ── Labour rows ───────────────────────────────────────────────────────────────
-function rebuildLabourRows() {
-  var weekStart = document.getElementById('cs-week-start').value || today();
-  var days = getWeekDaysFromMonday(weekStart);
-  var rs = getCSRateSheet();
-  var labOpts = getLabourOptions(rs);
-  var techOpts = getTechOptions();
-
-  var tbody = document.getElementById('cs-labour-body');
-  if (!tbody) return;
-
-  // Preserve any extra rows already added (beyond 7)
-  var currentRows = _csLabourRowCount;
-  tbody.innerHTML = '';
-  _csLabourRowCount = 0;
-
-  // Build one row per day of week
-  days.forEach(function(day) {
-    addLabourRow(day.name + ' ' + day.date.slice(5), labOpts, techOpts);
-  });
-}
-
-function addLabourRow(dayLabel, labOpts, techOpts) {
-  _csLabourRowCount++;
-  var idx = _csLabourRowCount;
-  var rs = getCSRateSheet();
-  var lo = labOpts || getLabourOptions(rs);
-  var to = techOpts || getTechOptions();
-  var dl = dayLabel || '';
-
-  var tbody = document.getElementById('cs-labour-body');
-  if (!tbody) return;
-
-  var tr = document.createElement('tr');
-  tr.id = 'cs-lb-row-' + idx;
-  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
-  tr.innerHTML =
-    '<td style="padding:.25rem .3rem;font-size:.7rem;font-weight:600;white-space:nowrap;color:var(--muted)">' + dl + '</td>'
-    + '<td style="padding:.2rem .3rem"><select class="cs-input" id="cs-lb-tech-' + idx + '" style="width:100%">' + to + '</select></td>'
-    + '<td style="padding:.2rem .3rem"><select class="cs-input cs-lb-cat" id="cs-lb-cat-' + idx + '" onchange="calcCSTotal()" style="width:100%">' + lo + '</select></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-st-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-ot-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-dt-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-ns-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()" title="Night shift hours"></td>'
-    + '<td class="cs-lb-tot" style="padding:.2rem .3rem;text-align:right;font-family:var(--mono);font-size:.72rem;color:var(--muted)" id="cs-lb-tot-' + idx + '">$0.00</td>';
-  tbody.appendChild(tr);
-
-  // Style inputs
-  tr.querySelectorAll('.cs-input').forEach(function(el) {
-    el.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;width:100%;font-family:var(--ff)';
-  });
-}
-
-// ── Equipment rows ────────────────────────────────────────────────────────────
-function addEquipmentRow() {
-  _csEquipmentRowCount++;
-  var idx = _csEquipmentRowCount;
-  var rs = getCSRateSheet();
-  var opts = getEquipmentOptions(rs);
-
-  var tbody = document.getElementById('cs-equipment-body');
-  if (!tbody) return;
-  var tr = document.createElement('tr');
-  tr.id = 'cs-eq-row-' + idx;
-  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
-  tr.innerHTML =
-    '<td style="padding:.2rem .3rem"><select class="cs-input cs-eq-select" id="cs-eq-item-' + idx + '" onchange="onEqSelect(' + idx + ')" style="min-width:200px">' + opts + '</select>'
-    + '<input class="cs-input" id="cs-eq-manual-' + idx + '" placeholder="Or type custom item…" style="margin-top:.2rem;width:100%;font-size:.7rem"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-eq-qty-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-eq-unit-' + idx + '" placeholder="hour" style="width:70px"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-eq-notes-' + idx + '" placeholder="Notes…"></td>'
-    + '<td style="padding:.2rem .3rem"><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-eq-row-' + idx + '\').remove();calcCSTotal()">✕</button></td>';
-  tbody.appendChild(tr);
-  tr.querySelectorAll('.cs-input').forEach(function(el) {
-    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
-  });
-}
-
-function onEqSelect(idx) {
-  var sel = document.getElementById('cs-eq-item-' + idx);
-  var unitEl = document.getElementById('cs-eq-unit-' + idx);
-  if (!sel || !unitEl) return;
-  var opt = sel.options[sel.selectedIndex];
-  if (opt && opt.dataset.unit) unitEl.value = opt.dataset.unit;
-}
-
-// ── Consumable rows ───────────────────────────────────────────────────────────
-function addConsumableRow() {
-  _csConsumableRowCount++;
-  var idx = _csConsumableRowCount;
-  var rs = getCSRateSheet();
-  var opts = getConsumableOptions(rs);
-
-  var tbody = document.getElementById('cs-consumables-body');
-  if (!tbody) return;
-  var tr = document.createElement('tr');
-  tr.id = 'cs-con-row-' + idx;
-  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
-  tr.innerHTML =
-    '<td style="padding:.2rem .3rem"><select class="cs-input cs-con-select" id="cs-con-item-' + idx + '" style="min-width:180px">' + opts + '</select>'
-    + '<input class="cs-input" id="cs-con-manual-' + idx + '" placeholder="Or type custom…" style="margin-top:.2rem;width:100%;font-size:.7rem"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-con-qty-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-con-unit-' + idx + '" placeholder="unit" style="width:70px"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-con-notes-' + idx + '" placeholder="Notes…"></td>'
-    + '<td style="padding:.2rem .3rem"><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-con-row-' + idx + '\').remove();calcCSTotal()">✕</button></td>';
-  tbody.appendChild(tr);
-  tr.querySelectorAll('.cs-input').forEach(function(el) {
-    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
-  });
-}
-
-// ── Film rows ─────────────────────────────────────────────────────────────────
-function addFilmRow() {
-  _csFilmRowCount++;
-  var idx = _csFilmRowCount;
-
-  var tbody = document.getElementById('cs-film-body');
-  if (!tbody) return;
-  var tr = document.createElement('tr');
-  tr.id = 'cs-film-row-' + idx;
-  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
-  tr.innerHTML =
-    '<td style="padding:.2rem .3rem"><select class="cs-input" id="cs-film-type-' + idx + '" style="min-width:180px">' + getFilmTypeOptions() + '</select></td>'
-    + '<td style="padding:.2rem .3rem"><select class="cs-input" id="cs-film-size-' + idx + '" style="width:100px">' + getPipeSizeOptions() + '</select></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-film-qty-' + idx + '" placeholder="0" min="0" oninput="calcCSTotal()"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-film-notes-' + idx + '" placeholder="Notes…"></td>'
-    + '<td style="padding:.2rem .3rpm"><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-film-row-' + idx + '\').remove();calcCSTotal()">✕</button></td>';
-  tbody.appendChild(tr);
-  tr.querySelectorAll('.cs-input').forEach(function(el) {
-    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
-  });
-}
-
-// ── Other rows ────────────────────────────────────────────────────────────────
-function addOtherRow() {
-  _csOtherRowCount++;
-  var idx = _csOtherRowCount;
-
-  var tbody = document.getElementById('cs-other-body');
-  if (!tbody) return;
-  var tr = document.createElement('tr');
-  tr.id = 'cs-other-row-' + idx;
-  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
-  tr.innerHTML =
-    '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-other-desc-' + idx + '" placeholder="Description…" style="width:100%"></td>'
-    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-other-amt-' + idx + '" placeholder="0.00" step="0.01" oninput="calcCSTotal()"></td>'
-    + '<td style="padding:.2rem .3rem"><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-other-row-' + idx + '\').remove();calcCSTotal()">✕</button></td>';
-  tbody.appendChild(tr);
-  tr.querySelectorAll('.cs-input').forEach(function(el) {
-    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
-  });
-}
-
-// ── calcCSTotal ───────────────────────────────────────────────────────────────
-function calcCSTotal() {
-  var rs = getCSRateSheet();
-
-  // Labour
-  var labourTotal = 0;
-  for (var i = 1; i <= _csLabourRowCount; i++) {
-    var catEl = document.getElementById('cs-lb-cat-' + i);
-    var stEl  = document.getElementById('cs-lb-st-' + i);
-    var otEl  = document.getElementById('cs-lb-ot-' + i);
-    var dtEl  = document.getElementById('cs-lb-dt-' + i);
-    var nsEl  = document.getElementById('cs-lb-ns-' + i);
-    var totEl = document.getElementById('cs-lb-tot-' + i);
-    if (!stEl) continue;
-    var catName = catEl ? catEl.value : '';
-    var cat = (rs.labour || []).find(function(l) { return l.name === catName; }) || {};
-    var stRate = cat.stRate || 0;
-    var otRate = cat.otRate || stRate * 1.5;
-    var dtRate = cat.dtRate || stRate * 2;
-    var nsRate = stRate * 1.15; // 15% night shift premium
-    var st = parseFloat(stEl.value) || 0;
-    var ot = parseFloat(otEl.value) || 0;
-    var dt = parseFloat(dtEl.value) || 0;
-    var ns = parseFloat(nsEl ? nsEl.value : 0) || 0;
-    var rowTotal = st * stRate + ot * otRate + dt * dtRate + ns * nsRate;
-    labourTotal += rowTotal;
-    if (totEl) {
-      totEl.textContent = fmtMoney(rowTotal);
-      totEl.style.color = rowTotal > 0 ? 'var(--nor-accent)' : 'var(--muted)';
-    }
-  }
-
-  // Equipment (qty × rate from rate sheet)
-  var equipTotal = 0;
-  document.querySelectorAll('[id^=cs-eq-row-]').forEach(function(row) {
-    var idx = row.id.replace('cs-eq-row-', '');
-    var itemSel = document.getElementById('cs-eq-item-' + idx);
-    var manual  = document.getElementById('cs-eq-manual-' + idx);
-    var qtyEl   = document.getElementById('cs-eq-qty-' + idx);
-    if (!qtyEl) return;
-    var qty = parseFloat(qtyEl.value) || 0;
-    var itemName = (itemSel && itemSel.value) || (manual && manual.value) || '';
-    var item = (rs.equipment || []).find(function(e) { return e.name === itemName; }) || {};
-    equipTotal += qty * (item.rate || 0);
-  });
-
-  // Consumables
-  var conTotal = 0;
-  document.querySelectorAll('[id^=cs-con-row-]').forEach(function(row) {
-    var idx = row.id.replace('cs-con-row-', '');
-    var itemSel = document.getElementById('cs-con-item-' + idx);
-    var qtyEl   = document.getElementById('cs-con-qty-' + idx);
-    if (!qtyEl) return;
-    var qty = parseFloat(qtyEl.value) || 0;
-    var itemName = (itemSel && itemSel.value) || '';
-    var item = (rs.equipment || []).find(function(e) { return e.name === itemName; }) || {};
-    conTotal += qty * (item.rate || 0);
-  });
-
-  // Film (qty × rate from rate sheet equipment list)
-  var filmTotal = 0;
-  document.querySelectorAll('[id^=cs-film-row-]').forEach(function(row) {
-    var idx = row.id.replace('cs-film-row-', '');
-    var typeEl = document.getElementById('cs-film-type-' + idx);
-    var qtyEl  = document.getElementById('cs-film-qty-' + idx);
-    if (!qtyEl) return;
-    var qty = parseFloat(qtyEl.value) || 0;
-    var typeName = (typeEl && typeEl.value) || '';
-    // Match to rate sheet film items
-    var item = (rs.equipment || []).find(function(e) { return typeName.toLowerCase().includes(e.name.toLowerCase().slice(0,10)); }) || {};
-    filmTotal += qty * (item.rate || 0);
-  });
-
-  // Travel
-  var travelTotal = 0;
-  var travelHrsST = parseFloat((document.getElementById('cs-travel-hrs-st')||{}).value) || 0;
-  var travelHrsOT = parseFloat((document.getElementById('cs-travel-hrs-ot')||{}).value) || 0;
-  var travelKm    = parseFloat((document.getElementById('cs-travel-km')||{}).value) || 0;
-  var travelKmRate= parseFloat((document.getElementById('cs-travel-km-rate')||{}).value) || 1.20;
-  var loaTechs    = parseFloat((document.getElementById('cs-travel-loa-techs')||{}).value) || 0;
-  var loaDays     = parseFloat((document.getElementById('cs-travel-loa-days')||{}).value) || 0;
-  var loaRate     = parseFloat((document.getElementById('cs-travel-loa-rate')||{}).value) || 70;
-  var flights     = parseFloat((document.getElementById('cs-travel-flights')||{}).value) || 0;
-  var hotels      = parseFloat((document.getElementById('cs-travel-hotels')||{}).value) || 0;
-  // Travel hours use first labour category rate or vehicle rate
-  var travelHrRate= 10; // service vehicle default
-  travelTotal = travelHrsST * travelHrRate + travelHrsOT * travelHrRate * 1.5
-              + travelKm * travelKmRate
-              + loaTechs * loaDays * loaRate
-              + flights + hotels;
-
-  // Other
-  var otherTotal = 0;
-  document.querySelectorAll('[id^=cs-other-row-]').forEach(function(row) {
-    var idx = row.id.replace('cs-other-row-', '');
-    var amtEl = document.getElementById('cs-other-amt-' + idx);
-    if (amtEl) otherTotal += parseFloat(amtEl.value) || 0;
-  });
-
-  var grandTotal = labourTotal + equipTotal + conTotal + filmTotal + travelTotal + otherTotal;
-
-  // Update display
-  var tots = {
-    'cs-tot-labour': labourTotal, 'cs-tot-equipment': equipTotal,
-    'cs-tot-consumables': conTotal, 'cs-tot-film': filmTotal,
-    'cs-tot-travel': travelTotal, 'cs-tot-other': otherTotal,
-    'cs-tot-all': grandTotal
-  };
-  Object.keys(tots).forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.textContent = fmtMoney(tots[id]);
-  });
-
-  return { labour: labourTotal, equipment: equipTotal, consumables: conTotal,
-           film: filmTotal, travel: travelTotal, other: otherTotal, total: grandTotal };
-}
-
-// ── saveCS ────────────────────────────────────────────────────────────────────
-async function saveCS(status) {
-  var jobId     = document.getElementById('cs-job').value;
-  var weekStart = document.getElementById('cs-week-start').value;
-  if (!jobId || !weekStart) { toast('Job and week start are required', 'error'); return; }
-  var job = _jobs.find(function(j){ return j.id === jobId; }) || {};
-
-  // Collect labour rows
-  var labourRows = [];
-  for (var i = 1; i <= _csLabourRowCount; i++) {
-    var catEl  = document.getElementById('cs-lb-cat-' + i);
-    var techEl = document.getElementById('cs-lb-tech-' + i);
-    var stEl   = document.getElementById('cs-lb-st-' + i);
-    var otEl   = document.getElementById('cs-lb-ot-' + i);
-    var dtEl   = document.getElementById('cs-lb-dt-' + i);
-    var nsEl   = document.getElementById('cs-lb-ns-' + i);
-    var totEl  = document.getElementById('cs-lb-tot-' + i);
-    if (!stEl) continue;
-    var st = parseFloat(stEl.value) || 0;
-    var ot = parseFloat(otEl.value) || 0;
-    var dt = parseFloat(dtEl.value) || 0;
-    var ns = parseFloat(nsEl ? nsEl.value : 0) || 0;
-    if (!st && !ot && !dt && !ns && !(catEl && catEl.value)) continue; // skip empty rows
-    var rs = getCSRateSheet();
-    var catName = catEl ? catEl.value : '';
-    var cat = (rs.labour || []).find(function(l){ return l.name === catName; }) || {};
-    labourRows.push({
-      dayLabel: (document.getElementById('cs-lb-row-' + i)||{}).children
-                ? document.getElementById('cs-lb-row-' + i).children[0].textContent : '',
-      technician: techEl ? techEl.value : '',
-      category: catName,
-      stRate: cat.stRate || 0, otRate: cat.otRate || 0, dtRate: cat.dtRate || 0,
-      st, ot, dt, ns,
-      total: parseFloat((totEl||{}).textContent.replace(/[^0-9.]/g,'')) || 0,
-    });
-  }
-
-  // Equipment rows
-  var equipRows = [];
-  document.querySelectorAll('[id^=cs-eq-row-]').forEach(function(row) {
-    var idx = row.id.replace('cs-eq-row-', '');
-    var item = (document.getElementById('cs-eq-item-'+idx)||{}).value || (document.getElementById('cs-eq-manual-'+idx)||{}).value || '';
-    var qty  = parseFloat((document.getElementById('cs-eq-qty-'+idx)||{}).value) || 0;
-    var unit = (document.getElementById('cs-eq-unit-'+idx)||{}).value || '';
-    var notes= (document.getElementById('cs-eq-notes-'+idx)||{}).value || '';
-    if (item || qty) equipRows.push({ item, qty, unit, notes });
-  });
-
-  // Consumable rows
-  var conRows = [];
-  document.querySelectorAll('[id^=cs-con-row-]').forEach(function(row) {
-    var idx = row.id.replace('cs-con-row-', '');
-    var item = (document.getElementById('cs-con-item-'+idx)||{}).value || (document.getElementById('cs-con-manual-'+idx)||{}).value || '';
-    var qty  = parseFloat((document.getElementById('cs-con-qty-'+idx)||{}).value) || 0;
-    var unit = (document.getElementById('cs-con-unit-'+idx)||{}).value || '';
-    var notes= (document.getElementById('cs-con-notes-'+idx)||{}).value || '';
-    if (item || qty) conRows.push({ item, qty, unit, notes });
-  });
-
-  // Film rows
-  var filmRows = [];
-  document.querySelectorAll('[id^=cs-film-row-]').forEach(function(row) {
-    var idx = row.id.replace('cs-film-row-', '');
-    var type = (document.getElementById('cs-film-type-'+idx)||{}).value || '';
-    var size = (document.getElementById('cs-film-size-'+idx)||{}).value || '';
-    var qty  = parseFloat((document.getElementById('cs-film-qty-'+idx)||{}).value) || 0;
-    var notes= (document.getElementById('cs-film-notes-'+idx)||{}).value || '';
-    if (type || qty) filmRows.push({ type, size, qty, notes });
-  });
-
-  // Other rows
-  var otherRows = [];
-  document.querySelectorAll('[id^=cs-other-row-]').forEach(function(row) {
-    var idx = row.id.replace('cs-other-row-', '');
-    var desc = (document.getElementById('cs-other-desc-'+idx)||{}).value || '';
-    var amt  = parseFloat((document.getElementById('cs-other-amt-'+idx)||{}).value) || 0;
-    if (desc || amt) otherRows.push({ desc, amt });
-  });
-
-  // Travel
-  var travel = {
-    hrsST:   parseFloat((document.getElementById('cs-travel-hrs-st')||{}).value) || 0,
-    hrsOT:   parseFloat((document.getElementById('cs-travel-hrs-ot')||{}).value) || 0,
-    km:      parseFloat((document.getElementById('cs-travel-km')||{}).value) || 0,
-    kmRate:  parseFloat((document.getElementById('cs-travel-km-rate')||{}).value) || 1.20,
-    loaTechs:parseFloat((document.getElementById('cs-travel-loa-techs')||{}).value) || 0,
-    loaDays: parseFloat((document.getElementById('cs-travel-loa-days')||{}).value) || 0,
-    loaRate: parseFloat((document.getElementById('cs-travel-loa-rate')||{}).value) || 70,
-    flights: parseFloat((document.getElementById('cs-travel-flights')||{}).value) || 0,
-    hotels:  parseFloat((document.getElementById('cs-travel-hotels')||{}).value) || 0,
-    notes:   (document.getElementById('cs-travel-notes')||{}).value || '',
-  };
-
-  var totals = calcCSTotal();
-  var id = _editCSId || uid();
-
-  var data = {
-    id, jobId, client: job.client || '', site: job.site || '',
-    csNum: _editCSId
-      ? (_chargeSheets.find(function(c){ return c.id === _editCSId; }) || {}).csNum || nextNum('CS-', _chargeSheets, 'csNum')
-      : nextNum('CS-', _chargeSheets, 'csNum'),
-    weekStart, notes: document.getElementById('cs-notes').value.trim(),
-    rateSheetId: job.rateSheetId || '',
-    labourRows, equipRows, conRows, filmRows, travel, otherRows,
-    labour: totals.labour, equipment: totals.equipment,
-    consumables: totals.consumables, film: totals.film,
-    travelTotal: totals.travel, other: totals.other,
-    total: totals.total,
-    status,
-    created: _editCSId ? (_chargeSheets.find(function(c){ return c.id === _editCSId; }) || {}).created || today() : today(),
-    modified: today(),
-  };
-
-  try {
-    await sbUpsert('charge_sheets', id, data);
-    if (_editCSId) { _chargeSheets = _chargeSheets.map(function(c){ return c.id === id ? data : c; }); }
-    else { _chargeSheets.unshift(data); }
-    closeModal('cs-modal');
-    renderCSList(); renderDashboard(); updatePendingBadge();
-    toast(status === 'pending' ? 'Charge sheet submitted for approval' : 'Draft saved', 'success');
-  } catch(e) { toast('Save failed: ' + e.message, 'error'); }
-}
-
-
-async function markVoid(id) {
-  if (!confirm('Mark this invoice as void? This cannot be undone.')) return;
-  var inv = _invoices.find(function(i){ return i.id === id; });
-  if (!inv) return;
-  inv.status = 'void'; inv.voidDate = today(); inv.modified = today();
-  try {
-    await sbUpsert('invoices', id, inv);
-    // Release any charge sheets back to approved status
-    await Promise.all((inv.chargeSheetIds||[]).map(async function(csId) {
-      var cs = _chargeSheets.find(function(c){ return c.id === csId; });
-      if (cs && cs.status === 'invoiced') {
-        cs.status = 'approved'; cs.invoiceId = null; cs.modified = today();
-        await sbUpsert('charge_sheets', csId, cs);
-      }
-    }));
-    renderInvoices(); renderDashboard();
-    toast('Invoice voided — charge sheets returned to Approved', 'info');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-async function markInvSent(id) {
-  var inv = _invoices.find(function(i){ return i.id === id; });
-  if (!inv) return;
-  inv.status = 'sent'; inv.sentDate = today(); inv.modified = today();
-  try {
-    await sbUpsert('invoices', id, inv);
-    renderInvoices(); renderDashboard();
-    toast('Invoice marked as sent', 'success');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-async function markInvoiceSent() {
-  if (!_currentInvId) return;
-  await markInvSent(_currentInvId);
-  closeModal('inv-view-modal');
-}
-
-async function markInvoiceVoid() {
-  if (!_currentInvId) return;
-  await markVoid(_currentInvId);
-  closeModal('inv-view-modal');
-}
-
-
-
-// ── NORTECH STANDARD LISTS ────────────────────────────────────────────────────
-// These are fixed company lists independent of any customer rate sheet.
-// Techs select from these when logging charge sheets.
-// Pricing is applied later at invoice creation by admin.
-
-var NORTECH_LABOUR_CATEGORIES = [
-  // NDT Disciplines
-  'Magnetic Particle Testing (MT)',
-  'Liquid Penetrant Testing (PT)',
-  'Ultrasonic Testing Level 1 (UT1)',
-  'Ultrasonic Testing Level 2 (UT2)',
-  'Phased Array UT / TOFD (PAUT)',
-  'Automated UT Corrosion (AUT)',
-  'Radiographic Testing (RT)',
-  'Eddy Current Testing (ECT)',
-  'Guided Wave Testing (GWT)',
-  'Hardness Testing',
-  'Ferrite Testing',
-  'Positive Material Identification (PMI)',
-  'Spectrographic Analysis',
-  'Visual Inspection CWB Level 2',
-  'Visual Inspection CWB Level 3',
-  'NACE Level 2 Inspection',
-  'API 510 Pressure Vessel Inspection',
-  'API 570 Piping Inspection',
-  'API 653 Tank Inspection',
-  'Rope Access Level 3',
-  'UAV / Drone Inspection',
-  'MFL Tank Floor Inspection',
-  'CGSB Level 3',
-  'Data Analysis',
-  // Roles
-  'Supervisor / Project Coordinator',
-  'HSE Supervisor',
-  'NDT Assistant / CEDO',
-  'Engineering',
-  'Inspection ISO / PID Drafter',
-  'Office Clerical',
-];
-
-var NORTECH_EQUIPMENT_LIST = [
-  // UT / PAUT
-  'PAUT/TOFD Unit (Omniscan, Focus LT)',
-  'AUT Unit',
-  'Ultrasonic Unit (Epoch, DMS Go)',
-  'PAUT Scanners & Cables',
-  'UT Probes & Calibration Blocks',
-  // RT
-  'Radiographic Exposure Device',
-  'Dark Room / Processing Equipment',
-  'NorScan Digital Imaging Acquisition (DDA)',
-  // MT / PT
-  'Magnetic Particle Yoke',
-  'Light Meter & Power Supply',
-  'Liquid Penetrant Kit',
-  // Specialty
-  'Optical Emission Spectrometer (OES)',
-  'LIPPS Unit',
-  'XRF (PMI) Unit',
-  'Hardness Tester (UCI)',
-  'Hardness Tester (Telebrineller)',
-  'Hardness Tester (King Tester)',
-  'Ferrite Tester',
-  'Coating Thickness Tester',
-  'Airal Robot (UT Drone)',
-  // Measurement / Safety
-  'Digital Pit Gauge',
-  'Voltmeter',
-  'Gas Monitor',
-  'Safety Equipment Kit',
-  // Vehicles / Field
-  'Service Vehicle',
-  '5-Ton Flat Deck Truck',
-  'Rope Access Equipment Set',
-  'UAV / Drone Unit',
-];
-
-var NORTECH_CONSUMABLES_LIST = [
-  // UT
-  'Ultrasonic Couplant (standard)',
-  'Ultrasonic Couplant (high/low temp)',
-  'PAUT Antifreeze',
-  // MT
-  'MT Contrast Paint',
-  'Wet Magnetic Particles',
-  'Dry Magnetic Particles',
-  // PT
-  'PT Penetrant',
-  'PT Developer',
-  'PT Cleaner',
-  // RT / Film
-  'Film (per weld)',
-  'Film Sheet',
-  'Film Digitizing',
-  // Grinding / Surface
-  'Grinding Discs',
-  'Surface Preparation Supplies',
-  // Chemistry
-  'Nital Acid Etchant',
-  'Methanol Neutralizer',
-  'NDT Cleaner',
-  // Other
-  'Temp Sticks',
-  'Calibration Blocks (consumable)',
-  'PPE (project-specific)',
-];
-
-var NORTECH_FILM_TYPES = [
-  { name: 'Film Per Weld — < 2"',        pipeSizes: ['< 2"'] },
-  { name: 'Film Per Weld — 2" & 3"',     pipeSizes: ['2"-3"'] },
-  { name: 'Film Per Weld — 4" & 5"',     pipeSizes: ['4"-5"'] },
-  { name: 'Film Per Weld — 6"',          pipeSizes: ['6"'] },
-  { name: 'Film Per Weld — 8"-12"',      pipeSizes: ['8"-12"'] },
-  { name: 'Film Per Weld — 14"+ ',       pipeSizes: ['14"+'] },
-  { name: 'Film Sheet 2.75" x 8.5"',     pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 2.75" x 17"',      pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 3.5" x 17"',       pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 4.5" x 17"',       pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 7" x 17"',         pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 14" x 17"',        pipeSizes: ['N/A'] },
-  { name: 'Film Digitizing per 17"',     pipeSizes: ['N/A'] },
-  { name: 'Film Digitizing per 17" Stapled', pipeSizes: ['N/A'] },
-];
-
-
-// ── Price visibility guard ────────────────────────────────────────────────────
-var _ADMIN_IDS = ['jon','jason','joel_c','renee','jeremy','mathieu'];
-
-function isAdmin() {
-  var viewer = (window.CURRENT_VIEWER || localStorage.getItem('hub_viewer') || 'tech');
-  return _ADMIN_IDS.indexOf(viewer) > -1;
-}
-
-// Price visibility wrappers — techs see '—' instead of amounts
-function fmtMoney(n) {
-  return isAdmin() ? _fmtMoneyImpl(n) : '—';
-}
-function fmtMoneyShort(n) {
-  return isAdmin() ? _fmtMoneyShortImpl(n) : '—';
-}
-
-// Hide entire sections from non-admins
-function applyAdminVisibility() {
-  var admin = isAdmin();
-
-  // Apply body class — CSS hides all .hide-from-tech elements
-  document.body.classList.toggle('tech-view', !admin);
-
-  // data-admin-only elements
-  document.querySelectorAll('[data-admin-only]').forEach(function(el) {
-    el.style.display = admin ? '' : 'none';
-  });
-
-  // If tech, redirect to Jobs view (their home base) and relabel dashboard
-  if (!admin) {
-    // Change dashboard nav label to "My Work"
-    var dashBtn = document.getElementById('nav-dashboard');
-    if (dashBtn) dashBtn.textContent = '🏠 My Work';
-    // Show jobs by default for techs
-    showView('jobs', document.getElementById('nav-jobs'));
-    // Simplify dashboard to just show active jobs + pending CS
-    renderTechDashboard();
-  }
-}
-
-function renderTechDashboard() {
-  // Simplified dashboard for technicians — no financials
-  var kpiEl = document.getElementById('dash-kpis');
-  if (!kpiEl) return;
-  var activeJobs   = _jobs.filter(function(j){ return j.status === 'draft' || j.status === 'submitted'; }).length;
-  var myPending    = _jobs.filter(function(j){ return j.status === 'submitted'; }).length;
-  var myApproved   = _jobs.filter(function(j){ return j.status === 'approved'; }).length;
-  kpiEl.innerHTML = [
-    { val: activeJobs,  lbl: 'Active Jobs / WOs',        sub: 'Currently open' },
-    { val: myPending,   lbl: 'Charge Sheets',       sub: 'Draft or pending' },
-    { val: myApproved,  lbl: 'Approved',            sub: 'Ready to invoice' },
-  ].map(function(k) {
-    return '<div class="kpi-tile"><div class="kpi-tile-val">' + k.val + '</div>'
-      + '<div class="kpi-tile-lbl">' + k.lbl + '</div>'
-      + '<div class="kpi-tile-sub">' + k.sub + '</div></div>';
-  }).join('');
-}
-
-
-
-
-// ── Canadian provincial tax rates ────────────────────────────────────────────
+// ── Canadian provincial tax rates ─────────────────────────────────────────────
 var CANADA_TAX_RATES = {
-  'AB': { name: 'Alberta',                   gst: 5,   pst: 0,   hst: 0,  total: 5,   label: 'GST 5%' },
-  'BC': { name: 'British Columbia',          gst: 5,   pst: 7,   hst: 0,  total: 12,  label: 'GST 5% + PST 7%' },
-  'SK': { name: 'Saskatchewan',              gst: 5,   pst: 6,   hst: 0,  total: 11,  label: 'GST 5% + PST 6%' },
-  'MB': { name: 'Manitoba',                  gst: 5,   pst: 7,   hst: 0,  total: 12,  label: 'GST 5% + PST 7%' },
-  'ON': { name: 'Ontario',                   gst: 0,   pst: 0,   hst: 13, total: 13,  label: 'HST 13%' },
-  'QC': { name: 'Quebec',                    gst: 5,   pst: 9.975, hst: 0, total: 14.975, label: 'GST 5% + QST 9.975%' },
-  'NB': { name: 'New Brunswick',             gst: 0,   pst: 0,   hst: 15, total: 15,  label: 'HST 15%' },
-  'NS': { name: 'Nova Scotia',               gst: 0,   pst: 0,   hst: 15, total: 15,  label: 'HST 15%' },
-  'PE': { name: 'Prince Edward Island',      gst: 0,   pst: 0,   hst: 15, total: 15,  label: 'HST 15%' },
-  'NL': { name: 'Newfoundland & Labrador',   gst: 0,   pst: 0,   hst: 15, total: 15,  label: 'HST 15%' },
-  'NT': { name: 'Northwest Territories',     gst: 5,   pst: 0,   hst: 0,  total: 5,   label: 'GST 5%' },
-  'NU': { name: 'Nunavut',                   gst: 5,   pst: 0,   hst: 0,  total: 5,   label: 'GST 5%' },
-  'YT': { name: 'Yukon',                     gst: 5,   pst: 0,   hst: 0,  total: 5,   label: 'GST 5%' },
-  'EXEMPT': { name: 'Tax Exempt',            gst: 0,   pst: 0,   hst: 0,  total: 0,   label: 'Exempt (Federal/First Nations)' },
+  'AB': { name: 'Alberta',                 gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
+  'BC': { name: 'British Columbia',        gst:5,  pst:7,      hst:0,  total:12,     label:'GST 5% + PST 7%' },
+  'SK': { name: 'Saskatchewan',            gst:5,  pst:6,      hst:0,  total:11,     label:'GST 5% + PST 6%' },
+  'MB': { name: 'Manitoba',               gst:5,  pst:7,      hst:0,  total:12,     label:'GST 5% + PST 7%' },
+  'ON': { name: 'Ontario',                 gst:0,  pst:0,      hst:13, total:13,     label:'HST 13%' },
+  'QC': { name: 'Quebec',                  gst:5,  pst:9.975,  hst:0,  total:14.975, label:'GST 5% + QST 9.975%' },
+  'NB': { name: 'New Brunswick',           gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
+  'NS': { name: 'Nova Scotia',             gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
+  'PE': { name: 'Prince Edward Island',    gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
+  'NL': { name: 'Newfoundland & Labrador', gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
+  'NT': { name: 'Northwest Territories',   gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
+  'NU': { name: 'Nunavut',                 gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
+  'YT': { name: 'Yukon',                   gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
+  'EXEMPT': { name: 'Tax Exempt',          gst:0,  pst:0,      hst:0,  total:0,      label:'Exempt (Federal/First Nations)' },
 };
 
 function getProvinceOptions(selected) {
   return Object.entries(CANADA_TAX_RATES).map(function(kv) {
-    var code = kv[0], p = kv[1];
-    return '<option value="' + code + '" ' + (code === selected ? 'selected' : '') + '>'
-      + p.name + ' — ' + p.label
-    + '</option>';
+    var code=kv[0], p=kv[1];
+    return '<option value="'+code+'" '+(code===selected?'selected':'')+'>'+p.name+' — '+p.label+'</option>';
   }).join('');
 }
 
@@ -3759,6 +2484,107 @@ function onProvinceChange() {
 }
 
 
+// ── Reverse invoice/WO status ─────────────────────────────────────────────────
+async function reverseInvoicePayment(id) {
+  var inv = _invoices.find(function(i){ return i.id===id; });
+  if (!inv) return;
+  if (!confirm('Reverse payment on '+inv.invNum+'?\n\nThis will:\n  • Set invoice back to Sent\n  • Remove the paid date\n  • Reverse actuals pushed to Command Centre\n\nContinue?')) return;
+  inv.status='sent'; inv.paidDate=null; inv.reversedDate=today(); inv.modified=today();
+  try {
+    await sbUpsert('invoices',id,inv);
+    renderInvoices(); renderDashboard();
+    pushActualsToCC();
+    toast('Payment reversed — invoice back to Sent','info');
+    closeModal('inv-view-modal');
+  } catch(e){ toast('Error: '+e.message,'error'); }
+}
+
+async function reverseInvoiceToApproved(id) {
+  var inv = _invoices.find(function(i){ return i.id===id; });
+  if (!inv) return;
+  var woCount = (inv.chargeSheetIds||[]).length;
+  if (!confirm('Reverse invoice '+inv.invNum+' back to draft?\n\nThis will:\n  • Set invoice back to Draft\n  • Return '+woCount+' work order'+(woCount!==1?'s':'')+' to Approved\n\nContinue?')) return;
+  inv.status='draft'; inv.sentDate=null; inv.modified=today();
+  try {
+    await sbUpsert('invoices',id,inv);
+    await Promise.all((inv.chargeSheetIds||[]).map(async function(woId){
+      var wo=_jobs.find(function(j){return j.id===woId;});
+      if(wo&&wo.status==='invoiced'){ wo.status='approved'; wo.invoiceId=null; wo.modified=today(); await sbUpsert('jobs',woId,wo); }
+    }));
+    renderInvoices(); renderJobs(); renderDashboard();
+    toast('Invoice reversed to Draft — work orders returned to Approved','info');
+    closeModal('inv-view-modal');
+  } catch(e){ toast('Error: '+e.message,'error'); }
+}
+
+async function markVoid(id) {
+  if (!confirm('Mark this invoice as void? This cannot be undone.')) return;
+  var inv = _invoices.find(function(i){ return i.id===id; });
+  if (!inv) return;
+  inv.status='void'; inv.voidDate=today(); inv.modified=today();
+  try {
+    await sbUpsert('invoices',id,inv);
+    await Promise.all((inv.chargeSheetIds||[]).map(async function(woId){
+      var wo=_jobs.find(function(j){return j.id===woId;});
+      if(wo&&wo.status==='invoiced'){ wo.status='approved'; wo.invoiceId=null; wo.modified=today(); await sbUpsert('jobs',woId,wo); }
+    }));
+    renderInvoices(); renderDashboard();
+    toast('Invoice voided — work orders returned to Approved','info');
+  } catch(e){ toast('Error: '+e.message,'error'); }
+}
+
+async function markInvSent(id) {
+  var inv=_invoices.find(function(i){return i.id===id;}); if(!inv)return;
+  inv.status='sent'; inv.sentDate=today(); inv.modified=today();
+  try { await sbUpsert('invoices',id,inv); renderInvoices(); renderDashboard(); toast('Invoice marked as sent','success'); }
+  catch(e){ toast('Error: '+e.message,'error'); }
+}
+async function markInvoiceSent(){ if(!_currentInvId)return; await markInvSent(_currentInvId); closeModal('inv-view-modal'); }
+async function markInvoiceVoid(){ if(!_currentInvId)return; await markVoid(_currentInvId); closeModal('inv-view-modal'); }
+
+
+// ── Price visibility guard ─────────────────────────────────────────────────────
+var _ADMIN_IDS = ['jon','jason','joel_c','renee','jeremy','mathieu'];
+
+function isAdmin() {
+  var viewer = (window.CURRENT_VIEWER || localStorage.getItem('hub_viewer') || 'tech');
+  return _ADMIN_IDS.indexOf(viewer) > -1;
+}
+
+function fmtMoney(n) { return isAdmin() ? _fmtMoneyImpl(n) : '—'; }
+function fmtMoneyShort(n) { return isAdmin() ? _fmtMoneyShortImpl(n) : '—'; }
+
+function applyAdminVisibility() {
+  if (!isAdmin()) {
+    document.body.classList.add('tech-view');
+    var invBtn = document.getElementById('inv-nav-btn');
+    if (invBtn) invBtn.style.display='none';
+    var rateBtn = document.getElementById('nav-rates');
+    if (rateBtn) rateBtn.style.display='none';
+  } else {
+    document.body.classList.remove('tech-view');
+  }
+}
+
+function renderTechDashboard() {
+  var kpiEl = document.getElementById('dash-kpis');
+  if (!kpiEl) return;
+  var activeJobs = _jobs.filter(function(j){ return j.status==='draft'||j.status==='submitted'; }).length;
+  var myPending  = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
+  var myApproved = _jobs.filter(function(j){ return j.status==='approved'; }).length;
+  kpiEl.innerHTML = [
+    {val:activeJobs, lbl:'Active Work Orders', sub:'Draft or submitted'},
+    {val:myPending,  lbl:'Pending Approval',   sub:'Awaiting admin review'},
+    {val:myApproved, lbl:'Approved',            sub:'Ready for invoicing'},
+  ].map(function(k){
+    return '<div class="kpi-tile"><div class="kpi-tile-val">'+k.val+'</div>'
+      +'<div class="kpi-tile-lbl">'+k.lbl+'</div>'
+      +'<div class="kpi-tile-sub">'+k.sub+'</div></div>';
+  }).join('');
+}
+
+
+// ── Job detail toggle ──────────────────────────────────────────────────────────
 function toggleJobDetail(jobId) {
   var detail = document.getElementById('job-detail-' + jobId);
   var icon   = document.getElementById('job-expand-icon-' + jobId);
@@ -3768,150 +2594,14 @@ function toggleJobDetail(jobId) {
   if (icon) icon.textContent = open ? '▲' : '▼';
 }
 
-// ── Job detail toggle handler ─────────────────────────────────────────────────
+// ── Global click delegation ─────────────────────────────────────────────────────
 document.addEventListener('click', function(e) {
   var el = e.target.closest('[data-toggle-job]');
-  if (!el) return;
-  // Don't toggle if clicking an action button inside the header
-  if (e.target.closest('button') || e.target.closest('a')) return;
-  toggleJobDetail(el.getAttribute('data-toggle-job'));
+  if (el && !e.target.closest('button') && !e.target.closest('a')) { toggleJobDetail(el.getAttribute('data-toggle-job')); return; }
 });
-
-document.addEventListener('click', function(e) {
-  var el = e.target.closest('[data-view-cs]');
-  if (el) { viewCS(el.getAttribute('data-view-cs')); return; }
-  var el2 = e.target.closest('[data-approve-cs]');
-  if (el2) { approveCS(el2.getAttribute('data-approve-cs')); return; }
-});
-
-
-
-// ── REVERSE PAYMENT / INVOICE STATUS ─────────────────────────────────────────
-
-async function reverseInvoicePayment(id) {
-  var inv = _invoices.find(function(i){ return i.id === id; });
-  if (!inv) return;
-  if (!confirm(
-    'Reverse payment on ' + inv.invNum + '?\n\n' +
-    'This will:\n' +
-    '  • Set invoice status back to Sent\n' +
-    '  • Remove the paid date\n' +
-    '  • Reverse the actuals pushed to Command Centre\n\n' +
-    'Continue?'
-  )) return;
-  inv.status = 'sent';
-  inv.paidDate = null;
-  inv.reversedDate = today();
-  inv.modified = today();
-  try {
-    await sbUpsert('invoices', id, inv);
-    renderInvoices(); renderDashboard();
-    // Reverse CC actuals
-    pushActualsToCC();
-    toast('Payment reversed — invoice back to Sent', 'info');
-    closeModal('inv-view-modal');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-async function reverseInvoiceToApproved(id) {
-  var inv = _invoices.find(function(i){ return i.id === id; });
-  if (!inv) return;
-  var csCount = (inv.chargeSheetIds || []).length;
-  if (!confirm(
-    'Reverse invoice ' + inv.invNum + ' back to draft?\n\n' +
-    'This will:\n' +
-    '  • Set invoice status back to Draft\n' +
-    '  • Return ' + csCount + ' charge sheet' + (csCount !== 1 ? 's' : '') + ' to Approved status\n' +
-    '  • Allow charge sheets to be re-invoiced\n\n' +
-    'This cannot be undone automatically. Continue?'
-  )) return;
-  inv.status = 'draft';
-  inv.sentDate = null;
-  inv.modified = today();
-  try {
-    await sbUpsert('invoices', id, inv);
-    // Return all linked charge sheets to Approved
-    var released = 0;
-    await Promise.all((inv.chargeSheetIds || []).map(async function(csId) {
-      var cs = _chargeSheets.find(function(c){ return c.id === csId; });
-      if (cs && cs.status === 'invoiced') {
-        cs.status = 'approved';
-        cs.invoiceId = null;
-        cs.modified = today();
-        await sbUpsert('charge_sheets', csId, cs);
-        released++;
-      }
-    }));
-    renderInvoices(); renderCSList(); renderDashboard(); updatePendingBadge();
-    toast('Invoice reversed to Draft — ' + released + ' charge sheet' + (released !== 1 ? 's' : '') + ' returned to Approved', 'info');
-    closeModal('inv-view-modal');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-async function reverseCSToApproved(id) {
-  var cs = _chargeSheets.find(function(c){ return c.id === id; });
-  if (!cs) return;
-  if (cs.status !== 'invoiced') {
-    toast('Only invoiced charge sheets can be reversed', 'error');
-    return;
-  }
-  // Find the linked invoice
-  var inv = _invoices.find(function(i){
-    return i.chargeSheetIds && i.chargeSheetIds.indexOf(id) > -1;
-  });
-  var invNote = inv
-    ? 'This charge sheet is on invoice ' + inv.invNum + ' (' + inv.status + ').\nRemoving it will leave that invoice incomplete.\n\n'
-    : '';
-  if (!confirm(
-    'Return charge sheet ' + cs.csNum + ' to Approved?\n\n' +
-    invNote +
-    'This will:\n' +
-    '  • Set charge sheet status back to Approved\n' +
-    '  • Allow it to be added to a new invoice\n\n' +
-    'Continue?'
-  )) return;
-  cs.status = 'approved';
-  cs.invoiceId = null;
-  cs.modified = today();
-  try {
-    await sbUpsert('charge_sheets', id, cs);
-    renderCSList(); renderDashboard(); updatePendingBadge();
-    toast('Charge sheet ' + cs.csNum + ' returned to Approved', 'info');
-    closeModal('cs-view-modal');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-
-async function reverseCSFromApproved(id) {
-  var cs = _chargeSheets.find(function(c){ return c.id === id; });
-  if (!cs) return;
-  if (cs.status !== 'approved') {
-    toast('Only approved charge sheets can be returned to pending', 'error');
-    return;
-  }
-  if (!confirm(
-    'Return charge sheet ' + cs.csNum + ' to Pending?\n\n' +
-    'This will:\n' +
-    '  • Set status back to Pending Approval\n' +
-    '  • Remove approval date\n' +
-    '  • Require re-approval before invoicing\n\n' +
-    'Continue?'
-  )) return;
-  cs.status = 'pending';
-  cs.approvedDate = null;
-  cs.modified = today();
-  try {
-    await sbUpsert('charge_sheets', id, cs);
-    renderCSList(); renderDashboard(); updatePendingBadge();
-    toast('Charge sheet ' + cs.csNum + ' returned to Pending', 'info');
-    closeModal('cs-view-modal');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-
 
 // ══════════════════════════════════════════════════════════════════════════════
-// WORK ORDER SYSTEM — replaces Job + Charge Sheet
+// WORK ORDER SYSTEM — replaces Job + Work Order
 // ══════════════════════════════════════════════════════════════════════════════
 
 var _editWOId = null;
@@ -4238,6 +2928,9 @@ function renderJobs() {
         + (j.status === 'approved'  && isAdmin() ? '<button class="btn btn-secondary btn-sm" data-invoice-wo="' + j.id + '">🧾 Generate Invoice</button>' : '')
         + (j.status === 'approved'  && isAdmin() ? '<button class="btn btn-ghost btn-sm" data-unapprove-wo="' + j.id + '">↩ Unapprove</button>' : '')
         + (j.status === 'submitted' ? '<button class="btn btn-ghost btn-sm" data-unapprove-wo="' + j.id + '">↩ Back to Draft</button>' : '')
+        + (isAdmin() && j.status !== 'invoiced' && j.status !== 'paid'
+          ? '<button class="btn btn-ghost btn-sm" data-delete-wo="' + j.id + '" style="color:#EF4444;border-color:rgba(185,28,28,.3)">🗑 Delete</button>'
+          : '')
       + '</div>'
     + '</div>';
   }).join('');
@@ -4333,6 +3026,8 @@ document.addEventListener('click', function(e) {
   if (el) { openInvoiceModal(null, el.getAttribute('data-invoice-wo')); return; }
   el = e.target.closest('[data-export-wo]');
   if (el) { exportWO('pdf', el.getAttribute('data-export-wo')); return; }
+  el = e.target.closest('[data-delete-wo]');
+  if (el) { deleteWO(el.getAttribute('data-delete-wo')); return; }
 });
 
 // ── openInvoiceModal — updated to accept WO id ────────────────────────────────
@@ -4345,7 +3040,7 @@ function openInvoiceModal(preClient, preWOId) {
     if (wo) preClient = wo.client;
   }
   _origOpenInvoiceModal(preClient);
-  // After modal opens, pre-check this WO in the CS selector (treated as charge sheet)
+  // After modal opens, pre-check this WO in the CS selector (treated as work order)
   if (preWOId) {
     setTimeout(function() {
       var chk = document.querySelector('.inv-cs-check[value="' + preWOId + '"]');
@@ -4498,58 +3193,92 @@ function buildWOPrintHTML(wo) {
     + '</body></html>';
 }
 
+
+// ── Price a work order / charge sheet using a rate sheet ─────────────────────
+function priceChargeSheet(cs, rs) {
+  if (!cs) return 0;
+  var total = 0;
+  var hasNewFormat = cs.labourRows && cs.labourRows.length > 0;
+  var hasOldFormat = cs.days && cs.days.length > 0;
+
+  if (hasNewFormat) {
+    if (rs && rs.labour) {
+      (cs.labourRows || []).forEach(function(row) {
+        var cat = (rs.labour || []).find(function(l){ return l.name === row.category; }) || {};
+        var stRate = cat.stRate || 0;
+        var otRate = cat.otRate || stRate * 1.5;
+        var dtRate = cat.dtRate || stRate * 2;
+        var nsRate = stRate * 1.15;
+        var reg = row.regHrs !== undefined ? row.regHrs : (row.st||0);
+        var ot  = row.otHrs  !== undefined ? row.otHrs  : (row.ot||0);
+        var dt  = row.dtHrs  !== undefined ? row.dtHrs  : (row.dt||0);
+        var ns  = row.nightHrs !== undefined ? row.nightHrs : (row.ns||0);
+        total += reg*stRate + ot*otRate + dt*dtRate + ns*nsRate;
+      });
+      (cs.equipRows || []).forEach(function(row) {
+        var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
+        total += (row.qty||0) * (item.rate||0);
+      });
+      (cs.conRows || cs.consumables || []).forEach(function(row) {
+        var item = (rs.equipment || []).find(function(e){ return e.name === (row.item||row.name); }) || {};
+        total += (row.qty||0) * (item.rate||0);
+      });
+      (cs.filmRows || cs.film || []).forEach(function(row) {
+        var item = (rs.equipment || []).find(function(e){
+          return (row.type||'') && e.name && (row.type||'').toLowerCase().includes(e.name.toLowerCase().slice(0,12));
+        }) || {};
+        total += (row.qty||0) * (item.rate||0);
+      });
+    }
+    var travel = cs.travel || {};
+    total += (travel.km||0) * (travel.kmRate||1.20);
+    total += (travel.loaTechs||0) * (travel.loaDays||0) * (travel.loaRate||70);
+    total += (travel.flights||0) + (travel.hotels||0) + (travel.camp||0) + (travel.misc||0);
+    (cs.otherRows || []).forEach(function(row){ total += row.amt||0; });
+    return total > 0 ? total : (cs.total || 0);
+
+  } else if (hasOldFormat) {
+    var hasCategories = (cs.days || []).some(function(d){ return d.category; });
+    if (rs && rs.labour && hasCategories) {
+      (cs.days || []).forEach(function(day) {
+        var cat = (rs.labour || []).find(function(l){ return l.name === (day.category||day.description); }) || {};
+        var stRate = cat.stRate || day.stRate || 0;
+        var otRate = cat.otRate || day.otRate || stRate * 1.5;
+        var dtRate = cat.dtRate || day.dtRate || stRate * 2;
+        total += (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
+      });
+      (cs.extras || []).forEach(function(e){ total += e.amount||0; });
+      return total > 0 ? total : (cs.total || 0);
+    } else {
+      return cs.total || 0;
+    }
+  }
+  return cs.total || 0;
+}
+
+
+async function deleteWO(id) {
+  var wo = _jobs.find(function(j){ return j.id === id; });
+  if (!wo) return;
+  var woNum = wo.woNum || wo.number || id;
+  if (wo.status === 'invoiced' || wo.status === 'paid') {
+    toast('Cannot delete a work order that has been invoiced or paid', 'error');
+    return;
+  }
+  if (!confirm(
+    'Delete Work Order ' + woNum + '?\n\n' +
+    'Client: ' + (wo.client||'—') + '\n' +
+    'Date: ' + (wo.date||'—') + '\n\n' +
+    'This cannot be undone. Continue?'
+  )) return;
+  try {
+    await sbDelete('jobs', id);
+    _jobs = _jobs.filter(function(j){ return j.id !== id; });
+    renderJobs(); renderDashboard(); updatePendingBadge();
+    toast('Work order ' + woNum + ' deleted', 'info');
+  } catch(e) { toast('Delete failed: ' + e.message, 'error'); }
+}
+
 </script>
-
-<!-- Rate Sheet Import Modal -->
-<div class="modal-overlay" id="import-rate-modal">
-  <div class="modal" style="max-width:600px">
-    <div class="modal-hdr">
-      <span class="modal-title">Import Rate Sheet</span>
-      <button class="modal-close" onclick="closeModal('import-rate-modal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">
-        Upload a Word (.docx) or PDF rate sheet. Claude will read it and extract labour categories, day rates, and equipment items automatically.
-      </p>
-
-      <!-- Drop zone -->
-      <div id="import-dropzone" onclick="document.getElementById('import-file-input').click()"
-           style="border:2px dashed var(--border2);border-radius:8px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1rem"
-           ondragover="event.preventDefault();this.style.borderColor='var(--nor-accent)'"
-           ondragleave="this.style.borderColor='var(--border2)'"
-           ondrop="handleImportDrop(event)">
-        <div style="font-size:2rem;margin-bottom:.5rem;opacity:.5">📄</div>
-        <div style="font-size:.82rem;font-weight:600;color:var(--text)">Drop file here or click to browse</div>
-        <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">.docx or .pdf — max 10MB</div>
-        <input type="file" id="import-file-input" accept=".docx,.pdf" style="display:none" onchange="handleImportFile(this.files[0])">
-      </div>
-
-      <!-- Status -->
-      <div id="import-status" style="display:none;padding:.75rem;border-radius:6px;font-size:.78rem;margin-bottom:1rem"></div>
-
-      <!-- Preview -->
-      <div id="import-preview" style="display:none">
-        <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.5rem">Extracted Data — Review Before Importing</div>
-        <div class="form-grid form-grid-2" style="gap:.5rem;margin-bottom:.75rem">
-          <div class="form-group">
-            <label class="form-label">Rate Sheet Name</label>
-            <input class="form-input" id="import-rs-name" placeholder="Rate sheet name">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Customer (if client-specific)</label>
-            <input class="form-input" id="import-rs-customer" placeholder="Leave blank for standard">
-          </div>
-        </div>
-        <div id="import-labour-preview" style="margin-bottom:.75rem"></div>
-        <div id="import-equipment-preview"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('import-rate-modal')">Cancel</button>
-      <button class="btn btn-primary" id="import-confirm-btn" style="display:none" onclick="confirmImport()">Import Rate Sheet</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
