@@ -4836,6 +4836,69 @@ function getTechOptions() {
   return opts;
 }
 
+
+// ── WO helper functions ───────────────────────────────────────────────────────
+function _woDetailField(label, value, span) {
+  return '<div' + (span ? ' style="grid-column:span ' + span + '"' : '') + '>'
+    + '<div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.1rem">' + label + '</div>'
+    + '<div>' + (value||'—') + '</div>'
+  + '</div>';
+}
+
+function openNewJobFlow() { openWOModal(); }
+
+async function saveJobAndReturn() {
+  var client = (document.getElementById('job-client')||{}).value || '';
+  var site   = (document.getElementById('job-site')  ||{}).value || '';
+  if (!client.trim() || !site.trim()) { toast('Client and location are required', 'error'); return null; }
+  var id = _editWOId || uid();
+  var data = {
+    id,
+    woNum:    (document.getElementById('job-number')   ||{}).value || nextNum('W-', _jobs, 'woNum'),
+    number:   (document.getElementById('job-number')   ||{}).value || nextNum('W-', _jobs, 'woNum'),
+    client:   client.trim(), site: site.trim(),
+    date:     (document.getElementById('wo-date')      ||{}).value || today(),
+    location: site.trim(),
+    equipOwner: (document.getElementById('wo-equip-owner') ||{}).value || '',
+    province:   (document.getElementById('job-province')   ||{}).value || 'AB',
+    po:         (document.getElementById('job-po')         ||{}).value || '',
+    jobNum:     (document.getElementById('job-client-wo')  ||{}).value || '',
+    afe:        (document.getElementById('wo-afe')         ||{}).value || '',
+    rig:        (document.getElementById('wo-rig')         ||{}).value || '',
+    labourRows: [], equipRows: [], consumables: [], film: [], travel: {},
+    status: 'draft',
+    created: today(), modified: today(),
+  };
+  try {
+    await sbUpsert('jobs', id, data);
+    if (_editWOId) { _jobs = _jobs.map(function(j){ return j.id === id ? data : j; }); }
+    else { _jobs.unshift(data); }
+    renderJobs(); renderDashboard();
+    toast('Work order saved', 'success');
+    return id;
+  } catch(e) { toast('Save failed: ' + e.message, 'error'); return null; }
+}
+
+async function saveJobAndStartCS() {
+  var id = await saveJobAndReturn();
+  if (!id) return;
+  closeModal('job-modal');
+}
+
+async function closeJob(id) {
+  var j = _jobs.find(function(j){ return j.id === id; }); if (!j) return;
+  j.status = 'closed'; j.modified = today();
+  try { await sbUpsert('jobs', id, j); renderJobs(); renderDashboard(); toast('Work order closed', 'success'); }
+  catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function reopenJob(id) {
+  var j = _jobs.find(function(j){ return j.id === id; }); if (!j) return;
+  j.status = 'draft'; j.modified = today();
+  try { await sbUpsert('jobs', id, j); renderJobs(); renderDashboard(); toast('Work order reopened', 'success'); }
+  catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
 </script>
 </body>
 </html>
