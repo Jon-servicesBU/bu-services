@@ -3102,6 +3102,23 @@ function toggleJobDetail(jobId) {
   if (icon) icon.textContent = open ? '▲' : '▼';
 }
 
+// ── Job detail toggle handler ─────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('[data-toggle-job]');
+  if (!el) return;
+  // Don't toggle if clicking an action button inside the header
+  if (e.target.closest('button') || e.target.closest('a')) return;
+  toggleJobDetail(el.getAttribute('data-toggle-job'));
+});
+
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('[data-view-cs]');
+  if (el) { viewCS(el.getAttribute('data-view-cs')); return; }
+  var el2 = e.target.closest('[data-approve-cs]');
+  if (el2) { approveCS(el2.getAttribute('data-approve-cs')); return; }
+});
+
+
 </script>
 
 <!-- Rate Sheet Import Modal -->
