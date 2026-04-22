@@ -3071,7 +3071,7 @@ function addLabourRow(dayLabel, labOpts, prefill) {
   tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,.04)';
   tr.innerHTML =
     '<td style="padding:.2rem .25rem"><input class="cs-input" type="date" id="cs-lb-date-' + idx + '" value="' + (p.date||defaultDate) + '" style="width:110px"></td>'
-    + '<td style="padding:.2rem .25rem"><input class="cs-input" id="cs-lb-tech-' + idx + '" placeholder="Technician" value="' + (p.technician||'') + '" style="width:130px" list="tech-datalist"></td>'
+    + '<td style="padding:.2rem .25rem"><select class="cs-input" id="cs-lb-tech-' + idx + '" style="width:140px">' + getTechOptions() + '</select></td>'
     + '<td style="padding:.2rem .25rem"><select class="cs-input cs-lb-cat" id="cs-lb-cat-' + idx + '" style="width:170px">' + lo + '</select></td>'
     + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-st-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.regHrs||'') + '" style="width:58px"></td>'
     + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-ot-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.otHrs||'') + '" style="width:58px"></td>'
@@ -3088,6 +3088,10 @@ function addLabourRow(dayLabel, labOpts, prefill) {
   if (p.category) {
     var catEl = document.getElementById('cs-lb-cat-' + idx);
     if (catEl) catEl.value = p.category;
+  }
+  if (p.technician) {
+    var techEl2 = document.getElementById('cs-lb-tech-' + idx);
+    if (techEl2) techEl2.value = p.technician;
   }
 }
 
@@ -3406,6 +3410,17 @@ async function deleteInvoice(id) {
 
 document.addEventListener('click', function(e) {
   var el;
+  // Customer dropdown selection
+  el = e.target.closest('.cust-item');
+  if (el) {
+    var name = el.getAttribute('data-cust-name');
+    if (name) selectCustomer(name);
+    return;
+  }
+  // Close customer dropdown when clicking outside
+  if (!e.target.closest('.cust-dropdown')) {
+    closeCustList();
+  }
   // Toggle job detail
   el = e.target.closest('[data-toggle-job]');
   if (el && !e.target.closest('button') && !e.target.closest('a')) {
@@ -4763,19 +4778,20 @@ var NORTECH_EMPLOYEES = [
 function filterCustomers(q) {
   var list = document.getElementById('cust-list');
   if (!list) return;
-  var val = q.toLowerCase().trim();
+  var val = (q||'').toLowerCase().trim();
   var matches = val.length === 0
-    ? NORTECH_CUSTOMERS.slice(0, 50)   // show first 50 when empty
-    : NORTECH_CUSTOMERS.filter(function(c) {
-        return c.name.toLowerCase().includes(val) || (c.loc||'').toLowerCase().includes(val);
+    ? NORTECH_CUSTOMERS.slice(0, 50)
+    : NORTECH_CUSTOMERS.filter(function(cu) {
+        return cu.name.toLowerCase().includes(val) || (cu.loc||'').toLowerCase().includes(val);
       }).slice(0, 80);
   if (!matches.length) {
     list.innerHTML = '<div class="cust-no-results">No customers found</div>';
   } else {
-    list.innerHTML = matches.map(function(cust) {
-      return '<div class="cust-item" onmousedown="selectCustomer(' + JSON.stringify(cust.name) + ')">'
-        + '<span class="cust-item-name">' + cust.name + '</span>'
-        + (cust.loc ? '<span class="cust-item-loc">' + cust.loc + '</span>' : '')
+    list.innerHTML = matches.map(function(cu, i) {
+      // Use data attribute to avoid quote-escaping issues in onmousedown
+      return '<div class="cust-item" data-cust-name="' + cu.name.replace(/"/g, '&quot;') + '">'
+        + '<span class="cust-item-name">' + cu.name + '</span>'
+        + (cu.loc ? '<span class="cust-item-loc">' + cu.loc + '</span>' : '')
       + '</div>';
     }).join('');
   }
