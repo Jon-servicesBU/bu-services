@@ -283,6 +283,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 .inv-totals tr td:last-child{text-align:right;font-family:monospace}
 .inv-totals .total-row td{font-weight:900;font-size:13px;border-top:2px solid #111;padding-top:.4rem}
 .inv-footer{margin-top:1.5rem;padding-top:.75rem;border-top:1px solid #ddd;font-size:9px;color:#999}
+
+/* ── Charge sheet tabs ─────────────────────────────────────────────── */
+.cs-tab{
+  font-size:.72rem;font-weight:600;color:var(--muted);
+  background:none;border:none;border-bottom:2px solid transparent;
+  padding:.4rem .7rem;cursor:pointer;font-family:var(--ff);
+  transition:all .15s;white-space:nowrap;
+}
+.cs-tab:hover{color:var(--text)}
+.cs-tab.active{color:var(--nor-accent);border-bottom-color:var(--nor-accent)}
+
 </style>
 </head>
 <body>
@@ -654,59 +665,186 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Charge Sheet Modal -->
 <div class="modal-overlay" id="cs-modal">
-  <div class="modal" style="max-width:780px">
+  <div class="modal" style="max-width:960px;width:96vw">
     <div class="modal-hdr">
       <span class="modal-title" id="cs-modal-title">New Charge Sheet</span>
       <button class="modal-close" onclick="closeModal('cs-modal')">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="form-grid form-grid-3" style="gap:.75rem;margin-bottom:1rem">
+    <div class="modal-body" style="padding:1rem 1.25rem">
+
+      <!-- Header info -->
+      <div class="form-grid form-grid-3" style="gap:.6rem;margin-bottom:1rem">
         <div class="form-group">
-          <label class="form-label">Job <span>*</span></label>
+          <label class="form-label">Job <span style="color:var(--nor-accent)">*</span></label>
           <select class="form-select" id="cs-job" onchange="onCSJobChange()">
             <option value="">— Select job —</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Technician <span>*</span></label>
-          <input class="form-input" id="cs-technician" placeholder="Technician name">
+          <label class="form-label">Week Starting (Monday) <span style="color:var(--nor-accent)">*</span></label>
+          <input class="form-input" id="cs-week-start" type="date" onchange="onCSWeekChange()">
         </div>
         <div class="form-group">
-          <label class="form-label">Week Starting <span>*</span></label>
-          <input class="form-input" id="cs-week-start" type="date">
+          <label class="form-label">Notes / Reference</label>
+          <input class="form-input" id="cs-notes" placeholder="PO #, field notes…">
         </div>
       </div>
 
-      <!-- Day rows -->
-      <div style="overflow-x:auto">
-        <div class="cs-day-grid" id="cs-day-grid">
-          <div class="col-hdr">Day</div>
-          <div class="col-hdr">Category</div>
-          <div class="col-hdr">ST Hrs</div>
-          <div class="col-hdr">OT Hrs</div>
-          <div class="col-hdr">DT Hrs</div>
-          <div class="col-hdr">Equipment / Notes</div>
-          <div class="col-hdr">Total</div>
+      <!-- Tab nav -->
+      <div style="display:flex;gap:.2rem;border-bottom:1px solid var(--border);margin-bottom:.75rem">
+        <button class="cs-tab active" onclick="switchCSTab('labour',this)" id="cs-tab-labour">⏱ Labour</button>
+        <button class="cs-tab" onclick="switchCSTab('equipment',this)" id="cs-tab-equipment">🔧 Equipment</button>
+        <button class="cs-tab" onclick="switchCSTab('consumables',this)" id="cs-tab-consumables">🧪 Consumables</button>
+        <button class="cs-tab" onclick="switchCSTab('film',this)" id="cs-tab-film">🎞 Film</button>
+        <button class="cs-tab" onclick="switchCSTab('travel',this)" id="cs-tab-travel">🚗 Travel</button>
+        <button class="cs-tab" onclick="switchCSTab('other',this)" id="cs-tab-other">+ Other</button>
+      </div>
+
+      <!-- LABOUR TAB -->
+      <div id="cs-panel-labour" class="cs-panel">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:.73rem" id="cs-labour-table">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Day</th>
+                <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:160px">Technician</th>
+                <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:180px">Category</th>
+                <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">ST</th>
+                <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">OT</th>
+                <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">DT</th>
+                <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:60px">Night</th>
+                <th style="padding:.3rem .4rem;text-align:right;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:70px">Total</th>
+              </tr>
+            </thead>
+            <tbody id="cs-labour-body"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addLabourRow()" style="margin-top:.5rem">+ Add Row</button>
+      </div>
+
+      <!-- EQUIPMENT TAB -->
+      <div id="cs-panel-equipment" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem" id="cs-equipment-table">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Equipment Item</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty / Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
+              <th style="width:30px"></th>
+            </tr>
+          </thead>
+          <tbody id="cs-equipment-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addEquipmentRow()" style="margin-top:.5rem">+ Add Equipment</button>
+      </div>
+
+      <!-- CONSUMABLES TAB -->
+      <div id="cs-panel-consumables" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Consumable</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Quantity</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
+              <th style="width:30px"></th>
+            </tr>
+          </thead>
+          <tbody id="cs-consumables-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addConsumableRow()" style="margin-top:.5rem">+ Add Consumable</button>
+      </div>
+
+      <!-- FILM TAB -->
+      <div id="cs-panel-film" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Film Type</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:120px">Pipe Size</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Quantity</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
+              <th style="width:30px"></th>
+            </tr>
+          </thead>
+          <tbody id="cs-film-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addFilmRow()" style="margin-top:.5rem">+ Add Film</button>
+      </div>
+
+      <!-- TRAVEL TAB -->
+      <div id="cs-panel-travel" class="cs-panel" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem">
+          <div class="form-group">
+            <label class="form-label">Travel Hours (ST)</label>
+            <input class="form-input" id="cs-travel-hrs-st" type="number" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Travel Hours (OT)</label>
+            <input class="form-input" id="cs-travel-hrs-ot" type="number" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mileage (km)</label>
+            <input class="form-input" id="cs-travel-km" type="number" placeholder="0" min="0" oninput="calcCSTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rate/km</label>
+            <input class="form-input" id="cs-travel-km-rate" type="number" placeholder="1.20" value="1.20" step="0.01" oninput="calcCSTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LOA — # Technicians</label>
+            <input class="form-input" id="cs-travel-loa-techs" type="number" placeholder="0" min="0" oninput="calcCSTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LOA — # Days</label>
+            <input class="form-input" id="cs-travel-loa-days" type="number" placeholder="0" min="0" oninput="calcCSTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LOA Rate ($/tech/day)</label>
+            <input class="form-input" id="cs-travel-loa-rate" type="number" placeholder="70.00" value="70.00" step="0.01" oninput="calcCSTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Flights (total cost)</label>
+            <input class="form-input" id="cs-travel-flights" type="number" placeholder="0.00" min="0" step="0.01" oninput="calcCSTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hotels / Camp (total cost)</label>
+            <input class="form-input" id="cs-travel-hotels" type="number" placeholder="0.00" min="0" step="0.01" oninput="calcCSTotal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Travel Notes</label>
+            <input class="form-input" id="cs-travel-notes" placeholder="Origin, destination, airline…">
+          </div>
         </div>
       </div>
 
-      <!-- Equipment / expenses -->
-      <div style="margin-top:1rem">
-        <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.4rem">Additional Items / Expenses</div>
-        <div id="cs-extras-list"></div>
-        <button class="btn btn-ghost btn-sm" onclick="addCSExtra()" style="margin-top:.3rem">+ Add Item</button>
+      <!-- OTHER TAB -->
+      <div id="cs-panel-other" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Description</th>
+              <th style="padding:.3rem .4rem;text-align:right;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:100px">Amount</th>
+              <th style="width:30px"></th>
+            </tr>
+          </thead>
+          <tbody id="cs-other-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addOtherRow()" style="margin-top:.5rem">+ Add Item</button>
       </div>
 
-      <div class="cs-total-row" id="cs-totals">
-        <span><span class="cs-total-lbl">Labour:</span> <span class="cs-total-val" id="cs-total-labour">$0.00</span></span>
-        <span><span class="cs-total-lbl">Expenses:</span> <span class="cs-total-val" id="cs-total-expenses">$0.00</span></span>
-        <span><span class="cs-total-lbl">Total:</span> <span class="cs-total-val grand" id="cs-total-all">$0.00</span></span>
+      <!-- Totals bar -->
+      <div style="display:flex;flex-wrap:wrap;gap:1rem;padding:.75rem 0;border-top:1px solid var(--border);margin-top:.75rem;font-size:.75rem">
+        <span><span style="color:var(--muted)">Labour:</span> <span id="cs-tot-labour" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
+        <span><span style="color:var(--muted)">Equipment:</span> <span id="cs-tot-equipment" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
+        <span><span style="color:var(--muted)">Consumables:</span> <span id="cs-tot-consumables" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
+        <span><span style="color:var(--muted)">Film:</span> <span id="cs-tot-film" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
+        <span><span style="color:var(--muted)">Travel:</span> <span id="cs-tot-travel" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
+        <span><span style="color:var(--muted)">Other:</span> <span id="cs-tot-other" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
+        <span style="margin-left:auto"><span style="color:var(--muted)">TOTAL:</span> <span id="cs-tot-all" style="font-family:var(--mono);font-weight:800;font-size:.95rem;color:var(--nor-accent)">$0.00</span></span>
       </div>
 
-      <div class="form-group" style="margin-top:.5rem">
-        <label class="form-label">Notes / Customer Signature Reference</label>
-        <textarea class="form-textarea" id="cs-notes" placeholder="Any notes, job conditions, or reference to signed copy…" style="min-height:50px"></textarea>
-      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('cs-modal')">Cancel</button>
@@ -715,6 +853,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </div>
+
 
 <!-- Rate Sheet Modal -->
 <div class="modal-overlay" id="rate-modal">
@@ -834,7 +973,9 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('inv-view-modal')">Close</button>
       <button class="btn btn-secondary" onclick="printInvoice()">🖨 Print / PDF</button>
-      <button class="btn btn-success" id="inv-mark-paid-btn" onclick="markInvoicePaid()">✓ Mark Paid</button>
+      <button class="btn btn-secondary" id="inv-mark-sent-btn" onclick="markInvoiceSent()" style="display:none">Mark Sent</button>
+      <button class="btn btn-success" id="inv-mark-paid-btn" onclick="markInvoicePaid()" style="display:none">✓ Mark Paid</button>
+      <button class="btn btn-sm" id="inv-void-btn" onclick="markInvoiceVoid()" style="display:none;background:rgba(185,28,28,.15);color:#EF4444;border:1px solid rgba(185,28,28,.3)">Void Invoice</button>
     </div>
   </div>
 </div>
@@ -1137,213 +1278,15 @@ async function saveJob(){
 }
 
 // ── Charge Sheets ─────────────────────────────────────────────────────────────
-function openCSModal(preJobId){
-  _editCSId=null;
-  _csExtraCount=0;
-  document.getElementById('cs-modal-title').textContent='New Charge Sheet';
-  // Populate job select
-  var jobSel=document.getElementById('cs-job');
-  jobSel.innerHTML='<option value="">— Select job —</option>'
-    +_jobs.filter(function(j){return j.status==='active';})
-          .map(function(j){return'<option value="'+j.id+'">'+(j.client?j.client+' — ':'')+j.site.slice(0,40)+'</option>';}).join('');
-  if(preJobId) jobSel.value=preJobId;
-  document.getElementById('cs-technician').value='';
-  document.getElementById('cs-week-start').value=today();
-  document.getElementById('cs-notes').value='';
-  document.getElementById('cs-extras-list').innerHTML='';
-  buildCSDayGrid();
-  document.getElementById('cs-modal').classList.add('open');
-}
+// openCSModal moved to rebuilt version above
 
-function buildCSDayGrid(){
-  var weekStart=document.getElementById('cs-week-start').value||today();
-  var days=getWeekDays(weekStart);
-  var jobId=document.getElementById('cs-job').value;
-  var job=_jobs.find(function(j){return j.id===jobId;})||{};
-  var rs=_rateSheets.find(function(r){return r.id===job.rateSheetId;})||{};
-  var labourCats=(rs.labour||[]);
-  var labourOptions='<option value="">— Select category —</option>'
-    +labourCats.map(function(l){return'<option value="'+l.name+'">'+l.name+' ('+fmtMoney(l.stRate)+'/day)</option>';}).join('');
-
-  var grid=document.getElementById('cs-day-grid');
-  // Keep the header row (first 7 children)
-  var headerCols=[];
-  for(var i=0;i<7;i++) headerCols.push(grid.children[i]);
-  grid.innerHTML='';
-  headerCols.forEach(function(c){grid.appendChild(c);});
-
-  days.forEach(function(day,idx){
-    // Day label
-    var d=document.createElement('div');
-    d.style.cssText='font-size:.72rem;font-weight:600;padding:.2rem .3rem;white-space:nowrap';
-    d.textContent=day.name+' '+day.date.slice(5);
-    grid.appendChild(d);
-    // Category select
-    var desc=document.createElement('select');
-    desc.id='cs-day-desc-'+idx;
-    desc.style.cssText='background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:.72rem;padding:.3rem .35rem;width:100%;font-family:var(--ff)';
-    desc.innerHTML=labourOptions;
-    desc.addEventListener('change',function(){
-      // Auto-fill rates when category selected
-      var cat=labourCats.find(function(l){return l.name===desc.value;});
-      if(cat){
-        var stEl=document.getElementById('cs-day-st-'+idx);
-        var otEl=document.getElementById('cs-day-ot-'+idx);
-        // Only set rate hint — don't auto-fill hours
-      }
-      calcCSTotal();
-    });
-    grid.appendChild(desc);
-    // ST hours
-    var st=document.createElement('input');
-    st.type='number'; st.id='cs-day-st-'+idx; st.placeholder='0'; st.min='0'; st.step='0.5';
-    st.addEventListener('input',calcCSTotal);
-    grid.appendChild(st);
-    // OT hours
-    var ot=document.createElement('input');
-    ot.type='number'; ot.id='cs-day-ot-'+idx; ot.placeholder='0'; ot.min='0'; ot.step='0.5';
-    ot.addEventListener('input',calcCSTotal);
-    grid.appendChild(ot);
-    // DT hours
-    var dt=document.createElement('input');
-    dt.type='number'; dt.id='cs-day-dt-'+idx; dt.placeholder='0'; dt.min='0'; dt.step='0.5';
-    dt.addEventListener('input',calcCSTotal);
-    grid.appendChild(dt);
-    // Equipment
-    var eq=document.createElement('input');
-    eq.type='text'; eq.id='cs-day-eq-'+idx; eq.placeholder='Equipment…';
-    grid.appendChild(eq);
-    // Row total
-    var total=document.createElement('div');
-    total.id='cs-day-total-'+idx;
-    total.style.cssText='font-family:var(--mono);font-size:.72rem;text-align:right;padding:.2rem .3rem;color:var(--muted)';
-    total.textContent='$0.00';
-    grid.appendChild(total);
-  });
-  calcCSTotal();
-}
+// buildCSDayGrid replaced by rebuildLabourRows above
 
 function onCSJobChange(){ buildCSDayGrid(); }
 
-function calcCSTotal(){
-  var jobId=document.getElementById('cs-job').value;
-  var job=_jobs.find(function(j){return j.id===jobId;})||{};
-  var rs=_rateSheets.find(function(r){return r.id===job.rateSheetId;})||{};
-  var labourTotal=0;
-  for(var i=0;i<7;i++){
-    var stEl=document.getElementById('cs-day-st-'+i);
-    var otEl=document.getElementById('cs-day-ot-'+i);
-    var dtEl=document.getElementById('cs-day-dt-'+i);
-    var totEl=document.getElementById('cs-day-total-'+i);
-    var catEl=document.getElementById('cs-day-desc-'+i);
-    if(!stEl)continue;
-    // Get rates from selected category
-    var catName=catEl?catEl.value:'';
-    var cat=(rs.labour||[]).find(function(l){return l.name===catName;});
-    var stRate=cat?cat.stRate||0:(rs.labour&&rs.labour[0]?rs.labour[0].stRate||0:0);
-    var otRate=cat?cat.otRate||stRate*1.5:(rs.labour&&rs.labour[0]?rs.labour[0].otRate||stRate*1.5:0);
-    var dtRate=cat?cat.dtRate||stRate*2:(rs.labour&&rs.labour[0]?rs.labour[0].dtRate||stRate*2:0);
-    var st=parseFloat(stEl.value)||0;
-    var ot=parseFloat(otEl.value)||0;
-    var dt=parseFloat(dtEl.value)||0;
-    var rowTotal=st*stRate+ot*otRate+dt*dtRate;
-    labourTotal+=rowTotal;
-    if(totEl){
-      totEl.textContent=fmtMoney(rowTotal);
-      totEl.style.color=rowTotal>0?'var(--nor-accent)':'var(--muted)';
-    }
-  }
+// calcCSTotal replaced above
 
-  // Extras
-  var extrasTotal=0;
-  document.querySelectorAll('.cs-extra-amount').forEach(function(el){
-    extrasTotal+=parseFloat(el.value)||0;
-  });
-
-  var grandTotal=labourTotal+extrasTotal;
-  var ltEl=document.getElementById('cs-total-labour');
-  var etEl=document.getElementById('cs-total-expenses');
-  var atEl=document.getElementById('cs-total-all');
-  if(ltEl)ltEl.textContent=fmtMoney(labourTotal);
-  if(etEl)etEl.textContent=fmtMoney(extrasTotal);
-  if(atEl)atEl.textContent=fmtMoney(grandTotal);
-  return{labour:labourTotal,expenses:extrasTotal,total:grandTotal};
-}
-
-function addCSExtra(){
-  _csExtraCount++;
-  var idx=_csExtraCount;
-  var list=document.getElementById('cs-extras-list');
-  var row=document.createElement('div');
-  row.id='cs-extra-'+idx;
-  row.style.cssText='display:grid;grid-template-columns:1fr 100px 24px;gap:.4rem;align-items:center;margin-bottom:.3rem';
-  row.innerHTML='<input class="form-input" placeholder="Description (e.g. Fuel, mileage, PPE)" style="font-size:.75rem;padding:.3rem .5rem">'
-    +'<input class="form-input cs-extra-amount" type="number" placeholder="0.00" style="font-size:.75rem;padding:.3rem .5rem;font-family:var(--mono)" oninput="calcCSTotal()">'
-    +'<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-extra-'+idx+'\').remove();calcCSTotal()" style="padding:.2rem .4rem">✕</button>';
-  list.appendChild(row);
-}
-
-async function saveCS(status){
-  var jobId=document.getElementById('cs-job').value;
-  var tech =document.getElementById('cs-technician').value.trim();
-  var weekStart=document.getElementById('cs-week-start').value;
-  if(!jobId||!tech||!weekStart){toast('Job, technician, and week are required','error');return;}
-  var job=_jobs.find(function(j){return j.id===jobId;})||{};
-
-  var days=[];
-  for(var i=0;i<7;i++){
-    var stEl=document.getElementById('cs-day-st-'+i);
-    if(!stEl)continue;
-    var d=getWeekDays(weekStart)[i];
-    var st=parseFloat(document.getElementById('cs-day-st-'+i).value)||0;
-    var ot=parseFloat(document.getElementById('cs-day-ot-'+i).value)||0;
-    var dt=parseFloat(document.getElementById('cs-day-dt-'+i).value)||0;
-    if(st||ot||dt){
-      var catEl=document.getElementById('cs-day-desc-'+i);
-      var catName=catEl?catEl.value:'';
-      var catObj=(job.rateSheetId?(_rateSheets.find(function(r){return r.id===job.rateSheetId;})||{}).labour||[]:[]).find(function(l){return l.name===catName;})||{};
-      days.push({
-        date:d.date, day:d.name,
-        category:catName,
-        stRate:catObj.stRate||0, otRate:catObj.otRate||0, dtRate:catObj.dtRate||0,
-        st,ot,dt,
-        equipment:(document.getElementById('cs-day-eq-'+i)||{}).value||'',
-      });
-    }
-  }
-
-  var extras=[];
-  document.querySelectorAll('#cs-extras-list > div').forEach(function(row){
-    var inputs=row.querySelectorAll('input');
-    if(inputs[0]&&inputs[1]&&(parseFloat(inputs[1].value)||0)>0){
-      extras.push({description:inputs[0].value,amount:parseFloat(inputs[1].value)||0});
-    }
-  });
-
-  var totals=calcCSTotal();
-  var id=_editCSId||uid();
-  var data={
-    id, jobId, client:job.client||'', site:job.site||'',
-    csNum: _editCSId ? (_chargeSheets.find(function(c){return c.id===_editCSId;})||{}).csNum||nextNum('CS-',_chargeSheets,'csNum')
-                     : nextNum('CS-',_chargeSheets,'csNum'),
-    technician:tech, weekStart,
-    days, extras,
-    labour:totals.labour, expenses:totals.expenses, total:totals.total,
-    notes:document.getElementById('cs-notes').value.trim(),
-    status,
-    created: _editCSId?(_chargeSheets.find(function(c){return c.id===_editCSId;})||{}).created||today():today(),
-    modified:today(),
-    rateSheetId:job.rateSheetId||'',
-  };
-  try{
-    await sbUpsert('charge_sheets',id,data);
-    if(_editCSId){_chargeSheets=_chargeSheets.map(function(c){return c.id===id?data:c;});}
-    else{_chargeSheets.unshift(data);}
-    closeModal('cs-modal');
-    renderCSList(); renderDashboard(); updatePendingBadge();
-    toast(status==='pending'?'Charge sheet submitted for approval':'Draft saved','success');
-  }catch(e){toast('Save failed: '+e.message,'error');}
-}
+// saveCS replaced above
 
 function renderCSList(){
   var filter=(document.getElementById('cs-filter-status')||{}).value||'';
@@ -1700,7 +1643,9 @@ function renderInvoices(){
       +'<td>'+chipHtml(i.status)+'</td>'
       +'<td style="white-space:nowrap">'
         +'<button class="btn btn-ghost btn-sm" onclick="viewInvoice(\''+i.id+'\')">View</button>'
+        +(i.status==='draft'?' <button class="btn btn-sm btn-secondary" onclick="markInvSent(\''+i.id+'\')">Mark Sent</button>':'')
         +(i.status==='sent'?' <button class="btn btn-sm btn-success" onclick="markPaid(\''+i.id+'\')">✓ Paid</button>':'')
+        +(i.status!=='void'&&i.status!=='paid'?' <button class="btn btn-sm" style="background:rgba(185,28,28,.15);color:#EF4444;border-color:rgba(185,28,28,.3)" onclick="markVoid(\''+i.id+'\')">Void</button>':'')
       +'</td>'
     +'</tr>';
   }).join('');
@@ -1740,8 +1685,12 @@ function viewInvoice(id){
     +(inv.notes?'<div class="inv-footer">'+inv.notes+'</div>':'')
   +'</div>';
   document.getElementById('inv-view-body').innerHTML=html;
-  var paidBtn=document.getElementById('inv-mark-paid-btn');
-  if(paidBtn) paidBtn.style.display=inv.status==='sent'?'inline-flex':'none';
+  var paidBtn = document.getElementById('inv-mark-paid-btn');
+  var sentBtn = document.getElementById('inv-mark-sent-btn');
+  var voidBtn = document.getElementById('inv-void-btn');
+  if (paidBtn) paidBtn.style.display = inv.status === 'sent' ? 'inline-flex' : 'none';
+  if (sentBtn) sentBtn.style.display = inv.status === 'draft' ? 'inline-flex' : 'none';
+  if (voidBtn) voidBtn.style.display = (inv.status !== 'void' && inv.status !== 'paid') ? 'inline-flex' : 'none';
   document.getElementById('inv-view-modal').classList.add('open');
 }
 
@@ -2058,6 +2007,609 @@ async function importSeedRateSheet(key) {
     renderRateSheets();
     toast('Rate sheet imported: ' + rs.labour.length + ' labour + ' + rs.equipment.length + ' equipment/consumable items', 'success');
   } catch(e) { toast('Import failed: ' + e.message, 'error'); }
+}
+
+
+
+// ── CHARGE SHEET — REBUILT ────────────────────────────────────────────────────
+
+var _csLabourRowCount = 0;
+var _csEquipmentRowCount = 0;
+var _csConsumableRowCount = 0;
+var _csFilmRowCount = 0;
+var _csOtherRowCount = 0;
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchCSTab(tab, btn) {
+  document.querySelectorAll('.cs-panel').forEach(function(p){ p.style.display='none'; });
+  document.querySelectorAll('.cs-tab').forEach(function(b){ b.classList.remove('active'); });
+  var panel = document.getElementById('cs-panel-'+tab);
+  if (panel) panel.style.display = 'block';
+  if (btn) btn.classList.add('active');
+}
+
+// ── Week start — always snap to Monday ───────────────────────────────────────
+function snapToMonday(dateStr) {
+  if (!dateStr) return today();
+  var d = new Date(dateStr + 'T00:00:00');
+  var day = d.getDay(); // 0=Sun, 1=Mon
+  var diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
+function onCSWeekChange() {
+  var input = document.getElementById('cs-week-start');
+  if (!input) return;
+  var snapped = snapToMonday(input.value);
+  input.value = snapped;
+  rebuildLabourRows();
+}
+
+function getWeekDaysFromMonday(mondayStr) {
+  var d = new Date(mondayStr + 'T00:00:00');
+  var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  return days.map(function(name, i) {
+    var dd = new Date(d);
+    dd.setDate(dd.getDate() + i);
+    return { name: name, date: dd.toISOString().slice(0, 10) };
+  });
+}
+
+// ── Get rate sheet for current job ───────────────────────────────────────────
+function getCSRateSheet() {
+  var jobId = (document.getElementById('cs-job')||{}).value || '';
+  var job = _jobs.find(function(j){ return j.id === jobId; }) || {};
+  return _rateSheets.find(function(r){ return r.id === job.rateSheetId; }) || {};
+}
+
+function getLabourOptions(rs) {
+  var cats = rs.labour || [];
+  // Technicians see names only — NO rates shown
+  return '<option value="">— Select category —</option>'
+    + cats.map(function(l) {
+      return '<option value="' + l.name + '">' + l.name + '</option>';
+    }).join('');
+}
+
+function getTechOptions() {
+  // Build from VIEWER_PEOPLE
+  return '<option value="">— Select technician —</option>'
+    + (window.VIEWER_PEOPLE || []).map(function(p) {
+      return '<option value="' + p.name + '">' + p.name + '</option>';
+    }).join('');
+}
+
+function getEquipmentOptions(rs) {
+  var items = (rs.equipment || []).filter(function(e) {
+    return ['hour','shift'].some(function(u){ return e.unit === u; });
+  });
+  return '<option value="">— Select equipment —</option>'
+    + items.map(function(e) {
+      return '<option value="' + e.name + '" data-unit="' + e.unit + '">' + e.name + '</option>';
+    }).join('');
+}
+
+function getConsumableOptions(rs) {
+  var items = (rs.equipment || []).filter(function(e) {
+    return !['hour','shift'].some(function(u){ return e.unit === u; });
+  });
+  return '<option value="">— Select consumable —</option>'
+    + items.map(function(e) {
+      return '<option value="' + e.name + '" data-unit="' + e.unit + '">' + e.name + '</option>';
+    }).join('');
+}
+
+var FILM_TYPES = [
+  'Film Per Weld < 2"', 'Film Per Weld 2"-3"', 'Film Per Weld 4"-5"',
+  'Film Per Weld 6"', 'Film Per Weld 8"-12"', 'Film Per Weld 14"+',
+  'Film Sheet 2.75"x8.5"', 'Film Sheet 2.75"x17"', 'Film Sheet 3.5"x17"',
+  'Film Sheet 4.5"x17"', 'Film Sheet 7"x17"', 'Film Sheet 14"x17"',
+  'Film Digitizing per 17"', 'Film Digitizing per 17" Stapled',
+];
+
+var PIPE_SIZES = ['< 2"', '2"-3"', '4"-5"', '6"', '8"-12"', '14"+', 'Sheet', 'N/A'];
+
+function getFilmTypeOptions() {
+  return '<option value="">— Film type —</option>'
+    + FILM_TYPES.map(function(t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
+}
+
+function getPipeSizeOptions() {
+  return '<option value="">— Pipe size —</option>'
+    + PIPE_SIZES.map(function(s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
+}
+
+// ── Open CS Modal ─────────────────────────────────────────────────────────────
+function openCSModal(preJobId) {
+  _editCSId = null;
+  _csLabourRowCount = 0;
+  _csEquipmentRowCount = 0;
+  _csConsumableRowCount = 0;
+  _csFilmRowCount = 0;
+  _csOtherRowCount = 0;
+
+  document.getElementById('cs-modal-title').textContent = 'New Charge Sheet';
+
+  // Populate job select
+  var jobSel = document.getElementById('cs-job');
+  jobSel.innerHTML = '<option value="">— Select job —</option>'
+    + _jobs.filter(function(j){ return j.status === 'active'; })
+           .map(function(j){ return '<option value="' + j.id + '">' + (j.client ? j.client + ' — ' : '') + j.site.slice(0, 40) + '</option>'; }).join('');
+  if (preJobId) jobSel.value = preJobId;
+
+  // Set week start to current Monday
+  document.getElementById('cs-week-start').value = snapToMonday(today());
+  document.getElementById('cs-notes').value = '';
+
+  // Clear all sections
+  ['cs-labour-body','cs-equipment-body','cs-consumables-body','cs-film-body','cs-other-body'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.innerHTML = '';
+  });
+  ['cs-travel-hrs-st','cs-travel-hrs-ot','cs-travel-km','cs-travel-loa-techs','cs-travel-loa-days','cs-travel-flights','cs-travel-hotels'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('cs-travel-km-rate').value = '1.20';
+  document.getElementById('cs-travel-loa-rate').value = '70.00';
+  document.getElementById('cs-travel-notes').value = '';
+
+  // Build initial 7 labour rows (one per day)
+  rebuildLabourRows();
+
+  // Switch to labour tab
+  switchCSTab('labour', document.getElementById('cs-tab-labour'));
+
+  // Reset totals
+  calcCSTotal();
+
+  document.getElementById('cs-modal').classList.add('open');
+}
+
+function onCSJobChange() {
+  rebuildLabourRows();
+  // Also update equipment/consumable dropdowns
+  var rs = getCSRateSheet();
+  var eqOpts = getEquipmentOptions(rs);
+  var conOpts = getConsumableOptions(rs);
+  document.querySelectorAll('.cs-eq-select').forEach(function(sel) { sel.innerHTML = eqOpts; });
+  document.querySelectorAll('.cs-con-select').forEach(function(sel) { sel.innerHTML = conOpts; });
+}
+
+// ── Labour rows ───────────────────────────────────────────────────────────────
+function rebuildLabourRows() {
+  var weekStart = document.getElementById('cs-week-start').value || today();
+  var days = getWeekDaysFromMonday(weekStart);
+  var rs = getCSRateSheet();
+  var labOpts = getLabourOptions(rs);
+  var techOpts = getTechOptions();
+
+  var tbody = document.getElementById('cs-labour-body');
+  if (!tbody) return;
+
+  // Preserve any extra rows already added (beyond 7)
+  var currentRows = _csLabourRowCount;
+  tbody.innerHTML = '';
+  _csLabourRowCount = 0;
+
+  // Build one row per day of week
+  days.forEach(function(day) {
+    addLabourRow(day.name + ' ' + day.date.slice(5), labOpts, techOpts);
+  });
+}
+
+function addLabourRow(dayLabel, labOpts, techOpts) {
+  _csLabourRowCount++;
+  var idx = _csLabourRowCount;
+  var rs = getCSRateSheet();
+  var lo = labOpts || getLabourOptions(rs);
+  var to = techOpts || getTechOptions();
+  var dl = dayLabel || '';
+
+  var tbody = document.getElementById('cs-labour-body');
+  if (!tbody) return;
+
+  var tr = document.createElement('tr');
+  tr.id = 'cs-lb-row-' + idx;
+  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.25rem .3rem;font-size:.7rem;font-weight:600;white-space:nowrap;color:var(--muted)">' + dl + '</td>'
+    + '<td style="padding:.2rem .3rem"><select class="cs-input" id="cs-lb-tech-' + idx + '" style="width:100%">' + to + '</select></td>'
+    + '<td style="padding:.2rem .3rem"><select class="cs-input cs-lb-cat" id="cs-lb-cat-' + idx + '" onchange="calcCSTotal()" style="width:100%">' + lo + '</select></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-st-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-ot-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-dt-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-lb-ns-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()" title="Night shift hours"></td>'
+    + '<td style="padding:.2rem .3rem;text-align:right;font-family:var(--mono);font-size:.72rem;color:var(--muted)" id="cs-lb-tot-' + idx + '">$0.00</td>';
+  tbody.appendChild(tr);
+
+  // Style inputs
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    el.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;width:100%;font-family:var(--ff)';
+  });
+}
+
+// ── Equipment rows ────────────────────────────────────────────────────────────
+function addEquipmentRow() {
+  _csEquipmentRowCount++;
+  var idx = _csEquipmentRowCount;
+  var rs = getCSRateSheet();
+  var opts = getEquipmentOptions(rs);
+
+  var tbody = document.getElementById('cs-equipment-body');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.id = 'cs-eq-row-' + idx;
+  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.2rem .3rem"><select class="cs-input cs-eq-select" id="cs-eq-item-' + idx + '" onchange="onEqSelect(' + idx + ')" style="min-width:200px">' + opts + '</select>'
+    + '<input class="cs-input" id="cs-eq-manual-' + idx + '" placeholder="Or type custom item…" style="margin-top:.2rem;width:100%;font-size:.7rem"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-eq-qty-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-eq-unit-' + idx + '" placeholder="hour" style="width:70px"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-eq-notes-' + idx + '" placeholder="Notes…"></td>'
+    + '<td style="padding:.2rem .3rem"><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-eq-row-' + idx + '\').remove();calcCSTotal()">✕</button></td>';
+  tbody.appendChild(tr);
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
+  });
+}
+
+function onEqSelect(idx) {
+  var sel = document.getElementById('cs-eq-item-' + idx);
+  var unitEl = document.getElementById('cs-eq-unit-' + idx);
+  if (!sel || !unitEl) return;
+  var opt = sel.options[sel.selectedIndex];
+  if (opt && opt.dataset.unit) unitEl.value = opt.dataset.unit;
+}
+
+// ── Consumable rows ───────────────────────────────────────────────────────────
+function addConsumableRow() {
+  _csConsumableRowCount++;
+  var idx = _csConsumableRowCount;
+  var rs = getCSRateSheet();
+  var opts = getConsumableOptions(rs);
+
+  var tbody = document.getElementById('cs-consumables-body');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.id = 'cs-con-row-' + idx;
+  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.2rem .3rem"><select class="cs-input cs-con-select" id="cs-con-item-' + idx + '" style="min-width:180px">' + opts + '</select>'
+    + '<input class="cs-input" id="cs-con-manual-' + idx + '" placeholder="Or type custom…" style="margin-top:.2rem;width:100%;font-size:.7rem"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-con-qty-' + idx + '" placeholder="0" min="0" step="0.5" oninput="calcCSTotal()"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-con-unit-' + idx + '" placeholder="unit" style="width:70px"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-con-notes-' + idx + '" placeholder="Notes…"></td>'
+    + '<td style="padding:.2rem .3rem"><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-con-row-' + idx + '\').remove();calcCSTotal()">✕</button></td>';
+  tbody.appendChild(tr);
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
+  });
+}
+
+// ── Film rows ─────────────────────────────────────────────────────────────────
+function addFilmRow() {
+  _csFilmRowCount++;
+  var idx = _csFilmRowCount;
+
+  var tbody = document.getElementById('cs-film-body');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.id = 'cs-film-row-' + idx;
+  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.2rem .3rem"><select class="cs-input" id="cs-film-type-' + idx + '" style="min-width:180px">' + getFilmTypeOptions() + '</select></td>'
+    + '<td style="padding:.2rem .3rem"><select class="cs-input" id="cs-film-size-' + idx + '" style="width:100px">' + getPipeSizeOptions() + '</select></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-film-qty-' + idx + '" placeholder="0" min="0" oninput="calcCSTotal()"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-film-notes-' + idx + '" placeholder="Notes…"></td>'
+    + '<td style="padding:.2rem .3rpm"><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-film-row-' + idx + '\').remove();calcCSTotal()">✕</button></td>';
+  tbody.appendChild(tr);
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
+  });
+}
+
+// ── Other rows ────────────────────────────────────────────────────────────────
+function addOtherRow() {
+  _csOtherRowCount++;
+  var idx = _csOtherRowCount;
+
+  var tbody = document.getElementById('cs-other-body');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.id = 'cs-other-row-' + idx;
+  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-other-desc-' + idx + '" placeholder="Description…" style="width:100%"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-other-amt-' + idx + '" placeholder="0.00" step="0.01" oninput="calcCSTotal()"></td>'
+    + '<td style="padding:.2rem .3rem"><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-other-row-' + idx + '\').remove();calcCSTotal()">✕</button></td>';
+  tbody.appendChild(tr);
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
+  });
+}
+
+// ── calcCSTotal ───────────────────────────────────────────────────────────────
+function calcCSTotal() {
+  var rs = getCSRateSheet();
+
+  // Labour
+  var labourTotal = 0;
+  for (var i = 1; i <= _csLabourRowCount; i++) {
+    var catEl = document.getElementById('cs-lb-cat-' + i);
+    var stEl  = document.getElementById('cs-lb-st-' + i);
+    var otEl  = document.getElementById('cs-lb-ot-' + i);
+    var dtEl  = document.getElementById('cs-lb-dt-' + i);
+    var nsEl  = document.getElementById('cs-lb-ns-' + i);
+    var totEl = document.getElementById('cs-lb-tot-' + i);
+    if (!stEl) continue;
+    var catName = catEl ? catEl.value : '';
+    var cat = (rs.labour || []).find(function(l) { return l.name === catName; }) || {};
+    var stRate = cat.stRate || 0;
+    var otRate = cat.otRate || stRate * 1.5;
+    var dtRate = cat.dtRate || stRate * 2;
+    var nsRate = stRate * 1.15; // 15% night shift premium
+    var st = parseFloat(stEl.value) || 0;
+    var ot = parseFloat(otEl.value) || 0;
+    var dt = parseFloat(dtEl.value) || 0;
+    var ns = parseFloat(nsEl ? nsEl.value : 0) || 0;
+    var rowTotal = st * stRate + ot * otRate + dt * dtRate + ns * nsRate;
+    labourTotal += rowTotal;
+    if (totEl) {
+      totEl.textContent = fmtMoney(rowTotal);
+      totEl.style.color = rowTotal > 0 ? 'var(--nor-accent)' : 'var(--muted)';
+    }
+  }
+
+  // Equipment (qty × rate from rate sheet)
+  var equipTotal = 0;
+  document.querySelectorAll('[id^=cs-eq-row-]').forEach(function(row) {
+    var idx = row.id.replace('cs-eq-row-', '');
+    var itemSel = document.getElementById('cs-eq-item-' + idx);
+    var manual  = document.getElementById('cs-eq-manual-' + idx);
+    var qtyEl   = document.getElementById('cs-eq-qty-' + idx);
+    if (!qtyEl) return;
+    var qty = parseFloat(qtyEl.value) || 0;
+    var itemName = (itemSel && itemSel.value) || (manual && manual.value) || '';
+    var item = (rs.equipment || []).find(function(e) { return e.name === itemName; }) || {};
+    equipTotal += qty * (item.rate || 0);
+  });
+
+  // Consumables
+  var conTotal = 0;
+  document.querySelectorAll('[id^=cs-con-row-]').forEach(function(row) {
+    var idx = row.id.replace('cs-con-row-', '');
+    var itemSel = document.getElementById('cs-con-item-' + idx);
+    var qtyEl   = document.getElementById('cs-con-qty-' + idx);
+    if (!qtyEl) return;
+    var qty = parseFloat(qtyEl.value) || 0;
+    var itemName = (itemSel && itemSel.value) || '';
+    var item = (rs.equipment || []).find(function(e) { return e.name === itemName; }) || {};
+    conTotal += qty * (item.rate || 0);
+  });
+
+  // Film (qty × rate from rate sheet equipment list)
+  var filmTotal = 0;
+  document.querySelectorAll('[id^=cs-film-row-]').forEach(function(row) {
+    var idx = row.id.replace('cs-film-row-', '');
+    var typeEl = document.getElementById('cs-film-type-' + idx);
+    var qtyEl  = document.getElementById('cs-film-qty-' + idx);
+    if (!qtyEl) return;
+    var qty = parseFloat(qtyEl.value) || 0;
+    var typeName = (typeEl && typeEl.value) || '';
+    // Match to rate sheet film items
+    var item = (rs.equipment || []).find(function(e) { return typeName.toLowerCase().includes(e.name.toLowerCase().slice(0,10)); }) || {};
+    filmTotal += qty * (item.rate || 0);
+  });
+
+  // Travel
+  var travelTotal = 0;
+  var travelHrsST = parseFloat((document.getElementById('cs-travel-hrs-st')||{}).value) || 0;
+  var travelHrsOT = parseFloat((document.getElementById('cs-travel-hrs-ot')||{}).value) || 0;
+  var travelKm    = parseFloat((document.getElementById('cs-travel-km')||{}).value) || 0;
+  var travelKmRate= parseFloat((document.getElementById('cs-travel-km-rate')||{}).value) || 1.20;
+  var loaTechs    = parseFloat((document.getElementById('cs-travel-loa-techs')||{}).value) || 0;
+  var loaDays     = parseFloat((document.getElementById('cs-travel-loa-days')||{}).value) || 0;
+  var loaRate     = parseFloat((document.getElementById('cs-travel-loa-rate')||{}).value) || 70;
+  var flights     = parseFloat((document.getElementById('cs-travel-flights')||{}).value) || 0;
+  var hotels      = parseFloat((document.getElementById('cs-travel-hotels')||{}).value) || 0;
+  // Travel hours use first labour category rate or vehicle rate
+  var travelHrRate= 10; // service vehicle default
+  travelTotal = travelHrsST * travelHrRate + travelHrsOT * travelHrRate * 1.5
+              + travelKm * travelKmRate
+              + loaTechs * loaDays * loaRate
+              + flights + hotels;
+
+  // Other
+  var otherTotal = 0;
+  document.querySelectorAll('[id^=cs-other-row-]').forEach(function(row) {
+    var idx = row.id.replace('cs-other-row-', '');
+    var amtEl = document.getElementById('cs-other-amt-' + idx);
+    if (amtEl) otherTotal += parseFloat(amtEl.value) || 0;
+  });
+
+  var grandTotal = labourTotal + equipTotal + conTotal + filmTotal + travelTotal + otherTotal;
+
+  // Update display
+  var tots = {
+    'cs-tot-labour': labourTotal, 'cs-tot-equipment': equipTotal,
+    'cs-tot-consumables': conTotal, 'cs-tot-film': filmTotal,
+    'cs-tot-travel': travelTotal, 'cs-tot-other': otherTotal,
+    'cs-tot-all': grandTotal
+  };
+  Object.keys(tots).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = fmtMoney(tots[id]);
+  });
+
+  return { labour: labourTotal, equipment: equipTotal, consumables: conTotal,
+           film: filmTotal, travel: travelTotal, other: otherTotal, total: grandTotal };
+}
+
+// ── saveCS ────────────────────────────────────────────────────────────────────
+async function saveCS(status) {
+  var jobId     = document.getElementById('cs-job').value;
+  var weekStart = document.getElementById('cs-week-start').value;
+  if (!jobId || !weekStart) { toast('Job and week start are required', 'error'); return; }
+  var job = _jobs.find(function(j){ return j.id === jobId; }) || {};
+
+  // Collect labour rows
+  var labourRows = [];
+  for (var i = 1; i <= _csLabourRowCount; i++) {
+    var catEl  = document.getElementById('cs-lb-cat-' + i);
+    var techEl = document.getElementById('cs-lb-tech-' + i);
+    var stEl   = document.getElementById('cs-lb-st-' + i);
+    var otEl   = document.getElementById('cs-lb-ot-' + i);
+    var dtEl   = document.getElementById('cs-lb-dt-' + i);
+    var nsEl   = document.getElementById('cs-lb-ns-' + i);
+    var totEl  = document.getElementById('cs-lb-tot-' + i);
+    if (!stEl) continue;
+    var st = parseFloat(stEl.value) || 0;
+    var ot = parseFloat(otEl.value) || 0;
+    var dt = parseFloat(dtEl.value) || 0;
+    var ns = parseFloat(nsEl ? nsEl.value : 0) || 0;
+    if (!st && !ot && !dt && !ns && !(catEl && catEl.value)) continue; // skip empty rows
+    var rs = getCSRateSheet();
+    var catName = catEl ? catEl.value : '';
+    var cat = (rs.labour || []).find(function(l){ return l.name === catName; }) || {};
+    labourRows.push({
+      dayLabel: (document.getElementById('cs-lb-row-' + i)||{}).children
+                ? document.getElementById('cs-lb-row-' + i).children[0].textContent : '',
+      technician: techEl ? techEl.value : '',
+      category: catName,
+      stRate: cat.stRate || 0, otRate: cat.otRate || 0, dtRate: cat.dtRate || 0,
+      st, ot, dt, ns,
+      total: parseFloat((totEl||{}).textContent.replace(/[^0-9.]/g,'')) || 0,
+    });
+  }
+
+  // Equipment rows
+  var equipRows = [];
+  document.querySelectorAll('[id^=cs-eq-row-]').forEach(function(row) {
+    var idx = row.id.replace('cs-eq-row-', '');
+    var item = (document.getElementById('cs-eq-item-'+idx)||{}).value || (document.getElementById('cs-eq-manual-'+idx)||{}).value || '';
+    var qty  = parseFloat((document.getElementById('cs-eq-qty-'+idx)||{}).value) || 0;
+    var unit = (document.getElementById('cs-eq-unit-'+idx)||{}).value || '';
+    var notes= (document.getElementById('cs-eq-notes-'+idx)||{}).value || '';
+    if (item || qty) equipRows.push({ item, qty, unit, notes });
+  });
+
+  // Consumable rows
+  var conRows = [];
+  document.querySelectorAll('[id^=cs-con-row-]').forEach(function(row) {
+    var idx = row.id.replace('cs-con-row-', '');
+    var item = (document.getElementById('cs-con-item-'+idx)||{}).value || (document.getElementById('cs-con-manual-'+idx)||{}).value || '';
+    var qty  = parseFloat((document.getElementById('cs-con-qty-'+idx)||{}).value) || 0;
+    var unit = (document.getElementById('cs-con-unit-'+idx)||{}).value || '';
+    var notes= (document.getElementById('cs-con-notes-'+idx)||{}).value || '';
+    if (item || qty) conRows.push({ item, qty, unit, notes });
+  });
+
+  // Film rows
+  var filmRows = [];
+  document.querySelectorAll('[id^=cs-film-row-]').forEach(function(row) {
+    var idx = row.id.replace('cs-film-row-', '');
+    var type = (document.getElementById('cs-film-type-'+idx)||{}).value || '';
+    var size = (document.getElementById('cs-film-size-'+idx)||{}).value || '';
+    var qty  = parseFloat((document.getElementById('cs-film-qty-'+idx)||{}).value) || 0;
+    var notes= (document.getElementById('cs-film-notes-'+idx)||{}).value || '';
+    if (type || qty) filmRows.push({ type, size, qty, notes });
+  });
+
+  // Other rows
+  var otherRows = [];
+  document.querySelectorAll('[id^=cs-other-row-]').forEach(function(row) {
+    var idx = row.id.replace('cs-other-row-', '');
+    var desc = (document.getElementById('cs-other-desc-'+idx)||{}).value || '';
+    var amt  = parseFloat((document.getElementById('cs-other-amt-'+idx)||{}).value) || 0;
+    if (desc || amt) otherRows.push({ desc, amt });
+  });
+
+  // Travel
+  var travel = {
+    hrsST:   parseFloat((document.getElementById('cs-travel-hrs-st')||{}).value) || 0,
+    hrsOT:   parseFloat((document.getElementById('cs-travel-hrs-ot')||{}).value) || 0,
+    km:      parseFloat((document.getElementById('cs-travel-km')||{}).value) || 0,
+    kmRate:  parseFloat((document.getElementById('cs-travel-km-rate')||{}).value) || 1.20,
+    loaTechs:parseFloat((document.getElementById('cs-travel-loa-techs')||{}).value) || 0,
+    loaDays: parseFloat((document.getElementById('cs-travel-loa-days')||{}).value) || 0,
+    loaRate: parseFloat((document.getElementById('cs-travel-loa-rate')||{}).value) || 70,
+    flights: parseFloat((document.getElementById('cs-travel-flights')||{}).value) || 0,
+    hotels:  parseFloat((document.getElementById('cs-travel-hotels')||{}).value) || 0,
+    notes:   (document.getElementById('cs-travel-notes')||{}).value || '',
+  };
+
+  var totals = calcCSTotal();
+  var id = _editCSId || uid();
+
+  var data = {
+    id, jobId, client: job.client || '', site: job.site || '',
+    csNum: _editCSId
+      ? (_chargeSheets.find(function(c){ return c.id === _editCSId; }) || {}).csNum || nextNum('CS-', _chargeSheets, 'csNum')
+      : nextNum('CS-', _chargeSheets, 'csNum'),
+    weekStart, notes: document.getElementById('cs-notes').value.trim(),
+    rateSheetId: job.rateSheetId || '',
+    labourRows, equipRows, conRows, filmRows, travel, otherRows,
+    labour: totals.labour, equipment: totals.equipment,
+    consumables: totals.consumables, film: totals.film,
+    travelTotal: totals.travel, other: totals.other,
+    total: totals.total,
+    status,
+    created: _editCSId ? (_chargeSheets.find(function(c){ return c.id === _editCSId; }) || {}).created || today() : today(),
+    modified: today(),
+  };
+
+  try {
+    await sbUpsert('charge_sheets', id, data);
+    if (_editCSId) { _chargeSheets = _chargeSheets.map(function(c){ return c.id === id ? data : c; }); }
+    else { _chargeSheets.unshift(data); }
+    closeModal('cs-modal');
+    renderCSList(); renderDashboard(); updatePendingBadge();
+    toast(status === 'pending' ? 'Charge sheet submitted for approval' : 'Draft saved', 'success');
+  } catch(e) { toast('Save failed: ' + e.message, 'error'); }
+}
+
+
+async function markVoid(id) {
+  if (!confirm('Mark this invoice as void? This cannot be undone.')) return;
+  var inv = _invoices.find(function(i){ return i.id === id; });
+  if (!inv) return;
+  inv.status = 'void'; inv.voidDate = today(); inv.modified = today();
+  try {
+    await sbUpsert('invoices', id, inv);
+    // Release any charge sheets back to approved status
+    await Promise.all((inv.chargeSheetIds||[]).map(async function(csId) {
+      var cs = _chargeSheets.find(function(c){ return c.id === csId; });
+      if (cs && cs.status === 'invoiced') {
+        cs.status = 'approved'; cs.invoiceId = null; cs.modified = today();
+        await sbUpsert('charge_sheets', csId, cs);
+      }
+    }));
+    renderInvoices(); renderDashboard();
+    toast('Invoice voided — charge sheets returned to Approved', 'info');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function markInvSent(id) {
+  var inv = _invoices.find(function(i){ return i.id === id; });
+  if (!inv) return;
+  inv.status = 'sent'; inv.sentDate = today(); inv.modified = today();
+  try {
+    await sbUpsert('invoices', id, inv);
+    renderInvoices(); renderDashboard();
+    toast('Invoice marked as sent', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function markInvoiceSent() {
+  if (!_currentInvId) return;
+  await markInvSent(_currentInvId);
+  closeModal('inv-view-modal');
+}
+
+async function markInvoiceVoid() {
+  if (!_currentInvId) return;
+  await markVoid(_currentInvId);
+  closeModal('inv-view-modal');
 }
 
 </script>
