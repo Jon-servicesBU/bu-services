@@ -2149,6 +2149,7 @@ async function markInvoicePaid(){
 
 async function markPaid(id){
   var inv=_invoices.find(function(i){return i.id===id;}); if(!inv)return;
+  if (!confirm('Mark invoice ' + inv.invNum + ' as PAID?\n\nClient: ' + inv.client + '\nTotal: ' + _fmtMoneyImpl(inv.total) + '\n\nThis will record payment and update actuals. Continue?')) return;
   inv.status='paid'; inv.paidDate=today(); inv.modified=today();
   try{
     await sbUpsert('invoices',id,inv);
@@ -2516,8 +2517,10 @@ async function markVoid(id) {
 }
 
 async function markInvSent(id) {
-  var inv=_invoices.find(function(i){return i.id===id;}); if(!inv)return;
-  inv.status='sent'; inv.sentDate=today(); inv.modified=today();
+  var inv = _invoices.find(function(i){ return i.id === id; });
+  if (!inv) return;
+  if (!confirm('Mark invoice ' + inv.invNum + ' as Sent? This means it has been delivered to the client. Continue?')) return;
+  inv.status = 'sent'; inv.sentDate = today(); inv.modified = today(); inv.sentDate=today(); inv.modified=today();
   try { await sbUpsert('invoices',id,inv); renderInvoices(); renderDashboard(); toast('Invoice marked as sent','success'); }
   catch(e){ toast('Error: '+e.message,'error'); }
 }
@@ -3180,6 +3183,58 @@ async function unapproveWO(id) {
     await sbUpsert('jobs', id, wo);
     renderJobs(); renderDashboard();
     toast('Work order returned to ' + prev, 'info');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+
+// ── Tab switching (WO modal) ──────────────────────────────────────────────────
+function switchCSTab(tab, btn) {
+  document.querySelectorAll('.cs-panel').forEach(function(p){ p.style.display = 'none'; });
+  document.querySelectorAll('.cs-tab').forEach(function(b){ b.classList.remove('active'); });
+  var panel = document.getElementById('cs-panel-' + tab);
+  if (panel) panel.style.display = 'block';
+  if (btn) btn.classList.add('active');
+}
+
+// ── Pipe sizes (film tab) ─────────────────────────────────────────────────────
+var PIPE_SIZES = ['< 2"','2"-3"','4"-5"','6"','8"-12"','14"+','Sheet','N/A'];
+
+function getPipeSizeOptions() {
+  return '<option value="">— Pipe size —</option>'
+    + PIPE_SIZES.map(function(s){ return '<option value="' + s + '">' + s + '</option>'; }).join('');
+}
+
+// ── Reverse: charge sheet approved → submitted ────────────────────────────────
+async function reverseCSFromApproved(id) {
+  var wo = _jobs.find(function(j){ return j.id === id; });
+  if (!wo) return;
+  if (wo.status !== 'approved') { toast('Only approved work orders can be returned to submitted', 'error'); return; }
+  var msg1 = 'Return Work Order ' + (wo.woNum||wo.number) + ' to Submitted? This will: set status back to Submitted, remove approval date, require re-approval before invoicing. Continue?';
+  if (!confirm(msg1)) return;
+  wo.status = 'submitted'; wo.approvedDate = null; wo.modified = today();
+  try {
+    await sbUpsert('jobs', id, wo);
+    renderJobs(); renderDashboard(); updatePendingBadge();
+    toast('Work order returned to Submitted', 'info');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ── Reverse: work order invoiced → approved ───────────────────────────────────
+async function reverseCSToApproved(id) {
+  var wo = _jobs.find(function(j){ return j.id === id; });
+  if (!wo) return;
+  if (wo.status !== 'invoiced') { toast('Only invoiced work orders can be returned to approved', 'error'); return; }
+  var inv = _invoices.find(function(i){
+    return i.chargeSheetIds && i.chargeSheetIds.indexOf(id) > -1;
+  });
+  var invNote = inv ? 'This work order is on invoice ' + inv.invNum + ' (' + inv.status + '). Removing it will leave that invoice incomplete. ' : '';
+  var msg2 = 'Return Work Order ' + (wo.woNum||wo.number) + ' to Approved? ' + invNote + 'Status will be set back to Approved, allowing re-invoicing. Continue?';
+  if (!confirm(msg2)) return;
+  wo.status = 'approved'; wo.invoiceId = null; wo.modified = today();
+  try {
+    await sbUpsert('jobs', id, wo);
+    renderJobs(); renderDashboard(); updatePendingBadge();
+    toast('Work order returned to Approved', 'info');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
