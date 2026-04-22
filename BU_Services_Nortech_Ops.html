@@ -1546,6 +1546,7 @@ function viewCS(id){
   if(c.status==='pending'&&isAdmin()) footer.innerHTML+=' <button class="btn btn-success" onclick="approveCS(\''+id+'\')">✓ Approve</button>';
   if(c.status==='approved') footer.innerHTML+=' <button class="btn btn-secondary" onclick="openInvoiceModal(\''+c.client+'\');closeModal(\'cs-view-modal\')">Generate Invoice</button>';
   if(c.status==='invoiced') footer.innerHTML+=' <button class="btn btn-secondary" onclick="reverseCSToApproved(\''+id+'\')">↩ Return to Approved</button>';
+  if(c.status==='approved') footer.innerHTML+=' <button class="btn btn-secondary" onclick="reverseCSFromApproved(\''+id+'\')">↩ Back to Pending</button>';
 
   document.getElementById('cs-view-modal').classList.add('open');
 }
@@ -3218,6 +3219,33 @@ async function reverseCSToApproved(id) {
     await sbUpsert('charge_sheets', id, cs);
     renderCSList(); renderDashboard(); updatePendingBadge();
     toast('Charge sheet ' + cs.csNum + ' returned to Approved', 'info');
+    closeModal('cs-view-modal');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+
+async function reverseCSFromApproved(id) {
+  var cs = _chargeSheets.find(function(c){ return c.id === id; });
+  if (!cs) return;
+  if (cs.status !== 'approved') {
+    toast('Only approved charge sheets can be returned to pending', 'error');
+    return;
+  }
+  if (!confirm(
+    'Return charge sheet ' + cs.csNum + ' to Pending?\n\n' +
+    'This will:\n' +
+    '  • Set status back to Pending Approval\n' +
+    '  • Remove approval date\n' +
+    '  • Require re-approval before invoicing\n\n' +
+    'Continue?'
+  )) return;
+  cs.status = 'pending';
+  cs.approvedDate = null;
+  cs.modified = today();
+  try {
+    await sbUpsert('charge_sheets', id, cs);
+    renderCSList(); renderDashboard(); updatePendingBadge();
+    toast('Charge sheet ' + cs.csNum + ' returned to Pending', 'info');
     closeModal('cs-view-modal');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
