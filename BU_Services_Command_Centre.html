@@ -1841,25 +1841,25 @@ function applyCRMOverlay(crm) {
     if (!r.ok) throw new Error('fetch failed');
     const live = await r.json();
     CONFIG.initiatives.forEach(init => {
-      if (CONFIG[init.id] !== undefined) init.actual2026 = CONFIG[init.id];
+      if (live[init.id] !== undefined) init.actual2026 = live[init.id];
     });
     CONFIG.base.forEach(b => {
-      if (CONFIG[b.id] !== undefined) b.actual2026 = CONFIG[b.id];
-      if (CONFIG[b.id + '_pipeline'] !== undefined) b.pipeline2026 = CONFIG[b.id + '_pipeline'];
+      if (live[b.id] !== undefined) b.actual2026 = live[b.id];
+      if (live[b.id + '_pipeline'] !== undefined) b.pipeline2026 = live[b.id + '_pipeline'];
     });
     if (CONFIG.regions) {
       CONFIG.regions.forEach(reg => {
-        if (CONFIG['region_' + reg.id] !== undefined) reg.actual2026 = CONFIG['region_' + reg.id];
-        if (CONFIG['region_' + reg.id + '_pipeline'] !== undefined) reg.pipeline2026 = CONFIG['region_' + reg.id + '_pipeline'];
-        if (CONFIG['util_' + reg.id] !== undefined) reg.util = CONFIG['util_' + reg.id];
+        if (live['region_' + reg.id] !== undefined) reg.actual2026 = live['region_' + reg.id];
+        if (live['region_' + reg.id + '_pipeline'] !== undefined) reg.pipeline2026 = live['region_' + reg.id + '_pipeline'];
+        if (live['util_' + reg.id] !== undefined) reg.util = live['util_' + reg.id];
       });
     }
-    if (CONFIG.lastUpdated) CONFIG.lastUpdated = CONFIG.lastUpdated;
+    if (live.lastUpdated) CONFIG.lastUpdated = live.lastUpdated;
     // Conference data
-    loadConferenceData(CONFIG);
+    loadConferenceData(live);
     // Add-on modules
     renderAddOns();
-    if (CONFIG.monthly) CONFIG.monthly = CONFIG.monthly;
+    if (live.monthly) CONFIG.monthly = live.monthly;
     if (CONFIG.meetings) {
       CONFIG.meetings.forEach(function(m) {
         if (CONFIG['actions_' + m.id] !== undefined) m.actions = CONFIG['actions_' + m.id];
@@ -1871,18 +1871,18 @@ function applyCRMOverlay(crm) {
       'bookings_nuc','bookings_nor','commit_nuc','commit_nor',
       'upside_nuc','upside_nor','sure_forecast_nuc','sure_forecast_nor',
       'arcndt_invoiced','arcndt_pipeline','int_invoiced','int_pipeline','eur_rate'];
-    perfKeys.forEach(function(k){ if(CONFIG[k]!==undefined) CONFIG[k]=CONFIG[k]; });
+    perfKeys.forEach(function(k){ if(live[k]!==undefined) CONFIG[k]=live[k]; });
     // Group B — Prev snapshot
     var prevKeys = ['prev_review_date','prev_nucleom','prev_nortech','prev_mining',
       'prev_pipeline','prev_powerline','prev_nuclear','prev_x3',
       'prev_bookings_nuc','prev_bookings_nor'];
-    prevKeys.forEach(function(k){ if(CONFIG[k]!==undefined) CONFIG[k]=CONFIG[k]; });
+    prevKeys.forEach(function(k){ if(live[k]!==undefined) CONFIG[k]=live[k]; });
     // Group C — KPI ref and monthly KPI fields
-    if (CONFIG.kpi_ref) CONFIG.kpi_ref = CONFIG.kpi_ref;
+    if (live.kpi_ref) CONFIG.kpi_ref = live.kpi_ref;
     // Group D — Cash
-    if (CONFIG.cash) CONFIG.cash = CONFIG.cash;
+    if (live.cash) CONFIG.cash = live.cash;
     // Group E — EBITDA initiatives
-    if (CONFIG.ebitda_initiatives) CONFIG.ebitda_initiatives = CONFIG.ebitda_initiatives;
+    if (live.ebitda_initiatives) CONFIG.ebitda_initiatives = live.ebitda_initiatives;
 
     // All CONFIG values updated from actuals.json — now render
     renderAll();
