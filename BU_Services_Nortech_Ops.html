@@ -2279,7 +2279,9 @@ function viewInvoice(id) {
   }
 
   // Get rate sheet and recalculate if saved subtotal is 0
-  var invRS = _rateSheets.find(function(r){ return r.id === inv.rateSheetId; }) || {};
+  // Get rate sheet — fall back to first available if not set on invoice
+  var invRS = _rateSheets.find(function(r){ return r.id === inv.rateSheetId; })
+           || _rateSheets[0] || {};
   var invSubtotal = inv.subtotal || 0;
   if (invSubtotal === 0 && inv.chargeSheetIds && inv.chargeSheetIds.length) {
     invSubtotal = inv.chargeSheetIds.reduce(function(sum, woId) {
@@ -5077,7 +5079,7 @@ async function reopenJob(id) {
 
 function updateInvTotals() {
   var rsId = (document.getElementById('inv-rate-sheet') || {}).value || '';
-  var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || {};
+  var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || _rateSheets[0] || {};
 
   var selected = Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el) {
     return _jobs.find(function(j){ return j.id === el.value; })
