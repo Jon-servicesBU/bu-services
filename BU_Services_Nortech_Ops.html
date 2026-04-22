@@ -2927,6 +2927,262 @@ function getConsumableOptions(rs) {
       }).join('');
 }
 
+
+// ── WO: Add row functions ─────────────────────────────────────────────────────
+function addLabourRow(dayLabel, labOpts, prefill) {
+  _csLabourRowCount++;
+  var idx = _csLabourRowCount;
+  var p   = prefill || {};
+  var lo  = getLabourOptions({});
+  var defaultDate = (document.getElementById('wo-date') || {}).value || today();
+
+  var tbody = document.getElementById('cs-labour-body');
+  if (!tbody) return;
+
+  var tr = document.createElement('tr');
+  tr.id = 'cs-lb-row-' + idx;
+  tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.2rem .25rem"><input class="cs-input" type="date" id="cs-lb-date-' + idx + '" value="' + (p.date||defaultDate) + '" style="width:110px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input" id="cs-lb-tech-' + idx + '" placeholder="Technician" value="' + (p.technician||'') + '" style="width:130px" list="tech-datalist"></td>'
+    + '<td style="padding:.2rem .25rem"><select class="cs-input cs-lb-cat" id="cs-lb-cat-' + idx + '" style="width:170px">' + lo + '</select></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-st-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.regHrs||'') + '" style="width:58px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-ot-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.otHrs||'') + '" style="width:58px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-dt-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.dtHrs||'') + '" style="width:58px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-ns-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.nightHrs||'') + '" style="width:58px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input" type="time" id="cs-lb-start-' + idx + '" value="' + (p.startTime||'') + '" style="width:85px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input" type="time" id="cs-lb-end-' + idx + '" value="' + (p.endTime||'') + '" style="width:85px"></td>'
+    + '<td style="padding:.2rem .25rem"><button class="btn btn-ghost btn-sm" onclick="this.closest(\'tr\').remove()" style="padding:.15rem .35rem">✕</button></td>';
+
+  tbody.appendChild(tr);
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
+  });
+  if (p.category) {
+    var catEl = document.getElementById('cs-lb-cat-' + idx);
+    if (catEl) catEl.value = p.category;
+  }
+}
+
+function addEquipmentRow(prefill) {
+  _csEquipmentRowCount++;
+  var idx = _csEquipmentRowCount;
+  var p = prefill || {};
+  var opts = getEquipmentOptions({});
+  var tbody = document.getElementById('cs-equipment-body');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.id = 'cs-eq-row-' + idx;
+  tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.2rem .3rem">'
+      + '<select class="cs-input cs-eq-select" id="cs-eq-item-' + idx + '" style="min-width:180px">' + opts + '</select>'
+      + '<input class="cs-input" id="cs-eq-manual-' + idx + '" placeholder="Or type custom…" style="margin-top:.2rem;width:100%;font-size:.7rem">'
+    + '</td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-eq-qty-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.qty||'') + '"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-eq-unit-' + idx + '" placeholder="unit" value="' + (p.unit||'') + '" style="width:70px"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-eq-notes-' + idx + '" placeholder="Notes…" value="' + (p.notes||'') + '"></td>'
+    + '<td><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-eq-row-' + idx + '\').remove()">✕</button></td>';
+  tbody.appendChild(tr);
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
+  });
+  if (p.item) { var s = document.getElementById('cs-eq-item-' + idx); if (s) s.value = p.item; }
+}
+
+function addConsumableRow(prefill) {
+  _csConsumableRowCount++;
+  var idx = _csConsumableRowCount;
+  var p = prefill || {};
+  var opts = getConsumableOptions({});
+  var tbody = document.getElementById('cs-consumables-body');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.id = 'cs-con-row-' + idx;
+  tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.2rem .3rem">'
+      + '<select class="cs-input cs-con-select" id="cs-con-item-' + idx + '" style="min-width:180px">' + opts + '</select>'
+      + '<input class="cs-input" id="cs-con-manual-' + idx + '" placeholder="Or type custom…" style="margin-top:.2rem;width:100%;font-size:.7rem">'
+    + '</td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-con-qty-' + idx + '" placeholder="0" value="' + (p.qty||'') + '"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-con-unit-' + idx + '" placeholder="unit" value="' + (p.unit||'') + '" style="width:70px"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-con-notes-' + idx + '" placeholder="Notes…"></td>'
+    + '<td><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-con-row-' + idx + '\').remove()">✕</button></td>';
+  tbody.appendChild(tr);
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
+  });
+  if (p.item) { var s = document.getElementById('cs-con-item-' + idx); if (s) s.value = p.item; }
+}
+
+function addFilmRow(prefill) {
+  _csFilmRowCount++;
+  var idx = _csFilmRowCount;
+  var p = prefill || {};
+  var tbody = document.getElementById('cs-film-body');
+  if (!tbody) return;
+  var tr = document.createElement('tr');
+  tr.id = 'cs-film-row-' + idx;
+  tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.2rem .3rem"><select class="cs-input" id="cs-film-type-' + idx + '" style="min-width:180px">' + getFilmTypeOptions() + '</select></td>'
+    + '<td style="padding:.2rem .3rem"><select class="cs-input" id="cs-film-size-' + idx + '" style="width:100px">' + getPipeSizeOptions() + '</select></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input cs-num" type="number" id="cs-film-qty-' + idx + '" placeholder="0" value="' + (p.qty||'') + '"></td>'
+    + '<td style="padding:.2rem .3rem"><input class="cs-input" id="cs-film-notes-' + idx + '" placeholder="Notes…"></td>'
+    + '<td><button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'cs-film-row-' + idx + '\').remove()">✕</button></td>';
+  tbody.appendChild(tr);
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
+  });
+  if (p.type) { var s = document.getElementById('cs-film-type-' + idx); if (s) s.value = p.type; }
+  if (p.pipeSize) { var s = document.getElementById('cs-film-size-' + idx); if (s) s.value = p.pipeSize; }
+}
+
+// ── WO: Save ──────────────────────────────────────────────────────────────────
+async function saveWO(status) {
+  var client = (document.getElementById('job-client') || {}).value || '';
+  var site   = (document.getElementById('job-site')   || {}).value || '';
+  var date   = (document.getElementById('wo-date')    || {}).value || today();
+  if (!client.trim() || !site.trim()) { toast('Client and location are required', 'error'); return; }
+
+  var labourRows = [];
+  for (var i = 1; i <= _csLabourRowCount; i++) {
+    var techEl  = document.getElementById('cs-lb-tech-' + i);
+    var catEl   = document.getElementById('cs-lb-cat-'  + i);
+    var regEl   = document.getElementById('cs-lb-st-'   + i);
+    var otEl    = document.getElementById('cs-lb-ot-'   + i);
+    var dtEl    = document.getElementById('cs-lb-dt-'   + i);
+    var nsEl    = document.getElementById('cs-lb-ns-'   + i);
+    var startEl = document.getElementById('cs-lb-start-'+ i);
+    var endEl   = document.getElementById('cs-lb-end-'  + i);
+    var dateEl  = document.getElementById('cs-lb-date-' + i);
+    if (!techEl) continue;
+    var reg = parseFloat(regEl ? regEl.value : 0) || 0;
+    var ot  = parseFloat(otEl  ? otEl.value  : 0) || 0;
+    var dt  = parseFloat(dtEl  ? dtEl.value  : 0) || 0;
+    var ns  = parseFloat(nsEl  ? nsEl.value  : 0) || 0;
+    if (!techEl.value && !reg && !ot && !dt && !ns) continue;
+    labourRows.push({
+      technician: techEl.value || '',
+      category:   catEl ? catEl.value : '',
+      regHrs: reg, otHrs: ot, dtHrs: dt, nightHrs: ns,
+      startTime:  startEl ? startEl.value : '',
+      endTime:    endEl   ? endEl.value   : '',
+      date:       dateEl  ? dateEl.value  : date,
+    });
+  }
+
+  var equipRows = [];
+  document.querySelectorAll('[id^=cs-eq-row-]').forEach(function(row) {
+    var idx  = row.id.replace('cs-eq-row-', '');
+    var item = (document.getElementById('cs-eq-item-'  + idx) || {}).value
+            || (document.getElementById('cs-eq-manual-'+ idx) || {}).value || '';
+    var qty  = parseFloat((document.getElementById('cs-eq-qty-'  + idx) || {}).value) || 0;
+    var unit = (document.getElementById('cs-eq-unit-'  + idx) || {}).value || '';
+    var note = (document.getElementById('cs-eq-notes-' + idx) || {}).value || '';
+    if (item || qty) equipRows.push({ item, qty, unit, notes: note });
+  });
+
+  var consumables = [];
+  document.querySelectorAll('[id^=cs-con-row-]').forEach(function(row) {
+    var idx  = row.id.replace('cs-con-row-', '');
+    var item = (document.getElementById('cs-con-item-'  + idx) || {}).value
+            || (document.getElementById('cs-con-manual-'+ idx) || {}).value || '';
+    var qty  = parseFloat((document.getElementById('cs-con-qty-'+ idx) || {}).value) || 0;
+    var unit = (document.getElementById('cs-con-unit-'  + idx) || {}).value || '';
+    if (item || qty) consumables.push({ item, qty, unit });
+  });
+
+  var film = [];
+  document.querySelectorAll('[id^=cs-film-row-]').forEach(function(row) {
+    var idx  = row.id.replace('cs-film-row-', '');
+    var type = (document.getElementById('cs-film-type-' + idx) || {}).value || '';
+    var size = (document.getElementById('cs-film-size-' + idx) || {}).value || '';
+    var qty  = parseFloat((document.getElementById('cs-film-qty-'+ idx) || {}).value) || 0;
+    if (type || qty) film.push({ type, pipeSize: size, qty });
+  });
+
+  var travel = {
+    km:       parseFloat((document.getElementById('cs-travel-km')        || {}).value) || 0,
+    kmRate:   parseFloat((document.getElementById('cs-travel-km-rate')   || {}).value) || 1.20,
+    hotels:   parseFloat((document.getElementById('cs-travel-hotels')    || {}).value) || 0,
+    camp:     parseFloat((document.getElementById('wo-travel-camp')      || {}).value) || 0,
+    flights:  parseFloat((document.getElementById('cs-travel-flights')   || {}).value) || 0,
+    loaTechs: parseFloat((document.getElementById('cs-travel-loa-techs') || {}).value) || 0,
+    loaDays:  parseFloat((document.getElementById('cs-travel-loa-days')  || {}).value) || 0,
+    loaRate:  parseFloat((document.getElementById('cs-travel-loa-rate')  || {}).value) || 70,
+    misc:     parseFloat((document.getElementById('wo-travel-misc')      || {}).value) || 0,
+    miscDesc: (document.getElementById('wo-travel-misc-desc')  || {}).value || '',
+    customerContact: (document.getElementById('wo-customer-contact') || {}).value || '',
+  };
+
+  var totalReg = labourRows.reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
+  var totalOT  = labourRows.reduce(function(s,r){ return s+(r.otHrs||0);  }, 0);
+  var totalDT  = labourRows.reduce(function(s,r){ return s+(r.dtHrs||0);  }, 0);
+
+  var id       = _editWOId || uid();
+  var existing = _editWOId ? (_jobs.find(function(j){ return j.id === _editWOId; }) || {}) : {};
+
+  var data = {
+    id,
+    woNum:    (document.getElementById('job-number')    || {}).value || nextNum('W-', _jobs, 'woNum'),
+    number:   (document.getElementById('job-number')    || {}).value || nextNum('W-', _jobs, 'woNum'),
+    client:   client.trim(),
+    site:     site.trim(),
+    date,
+    location: site.trim(),
+    equipOwner:   (document.getElementById('wo-equip-owner')  || {}).value || '',
+    province:     (document.getElementById('job-province')    || {}).value || 'AB',
+    po:           (document.getElementById('job-po')          || {}).value || '',
+    jobNum:       (document.getElementById('job-client-wo')   || {}).value || '',
+    afe:          (document.getElementById('wo-afe')          || {}).value || '',
+    rig:          (document.getElementById('wo-rig')          || {}).value || '',
+    notes:        (document.getElementById('cs-notes')        || {}).value || '',
+    fieldReports: (document.getElementById('wo-field-reports')|| {}).value || '',
+    labourRows, equipRows, consumables, film, travel,
+    totalReg, totalOT, totalDT,
+    status: (existing.status === 'approved' || existing.status === 'invoiced' || existing.status === 'paid')
+      ? existing.status : status,
+    rateSheetId: existing.rateSheetId || '',
+    created:  existing.created || today(),
+    modified: today(),
+  };
+
+  try {
+    await sbUpsert('jobs', id, data);
+    if (_editWOId) { _jobs = _jobs.map(function(j){ return j.id === id ? data : j; }); }
+    else { _jobs.unshift(data); }
+    closeModal('job-modal');
+    renderJobs(); renderDashboard(); updatePendingBadge();
+    toast(status === 'submitted' ? 'Work order submitted' : 'Draft saved', 'success');
+  } catch(e) { toast('Save failed: ' + e.message, 'error'); }
+}
+
+// ── WO: Approve / Unapprove ───────────────────────────────────────────────────
+async function approveWO(id) {
+  var wo = _jobs.find(function(j){ return j.id === id; }); if (!wo) return;
+  if (!confirm('Approve Work Order ' + (wo.woNum||wo.number) + '?\n\nThis will mark it ready for invoicing.')) return;
+  wo.status = 'approved'; wo.approvedDate = today(); wo.modified = today();
+  try {
+    await sbUpsert('jobs', id, wo);
+    renderJobs(); renderDashboard();
+    toast('Work order approved', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function unapproveWO(id) {
+  var wo = _jobs.find(function(j){ return j.id === id; }); if (!wo) return;
+  var prev = wo.status === 'approved' ? 'submitted' : 'draft';
+  if (!confirm('Return Work Order ' + (wo.woNum||wo.number) + ' to ' + prev + '?')) return;
+  wo.status = prev; wo.approvedDate = null; wo.modified = today();
+  try {
+    await sbUpsert('jobs', id, wo);
+    renderJobs(); renderDashboard();
+    toast('Work order returned to ' + prev, 'info');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
 </script>
 </body>
 </html>
