@@ -1255,7 +1255,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 
 <!-- TOP BAR -->
 <nav class="unav"><div class="unav-brand"><span class="unav-brand-name">BU Services</span><span class="unav-brand-sep">·</span><span class="unav-brand-page">Command Centre</span></div><div class="unav-links"><a href="#overview">Overview</a><a href="#revenue">Revenue</a><a href="#actuals-vs-budget">Actuals vs Budget</a><a href="#monthly">Monthly</a><a href="#regions">Regions</a><a href="#performance">Performance</a><a href="#initiatives">Initiatives</a><a href="#gates">Gates</a><a href="#meetings">Meeting Health</a><a href="#risks">Risks</a><a href="#documents">Documents</a><a href="#conferences">Conferences</a><a href="#proposals">Proposals</a><a href="#reconciliation">Recon</a><a href="#nuclear">Nuclear</a><a href="#system">System</a><a href="#digest">Email Digest</a></div></nav>
-<div class="sysbar"><span class="sysbar-label">BU Services</span><a class="sysbtn sysbtn-hub" href="BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a><a class="sysbtn sysbtn-people" href="BU_Services_People_Dashboard.html" target="buservices">👥 People</a><a class="sysbtn sysbtn-meetings" href="BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a><span class="sysbtn sysbtn-cc current">📊 Command Centre</span><a class="sysbtn sysbtn-crm" href="BU_Services_CRM.html" target="buservices">🗂 CRM</a></div>
+<div class="sysbar"><span class="sysbar-label">BU Services</span><a class="sysbtn sysbtn-hub" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a><a class="sysbtn sysbtn-people" href="https://jon-servicesbu.github.io/bu-services/BU_Services_People_Dashboard.html" target="buservices">👥 People</a><a class="sysbtn sysbtn-meetings" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a><span class="sysbtn sysbtn-cc current">📊 Command Centre</span><a class="sysbtn sysbtn-crm" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a></div>
 
 <!-- HERO -->
 <div class="hero" id="overview">
@@ -1822,12 +1822,14 @@ function sbSubscribe(callback) {
   renderAll();
 
   function refreshAffectedSections() {
-    if (typeof renderOverview       === 'function') renderOverview();
-    if (typeof renderInitiatives    === 'function') renderInitiatives();
-    if (typeof renderProposals      === 'function') renderProposals();
-    if (typeof renderReconciliation === 'function') renderReconciliation();
-    if (typeof renderMeetingHealth  === 'function') renderMeetingHealth();
-    if (typeof renderConferences    === 'function') renderConferences();
+    // Re-render sections that CRM data affects
+    if (typeof renderOverview        === 'function') renderOverview();
+    if (typeof renderRevenueFoundation === 'function') renderRevenueFoundation();
+    if (typeof renderProposals       === 'function') renderProposals();
+    if (typeof renderReconciliation  === 'function') renderReconciliation();
+    if (typeof renderMeetings        === 'function') renderMeetings();
+    if (typeof renderConferences     === 'function') renderConferences();
+    if (typeof renderRegions         === 'function') renderRegions();
   }
 
   function updateCRMBadge(isoTimestamp) {
@@ -3242,7 +3244,7 @@ ${CONFIG.regions.map(function(reg) {
     BU Services &nbsp;·&nbsp; Ekoscan Integrity Group &nbsp;·&nbsp; Jon Eustace, CEO North America &nbsp;·&nbsp; Confidential
   </div>
   <div class="footer-right">
-    <a href="BU_Services_CRM.html" target="buservices" id="crm-link" style="font-size:.65rem;color:rgba(0,174,239,.5);text-decoration:none;font-family:var(--mono);margin-right:.75rem;transition:color .15s" onmouseover="this.style.color='#00AEEF'" onmouseout="this.style.color='rgba(0,174,239,.5)'">🗂 CRM →</a>
+    <a href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices" id="crm-link" style="font-size:.65rem;color:rgba(0,174,239,.5);text-decoration:none;font-family:var(--mono);margin-right:.75rem;transition:color .15s" onmouseover="this.style.color='#00AEEF'" onmouseout="this.style.color='rgba(0,174,239,.5)'">🗂 CRM →</a>
     <span class="footer-version" id="footer-version"></span>
   </div>
 </div>

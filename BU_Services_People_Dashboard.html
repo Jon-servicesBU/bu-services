@@ -427,12 +427,14 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   font-size:.65rem;color:rgba(255,255,255,.25);
   font-family:'Courier New',monospace;
   white-space:nowrap;margin-left:.75rem;flex-shrink:0}
+.sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5)}
+.sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF}
 </style>
 </head>
 <body>
 
 <nav class="unav"><div class="unav-brand"><span class="unav-brand-name">BU Services</span><span class="unav-brand-sep">·</span><span class="unav-brand-page">People &amp; Capacity</span></div><div class="unav-links"><a href="#util">Utilization</a><a href="#roster">Roster</a><a href="#people">People</a><a href="#vacation">Vacation</a><a href="#anniversaries">Anniversaries</a></div></nav>
-<div class="sysbar"><span class="sysbar-label">BU Services</span><a class="sysbtn sysbtn-hub" href="BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a><span class="sysbtn sysbtn-people current">👥 People</span><a class="sysbtn sysbtn-meetings" href="BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a><a class="sysbtn sysbtn-cc" href="BU_Services_Command_Centre.html" target="buservices">📊 Command Centre</a></div>
+<div class="sysbar"><span class="sysbar-label">BU Services</span><a class="sysbtn sysbtn-hub" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a><span class="sysbtn sysbtn-people current">👥 People</span><a class="sysbtn sysbtn-meetings" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a><a class="sysbtn sysbtn-cc" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Command_Centre.html" target="buservices">📊 Command Centre</a><a class="sysbtn sysbtn-crm" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a></div>
 
 <div class="page-hdr">
   <div class="eyebrow">Ekoscan Integrity Group — BU Services</div>
@@ -617,7 +619,7 @@ var navAs = document.querySelectorAll('.unav-links a');
 var secIds = ['util','roster','people','vacation','anniversaries'];
 var secs = secIds.map(function(id){ return document.getElementById(id); });
 window.addEventListener('scroll', function(){
-  var y = window.scrollY + 80;
+  var y = window.scrollY + 92;
   var active = 0;
   secs.forEach(function(s,i){ if(s && s.offsetTop <= y) active = i; });
   navAs.forEach(function(a,i){ a.classList.toggle('active', i===active); });
