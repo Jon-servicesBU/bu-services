@@ -438,7 +438,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 <body>
 
 <nav class="unav"><div class="unav-brand"><span class="unav-brand-name">BU Services</span><span class="unav-brand-sep">·</span><span class="unav-brand-page">People &amp; Capacity</span></div><div class="unav-links"><a href="#util">Utilization</a><a href="#roster">Roster</a><a href="#people">People</a><a href="#vacation">Vacation</a><a href="#anniversaries">Anniversaries</a></div></nav>
-<div class="sysbar"><span class="sysbar-label">BU Services</span><a class="sysbtn sysbtn-hub" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a><span class="sysbtn sysbtn-people current">👥 People</span><a class="sysbtn sysbtn-meetings" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a><a class="sysbtn sysbtn-cc" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Command_Centre.html" target="buservices">📊 Command Centre</a><a class="sysbtn sysbtn-crm" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a></div>
+<div class="sysbar"><span class="sysbar-label">BU Services</span><a class="sysbtn sysbtn-hub" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a><span class="sysbtn sysbtn-people current">👥 People</span><a class="sysbtn sysbtn-meetings" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a><a class="sysbtn sysbtn-cc" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Command_Centre.html" target="buservices">📊 Command Centre</a><a class="sysbtn sysbtn-crm" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a>
+  <a class="sysbtn sysbtn-nortech" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Nortech_Ops.html" target="buservices">🔧 Nortech Ops</a>
+</div>
 
 <div class="page-hdr">
   <div class="eyebrow">Ekoscan Integrity Group — BU Services</div>
@@ -642,53 +644,50 @@ function setViewer(id) {
 function showLoginScreen() {
   var overlay = document.createElement('div');
   overlay.id = 'login-overlay';
-  overlay.style.cssText = [
-    'position:fixed;inset:0;z-index:9999',
-    'background:rgba(6,14,28,.97)',
-    'display:flex;align-items:center;justify-content:center',
-    'backdrop-filter:blur(8px)',
-  ].join(';');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(6,14,28,.97);display:flex;align-items:center;justify-content:center;overflow:hidden;backdrop-filter:blur(8px)';
 
-  overlay.innerHTML = `
-    <div style="max-width:480px;width:90%;text-align:center">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;
-                  letter-spacing:4px;text-transform:uppercase;color:rgba(0,174,239,.7);margin-bottom:.75rem">
-        Ekoscan Integrity Group
-      </div>
-      <h1 style="font-family:'Barlow Condensed',sans-serif;font-size:2.4rem;font-weight:900;
-                 color:#fff;letter-spacing:-.02em;margin-bottom:.4rem">
-        BU Services
-      </h1>
-      <p style="font-size:.85rem;color:rgba(255,255,255,.4);margin-bottom:2rem">
-        Select your name to continue
-      </p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
-        ${VIEWER_PEOPLE.map(p => `
-          <button onclick="setViewer('${p.id}')" style="
-            display:flex;align-items:center;gap:.75rem;
-            background:rgba(255,255,255,.04);
-            border:1px solid rgba(255,255,255,.1);
-            border-radius:8px;padding:.75rem 1rem;
-            cursor:pointer;transition:all .15s;text-align:left;
-            font-family:inherit;
-          " onmouseover="this.style.background='rgba(255,255,255,.08)';this.style.borderColor='rgba(255,255,255,.25)'"
-            onmouseout="this.style.background='rgba(255,255,255,.04)';this.style.borderColor='rgba(255,255,255,.1)'">
-            <span style="width:36px;height:36px;border-radius:50%;
-                         background:${p.color};display:flex;align-items:center;
-                         justify-content:center;font-size:.75rem;font-weight:800;
-                         color:#fff;flex-shrink:0">${p.initials}</span>
-            <span>
-              <div style="font-size:.83rem;font-weight:700;color:#fff">${p.name}</div>
-              <div style="font-size:.65rem;color:rgba(255,255,255,.4);margin-top:.1rem">${p.role}</div>
-            </span>
-          </button>
-        `).join('')}
-      </div>
-      <p style="margin-top:1.5rem;font-size:.68rem;color:rgba(255,255,255,.2)">
-        BU Services Commercial Management System · Confidential
-      </p>
-    </div>
-  `;
+  var inner = document.createElement('div');
+  inner.style.cssText = 'width:min(700px,95vw);max-height:90vh;display:flex;flex-direction:column;text-align:center';
+
+  // Header — fixed, doesn't scroll
+  var header = document.createElement('div');
+  header.style.cssText = 'flex-shrink:0;padding-bottom:.75rem';
+  header.innerHTML = '<div style="font-family:Barlow Condensed,sans-serif;font-size:.65rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(0,174,239,.7);margin-bottom:.4rem">Ekoscan Integrity Group</div>' +
+    '<h1 style="font-family:Barlow Condensed,sans-serif;font-size:2rem;font-weight:900;color:#fff;margin:0 0 .25rem">BU Services</h1>' +
+    '<p style="font-size:.8rem;color:rgba(255,255,255,.4);margin:0">Select your name to continue</p>';
+  inner.appendChild(header);
+
+  // Scrollable grid
+  var grid = document.createElement('div');
+  grid.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:.25rem .1rem';
+  var gridInner = document.createElement('div');
+  gridInner.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem';
+
+  VIEWER_PEOPLE.forEach(function(p) {
+    var btn = document.createElement('button');
+    btn.style.cssText = 'display:flex;align-items:center;gap:.45rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.45rem .6rem;cursor:pointer;text-align:left;font-family:inherit;width:100%;min-width:0;transition:background .15s,border-color .15s';
+    btn.onmouseover = function(){this.style.background='rgba(255,255,255,.09)';this.style.borderColor='rgba(255,255,255,.25)'};
+    btn.onmouseout  = function(){this.style.background='rgba(255,255,255,.04)';this.style.borderColor='rgba(255,255,255,.1)'};
+    btn.onclick = function(){ setViewer(p.id); };
+    btn.innerHTML =
+      '<span style="width:28px;height:28px;border-radius:50%;background:'+p.color+';display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;flex-shrink:0">'+p.initials+'</span>' +
+      '<span style="min-width:0;overflow:hidden">' +
+        '<div style="font-size:.72rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>' +
+        '<div style="font-size:.58rem;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.05rem">'+p.role+'</div>' +
+      '</span>';
+    gridInner.appendChild(btn);
+  });
+
+  grid.appendChild(gridInner);
+  inner.appendChild(grid);
+
+  // Footer
+  var footer = document.createElement('div');
+  footer.style.cssText = 'flex-shrink:0;padding-top:.6rem;font-size:.63rem;color:rgba(255,255,255,.2)';
+  footer.textContent = 'BU Services Commercial Management System · Confidential';
+  inner.appendChild(footer);
+
+  overlay.appendChild(inner);
   document.body.appendChild(overlay);
 }
 
