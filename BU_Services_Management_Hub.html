@@ -1672,6 +1672,17 @@ function ptDaysUntil(s) {
   if (!s) return null;
   return Math.round((new Date(s+'T00:00:00') - new Date(ptToday()+'T00:00:00')) / 86400000);
 }
+
+function ptToday() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function ptFmtDate(s) {
+  if (!s) return '—';
+  var d = new Date(s + 'T00:00:00');
+  return d.toLocaleDateString('en-CA', {month:'short', day:'numeric', year:'numeric'});
+}
+
 function ptInitials(name) {
   return name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
 }
