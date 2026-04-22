@@ -874,9 +874,9 @@ hr.divider{border:none;border-top:1px solid var(--mid);margin:1.5rem 0}
     <div class="ai-toolbar">
       <button class="ai-add-btn" onclick="openAIModal()">+ Add Action</button>
       <div class="ai-filter-tabs">
-        <button class="ai-ftab active" data-filter="open" onclick="aiFilter('open',this)">Open</button>
+        <button class="ai-ftab" data-filter="open" onclick="aiFilter('open',this)">Open</button>
         <button class="ai-ftab" data-filter="done" onclick="aiFilter('done',this)">Done</button>
-        <button class="ai-ftab" data-filter="all" onclick="aiFilter('all',this)">All</button>
+        <button class="ai-ftab active" data-filter="all" onclick="aiFilter('all',this)">All</button>
       </div>
       <span class="ai-overdue-count" id="ai-overdue-count"></span>
     </div>
@@ -2110,7 +2110,7 @@ function renderOT() {
 
 // ── ACTION ITEMS ──────────────────────────────────────────────────────────────
 var aiEditId      = null;
-var aiCurrentFilter = 'open';
+var aiCurrentFilter = 'all';
 
 function openAIModal(editId) {
   aiEditId = editId || null;
