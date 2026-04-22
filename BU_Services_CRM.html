@@ -1145,6 +1145,137 @@ body{
 </div>
 
 <script>
+// ══════════════════════════════════════════════════════════════════════════════
+// BU SERVICES — VIEWER IDENTITY
+// Reads from: 1) URL param ?viewer=X  2) localStorage hub_viewer  3) login screen
+// ══════════════════════════════════════════════════════════════════════════════
+
+var VIEWER_PEOPLE = [
+  { id: 'jon',     name: 'Jon Eustace',          role: 'CEO North America',            initials: 'JE', color: '#00AEEF' },
+  { id: 'max',     name: 'Emmanuel Aggrey',       role: 'Commercial — Mining & West',   initials: 'EA', color: '#C9860A' },
+  { id: 'vinoth',  name: 'Vinoth Tharma',         role: 'Commercial — Nuclear & East',  initials: 'VT', color: '#22882F' },
+  { id: 'rick',    name: 'Rick Carlton',           role: 'Commercial — Pipeline DA',     initials: 'RC', color: '#368CD9' },
+  { id: 'mathieu', name: 'Mathieu Beauchesne',     role: 'Commercial — Powerline',       initials: 'MB', color: '#E97132' },
+  { id: 'olivier', name: 'Olivier Marcotte',       role: 'Operations — Nucleom',         initials: 'OM', color: '#7C3AED' },
+  { id: 'jeremy',  name: 'Jeremy Irwin',           role: 'Finance',                      initials: 'JI', color: '#0891B2' },
+  { id: 'renee',   name: 'Renée Lachance',         role: 'HR & Administration',          initials: 'RL', color: '#BE185D' },
+];
+
+// Determine current viewer
+var _urlViewer = new URLSearchParams(window.location.search).get('viewer');
+var _lsViewer  = localStorage.getItem('hub_viewer');
+var CURRENT_VIEWER = _urlViewer || _lsViewer || null;
+
+// If URL param set, persist it
+if (_urlViewer) localStorage.setItem('hub_viewer', _urlViewer);
+
+function getCurrentViewer() { return CURRENT_VIEWER; }
+function isJon() { return CURRENT_VIEWER === 'jon'; }
+
+function setViewer(id) {
+  CURRENT_VIEWER = id;
+  localStorage.setItem('hub_viewer', id);
+  // Remove URL param and reload cleanly
+  var url = window.location.pathname;
+  window.location.href = url;
+}
+
+function showLoginScreen() {
+  var overlay = document.createElement('div');
+  overlay.id = 'login-overlay';
+  overlay.style.cssText = [
+    'position:fixed;inset:0;z-index:9999',
+    'background:rgba(6,14,28,.97)',
+    'display:flex;align-items:center;justify-content:center',
+    'backdrop-filter:blur(8px)',
+  ].join(';');
+
+  overlay.innerHTML = `
+    <div style="max-width:480px;width:90%;text-align:center">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;
+                  letter-spacing:4px;text-transform:uppercase;color:rgba(0,174,239,.7);margin-bottom:.75rem">
+        Ekoscan Integrity Group
+      </div>
+      <h1 style="font-family:'Barlow Condensed',sans-serif;font-size:2.4rem;font-weight:900;
+                 color:#fff;letter-spacing:-.02em;margin-bottom:.4rem">
+        BU Services
+      </h1>
+      <p style="font-size:.85rem;color:rgba(255,255,255,.4);margin-bottom:2rem">
+        Select your name to continue
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+        ${VIEWER_PEOPLE.map(p => `
+          <button onclick="setViewer('${p.id}')" style="
+            display:flex;align-items:center;gap:.75rem;
+            background:rgba(255,255,255,.04);
+            border:1px solid rgba(255,255,255,.1);
+            border-radius:8px;padding:.75rem 1rem;
+            cursor:pointer;transition:all .15s;text-align:left;
+            font-family:inherit;
+          " onmouseover="this.style.background='rgba(255,255,255,.08)';this.style.borderColor='rgba(255,255,255,.25)'"
+            onmouseout="this.style.background='rgba(255,255,255,.04)';this.style.borderColor='rgba(255,255,255,.1)'">
+            <span style="width:36px;height:36px;border-radius:50%;
+                         background:${p.color};display:flex;align-items:center;
+                         justify-content:center;font-size:.75rem;font-weight:800;
+                         color:#fff;flex-shrink:0">${p.initials}</span>
+            <span>
+              <div style="font-size:.83rem;font-weight:700;color:#fff">${p.name}</div>
+              <div style="font-size:.65rem;color:rgba(255,255,255,.4);margin-top:.1rem">${p.role}</div>
+            </span>
+          </button>
+        `).join('')}
+      </div>
+      <p style="margin-top:1.5rem;font-size:.68rem;color:rgba(255,255,255,.2)">
+        BU Services Commercial Management System · Confidential
+      </p>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+// Show login if no viewer set
+if (!CURRENT_VIEWER) {
+  document.addEventListener('DOMContentLoaded', function() {
+    showLoginScreen();
+  });
+}
+
+// Update sysbar with current user badge + switch button
+document.addEventListener('DOMContentLoaded', function() {
+  if (!CURRENT_VIEWER) return;
+  var person = VIEWER_PEOPLE.find(function(p) { return p.id === CURRENT_VIEWER; });
+  if (!person) return;
+
+  // Find sysbar and add user badge on the right
+  var sysbar = document.querySelector('.sysbar');
+  if (!sysbar) return;
+
+  var badge = document.createElement('div');
+  badge.style.cssText = 'margin-left:auto;display:flex;align-items:center;gap:.5rem';
+  badge.innerHTML = `
+    <span style="width:24px;height:24px;border-radius:50%;background:${person.color};
+                 display:flex;align-items:center;justify-content:center;
+                 font-size:.6rem;font-weight:800;color:#fff;flex-shrink:0">
+      ${person.initials}
+    </span>
+    <span style="font-size:.68rem;color:rgba(255,255,255,.5);font-weight:600">
+      ${person.name.split(' ')[0]}
+    </span>
+    <button onclick="localStorage.removeItem('hub_viewer');window.location.reload()" 
+            style="font-size:.6rem;color:rgba(255,255,255,.3);background:none;
+                   border:1px solid rgba(255,255,255,.1);border-radius:3px;
+                   padding:.1rem .35rem;cursor:pointer;font-family:inherit;
+                   transition:all .15s"
+            onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,.4)'"
+            onmouseout="this.style.color='rgba(255,255,255,.3)';this.style.borderColor='rgba(255,255,255,.1)'">
+      Switch
+    </button>
+  `;
+  sysbar.appendChild(badge);
+});
+
+</script>
+<script>
 // ══════════════════════════════════════════════════════════════════════
 // BU SERVICES CRM — CORE ENGINE
 // ══════════════════════════════════════════════════════════════════════
