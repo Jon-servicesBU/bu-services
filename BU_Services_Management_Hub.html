@@ -1805,7 +1805,9 @@ async function hubSbSelect(table, filters) {
   var qs = Object.entries(filters || {}).map(function(kv) {
     return encodeURIComponent(kv[0]) + '=eq.' + encodeURIComponent(kv[1]);
   }).join('&');
-  var url = _HUB_SB_URL + '/rest/v1/' + table + '?select=id,person_id,data,updated_at' + (qs ? '&' + qs : '');
+  // action_items table has no person_id column
+  var selectCols = table === 'action_items' ? 'id,data,updated_at' : 'id,person_id,data,updated_at';
+  var url = _HUB_SB_URL + '/rest/v1/' + table + '?select=' + selectCols + (qs ? '&' + qs : '');
   var res = await fetch(url, {
     headers: { 'apikey': _HUB_SB_KEY, 'Authorization': 'Bearer ' + _HUB_SB_KEY },
   });
@@ -2214,16 +2216,22 @@ function renderPPToolBadges() {
 
   var sprint = ptLoad('pt_sprint').find(function(i){return i.personId===pid;});
   var oneon  = ptLoad('pt_oneon').find(function(i){return i.personId===pid;});
-  if (!sprint && !oneon) return;
 
   var wrap = document.createElement('div');
   wrap.className = 'pp-tool-badges';
 
+  // Always show action buttons
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:.4rem;margin-bottom:.5rem;flex-wrap:wrap';
+  btnRow.innerHTML =
+    '<button data-act="ot-open" data-id="'+pid+'" style="font-size:.7rem;padding:.25rem .65rem;border-radius:4px;border:1px solid rgba(0,174,239,.3);color:rgba(0,174,239,.8);background:rgba(0,174,239,.08);cursor:pointer;font-family:inherit">💬 Log 1:1</button>' +
+    '<button data-act="sb-open" data-id="'+pid+'" style="font-size:.7rem;padding:.25rem .65rem;border-radius:4px;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);background:rgba(255,255,255,.04);cursor:pointer;font-family:inherit">🎯 Sprint Item</button>';
+  wrap.appendChild(btnRow);
+
   if (sprint) {
     var statusCls = {on:'sb-status-on',risk:'sb-status-risk',blocked:'sb-status-blocked'};
-    var statusLbl = {on:'On Track',risk:'At Risk',blocked:'Blocked'};
     var chip = document.createElement('span');
-    chip.className = 'pp-sprint-badge '+statusCls[sprint.status];
+    chip.className = 'pp-sprint-badge '+(statusCls[sprint.status]||'');
     chip.textContent = '🎯 '+sprint.focus.slice(0,50)+(sprint.focus.length>50?'…':'');
     chip.title = sprint.focus;
     wrap.appendChild(chip);
@@ -2265,6 +2273,12 @@ document.addEventListener('click', function(e) {
   if (act==='edit')     { e.stopPropagation(); openSBModal(id); }
   if (act==='del')      { e.stopPropagation(); deleteSBItem(id); }
   if (act==='ot-open')  { openOTModal(id); }
+  if (act==='sb-open')  { 
+    openSBModal(null);  // open as new
+    // Pre-select the person
+    var sel = document.getElementById('sb-person');
+    if (sel) sel.value = id;
+  }
   if (act==='ai-del')   { e.stopPropagation(); deleteAIItem(id); }
   if (act==='ai-toggle'){ e.stopPropagation(); toggleAIItem(id); }
 });
