@@ -3071,7 +3071,17 @@ function addLabourRow(dayLabel, labOpts, prefill) {
   tr.style.cssText = 'border-bottom:1px solid rgba(255,255,255,.04)';
   tr.innerHTML =
     '<td style="padding:.2rem .25rem"><input class="cs-input" type="date" id="cs-lb-date-' + idx + '" value="' + (p.date||defaultDate) + '" style="width:110px"></td>'
-    + '<td style="padding:.2rem .25rem"><select class="cs-input" id="cs-lb-tech-' + idx + '" style="width:140px">' + getTechOptions() + '</select></td>'
+    + '<td style="padding:.2rem .25rem">'
+    + '<input class="cs-input" id="cs-lb-tech-' + idx + '" list="tech-datalist-' + idx + '" placeholder="Type name…" autocomplete="off" style="width:140px">'
+    + '<datalist id="tech-datalist-' + idx + '">'
+    + NORTECH_EMPLOYEES.filter(function(e){ return e.status === "Active"; }).map(function(e){
+        return '<option value="' + e.name + '">';
+      }).join('')
+    + NORTECH_EMPLOYEES.filter(function(e){ return e.status !== "Active"; }).map(function(e){
+        return '<option value="' + e.name + ' (' + e.status + ')">';
+      }).join('')
+    + '</datalist>'
+    + '</td>'
     + '<td style="padding:.2rem .25rem"><select class="cs-input cs-lb-cat" id="cs-lb-cat-' + idx + '" style="width:170px">' + lo + '</select></td>'
     + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-st-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.regHrs||'') + '" style="width:58px"></td>'
     + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-ot-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.otHrs||'') + '" style="width:58px"></td>'
@@ -4780,15 +4790,14 @@ function filterCustomers(q) {
   if (!list) return;
   var val = (q||'').toLowerCase().trim();
   var matches = val.length === 0
-    ? NORTECH_CUSTOMERS.slice(0, 50)
+    ? NORTECH_CUSTOMERS            // show ALL when empty — list is scrollable
     : NORTECH_CUSTOMERS.filter(function(cu) {
         return cu.name.toLowerCase().includes(val) || (cu.loc||'').toLowerCase().includes(val);
-      }).slice(0, 80);
+      });
   if (!matches.length) {
     list.innerHTML = '<div class="cust-no-results">No customers found</div>';
   } else {
-    list.innerHTML = matches.map(function(cu, i) {
-      // Use data attribute to avoid quote-escaping issues in onmousedown
+    list.innerHTML = matches.map(function(cu) {
       return '<div class="cust-item" data-cust-name="' + cu.name.replace(/"/g, '&quot;') + '">'
         + '<span class="cust-item-name">' + cu.name + '</span>'
         + (cu.loc ? '<span class="cust-item-loc">' + cu.loc + '</span>' : '')
