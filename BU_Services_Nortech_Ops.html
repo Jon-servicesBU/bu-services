@@ -1535,7 +1535,10 @@ function renderJobs() {
   var q      = (document.getElementById('job-search')        || {}).value || '';
   var filter = (document.getElementById('job-filter-status') || {}).value || '';
 
+  var validStatuses = ['draft','submitted','approved','invoiced','paid'];
   var filtered = _jobs.filter(function(j) {
+    // Hide legacy jobs that don't have WO format
+    if (validStatuses.indexOf(j.status) === -1 && !j.woNum) return false;
     if (filter && j.status !== filter) return false;
     if (!q) return true;
     return ((j.client||'')+(j.site||'')+(j.woNum||j.number||'')+(j.po||'')+(j.jobNum||'')).toLowerCase().includes(q.toLowerCase());
@@ -2284,10 +2287,12 @@ async function markPaid(id){
 }
 
 function printInvoice(){
-  var content=document.getElementById('inv-view-body').innerHTML;
-  var win=window.open('','_blank');
-  win.document.write('<html><head><title>Invoice</title></head><body>'+content+'<script>window.print();<\/script></body></html>');
+  var content = document.getElementById('inv-view-body').innerHTML;
+  var win = window.open('', '_blank');
+  win.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px}</style></head><body>' + content + '</body></html>');
   win.document.close();
+  win.focus();
+  setTimeout(function(){ win.print(); }, 500);
 }
 
 // ── Push actuals to Command Centre via Supabase ───────────────────────────────
