@@ -1840,6 +1840,12 @@ function applyCRMOverlay(crm) {
     const r = await fetch('actuals.json');
     if (!r.ok) throw new Error('fetch failed');
     const live = await r.json();
+    console.log('actuals.json loaded, monthly present:', !!live.monthly, 'nucleom:', live.nucleom);
+    // Set monthly FIRST before anything else can crash
+    // monthly already set above
+    if (live.kpi_ref) CONFIG.kpi_ref = live.kpi_ref;
+    if (live.cash) CONFIG.cash = live.cash;
+    if (live.ebitda_initiatives) CONFIG.ebitda_initiatives = live.ebitda_initiatives;
     CONFIG.initiatives.forEach(init => {
       if (live[init.id] !== undefined) init.actual2026 = live[init.id];
     });
@@ -1856,10 +1862,10 @@ function applyCRMOverlay(crm) {
     }
     if (live.lastUpdated) CONFIG.lastUpdated = live.lastUpdated;
     // Conference data
-    loadConferenceData(live);
+    try { loadConferenceData(live); } catch(e) { console.warn("loadConferenceData failed:", e.message); }
     // Add-on modules
     renderAddOns();
-    if (live.monthly) CONFIG.monthly = live.monthly;
+    // monthly already set above
     if (CONFIG.meetings) {
       CONFIG.meetings.forEach(function(m) {
         if (CONFIG['actions_' + m.id] !== undefined) m.actions = CONFIG['actions_' + m.id];
@@ -3057,6 +3063,7 @@ $('init-grid').innerHTML = CONFIG.initiatives.map(init => {
         <div class="icard-actual">${fmt(init.actual2026,2)}</div>
         <div class="icard-target">of ${fmt(init.target2026,2)} target</div>
       </div>
+      ${init.pipeline2026 > 0 ? `<div style="margin-top:.35rem;font-size:.68rem;color:rgba(255,255,255,.5)">+ ${fmt(init.pipeline2026,2)} pipeline</div>` : ''}
     </div>
     <div class="icard-footer">
       <span class="status-chip ${chipClass}">${chip}</span>
