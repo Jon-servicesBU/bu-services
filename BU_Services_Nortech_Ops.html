@@ -1070,8 +1070,8 @@ var _rateEqCount  = 0;
 function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function today(){ return new Date().toISOString().slice(0,10); }
 function fmtDate(s){ if(!s)return'—'; var d=new Date(s+'T00:00:00'); return d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'}); }
-function fmtMoney(n){ return '$'+Number(n||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fmtMoneyShort(n){ var v=Number(n||0); if(v>=1000000)return'$'+(v/1e6).toFixed(2)+'M'; if(v>=1000)return'$'+(v/1000).toFixed(1)+'k'; return fmtMoney(v); }
+function _fmtMoneyImpl(n){ return '$'+Number(n||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function _fmtMoneyShortImpl(n){ var v=Number(n||0); if(v>=1000000)return'$'+(v/1e6).toFixed(2)+'M'; if(v>=1000)return'$'+(v/1000).toFixed(1)+'k'; return fmtMoney(v); }
 function chipHtml(status){
   var map={draft:'chip-draft',pending:'chip-pending',approved:'chip-approved',invoiced:'chip-invoiced',paid:'chip-paid',void:'chip-void',sent:'chip-invoiced',active:'chip-active',closed:'chip-closed'};
   var lbl={draft:'Draft',pending:'Pending',approved:'Approved',invoiced:'Invoiced',paid:'Paid',void:'Void',sent:'Sent',active:'Active',closed:'Closed'};
@@ -3000,15 +3000,12 @@ function isAdmin() {
   return _ADMIN_IDS.indexOf(viewer) > -1;
 }
 
-// Wrap fmtMoney — non-admins see '—' instead of prices
-var _fmtMoneyReal = fmtMoney;
-var _fmtMoneyShortReal = fmtMoneyShort;
-
+// Price visibility wrappers — techs see '—' instead of amounts
 function fmtMoney(n) {
-  return isAdmin() ? _fmtMoneyReal(n) : '—';
+  return isAdmin() ? _fmtMoneyImpl(n) : '—';
 }
 function fmtMoneyShort(n) {
-  return isAdmin() ? _fmtMoneyShortReal(n) : '—';
+  return isAdmin() ? _fmtMoneyShortImpl(n) : '—';
 }
 
 // Hide entire sections from non-admins
