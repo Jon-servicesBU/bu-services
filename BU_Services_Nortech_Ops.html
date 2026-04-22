@@ -575,6 +575,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="sec-hdr">
       <div><h2>Rate Sheets</h2><div class="sec-sub">Standard and customer-specific pricing</div></div>
       <div class="sec-actions">
+        <button class="btn btn-ghost" onclick="openImportRateModal()">⬆ Import from File</button>
         <button class="btn btn-primary" onclick="openRateModal()">+ New Rate Sheet</button>
       </div>
     </div>
@@ -1739,11 +1740,13 @@ async function markPaid(id){
   }catch(e){toast('Update failed: '+e.message,'error');}
 }
 
-function printInvoice(){
-  var content=document.getElementById('inv-view-body').innerHTML;
-  var win=window.open('','_blank');
-  win.document.write('<html><head><title>Invoice</title></head><body>'+content+'<script>window.print();<\/script></body></html>');
+function printInvoice() {
+  var content = document.getElementById('inv-view-body').innerHTML;
+  var win = window.open('', '_blank');
+  win.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px}</style></head><body>' + content + '</body></html>');
   win.document.close();
+  win.focus();
+  setTimeout(function(){ win.print(); }, 500);
 }
 
 // ── Push actuals to Command Centre via Supabase ───────────────────────────────
@@ -1784,5 +1787,57 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 </script>
+
+<!-- Rate Sheet Import Modal -->
+<div class="modal-overlay" id="import-rate-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-hdr">
+      <span class="modal-title">Import Rate Sheet</span>
+      <button class="modal-close" onclick="closeModal('import-rate-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">
+        Upload a Word (.docx) or PDF rate sheet. Claude will read it and extract labour categories, day rates, and equipment items automatically.
+      </p>
+
+      <!-- Drop zone -->
+      <div id="import-dropzone" onclick="document.getElementById('import-file-input').click()"
+           style="border:2px dashed var(--border2);border-radius:8px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:1rem"
+           ondragover="event.preventDefault();this.style.borderColor='var(--nor-accent)'"
+           ondragleave="this.style.borderColor='var(--border2)'"
+           ondrop="handleImportDrop(event)">
+        <div style="font-size:2rem;margin-bottom:.5rem;opacity:.5">📄</div>
+        <div style="font-size:.82rem;font-weight:600;color:var(--text)">Drop file here or click to browse</div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:.25rem">.docx or .pdf — max 10MB</div>
+        <input type="file" id="import-file-input" accept=".docx,.pdf" style="display:none" onchange="handleImportFile(this.files[0])">
+      </div>
+
+      <!-- Status -->
+      <div id="import-status" style="display:none;padding:.75rem;border-radius:6px;font-size:.78rem;margin-bottom:1rem"></div>
+
+      <!-- Preview -->
+      <div id="import-preview" style="display:none">
+        <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.5rem">Extracted Data — Review Before Importing</div>
+        <div class="form-grid form-grid-2" style="gap:.5rem;margin-bottom:.75rem">
+          <div class="form-group">
+            <label class="form-label">Rate Sheet Name</label>
+            <input class="form-input" id="import-rs-name" placeholder="Rate sheet name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Customer (if client-specific)</label>
+            <input class="form-input" id="import-rs-customer" placeholder="Leave blank for standard">
+          </div>
+        </div>
+        <div id="import-labour-preview" style="margin-bottom:.75rem"></div>
+        <div id="import-equipment-preview"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('import-rate-modal')">Cancel</button>
+      <button class="btn btn-primary" id="import-confirm-btn" style="display:none" onclick="confirmImport()">Import Rate Sheet</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
