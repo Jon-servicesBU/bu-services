@@ -576,6 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div><h2>Rate Sheets</h2><div class="sec-sub">Standard and customer-specific pricing</div></div>
       <div class="sec-actions">
         <button class="btn btn-ghost" onclick="openImportRateModal()">⬆ Import from File</button>
+        <button class="btn btn-ghost" onclick="importSeedRateSheet('ellisdon_march_2026')" title="Load pre-built EllisDon 2026 rate sheet">📋 EllisDon 2026</button>
         <button class="btn btn-primary" onclick="openRateModal()">+ New Rate Sheet</button>
       </div>
     </div>
@@ -680,11 +681,11 @@ document.addEventListener('DOMContentLoaded', function() {
       <div style="overflow-x:auto">
         <div class="cs-day-grid" id="cs-day-grid">
           <div class="col-hdr">Day</div>
-          <div class="col-hdr">Description / Work Performed</div>
-          <div class="col-hdr">ST Hours</div>
-          <div class="col-hdr">OT Hours</div>
-          <div class="col-hdr">DT Hours</div>
-          <div class="col-hdr">Equipment</div>
+          <div class="col-hdr">Category</div>
+          <div class="col-hdr">ST Hrs</div>
+          <div class="col-hdr">OT Hrs</div>
+          <div class="col-hdr">DT Hrs</div>
+          <div class="col-hdr">Equipment / Notes</div>
           <div class="col-hdr">Total</div>
         </div>
       </div>
@@ -1177,10 +1178,21 @@ function buildCSDayGrid(){
     d.style.cssText='font-size:.72rem;font-weight:600;padding:.2rem .3rem;white-space:nowrap';
     d.textContent=day.name+' '+day.date.slice(5);
     grid.appendChild(d);
-    // Description
-    var desc=document.createElement('input');
-    desc.type='text'; desc.id='cs-day-desc-'+idx; desc.placeholder='Work performed…';
-    desc.addEventListener('input',calcCSTotal);
+    // Category select
+    var desc=document.createElement('select');
+    desc.id='cs-day-desc-'+idx;
+    desc.style.cssText='background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:.72rem;padding:.3rem .35rem;width:100%;font-family:var(--ff)';
+    desc.innerHTML=labourOptions;
+    desc.addEventListener('change',function(){
+      // Auto-fill rates when category selected
+      var cat=labourCats.find(function(l){return l.name===desc.value;});
+      if(cat){
+        var stEl=document.getElementById('cs-day-st-'+idx);
+        var otEl=document.getElementById('cs-day-ot-'+idx);
+        // Only set rate hint — don't auto-fill hours
+      }
+      calcCSTotal();
+    });
     grid.appendChild(desc);
     // ST hours
     var st=document.createElement('input');
@@ -1217,23 +1229,29 @@ function calcCSTotal(){
   var jobId=document.getElementById('cs-job').value;
   var job=_jobs.find(function(j){return j.id===jobId;})||{};
   var rs=_rateSheets.find(function(r){return r.id===job.rateSheetId;})||{};
-  var stRate=(rs.labour&&rs.labour[0])?rs.labour[0].stRate||0:0;
-  var otRate=(rs.labour&&rs.labour[0])?rs.labour[0].otRate||stRate*1.5:0;
-  var dtRate=(rs.labour&&rs.labour[0])?rs.labour[0].dtRate||stRate*2:0;
-
   var labourTotal=0;
   for(var i=0;i<7;i++){
     var stEl=document.getElementById('cs-day-st-'+i);
     var otEl=document.getElementById('cs-day-ot-'+i);
     var dtEl=document.getElementById('cs-day-dt-'+i);
     var totEl=document.getElementById('cs-day-total-'+i);
+    var catEl=document.getElementById('cs-day-desc-'+i);
     if(!stEl)continue;
+    // Get rates from selected category
+    var catName=catEl?catEl.value:'';
+    var cat=(rs.labour||[]).find(function(l){return l.name===catName;});
+    var stRate=cat?cat.stRate||0:(rs.labour&&rs.labour[0]?rs.labour[0].stRate||0:0);
+    var otRate=cat?cat.otRate||stRate*1.5:(rs.labour&&rs.labour[0]?rs.labour[0].otRate||stRate*1.5:0);
+    var dtRate=cat?cat.dtRate||stRate*2:(rs.labour&&rs.labour[0]?rs.labour[0].dtRate||stRate*2:0);
     var st=parseFloat(stEl.value)||0;
     var ot=parseFloat(otEl.value)||0;
     var dt=parseFloat(dtEl.value)||0;
     var rowTotal=st*stRate+ot*otRate+dt*dtRate;
     labourTotal+=rowTotal;
-    if(totEl)totEl.textContent=fmtMoney(rowTotal);
+    if(totEl){
+      totEl.textContent=fmtMoney(rowTotal);
+      totEl.style.color=rowTotal>0?'var(--nor-accent)':'var(--muted)';
+    }
   }
 
   // Extras
@@ -1281,9 +1299,13 @@ async function saveCS(status){
     var ot=parseFloat(document.getElementById('cs-day-ot-'+i).value)||0;
     var dt=parseFloat(document.getElementById('cs-day-dt-'+i).value)||0;
     if(st||ot||dt){
+      var catEl=document.getElementById('cs-day-desc-'+i);
+      var catName=catEl?catEl.value:'';
+      var catObj=(job.rateSheetId?(_rateSheets.find(function(r){return r.id===job.rateSheetId;})||{}).labour||[]:[]).find(function(l){return l.name===catName;})||{};
       days.push({
         date:d.date, day:d.name,
-        description:(document.getElementById('cs-day-desc-'+i)||{}).value||'',
+        category:catName,
+        stRate:catObj.stRate||0, otRate:catObj.otRate||0, dtRate:catObj.dtRate||0,
         st,ot,dt,
         equipment:(document.getElementById('cs-day-eq-'+i)||{}).value||'',
       });
@@ -1372,7 +1394,7 @@ function viewCS(id){
       var amt=d.st*stRate+d.ot*otRate+d.dt*dtRate;
       return '<tr>'
         +'<td style="white-space:nowrap;font-size:.72rem">'+d.day+' '+fmtDate(d.date)+'</td>'
-        +'<td style="font-size:.72rem">'+d.description+'</td>'
+        +'<td style="font-size:.72rem">'+(d.category||d.description||'—')+'</td>'
         +'<td style="text-align:center;font-family:var(--mono);font-size:.72rem">'+d.st+'</td>'
         +'<td style="text-align:center;font-family:var(--mono);font-size:.72rem">'+d.ot+'</td>'
         +'<td style="text-align:center;font-family:var(--mono);font-size:.72rem">'+d.dt+'</td>'
@@ -2016,6 +2038,26 @@ function showImportStatus(msg, type) {
   };
   el.style.cssText = 'display:block;padding:.75rem;border-radius:6px;font-size:.78rem;margin-bottom:1rem;' + (styles[type]||styles.loading);
   el.textContent = msg;
+}
+
+
+// ── Pre-built rate sheets ────────────────────────────────────────────────────
+var SEED_RATE_SHEETS = {
+  'ellisdon_march_2026': {"id": "ellisdon_march_2026", "name": "EllisDon NDT Rates \u2014 March 2026", "customer": "EllisDon", "effective": "2026-03-01", "currency": "CAD", "notes": "Quote #26-117. March 2026 \u2013 March 2027. FOB Edmonton, AB. Rates portal to portal. Regular time Mon-Fri 7:30am-4:00pm. 15% night shift differential. RT/PAUT/TOFD/AUT min 4hr callout, all others 2hr min. Remote: LOA $70/tech/day, MOB/DEMOB $1.20/km.", "labour": [{"name": "Magnetic Particle Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Liquid Penetrant Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Hardness Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Ferrite Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Manual UT Level 1", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Manual UT Level 2", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "Visual CWB Level 2", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "Visual CWB Level 3", "stRate": 135.0, "otRate": 202.5, "dtRate": 202.5}, {"name": "NACE Level 2", "stRate": 130.0, "otRate": 195.0, "dtRate": 195.0}, {"name": "Positive Material Identification", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Spectrographic Analysis", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Radiographic Testing (2 person)", "stRate": 165.0, "otRate": 247.5, "dtRate": 247.5}, {"name": "PAUT / TOFD (2 person)", "stRate": 225.0, "otRate": 337.5, "dtRate": 337.5}, {"name": "AUT Corrosion Testing (2 person)", "stRate": 215.0, "otRate": 322.5, "dtRate": 322.5}, {"name": "Data Analysis", "stRate": 135.0, "otRate": 202.5, "dtRate": 202.5}, {"name": "NDT Assistant / CEDO", "stRate": 85.0, "otRate": 127.5, "dtRate": 127.5}, {"name": "Supervisor / Project Coordinator", "stRate": 135.0, "otRate": 202.0, "dtRate": 202.0}, {"name": "HSE Supervisor", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "API 510 ISI-PVPP Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "API 653 Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "API 570 Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "Rope Access Level 3", "stRate": 145.0, "otRate": 217.5, "dtRate": 217.5}, {"name": "UAV UT/Visual Drone (2 person)", "stRate": 255.0, "otRate": 382.5, "dtRate": 382.5}, {"name": "CGSB Level 3", "stRate": 150.0, "otRate": 225.0, "dtRate": 225.0}, {"name": "Engineering", "stRate": 215.0, "otRate": 322.5, "dtRate": 322.5}, {"name": "Inspection ISO / PID Drafter", "stRate": 87.0, "otRate": 130.5, "dtRate": 130.5}, {"name": "Office Clerical", "stRate": 59.0, "otRate": 88.5, "dtRate": 88.5}, {"name": "MFL Tank Floor Inspection", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}, {"name": "Guided Wave Testing", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}, {"name": "Eddy Current Testing", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}], "equipment": [{"name": "MP Yoke, calibration block, light meter", "rate": 5.0, "unit": "hour"}, {"name": "Liquid Penetrant testing kit", "rate": 5.0, "unit": "hour"}, {"name": "Ultrasonic unit, calibration blocks, probes", "rate": 20.0, "unit": "hour"}, {"name": "Radiographic exposure device, dark room", "rate": 25.0, "unit": "hour"}, {"name": "NorScan Digital Imaging Acquisition (DDA)", "rate": 75.0, "unit": "hour"}, {"name": "Optical Emission Spectrometry unit", "rate": 99.0, "unit": "hour"}, {"name": "LIPPS unit, argon, calibration blocks", "rate": 55.0, "unit": "hour"}, {"name": "PMI (XRF) unit & calibration blocks", "rate": 35.0, "unit": "hour"}, {"name": "Hardness Tester (UCI)", "rate": 15.0, "unit": "hour"}, {"name": "Hardness Tester (Telebrineller)", "rate": 15.0, "unit": "hour"}, {"name": "Hardness Tester (King Tester)", "rate": 20.0, "unit": "hour"}, {"name": "Ferrite Tester unit", "rate": 15.0, "unit": "hour"}, {"name": "PAUT/TOFD unit, scanners, cables, probes", "rate": 1250.0, "unit": "shift"}, {"name": "AUT unit, cables, probes, calibration blocks", "rate": 1250.0, "unit": "shift"}, {"name": "Coating Tester unit", "rate": 150.0, "unit": "shift"}, {"name": "Voltmeter", "rate": 50.0, "unit": "shift"}, {"name": "Digital Pit Gauge", "rate": 85.0, "unit": "shift"}, {"name": "Airal Robot, UT Thickness unit", "rate": 2625.0, "unit": "shift"}, {"name": "Ultrasonic Couplant", "rate": 33.0, "unit": "liter"}, {"name": "Ultrasonic Couplant High/Low temp", "rate": 3.5, "unit": "oz"}, {"name": "MT Contrast Paint / Wet Particles", "rate": 32.0, "unit": "can"}, {"name": "Dry Magnetic Particle", "rate": 15.0, "unit": "can"}, {"name": "PT Penetrant, Developer, Cleaner", "rate": 35.0, "unit": "can"}, {"name": "Grinding Discs", "rate": 22.0, "unit": "disc"}, {"name": "Temp Sticks", "rate": 25.0, "unit": "stick"}, {"name": "NDT Cleaner", "rate": 15.0, "unit": "can"}, {"name": "Nital Acid Etchant", "rate": 12.5, "unit": "oz"}, {"name": "Methanol Neutralizer", "rate": 35.75, "unit": "liter"}, {"name": "PAUT Antifreeze", "rate": 20.0, "unit": "liter"}, {"name": "Film < 2\" per weld", "rate": 9.0, "unit": "weld"}, {"name": "Film 2\"-3\" per weld (4 exposures)", "rate": 12.0, "unit": "weld"}, {"name": "Film 4\"-5\" per weld", "rate": 12.0, "unit": "weld"}, {"name": "Film 6\" per weld", "rate": 15.0, "unit": "weld"}, {"name": "Film 8\"-12\" per weld", "rate": 21.0, "unit": "weld"}, {"name": "Film 14\"+ per weld", "rate": 1.75, "unit": "diameter inch"}, {"name": "Film 2.75\"x8.5\" sheet", "rate": 4.5, "unit": "sheet"}, {"name": "Film 2.75\"x17\" sheet", "rate": 8.0, "unit": "sheet"}, {"name": "Film 3.5\"x17\" sheet", "rate": 13.0, "unit": "sheet"}, {"name": "Film 4.5\"x17\" sheet", "rate": 15.0, "unit": "sheet"}, {"name": "Film 7\"x17\" sheet", "rate": 19.0, "unit": "sheet"}, {"name": "Film 14\"x17\" sheet", "rate": 24.0, "unit": "sheet"}, {"name": "Film Digitizing per 17\" length", "rate": 5.0, "unit": "length"}, {"name": "Film Digitizing per 17\" stapled", "rate": 7.5, "unit": "length"}, {"name": "Film Minimum digitizing charge", "rate": 85.0, "unit": "job"}, {"name": "Service Vehicle & Fuel", "rate": 10.0, "unit": "hour"}, {"name": "Environmental Fee (MT/PT/RT)", "rate": 10.0, "unit": "shift"}, {"name": "LOA (Remote)", "rate": 70.0, "unit": "tech/day"}, {"name": "MOB/DEMOB Kilometers (Remote)", "rate": 1.2, "unit": "km"}, {"name": "Remote Service Vehicle (onsite)", "rate": 120.0, "unit": "shift"}], "created": "2026-04-22", "modified": "2026-04-22"}
+};
+
+async function importSeedRateSheet(key) {
+  var rs = SEED_RATE_SHEETS[key];
+  if (!rs) return;
+  rs.id = uid();
+  rs.created = today();
+  rs.modified = today();
+  try {
+    await sbUpsert('rate_sheets', rs.id, rs);
+    _rateSheets.unshift(rs);
+    renderRateSheets();
+    toast('Rate sheet imported: ' + rs.labour.length + ' labour + ' + rs.equipment.length + ' equipment/consumable items', 'success');
+  } catch(e) { toast('Import failed: ' + e.message, 'error'); }
 }
 
 </script>
