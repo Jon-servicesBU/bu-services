@@ -3411,6 +3411,37 @@ function renderConferences(){
   renderConferenceSpendProgress();
 }
 
+
+async function manualRefreshCRM() {
+  try {
+    const row = await sbRead('pipeline_sync');
+    if (!row || !row.data) {
+      console.log('CC: No CRM sync data in Supabase yet');
+      return;
+    }
+    applyCRMOverlay(row.data);
+    refreshAffectedSections();
+    if (row.data._synced) updateCRMBadge(row.data._synced);
+    console.log('CC: CRM data manually refreshed');
+  } catch(e) {
+    console.warn('CC: Manual refresh failed:', e.message);
+  }
+}
+
+// Re-read CRM data from Supabase when tab gets focus
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    sbRead('pipeline_sync').then(function(row) {
+      if (!row || !row.data) return;
+      applyCRMOverlay(row.data);
+      refreshAffectedSections();
+      if (row.data._synced) updateCRMBadge(row.data._synced);
+      console.log('CC: CRM data refreshed on focus');
+    }).catch(function(e) {
+      console.warn('CC: Supabase refresh failed:', e.message);
+    });
+  }
+});
 </script>
 </body>
 </html>
