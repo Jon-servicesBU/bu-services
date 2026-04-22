@@ -1818,7 +1818,64 @@ function updateInvTotals(){
   if (preview) preview.style.display = (rsId && selected.length) ? 'block' : 'none';
 }
 
-// Price a charge sheet using a rate sheet — called at invoice time
+// Price a charge sheet using a rate sheet — handles both old and new CS formats
+function priceChargeSheet(cs, rs) {
+  if (!cs) return 0;
+  var total = 0;
+  var labour = cs.labour || 0;   // old format pre-calculated
+  var hasNewFormat = cs.labourRows && cs.labourRows.length > 0;
+
+  if (hasNewFormat && rs && rs.labour) {
+    // NEW format — price each row individually
+    (cs.labourRows || []).forEach(function(row) {
+      var cat = (rs.labour || []).find(function(l){ return l.name === row.category; }) || {};
+      var stRate = cat.stRate || 0;
+      var otRate = cat.otRate || stRate * 1.5;
+      var dtRate = cat.dtRate || stRate * 2;
+      var nsRate = stRate * 1.15;
+      total += (row.st||0)*stRate + (row.ot||0)*otRate + (row.dt||0)*dtRate + (row.ns||0)*nsRate;
+    });
+    (cs.equipRows || []).forEach(function(row) {
+      var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
+      total += (row.qty||0) * (item.rate||0);
+    });
+    (cs.conRows || []).forEach(function(row) {
+      var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
+      total += (row.qty||0) * (item.rate||0);
+    });
+    (cs.filmRows || []).forEach(function(row) {
+      var item = (rs.equipment || []).find(function(e){
+        return row.type && e.name && row.type.toLowerCase().includes(e.name.toLowerCase().slice(0,12));
+      }) || {};
+      total += (row.qty||0) * (item.rate||0);
+    });
+    var travel = cs.travel || {};
+    total += (travel.km||0) * (travel.kmRate||1.20);
+    total += (travel.loaTechs||0) * (travel.loaDays||0) * (travel.loaRate||70);
+    total += (travel.flights||0) + (travel.hotels||0);
+    (cs.otherRows || []).forEach(function(row){ total += row.amt||0; });
+
+  } else if (!hasNewFormat && rs && rs.labour) {
+    // OLD format (days array) — price each day row
+    (cs.days || []).forEach(function(day) {
+      var cat = (rs.labour || []).find(function(l){ return l.name === day.category; }) || {};
+      // Also try matching by description for very old format
+      if (!cat.stRate) cat = (rs.labour || []).find(function(l){ return l.name === day.description; }) || {};
+      var stRate = cat.stRate || day.stRate || 0;
+      var otRate = cat.otRate || day.otRate || stRate * 1.5;
+      var dtRate = cat.dtRate || day.dtRate || stRate * 2;
+      total += (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
+    });
+    (cs.extras || []).forEach(function(e){ total += e.amount||0; });
+
+  } else {
+    // No rate sheet or no row data — use saved total
+    total = cs.total || 0;
+  }
+  return total;
+}
+
+
 function priceChargeSheet(cs, rs) {
   if (!rs || !rs.labour) return cs.total || 0; // fallback to saved total
   var total = 0;
@@ -1961,10 +2018,47 @@ function viewInvoice(id){
 
   // Build line items from charge sheets with full detail
   var lineItems = '';
+  var invRS = _rateSheets.find(function(r){ return r.id===inv.rateSheetId; }) || {};
   (inv.chargeSheets||[]).forEach(function(cs) {
     var fullCS = _chargeSheets.find(function(s){ return s.id===cs.id; }) || cs;
-    var rs = _rateSheets.find(function(r){ return r.id===inv.rateSheetId; }) || {};
-    // Labour rows
+    var rs = invRS;
+    var hasNewFormat = fullCS.labourRows && fullCS.labourRows.length > 0;
+
+    // OLD format fallback — days array
+    if (!hasNewFormat && (fullCS.days || []).length > 0) {
+      (fullCS.days || []).forEach(function(day) {
+        if (!day.st && !day.ot && !day.dt) return;
+        var cat = (rs.labour||[]).find(function(l){ return l.name===(day.category||day.description); }) || {};
+        var stRate = cat.stRate || day.stRate || 0;
+        var otRate = cat.otRate || day.otRate || stRate*1.5;
+        var dtRate = cat.dtRate || day.dtRate || stRate*2;
+        var hrs = [];
+        if (day.st) hrs.push(day.st+' ST');
+        if (day.ot) hrs.push(day.ot+' OT');
+        if (day.dt) hrs.push(day.dt+' DT');
+        var rowAmt = (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
+        var desc = day.category || day.description || 'Labour';
+        lineItems += '<tr>'
+          +'<td style="padding:.35rem .5rem;font-size:10px">'+desc
+            +(fullCS.technician ? '<br><span style="color:#666;font-size:9px">'+day.day+' '+day.date+' — '+fullCS.technician+'</span>' : '')
+          +'</td>'
+          +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
+          +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">1</td>'
+          +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+hrs.join(', ')+'</td>'
+          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(stRate)+'</td>'
+          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(rowAmt)+'</td>'
+          +'</tr>';
+      });
+      (fullCS.extras || []).forEach(function(e) {
+        lineItems += '<tr>'
+          +'<td style="padding:.35rem .5rem;font-size:10px">'+e.description+'</td>'
+          +'<td colspan="3"></td><td></td>'
+          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(e.amount||0)+'</td>'
+          +'</tr>';
+      });
+    }
+
+    // NEW format — labour rows
     (fullCS.labourRows||[]).forEach(function(row) {
       if (!row.st && !row.ot && !row.dt && !row.ns) return;
       var cat = (rs.labour||[]).find(function(l){ return l.name===row.category; }) || {};
@@ -2044,15 +2138,27 @@ function viewInvoice(id){
     });
   });
 
+  // Recalculate subtotal using rate sheet if available, else use saved value
+  var invSubtotal = inv.subtotal || 0;
+  if (invRS && invRS.labour && (inv.chargeSheetIds||[]).length > 0) {
+    var recalc = (inv.chargeSheets||[]).reduce(function(sum, cs) {
+      var fullCS = _chargeSheets.find(function(s){ return s.id===cs.id; }) || cs;
+      return sum + priceChargeSheet(fullCS, invRS);
+    }, 0);
+    if (recalc > 0) invSubtotal = recalc;
+  }
   var discount = inv.discount || 0;
-  var taxable  = inv.subtotal - discount;
+  var taxable  = invSubtotal - discount;
+  var invTax   = taxable * ((inv.taxRate||0)/100);
+  var invTotal = taxable + invTax;
 
   var html = '<div class="inv-preview">'
     // Header — logo left, INVOICE right
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem">'
       + '<div>'
-        + (NORTECH.logo ? '<img src="'+NORTECH.logo+'" style="max-height:60px;margin-bottom:.4rem">' : '')
-        + '<div style="font-size:18px;font-weight:900;color:#C0392B;line-height:1">'+(NORTECH.logo?'':'NORTECH ADVANCED NDT')+'</div>'
+        + '<div style="font-size:22px;font-weight:900;color:#C0392B;line-height:1;margin-bottom:.2rem">N<span style="border-radius:50%;background:#C0392B;color:#fff;padding:0 3px;font-size:16px">O</span>RTECH</div>'
+        + '<div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#333;margin-bottom:.15rem">ADVANCED NDT</div>'
+        + '<div style="font-size:8px;color:#999;font-style:italic">Your Advanced NDT and Engineering Specialists</div>'
         + '<div style="font-size:9px;color:#666;margin-top:.2rem">'+NORTECH.address+'</div>'
         + '<div style="font-size:9px;color:#666">Phone: '+NORTECH.phone+' · Fax: '+NORTECH.fax+'</div>'
         + '<div style="font-size:9px;color:#666">'+NORTECH.web+'</div>'
@@ -2103,10 +2209,10 @@ function viewInvoice(id){
         + '<div>Amount Exempt from Sales Tax CAD 0.00</div>'
       + '</div>'
       + '<table style="font-size:10px;border-collapse:collapse;min-width:220px">'
-      + '<tr><td style="padding:.2rem .5rem;color:#666">Subtotal:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace"><strong>'+_fmtMoneyImpl(inv.subtotal)+'</strong></td></tr>'
+      + '<tr><td style="padding:.2rem .5rem;color:#666">Subtotal:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace"><strong>'+_fmtMoneyImpl(invSubtotal)+'</strong></td></tr>'
       + '<tr><td style="padding:.2rem .5rem;color:#666">Invoice Discount:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">'+_fmtMoneyImpl(discount)+'</td></tr>'
-      + '<tr><td style="padding:.2rem .5rem;color:#666">Total Tax:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">'+_fmtMoneyImpl(inv.tax)+'</td></tr>'
-      + '<tr style="border-top:2px solid #111"><td style="padding:.3rem .5rem;font-weight:900;font-size:12px">Total CAD:</td><td style="padding:.3rem .5rem;text-align:right;font-family:monospace;font-weight:900;font-size:12px">'+_fmtMoneyImpl(inv.total)+'</td></tr>'
+      + '<tr><td style="padding:.2rem .5rem;color:#666">Total Tax:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">'+_fmtMoneyImpl(invTax)+'</td></tr>'
+      + '<tr style="border-top:2px solid #111"><td style="padding:.3rem .5rem;font-weight:900;font-size:12px">Total CAD:</td><td style="padding:.3rem .5rem;text-align:right;font-family:monospace;font-weight:900;font-size:12px">'+_fmtMoneyImpl(invTotal)+'</td></tr>'
     + '</table></div>'
     + (inv.notes ? '<div style="margin-top:1rem;padding-top:.75rem;border-top:1px solid #ddd;font-size:9px;color:#999">'+inv.notes+'</div>' : '')
   + '</div>';
