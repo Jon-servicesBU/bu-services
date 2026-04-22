@@ -1014,6 +1014,8 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-secondary" onclick="printInvoice()">🖨 Print / PDF</button>
       <button class="btn btn-secondary" id="inv-mark-sent-btn" onclick="markInvoiceSent()" style="display:none">Mark Sent</button>
       <button class="btn btn-success" id="inv-mark-paid-btn" onclick="markInvoicePaid()" style="display:none">✓ Mark Paid</button>
+      <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)" style="display:none">↩ Reverse Payment</button>
+      <button class="btn btn-secondary" id="inv-reverse-inv-btn" onclick="reverseInvoiceToApproved(_currentInvId)" style="display:none">↩ Back to Draft</button>
       <button class="btn btn-sm" id="inv-void-btn" onclick="markInvoiceVoid()" style="display:none;background:rgba(185,28,28,.15);color:#EF4444;border:1px solid rgba(185,28,28,.3)">Void Invoice</button>
     </div>
   </div>
@@ -1543,6 +1545,7 @@ function viewCS(id){
   if(c.status==='draft') footer.innerHTML+=' <button class="btn btn-secondary" onclick="editCS(\''+id+'\')">Edit</button> <button class="btn btn-primary" onclick="submitCS(\''+id+'\')">Submit for Approval</button>';
   if(c.status==='pending'&&isAdmin()) footer.innerHTML+=' <button class="btn btn-success" onclick="approveCS(\''+id+'\')">✓ Approve</button>';
   if(c.status==='approved') footer.innerHTML+=' <button class="btn btn-secondary" onclick="openInvoiceModal(\''+c.client+'\');closeModal(\'cs-view-modal\')">Generate Invoice</button>';
+  if(c.status==='invoiced') footer.innerHTML+=' <button class="btn btn-secondary" onclick="reverseCSToApproved(\''+id+'\')">↩ Return to Approved</button>';
 
   document.getElementById('cs-view-modal').classList.add('open');
 }
@@ -1943,9 +1946,13 @@ function viewInvoice(id){
   var paidBtn = document.getElementById('inv-mark-paid-btn');
   var sentBtn = document.getElementById('inv-mark-sent-btn');
   var voidBtn = document.getElementById('inv-void-btn');
-  if (paidBtn) paidBtn.style.display = inv.status === 'sent' ? 'inline-flex' : 'none';
-  if (sentBtn) sentBtn.style.display = inv.status === 'draft' ? 'inline-flex' : 'none';
-  if (voidBtn) voidBtn.style.display = (inv.status !== 'void' && inv.status !== 'paid') ? 'inline-flex' : 'none';
+  if (paidBtn)       paidBtn.style.display       = inv.status === 'sent'  ? 'inline-flex' : 'none';
+  if (sentBtn)       sentBtn.style.display       = inv.status === 'draft' ? 'inline-flex' : 'none';
+  if (voidBtn)       voidBtn.style.display       = (inv.status !== 'void' && inv.status !== 'paid') ? 'inline-flex' : 'none';
+  var revPaidBtn = document.getElementById('inv-reverse-paid-btn');
+  var revInvBtn  = document.getElementById('inv-reverse-inv-btn');
+  if (revPaidBtn) revPaidBtn.style.display = inv.status === 'paid' ? 'inline-flex' : 'none';
+  if (revInvBtn)  revInvBtn.style.display  = (inv.status === 'sent' || inv.status === 'draft') ? 'inline-flex' : 'none';
   document.getElementById('inv-view-modal').classList.add('open');
 }
 
@@ -3118,6 +3125,102 @@ document.addEventListener('click', function(e) {
   if (el2) { approveCS(el2.getAttribute('data-approve-cs')); return; }
 });
 
+
+
+// ── REVERSE PAYMENT / INVOICE STATUS ─────────────────────────────────────────
+
+async function reverseInvoicePayment(id) {
+  var inv = _invoices.find(function(i){ return i.id === id; });
+  if (!inv) return;
+  if (!confirm(
+    'Reverse payment on ' + inv.invNum + '?\n\n' +
+    'This will:\n' +
+    '  • Set invoice status back to Sent\n' +
+    '  • Remove the paid date\n' +
+    '  • Reverse the actuals pushed to Command Centre\n\n' +
+    'Continue?'
+  )) return;
+  inv.status = 'sent';
+  inv.paidDate = null;
+  inv.reversedDate = today();
+  inv.modified = today();
+  try {
+    await sbUpsert('invoices', id, inv);
+    renderInvoices(); renderDashboard();
+    // Reverse CC actuals
+    pushActualsToCC();
+    toast('Payment reversed — invoice back to Sent', 'info');
+    closeModal('inv-view-modal');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function reverseInvoiceToApproved(id) {
+  var inv = _invoices.find(function(i){ return i.id === id; });
+  if (!inv) return;
+  var csCount = (inv.chargeSheetIds || []).length;
+  if (!confirm(
+    'Reverse invoice ' + inv.invNum + ' back to draft?\n\n' +
+    'This will:\n' +
+    '  • Set invoice status back to Draft\n' +
+    '  • Return ' + csCount + ' charge sheet' + (csCount !== 1 ? 's' : '') + ' to Approved status\n' +
+    '  • Allow charge sheets to be re-invoiced\n\n' +
+    'This cannot be undone automatically. Continue?'
+  )) return;
+  inv.status = 'draft';
+  inv.sentDate = null;
+  inv.modified = today();
+  try {
+    await sbUpsert('invoices', id, inv);
+    // Return all linked charge sheets to Approved
+    var released = 0;
+    await Promise.all((inv.chargeSheetIds || []).map(async function(csId) {
+      var cs = _chargeSheets.find(function(c){ return c.id === csId; });
+      if (cs && cs.status === 'invoiced') {
+        cs.status = 'approved';
+        cs.invoiceId = null;
+        cs.modified = today();
+        await sbUpsert('charge_sheets', csId, cs);
+        released++;
+      }
+    }));
+    renderInvoices(); renderCSList(); renderDashboard(); updatePendingBadge();
+    toast('Invoice reversed to Draft — ' + released + ' charge sheet' + (released !== 1 ? 's' : '') + ' returned to Approved', 'info');
+    closeModal('inv-view-modal');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function reverseCSToApproved(id) {
+  var cs = _chargeSheets.find(function(c){ return c.id === id; });
+  if (!cs) return;
+  if (cs.status !== 'invoiced') {
+    toast('Only invoiced charge sheets can be reversed', 'error');
+    return;
+  }
+  // Find the linked invoice
+  var inv = _invoices.find(function(i){
+    return i.chargeSheetIds && i.chargeSheetIds.indexOf(id) > -1;
+  });
+  var invNote = inv
+    ? 'This charge sheet is on invoice ' + inv.invNum + ' (' + inv.status + ').\nRemoving it will leave that invoice incomplete.\n\n'
+    : '';
+  if (!confirm(
+    'Return charge sheet ' + cs.csNum + ' to Approved?\n\n' +
+    invNote +
+    'This will:\n' +
+    '  • Set charge sheet status back to Approved\n' +
+    '  • Allow it to be added to a new invoice\n\n' +
+    'Continue?'
+  )) return;
+  cs.status = 'approved';
+  cs.invoiceId = null;
+  cs.modified = today();
+  try {
+    await sbUpsert('charge_sheets', id, cs);
+    renderCSList(); renderDashboard(); updatePendingBadge();
+    toast('Charge sheet ' + cs.csNum + ' returned to Approved', 'info');
+    closeModal('cs-view-modal');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
 
 </script>
 
