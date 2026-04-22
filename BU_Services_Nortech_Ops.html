@@ -463,9 +463,26 @@ document.addEventListener('DOMContentLoaded', function() {
   <!-- ══ DASHBOARD ══════════════════════════════════════════════════════════ -->
   <div id="view-dashboard" class="view active">
     <div class="kpi-row" id="dash-kpis"></div>
-    <div style="display:grid;grid-template-columns:1fr;gap:1.25rem;max-width:600px">
-      
-  </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+      <div class="section">
+        <div class="sec-hdr">
+          <div><h2>Recent Work Orders</h2><div class="sec-sub">Latest submitted &amp; approved</div></div>
+          <div class="sec-actions"><button class="btn btn-sm btn-primary" onclick="showView('jobs',document.getElementById('nav-jobs'))">View All</button></div>
+        </div>
+        <div class="card" style="padding:0">
+          <table class="data-table" id="dash-cs-table"><tbody></tbody></table>
+        </div>
+      </div>
+      <div class="section" data-admin-only>
+        <div class="sec-hdr">
+          <div><h2>Outstanding Invoices</h2><div class="sec-sub">Sent but unpaid</div></div>
+          <div class="sec-actions"><button class="btn btn-sm btn-secondary" onclick="showView('invoices',document.getElementById('nav-invoices'))">View All</button></div>
+        </div>
+        <div class="card" style="padding:0">
+          <table class="data-table" id="dash-inv-table"><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
 
   <!-- ══ WORK ORDERS VIEW ══════════════════════════════════════════════════════ -->
   <div id="view-jobs" class="view" style="display:none">
@@ -1428,8 +1445,8 @@ function renderDashboard(){
                              .reduce(function(s,i){return s+(i.total||0);},0);
 
   var kpis=[
-    {val:openJobs,       lbl:'Active Jobs',           sub:'Field operations'},
-    {val:pendingCS,      lbl:'Pending Approval',       sub:'Charge sheets to review', alert:pendingCS>0},
+    {val:openJobs,       lbl:'Active Work Orders',    sub:'Draft / submitted / approved'},
+    {val:pendingCS,      lbl:'Pending Approval',       sub:'Work orders to review', alert:pendingCS>0},
     {val:fmtMoneyShort(outstanding), lbl:'Outstanding',sub:'Invoices sent unpaid'},
     {val:fmtMoneyShort(paidMTD),     lbl:'Paid MTD',   sub:'Month to date'},
   ];
