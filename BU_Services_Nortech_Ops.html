@@ -303,6 +303,7 @@ body.tech-view .cs-lb-tot           { display: none !important; }
 .cust-item-name { font-weight:600; color:var(--text); }
 .cust-item-loc { font-size:.68rem; color:var(--muted); }
 .cust-no-results { padding:.6rem .75rem; color:var(--muted); font-size:.75rem; }
+.inv-wo-row:hover { background:rgba(255,255,255,.05); }
 
 </style>
 </head>
@@ -2153,23 +2154,36 @@ function openInvoiceModal(preClient){
   document.getElementById('inv-modal').classList.add('open');
 }
 
-function loadApprovedCS(){
-  var client=document.getElementById('inv-client').value;
-  var sel=document.getElementById('inv-cs-selector');
-  if(!client){sel.innerHTML='<div style="color:var(--muted);font-size:.75rem;padding:.5rem">Select a client first</div>';return;}
-  var approved=_chargeSheets.filter(function(c){return c.client===client&&c.status==='approved';});
-  if(!approved.length){
-    sel.innerHTML='<div style="color:var(--muted);font-size:.75rem;padding:.5rem">No approved work orders for this client</div>';
+function loadApprovedCS() {
+  var client = (document.getElementById('inv-client') || {}).value || '';
+  var sel    = document.getElementById('inv-cs-selector');
+  if (!client) {
+    sel.innerHTML = '<div style="color:var(--muted);font-size:.75rem;padding:.5rem">Select a client first</div>';
     return;
   }
-  sel.innerHTML=approved.map(function(c){
-    return '<label style="display:flex;align-items:center;gap:.6rem;padding:.4rem .5rem;border-radius:4px;cursor:pointer;font-size:.75rem" onmouseover="this.style.background=\'rgba(255,255,255,.04)\'" onmouseout="this.style.background=\'transparent\'">'
-      +'<input type="checkbox" class="inv-cs-check" value="'+c.id+'" onchange="updateInvTotals()" style="accent-color:var(--nor-accent)">'
-      +'<span style="flex:1"><strong>'+c.csNum+'</strong> · '+c.technician+' · Week of '+fmtDate(c.weekStart)+'</span>'
-      +'<span style="font-family:var(--mono);font-weight:700">'+fmtMoney(c.total)+'</span>'
-    +'</label>';
+  // Load approved work orders for this client
+  var approved = _jobs.filter(function(j){ return j.client === client && j.status === 'approved'; });
+  if (!approved.length) {
+    sel.innerHTML = '<div style="color:var(--muted);font-size:.75rem;padding:.5rem">No approved work orders for this client.<br><span style="font-size:.68rem;color:var(--faint)">Work orders must be Approved before invoicing.</span></div>';
+    return;
+  }
+  sel.innerHTML = approved.map(function(wo) {
+    var woNum    = wo.woNum || wo.number || '—';
+    var totalReg = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
+    var totalOT  = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0);  }, 0);
+    var techs    = [...new Set((wo.labourRows||[]).map(function(r){ return r.technician; }).filter(Boolean))].join(', ');
+    return '<label style="display:flex;align-items:center;gap:.6rem;padding:.45rem .6rem;border-radius:4px;cursor:pointer;font-size:.75rem;border-bottom:1px solid rgba(255,255,255,.04)" class="inv-wo-row">'
+      + '<input type="checkbox" class="inv-cs-check" value="' + wo.id + '" onchange="updateInvTotals()" style="accent-color:var(--nor-accent)">'
+      + '<span style="flex:1">'
+        + '<strong>' + woNum + '</strong>'
+        + ' · ' + fmtDate(wo.date)
+        + (techs ? ' · ' + techs : '')
+        + (wo.site ? '<br><span style="font-size:.68rem;color:var(--muted)">' + (wo.site||'').slice(0,50) + '</span>' : '')
+      + '</span>'
+    + '</label>';
   }).join('');
 }
+
 
 function updateInvTotals(){
   var selected=Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){
