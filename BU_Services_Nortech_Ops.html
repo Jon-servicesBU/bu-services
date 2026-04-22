@@ -1881,7 +1881,7 @@ async function parseRateSheetText(text) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: 1000,
       messages: [{ role: 'user', content: RATE_PROMPT + ' Document text: ' + text.slice(0, 8000) }]
     })
@@ -1889,8 +1889,10 @@ async function parseRateSheetText(text) {
   if (!res.ok) throw new Error('API error ' + res.status);
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-  var match = txt.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('No JSON in response');
+  console.log('AI response:', txt.slice(0, 200));
+  var clean = txt.replace(/```json|```/g,'').trim();
+  var match = clean.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
   return JSON.parse(match[0]);
 }
 
@@ -1905,7 +1907,7 @@ async function parseRateSheetPDF(file) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: 1000,
       messages: [{
         role: 'user',
@@ -1919,8 +1921,10 @@ async function parseRateSheetPDF(file) {
   if (!res.ok) throw new Error('API error ' + res.status);
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-  var match = txt.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('No JSON in response');
+  console.log('AI response:', txt.slice(0, 200));
+  var clean = txt.replace(/```json|```/g,'').trim();
+  var match = clean.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
   return JSON.parse(match[0]);
 }
 
