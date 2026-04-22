@@ -1763,6 +1763,78 @@ function sbSubscribe(callback) {
 
 // Power Automate writes actuals.json to SharePoint every Sunday 7PM ET.
 // If unavailable (local file use / offline), falls back to CONFIG defaults silently.
+function refreshAffectedSections() {
+  // Re-render sections that CRM data affects
+  if (typeof renderOverview        === 'function') renderOverview();
+  if (typeof renderRevenueFoundation === 'function') renderRevenueFoundation();
+  if (typeof renderProposals       === 'function') renderProposals();
+  if (typeof renderReconciliation  === 'function') renderReconciliation();
+  if (typeof renderMeetings        === 'function') renderMeetings();
+  if (typeof renderConferences     === 'function') renderConferences();
+  if (typeof renderRegions         === 'function') renderRegions();
+}
+
+function updateCRMBadge(isoTimestamp) {
+  var badge = document.getElementById('crm-sync-badge');
+  var sep   = document.getElementById('crm-sep');
+  if (!badge) return;
+  var t = new Date(isoTimestamp).toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit',hour12:false});
+  badge.textContent = '\ud83d\uddc2 CRM synced ' + t;
+  badge.style.display = 'inline';
+  badge.style.color = '#22C55E';
+  if (sep) sep.style.display = 'inline';
+  setTimeout(function() { badge.style.color = 'rgba(34,197,94,.7)'; }, 2000);
+}
+
+// ── Apply CRM sync data to CONFIG ─────────────────────────────────────────
+function applyCRMOverlay(crm) {
+  if (!crm) return;
+
+  // Pipeline by initiative ($M) → CONFIG.initiatives[].pipeline2026
+  ['mining','pipeline','powerline','nuclear','x3','nucleom'].forEach(function(id) {
+    var k = id + '_pipeline';
+    if (crm[k] === undefined) return;
+    CONFIG.initiatives.forEach(function(init) {
+      if (init.id === id) init.pipeline2026 = crm[k];
+    });
+    CONFIG[k] = crm[k];
+  });
+
+  // Proposals by initiative
+  ['proposals_mining','proposals_pipeline','proposals_powerline',
+   'proposals_nuclear','proposals_x3','proposals_base'].forEach(function(k) {
+    if (crm[k]) CONFIG[k] = crm[k];
+  });
+  if (crm.proposals_summary) CONFIG.proposals_summary = crm.proposals_summary;
+
+  // Reconciliation
+  if (crm.recon_nuc)     CONFIG.recon_nuc     = crm.recon_nuc;
+  if (crm.recon_nor)     CONFIG.recon_nor     = crm.recon_nor;
+  if (crm.recon_summary) CONFIG.recon_summary = crm.recon_summary;
+
+  // Conference partial
+  if (crm.conf_summary_partial) {
+    CONFIG.conf_summary = CONFIG.conf_summary || {};
+    Object.assign(CONFIG.conf_summary, crm.conf_summary_partial);
+  }
+
+  // Action items → CONFIG.meetings
+  ['actions_commercial','actions_ops','actions_gate','actions_finance',
+   'actions_hr','actions_eurazeo','actions_overdue'].forEach(function(k) {
+    if (crm[k] === undefined) return;
+    CONFIG[k] = crm[k];
+    if (CONFIG.meetings && k.startsWith('actions_')) {
+      var mid = k.replace('actions_','');
+      CONFIG.meetings.forEach(function(m) {
+        if (m.id === mid) m.actions = crm[k];
+      });
+    }
+  });
+  if (crm.actions_overdue !== undefined) CONFIG.actions_overdue = crm.actions_overdue;
+  if (crm.owner_pipeline) CONFIG.crm_owner_pipeline = crm.owner_pipeline;
+  CONFIG.crm_synced = crm._synced || null;
+}
+
 (async () => {
   try {
     const r = await fetch('actuals.json');
@@ -1821,78 +1893,12 @@ function sbSubscribe(callback) {
   // Render everything with CONFIG defaults (actuals.json values overlay on top if loaded)
   renderAll();
 
-  function refreshAffectedSections() {
-    // Re-render sections that CRM data affects
-    if (typeof renderOverview        === 'function') renderOverview();
-    if (typeof renderRevenueFoundation === 'function') renderRevenueFoundation();
-    if (typeof renderProposals       === 'function') renderProposals();
-    if (typeof renderReconciliation  === 'function') renderReconciliation();
-    if (typeof renderMeetings        === 'function') renderMeetings();
-    if (typeof renderConferences     === 'function') renderConferences();
-    if (typeof renderRegions         === 'function') renderRegions();
-  }
-
-  function updateCRMBadge(isoTimestamp) {
-    var badge = document.getElementById('crm-sync-badge');
-    var sep   = document.getElementById('crm-sep');
-    if (!badge) return;
-    var t = new Date(isoTimestamp).toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit',hour12:false});
-    badge.textContent = '\ud83d\uddc2 CRM synced ' + t;
-    badge.style.display = 'inline';
-    badge.style.color = '#22C55E';
-    if (sep) sep.style.display = 'inline';
-    setTimeout(function() { badge.style.color = 'rgba(34,197,94,.7)'; }, 2000);
-  }
 
 
-  // ── Apply CRM sync data to CONFIG ─────────────────────────────────────────
-  function applyCRMOverlay(crm) {
-    if (!crm) return;
 
-    // Pipeline by initiative ($M) → CONFIG.initiatives[].pipeline2026
-    ['mining','pipeline','powerline','nuclear','x3','nucleom'].forEach(function(id) {
-      var k = id + '_pipeline';
-      if (crm[k] === undefined) return;
-      CONFIG.initiatives.forEach(function(init) {
-        if (init.id === id) init.pipeline2026 = crm[k];
-      });
-      CONFIG[k] = crm[k];
-    });
 
-    // Proposals by initiative
-    ['proposals_mining','proposals_pipeline','proposals_powerline',
-     'proposals_nuclear','proposals_x3','proposals_base'].forEach(function(k) {
-      if (crm[k]) CONFIG[k] = crm[k];
-    });
-    if (crm.proposals_summary) CONFIG.proposals_summary = crm.proposals_summary;
 
-    // Reconciliation
-    if (crm.recon_nuc)     CONFIG.recon_nuc     = crm.recon_nuc;
-    if (crm.recon_nor)     CONFIG.recon_nor     = crm.recon_nor;
-    if (crm.recon_summary) CONFIG.recon_summary = crm.recon_summary;
 
-    // Conference partial
-    if (crm.conf_summary_partial) {
-      CONFIG.conf_summary = CONFIG.conf_summary || {};
-      Object.assign(CONFIG.conf_summary, crm.conf_summary_partial);
-    }
-
-    // Action items → CONFIG.meetings
-    ['actions_commercial','actions_ops','actions_gate','actions_finance',
-     'actions_hr','actions_eurazeo','actions_overdue'].forEach(function(k) {
-      if (crm[k] === undefined) return;
-      CONFIG[k] = crm[k];
-      if (CONFIG.meetings && k.startsWith('actions_')) {
-        var mid = k.replace('actions_','');
-        CONFIG.meetings.forEach(function(m) {
-          if (m.id === mid) m.actions = crm[k];
-        });
-      }
-    });
-    if (crm.actions_overdue !== undefined) CONFIG.actions_overdue = crm.actions_overdue;
-    if (crm.owner_pipeline) CONFIG.crm_owner_pipeline = crm.owner_pipeline;
-    CONFIG.crm_synced = crm._synced || null;
-  }
 
   // Initial load from Supabase on page open
   sbRead('pipeline_sync').then(function(row) {
