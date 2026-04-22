@@ -492,29 +492,25 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
-  <!-- ══ JOBS ═══════════════════════════════════════════════════════════════ -->
+  <!-- ══ JOBS ════════════════════════════════════════════════════════════════ -->
   <div id="view-jobs" class="view" style="display:none">
     <div class="sec-hdr">
-      <div><h2>Jobs Register</h2><div class="sec-sub">Active and recent jobs</div></div>
+      <div><h2>Jobs</h2><div class="sec-sub">Tap a job to log work or view history</div></div>
       <div class="sec-actions">
-        <input class="form-input" style="width:200px" placeholder="Search jobs…" id="job-search" oninput="renderJobs()">
-        <button class="btn btn-primary" onclick="openJobModal()">+ New Job</button>
+        <input class="form-input" style="width:180px" placeholder="Search…" id="job-search" oninput="renderJobs()">
+        <select class="form-select" style="width:120px;font-size:.72rem" id="job-filter-status" onchange="renderJobs()">
+          <option value="">All Jobs</option>
+          <option value="active">Active</option>
+          <option value="closed">Closed</option>
+        </select>
+        <button class="btn btn-primary" onclick="openNewJobFlow()">+ New Job</button>
       </div>
     </div>
-    <div class="card" style="padding:0">
-      <table class="data-table">
-        <thead><tr>
-          <th>Job #</th><th>Client</th><th>Site / Description</th>
-          <th>Type</th><th>Rate Sheet</th><th>Status</th>
-          <th>Charge Sheets</th><th></th>
-        </tr></thead>
-        <tbody id="jobs-tbody"></tbody>
-      </table>
-      <div class="empty-state" id="jobs-empty" style="display:none">
-        <div class="empty-state-icon">🔧</div>
-        <div class="empty-state-title">No Jobs Yet</div>
-        <div class="empty-state-sub">Create your first job to start logging charge sheets</div>
-      </div>
+    <div id="jobs-grid" style="display:grid;gap:.75rem"></div>
+    <div class="empty-state" id="jobs-empty" style="display:none">
+      <div class="empty-state-icon">🔧</div>
+      <div class="empty-state-title">No Jobs Yet</div>
+      <div class="empty-state-sub">Tap + New Job to get started</div>
     </div>
   </div>
 
@@ -605,27 +601,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Job Modal -->
 <div class="modal-overlay" id="job-modal">
-  <div class="modal">
+  <div class="modal" style="max-width:560px">
     <div class="modal-hdr">
       <span class="modal-title" id="job-modal-title">New Job</span>
       <button class="modal-close" onclick="closeModal('job-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-grid form-grid-2" style="gap:.75rem">
-        <div class="form-group">
-          <label class="form-label">Client / Company <span>*</span></label>
-          <input class="form-input" id="job-client" placeholder="e.g. TC Energy">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Job # / PO Reference</label>
-          <input class="form-input" id="job-number" placeholder="Auto-generated if blank">
+      <div class="form-grid form-grid-2" style="gap:.65rem">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Client / Company <span style="color:var(--nor-accent)">*</span></label>
+          <input class="form-input" id="job-client" placeholder="e.g. TC Energy, EllisDon, Pembina">
         </div>
         <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Site / Description <span>*</span></label>
-          <input class="form-input" id="job-site" placeholder="e.g. NGTL Line 100-3 — Inline Inspection">
+          <label class="form-label">Site / Scope <span style="color:var(--nor-accent)">*</span></label>
+          <input class="form-input" id="job-site" placeholder="e.g. NGTL Line 100-3 — PAUT inline inspection">
         </div>
         <div class="form-group">
-          <label class="form-label">Billing Type <span>*</span></label>
+          <label class="form-label">PO / Reference #</label>
+          <input class="form-input" id="job-po" placeholder="Customer PO #">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Job # (auto if blank)</label>
+          <input class="form-input" id="job-number" placeholder="NOR-1001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Billing Type <span style="color:var(--nor-accent)">*</span></label>
           <select class="form-select" id="job-billing">
             <option value="tm">T&M — Time & Materials</option>
             <option value="fixed">Fixed Price</option>
@@ -646,19 +646,16 @@ document.addEventListener('DOMContentLoaded', function() {
           <label class="form-label">Start Date</label>
           <input class="form-input" id="job-start" type="date">
         </div>
-        <div class="form-group">
-          <label class="form-label">PO Number</label>
-          <input class="form-input" id="job-po" placeholder="Customer PO #">
-        </div>
         <div class="form-group" style="grid-column:1/-1">
           <label class="form-label">Notes</label>
-          <textarea class="form-textarea" id="job-notes" placeholder="Scope notes, contacts, special instructions…" style="min-height:60px"></textarea>
+          <textarea class="form-textarea" id="job-notes" placeholder="Scope, contacts, special instructions…" style="min-height:55px"></textarea>
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveJob()">Save Job</button>
+      <button class="btn btn-secondary" onclick="saveJob()">Save Only</button>
+      <button class="btn btn-primary" onclick="saveJobAndStartCS()">Save + Log This Week</button>
     </div>
   </div>
 </div>
@@ -1188,36 +1185,160 @@ function updatePendingBadge(){
 }
 
 // ── Jobs ──────────────────────────────────────────────────────────────────────
-function renderJobs(){
-  var q=(document.getElementById('job-search')||{}).value||'';
-  var filtered=_jobs.filter(function(j){
-    if(!q) return true;
+
+function renderJobs() {
+  var q      = (document.getElementById('job-search')||{}).value || '';
+  var filter = (document.getElementById('job-filter-status')||{}).value || '';
+  var filtered = _jobs.filter(function(j) {
+    if (filter && j.status !== filter) return false;
+    if (!q) return true;
     return (j.client+j.site+j.number+j.po).toLowerCase().includes(q.toLowerCase());
   });
-  var tbody=document.getElementById('jobs-tbody');
-  var empty=document.getElementById('jobs-empty');
-  if(!tbody)return;
-  if(!filtered.length){tbody.innerHTML='';if(empty)empty.style.display='block';return;}
-  if(empty)empty.style.display='none';
-  tbody.innerHTML=filtered.map(function(j){
-    var cs=_chargeSheets.filter(function(c){return c.jobId===j.id;});
-    var rs=_rateSheets.find(function(r){return r.id===j.rateSheetId;})||{};
-    var billingLbl={tm:'T&M',fixed:'Fixed Price',mixed:'Mixed'};
-    return '<tr>'
-      +'<td style="font-family:var(--mono);font-size:.72rem;color:var(--muted)">'+j.number+'</td>'
-      +'<td><span style="font-weight:600">'+j.client+'</span>'+(j.po?'<br><span style="font-size:.65rem;color:var(--muted)">PO: '+j.po+'</span>':'')+'</td>'
-      +'<td style="max-width:220px">'+j.site+'</td>'
-      +'<td><span class="chip chip-draft" style="font-size:.62rem">'+(billingLbl[j.billing]||j.billing)+'</span></td>'
-      +'<td style="font-size:.72rem;color:var(--muted)">'+(rs.name||'—')+'</td>'
-      +'<td>'+chipHtml(j.status)+'</td>'
-      +'<td style="font-size:.72rem">'+cs.length+' sheets'+(cs.filter(function(c){return c.status==='pending';}).length?' · <span style="color:#F59E0B">'+cs.filter(function(c){return c.status==='pending';}).length+' pending</span>':'')+'</td>'
-      +'<td>'
-        +'<button class="btn btn-ghost btn-sm" onclick="openJobModal(\''+j.id+'\')">Edit</button> '
-        +'<button class="btn btn-sm btn-secondary" onclick="openCSModal(\''+j.id+'\')">+ CS</button>'
-      +'</td>'
-    +'</tr>';
+
+  var grid  = document.getElementById('jobs-grid');
+  var empty = document.getElementById('jobs-empty');
+  if (!grid) return;
+
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map(function(j) {
+    var sheets = _chargeSheets.filter(function(c){ return c.jobId === j.id; });
+    var pending = sheets.filter(function(c){ return c.status === 'pending'; }).length;
+    var approved = sheets.filter(function(c){ return c.status === 'approved'; }).length;
+    var totalBilled = sheets.reduce(function(s,c){ return s + (c.total||0); }, 0);
+    var rs = _rateSheets.find(function(r){ return r.id === j.rateSheetId; }) || {};
+    var billingLbl = {tm:'T&M', fixed:'Fixed', mixed:'Mixed'}[j.billing] || j.billing;
+
+    // Recent charge sheets (last 3)
+    var recentSheets = sheets.slice(0, 3);
+
+    return '<div class="card" style="padding:0;overflow:hidden">'
+      // Job header
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border)">'
+        + '<div style="flex:1;min-width:0">'
+          + '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem">'
+            + '<span style="font-family:var(--ffc);font-size:.95rem;font-weight:800">' + j.client + '</span>'
+            + chipHtml(j.status)
+            + (pending ? '<span class="chip chip-pending">' + pending + ' pending</span>' : '')
+          + '</div>'
+          + '<div style="font-size:.78rem;color:var(--muted);margin-bottom:.2rem">' + j.site + '</div>'
+          + '<div style="display:flex;gap:1rem;font-size:.68rem;color:var(--faint)">'
+            + '<span>' + j.number + '</span>'
+            + (j.po ? '<span>PO: ' + j.po + '</span>' : '')
+            + '<span>' + billingLbl + '</span>'
+            + (rs.name ? '<span>' + rs.name + '</span>' : '')
+          + '</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;margin-left:.75rem">'
+          + '<span style="font-family:var(--ffc);font-size:1.1rem;font-weight:900;color:var(--nor-accent)">' + fmtMoneyShort(totalBilled) + '</span>'
+          + '<span style="font-size:.62rem;color:var(--muted)">' + sheets.length + ' sheet' + (sheets.length !== 1 ? 's' : '') + '</span>'
+        + '</div>'
+      + '</div>'
+      // Charge sheet history strip
+      + (recentSheets.length
+        ? '<div style="padding:.5rem 1.1rem;border-bottom:1px solid var(--border);display:flex;gap:.4rem;flex-wrap:wrap">'
+          + recentSheets.map(function(cs) {
+            return '<div onclick="viewCS(\'' + cs.id + '\')" style="display:flex;align-items:center;gap:.35rem;background:var(--surface2);border-radius:4px;padding:.25rem .55rem;cursor:pointer;font-size:.68rem;border:1px solid var(--border)">'
+              + '<span style="color:var(--muted)">' + cs.csNum + '</span>'
+              + '<span>w/o ' + cs.weekStart.slice(5) + '</span>'
+              + chipHtml(cs.status)
+              + '<span style="font-family:var(--mono);color:var(--muted)">' + fmtMoneyShort(cs.total) + '</span>'
+            + '</div>';
+          }).join('')
+          + (sheets.length > 3 ? '<span style="font-size:.68rem;color:var(--muted);padding:.25rem .4rem">+' + (sheets.length - 3) + ' more</span>' : '')
+        + '</div>'
+        : '')
+      // Action buttons
+      + '<div style="padding:.55rem 1.1rem;display:flex;gap:.4rem;flex-wrap:wrap">'
+        + '<button class="btn btn-primary btn-sm" onclick="openCSModal(\'' + j.id + '\')">+ Log This Week</button>'
+        + '<button class="btn btn-ghost btn-sm" onclick="openJobModal(\'' + j.id + '\')">Edit Job</button>'
+        + (j.status === 'active'
+          ? '<button class="btn btn-ghost btn-sm" onclick="closeJob(\'' + j.id + '\')">Close Job</button>'
+          : '<button class="btn btn-ghost btn-sm" onclick="reopenJob(\'' + j.id + '\')">Reopen</button>')
+        + (approved > 0 ? '<button class="btn btn-secondary btn-sm" onclick="openInvoiceModal(\'' + j.client + '\')">Invoice (' + approved + ' approved)</button>' : '')
+      + '</div>'
+    + '</div>';
   }).join('');
 }
+
+function openNewJobFlow() {
+  _editJobId = null;
+  var modal = document.getElementById('job-modal');
+  document.getElementById('job-modal-title').textContent = 'New Job';
+  var rsSel = document.getElementById('job-rate-sheet');
+  rsSel.innerHTML = '<option value="">— Select rate sheet —</option>'
+    + _rateSheets.map(function(r){ return '<option value="' + r.id + '">' + r.name + (r.customer ? ' (' + r.customer + ')' : '') + '</option>'; }).join('');
+  ['job-client','job-number','job-site','job-fixed-price','job-po','job-notes'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('job-billing').value = 'tm';
+  document.getElementById('job-rate-sheet').value = '';
+  document.getElementById('job-start').value = today();
+  modal.classList.add('open');
+}
+
+async function saveJobAndStartCS() {
+  // Save job first, then open charge sheet
+  var id = await saveJobAndReturn();
+  if (!id) return;
+  closeModal('job-modal');
+  // Small delay to let job render
+  setTimeout(function(){ openCSModal(id); }, 150);
+}
+
+async function saveJobAndReturn() {
+  var client = document.getElementById('job-client').value.trim();
+  var site   = document.getElementById('job-site').value.trim();
+  if (!client || !site) { toast('Client and site are required', 'error'); return null; }
+  var id = _editJobId || uid();
+  var data = {
+    id, client, site,
+    number:      document.getElementById('job-number').value.trim() || nextNum('NOR-', _jobs, 'number'),
+    billing:     document.getElementById('job-billing').value,
+    rateSheetId: document.getElementById('job-rate-sheet').value,
+    fixedPrice:  parseFloat(document.getElementById('job-fixed-price').value) || 0,
+    startDate:   document.getElementById('job-start').value,
+    po:          document.getElementById('job-po').value.trim(),
+    notes:       document.getElementById('job-notes').value.trim(),
+    status:      'active',
+    created:     _editJobId ? (_jobs.find(function(j){ return j.id === _editJobId; }) || {}).created || today() : today(),
+    modified:    today(),
+  };
+  try {
+    await sbUpsert('jobs', id, data);
+    if (_editJobId) { _jobs = _jobs.map(function(j){ return j.id === id ? data : j; }); }
+    else { _jobs.unshift(data); }
+    renderJobs(); renderDashboard();
+    toast('Job saved', 'success');
+    return id;
+  } catch(e) { toast('Save failed: ' + e.message, 'error'); return null; }
+}
+
+async function closeJob(id) {
+  var j = _jobs.find(function(j){ return j.id === id; }); if (!j) return;
+  j.status = 'closed'; j.closedDate = today(); j.modified = today();
+  try {
+    await sbUpsert('jobs', id, j);
+    renderJobs(); renderDashboard();
+    toast('Job closed', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function reopenJob(id) {
+  var j = _jobs.find(function(j){ return j.id === id; }); if (!j) return;
+  j.status = 'active'; j.modified = today();
+  try {
+    await sbUpsert('jobs', id, j);
+    renderJobs(); renderDashboard();
+    toast('Job reopened', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
 
 function openJobModal(editId){
   _editJobId=editId||null;
@@ -1248,39 +1369,11 @@ function openJobModal(editId){
   modal.classList.add('open');
 }
 
-async function saveJob(){
-  var client=document.getElementById('job-client').value.trim();
-  var site  =document.getElementById('job-site').value.trim();
-  if(!client||!site){toast('Client and site are required','error');return;}
-  var id=_editJobId||uid();
-  var data={
-    id,client,site,
-    number: document.getElementById('job-number').value.trim() || nextNum('NOR-',_jobs,'number'),
-    billing: document.getElementById('job-billing').value,
-    rateSheetId: document.getElementById('job-rate-sheet').value,
-    fixedPrice: parseFloat(document.getElementById('job-fixed-price').value)||0,
-    startDate: document.getElementById('job-start').value,
-    po: document.getElementById('job-po').value.trim(),
-    notes: document.getElementById('job-notes').value.trim(),
-    status: 'active',
-    created: _editJobId ? (_jobs.find(function(j){return j.id===_editJobId;})||{}).created||today() : today(),
-    modified: today(),
-  };
-  try{
-    await sbUpsert('jobs', id, data);
-    if(_editJobId){ _jobs=_jobs.map(function(j){return j.id===id?data:j;}); }
-    else { _jobs.unshift(data); }
-    closeModal('job-modal');
-    renderJobs();
-    renderDashboard();
-    toast('Job saved','success');
-  }catch(e){ toast('Save failed: '+e.message,'error'); }
+async function saveJob() {
+  await saveJobAndReturn();
+  closeModal('job-modal');
 }
 
-// ── Charge Sheets ─────────────────────────────────────────────────────────────
-// openCSModal moved to rebuilt version above
-
-// buildCSDayGrid replaced by rebuildLabourRows above
 
 function onCSJobChange(){ buildCSDayGrid(); }
 
