@@ -477,8 +477,8 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
   <div class="unav-links">
     <button class="active" onclick="showView('dashboard',this)" id="nav-dashboard">📊 Dashboard</button>
-    <button onclick="showView('jobs',this)" id="nav-jobs">🔧 Jobs</button>
-    <button onclick="showView('charge-sheets',this)" id="nav-cs">📋 Charge Sheets</button>
+    <button onclick="showView('jobs',this)" id="nav-jobs">🔧 Work Orders</button>
+    <button onclick="showView('charge-sheets',this)" id="nav-cs" data-admin-only style="display:none">📋 Charge Sheets</button>
     <button onclick="showView('invoices',this)" id="nav-invoices" data-admin-only>🧾 Invoices</button>
     <button onclick="showView('rate-sheets',this)" id="nav-rates" data-admin-only>💲 Rate Sheets</button>
   </div>
@@ -524,27 +524,236 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
-  <!-- ══ JOBS ════════════════════════════════════════════════════════════════ -->
+  <!-- ══ WORK ORDERS VIEW ══════════════════════════════════════════════════════ -->
   <div id="view-jobs" class="view" style="display:none">
     <div class="sec-hdr">
-      <div><h2>Jobs</h2><div class="sec-sub">Tap a job to log work or view history</div></div>
+      <div><h2>Work Orders</h2><div class="sec-sub">Tap a work order to view details or log more work</div></div>
       <div class="sec-actions">
         <input class="form-input" style="width:180px" placeholder="Search…" id="job-search" oninput="renderJobs()">
         <select class="form-select" style="width:120px;font-size:.72rem" id="job-filter-status" onchange="renderJobs()">
-          <option value="">All Jobs</option>
-          <option value="active">Active</option>
-          <option value="closed">Closed</option>
+          <option value="">All</option>
+          <option value="draft">Draft</option>
+          <option value="submitted">Submitted</option>
+          <option value="approved">Approved</option>
+          <option value="invoiced">Invoiced</option>
+          <option value="paid">Paid</option>
         </select>
-        <button class="btn btn-primary" onclick="openNewJobFlow()">+ New Job</button>
+        <button class="btn btn-primary" onclick="openWOModal()">+ New Work Order</button>
       </div>
     </div>
     <div id="jobs-grid" style="display:grid;gap:.75rem"></div>
     <div class="empty-state" id="jobs-empty" style="display:none">
       <div class="empty-state-icon">🔧</div>
-      <div class="empty-state-title">No Jobs Yet</div>
-      <div class="empty-state-sub">Tap + New Job to get started</div>
+      <div class="empty-state-title">No Work Orders Yet</div>
+      <div class="empty-state-sub">Tap + New Work Order to get started</div>
     </div>
   </div>
+
+<!-- ══ WORK ORDER MODAL ══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="job-modal">
+  <div class="modal" style="max-width:900px;width:96vw">
+    <div class="modal-hdr">
+      <span class="modal-title" id="wo-modal-title">New Work Order</span>
+      <button class="modal-close" onclick="closeModal('job-modal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:1rem 1.25rem">
+
+      <!-- Header info -->
+      <div class="form-grid" style="grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem">
+        <div class="form-group" style="grid-column:1/3">
+          <label class="form-label">Client / Company <span style="color:var(--nor-accent)">*</span></label>
+          <input class="form-input" id="job-client" placeholder="e.g. YANDA CANADA LTD">
+        </div>
+        <div class="form-group">
+          <label class="form-label">WO # (auto if blank)</label>
+          <input class="form-input" id="job-number" placeholder="W-99001">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of Work <span style="color:var(--nor-accent)">*</span></label>
+          <input class="form-input" id="wo-date" type="date">
+        </div>
+        <div class="form-group" style="grid-column:1/3">
+          <label class="form-label">Location / Site <span style="color:var(--nor-accent)">*</span></label>
+          <input class="form-input" id="job-site" placeholder="Site address or description">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Equipment Owner</label>
+          <input class="form-input" id="wo-equip-owner" placeholder="e.g. ALTEC">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Province</label>
+          <select class="form-select" id="job-province"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">P.O. #</label>
+          <input class="form-input" id="job-po" placeholder="e.g. PO200231COC2510">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Job #</label>
+          <input class="form-input" id="job-client-wo" placeholder="e.g. CA23007-SCM-AGC-004">
+        </div>
+        <div class="form-group">
+          <label class="form-label">AFE #</label>
+          <input class="form-input" id="wo-afe" placeholder="e.g. MT REQ#15">
+        </div>
+        <div class="form-group">
+          <label class="form-label">RIG #</label>
+          <input class="form-input" id="wo-rig" placeholder="Rig number if applicable">
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:.2rem;border-bottom:1px solid var(--border);margin-bottom:.75rem">
+        <button class="cs-tab active" onclick="switchCSTab('labour',this)">⏱ Labour</button>
+        <button class="cs-tab" onclick="switchCSTab('consumables',this)">🧪 Consumables</button>
+        <button class="cs-tab" onclick="switchCSTab('equipment',this)">🔧 Equipment</button>
+        <button class="cs-tab" onclick="switchCSTab('film',this)">🎞 Film</button>
+        <button class="cs-tab" onclick="switchCSTab('travel',this)">🚗 Travel</button>
+        <button class="cs-tab" onclick="switchCSTab('service',this)">📝 Description</button>
+      </div>
+
+      <!-- LABOUR TAB -->
+      <div id="cs-panel-labour" class="cs-panel">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:90px">Date</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:140px">Technician</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:160px">Category</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">OT Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">DT Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Night</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:90px">Start</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:90px">End</th>
+              <th style="width:24px"></th>
+            </tr></thead>
+            <tbody id="cs-labour-body"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addLabourRow()" style="margin-top:.5rem">+ Add Technician Row</button>
+      </div>
+
+      <!-- CONSUMABLES TAB -->
+      <div id="cs-panel-consumables" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Consumable Type</th>
+            <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
+            <th style="width:24px"></th>
+          </tr></thead>
+          <tbody id="cs-consumables-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addConsumableRow()" style="margin-top:.5rem">+ Add Consumable</button>
+      </div>
+
+      <!-- EQUIPMENT TAB -->
+      <div id="cs-panel-equipment" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Equipment Item</th>
+            <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty / Hrs</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
+            <th style="width:24px"></th>
+          </tr></thead>
+          <tbody id="cs-equipment-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addEquipmentRow()" style="margin-top:.5rem">+ Add Equipment</button>
+      </div>
+
+      <!-- FILM TAB -->
+      <div id="cs-panel-film" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Film Type</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:120px">Pipe Size</th>
+            <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
+            <th style="width:24px"></th>
+          </tr></thead>
+          <tbody id="cs-film-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addFilmRow()" style="margin-top:.5rem">+ Add Film</button>
+      </div>
+
+      <!-- TRAVEL TAB -->
+      <div id="cs-panel-travel" class="cs-panel" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem">
+          <div class="form-group">
+            <label class="form-label">Total Kilometers</label>
+            <input class="form-input" id="cs-travel-km" type="number" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rate / km ($)</label>
+            <input class="form-input" id="cs-travel-km-rate" type="number" placeholder="1.20" value="1.20" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Customer Contact</label>
+            <input class="form-input" id="wo-customer-contact" placeholder="Name / phone">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hotel ($)</label>
+            <input class="form-input" id="cs-travel-hotels" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Camp ($)</label>
+            <input class="form-input" id="wo-travel-camp" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Flights ($)</label>
+            <input class="form-input" id="cs-travel-flights" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LOA — # Technicians</label>
+            <input class="form-input" id="cs-travel-loa-techs" type="number" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LOA — # Days</label>
+            <input class="form-input" id="cs-travel-loa-days" type="number" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LOA Rate ($/tech/day)</label>
+            <input class="form-input" id="cs-travel-loa-rate" type="number" placeholder="70.00" value="70.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Misc. Charges ($)</label>
+            <input class="form-input" id="wo-travel-misc" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Misc. Description</label>
+            <input class="form-input" id="wo-travel-misc-desc" placeholder="Description of misc charges">
+          </div>
+        </div>
+      </div>
+
+      <!-- DESCRIPTION OF SERVICE TAB -->
+      <div id="cs-panel-service" class="cs-panel" style="display:none">
+        <div class="form-group" style="margin-bottom:.65rem">
+          <label class="form-label">Description of Service</label>
+          <textarea class="form-textarea" id="cs-notes" placeholder="e.g.&#10;-TRAVELED TO SITE FROM SHOP&#10;-SIGNED IN AT MAIN OFFICE&#10;-PERFORMED MT AND HT AS PER REQUEST&#10;-COMPLETED REPORTS&#10;-TRAVELED BACK TO SHOP" style="min-height:120px"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Field Reports (comma separated)</label>
+          <input class="form-input" id="wo-field-reports" placeholder="e.g. 393474 (MT), 393475 (HT)">
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
+      <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
+      <button class="btn btn-secondary" onclick="exportWO('pdf')" id="wo-export-pdf-btn" style="display:none">⬇ Export PDF</button>
+      <button class="btn btn-secondary" onclick="exportWO('word')" id="wo-export-word-btn" style="display:none">⬇ Export Word</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-secondary" onclick="saveWO('draft')">Save Draft</button>
+      <button class="btn btn-primary" onclick="saveWO('submitted')">Submit Work Order</button>
+    </div>
+  </div>
+</div>
+
 
   <!-- ══ CHARGE SHEETS ══════════════════════════════════════════════════════ -->
   <div id="view-charge-sheets" class="view" style="display:none">
@@ -631,75 +840,211 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- ══ MODALS ═════════════════════════════════════════════════════════════ -->
 
-<!-- Job Modal -->
+<!-- ══ WORK ORDER MODAL ══════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="job-modal">
-  <div class="modal" style="max-width:560px">
+  <div class="modal" style="max-width:900px;width:96vw">
     <div class="modal-hdr">
-      <span class="modal-title" id="job-modal-title">New Job</span>
+      <span class="modal-title" id="wo-modal-title">New Work Order</span>
       <button class="modal-close" onclick="closeModal('job-modal')">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="form-grid form-grid-2" style="gap:.65rem">
-        <div class="form-group" style="grid-column:1/-1">
+    <div class="modal-body" style="padding:1rem 1.25rem">
+
+      <!-- Header info -->
+      <div class="form-grid" style="grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem">
+        <div class="form-group" style="grid-column:1/3">
           <label class="form-label">Client / Company <span style="color:var(--nor-accent)">*</span></label>
-          <input class="form-input" id="job-client" placeholder="e.g. TC Energy, EllisDon, Pembina">
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Site / Scope <span style="color:var(--nor-accent)">*</span></label>
-          <input class="form-input" id="job-site" placeholder="e.g. NGTL Line 100-3 — PAUT inline inspection">
+          <input class="form-input" id="job-client" placeholder="e.g. YANDA CANADA LTD">
         </div>
         <div class="form-group">
-          <label class="form-label">Customer PO #</label>
-          <input class="form-input" id="job-po" placeholder="e.g. HQ245658">
+          <label class="form-label">WO # (auto if blank)</label>
+          <input class="form-input" id="job-number" placeholder="W-99001">
         </div>
         <div class="form-group">
-          <label class="form-label">Nortech WO #</label>
-          <input class="form-input" id="job-number" placeholder="e.g. 99339">
+          <label class="form-label">Date of Work <span style="color:var(--nor-accent)">*</span></label>
+          <input class="form-input" id="wo-date" type="date">
+        </div>
+        <div class="form-group" style="grid-column:1/3">
+          <label class="form-label">Location / Site <span style="color:var(--nor-accent)">*</span></label>
+          <input class="form-input" id="job-site" placeholder="Site address or description">
         </div>
         <div class="form-group">
-          <label class="form-label">Client WO / Job #</label>
-          <input class="form-input" id="job-client-wo" placeholder="e.g. 702246">
+          <label class="form-label">Equipment Owner</label>
+          <input class="form-input" id="wo-equip-owner" placeholder="e.g. ALTEC">
         </div>
         <div class="form-group">
-          <label class="form-label">Customer ID</label>
-          <input class="form-input" id="job-customer-id" placeholder="e.g. CN000000305">
+          <label class="form-label">Province</label>
+          <select class="form-select" id="job-province"></select>
         </div>
         <div class="form-group">
-          <label class="form-label">Billing Type <span style="color:var(--nor-accent)">*</span></label>
-          <select class="form-select" id="job-billing">
-            <option value="tm">T&M — Time & Materials</option>
-            <option value="fixed">Fixed Price</option>
-            <option value="mixed">Mixed (T&M + Fixed items)</option>
-          </select>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label" style="color:var(--muted)">Rate sheet is selected at invoice time by admin</label>
-          <input type="hidden" id="job-rate-sheet" value="">
-          <input type="hidden" id="job-fixed-price" value="0">
+          <label class="form-label">P.O. #</label>
+          <input class="form-input" id="job-po" placeholder="e.g. PO200231COC2510">
         </div>
         <div class="form-group">
-          <label class="form-label">Start Date</label>
-          <input class="form-input" id="job-start" type="date">
+          <label class="form-label">Job #</label>
+          <input class="form-input" id="job-client-wo" placeholder="e.g. CA23007-SCM-AGC-004">
         </div>
         <div class="form-group">
-          <label class="form-label">Province / Territory</label>
-          <select class="form-select" id="job-province">
-            <option value="">— Select province —</option>
-          </select>
+          <label class="form-label">AFE #</label>
+          <input class="form-input" id="wo-afe" placeholder="e.g. MT REQ#15">
         </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Notes</label>
-          <textarea class="form-textarea" id="job-notes" placeholder="Scope, contacts, special instructions…" style="min-height:55px"></textarea>
+        <div class="form-group">
+          <label class="form-label">RIG #</label>
+          <input class="form-input" id="wo-rig" placeholder="Rig number if applicable">
         </div>
       </div>
-    </div>
-    <div class="modal-footer">
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:.2rem;border-bottom:1px solid var(--border);margin-bottom:.75rem">
+        <button class="cs-tab active" onclick="switchCSTab('labour',this)">⏱ Labour</button>
+        <button class="cs-tab" onclick="switchCSTab('consumables',this)">🧪 Consumables</button>
+        <button class="cs-tab" onclick="switchCSTab('equipment',this)">🔧 Equipment</button>
+        <button class="cs-tab" onclick="switchCSTab('film',this)">🎞 Film</button>
+        <button class="cs-tab" onclick="switchCSTab('travel',this)">🚗 Travel</button>
+        <button class="cs-tab" onclick="switchCSTab('service',this)">📝 Description</button>
+      </div>
+
+      <!-- LABOUR TAB -->
+      <div id="cs-panel-labour" class="cs-panel">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:90px">Date</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:140px">Technician</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:160px">Category</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">OT Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">DT Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Night</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:90px">Start</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:90px">End</th>
+              <th style="width:24px"></th>
+            </tr></thead>
+            <tbody id="cs-labour-body"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addLabourRow()" style="margin-top:.5rem">+ Add Technician Row</button>
+      </div>
+
+      <!-- CONSUMABLES TAB -->
+      <div id="cs-panel-consumables" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Consumable Type</th>
+            <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
+            <th style="width:24px"></th>
+          </tr></thead>
+          <tbody id="cs-consumables-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addConsumableRow()" style="margin-top:.5rem">+ Add Consumable</button>
+      </div>
+
+      <!-- EQUIPMENT TAB -->
+      <div id="cs-panel-equipment" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Equipment Item</th>
+            <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty / Hrs</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
+            <th style="width:24px"></th>
+          </tr></thead>
+          <tbody id="cs-equipment-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addEquipmentRow()" style="margin-top:.5rem">+ Add Equipment</button>
+      </div>
+
+      <!-- FILM TAB -->
+      <div id="cs-panel-film" class="cs-panel" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Film Type</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:120px">Pipe Size</th>
+            <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty</th>
+            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
+            <th style="width:24px"></th>
+          </tr></thead>
+          <tbody id="cs-film-body"></tbody>
+        </table>
+        <button class="btn btn-ghost btn-sm" onclick="addFilmRow()" style="margin-top:.5rem">+ Add Film</button>
+      </div>
+
+      <!-- TRAVEL TAB -->
+      <div id="cs-panel-travel" class="cs-panel" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem">
+          <div class="form-group">
+            <label class="form-label">Total Kilometers</label>
+            <input class="form-input" id="cs-travel-km" type="number" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rate / km ($)</label>
+            <input class="form-input" id="cs-travel-km-rate" type="number" placeholder="1.20" value="1.20" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Customer Contact</label>
+            <input class="form-input" id="wo-customer-contact" placeholder="Name / phone">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hotel ($)</label>
+            <input class="form-input" id="cs-travel-hotels" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Camp ($)</label>
+            <input class="form-input" id="wo-travel-camp" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Flights ($)</label>
+            <input class="form-input" id="cs-travel-flights" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LOA — # Technicians</label>
+            <input class="form-input" id="cs-travel-loa-techs" type="number" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LOA — # Days</label>
+            <input class="form-input" id="cs-travel-loa-days" type="number" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LOA Rate ($/tech/day)</label>
+            <input class="form-input" id="cs-travel-loa-rate" type="number" placeholder="70.00" value="70.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Misc. Charges ($)</label>
+            <input class="form-input" id="wo-travel-misc" type="number" placeholder="0.00" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Misc. Description</label>
+            <input class="form-input" id="wo-travel-misc-desc" placeholder="Description of misc charges">
+          </div>
+        </div>
+      </div>
+
+      <!-- DESCRIPTION OF SERVICE TAB -->
+      <div id="cs-panel-service" class="cs-panel" style="display:none">
+        <div class="form-group" style="margin-bottom:.65rem">
+          <label class="form-label">Description of Service</label>
+          <textarea class="form-textarea" id="cs-notes" placeholder="e.g.&#10;-TRAVELED TO SITE FROM SHOP&#10;-SIGNED IN AT MAIN OFFICE&#10;-PERFORMED MT AND HT AS PER REQUEST&#10;-COMPLETED REPORTS&#10;-TRAVELED BACK TO SHOP" style="min-height:120px"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Field Reports (comma separated)</label>
+          <input class="form-input" id="wo-field-reports" placeholder="e.g. 393474 (MT), 393475 (HT)">
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
-      <button class="btn btn-secondary" onclick="saveJob()">Save Only</button>
-      <button class="btn btn-primary" onclick="saveJobAndStartCS()">Save + Log This Week</button>
+      <button class="btn btn-secondary" onclick="exportWO('pdf')" id="wo-export-pdf-btn" style="display:none">⬇ Export PDF</button>
+      <button class="btn btn-secondary" onclick="exportWO('word')" id="wo-export-word-btn" style="display:none">⬇ Export Word</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-secondary" onclick="saveWO('draft')">Save Draft</button>
+      <button class="btn btn-primary" onclick="saveWO('submitted')">Submit Work Order</button>
     </div>
   </div>
 </div>
+
 
 <!-- Charge Sheet Modal -->
 <div class="modal-overlay" id="cs-modal">
@@ -1193,9 +1538,9 @@ function renderAll(){
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function renderDashboard(){
   // KPIs
-  var openJobs    = _jobs.filter(function(j){return j.status==='active';}).length;
-  var pendingCS   = _chargeSheets.filter(function(c){return c.status==='pending';}).length;
-  var approvedCS  = _chargeSheets.filter(function(c){return c.status==='approved';}).length;
+  var openJobs    = _jobs.filter(function(j){return j.status==='draft'||j.status==='submitted'||j.status==='approved';}).length;
+  var pendingCS   = _jobs.filter(function(j){return j.status==='submitted';}).length;
+  var approvedCS  = _jobs.filter(function(j){return j.status==='approved';}).length;
   var outstanding = _invoices.filter(function(i){return i.status==='sent';})
                              .reduce(function(s,i){return s+(i.total||0);},0);
   var paidMTD     = _invoices.filter(function(i){return i.status==='paid'&&(i.paidDate||'').startsWith(today().slice(0,7));})
@@ -1798,11 +2143,14 @@ function updateInvTotals(){
   var rsId = (document.getElementById('inv-rate-sheet')||{}).value || '';
   var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || {};
   var selected = Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){
-    return _chargeSheets.find(function(c){ return c.id === el.value; }) || {};
+    // Try work orders first, fall back to charge sheets
+    return _jobs.find(function(j){ return j.id === el.value; })
+        || _chargeSheets.find(function(c){ return c.id === el.value; }) || {};
   });
   // Price each charge sheet using selected rate sheet
   var subtotal = selected.reduce(function(sum, cs) {
-    return sum + priceChargeSheet(cs, rs);
+    var priced = priceChargeSheet(cs, rs);
+    return sum + (priced > 0 ? priced : (cs.total || 0));
   }, 0);
   var discount = parseFloat((document.getElementById('inv-discount')||{}).value)||0;
   var taxable  = subtotal - discount;
@@ -1822,58 +2170,72 @@ function updateInvTotals(){
 function priceChargeSheet(cs, rs) {
   if (!cs) return 0;
   var total = 0;
-  var labour = cs.labour || 0;   // old format pre-calculated
   var hasNewFormat = cs.labourRows && cs.labourRows.length > 0;
+  var hasOldFormat = cs.days && cs.days.length > 0;
 
-  if (hasNewFormat && rs && rs.labour) {
-    // NEW format — price each row individually
-    (cs.labourRows || []).forEach(function(row) {
-      var cat = (rs.labour || []).find(function(l){ return l.name === row.category; }) || {};
-      var stRate = cat.stRate || 0;
-      var otRate = cat.otRate || stRate * 1.5;
-      var dtRate = cat.dtRate || stRate * 2;
-      var nsRate = stRate * 1.15;
-      total += (row.st||0)*stRate + (row.ot||0)*otRate + (row.dt||0)*dtRate + (row.ns||0)*nsRate;
-    });
-    (cs.equipRows || []).forEach(function(row) {
-      var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
-      total += (row.qty||0) * (item.rate||0);
-    });
-    (cs.conRows || []).forEach(function(row) {
-      var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
-      total += (row.qty||0) * (item.rate||0);
-    });
-    (cs.filmRows || []).forEach(function(row) {
-      var item = (rs.equipment || []).find(function(e){
-        return row.type && e.name && row.type.toLowerCase().includes(e.name.toLowerCase().slice(0,12));
-      }) || {};
-      total += (row.qty||0) * (item.rate||0);
-    });
+  if (hasNewFormat) {
+    // NEW tabbed format — price each section
+    if (rs && rs.labour) {
+      (cs.labourRows || []).forEach(function(row) {
+        var cat = (rs.labour || []).find(function(l){ return l.name === row.category; }) || {};
+        var stRate = cat.stRate || 0;
+        var otRate = cat.otRate || stRate * 1.5;
+        var dtRate = cat.dtRate || stRate * 2;
+        var nsRate = stRate * 1.15;
+        // Support both old (st/ot/dt/ns) and new WO (regHrs/otHrs/dtHrs/nightHrs) formats
+        var reg = row.regHrs !== undefined ? row.regHrs : (row.st||0);
+        var ot  = row.otHrs  !== undefined ? row.otHrs  : (row.ot||0);
+        var dt  = row.dtHrs  !== undefined ? row.dtHrs  : (row.dt||0);
+        var ns  = row.nightHrs!== undefined ? row.nightHrs : (row.ns||0);
+        total += reg*stRate + ot*otRate + dt*dtRate + ns*nsRate;
+      });
+      (cs.equipRows || []).forEach(function(row) {
+        var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
+        total += (row.qty||0) * (item.rate||0);
+      });
+      (cs.conRows || []).forEach(function(row) {
+        var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
+        total += (row.qty||0) * (item.rate||0);
+      });
+      (cs.filmRows || []).forEach(function(row) {
+        var item = (rs.equipment || []).find(function(e){
+          return row.type && e.name && row.type.toLowerCase().includes(e.name.toLowerCase().slice(0,12));
+        }) || {};
+        total += (row.qty||0) * (item.rate||0);
+      });
+    }
     var travel = cs.travel || {};
     total += (travel.km||0) * (travel.kmRate||1.20);
     total += (travel.loaTechs||0) * (travel.loaDays||0) * (travel.loaRate||70);
     total += (travel.flights||0) + (travel.hotels||0);
     (cs.otherRows || []).forEach(function(row){ total += row.amt||0; });
+    // If pricing produced 0 (no rate sheet match), fall back to saved total
+    return total > 0 ? total : (cs.total || 0);
 
-  } else if (!hasNewFormat && rs && rs.labour) {
-    // OLD format (days array) — price each day row
-    (cs.days || []).forEach(function(day) {
-      var cat = (rs.labour || []).find(function(l){ return l.name === day.category; }) || {};
-      // Also try matching by description for very old format
-      if (!cat.stRate) cat = (rs.labour || []).find(function(l){ return l.name === day.description; }) || {};
-      var stRate = cat.stRate || day.stRate || 0;
-      var otRate = cat.otRate || day.otRate || stRate * 1.5;
-      var dtRate = cat.dtRate || day.dtRate || stRate * 2;
-      total += (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
-    });
-    (cs.extras || []).forEach(function(e){ total += e.amount||0; });
-
-  } else {
-    // No rate sheet or no row data — use saved total
-    total = cs.total || 0;
+  } else if (hasOldFormat) {
+    // OLD day-grid format
+    var hasCategories = (cs.days || []).some(function(d){ return d.category; });
+    if (rs && rs.labour && hasCategories) {
+      // Has categories — price from rate sheet
+      (cs.days || []).forEach(function(day) {
+        var cat = (rs.labour || []).find(function(l){ return l.name === (day.category || day.description); }) || {};
+        var stRate = cat.stRate || day.stRate || 0;
+        var otRate = cat.otRate || day.otRate || stRate * 1.5;
+        var dtRate = cat.dtRate || day.dtRate || stRate * 2;
+        total += (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
+      });
+      (cs.extras || []).forEach(function(e){ total += e.amount||0; });
+      return total > 0 ? total : (cs.total || 0);
+    } else {
+      // No categories or no rate sheet — use saved total
+      return cs.total || 0;
+    }
   }
-  return total;
+
+  // No row data at all — use saved total
+  return cs.total || 0;
 }
+
 
 
 function priceChargeSheet(cs, rs) {
@@ -1920,7 +2282,9 @@ async function saveInvoice(status){
   if(!client){toast('Select a client','error');return;}
   var selectedCSIds=Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){return el.value;});
   if(!selectedCSIds.length){toast('Select at least one charge sheet','error');return;}
-  var selectedCS=selectedCSIds.map(function(id){return _chargeSheets.find(function(c){return c.id===id;})||{};});
+  var selectedCS=selectedCSIds.map(function(id){
+    return _jobs.find(function(j){return j.id===id;}) || _chargeSheets.find(function(c){return c.id===id;}) || {};
+  });
   var rsId = (document.getElementById('inv-rate-sheet')||{}).value || '';
   var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || {};
   var subtotal = selectedCS.reduce(function(s,c){ return s + priceChargeSheet(c, rs); }, 0);
@@ -1949,11 +2313,14 @@ async function saveInvoice(status){
   };
   try{
     await sbUpsert('invoices',id,data);
-    // Mark charge sheets as invoiced
-    await Promise.all(selectedCSIds.map(async function(csId){
-      var cs=_chargeSheets.find(function(c){return c.id===csId;}); if(!cs)return;
-      cs.status='invoiced'; cs.invoiceId=id; cs.modified=today();
-      await sbUpsert('charge_sheets',csId,cs);
+    // Mark work orders as invoiced
+    await Promise.all(selectedCSIds.map(async function(woId){
+      // Try jobs (work orders) first
+      var wo = _jobs.find(function(j){ return j.id === woId; });
+      if (wo) { wo.status='invoiced'; wo.invoiceId=id; wo.modified=today(); await sbUpsert('jobs',woId,wo); return; }
+      // Fall back to charge sheets
+      var cs = _chargeSheets.find(function(c){ return c.id === woId; });
+      if (cs) { cs.status='invoiced'; cs.invoiceId=id; cs.modified=today(); await sbUpsert('charge_sheets',woId,cs); }
     }));
     _invoices.unshift(data);
     closeModal('inv-modal');
@@ -2026,29 +2393,46 @@ function viewInvoice(id){
 
     // OLD format fallback — days array
     if (!hasNewFormat && (fullCS.days || []).length > 0) {
-      (fullCS.days || []).forEach(function(day) {
-        if (!day.st && !day.ot && !day.dt) return;
-        var cat = (rs.labour||[]).find(function(l){ return l.name===(day.category||day.description); }) || {};
-        var stRate = cat.stRate || day.stRate || 0;
-        var otRate = cat.otRate || day.otRate || stRate*1.5;
-        var dtRate = cat.dtRate || day.dtRate || stRate*2;
-        var hrs = [];
-        if (day.st) hrs.push(day.st+' ST');
-        if (day.ot) hrs.push(day.ot+' OT');
-        if (day.dt) hrs.push(day.dt+' DT');
-        var rowAmt = (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
-        var desc = day.category || day.description || 'Labour';
+      // Check if days have categories for rate-sheet pricing
+      var daysHaveCats = (fullCS.days||[]).some(function(d){ return d.category; });
+      if (daysHaveCats) {
+        (fullCS.days || []).forEach(function(day) {
+          if (!day.st && !day.ot && !day.dt) return;
+          var cat = (rs.labour||[]).find(function(l){ return l.name===(day.category||day.description); }) || {};
+          var stRate = cat.stRate || day.stRate || 0;
+          var otRate = cat.otRate || day.otRate || stRate*1.5;
+          var dtRate = cat.dtRate || day.dtRate || stRate*2;
+          var hrs = [];
+          if (day.st) hrs.push(day.st+' ST');
+          if (day.ot) hrs.push(day.ot+' OT');
+          if (day.dt) hrs.push(day.dt+' DT');
+          var rowAmt = (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
+          var desc = day.category || day.description || 'NDT Services';
+          lineItems += '<tr>'
+            +'<td style="padding:.35rem .5rem;font-size:10px">'+desc
+              +(fullCS.technician ? '<br><span style="color:#666;font-size:9px">'+day.day+' '+day.date+' — '+fullCS.technician+'</span>' : '')
+            +'</td>'
+            +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
+            +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">1</td>'
+            +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+hrs.join(', ')+'</td>'
+            +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(stRate)+'</td>'
+            +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(rowAmt)+'</td>'
+            +'</tr>';
+        });
+      } else {
+        // No categories — show a summary line per CS using saved total
+        var csDesc = fullCS.site || fullCS.client || 'NDT Services';
+        var techLine = fullCS.technician ? ' — '+fullCS.technician : '';
+        var wkLine = fullCS.weekStart ? ' (w/o '+fullCS.weekStart+')' : '';
         lineItems += '<tr>'
-          +'<td style="padding:.35rem .5rem;font-size:10px">'+desc
-            +(fullCS.technician ? '<br><span style="color:#666;font-size:9px">'+day.day+' '+day.date+' — '+fullCS.technician+'</span>' : '')
-          +'</td>'
+          +'<td style="padding:.35rem .5rem;font-size:10px">'+csDesc+techLine+wkLine+'</td>'
           +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">@</td>'
           +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">1</td>'
-          +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">'+hrs.join(', ')+'</td>'
-          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(stRate)+'</td>'
-          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(rowAmt)+'</td>'
+          +'<td style="padding:.35rem .5rem;text-align:center;font-size:10px">As quoted</td>'
+          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">—</td>'
+          +'<td style="padding:.35rem .5rem;text-align:right;font-size:10px;font-family:monospace">'+_fmtMoneyImpl(fullCS.total||0)+'</td>'
           +'</tr>';
-      });
+      }
       (fullCS.extras || []).forEach(function(e) {
         lineItems += '<tr>'
           +'<td style="padding:.35rem .5rem;font-size:10px">'+e.description+'</td>'
@@ -2140,11 +2524,12 @@ function viewInvoice(id){
 
   // Recalculate subtotal using rate sheet if available, else use saved value
   var invSubtotal = inv.subtotal || 0;
-  if (invRS && invRS.labour && (inv.chargeSheetIds||[]).length > 0) {
+  if ((inv.chargeSheetIds||[]).length > 0) {
     var recalc = (inv.chargeSheets||[]).reduce(function(sum, cs) {
       var fullCS = _chargeSheets.find(function(s){ return s.id===cs.id; }) || cs;
       return sum + priceChargeSheet(fullCS, invRS);
     }, 0);
+    // Use recalc if it produced a value, otherwise keep saved subtotal
     if (recalc > 0) invSubtotal = recalc;
   }
   var discount = inv.discount || 0;
@@ -3274,7 +3659,7 @@ var NORTECH_FILM_TYPES = [
 
 
 // ── Price visibility guard ────────────────────────────────────────────────────
-var _ADMIN_IDS = ['jon','jason','joel_c','renee','jeremy'];
+var _ADMIN_IDS = ['jon','jason','joel_c','renee','jeremy','mathieu'];
 
 function isAdmin() {
   var viewer = (window.CURRENT_VIEWER || localStorage.getItem('hub_viewer') || 'tech');
@@ -3317,11 +3702,11 @@ function renderTechDashboard() {
   // Simplified dashboard for technicians — no financials
   var kpiEl = document.getElementById('dash-kpis');
   if (!kpiEl) return;
-  var activeJobs   = _jobs.filter(function(j){ return j.status === 'active'; }).length;
-  var myPending    = _chargeSheets.filter(function(c){ return c.status === 'draft' || c.status === 'pending'; }).length;
-  var myApproved   = _chargeSheets.filter(function(c){ return c.status === 'approved'; }).length;
+  var activeJobs   = _jobs.filter(function(j){ return j.status === 'draft' || j.status === 'submitted'; }).length;
+  var myPending    = _jobs.filter(function(j){ return j.status === 'submitted'; }).length;
+  var myApproved   = _jobs.filter(function(j){ return j.status === 'approved'; }).length;
   kpiEl.innerHTML = [
-    { val: activeJobs,  lbl: 'Active Jobs',        sub: 'Currently open' },
+    { val: activeJobs,  lbl: 'Active Jobs / WOs',        sub: 'Currently open' },
     { val: myPending,   lbl: 'Charge Sheets',       sub: 'Draft or pending' },
     { val: myApproved,  lbl: 'Approved',            sub: 'Ready to invoice' },
   ].map(function(k) {
@@ -3521,6 +3906,596 @@ async function reverseCSFromApproved(id) {
     toast('Charge sheet ' + cs.csNum + ' returned to Pending', 'info');
     closeModal('cs-view-modal');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WORK ORDER SYSTEM — replaces Job + Charge Sheet
+// ══════════════════════════════════════════════════════════════════════════════
+
+var _editWOId = null;
+
+// ── Open WO Modal ─────────────────────────────────────────────────────────────
+function openWOModal(editId) {
+  _editWOId = editId || null;
+  _csLabourRowCount = 0;
+  _csEquipmentRowCount = 0;
+  _csConsumableRowCount = 0;
+  _csFilmRowCount = 0;
+
+  var wo = editId ? (_jobs.find(function(j){ return j.id === editId; }) || {}) : {};
+  document.getElementById('wo-modal-title').textContent = editId ? 'Edit Work Order' : 'New Work Order';
+
+  // Populate province dropdown
+  var pSel = document.getElementById('job-province');
+  if (pSel) { pSel.innerHTML = '<option value="">— Province —</option>' + getProvinceOptions(wo.province || 'AB'); pSel.value = wo.province || 'AB'; }
+
+  // Fill header fields
+  var fields = {
+    'job-client': wo.client || '',
+    'job-number': wo.number || '',
+    'wo-date':    wo.date   || today(),
+    'job-site':   wo.site   || '',
+    'wo-equip-owner': wo.equipOwner || '',
+    'job-po':     wo.po     || '',
+    'job-client-wo': wo.jobNum || '',
+    'wo-afe':     wo.afe    || '',
+    'wo-rig':     wo.rig    || '',
+    'cs-notes':   wo.notes  || '',
+    'wo-field-reports': wo.fieldReports || '',
+    'cs-travel-km':       (wo.travel && wo.travel.km)      || '',
+    'cs-travel-km-rate':  (wo.travel && wo.travel.kmRate)  || '1.20',
+    'cs-travel-hotels':   (wo.travel && wo.travel.hotels)  || '',
+    'wo-travel-camp':     (wo.travel && wo.travel.camp)    || '',
+    'cs-travel-flights':  (wo.travel && wo.travel.flights) || '',
+    'cs-travel-loa-techs':(wo.travel && wo.travel.loaTechs)|| '',
+    'cs-travel-loa-days': (wo.travel && wo.travel.loaDays) || '',
+    'cs-travel-loa-rate': (wo.travel && wo.travel.loaRate) || '70.00',
+    'wo-travel-misc':     (wo.travel && wo.travel.misc)    || '',
+    'wo-travel-misc-desc':(wo.travel && wo.travel.miscDesc)|| '',
+    'wo-customer-contact':(wo.travel && wo.travel.customerContact) || '',
+  };
+  Object.keys(fields).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = fields[id];
+  });
+
+  // Clear & rebuild tabbed sections
+  ['cs-labour-body','cs-equipment-body','cs-consumables-body','cs-film-body'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.innerHTML = '';
+  });
+
+  // Restore saved rows if editing
+  if (editId && wo.labourRows && wo.labourRows.length) {
+    wo.labourRows.forEach(function(row) { addLabourRow(null, null, row); });
+  } else {
+    addLabourRow(); // Start with one empty row
+  }
+  if (editId && wo.equipRows && wo.equipRows.length) {
+    wo.equipRows.forEach(function(row) { addEquipmentRow(row); });
+  }
+  if (editId && wo.consumables && wo.consumables.length) {
+    wo.consumables.forEach(function(row) { addConsumableRow(row); });
+  }
+  if (editId && wo.film && wo.film.length) {
+    wo.film.forEach(function(row) { addFilmRow(row); });
+  }
+
+  // Show export buttons only when editing existing WO
+  var expPdf  = document.getElementById('wo-export-pdf-btn');
+  var expWord = document.getElementById('wo-export-word-btn');
+  if (expPdf)  expPdf.style.display  = editId ? 'inline-flex' : 'none';
+  if (expWord) expWord.style.display = editId ? 'inline-flex' : 'none';
+
+  switchCSTab('labour', document.querySelector('#job-modal .cs-tab'));
+  document.getElementById('job-modal').classList.add('open');
+}
+
+// Also expose as openJobModal for legacy callers
+function openJobModal(id) { openWOModal(id); }
+function openNewJobFlow() { openWOModal(); }
+
+// ── Save Work Order ───────────────────────────────────────────────────────────
+async function saveWO(status) {
+  var client = document.getElementById('job-client').value.trim();
+  var site   = document.getElementById('job-site').value.trim();
+  var date   = document.getElementById('wo-date').value;
+  if (!client || !site) { toast('Client and location are required', 'error'); return; }
+
+  // Collect labour rows
+  var labourRows = [];
+  for (var i = 1; i <= _csLabourRowCount; i++) {
+    var techEl = document.getElementById('cs-lb-tech-' + i);
+    var catEl  = document.getElementById('cs-lb-cat-' + i);
+    var regEl  = document.getElementById('cs-lb-st-' + i);
+    var otEl   = document.getElementById('cs-lb-ot-' + i);
+    var dtEl   = document.getElementById('cs-lb-dt-' + i);
+    var nsEl   = document.getElementById('cs-lb-ns-' + i);
+    var startEl= document.getElementById('cs-lb-start-' + i);
+    var endEl  = document.getElementById('cs-lb-end-' + i);
+    var dateEl = document.getElementById('cs-lb-date-' + i);
+    if (!techEl) continue;
+    var reg = parseFloat(regEl ? regEl.value : 0) || 0;
+    var ot  = parseFloat(otEl  ? otEl.value  : 0) || 0;
+    var dt  = parseFloat(dtEl  ? dtEl.value  : 0) || 0;
+    var ns  = parseFloat(nsEl  ? nsEl.value  : 0) || 0;
+    if (!techEl.value && !reg && !ot && !dt && !ns) continue;
+    labourRows.push({
+      technician: techEl ? techEl.value : '',
+      category:   catEl  ? catEl.value  : '',
+      regHrs: reg, otHrs: ot, dtHrs: dt, nightHrs: ns,
+      startTime:  startEl ? startEl.value : '',
+      endTime:    endEl   ? endEl.value   : '',
+      date:       dateEl  ? dateEl.value  : date,
+    });
+  }
+
+  // Equipment rows
+  var equipRows = [];
+  document.querySelectorAll('[id^=cs-eq-row-]').forEach(function(row) {
+    var idx  = row.id.replace('cs-eq-row-', '');
+    var item = (document.getElementById('cs-eq-item-' + idx)  || {}).value || (document.getElementById('cs-eq-manual-' + idx) || {}).value || '';
+    var qty  = parseFloat((document.getElementById('cs-eq-qty-'   + idx) || {}).value) || 0;
+    var unit = (document.getElementById('cs-eq-unit-'  + idx) || {}).value || '';
+    var note = (document.getElementById('cs-eq-notes-' + idx) || {}).value || '';
+    if (item || qty) equipRows.push({ item, qty, unit, notes: note });
+  });
+
+  // Consumable rows
+  var consumables = [];
+  document.querySelectorAll('[id^=cs-con-row-]').forEach(function(row) {
+    var idx  = row.id.replace('cs-con-row-', '');
+    var item = (document.getElementById('cs-con-item-' + idx) || {}).value || (document.getElementById('cs-con-manual-' + idx) || {}).value || '';
+    var qty  = parseFloat((document.getElementById('cs-con-qty-' + idx) || {}).value) || 0;
+    var unit = (document.getElementById('cs-con-unit-' + idx) || {}).value || '';
+    if (item || qty) consumables.push({ item, qty, unit });
+  });
+
+  // Film rows
+  var film = [];
+  document.querySelectorAll('[id^=cs-film-row-]').forEach(function(row) {
+    var idx  = row.id.replace('cs-film-row-', '');
+    var type = (document.getElementById('cs-film-type-' + idx) || {}).value || '';
+    var size = (document.getElementById('cs-film-size-' + idx) || {}).value || '';
+    var qty  = parseFloat((document.getElementById('cs-film-qty-' + idx) || {}).value) || 0;
+    if (type || qty) film.push({ type, pipeSize: size, qty });
+  });
+
+  // Travel
+  var travel = {
+    km:      parseFloat((document.getElementById('cs-travel-km')       || {}).value) || 0,
+    kmRate:  parseFloat((document.getElementById('cs-travel-km-rate')  || {}).value) || 1.20,
+    hotels:  parseFloat((document.getElementById('cs-travel-hotels')   || {}).value) || 0,
+    camp:    parseFloat((document.getElementById('wo-travel-camp')     || {}).value) || 0,
+    flights: parseFloat((document.getElementById('cs-travel-flights')  || {}).value) || 0,
+    loaTechs:parseFloat((document.getElementById('cs-travel-loa-techs')|| {}).value) || 0,
+    loaDays: parseFloat((document.getElementById('cs-travel-loa-days') || {}).value) || 0,
+    loaRate: parseFloat((document.getElementById('cs-travel-loa-rate') || {}).value) || 70,
+    misc:    parseFloat((document.getElementById('wo-travel-misc')     || {}).value) || 0,
+    miscDesc:(document.getElementById('wo-travel-misc-desc') || {}).value || '',
+    customerContact: (document.getElementById('wo-customer-contact') || {}).value || '',
+  };
+
+  // Total hours summary
+  var totalReg = labourRows.reduce(function(s,r){ return s + (r.regHrs||0); }, 0);
+  var totalOT  = labourRows.reduce(function(s,r){ return s + (r.otHrs||0); }, 0);
+  var totalDT  = labourRows.reduce(function(s,r){ return s + (r.dtHrs||0); }, 0);
+
+  var id = _editWOId || uid();
+  var existing = _editWOId ? (_jobs.find(function(j){ return j.id === _editWOId; }) || {}) : {};
+
+  var data = {
+    id,
+    woNum:  document.getElementById('job-number').value.trim() || nextNum('W-', _jobs, 'woNum'),
+    // Keep number = woNum for backward compat
+    number: document.getElementById('job-number').value.trim() || nextNum('W-', _jobs, 'woNum'),
+    client,
+    site,
+    date,
+    location: site,
+    equipOwner:   (document.getElementById('wo-equip-owner') || {}).value || '',
+    province:     (document.getElementById('job-province')   || {}).value || 'AB',
+    po:           (document.getElementById('job-po')         || {}).value || '',
+    jobNum:       (document.getElementById('job-client-wo')  || {}).value || '',
+    afe:          (document.getElementById('wo-afe')         || {}).value || '',
+    rig:          (document.getElementById('wo-rig')         || {}).value || '',
+    notes:        (document.getElementById('cs-notes')       || {}).value || '',
+    fieldReports: (document.getElementById('wo-field-reports')|| {}).value || '',
+    labourRows, equipRows, consumables, film, travel,
+    totalReg, totalOT, totalDT,
+    status: existing.status === 'approved' || existing.status === 'invoiced' || existing.status === 'paid'
+      ? existing.status  // don't downgrade
+      : status,
+    rateSheetId: existing.rateSheetId || '',
+    created:  existing.created || today(),
+    modified: today(),
+  };
+
+  try {
+    await sbUpsert('jobs', id, data);
+    if (_editWOId) { _jobs = _jobs.map(function(j){ return j.id === id ? data : j; }); }
+    else { _jobs.unshift(data); }
+    closeModal('job-modal');
+    renderJobs(); renderDashboard(); updatePendingBadge();
+    toast(status === 'submitted' ? 'Work order submitted' : 'Draft saved', 'success');
+  } catch(e) { toast('Save failed: ' + e.message, 'error'); }
+}
+
+// ── Render Work Orders ────────────────────────────────────────────────────────
+function renderJobs() {
+  var q      = (document.getElementById('job-search')        || {}).value || '';
+  var filter = (document.getElementById('job-filter-status') || {}).value || '';
+
+  var filtered = _jobs.filter(function(j) {
+    if (filter && j.status !== filter) return false;
+    if (!q) return true;
+    return ((j.client||'') + (j.site||'') + (j.woNum||j.number||'') + (j.po||'') + (j.jobNum||'')).toLowerCase().includes(q.toLowerCase());
+  });
+
+  var grid  = document.getElementById('jobs-grid');
+  var empty = document.getElementById('jobs-empty');
+  if (!grid) return;
+
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map(function(j) {
+    var woNum    = j.woNum || j.number || '—';
+    var totalReg = j.totalReg || (j.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0);},0);
+    var totalOT  = j.totalOT  || (j.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0);},0);
+    var techs    = [...new Set((j.labourRows||[]).map(function(r){ return r.technician; }).filter(Boolean))];
+    var province = (CANADA_TAX_RATES[j.province] || {}).name || j.province || '';
+
+    return '<div class="card" style="padding:0;overflow:hidden" id="job-card-' + j.id + '">'
+      // Header — clickable
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer" data-toggle-job="' + j.id + '">'
+        + '<div style="flex:1;min-width:0">'
+          + '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;flex-wrap:wrap">'
+            + '<span style="font-family:var(--ffc);font-size:.95rem;font-weight:800">' + j.client + '</span>'
+            + '<span style="font-family:var(--mono);font-size:.72rem;color:var(--nor-accent)">' + woNum + '</span>'
+            + chipHtml(j.status)
+          + '</div>'
+          + '<div style="font-size:.78rem;color:var(--muted);margin-bottom:.15rem">' + (j.site||j.location||'') + '</div>'
+          + '<div style="display:flex;gap:.75rem;font-size:.68rem;color:var(--faint);flex-wrap:wrap">'
+            + (j.po     ? '<span>PO: '  + j.po     + '</span>' : '')
+            + (j.jobNum ? '<span>Job: ' + j.jobNum + '</span>' : '')
+            + (j.afe    ? '<span>AFE: ' + j.afe    + '</span>' : '')
+            + (j.date   ? '<span>' + fmtDate(j.date) + '</span>' : '')
+            + (province ? '<span>' + province + '</span>' : '')
+          + '</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;margin-left:.75rem">'
+          + '<span style="font-size:.62rem;color:var(--muted)">'
+            + (totalReg ? totalReg + ' reg' : '')
+            + (totalOT  ? ' · ' + totalOT + ' OT' : '')
+            + ' hrs'
+          + '</span>'
+          + '<span style="font-size:.62rem;color:var(--faint)">' + (techs.length ? techs.join(', ').slice(0,30) : 'No techs') + '</span>'
+          + '<span style="font-size:.8rem;color:var(--faint)" id="job-expand-icon-' + j.id + '">▼</span>'
+        + '</div>'
+      + '</div>'
+      // Detail panel
+      + '<div id="job-detail-' + j.id + '" style="display:none;border-top:1px solid var(--border);background:var(--surface2)">'
+        + '<div style="padding:.85rem 1.1rem">'
+          // Details grid
+          + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem .75rem;font-size:.74rem;margin-bottom:.85rem">'
+            + _woDetailField('WO #',           woNum)
+            + _woDetailField('Client',          j.client)
+            + _woDetailField('Date',            fmtDate(j.date))
+            + _woDetailField('Status',          chipHtml(j.status))
+            + _woDetailField('Location',        j.site||j.location||'—', 2)
+            + _woDetailField('Equipment Owner', j.equipOwner||'—')
+            + _woDetailField('Province',        province||'—')
+            + _woDetailField('P.O. #',          j.po||'—')
+            + _woDetailField('Job #',           j.jobNum||'—')
+            + _woDetailField('AFE #',           j.afe||'—')
+            + _woDetailField('RIG #',           j.rig||'—')
+          + '</div>'
+          // Labour summary
+          + ((j.labourRows||[]).length ? '<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.35rem">Labour</div>'
+            + '<table style="width:100%;border-collapse:collapse;font-size:.73rem;margin-bottom:.75rem">'
+            + '<thead><tr style="border-bottom:1px solid var(--border)">'
+              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Date</th>'
+              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Technician</th>'
+              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Category</th>'
+              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:center;text-transform:uppercase;letter-spacing:1.5px">Reg</th>'
+              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:center;text-transform:uppercase;letter-spacing:1.5px">OT</th>'
+              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">Start</th>'
+              + '<th style="padding:.2rem .4rem;color:var(--muted);font-size:.6rem;text-align:left;text-transform:uppercase;letter-spacing:1.5px">End</th>'
+            + '</tr></thead>'
+            + '<tbody>' + (j.labourRows||[]).map(function(r) {
+                return '<tr style="border-bottom:1px solid rgba(255,255,255,.03)">'
+                  + '<td style="padding:.25rem .4rem;font-size:.7rem">' + (fmtDate(r.date)||'—') + '</td>'
+                  + '<td style="padding:.25rem .4rem;font-weight:600">' + (r.technician||'—') + '</td>'
+                  + '<td style="padding:.25rem .4rem;font-size:.7rem;color:var(--muted)">' + (r.category||'—') + '</td>'
+                  + '<td style="padding:.25rem .4rem;text-align:center;font-family:var(--mono)">' + (r.regHrs||0) + '</td>'
+                  + '<td style="padding:.25rem .4rem;text-align:center;font-family:var(--mono)">' + (r.otHrs||0) + '</td>'
+                  + '<td style="padding:.25rem .4rem;font-size:.7rem;color:var(--muted)">' + (r.startTime||'—') + '</td>'
+                  + '<td style="padding:.25rem .4rem;font-size:.7rem;color:var(--muted)">' + (r.endTime||'—') + '</td>'
+                + '</tr>';
+              }).join('')
+            + '</tbody></table>' : '')
+          // Consumables
+          + ((j.consumables||[]).length ? '<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.3rem">Consumables</div>'
+            + (j.consumables||[]).map(function(c){ return '<span style="font-size:.74rem;margin-right:.75rem">' + c.item + ' × ' + c.qty + '</span>'; }).join('') + '<br><br>' : '')
+          // Notes
+          + (j.notes ? '<div style="font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:.25rem">Description of Service</div>'
+            + '<div style="font-size:.74rem;color:var(--muted);white-space:pre-line;margin-bottom:.75rem">' + j.notes + '</div>' : '')
+          // Field reports
+          + (j.fieldReports ? '<div style="font-size:.74rem;color:var(--muted)">Field Reports: ' + j.fieldReports + '</div>' : '')
+        + '</div>'
+      + '</div>'
+      // Action buttons
+      + '<div style="padding:.55rem 1.1rem;display:flex;gap:.4rem;flex-wrap:wrap">'
+        + '<button class="btn btn-primary btn-sm" data-open-wo="' + j.id + '">Edit / Add Work</button>'
+        + '<button class="btn btn-secondary btn-sm" data-export-wo="' + j.id + '">⬇ Export</button>'
+        + (j.status === 'submitted' && isAdmin() ? '<button class="btn btn-success btn-sm" data-approve-wo="' + j.id + '">✓ Approve</button>' : '')
+        + (j.status === 'approved'  && isAdmin() ? '<button class="btn btn-secondary btn-sm" data-invoice-wo="' + j.id + '">🧾 Generate Invoice</button>' : '')
+        + (j.status === 'approved'  && isAdmin() ? '<button class="btn btn-ghost btn-sm" data-unapprove-wo="' + j.id + '">↩ Unapprove</button>' : '')
+        + (j.status === 'submitted' ? '<button class="btn btn-ghost btn-sm" data-unapprove-wo="' + j.id + '">↩ Back to Draft</button>' : '')
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function _woDetailField(label, value, span) {
+  return '<div' + (span ? ' style="grid-column:span ' + span + '"' : '') + '>'
+    + '<div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:.1rem">' + label + '</div>'
+    + '<div>' + (value||'—') + '</div>'
+  + '</div>';
+}
+
+// ── WO Status Actions ─────────────────────────────────────────────────────────
+async function approveWO(id) {
+  var wo = _jobs.find(function(j){ return j.id === id; }); if (!wo) return;
+  if (!confirm('Approve Work Order ' + (wo.woNum||wo.number) + '?\n\nThis will mark it ready for invoicing.')) return;
+  wo.status = 'approved'; wo.approvedDate = today(); wo.modified = today();
+  try {
+    await sbUpsert('jobs', id, wo);
+    renderJobs(); renderDashboard();
+    toast('Work order approved', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function unapproveWO(id) {
+  var wo = _jobs.find(function(j){ return j.id === id; }); if (!wo) return;
+  var prev = wo.status === 'approved' ? 'submitted' : 'draft';
+  if (!confirm('Return Work Order ' + (wo.woNum||wo.number) + ' to ' + prev + '?')) return;
+  wo.status = prev; wo.approvedDate = null; wo.modified = today();
+  try {
+    await sbUpsert('jobs', id, wo);
+    renderJobs(); renderDashboard();
+    toast('Work order returned to ' + prev, 'info');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function updatePendingBadge() {
+  var pending = _jobs.filter(function(j){ return j.status === 'submitted'; }).length;
+  var badge = document.getElementById('pending-badge');
+  if (badge) { badge.textContent = pending + ' Pending'; badge.style.display = pending ? 'inline' : 'none'; }
+}
+
+// ── Labour row — updated for WO (date + start/end time) ──────────────────────
+function addLabourRow(dayLabel, labOpts, prefill) {
+  _csLabourRowCount++;
+  var idx = _csLabourRowCount;
+  var p   = prefill || {};
+  var lo  = labOpts || getLabourOptions({});
+  var to  = getTechOptions();
+  var defaultDate = (document.getElementById('wo-date') || {}).value || today();
+
+  var tbody = document.getElementById('cs-labour-body');
+  if (!tbody) return;
+
+  var tr = document.createElement('tr');
+  tr.id = 'cs-lb-row-' + idx;
+  tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
+  tr.innerHTML =
+    '<td style="padding:.2rem .25rem"><input class="cs-input" type="date" id="cs-lb-date-' + idx + '" value="' + (p.date||defaultDate) + '" style="width:110px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input" id="cs-lb-tech-' + idx + '" list="tech-list-' + idx + '" placeholder="Technician" value="' + (p.technician||'') + '" style="width:130px">'
+      + '<datalist id="tech-list-' + idx + '">' + (window.VIEWER_PEOPLE||[]).map(function(p){ return '<option value="'+p.name+'">'; }).join('') + '</datalist></td>'
+    + '<td style="padding:.2rem .25rem"><select class="cs-input cs-lb-cat" id="cs-lb-cat-' + idx + '" style="width:170px">' + lo + '</select></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-st-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.regHrs||'') + '" style="width:58px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-ot-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.otHrs||'') + '" style="width:58px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-dt-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.dtHrs||'') + '" style="width:58px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="cs-lb-ns-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.nightHrs||'') + '" style="width:58px" title="Night shift hrs"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input" type="time" id="cs-lb-start-' + idx + '" value="' + (p.startTime||'') + '" style="width:85px"></td>'
+    + '<td style="padding:.2rem .25rem"><input class="cs-input" type="time" id="cs-lb-end-' + idx + '" value="' + (p.endTime||'') + '" style="width:85px"></td>'
+    + '<td style="padding:.2rem .25rem"><button class="btn btn-ghost btn-sm" onclick="this.closest(\'tr\').remove()" style="padding:.15rem .35rem">✕</button></td>';
+
+  tbody.appendChild(tr);
+  tr.querySelectorAll('.cs-input').forEach(function(el) {
+    if (!el.style.width) el.style.width = '100%';
+    el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
+  });
+  // Set category if prefill
+  if (p.category) {
+    var catEl = document.getElementById('cs-lb-cat-' + idx);
+    if (catEl) catEl.value = p.category;
+  }
+}
+
+// ── WO Event Delegation ───────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var el;
+  el = e.target.closest('[data-open-wo]');
+  if (el) { openWOModal(el.getAttribute('data-open-wo')); return; }
+  el = e.target.closest('[data-approve-wo]');
+  if (el) { approveWO(el.getAttribute('data-approve-wo')); return; }
+  el = e.target.closest('[data-unapprove-wo]');
+  if (el) { unapproveWO(el.getAttribute('data-unapprove-wo')); return; }
+  el = e.target.closest('[data-invoice-wo]');
+  if (el) { openInvoiceModal(null, el.getAttribute('data-invoice-wo')); return; }
+  el = e.target.closest('[data-export-wo]');
+  if (el) { exportWO('pdf', el.getAttribute('data-export-wo')); return; }
+});
+
+// ── openInvoiceModal — updated to accept WO id ────────────────────────────────
+// patch the existing openInvoiceModal to also accept a WO id
+var _origOpenInvoiceModal = openInvoiceModal;
+function openInvoiceModal(preClient, preWOId) {
+  // If called with a WO id, pre-select that WO's approved status
+  if (preWOId) {
+    var wo = _jobs.find(function(j){ return j.id === preWOId; });
+    if (wo) preClient = wo.client;
+  }
+  _origOpenInvoiceModal(preClient);
+  // After modal opens, pre-check this WO in the CS selector (treated as charge sheet)
+  if (preWOId) {
+    setTimeout(function() {
+      var chk = document.querySelector('.inv-cs-check[value="' + preWOId + '"]');
+      if (chk) { chk.checked = true; updateInvTotals(); }
+    }, 100);
+  }
+}
+
+// ── Export Work Order as PDF or Word ─────────────────────────────────────────
+function exportWO(format, woId) {
+  var id = woId || _editWOId;
+  if (!id) { toast('Save the work order first before exporting', 'error'); return; }
+  var wo = _jobs.find(function(j){ return j.id === id; });
+  if (!wo) { toast('Work order not found', 'error'); return; }
+
+  var woNum = wo.woNum || wo.number || 'WO';
+  var html  = buildWOPrintHTML(wo);
+
+  if (format === 'pdf') {
+    var win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(function(){ win.print(); }, 600);
+    toast('Print dialog opened — choose Save as PDF', 'info');
+  } else {
+    // Word export via data URI
+    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url;
+    a.download = 'WorkOrder-' + woNum + '.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('Word document downloaded', 'success');
+  }
+}
+
+function buildWOPrintHTML(wo) {
+  var woNum  = wo.woNum || wo.number || '—';
+  var totalReg = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
+  var totalOT  = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0);  }, 0);
+  var totalDT  = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.dtHrs||0);  }, 0);
+
+  var labourTable = (wo.labourRows||[]).map(function(r) {
+    return '<tr>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (r.technician||'—') + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">' + (r.regHrs||0) + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">' + (r.otHrs||0) + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (r.startTime||'—') + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (r.endTime||'—') + '</td>'
+    + '</tr>';
+  }).join('');
+
+  var consumableTable = (wo.consumables||[]).map(function(c) {
+    return '<tr>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (c.item||'—') + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">' + (c.qty||0) + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee"></td>'
+    + '</tr>';
+  }).join('');
+
+  var travel = wo.travel || {};
+
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Work Order ' + woNum + '</title>'
+    + '<style>'
+    + 'body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px;color:#111}'
+    + 'h1{font-size:22px;font-weight:900;color:#C0392B;margin:0}'
+    + 'h2{font-size:13px;font-weight:700;margin:0}'
+    + '.header{display:flex;justify-content:space-between;margin-bottom:16px}'
+    + '.company{font-size:9px;color:#666;margin-top:4px;line-height:1.4}'
+    + '.wo-num{font-size:20px;font-weight:900;text-align:center}'
+    + '.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px;border:1px solid #ddd;padding:8px;margin-bottom:12px;font-size:10px}'
+    + '.ref-lbl{color:#666;font-weight:700}'
+    + 'table{width:100%;border-collapse:collapse;margin-bottom:12px}'
+    + 'th{background:#f4f4f4;padding:4px 8px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd}'
+    + '.footer-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px;margin-top:8px}'
+    + '.footer-lbl{color:#666}'
+    + '@media print{body{padding:0}}'
+    + '</style></head><body>'
+    // Header
+    + '<div class="header">'
+      + '<div>'
+        + '<div style="font-size:22px;font-weight:900;color:#C0392B;line-height:1">N<span style="border-radius:50%;background:#C0392B;color:#fff;padding:0 3px;font-size:16px">O</span>RTECH</div>'
+        + '<div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#333">ADVANCED NDT</div>'
+        + '<div class="company">' + NORTECH.address + '<br>Ph: ' + NORTECH.phone + ' Fx: ' + NORTECH.fax + '<br>' + NORTECH.web + '</div>'
+      + '</div>'
+      + '<div style="text-align:right">'
+        + '<div style="font-size:9px;color:#999">Print Date: ' + new Date().toLocaleString() + '</div>'
+        + '<div style="margin-top:8px"><h2>Work Order</h2><div class="wo-num">' + woNum + '</div></div>'
+      + '</div>'
+    + '</div>'
+    // Client + refs
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px;font-size:10px">'
+      + '<div>'
+        + '<div><span class="ref-lbl">CLIENT: </span>' + (wo.client||'—') + '</div>'
+        + '<div><span class="ref-lbl">LOCATION: </span>' + (wo.site||'—') + '</div>'
+        + '<div><span class="ref-lbl">EQUIPMENT OWNER: </span>' + (wo.equipOwner||'—') + '</div>'
+      + '</div>'
+      + '<div>'
+        + '<div><span class="ref-lbl">P.O.#: </span>' + (wo.po||'—') + '</div>'
+        + '<div><span class="ref-lbl">JOB#: </span>' + (wo.jobNum||'—') + '</div>'
+        + '<div><span class="ref-lbl">AFE#: </span>' + (wo.afe||'—') + '</div>'
+        + '<div><span class="ref-lbl">RIG#: </span>' + (wo.rig||'—') + '</div>'
+      + '</div>'
+    + '</div>'
+    // Description of service
+    + '<div style="margin-bottom:12px">'
+      + '<div style="font-weight:700;font-size:10px;border-bottom:2px solid #111;padding-bottom:2px;margin-bottom:6px">DESCRIPTION OF SERVICE</div>'
+      + '<div style="font-size:10px"><strong>' + fmtDate(wo.date) + '</strong></div>'
+      + '<div style="font-size:10px;white-space:pre-line;margin:4px 0">' + (wo.notes||'') + '</div>'
+      + (wo.fieldReports ? '<div style="font-size:10px;margin-top:4px">Field Reports: ' + wo.fieldReports + '</div>' : '')
+    + '</div>'
+    // Consumables table
+    + ((wo.consumables||[]).length ? '<div style="display:grid;grid-template-columns:1fr auto;gap:16px;margin-bottom:12px">'
+      + '<div></div>'
+      + '<table style="width:280px">'
+        + '<thead><tr><th>Consumable Type</th><th>Qty</th><th>Amount</th></tr></thead>'
+        + '<tbody>' + consumableTable + '</tbody>'
+      + '</table></div>' : '')
+    // Labour table
+    + '<table>'
+      + '<thead><tr><th>Technician</th><th>Reg. Hrs</th><th>OT Hrs</th><th>Start date/time</th><th>End date/time</th></tr></thead>'
+      + '<tbody>' + labourTable + '</tbody>'
+      + '<tfoot><tr style="font-weight:700;background:#f9f9f9">'
+        + '<td style="padding:4px 8px">Subtotal:</td>'
+        + '<td style="padding:4px 8px;text-align:center">' + totalReg.toFixed(2) + '</td>'
+        + '<td style="padding:4px 8px;text-align:center">' + totalOT.toFixed(2) + '</td>'
+        + '<td colspan="2"></td>'
+      + '</tr></tfoot>'
+    + '</table>'
+    // Footer
+    + '<div class="footer-grid">'
+      + '<div><span class="footer-lbl">Total Kilometers:</span> ' + (travel.km||'') + '</div>'
+      + '<div style="text-align:right"><span class="footer-lbl">Total Reg. Hours:</span> <strong>' + totalReg.toFixed(2) + '</strong></div>'
+      + '<div><span class="footer-lbl">Hotel:</span> ' + (travel.hotels ? '$' + travel.hotels : '') + '</div>'
+      + '<div style="text-align:right"><span class="footer-lbl">Total OT. Hours:</span> <strong>' + totalOT.toFixed(2) + '</strong></div>'
+      + '<div><span class="footer-lbl">Camp:</span> ' + (travel.camp ? '$' + travel.camp : '') + '</div>'
+      + '<div></div>'
+      + '<div><span class="footer-lbl">Meals (LOA):</span> ' + (travel.loaTechs ? travel.loaTechs + ' tech × ' + travel.loaDays + ' days' : '') + '</div>'
+      + '<div></div>'
+      + '<div><span class="footer-lbl">Misc. Charges:</span> ' + (travel.misc ? '$' + travel.misc + (travel.miscDesc ? ' — ' + travel.miscDesc : '') : '') + '</div>'
+      + '<div></div>'
+      + '<div><span class="footer-lbl">Customer Contact:</span> ' + (travel.customerContact||'') + '</div>'
+      + '<div></div>'
+    + '</div>'
+    + '<div style="margin-top:16px;font-size:9px;color:#999;border-top:1px solid #ddd;padding-top:4px">Nortech Advanced NDT Ltd.</div>'
+    + '</body></html>';
 }
 
 </script>
