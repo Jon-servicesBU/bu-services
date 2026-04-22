@@ -1786,6 +1786,204 @@ document.addEventListener('DOMContentLoaded',function(){
   loadAll();
 });
 
+
+// ── RATE SHEET IMPORT ────────────────────────────────────────────────────────
+
+var _importedRateData = null;
+
+function openImportRateModal() {
+  var status = document.getElementById('import-status');
+  var preview = document.getElementById('import-preview');
+  var btn = document.getElementById('import-confirm-btn');
+  var fi = document.getElementById('import-file-input');
+  if (status) { status.style.display = 'none'; }
+  if (preview) { preview.style.display = 'none'; }
+  if (btn) { btn.style.display = 'none'; }
+  if (fi) { fi.value = ''; }
+  _importedRateData = null;
+  document.getElementById('import-rate-modal').classList.add('open');
+}
+
+function handleImportDrop(e) {
+  e.preventDefault();
+  document.getElementById('import-dropzone').style.borderColor = 'var(--border2)';
+  var file = e.dataTransfer.files[0];
+  if (file) handleImportFile(file);
+}
+
+async function handleImportFile(file) {
+  if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (ext !== 'docx' && ext !== 'pdf') {
+    showImportStatus('Only .docx and .pdf files are supported', 'error');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    showImportStatus('File too large (max 10MB)', 'error');
+    return;
+  }
+  showImportStatus('Reading file…', 'loading');
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('import-confirm-btn').style.display = 'none';
+  try {
+    var payload;
+    if (ext === 'docx') {
+      var text = await extractDocxText(file);
+      if (!text || text.trim().length < 20) {
+        showImportStatus('Could not extract text. Try PDF format.', 'error');
+        return;
+      }
+      showImportStatus('Analysing with AI…', 'loading');
+      payload = await parseRateSheetText(text);
+    } else {
+      showImportStatus('Analysing PDF with AI…', 'loading');
+      payload = await parseRateSheetPDF(file);
+    }
+    if (!payload) {
+      showImportStatus('Could not extract rates from document.', 'error');
+      return;
+    }
+    _importedRateData = payload;
+    showImportPreview(payload);
+    showImportStatus('✓ Rate sheet extracted — review and confirm below', 'success');
+    document.getElementById('import-confirm-btn').style.display = 'inline-flex';
+  } catch(e) {
+    showImportStatus('Error: ' + e.message, 'error');
+  }
+}
+
+async function extractDocxText(file) {
+  if (!window.mammoth) {
+    await new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+      s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        var result = await mammoth.extractRawText({ arrayBuffer: e.target.result });
+        resolve(result.value);
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = function() { reject(new Error('File read failed')); };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+var RATE_PROMPT = 'This is a rate sheet for a field NDT / inspection services company. Extract all pricing and return ONLY valid JSON in this exact format: {"name":"<sheet name>","customer":"<client name or empty>","effective":"<YYYY-MM-DD or today>","currency":"CAD","labour":[{"name":"<category>","stRate":<number>,"otRate":<number>,"dtRate":<number>}],"equipment":[{"name":"<item>","rate":<number>,"unit":"<day/trip/km>"}]} Extract ALL labour categories. If only one rate listed, set OT=ST*1.5, DT=ST*2. Return ONLY the JSON object.';
+
+async function parseRateSheetText(text) {
+  var res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: RATE_PROMPT + ' Document text: ' + text.slice(0, 8000) }]
+    })
+  });
+  if (!res.ok) throw new Error('API error ' + res.status);
+  var data = await res.json();
+  var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+  var match = txt.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON in response');
+  return JSON.parse(match[0]);
+}
+
+async function parseRateSheetPDF(file) {
+  var base64 = await new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
+    reader.onerror = function() { reject(new Error('Read failed')); };
+    reader.readAsDataURL(file);
+  });
+  var res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          { type: 'text', text: RATE_PROMPT }
+        ]
+      }]
+    })
+  });
+  if (!res.ok) throw new Error('API error ' + res.status);
+  var data = await res.json();
+  var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+  var match = txt.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON in response');
+  return JSON.parse(match[0]);
+}
+
+function showImportPreview(data) {
+  document.getElementById('import-rs-name').value = data.name || '';
+  document.getElementById('import-rs-customer').value = data.customer || '';
+  var labourEl = document.getElementById('import-labour-preview');
+  if (labourEl) {
+    labourEl.innerHTML = (data.labour && data.labour.length
+      ? '<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Labour (' + data.labour.length + ' categories)</div>'
+        + data.labour.map(function(l) {
+          return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
+            + '<span style="font-weight:600">' + l.name + '</span>'
+            + '<span style="font-family:var(--mono);color:var(--muted)">ST:' + fmtMoney(l.stRate) + ' OT:' + fmtMoney(l.otRate) + ' DT:' + fmtMoney(l.dtRate) + '</span>'
+          + '</div>';
+        }).join('')
+      : '<div style="color:var(--muted);font-size:.75rem">No labour rates found</div>');
+  }
+  var eqEl = document.getElementById('import-equipment-preview');
+  if (eqEl && data.equipment && data.equipment.length) {
+    eqEl.innerHTML = '<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Equipment (' + data.equipment.length + ' items)</div>'
+      + data.equipment.map(function(e) {
+        return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
+          + '<span>' + e.name + '</span>'
+          + '<span style="font-family:var(--mono);color:var(--muted)">' + fmtMoney(e.rate) + '/' + e.unit + '</span>'
+        + '</div>';
+      }).join('');
+  }
+  document.getElementById('import-preview').style.display = 'block';
+}
+
+async function confirmImport() {
+  if (!_importedRateData) return;
+  var name = document.getElementById('import-rs-name').value.trim();
+  if (!name) { toast('Enter a name for this rate sheet', 'error'); return; }
+  var data = Object.assign({}, _importedRateData, {
+    id: uid(), name: name,
+    customer: document.getElementById('import-rs-customer').value.trim(),
+    created: today(), modified: today(),
+    effective: _importedRateData.effective || today(),
+    currency: _importedRateData.currency || 'CAD',
+  });
+  try {
+    await sbUpsert('rate_sheets', data.id, data);
+    _rateSheets.unshift(data);
+    closeModal('import-rate-modal');
+    renderRateSheets();
+    toast('Imported: ' + (data.labour||[]).length + ' labour categories, ' + (data.equipment||[]).length + ' equipment items', 'success');
+  } catch(e) { toast('Import failed: ' + e.message, 'error'); }
+}
+
+function showImportStatus(msg, type) {
+  var el = document.getElementById('import-status');
+  if (!el) return;
+  var styles = {
+    loading: 'background:rgba(0,174,239,.1);color:rgba(0,174,239,.8);border:1px solid rgba(0,174,239,.2)',
+    success: 'background:rgba(22,163,74,.1);color:#22C55E;border:1px solid rgba(22,163,74,.2)',
+    error:   'background:rgba(185,28,28,.1);color:#EF4444;border:1px solid rgba(185,28,28,.2)',
+  };
+  el.style.cssText = 'display:block;padding:.75rem;border-radius:6px;font-size:.78rem;margin-bottom:1rem;' + (styles[type]||styles.loading);
+  el.textContent = msg;
+}
+
 </script>
 
 <!-- Rate Sheet Import Modal -->
