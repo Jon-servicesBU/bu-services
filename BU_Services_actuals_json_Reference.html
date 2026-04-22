@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — actuals.json Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700&family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A1F5C;--blue:#1A5CA8;--sky:#00AEEF;--amber:#C9860A;--green:#16A34A;
+  --red:#B91C1C;--dgrey:#6678A0;--dark:#1C2B4A;--mid:#2D4A7A;--bg:#0A1425;
+  --mono:'IBM Plex Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:#E8EDF5;min-height:100vh;-webkit-font-smoothing:antialiased}
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(10,20,37,.97);backdrop-filter:blur(8px);
+  border-bottom:2px solid var(--sky);display:flex;align-items:center;padding:0 1.5rem;height:52px;gap:1.5rem}
+.brand{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;color:var(--sky);
+  letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.nav-btn{color:var(--sky);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);
+  border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;text-decoration:none;margin-left:auto}
+.page-hdr{background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 100%);
+  padding:2.5rem 2.5rem 2rem;border-bottom:3px solid var(--sky)}
+.page-hdr .eh{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--sky);margin-bottom:.5rem;font-family:var(--mono)}
+.page-hdr h1{font-family:'Barlow Condensed',sans-serif;font-size:2.4rem;font-weight:900;color:#fff;margin-bottom:.3rem}
+.page-hdr p{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.65;max-width:700px}
+.section{padding:2rem 2.5rem;max-width:1400px;margin:0 auto}
+.section-hdr{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.25rem;padding-bottom:.6rem;border-bottom:2px solid var(--sky)}
+.section-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:800;color:#fff}
+.section-hdr .sh-sub{font-size:.72rem;color:var(--dgrey)}
+.field-grid{display:grid;grid-template-columns:220px 100px 1fr 120px;gap:0;margin-bottom:1.5rem;
+  border:1px solid var(--mid);border-radius:8px;overflow:hidden}
+.fg-hdr{background:var(--navy);padding:.45rem .75rem;font-size:.62rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.7);border-right:1px solid var(--mid)}
+.fg-hdr:last-child{border-right:none}
+.fg-row{display:contents}
+.fg-row:hover .fg-cell{background:rgba(0,174,239,.05)}
+.fg-cell{padding:.4rem .75rem;border-top:1px solid rgba(255,255,255,.04);
+  border-right:1px solid rgba(255,255,255,.04);font-size:.7rem;color:#D0D8E8;
+  display:flex;align-items:center;line-height:1.4}
+.fg-cell:last-child{border-right:none}
+.fg-cell.key{font-family:var(--mono);font-size:.68rem;color:#7DD3FC;font-weight:500}
+.fg-cell.type{font-family:var(--mono);font-size:.62rem;color:var(--dgrey)}
+.fg-cell.desc{color:#D0D8E8}
+.fg-cell.owner{font-size:.62rem}
+.owner-pa{color:#6EE7B7;font-weight:700}
+.owner-manual{color:#FCD34D;font-weight:700}
+.owner-jon{color:#7DD3FC;font-weight:700}
+.group-banner{background:linear-gradient(90deg,rgba(26,92,168,.25) 0%,rgba(26,92,168,.05) 100%);
+  padding:.5rem .75rem;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:800;
+  color:var(--sky);letter-spacing:.04em;text-transform:uppercase;border-top:2px solid rgba(0,174,239,.2);
+  grid-column:1/-1}
+.legend{display:flex;gap:1.5rem;flex-wrap:wrap;margin-bottom:1.25rem;font-size:.7rem}
+.leg-item{display:flex;align-items:center;gap:.4rem}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.copy-btn{background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.3);color:var(--sky);
+  font-family:var(--mono);font-size:.68rem;font-weight:700;padding:.35rem .85rem;border-radius:5px;
+  cursor:pointer;transition:background .15s;margin-bottom:1.25rem}
+.copy-btn:hover{background:rgba(0,174,239,.22)}
+.json-preview{background:#0D1A2E;border:1px solid var(--mid);border-radius:8px;
+  padding:1.25rem 1.5rem;overflow-x:auto;margin-bottom:1.5rem}
+.json-preview pre{font-family:var(--mono);font-size:.68rem;line-height:1.7;color:#E8EDF5;white-space:pre}
+.jk{color:#7DD3FC}.jv-num{color:#6EE7B7}.jv-str{color:#FCD34D}.jv-null{color:#F87171}
+.jc{color:#6678A0;font-style:italic}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="brand">BU Services</div>
+  <span style="font-size:.72rem;color:var(--dgrey);font-family:var(--mono)">actuals.json Field Reference</span>
+  <a class="nav-btn" href="BU_Services_Management_Hub.html" target="buservices">&#8592; Management Hub</a>
+</nav>
+
+<div class="page-hdr">
+  <div class="eh">Ekoscan Integrity Group &nbsp;&middot;&nbsp; BU Services &nbsp;&middot;&nbsp; Data Bridge Reference</div>
+  <h1>actuals.json &mdash; Field Reference</h1>
+  <p>Complete annotated reference for all fields in actuals.json. Every field the Command Centre reads is listed here with its data type, who writes it, and what happens if it is missing or wrong.</p>
+</div>
+
+<div class="section">
+  <div class="legend">
+    <span class="leg-item"><span class="leg-dot" style="background:#16A34A"></span><span class="owner-pa">Power Automate</span> &mdash; written automatically every Sunday 7PM ET</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#C9860A"></span><span class="owner-manual">Jeremy Irwin</span> &mdash; entered manually</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#00AEEF"></span><span class="owner-jon">Jon Eustace</span> &mdash; entered manually</span>
+  </div>
+
+  <button class="copy-btn" onclick="copyStarter()">&#128203; Copy Starter Template (all zeros)</button>
+
+  <div class="section-hdr"><h2>Header Fields</h2><span class="sh-sub">Metadata — written by Power Automate on every run</span></div>
+  <div class="field-grid">
+    <div class="fg-hdr">Field</div><div class="fg-hdr">Type</div><div class="fg-hdr">Description</div><div class="fg-hdr">Owner</div>
+    <div class="fg-row"><div class="fg-cell key">"lastUpdated"</div><div class="fg-cell type">string</div><div class="fg-cell desc">Date of last PA run or manual update. Format: YYYY-MM-DD</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"updatedBy"</div><div class="fg-cell type">string</div><div class="fg-cell desc">Name of last updater — "Power Automate — BU Services Flow" or a person name</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+  </div>
+
+  <div class="section-hdr"><h2>Revenue Fields</h2><span class="sh-sub">All in CAD $M &nbsp;&middot;&nbsp; Salesforce Closed Won YTD unless noted</span></div>
+  <div class="field-grid">
+    <div class="fg-hdr">Field</div><div class="fg-hdr">Type</div><div class="fg-hdr">Description &amp; Command Centre usage</div><div class="fg-hdr">Owner</div>
+    <div class="fg-row"><div class="fg-cell key">"nucleom"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nucleom Closed Won YTD (incl. Arcanite). Salesforce query. Feeds Revenue Foundation and KPI row.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"nucleom_pipeline"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nucleom open pipeline (not Closed Won). Feeds Revenue Foundation Closed + Pipeline total.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"nortech"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nortech + RockX invoiced revenue YTD. NOT in Salesforce — enter manually each month by 5th.</div><div class="fg-cell"><span class="owner-manual">Jeremy Irwin</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"nortech_pipeline"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nortech open pipeline. Manual entry.</div><div class="fg-cell"><span class="owner-manual">Jeremy Irwin</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"mining"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Mining NDT Closed Won YTD. Salesforce: BU_Initiative__c = 'Mining NDT'. Feeds Initiative Progress card.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"pipeline"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Pipeline DA Closed Won YTD. Salesforce: BU_Initiative__c = 'Pipeline DA'.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"powerline"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Powerline Closed Won YTD. Salesforce: BU_Initiative__c = 'Powerline'.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"nuclear"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nuclear/OPG Closed Won YTD. Salesforce: BU_Initiative__c = 'Nuclear/OPG'.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"x3"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">3X Composite Closed Won YTD. Salesforce: BU_Initiative__c = '3X Composite'.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+  </div>
+
+  <div class="section-hdr"><h2>Regional Revenue</h2><span class="sh-sub">Nucleom only &nbsp;&middot;&nbsp; Salesforce by Region field</span></div>
+  <div class="field-grid">
+    <div class="fg-hdr">Field</div><div class="fg-hdr">Type</div><div class="fg-hdr">Description</div><div class="fg-hdr">Owner</div>
+    <div class="fg-row"><div class="fg-cell key">"region_hq"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">HQ — Québec City Closed Won. Ops lead: Eric Rodrigue.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"region_montreal"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Montréal Closed Won. Ops lead: Eric Rodrigue.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"region_central"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Central (Whitby/Oakville/Thunder Bay) Closed Won. Ops lead: Joel Djordjevic.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"region_edmonton"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Edmonton Closed Won. Ops lead: Jason Borza.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"region_vancouver"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Vancouver Closed Won. Ops lead: Jason Borza.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"region_*_pipeline"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Open pipeline for each region (5 fields: hq, montreal, central, edmonton, vancouver).</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"util_*"</div><div class="fg-cell type">float %</div><div class="fg-cell desc">Crew utilisation % for each region this week (util_hq, util_montreal, util_central, util_edmonton, util_vancouver). Ops leads update SharePoint tracker Wednesday. PA reads Sunday.</div><div class="fg-cell"><span class="owner-pa">Power Automate via ops leads</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"util_target"</div><div class="fg-cell type">float %</div><div class="fg-cell desc">Target utilisation rate. Default 85.0. Update here to change target across all region cards.</div><div class="fg-cell"><span class="owner-jon">Jon Eustace</span></div></div>
+  </div>
+
+  <div class="section-hdr"><h2>Deck Report Fields</h2><span class="sh-sub">INT BU bi-weekly performance data &nbsp;&middot;&nbsp; All in CAD $M unless noted</span></div>
+  <div class="field-grid">
+    <div class="fg-hdr">Field</div><div class="fg-hdr">Type</div><div class="fg-hdr">Description</div><div class="fg-hdr">Owner</div>
+    <div class="fg-row"><div class="fg-cell key">"budget_nuc"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nucleom annual budget. Enter once before Jan 31. Unlocks Deck Report performance table.</div><div class="fg-cell"><span class="owner-manual">Jeremy Irwin</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"budget_nor"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nortech annual budget.</div><div class="fg-cell"><span class="owner-manual">Jeremy Irwin</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"budget_int"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">INT (Intact) annual budget.</div><div class="fg-cell"><span class="owner-manual">Jeremy Irwin</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"budget_arcndt"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">ARC NDT annual budget.</div><div class="fg-cell"><span class="owner-manual">Jeremy Irwin</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"eur_rate"</div><div class="fg-cell type">float</div><div class="fg-cell desc">EUR/CAD exchange rate (e.g. 0.72). Used to convert all revenue figures to k€ for Eurazeo reporting. Update annually.</div><div class="fg-cell"><span class="owner-manual">Jeremy Irwin</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"bookings_nuc"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nucleom Bookings stage pipeline. Salesforce.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"commit_nuc"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nucleom Commit stage pipeline.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"upside_nuc"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nucleom Upside pipeline.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"sure_forecast_nuc"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nucleom Sure Forecast (Closed Won + Commit). Calculated by PA.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"prev_*" fields</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Previous review snapshot (prev_nucleom, prev_nortech, prev_mining etc.). Written automatically by PA each Sunday to enable delta calculations in the Deck Report.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+  </div>
+
+  <div class="section-hdr"><h2>Meeting Health</h2><span class="sh-sub">Action counts per meeting series &nbsp;&middot;&nbsp; From SharePoint Meeting Actions list</span></div>
+  <div class="field-grid">
+    <div class="fg-hdr">Field</div><div class="fg-hdr">Type</div><div class="fg-hdr">Description</div><div class="fg-hdr">Owner</div>
+    <div class="fg-row"><div class="fg-cell key">"actions_commercial"</div><div class="fg-cell type">int</div><div class="fg-cell desc">Open action count — Commercial Weekly meeting. Feeds Meeting Health section RAG indicator.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"actions_ops"</div><div class="fg-cell type">int</div><div class="fg-cell desc">Open action count — Ops Weekly.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"actions_nuclear"</div><div class="fg-cell type">int</div><div class="fg-cell desc">Open action count — Nuclear Steering.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"actions_gate"</div><div class="fg-cell type">int</div><div class="fg-cell desc">Open action count — Gate Reviews.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"actions_finance"</div><div class="fg-cell type">int</div><div class="fg-cell desc">Open action count — Financial Review.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"actions_hr"</div><div class="fg-cell type">int</div><div class="fg-cell desc">Open action count — HR &amp; Retention.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"actions_eurazeo"</div><div class="fg-cell type">int</div><div class="fg-cell desc">Open action count — Eurazeo/EIG Update.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"actions_overdue"</div><div class="fg-cell type">int</div><div class="fg-cell desc">Total overdue actions across all meetings. Triggers red banner in Meeting Health section.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+  </div>
+
+  <div class="section-hdr"><h2>Gates &amp; Risks (manual)</h2><span class="sh-sub">Updated by Jon Eustace after each Gate Review</span></div>
+  <div class="field-grid">
+    <div class="fg-hdr">Field</div><div class="fg-hdr">Type</div><div class="fg-hdr">Description</div><div class="fg-hdr">Owner</div>
+    <div class="fg-row"><div class="fg-cell key">"gates[].status"</div><div class="fg-cell type">string</div><div class="fg-cell desc">Status for each of 12 gate milestones. Values: "green" | "amber" | "grey" | "red". Update in actuals.json after each Gate Review or when a milestone changes.</div><div class="fg-cell"><span class="owner-jon">Jon Eustace</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"risks[].status"</div><div class="fg-cell type">string</div><div class="fg-cell desc">Risk status. Values: "monitoring" | "triggered" | "resolved". Update when a trigger condition is observed.</div><div class="fg-cell"><span class="owner-jon">Jon Eustace</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"nuclear_outages[]"</div><div class="fg-cell type">array</div><div class="fg-cell desc">OPG outage windows. Each record: id, station, unit, outage_type, start_date, end_date, contract_status, value_est_cad, lead_owner, notes. Copy outage_001 template for each new record.</div><div class="fg-cell"><span class="owner-jon">Jon + Olivier</span></div></div>
+  </div>
+
+  <div class="section-hdr"><h2>Monthly Revenue</h2><span class="sh-sub">Object keyed by "2026_01" through "2026_12"</span></div>
+  <div class="field-grid">
+    <div class="fg-hdr">Field</div><div class="fg-hdr">Type</div><div class="fg-hdr">Description</div><div class="fg-hdr">Owner</div>
+    <div class="fg-row"><div class="fg-cell key">"monthly.2026_MM.nucleom"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nucleom invoiced revenue for that month. Written by PA from Salesforce (CloseDate in that month).</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"monthly.2026_MM.nortech"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Nortech invoiced revenue for that month. Manual entry by Jeremy Irwin.</div><div class="fg-cell"><span class="owner-manual">Jeremy Irwin</span></div></div>
+    <div class="fg-row"><div class="fg-cell key">"monthly.2026_MM.mining"<br>"...pipeline" "...powerline"<br>"...nuclear" "...x3"</div><div class="fg-cell type">float $M</div><div class="fg-cell desc">Initiative breakdown by month. Written by PA. Feeds the Monthly Revenue chart and table.</div><div class="fg-cell"><span class="owner-pa">Power Automate</span></div></div>
+  </div>
+
+  <div class="section-hdr"><h2>Starter Template</h2><span class="sh-sub">Copy this into actuals.json on SharePoint as the year-start baseline</span></div>
+  <div class="json-preview">
+    <pre id="starter-json"></pre>
+  </div>
+
+</div>
+
+<div style="background:rgba(10,20,37,.8);border-top:1px solid var(--mid);padding:1rem 2.5rem;text-align:center;font-size:.65rem;color:var(--dgrey);margin-top:2rem">
+  actuals.json Field Reference &nbsp;&middot;&nbsp; BU Services &nbsp;&middot;&nbsp; Ekoscan Integrity Group &nbsp;&middot;&nbsp; Confidential &mdash; Internal Use Only
+</div>
+
+<script>
+const STARTER = {
+  "lastUpdated": "YYYY-MM-DD",
+  "updatedBy": "Jeremy Irwin",
+  "nucleom": 0.0, "nucleom_pipeline": 0.0,
+  "nortech": 0.0, "nortech_pipeline": 0.0,
+  "mining": 0.0, "pipeline": 0.0, "powerline": 0.0, "nuclear": 0.0, "x3": 0.0,
+  "region_hq": 0.0, "region_hq_pipeline": 0.0,
+  "region_montreal": 0.0, "region_montreal_pipeline": 0.0,
+  "region_central": 0.0, "region_central_pipeline": 0.0,
+  "region_edmonton": 0.0, "region_edmonton_pipeline": 0.0,
+  "region_vancouver": 0.0, "region_vancouver_pipeline": 0.0,
+  "util_hq": 0.0, "util_montreal": 0.0, "util_central": 0.0,
+  "util_edmonton": 0.0, "util_vancouver": 0.0,
+  "util_target": 85.0, "util_week": "",
+  "tech_deployments_hq": 0, "tech_deployments_montreal": 0,
+  "tech_deployments_central": 0, "tech_deployments_edmonton": 0, "tech_deployments_vancouver": 0,
+  "actions_commercial": 0, "actions_ops": 0, "actions_nuclear": 0,
+  "actions_gate": 0, "actions_finance": 0, "actions_hr": 0,
+  "actions_eurazeo": 0, "actions_overdue": 0,
+  "budget_nuc": 0.0, "budget_nor": 0.0, "budget_int": 0.0, "budget_arcndt": 0.0,
+  "bookings_nuc": 0.0, "bookings_nor": 0.0,
+  "commit_nuc": 0.0, "commit_nor": 0.0,
+  "upside_nuc": 0.0, "upside_nor": 0.0,
+  "sure_forecast_nuc": 0.0, "sure_forecast_nor": 0.0,
+  "arcndt_invoiced": 0.0, "arcndt_pipeline": 0.0,
+  "int_invoiced": 0.0, "int_pipeline": 0.0,
+  "eur_rate": 0.72,
+  "prev_review_date": "", "prev_nucleom": 0.0, "prev_nortech": 0.0,
+  "prev_mining": 0.0, "prev_pipeline": 0.0, "prev_powerline": 0.0,
+  "prev_nuclear": 0.0, "prev_x3": 0.0,
+  "prev_bookings_nuc": 0.0, "prev_bookings_nor": 0.0,
+  "kpi_ref": {
+    "fy24_avg": { "nuc_hours": 0, "nuc_rate": 0, "nuc_util": 0, "nuc_cost": 0, "nuc_margin": 0,
+                  "nor_hours": 0, "nor_rate": 0, "nor_util": 0, "nor_cost": 0, "nor_margin": 0 },
+    "fy25_avg": { "nuc_hours": 0, "nuc_rate": 0, "nuc_util": 0, "nuc_cost": 0, "nuc_margin": 0,
+                  "nor_hours": 0, "nor_rate": 0, "nor_util": 0, "nor_cost": 0, "nor_margin": 0 }
+  },
+  "cash": {},
+  "ebitda_initiatives": [],
+  "monthly": {
+    "2026_01": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_02": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_03": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_04": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_05": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_06": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_07": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_08": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_09": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_10": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_11": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0},
+    "2026_12": {"nucleom":0,"nortech":0,"mining":0,"pipeline":0,"powerline":0,"nuclear":0,"x3":0}
+  },
+  "nuclear_outages": [{
+    "id": "outage_001", "station": "", "unit": "", "outage_type": "",
+    "start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD",
+    "contract_status": "Not Pursuing", "value_est_cad": 0,
+    "lead_owner": "Olivier Marcotte", "nuclear_lead": "Louis-Pier Théberge", "notes": ""
+  }]
+};
+
+document.getElementById('starter-json').textContent = JSON.stringify(STARTER, null, 2);
+
+function copyStarter() {
+  navigator.clipboard.writeText(JSON.stringify(STARTER, null, 2)).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ Copied — paste into actuals.json on SharePoint';
+    setTimeout(() => btn.textContent = '📋 Copy Starter Template (all zeros)', 3000);
+  });
+}
+</script>
+</body>
+</html>

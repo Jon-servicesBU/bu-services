@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Commercial Team — Weekly Rhythm Cards — BU Services Weekly Rhythm</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0A1425; color: #E8EDF5; min-height: 100vh; }
+.page-header { background: linear-gradient(135deg, #0A1F5C 0%, #1A5CA8 100%);
+  padding: 2rem 2.5rem 1.5rem; border-bottom: 3px solid #00AEEF; }
+.page-header .eh { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+  color: #00AEEF; margin-bottom: .4rem; }
+.page-header h1 { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: .25rem; }
+.page-header .sub { font-size: .95rem; color: #A8B8D0; }
+.page-header .meta { font-size: .72rem; color: #6678A0; margin-top: .5rem; }
+.container { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem; }
+/* Person section */
+.person-block { margin-bottom: 2.5rem; }
+.person-hdr { display: flex; align-items: baseline; gap: 1rem;
+  padding: .75rem 1rem; border-radius: 8px 8px 0 0; margin-bottom: 0; }
+.person-hdr h2 { font-size: 1.4rem; font-weight: 800; color: #fff; }
+.person-hdr .role { font-size: .8rem; color: rgba(255,255,255,.7); font-weight: 500; }
+.person-hdr .employer { font-size: .68rem; color: rgba(255,255,255,.5);
+  margin-left: auto; font-style: italic; }
+.mandate { padding: .65rem 1rem; background: rgba(255,255,255,.04);
+  border-left: 3px solid; font-size: .82rem; color: #A8B8D0;
+  border-radius: 0; margin-bottom: 1rem; line-height: 1.6; }
+/* Calendar grid */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .5rem; margin-bottom: 1rem; }
+.day-col { background: #1C2B4A; border: 1px solid #2D4A7A;
+  border-radius: 8px; overflow: hidden; }
+.day-hdr { padding: .4rem .5rem; font-size: .65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em; text-align: center; }
+.day-tasks { padding: .4rem .5rem; min-height: 80px; }
+.task-item { padding: .3rem .4rem; margin-bottom: .3rem;
+  border-radius: 4px; font-size: .71rem; line-height: 1.45; }
+.task-item .t-name { font-weight: 600; color: #E8EDF5; }
+.task-item .t-time { font-size: .62rem; color: #6678A0; font-family: monospace; }
+.task-item .t-guide { font-size: .6rem; margin-top: .2rem; }
+.task-item .t-guide a { color: #00AEEF; text-decoration: none; }
+.task-item .t-guide a:hover { text-decoration: underline; }
+/* Bottom rows */
+.bottom-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .75rem; margin-bottom: 1.5rem; }
+.card { background: #1C2B4A; border: 1px solid #2D4A7A; border-radius: 8px;
+  padding: .75rem .85rem; }
+.card-title { font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; margin-bottom: .5rem; padding-bottom: .35rem;
+  border-bottom: 1px solid #2D4A7A; }
+.card-row { display: flex; gap: .4rem; align-items: flex-start;
+  font-size: .74rem; margin-bottom: .3rem; line-height: 1.5; }
+.card-row .cr-dot { flex-shrink: 0; width: 6px; height: 6px;
+  border-radius: 50%; margin-top: .3rem; }
+.card-row .cr-text { color: #A8B8D0; }
+.card-row .cr-text strong { color: #E8EDF5; }
+/* Alert pill */
+.alert-pill { display: inline-flex; align-items: center; gap: .3rem;
+  padding: .2rem .55rem; border-radius: 12px; font-size: .65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .04em; }
+.divider { border: none; border-top: 1px solid #2D4A7A; margin: 1.5rem 0; }
+/* Responsive */
+@media (max-width: 900px) { .cal-grid { grid-template-columns: repeat(4,1fr); }
+  .bottom-grid { grid-template-columns: 1fr 1fr; } }
+@media print { body { background: #fff; color: #1A2A4A; }
+  .day-col, .card { border: 1px solid #D0DCF0; background: #F4F7FB; }
+  .page-header { background: #0A1F5C !important; -webkit-print-color-adjust: exact; } }
+</style>
+</head>
+<body>
+<div class="page-header">
+  <div class="eh">Ekoscan Integrity Group — BU Services</div>
+  <h1>Commercial Team — Weekly Rhythm Cards</h1>
+  <div class="sub">Max Aggrey (Commercial Director West) · Vinoth Tharma (Commercial Director East)</div>
+  <div class="meta">Weekly Rhythm Reference Card · 2026 · Confidential · Opens in any browser</div>
+</div>
+<div class="container">
+<div class="person-block">
+  <div class="person-hdr" style="background:#1A5CA8">
+    <h2>Max Aggrey</h2>
+    <span class="role">Commercial Director — West</span>
+    <span class="employer">Employed by: Nucleom Inc.</span>
+  </div>
+  <div class="mandate" style="border-color:#1A5CA8">Own Mining NDT West, Pipeline DA (co-own with Rick), 3X Composite West. Commercial responsibility for Nortech Western Canada. Weekly check-in with Jason Borza on Nortech pipeline.</div>
+  <div class="cal-grid"><div class="day-col">
+    <div class="day-hdr" style="background:#1A5CA8;color:#fff">Mon</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(0,174,239,.08);border-left:2px solid #00AEEF">
+        <div class="t-name">Read KPI email</div>
+        <div class="t-time">20 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_Command_Centre.html</a></div>
+      </div><div class="task-item" style="background:rgba(26,92,168,.12);border-left:2px solid #1A5CA8">
+        <div class="t-name">Commercial meeting — pipeline update</div>
+        <div class="t-time">45 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_Command_Centre.html</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#1A5CA8;color:#fff">Tue</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(22,163,74,.08);border-left:2px solid #16A34A">
+        <div class="t-name">Client calls / site follow-ups</div>
+        <div class="t-time">2 hrs</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div><div class="task-item" style="background:rgba(0,174,239,.08);border-left:2px solid #00AEEF">
+        <div class="t-name">New leads → Salesforce same day</div>
+        <div class="t-time">15 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#1A5CA8;color:#fff">Wed</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(201,134,10,.08);border-left:2px solid #C9860A">
+        <div class="t-name">Conference lead entry (post-show)</div>
+        <div class="t-time">30 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div><div class="task-item" style="background:rgba(13,80,80,.12);border-left:2px solid #0D5050">
+        <div class="t-name">Nortech check-in with Jason Borza</div>
+        <div class="t-time">30 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_Max_Aggrey_Role_Brief.docx</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#1A5CA8;color:#fff">Thu</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(13,80,80,.12);border-left:2px solid #0D5050">
+        <div class="t-name">Pipeline DA coord — Rick Carlton</div>
+        <div class="t-time">30 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_Rick_Carlton_Role_Brief.docx</a></div>
+      </div><div class="task-item" style="background:rgba(22,163,74,.08);border-left:2px solid #16A34A">
+        <div class="t-name">Quote / proposal preparation</div>
+        <div class="t-time">1–2 hrs</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#1A5CA8;color:#fff">Fri</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(0,174,239,.08);border-left:2px solid #00AEEF">
+        <div class="t-name">Salesforce update — ALL open opps</div>
+        <div class="t-time">30 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div><div class="task-item" style="background:rgba(0,174,239,.08);border-left:2px solid #00AEEF">
+        <div class="t-name">New contacts from week → Leads</div>
+        <div class="t-time">15 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div><div class="task-item" style="background:rgba(185,28,28,.08);border-left:2px solid #B91C1C">
+        <div class="t-name">3X findings review — flag if any</div>
+        <div class="t-time">10 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_Max_Aggrey_Role_Brief.docx</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#1A5CA8;color:#fff">Sat</div>
+    <div class="day-tasks"><div style="font-size:.65rem;color:#2D4A7A;text-align:center;padding:.5rem 0;">—</div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#1A5CA8;color:#fff">Sun</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(102,120,160,.1);border-left:2px solid #6678A0">
+        <div class="t-name">PA flow runs 7PM ET</div>
+        <div class="t-time">—</div>
+        <div class="t-guide">→ <a href="#">actuals.json</a></div>
+      </div></div>
+  </div></div>
+  <div class="bottom-grid">
+    <div class="card">
+      <div class="card-title" style="color:#C9860A">📅 Monthly Tasks</div>
+      <div class="card-row"><span class="cr-dot" style="background:#C9860A"></span><span class="cr-text"><strong>Nortech pipeline brief to Jon</strong><br><span style="font-size:.65rem">→ Monday Commercial Meeting — verbal</span></span></div><div class="card-row"><span class="cr-dot" style="background:#C9860A"></span><span class="cr-text"><strong>Conference ROI review (post-show)</strong><br><span style="font-size:.65rem">→ BU_Services_Conference_Action_Tracker.xlsx</span></span></div><div class="card-row"><span class="cr-dot" style="background:#C9860A"></span><span class="cr-text"><strong>Review Proposal Health section</strong><br><span style="font-size:.65rem">→ BU_Services_Command_Centre.html</span></span></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#B91C1C">⚡ Standing Triggers — respond same day</div>
+      <div class="card-row"><span class="cr-dot" style="background:#B91C1C"></span><span class="cr-text"><strong>AMBER/RED field finding</strong><br>Flag to Rick Carlton same day → Salesforce 3X opportunity</span></div><div class="card-row"><span class="cr-dot" style="background:#B91C1C"></span><span class="cr-text"><strong>Existing client mentions new scope</strong><br>Warm handoff to yourself + log in SF — do not quote without Rick on PI work</span></div><div class="card-row"><span class="cr-dot" style="background:#B91C1C"></span><span class="cr-text"><strong>New contact made (anywhere)</strong><br>Salesforce Lead within 48 hours — BU_Initiative__c required</span></div><div class="card-row"><span class="cr-dot" style="background:#B91C1C"></span><span class="cr-text"><strong>Stalled deal alert (Monday email)</strong><br>Review in Salesforce, log an Activity or update Stage</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#00AEEF">🖥 Systems You Own</div>
+      <div class="card-row"><span class="cr-dot" style="background:#00AEEF"></span><span class="cr-text"><strong>Salesforce</strong> — Own all Mining NDT, Pipeline DA, 3X Composite opportunities. Update every Friday. BU_Initiative__c on every record.</span></div><div class="card-row"><span class="cr-dot" style="background:#00AEEF"></span><span class="cr-text"><strong>Command Centre</strong> — Read every Monday — your pipeline numbers are front and centre.</span></div><div class="card-row"><span class="cr-dot" style="background:#00AEEF"></span><span class="cr-text"><strong>Conference Action Tracker</strong> — Enter SF outcomes post-conference. Shanny handles cost entries.</span></div>
+    </div>
+  </div>
+</div><hr class="divider"><div class="person-block">
+  <div class="person-hdr" style="background:#0D5050">
+    <h2>Vinoth Tharma</h2>
+    <span class="role">Commercial Director — East</span>
+    <span class="employer">Employed by: Nucleom Inc.</span>
+  </div>
+  <div class="mandate" style="border-color:#0D5050">Own Mining NDT East, Nuclear/OPG MSA & maintenance (supported by Jon's OPG relationship), Powerline (with Mathieu B), 3X East. Olivier Marcotte owns Aecon/SMR/refurb — separate lane.</div>
+  <div class="cal-grid"><div class="day-col">
+    <div class="day-hdr" style="background:#0D5050;color:#fff">Mon</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(0,174,239,.08);border-left:2px solid #00AEEF">
+        <div class="t-name">Read KPI email</div>
+        <div class="t-time">20 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_Command_Centre.html</a></div>
+      </div><div class="task-item" style="background:rgba(26,92,168,.12);border-left:2px solid #1A5CA8">
+        <div class="t-name">Commercial meeting — pipeline update</div>
+        <div class="t-time">45 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_Command_Centre.html</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#0D5050;color:#fff">Tue</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(109,40,217,.08);border-left:2px solid #6D28D9">
+        <div class="t-name">OPG/Bruce Power — log activity even if nothing moved</div>
+        <div class="t-time">15 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div><div class="task-item" style="background:rgba(22,163,74,.08);border-left:2px solid #16A34A">
+        <div class="t-name">Client calls / Mining NDT follow-ups</div>
+        <div class="t-time">2 hrs</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#0D5050;color:#fff">Wed</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(109,40,217,.08);border-left:2px solid #6D28D9">
+        <div class="t-name">Nuclear opp status — update Salesforce</div>
+        <div class="t-time">20 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div><div class="task-item" style="background:rgba(201,134,10,.08);border-left:2px solid #C9860A">
+        <div class="t-name">Powerline coord with Mathieu B</div>
+        <div class="t-time">30 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_Vinoth_Tharma_Role_Brief.docx</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#0D5050;color:#fff">Thu</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(22,163,74,.08);border-left:2px solid #16A34A">
+        <div class="t-name">Quote / proposal preparation</div>
+        <div class="t-time">1–2 hrs</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div><div class="task-item" style="background:rgba(0,174,239,.08);border-left:2px solid #00AEEF">
+        <div class="t-name">New leads → Salesforce</div>
+        <div class="t-time">15 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#0D5050;color:#fff">Fri</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(0,174,239,.08);border-left:2px solid #00AEEF">
+        <div class="t-name">Salesforce update — ALL open opps</div>
+        <div class="t-time">30 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div><div class="task-item" style="background:rgba(109,40,217,.08);border-left:2px solid #6D28D9">
+        <div class="t-name">Nuclear opps — activity logged this week?</div>
+        <div class="t-time">15 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_SF_Conference_Entry_Guide.docx</a></div>
+      </div><div class="task-item" style="background:rgba(185,28,28,.08);border-left:2px solid #B91C1C">
+        <div class="t-name">3X findings review — flag if any</div>
+        <div class="t-time">10 min</div>
+        <div class="t-guide">→ <a href="#">BU_Services_Vinoth_Tharma_Role_Brief.docx</a></div>
+      </div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#0D5050;color:#fff">Sat</div>
+    <div class="day-tasks"><div style="font-size:.65rem;color:#2D4A7A;text-align:center;padding:.5rem 0;">—</div></div>
+  </div><div class="day-col">
+    <div class="day-hdr" style="background:#0D5050;color:#fff">Sun</div>
+    <div class="day-tasks"><div class="task-item" style="background:rgba(102,120,160,.1);border-left:2px solid #6678A0">
+        <div class="t-name">PA flow runs 7PM ET</div>
+        <div class="t-time">—</div>
+        <div class="t-guide">→ <a href="#">actuals.json</a></div>
+      </div></div>
+  </div></div>
+  <div class="bottom-grid">
+    <div class="card">
+      <div class="card-title" style="color:#C9860A">📅 Monthly Tasks</div>
+      <div class="card-row"><span class="cr-dot" style="background:#C9860A"></span><span class="cr-text"><strong>CNA debrief with Jon (post-2027)</strong><br><span style="font-size:.65rem">→ Role Brief — CNA 2026 attended by Jon</span></span></div><div class="card-row"><span class="cr-dot" style="background:#C9860A"></span><span class="cr-text"><strong>Conference ROI review (post-show)</strong><br><span style="font-size:.65rem">→ BU_Services_Conference_Action_Tracker.xlsx</span></span></div><div class="card-row"><span class="cr-dot" style="background:#C9860A"></span><span class="cr-text"><strong>Review Proposal Health — Nuclear track</strong><br><span style="font-size:.65rem">→ BU_Services_Command_Centre.html</span></span></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#B91C1C">⚡ Standing Triggers — respond same day</div>
+      <div class="card-row"><span class="cr-dot" style="background:#B91C1C"></span><span class="cr-text"><strong>Aecon / SMR / refurb conversation</strong><br>Stop — escalate to Olivier Marcotte immediately</span></div><div class="card-row"><span class="cr-dot" style="background:#B91C1C"></span><span class="cr-text"><strong>Existing client mentions new scope</strong><br>Warm handoff to yourself + log in SF same day</span></div><div class="card-row"><span class="cr-dot" style="background:#B91C1C"></span><span class="cr-text"><strong>New contact made (anywhere)</strong><br>Salesforce Lead within 48 hours — tag Nuclear-OPG if applicable</span></div><div class="card-row"><span class="cr-dot" style="background:#B91C1C"></span><span class="cr-text"><strong>Nuclear opp — no activity this week</strong><br>Log a note in SF: "No update — next step [date]"</span></div><div class="card-row"><span class="cr-dot" style="background:#B91C1C"></span><span class="cr-text"><strong>3X field finding</strong><br>Flag to commercial lead same day → SF opportunity</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#00AEEF">🖥 Systems You Own</div>
+      <div class="card-row"><span class="cr-dot" style="background:#00AEEF"></span><span class="cr-text"><strong>Salesforce</strong> — Own all Mining NDT East, Nuclear-OPG MSA/maintenance, Powerline, 3X East. Friday update mandatory.</span></div><div class="card-row"><span class="cr-dot" style="background:#00AEEF"></span><span class="cr-text"><strong>Command Centre</strong> — Read every Monday. Nuclear Outage Calendar section — review outage windows.</span></div><div class="card-row"><span class="cr-dot" style="background:#00AEEF"></span><span class="cr-text"><strong>Conference Action Tracker</strong> — Enter SF outcomes post-conference. Shanny handles cost entries.</span></div>
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>

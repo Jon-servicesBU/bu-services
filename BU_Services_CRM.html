@@ -1,0 +1,2931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BU Services CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & VARS ─────────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:   #0A1F5C;
+  --blue:   #1A5CA8;
+  --sky:    #00AEEF;
+  --orange: #E97132;
+  --green:  #16A34A;
+  --amber:  #D97706;
+  --red:    #DC2626;
+  --purp:   #7C3AED;
+  --teal:   #0D9488;
+  --ink:    #0F172A;
+  --body:   #1E293B;
+  --mid:    #334155;
+  --muted:  #64748B;
+  --border: #1E2D45;
+  --surface:#0D1B2E;
+  --bg:     #080F1E;
+  --white:  #F8FAFC;
+  --mono:   'DM Mono', monospace;
+  --init-mining:   #0EA5E9;
+  --init-pipeline: #8B5CF6;
+  --init-nuclear:  #10B981;
+  --init-power:    #F59E0B;
+  --init-3x:       #EF4444;
+  --init-base:     #64748B;
+}
+
+html{scroll-padding-top:88px;scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--white);
+  font-size:14px;
+  line-height:1.6;
+  min-height:100vh;
+}
+
+/* ── UNIFIED TOPNAV ──────────────────────────────────────────────────── */
+.unav{
+  position:sticky;top:0;z-index:100;
+  height:48px;
+  background:rgba(8,16,32,.98);
+  border-bottom:1px solid rgba(0,174,239,.3);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;
+  padding:0 1.5rem;gap:0;
+}
+.unav-brand{display:flex;align-items:baseline;gap:.5rem;flex-shrink:0;margin-right:1.25rem}
+.unav-brand-name{font-size:.82rem;font-weight:800;color:#fff;letter-spacing:-.01em;white-space:nowrap}
+.unav-brand-sep{color:rgba(255,255,255,.18);font-size:.75rem;margin:0 .1rem}
+.unav-brand-page{font-size:.72rem;font-weight:600;color:var(--sky);white-space:nowrap}
+.unav-links{display:flex;align-items:center;gap:0;flex:1;overflow-x:auto;scrollbar-width:none}
+.unav-links::-webkit-scrollbar{display:none}
+.unav-links a{
+  padding:.25rem .7rem;font-size:.72rem;font-weight:600;
+  color:rgba(255,255,255,.45);text-decoration:none;white-space:nowrap;
+  border-radius:4px;transition:all .15s;cursor:pointer;border:none;
+  background:none;font-family:inherit}
+.unav-links a:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.06)}
+.unav-links a.active{color:#fff;background:rgba(0,174,239,.15)}
+.unav-right{margin-left:auto;display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.unav-date{font-size:.65rem;color:rgba(255,255,255,.25);font-family:var(--mono);white-space:nowrap}
+
+/* ── SYSBAR ──────────────────────────────────────────────────────────── */
+.sysbar{
+  position:sticky;top:48px;z-index:99;
+  background:rgba(5,12,25,.98);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;padding:0 1.25rem;gap:.5rem;height:36px;
+  backdrop-filter:blur(8px);
+}
+.sysbar-label{font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2);margin-right:.35rem;white-space:nowrap;font-family:var(--mono)}
+.sysbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;text-decoration:none;cursor:pointer;border:1.5px solid;transition:all .18s;white-space:nowrap;font-family:inherit;background:none}
+.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7)}
+.sysbtn-hub:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);color:#00AEEF}
+.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7)}
+.sysbtn-people:hover{background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);color:#FCD34D}
+.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7)}
+.sysbtn-meetings:hover{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);color:#6EE7B7}
+.sysbtn-cc{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.4)}
+.sysbtn-cc:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.85)}
+.sysbtn-crm{background:rgba(0,174,239,.12);border-color:rgba(0,174,239,.5);color:#00AEEF;cursor:default;pointer-events:none}
+
+/* ── LAYOUT ──────────────────────────────────────────────────────────── */
+.shell{display:flex;min-height:calc(100vh - 84px)}
+
+/* ── LEFT SIDEBAR ────────────────────────────────────────────────────── */
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:rgba(13,27,46,.95);
+  border-right:1px solid var(--border);
+  position:sticky;top:84px;
+  height:calc(100vh - 84px);
+  overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.sidebar-section{padding:.75rem 0}
+.sidebar-section + .sidebar-section{border-top:1px solid var(--border)}
+.sidebar-lbl{
+  font-family:var(--mono);font-size:.58rem;font-weight:500;
+  letter-spacing:2px;text-transform:uppercase;color:var(--muted);
+  padding:.25rem 1rem .4rem;display:block}
+.sidebar-link{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.45rem 1rem;font-size:.78rem;font-weight:500;
+  color:rgba(255,255,255,.5);cursor:pointer;
+  border-left:2px solid transparent;transition:all .15s;
+  text-decoration:none}
+.sidebar-link:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.04)}
+.sidebar-link.active{color:#fff;border-left-color:var(--sky);background:rgba(0,174,239,.08)}
+.sidebar-link .sl-icon{font-size:.9rem;opacity:.7;flex-shrink:0}
+.sidebar-link .sl-badge{
+  margin-left:auto;font-size:.6rem;font-weight:700;
+  padding:.1rem .38rem;border-radius:10px;
+  background:rgba(0,174,239,.15);color:var(--sky)}
+.sidebar-link .sl-badge.red{background:rgba(220,38,38,.2);color:#FCA5A5}
+.sidebar-link .sl-badge.amber{background:rgba(217,119,6,.2);color:#FCD34D}
+
+/* ── MAIN CONTENT ────────────────────────────────────────────────────── */
+.main{flex:1;min-width:0;overflow-x:hidden}
+.view{display:none;padding:1.75rem 2rem 3rem}
+.view.active{display:block}
+
+/* ── PAGE HEADER ─────────────────────────────────────────────────────── */
+.view-hdr{
+  display:flex;align-items:center;gap:1rem;
+  margin-bottom:1.75rem;flex-wrap:wrap}
+.view-title{font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:-.02em}
+.view-sub{font-size:.78rem;color:var(--muted);margin-top:.15rem}
+.view-actions{margin-left:auto;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+
+/* ── BUTTONS ─────────────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:.35rem;
+  padding:.38rem .9rem;border-radius:6px;
+  font-size:.75rem;font-weight:700;cursor:pointer;
+  border:1.5px solid;transition:all .15s;
+  font-family:inherit;white-space:nowrap}
+.btn-primary{background:rgba(0,174,239,.2);border-color:rgba(0,174,239,.5);color:var(--sky)}
+.btn-primary:hover{background:rgba(0,174,239,.35);border-color:var(--sky);box-shadow:0 0 12px rgba(0,174,239,.2)}
+.btn-ghost{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.6)}
+.btn-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#fff}
+.btn-danger{background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.3);color:#FCA5A5}
+.btn-danger:hover{background:rgba(220,38,38,.25);border-color:rgba(220,38,38,.6)}
+.btn-sm{padding:.25rem .65rem;font-size:.68rem}
+
+/* ── SEARCH / FILTER BAR ─────────────────────────────────────────────── */
+.filter-bar{
+  display:flex;gap:.65rem;margin-bottom:1.25rem;
+  flex-wrap:wrap;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:320px}
+.search-input{
+  width:100%;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);border-radius:6px;
+  padding:.4rem .75rem .4rem 2rem;font-size:.78rem;
+  color:var(--white);font-family:inherit;outline:none;
+  transition:border-color .15s}
+.search-input:focus{border-color:rgba(0,174,239,.5)}
+.search-input::placeholder{color:var(--muted)}
+.search-icon{
+  position:absolute;left:.65rem;top:50%;transform:translateY(-50%);
+  font-size:.75rem;color:var(--muted)}
+.filter-chip{
+  padding:.28rem .7rem;border-radius:20px;
+  font-size:.68rem;font-weight:700;cursor:pointer;
+  border:1.5px solid var(--border);
+  color:var(--muted);background:none;
+  transition:all .15s;font-family:inherit;white-space:nowrap}
+.filter-chip:hover{border-color:rgba(255,255,255,.25);color:var(--white)}
+.filter-chip.active{color:var(--sky);border-color:rgba(0,174,239,.5);background:rgba(0,174,239,.1)}
+
+/* ── INITIATIVE TAGS ─────────────────────────────────────────────────── */
+.init-tag{
+  display:inline-flex;align-items:center;gap:.25rem;
+  font-size:.6rem;font-weight:700;padding:.12rem .45rem;
+  border-radius:3px;white-space:nowrap;text-transform:uppercase;letter-spacing:.4px}
+.init-mining  {background:rgba(14,165,233,.15);color:#38BDF8}
+.init-pipeline{background:rgba(139,92,246,.15);color:#A78BFA}
+.init-nuclear {background:rgba(16,185,129,.15);color:#34D399}
+.init-power   {background:rgba(245,158,11,.15);color:#FCD34D}
+.init-3x      {background:rgba(239,68,68,.15);color:#FCA5A5}
+.init-base    {background:rgba(100,116,139,.15);color:#94A3B8}
+
+/* ── STAGE BADGES ────────────────────────────────────────────────────── */
+.stage-badge{
+  font-size:.62rem;font-weight:700;padding:.12rem .5rem;
+  border-radius:3px;white-space:nowrap;text-transform:uppercase;letter-spacing:.3px}
+.stage-qualifying  {background:rgba(100,116,139,.2);color:#94A3B8}
+.stage-proposing   {background:rgba(14,165,233,.15);color:#38BDF8}
+.stage-negotiating {background:rgba(245,158,11,.15);color:#FCD34D}
+.stage-closed-won  {background:rgba(16,185,129,.15);color:#34D399}
+.stage-closed-lost {background:rgba(220,38,38,.12);color:#FCA5A5}
+
+/* ── CARDS ───────────────────────────────────────────────────────────── */
+.card{
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;
+  transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:rgba(255,255,255,.12);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.card-hdr{
+  padding:.7rem 1rem;display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid var(--border)}
+.card-body{padding:.85rem 1rem}
+.card-footer{
+  padding:.5rem 1rem;border-top:1px solid var(--border);
+  display:flex;gap:.4rem;align-items:center;
+  background:rgba(0,0,0,.1)}
+
+/* ── STATS ROW ───────────────────────────────────────────────────────── */
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:.75rem;margin-bottom:1.5rem}
+.stat-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:8px;padding:.85rem 1rem}
+.stat-label{
+  font-family:var(--mono);font-size:.6rem;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+.stat-value{font-size:1.5rem;font-weight:800;color:#fff;line-height:1}
+.stat-sub{font-size:.68rem;color:var(--muted);margin-top:.25rem}
+.stat-delta{font-size:.7rem;font-weight:700}
+.stat-delta.up{color:#34D399}
+.stat-delta.down{color:#FCA5A5}
+
+/* ── PIPELINE TABLE ──────────────────────────────────────────────────── */
+.pipeline-table{width:100%;border-collapse:collapse}
+.pipeline-table th{
+  padding:.45rem .85rem;text-align:left;
+  font-family:var(--mono);font-size:.6rem;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.pipeline-table th:hover{color:var(--white)}
+.pipeline-table th.sorted{color:var(--sky)}
+.pipeline-table td{
+  padding:.6rem .85rem;border-bottom:1px solid rgba(255,255,255,.04);
+  font-size:.82rem;color:rgba(255,255,255,.8);vertical-align:middle}
+.pipeline-table tr:hover td{background:rgba(255,255,255,.03)}
+.pipeline-table tr.clickable{cursor:pointer}
+.opp-name{font-weight:600;color:#fff}
+.opp-company{font-size:.72rem;color:var(--muted)}
+.amount-cell{font-family:var(--mono);font-size:.78rem;color:var(--white)}
+.owner-chip{
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-size:.68rem;font-weight:600;
+  padding:.15rem .5rem;border-radius:10px;
+  background:rgba(255,255,255,.07);color:rgba(255,255,255,.65)}
+.stale-flag{color:#FCA5A5;font-size:.65rem;font-weight:700;margin-left:.4rem}
+
+/* ── KANBAN BOARD ────────────────────────────────────────────────────── */
+.kanban{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(220px,1fr));
+  gap:.75rem;overflow-x:auto;padding-bottom:.5rem}
+.kanban-col{
+  background:rgba(255,255,255,.02);
+  border:1px solid var(--border);border-radius:8px;
+  min-height:300px;display:flex;flex-direction:column}
+.kanban-col-hdr{
+  padding:.6rem .85rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.5rem}
+.kanban-col-title{font-size:.75rem;font-weight:700;color:#fff}
+.kanban-col-count{
+  margin-left:auto;font-family:var(--mono);font-size:.65rem;
+  color:var(--muted);background:rgba(255,255,255,.06);
+  padding:.1rem .4rem;border-radius:3px}
+.kanban-col-total{font-family:var(--mono);font-size:.62rem;color:var(--sky);margin-left:.25rem}
+.kanban-cards{padding:.5rem;display:flex;flex-direction:column;gap:.4rem;flex:1}
+.kanban-card{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:6px;padding:.65rem .75rem;cursor:pointer;
+  transition:all .15s}
+.kanban-card:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);transform:translateY(-1px)}
+.kc-name{font-size:.78rem;font-weight:600;color:#fff;margin-bottom:.2rem;line-height:1.3}
+.kc-company{font-size:.65rem;color:var(--muted)}
+.kc-footer{display:flex;align-items:center;gap:.4rem;margin-top:.5rem;flex-wrap:wrap}
+.kc-amount{font-family:var(--mono);font-size:.68rem;color:var(--sky)}
+.kc-stale{font-size:.6rem;color:#FCA5A5;font-weight:700}
+
+/* ── MODAL ───────────────────────────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.75);z-index:1000;
+  align-items:flex-start;justify-content:center;
+  padding:2rem 1rem;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal{
+  background:#0D1B2E;border:1px solid var(--border);
+  border-radius:12px;width:min(620px,100%);
+  margin:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-hdr{
+  padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.75rem}
+.modal-title{font-size:.95rem;font-weight:800;color:#fff}
+.modal-close{
+  margin-left:auto;background:none;border:none;
+  color:var(--muted);cursor:pointer;font-size:1rem;
+  padding:.2rem;transition:color .15s}
+.modal-close:hover{color:#fff}
+.modal-body{padding:1.25rem 1.4rem}
+.modal-footer{
+  padding:.85rem 1.4rem;border-top:1px solid var(--border);
+  display:flex;gap:.5rem;justify-content:flex-end;
+  background:rgba(0,0,0,.15)}
+
+/* ── FORM FIELDS ─────────────────────────────────────────────────────── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.form-grid.full{grid-template-columns:1fr}
+.field{margin-bottom:.85rem}
+.field-label{
+  display:block;font-family:var(--mono);font-size:.6rem;
+  font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.35rem}
+.field-input,.field-select,.field-textarea{
+  width:100%;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);border-radius:6px;
+  padding:.48rem .75rem;font-size:.83rem;
+  color:var(--white);font-family:inherit;
+  outline:none;transition:border-color .15s}
+.field-input:focus,.field-select:focus,.field-textarea:focus{
+  border-color:rgba(0,174,239,.5);background:rgba(0,174,239,.04)}
+.field-select option{background:#0D1B2E;color:var(--white)}
+.field-textarea{resize:vertical;min-height:72px}
+.field-hint{font-size:.65rem;color:var(--muted);margin-top:.25rem}
+.field-row{display:flex;gap:.5rem}
+.required{color:var(--sky)}
+
+/* ── DETAIL PANEL ────────────────────────────────────────────────────── */
+.detail-panel{
+  position:fixed;top:84px;right:0;bottom:0;
+  width:min(480px,92vw);
+  background:#0D1B2E;border-left:1px solid var(--border);
+  z-index:200;overflow-y:auto;
+  transform:translateX(100%);transition:transform .25s ease}
+.detail-panel.open{transform:translateX(0)}
+.dp-hdr{
+  padding:1rem 1.25rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:.75rem;
+  position:sticky;top:0;background:#0D1B2E;z-index:1}
+.dp-close{
+  background:none;border:none;color:var(--muted);
+  cursor:pointer;font-size:1rem;padding:.2rem;
+  transition:color .15s;flex-shrink:0}
+.dp-close:hover{color:#fff}
+.dp-body{padding:1rem 1.25rem}
+.dp-section{margin-bottom:1.25rem}
+.dp-section-title{
+  font-family:var(--mono);font-size:.58rem;font-weight:500;
+  letter-spacing:2px;text-transform:uppercase;color:var(--muted);
+  margin-bottom:.6rem;padding-bottom:.35rem;
+  border-bottom:1px solid var(--border)}
+.dp-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:.3rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.dp-row:last-child{border-bottom:none}
+.dp-key{font-size:.72rem;color:var(--muted)}
+.dp-val{font-size:.78rem;color:#fff;font-weight:500;text-align:right;max-width:65%}
+.activity-item{
+  padding:.65rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.activity-item:last-child{border-bottom:none}
+.activity-meta{font-size:.65rem;color:var(--muted);margin-bottom:.25rem;display:flex;gap:.5rem}
+.activity-text{font-size:.78rem;color:rgba(255,255,255,.75);line-height:1.5}
+
+/* ── EMPTY STATE ─────────────────────────────────────────────────────── */
+.empty{
+  text-align:center;padding:3rem 1rem;color:var(--muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:.75rem;opacity:.4}
+.empty-title{font-size:.9rem;font-weight:600;color:rgba(255,255,255,.4);margin-bottom:.35rem}
+.empty-sub{font-size:.78rem}
+
+/* ── TOAST ───────────────────────────────────────────────────────────── */
+.toast-wrap{position:fixed;bottom:1.5rem;right:1.5rem;z-index:2000;display:flex;flex-direction:column;gap:.4rem}
+.toast{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.6rem 1rem;border-radius:7px;
+  font-size:.78rem;font-weight:600;
+  animation:toast-in .2s ease;
+  box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.success{background:#064E3B;border:1px solid #065F46;color:#34D399}
+.toast.error{background:#450A0A;border:1px solid #7F1D1D;color:#FCA5A5}
+.toast.info{background:#0C2340;border:1px solid #1e3a5f;color:#7DD3FC}
+@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── STALE ALERT BANNER ──────────────────────────────────────────────── */
+.stale-banner{
+  background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.25);
+  border-radius:7px;padding:.6rem .9rem;margin-bottom:1rem;
+  display:flex;align-items:center;gap:.65rem;font-size:.78rem;color:#FCA5A5}
+
+/* ── PROGRESS BAR ────────────────────────────────────────────────────── */
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:width .3s}
+
+/* ── TABS (inside views) ─────────────────────────────────────────────── */
+.view-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
+.view-tab{
+  padding:.5rem 1rem;font-size:.75rem;font-weight:600;cursor:pointer;
+  color:var(--muted);border-bottom:2px solid transparent;
+  margin-bottom:-1px;transition:all .15s;
+  background:none;border-top:none;border-left:none;border-right:none;
+  font-family:inherit}
+.view-tab:hover{color:rgba(255,255,255,.7)}
+.view-tab.active{color:#fff;border-bottom-color:var(--sky)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────── */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .kanban{grid-template-columns:repeat(3,minmax(200px,1fr))}
+  .form-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .view{padding:1rem}
+  .kanban{grid-template-columns:repeat(2,minmax(180px,1fr))}
+}
+
+</style>
+</head>
+<body>
+
+<!-- ── TOPNAV ─────────────────────────────────────────────────────────── -->
+<nav class="unav">
+  <div class="unav-brand">
+    <span class="unav-brand-name">BU Services</span>
+    <span class="unav-brand-sep">·</span>
+    <span class="unav-brand-page">CRM</span>
+  </div>
+  <div class="unav-links" id="unav-links">
+    <a class="active" onclick="showView('pipeline',this)">Pipeline</a>
+    <a onclick="showView('leads',this)">Leads</a>
+    <a onclick="showView('accounts',this)">Accounts</a>
+    <a onclick="showView('activities',this)">Activities</a>
+    <a onclick="showView('conferences',this)">Conferences</a>
+    <a onclick="showView('dashboard',this)">Dashboard</a>
+  </div>
+  <div class="unav-right">
+    <div id="sync-status" style="display:flex;align-items:center;gap:.4rem;margin-right:.6rem;cursor:pointer" onclick="syncToActuals()" title="Sync to team database">
+      <span id="sync-dot" style="width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);flex-shrink:0;transition:background .3s"></span>
+      <span id="sync-label" style="font-size:.63rem;color:rgba(255,255,255,.3);font-family:var(--mono);white-space:nowrap">Sync</span>
+    </div>
+    <span class="unav-date" id="nav-date"></span>
+  </div>
+</nav>
+
+<!-- ── SYSBAR ─────────────────────────────────────────────────────────── -->
+<div class="sysbar">
+  <span class="sysbar-label">BU Services</span>
+  <a class="sysbtn sysbtn-hub" href="BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a>
+  <a class="sysbtn sysbtn-people" href="BU_Services_People_Dashboard.html" target="buservices">👥 People</a>
+  <a class="sysbtn sysbtn-meetings" href="BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a>
+  <a class="sysbtn sysbtn-cc" href="BU_Services_Command_Centre.html" target="buservices">📊 Command Centre</a>
+  <span class="sysbtn sysbtn-crm">🗂 CRM</span>
+</div>
+
+<!-- ── SHELL ──────────────────────────────────────────────────────────── -->
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <span class="sidebar-lbl">Pipeline</span>
+      <a class="sidebar-link active" onclick="showView('pipeline',null,'kanban')">
+        <span class="sl-icon">🗂</span> Kanban Board
+      </a>
+      <a class="sidebar-link" onclick="showView('pipeline',null,'list')">
+        <span class="sl-icon">📋</span> List View
+        <span class="sl-badge" id="sb-stale-count"></span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-lbl">Records</span>
+      <a class="sidebar-link" onclick="showView('leads',this)">
+        <span class="sl-icon">⚡</span> Leads
+        <span class="sl-badge" id="sb-lead-count"></span>
+      </a>
+      <a class="sidebar-link" onclick="showView('accounts',this)">
+        <span class="sl-icon">🏢</span> Accounts
+      </a>
+      <a class="sidebar-link" onclick="showView('activities',this)">
+        <span class="sl-icon">📝</span> Activities
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-lbl">Initiatives</span>
+      <a class="sidebar-link" onclick="filterByInit('Mining NDT')">
+        <span class="sl-icon" style="color:#38BDF8">◆</span> Mining NDT
+        <span class="sl-badge" id="sb-mining-count"></span>
+      </a>
+      <a class="sidebar-link" onclick="filterByInit('Pipeline DA')">
+        <span class="sl-icon" style="color:#A78BFA">◆</span> Pipeline DA
+        <span class="sl-badge" id="sb-pipeline-count"></span>
+      </a>
+      <a class="sidebar-link" onclick="filterByInit('Nuclear/OPG')">
+        <span class="sl-icon" style="color:#34D399">◆</span> Nuclear/OPG
+        <span class="sl-badge" id="sb-nuclear-count"></span>
+      </a>
+      <a class="sidebar-link" onclick="filterByInit('Powerline')">
+        <span class="sl-icon" style="color:#FCD34D">◆</span> Powerline
+        <span class="sl-badge" id="sb-power-count"></span>
+      </a>
+      <a class="sidebar-link" onclick="filterByInit('3X Composite')">
+        <span class="sl-icon" style="color:#FCA5A5">◆</span> 3X Composite
+        <span class="sl-badge" id="sb-3x-count"></span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <span class="sidebar-lbl">Tools</span>
+      <a class="sidebar-link" onclick="showView('conferences',this)">
+        <span class="sl-icon">🎪</span> Conferences
+      </a>
+      <a class="sidebar-link" onclick="showView('dashboard',this)">
+        <span class="sl-icon">📊</span> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="main-content">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VIEW: PIPELINE                                              -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="view active" id="view-pipeline">
+      <div class="view-hdr">
+        <div>
+          <div class="view-title">Pipeline</div>
+          <div class="view-sub">Active opportunities · All commercial owners · All initiatives</div>
+        </div>
+        <div class="view-actions">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" id="opp-search" placeholder="Search opportunities…" oninput="renderPipeline()">
+          </div>
+          <button class="btn btn-primary" onclick="openOppModal()">+ New Opportunity</button>
+        </div>
+      </div>
+
+      <div class="filter-bar" id="opp-filters">
+        <button class="filter-chip active" data-filter="all" onclick="setOppFilter('all',this)">All</button>
+        <button class="filter-chip" data-filter="open" onclick="setOppFilter('open',this)">Open</button>
+        <button class="filter-chip" data-filter="stale" onclick="setOppFilter('stale',this)">⚠ Stale</button>
+        <button class="filter-chip" data-owner="" id="owner-filter-all" onclick="setOwnerFilter('',this)">All Owners</button>
+        <button class="filter-chip" data-owner="max" onclick="setOwnerFilter('max',this)">Emmanuel</button>
+        <button class="filter-chip" data-owner="vinoth" onclick="setOwnerFilter('vinoth',this)">Vinoth</button>
+        <button class="filter-chip" data-owner="rick" onclick="setOwnerFilter('rick',this)">Rick</button>
+        <button class="filter-chip" data-owner="mathieu" onclick="setOwnerFilter('mathieu',this)">Mathieu</button>
+        <button class="filter-chip" data-owner="olivier" onclick="setOwnerFilter('olivier',this)">Olivier</button>
+      </div>
+
+      <!-- Stale banner -->
+      <div class="stale-banner" id="stale-banner" style="display:none">
+        ⚠ <span id="stale-banner-text"></span>
+      </div>
+
+      <!-- Tab: Kanban / List -->
+      <div class="view-tabs">
+        <button class="view-tab active" onclick="switchPipelineTab('kanban',this)" id="tab-kanban">Kanban</button>
+        <button class="view-tab" onclick="switchPipelineTab('list',this)" id="tab-list">List</button>
+      </div>
+
+      <!-- KANBAN -->
+      <div class="tab-panel active" id="panel-kanban">
+        <div class="kanban" id="kanban-board"></div>
+      </div>
+
+      <!-- LIST -->
+      <div class="tab-panel" id="panel-list">
+        <table class="pipeline-table" id="opp-table">
+          <thead>
+            <tr>
+              <th onclick="sortOpps('name')">Opportunity</th>
+              <th onclick="sortOpps('initiative')">Initiative</th>
+              <th onclick="sortOpps('owner')">Owner</th>
+              <th onclick="sortOpps('stage')">Stage</th>
+              <th onclick="sortOpps('amount')">Amount</th>
+              <th onclick="sortOpps('closeDate')">Close Date</th>
+              <th onclick="sortOpps('lastActivity')">Last Activity</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="opp-tbody"></tbody>
+        </table>
+        <div class="empty" id="opp-empty" style="display:none">
+          <div class="empty-icon">🗂</div>
+          <div class="empty-title">No opportunities found</div>
+          <div class="empty-sub">Add one with + New Opportunity or adjust your filters</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VIEW: LEADS                                                 -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-leads">
+      <div class="view-hdr">
+        <div>
+          <div class="view-title">Leads</div>
+          <div class="view-sub">New contacts · Not yet converted to opportunities</div>
+        </div>
+        <div class="view-actions">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" id="lead-search" placeholder="Search leads…" oninput="renderLeads()">
+          </div>
+          <button class="btn btn-primary" onclick="openLeadModal()">+ New Lead</button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-chip active" data-lfilter="all" onclick="setLeadFilter('all',this)">All</button>
+        <button class="filter-chip" data-lfilter="hot" onclick="setLeadFilter('hot',this)">🔴 Hot</button>
+        <button class="filter-chip" data-lfilter="warm" onclick="setLeadFilter('warm',this)">🟡 Warm</button>
+        <button class="filter-chip" data-lfilter="cold" onclick="setLeadFilter('cold',this)">🔵 Cold</button>
+        <button class="filter-chip" data-lfilter="needs-48h" onclick="setLeadFilter('needs-48h',this)">⏰ Needs Entry</button>
+      </div>
+      <table class="pipeline-table" id="lead-table">
+        <thead>
+          <tr>
+            <th>Contact</th>
+            <th>Company</th>
+            <th>Initiative</th>
+            <th>Source</th>
+            <th>Rating</th>
+            <th>Owner</th>
+            <th>Created</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="lead-tbody"></tbody>
+      </table>
+      <div class="empty" id="lead-empty" style="display:none">
+        <div class="empty-icon">⚡</div>
+        <div class="empty-title">No leads yet</div>
+        <div class="empty-sub">Log every new contact as a Lead — conferences, site visits, cold calls</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VIEW: ACCOUNTS                                              -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-accounts">
+      <div class="view-hdr">
+        <div>
+          <div class="view-title">Accounts</div>
+          <div class="view-sub">Companies · Operators · Clients</div>
+        </div>
+        <div class="view-actions">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" id="acct-search" placeholder="Search accounts…" oninput="renderAccounts()">
+          </div>
+          <button class="btn btn-primary" onclick="openAcctModal()">+ New Account</button>
+        </div>
+      </div>
+      <div id="acct-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem"></div>
+      <div class="empty" id="acct-empty" style="display:none">
+        <div class="empty-icon">🏢</div>
+        <div class="empty-title">No accounts yet</div>
+        <div class="empty-sub">Accounts are created when you convert a Lead or add one manually</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VIEW: ACTIVITIES                                            -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-activities">
+      <div class="view-hdr">
+        <div>
+          <div class="view-title">Activity Log</div>
+          <div class="view-sub">Every client interaction · calls · meetings · site visits</div>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-primary" onclick="openActivityModal()">+ Log Activity</button>
+        </div>
+      </div>
+      <div id="activity-feed"></div>
+      <div class="empty" id="activity-empty" style="display:none">
+        <div class="empty-icon">📝</div>
+        <div class="empty-title">No activities logged</div>
+        <div class="empty-sub">Log every client touchpoint — calls, meetings, site visits, emails</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VIEW: CONFERENCES                                           -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-conferences">
+      <div class="view-hdr">
+        <div>
+          <div class="view-title">Conference Tracker</div>
+          <div class="view-sub">48-hour lead entry rule · post-show pipeline</div>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-primary" onclick="openConfModal()">+ Log Conference</button>
+        </div>
+      </div>
+      <div id="conf-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.75rem"></div>
+      <div class="empty" id="conf-empty">
+        <div class="empty-icon">🎪</div>
+        <div class="empty-title">No conferences logged</div>
+        <div class="empty-sub">Log each BU Services conference — track leads entered within 48 hours</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VIEW: DASHBOARD                                             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-dashboard">
+      <div class="view-hdr">
+        <div>
+          <div class="view-title">Pipeline Dashboard</div>
+          <div class="view-sub">All initiatives · All owners · Live from CRM data</div>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-ghost btn-sm" onclick="exportJSON()">↓ Export JSON</button>
+        </div>
+      </div>
+      <div class="stats-row" id="dash-stats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem" id="dash-grids"></div>
+      <div id="dash-by-owner"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ── TOAST CONTAINER ───────────────────────────────────────────── -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ── DETAIL PANEL ──────────────────────────────────────────────── -->
+<div class="detail-panel" id="detail-panel">
+  <div class="dp-hdr">
+    <div>
+      <div id="dp-title" style="font-size:.95rem;font-weight:800;color:#fff;margin-bottom:.15rem"></div>
+      <div id="dp-subtitle" style="font-size:.72rem;color:var(--muted)"></div>
+    </div>
+    <button class="dp-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="dp-body" id="dp-body"></div>
+</div>
+<div id="detail-backdrop" style="display:none;position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.4)" onclick="closeDetail()"></div>
+
+<!-- ── OPPORTUNITY MODAL ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="opp-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title" id="opp-modal-title">New Opportunity</span>
+      <button class="modal-close" onclick="closeModal('opp-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Opportunity Name <span class="required">*</span></label>
+          <input class="field-input" id="opp-name" placeholder="e.g. Teck Highland Valley — Robotic UT — 2026">
+          <div class="field-hint">Format: [Company] — [Service] — [Year]</div>
+        </div>
+        <div class="field">
+          <label class="field-label">Account / Company <span class="required">*</span></label>
+          <input class="field-input" id="opp-company" placeholder="e.g. Teck Highland Valley Copper Operations" list="acct-datalist">
+          <datalist id="acct-datalist"></datalist>
+        </div>
+        <div class="field">
+          <label class="field-label">BU Initiative <span class="required">*</span></label>
+          <select class="field-select" id="opp-initiative">
+            <option value="">— Select —</option>
+            <option>Mining NDT</option>
+            <option>Pipeline DA</option>
+            <option>Nuclear/OPG</option>
+            <option>Powerline</option>
+            <option>3X Composite</option>
+            <option>Base Business</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Stage <span class="required">*</span></label>
+          <select class="field-select" id="opp-stage">
+            <option value="Qualifying">Qualifying</option>
+            <option value="Proposing">Proposing</option>
+            <option value="Negotiating">Negotiating</option>
+            <option value="Closed Won">Closed Won</option>
+            <option value="Closed Lost">Closed Lost</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Amount (CAD $) <span class="required">*</span></label>
+          <input class="field-input" id="opp-amount" type="number" placeholder="e.g. 250000">
+        </div>
+        <div class="field">
+          <label class="field-label">Close Date <span class="required">*</span></label>
+          <input class="field-input" id="opp-close-date" type="date">
+        </div>
+        <div class="field">
+          <label class="field-label">Commercial Owner <span class="required">*</span></label>
+          <select class="field-select" id="opp-owner">
+            <option value="max">Emmanuel Aggrey</option>
+            <option value="vinoth">Vinoth Tharma</option>
+            <option value="rick">Rick Carlton</option>
+            <option value="mathieu">Mathieu Beauchesne</option>
+            <option value="olivier">Olivier Marcotte</option>
+            <option value="jon">Jon Eustace</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Region</label>
+          <select class="field-select" id="opp-region">
+            <option value="">— None —</option>
+            <option>Quebec / Eastern</option>
+            <option>Central (ON/MB)</option>
+            <option>Western (BC/AB/SK)</option>
+            <option>Northern</option>
+            <option>National</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Assigned Technicians</label>
+          <input class="field-input" id="opp-techs" placeholder="e.g. M. Tremblay, J. Bouchard (enter on Closed Won)">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Next Action</label>
+          <input class="field-input" id="opp-next-action" placeholder="What happens next and by when?">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Notes</label>
+          <textarea class="field-textarea" id="opp-notes" placeholder="Context, client background, key contacts, any flags…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('opp-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveOpp()">Save Opportunity</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LEAD MODAL ────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="lead-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title" id="lead-modal-title">New Lead</span>
+      <button class="modal-close" onclick="closeModal('lead-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label">First Name <span class="required">*</span></label>
+          <input class="field-input" id="lead-first" placeholder="First name">
+        </div>
+        <div class="field">
+          <label class="field-label">Last Name <span class="required">*</span></label>
+          <input class="field-input" id="lead-last" placeholder="Last name">
+        </div>
+        <div class="field">
+          <label class="field-label">Company <span class="required">*</span></label>
+          <input class="field-input" id="lead-company" placeholder="e.g. Teck Highland Valley Copper Operations">
+        </div>
+        <div class="field">
+          <label class="field-label">Title</label>
+          <input class="field-input" id="lead-title" placeholder="e.g. Integrity Manager">
+        </div>
+        <div class="field">
+          <label class="field-label">Email</label>
+          <input class="field-input" id="lead-email" type="email" placeholder="business@company.com">
+        </div>
+        <div class="field">
+          <label class="field-label">Phone</label>
+          <input class="field-input" id="lead-phone" placeholder="+1 (xxx) xxx-xxxx">
+        </div>
+        <div class="field">
+          <label class="field-label">BU Initiative <span class="required">*</span></label>
+          <select class="field-select" id="lead-initiative">
+            <option value="">— Select —</option>
+            <option>Mining NDT</option>
+            <option>Pipeline DA</option>
+            <option>Nuclear/OPG</option>
+            <option>Powerline</option>
+            <option>3X Composite</option>
+            <option>Base Business</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Lead Source <span class="required">*</span></label>
+          <select class="field-select" id="lead-source">
+            <option value="">— Select —</option>
+            <option>CIM Vancouver 2026</option>
+            <option>IPEIA 2026</option>
+            <option>IPC Pipeline 2026</option>
+            <option>IPCE 2026</option>
+            <option>CNA 2026</option>
+            <option>CEN CAN Expo 2026</option>
+            <option>Canadian Mining Expo 2026</option>
+            <option>ASNT 2026</option>
+            <option>ECNDT Verona 2026</option>
+            <option>T&amp;D Conference 2026</option>
+            <option>API Inspection Summit 2026</option>
+            <option>Direct Outreach</option>
+            <option>Referral</option>
+            <option>Existing Account</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Rating <span class="required">*</span></label>
+          <select class="field-select" id="lead-rating">
+            <option value="Hot">🔴 Hot — asked for a quote</option>
+            <option value="Warm">🟡 Warm — interested, not yet</option>
+            <option value="Cold">🔵 Cold — early relationship</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Owner</label>
+          <select class="field-select" id="lead-owner">
+            <option value="max">Emmanuel Aggrey</option>
+            <option value="vinoth">Vinoth Tharma</option>
+            <option value="rick">Rick Carlton</option>
+            <option value="mathieu">Mathieu Beauchesne</option>
+            <option value="olivier">Olivier Marcotte</option>
+            <option value="jon">Jon Eustace</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Notes <span class="required">*</span></label>
+          <textarea class="field-textarea" id="lead-notes" placeholder="What problem do they have? What service discussed? When to follow up? Be specific."></textarea>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Conference (if from a show)</label>
+          <input class="field-input" id="lead-conference" placeholder="Leave blank if not from a conference">
+          <div class="field-hint">⏰ 48-hour rule: all conference leads must be entered within 48 hours of returning</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('lead-modal')">Cancel</button>
+      <button class="btn btn-ghost" onclick="saveLeadAndConvert()">Save + Convert to Opportunity</button>
+      <button class="btn btn-primary" onclick="saveLead()">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACCOUNT MODAL ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="acct-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title" id="acct-modal-title">New Account</span>
+      <button class="modal-close" onclick="closeModal('acct-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Account Name <span class="required">*</span></label>
+          <input class="field-input" id="acct-name" placeholder="e.g. Teck Highland Valley Copper Operations">
+        </div>
+        <div class="field">
+          <label class="field-label">Industry</label>
+          <select class="field-select" id="acct-industry">
+            <option value="">— Select —</option>
+            <option>Mining</option>
+            <option>Pipeline / Midstream</option>
+            <option>Nuclear / Utility</option>
+            <option>Power / Transmission</option>
+            <option>Industrial</option>
+            <option>Government</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Region</label>
+          <select class="field-select" id="acct-region">
+            <option value="">— Select —</option>
+            <option>Quebec / Eastern</option>
+            <option>Central (ON/MB)</option>
+            <option>Western (BC/AB/SK)</option>
+            <option>Northern</option>
+            <option>National</option>
+            <option>International</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Primary Contact</label>
+          <input class="field-input" id="acct-contact" placeholder="Name · title">
+        </div>
+        <div class="field">
+          <label class="field-label">Primary Initiative</label>
+          <select class="field-select" id="acct-initiative">
+            <option value="">— Select —</option>
+            <option>Mining NDT</option>
+            <option>Pipeline DA</option>
+            <option>Nuclear/OPG</option>
+            <option>Powerline</option>
+            <option>3X Composite</option>
+            <option>Base Business</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Notes</label>
+          <textarea class="field-textarea" id="acct-notes" placeholder="Background, relationship history, key contacts…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('acct-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAcct()">Save Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACTIVITY MODAL ────────────────────────────────────────────── -->
+<div class="modal-overlay" id="activity-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title">Log Activity</span>
+      <button class="modal-close" onclick="closeModal('activity-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label">Activity Type <span class="required">*</span></label>
+          <select class="field-select" id="act-type">
+            <option>Meeting</option>
+            <option>Call</option>
+            <option>Site Visit</option>
+            <option>Email</option>
+            <option>Conference</option>
+            <option>Proposal Sent</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Date <span class="required">*</span></label>
+          <input class="field-input" id="act-date" type="date">
+        </div>
+        <div class="field">
+          <label class="field-label">Contact / Company</label>
+          <input class="field-input" id="act-contact" placeholder="Who did you speak with?">
+        </div>
+        <div class="field">
+          <label class="field-label">Linked Opportunity</label>
+          <select class="field-select" id="act-opp"></select>
+        </div>
+        <div class="field">
+          <label class="field-label">Owner</label>
+          <select class="field-select" id="act-owner">
+            <option value="max">Emmanuel Aggrey</option>
+            <option value="vinoth">Vinoth Tharma</option>
+            <option value="rick">Rick Carlton</option>
+            <option value="mathieu">Mathieu Beauchesne</option>
+            <option value="olivier">Olivier Marcotte</option>
+            <option value="jon">Jon Eustace</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">AMBER/RED Finding?</label>
+          <select class="field-select" id="act-finding">
+            <option value="">No</option>
+            <option value="AMBER">⚠ AMBER finding — 3X opportunity</option>
+            <option value="RED">🔴 RED finding — urgent 3X opportunity</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Notes <span class="required">*</span></label>
+          <textarea class="field-textarea" id="act-notes" placeholder="What was discussed? What was agreed? What happens next?"></textarea>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Next Action</label>
+          <input class="field-input" id="act-next" placeholder="What is the next step and when?">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('activity-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveActivity()">Log Activity</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFERENCE MODAL ──────────────────────────────────────────── -->
+<div class="modal-overlay" id="conf-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title">Log Conference</span>
+      <button class="modal-close" onclick="closeModal('conf-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Conference Name <span class="required">*</span></label>
+          <select class="field-select" id="conf-name">
+            <option>CIM Vancouver 2026</option>
+            <option>IPEIA 2026</option>
+            <option>IPC Pipeline 2026</option>
+            <option>IPCE 2026</option>
+            <option>CNA 2026</option>
+            <option>CEN CAN Expo 2026</option>
+            <option>Canadian Mining Expo 2026</option>
+            <option>ASNT 2026</option>
+            <option>ECNDT Verona 2026</option>
+            <option>T&D Conference 2026</option>
+            <option>API Inspection Summit 2026</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Return Date <span class="required">*</span></label>
+          <input class="field-input" id="conf-return" type="date">
+          <div class="field-hint">48-hour deadline starts from this date</div>
+        </div>
+        <div class="field">
+          <label class="field-label">Attending Owner</label>
+          <select class="field-select" id="conf-owner">
+            <option value="max">Emmanuel Aggrey</option>
+            <option value="vinoth">Vinoth Tharma</option>
+            <option value="rick">Rick Carlton</option>
+            <option value="mathieu">Mathieu Beauchesne</option>
+            <option value="olivier">Olivier Marcotte</option>
+            <option value="jon">Jon Eustace</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Leads Entered</label>
+          <input class="field-input" id="conf-leads-entered" type="number" min="0" placeholder="0">
+        </div>
+        <div class="field">
+          <label class="field-label">Target Leads</label>
+          <input class="field-input" id="conf-leads-target" type="number" min="0" placeholder="5">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label class="field-label">Notes</label>
+          <textarea class="field-textarea" id="conf-notes" placeholder="Key conversations, hot leads, lessons learned…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('conf-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConf()">Save Conference</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+// BU SERVICES CRM — CORE ENGINE
+// ══════════════════════════════════════════════════════════════════════
+
+// ── Constants ─────────────────────────────────────────────────────────
+const OWNERS = {
+  max:     'Emmanuel Aggrey',
+  vinoth:  'Vinoth Tharma',
+  rick:    'Rick Carlton',
+  mathieu: 'Mathieu Beauchesne',
+  olivier: 'Olivier Marcotte',
+  jon:     'Jon Eustace',
+};
+
+const INIT_CLASSES = {
+  'Mining NDT':  'init-mining',
+  'Pipeline DA': 'init-pipeline',
+  'Nuclear/OPG': 'init-nuclear',
+  'Powerline':   'init-power',
+  '3X Composite':'init-3x',
+  'Base Business':'init-base',
+};
+
+const STAGE_CLASSES = {
+  'Qualifying':   'stage-qualifying',
+  'Proposing':    'stage-proposing',
+  'Negotiating':  'stage-negotiating',
+  'Closed Won':   'stage-closed-won',
+  'Closed Lost':  'stage-closed-lost',
+};
+
+const STAGES = ['Qualifying','Proposing','Negotiating','Closed Won','Closed Lost'];
+const STALE_DAYS = 30;
+
+// ── Storage ───────────────────────────────────────────────────────────
+function load(key) {
+  try { return JSON.parse(localStorage.getItem('bucrm_'+key) || '[]'); }
+  catch(e) { return []; }
+}
+function save(key, val) {
+  localStorage.setItem('bucrm_'+key, JSON.stringify(val));
+}
+function loadObj(key, def) {
+  try { return JSON.parse(localStorage.getItem('bucrm_'+key) || JSON.stringify(def)); }
+  catch(e) { return def; }
+}
+
+// ── Date helpers ──────────────────────────────────────────────────────
+function today() { return new Date().toISOString().slice(0,10); }
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s+'T00:00:00');
+  return d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+}
+function daysAgo(iso) {
+  if (!iso) return null;
+  return Math.round((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+function daysUntil(iso) {
+  if (!iso) return null;
+  return Math.round((new Date(iso+'T00:00:00') - new Date(today()+'T00:00:00')) / 86400000);
+}
+function isStale(opp) {
+  if (opp.stage === 'Closed Won' || opp.stage === 'Closed Lost') return false;
+  const d = daysAgo(opp.lastActivity || opp.created);
+  return d !== null && d >= STALE_DAYS;
+}
+function isOverdue(opp) {
+  const d = daysUntil(opp.closeDate);
+  return d !== null && d < 0 && opp.stage !== 'Closed Won' && opp.stage !== 'Closed Lost';
+}
+
+// ── ID generator ──────────────────────────────────────────────────────
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ── Format money ─────────────────────────────────────────────────────
+function fmtMoney(n) {
+  if (!n && n !== 0) return '—';
+  n = Number(n);
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+  if (n >= 1000)    return '$' + Math.round(n/1000) + 'K';
+  return '$' + n.toLocaleString();
+}
+
+// ── Init tag HTML ─────────────────────────────────────────────────────
+function initTag(init) {
+  if (!init) return '';
+  const cls = INIT_CLASSES[init] || 'init-base';
+  const short = init.replace('/OPG','').replace(' Composite','').replace('Base Business','Base');
+  return `<span class="init-tag ${cls}">${short}</span>`;
+}
+
+// ── Stage badge HTML ──────────────────────────────────────────────────
+function stageBadge(stage) {
+  const cls = STAGE_CLASSES[stage] || 'stage-qualifying';
+  return `<span class="stage-badge ${cls}">${stage}</span>`;
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const wrap = document.getElementById('toast-wrap');
+  const el   = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icons = {success:'✓', error:'✕', info:'ℹ'};
+  el.innerHTML = `<span>${icons[type]||''}</span><span>${msg}</span>`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .4s'; }, 2500);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// NAV & VIEW SWITCHING
+// ══════════════════════════════════════════════════════════════════════
+let currentView = 'pipeline';
+let currentPipelineTab = 'kanban';
+let oppFilter  = 'all';
+let ownerFilter = '';
+let leadFilter = 'all';
+let initFilter = '';
+let oppSort    = {col:'closeDate', dir:1};
+let editingId  = null;
+
+function showView(viewId, linkEl, tab) {
+  currentView = viewId;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.unav-links a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(a => a.classList.remove('active'));
+  const view = document.getElementById('view-'+viewId);
+  if (view) view.classList.add('active');
+  if (linkEl) linkEl.classList.add('active');
+  if (viewId === 'pipeline' && tab) switchPipelineTab(tab);
+  else if (viewId === 'pipeline') renderPipeline();
+  else if (viewId === 'leads')       renderLeads();
+  else if (viewId === 'accounts')    renderAccounts();
+  else if (viewId === 'activities')  renderActivities();
+  else if (viewId === 'conferences') renderConferences();
+  else if (viewId === 'dashboard')   renderDashboard();
+  updateSidebarCounts();
+}
+
+function switchPipelineTab(tab, el) {
+  currentPipelineTab = tab;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const tabEl = document.getElementById('tab-'+tab);
+  const panelEl = document.getElementById('panel-'+tab);
+  if (tabEl) tabEl.classList.add('active');
+  if (panelEl) panelEl.classList.add('active');
+  if (el) el.classList.add('active');
+  renderPipeline();
+}
+
+function setOppFilter(f, el) {
+  oppFilter = f;
+  document.querySelectorAll('#opp-filters .filter-chip[data-filter]').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderPipeline();
+}
+
+function setOwnerFilter(o, el) {
+  ownerFilter = o;
+  document.querySelectorAll('#opp-filters .filter-chip[data-owner]').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderPipeline();
+}
+
+function filterByInit(init) {
+  initFilter = (initFilter === init) ? '' : init;
+  showView('pipeline', null, 'list');
+}
+
+function setLeadFilter(f, el) {
+  leadFilter = f;
+  document.querySelectorAll('[data-lfilter]').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderLeads();
+}
+
+function sortOpps(col) {
+  if (oppSort.col === col) oppSort.dir *= -1;
+  else { oppSort.col = col; oppSort.dir = 1; }
+  renderPipeline();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// PIPELINE RENDER
+// ══════════════════════════════════════════════════════════════════════
+function getFilteredOpps() {
+  let opps = load('opps');
+  const q  = (document.getElementById('opp-search')?.value || '').toLowerCase();
+  if (q) opps = opps.filter(o =>
+    (o.name||'').toLowerCase().includes(q) ||
+    (o.company||'').toLowerCase().includes(q) ||
+    (OWNERS[o.owner]||'').toLowerCase().includes(q)
+  );
+  if (oppFilter === 'open')  opps = opps.filter(o => o.stage !== 'Closed Won' && o.stage !== 'Closed Lost');
+  if (oppFilter === 'stale') opps = opps.filter(o => isStale(o));
+  if (ownerFilter)           opps = opps.filter(o => o.owner === ownerFilter);
+  if (initFilter)            opps = opps.filter(o => o.initiative === initFilter);
+  return opps;
+}
+
+function renderPipeline() {
+  const opps   = getFilteredOpps();
+  const allOpen = load('opps').filter(o => o.stage !== 'Closed Won' && o.stage !== 'Closed Lost');
+  const stale   = allOpen.filter(isStale);
+
+  // Stale banner
+  const banner = document.getElementById('stale-banner');
+  const bannerTxt = document.getElementById('stale-banner-text');
+  if (stale.length > 0) {
+    banner.style.display = 'flex';
+    bannerTxt.textContent = `${stale.length} open ${stale.length===1?'opportunity has':'opportunities have'} no activity in ${STALE_DAYS}+ days — update Salesforce or close.`;
+  } else {
+    banner.style.display = 'none';
+  }
+
+  if (currentPipelineTab === 'kanban') renderKanban(opps);
+  else renderOppList(opps);
+}
+
+function renderKanban(opps) {
+  const board = document.getElementById('kanban-board');
+  board.innerHTML = STAGES.map(stage => {
+    const cols = opps.filter(o => o.stage === stage);
+    const total = cols.reduce((s,o) => s + Number(o.amount||0), 0);
+    const cards = cols.map(o => {
+      const staleFlag = isStale(o) ? '<span class="kc-stale">⚠ Stale</span>' : '';
+      const overdueFlag = isOverdue(o) ? '<span class="kc-stale">📅 Overdue</span>' : '';
+      return `<div class="kanban-card" onclick="openDetail('opp','${o.id}')">
+        <div class="kc-name">${o.name || 'Unnamed'}</div>
+        <div class="kc-company">${o.company || ''}</div>
+        <div class="kc-footer">
+          ${initTag(o.initiative)}
+          <span class="kc-amount">${fmtMoney(o.amount)}</span>
+          ${staleFlag}${overdueFlag}
+        </div>
+      </div>`;
+    }).join('');
+    const cls = STAGE_CLASSES[stage] || 'stage-qualifying';
+    return `<div class="kanban-col">
+      <div class="kanban-col-hdr">
+        <span class="stage-badge ${cls}">${stage}</span>
+        <span class="kanban-col-count">${cols.length}</span>
+        ${total > 0 ? `<span class="kanban-col-total">${fmtMoney(total)}</span>` : ''}
+      </div>
+      <div class="kanban-cards">${cards || `<div style="padding:.5rem;font-size:.72rem;color:var(--muted);text-align:center">No opportunities</div>`}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderOppList(opps) {
+  const sorted = [...opps].sort((a,b) => {
+    let av = a[oppSort.col] || '';
+    let bv = b[oppSort.col] || '';
+    if (oppSort.col === 'amount') { av = Number(av)||0; bv = Number(bv)||0; }
+    return av < bv ? -oppSort.dir : av > bv ? oppSort.dir : 0;
+  });
+
+  const tbody = document.getElementById('opp-tbody');
+  const empty = document.getElementById('opp-empty');
+
+  if (!sorted.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = sorted.map(o => {
+    const da = daysAgo(o.lastActivity || o.created);
+    const staleHtml = isStale(o) ? `<span class="stale-flag">⚠ ${da}d</span>` : '';
+    const dueDays = daysUntil(o.closeDate);
+    const dueColor = isOverdue(o) ? 'color:#FCA5A5;font-weight:700' : dueDays !== null && dueDays <= 14 ? 'color:#FCD34D' : '';
+    return `<tr class="clickable" onclick="openDetail('opp','${o.id}')">
+      <td>
+        <div class="opp-name">${o.name || 'Unnamed'}</div>
+        <div class="opp-company">${o.company || ''}</div>
+      </td>
+      <td>${initTag(o.initiative)}</td>
+      <td><span class="owner-chip">${(OWNERS[o.owner]||o.owner||'').split(' ')[0]}</span></td>
+      <td>${stageBadge(o.stage)}</td>
+      <td class="amount-cell">${fmtMoney(o.amount)}</td>
+      <td><span style="${dueColor}">${fmtDate(o.closeDate)}</span></td>
+      <td>${da !== null ? `${da}d ago${staleHtml}` : '—'}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openOppModal('${o.id}')">✏</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteRecord('opps','${o.id}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// LEADS RENDER
+// ══════════════════════════════════════════════════════════════════════
+function renderLeads() {
+  let leads = load('leads');
+  const q = (document.getElementById('lead-search')?.value || '').toLowerCase();
+  if (q) leads = leads.filter(l =>
+    (l.firstName+' '+l.lastName).toLowerCase().includes(q) ||
+    (l.company||'').toLowerCase().includes(q)
+  );
+  if (leadFilter === 'hot')      leads = leads.filter(l => l.rating === 'Hot');
+  if (leadFilter === 'warm')     leads = leads.filter(l => l.rating === 'Warm');
+  if (leadFilter === 'cold')     leads = leads.filter(l => l.rating === 'Cold');
+  if (leadFilter === 'needs-48h') leads = leads.filter(l => {
+    if (!l.conference) return false;
+    const hoursAgo = (Date.now() - new Date(l.created).getTime()) / 3600000;
+    return hoursAgo <= 72;
+  });
+
+  const tbody = document.getElementById('lead-tbody');
+  const empty = document.getElementById('lead-empty');
+  if (!leads.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const ratingColors = {Hot:'color:#FCA5A5', Warm:'color:#FCD34D', Cold:'color:#7DD3FC'};
+  const ratingDots   = {Hot:'🔴', Warm:'🟡', Cold:'🔵'};
+  tbody.innerHTML = leads.map(l => {
+    const daysSince = daysAgo(l.created);
+    const hoursFlag = l.conference && daysSince === 0 ? '<span style="color:#FCD34D;font-size:.65rem">⏰ Enter now</span>' : '';
+    const convFlag  = l.converted ? '<span style="color:#34D399;font-size:.65rem">✓ Converted</span>' : '';
+    return `<tr class="clickable" onclick="openDetail('lead','${l.id}')">
+      <td>
+        <div class="opp-name">${l.firstName} ${l.lastName}</div>
+        <div class="opp-company">${l.title||''}</div>
+      </td>
+      <td>${l.company||'—'}</td>
+      <td>${initTag(l.initiative)}</td>
+      <td><span style="font-size:.72rem;color:var(--muted)">${l.source||'—'}</span></td>
+      <td><span style="${ratingColors[l.rating]||''}">${ratingDots[l.rating]||''} ${l.rating||'—'}</span></td>
+      <td><span class="owner-chip">${(OWNERS[l.owner]||l.owner||'').split(' ')[0]}</span></td>
+      <td><span style="font-size:.72rem;color:var(--muted)">${daysSince !== null ? daysSince+'d ago' : '—'}</span></td>
+      <td>${convFlag}${hoursFlag}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();convertLead('${l.id}')">→ Convert</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteRecord('leads','${l.id}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ACCOUNTS RENDER
+// ══════════════════════════════════════════════════════════════════════
+function renderAccounts() {
+  let accts = load('accounts');
+  const q = (document.getElementById('acct-search')?.value || '').toLowerCase();
+  if (q) accts = accts.filter(a => (a.name||'').toLowerCase().includes(q));
+
+  const grid = document.getElementById('acct-grid');
+  const empty = document.getElementById('acct-empty');
+  if (!accts.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const opps  = load('opps');
+  grid.innerHTML = accts.map(a => {
+    const relOpps = opps.filter(o => (o.company||'').toLowerCase() === (a.name||'').toLowerCase());
+    const openOpps  = relOpps.filter(o => o.stage !== 'Closed Won' && o.stage !== 'Closed Lost');
+    const wonOpps   = relOpps.filter(o => o.stage === 'Closed Won');
+    const wonTotal  = wonOpps.reduce((s,o) => s+Number(o.amount||0), 0);
+    return `<div class="card" onclick="openDetail('account','${a.id}')">
+      <div class="card-hdr">
+        <span style="font-size:.9rem;font-weight:700;color:#fff;flex:1">${a.name}</span>
+        ${initTag(a.initiative)}
+      </div>
+      <div class="card-body">
+        <div style="font-size:.72rem;color:var(--muted);margin-bottom:.4rem">${a.industry||''} ${a.region ? '· '+a.region : ''}</div>
+        <div style="display:flex;gap:1rem;font-size:.75rem">
+          <span style="color:var(--muted)">${openOpps.length} open opp${openOpps.length!==1?'s':''}</span>
+          ${wonTotal > 0 ? `<span style="color:#34D399">${fmtMoney(wonTotal)} won</span>` : ''}
+        </div>
+        ${a.contact ? `<div style="font-size:.72rem;color:var(--muted);margin-top:.35rem">👤 ${a.contact}</div>` : ''}
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openAcctModal('${a.id}')">✏ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteRecord('accounts','${a.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ACTIVITIES RENDER
+// ══════════════════════════════════════════════════════════════════════
+function renderActivities() {
+  const acts = load('activities').sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const feed = document.getElementById('activity-feed');
+  const empty = document.getElementById('activity-empty');
+  if (!acts.length) {
+    feed.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const typeIcons = {Meeting:'🤝',Call:'📞','Site Visit':'🔧',Email:'✉',Conference:'🎪','Proposal Sent':'📄'};
+  const findingColors = {AMBER:'color:#FCD34D', RED:'color:#FCA5A5'};
+
+  feed.innerHTML = acts.map(a => {
+    const oppName = a.oppId ? (load('opps').find(o=>o.id===a.oppId)||{}).name || '' : '';
+    const findingBadge = a.finding ? `<span style="${findingColors[a.finding]||''};font-size:.65rem;font-weight:700;margin-left:.4rem">⚠ ${a.finding} Finding → 3X opportunity</span>` : '';
+    return `<div class="card" style="margin-bottom:.6rem">
+      <div class="card-hdr">
+        <span style="font-size:1rem">${typeIcons[a.type]||'📝'}</span>
+        <span style="font-weight:600;color:#fff;font-size:.82rem">${a.type} — ${a.contact||'Unknown'}</span>
+        ${findingBadge}
+        <span style="margin-left:auto;font-size:.68rem;color:var(--muted)">${fmtDate(a.date)}</span>
+        <span class="owner-chip" style="margin-left:.5rem">${(OWNERS[a.owner]||a.owner||'').split(' ')[0]}</span>
+      </div>
+      <div class="card-body">
+        ${oppName ? `<div style="font-size:.68rem;color:var(--sky);margin-bottom:.35rem">↗ ${oppName}</div>` : ''}
+        <div class="activity-text">${a.notes||''}</div>
+        ${a.nextAction ? `<div style="font-size:.72rem;color:#FCD34D;margin-top:.4rem">→ ${a.nextAction}</div>` : ''}
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-danger btn-sm" onclick="deleteRecord('activities','${a.id}')">✕ Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// CONFERENCES RENDER
+// ══════════════════════════════════════════════════════════════════════
+function renderConferences() {
+  const confs = load('conferences').sort((a,b) => (b.returnDate||'').localeCompare(a.returnDate||''));
+  const grid  = document.getElementById('conf-grid');
+  const empty = document.getElementById('conf-empty');
+  if (!confs.length) {
+    grid.innerHTML = ''; empty.style.display = 'block'; return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = confs.map(c => {
+    const entered  = Number(c.leadsEntered||0);
+    const target   = Number(c.leadsTarget||5);
+    const pct      = target > 0 ? Math.min(100, Math.round(entered/target*100)) : 0;
+    const daysBack = daysAgo(c.returnDate);
+    const deadline = daysBack !== null && daysBack <= 2 && entered < target;
+    const deadlineBadge = deadline ? '<span style="color:#FCA5A5;font-size:.65rem;font-weight:700">⏰ 48h deadline</span>' : '';
+    const barColor = pct >= 100 ? '#34D399' : pct >= 60 ? '#FCD34D' : '#FCA5A5';
+    return `<div class="card">
+      <div class="card-hdr">
+        <span style="font-weight:700;color:#fff;font-size:.85rem;flex:1">${c.name}</span>
+        ${deadlineBadge}
+      </div>
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:.5rem">
+          <span>${fmtDate(c.returnDate)} · ${OWNERS[c.owner]||c.owner||''}</span>
+          <span style="color:${barColor};font-weight:700">${entered}/${target} leads</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${barColor}"></div></div>
+        ${c.notes ? `<div style="font-size:.73rem;color:var(--muted);margin-top:.5rem">${c.notes}</div>` : ''}
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-ghost btn-sm" onclick="openConfModal('${c.id}')">✏ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRecord('conferences','${c.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════════════════════
+function renderDashboard() {
+  const opps  = load('opps');
+  const leads = load('leads');
+  const open  = opps.filter(o => o.stage !== 'Closed Won' && o.stage !== 'Closed Lost');
+  const won   = opps.filter(o => o.stage === 'Closed Won');
+  const stale = open.filter(isStale);
+  const pipeline = open.reduce((s,o) => s+Number(o.amount||0), 0);
+  const wonTotal  = won.reduce((s,o) => s+Number(o.amount||0), 0);
+
+  document.getElementById('dash-stats').innerHTML = [
+    {label:'Total Pipeline', value:fmtMoney(pipeline), sub:`${open.length} open opportunities`},
+    {label:'Closed Won', value:fmtMoney(wonTotal), sub:`${won.length} deals won`, extra:'up'},
+    {label:'Open Leads', value:leads.filter(l=>!l.converted).length, sub:'Not yet converted'},
+    {label:'Stale Deals', value:stale.length, sub:`>${STALE_DAYS} days no activity`, extra: stale.length > 0 ? 'down' : ''},
+  ].map(s => `<div class="stat-card">
+    <div class="stat-label">${s.label}</div>
+    <div class="stat-value">${s.value}</div>
+    <div class="stat-sub">${s.sub} ${s.extra ? `<span class="stat-delta ${s.extra}">${s.extra==='up'?'↑':'↓'}</span>` : ''}</div>
+  </div>`).join('');
+
+  // By initiative
+  const byInit = {};
+  ['Mining NDT','Pipeline DA','Nuclear/OPG','Powerline','3X Composite','Base Business'].forEach(i => {
+    const iOpps  = open.filter(o => o.initiative === i);
+    const iWon   = won.filter(o => o.initiative === i);
+    byInit[i] = {
+      pipeline: iOpps.reduce((s,o) => s+Number(o.amount||0), 0),
+      won:      iWon.reduce((s,o) => s+Number(o.amount||0), 0),
+      count:    iOpps.length,
+    };
+  });
+
+  document.getElementById('dash-grids').innerHTML = `
+  <div class="card">
+    <div class="card-hdr"><span style="font-weight:700;color:#fff">Pipeline by Initiative</span></div>
+    <div class="card-body">
+      ${Object.entries(byInit).map(([init,d]) => {
+        const pct = pipeline > 0 ? Math.round(d.pipeline/pipeline*100) : 0;
+        return `<div style="margin-bottom:.65rem">
+          <div style="display:flex;justify-content:space-between;margin-bottom:.25rem">
+            <span>${initTag(init)} <span style="font-size:.75rem;color:rgba(255,255,255,.6)">${init}</span></span>
+            <span style="font-family:var(--mono);font-size:.72rem;color:var(--sky)">${fmtMoney(d.pipeline)}</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--sky)"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span style="font-weight:700;color:#fff">Pipeline by Stage</span></div>
+    <div class="card-body">
+      ${STAGES.map(stage => {
+        const sOpps = opps.filter(o => o.stage === stage);
+        const sTotal = sOpps.reduce((s,o) => s+Number(o.amount||0), 0);
+        const maxTotal = Math.max(...STAGES.map(s => opps.filter(o=>o.stage===s).reduce((t,o)=>t+Number(o.amount||0),0)), 1);
+        const pct = Math.round(sTotal/maxTotal*100);
+        const cls = STAGE_CLASSES[stage] || 'stage-qualifying';
+        return `<div style="margin-bottom:.65rem">
+          <div style="display:flex;justify-content:space-between;margin-bottom:.25rem">
+            <span class="stage-badge ${cls}">${stage}</span>
+            <span style="font-family:var(--mono);font-size:.72rem">${fmtMoney(sTotal)} · ${sOpps.length}</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+
+  // By owner
+  document.getElementById('dash-by-owner').innerHTML = `
+  <div class="card">
+    <div class="card-hdr"><span style="font-weight:700;color:#fff">Pipeline by Owner</span></div>
+    <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem">
+      ${Object.entries(OWNERS).map(([id, name]) => {
+        const ownerOpps = open.filter(o => o.owner === id);
+        const ownerPipe = ownerOpps.reduce((s,o) => s+Number(o.amount||0), 0);
+        const ownerStale = ownerOpps.filter(isStale).length;
+        const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2);
+        return `<div style="display:flex;align-items:center;gap:.75rem;padding:.6rem;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border)">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,174,239,.25);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:var(--sky);flex-shrink:0">${initials}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:.78rem;font-weight:600;color:#fff">${name.split(' ')[0]} ${name.split(' ').slice(-1)[0]}</div>
+            <div style="font-size:.7rem;color:var(--muted)">${ownerOpps.length} open · ${fmtMoney(ownerPipe)}</div>
+            ${ownerStale > 0 ? `<div style="font-size:.65rem;color:#FCA5A5">⚠ ${ownerStale} stale</div>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// MODAL OPEN/CLOSE
+// ══════════════════════════════════════════════════════════════════════
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  editingId = null;
+}
+
+function openOppModal(editId) {
+  editingId = editId || null;
+  const modal = document.getElementById('opp-modal');
+  document.getElementById('opp-modal-title').textContent = editId ? 'Edit Opportunity' : 'New Opportunity';
+  // Populate account datalist
+  const dl = document.getElementById('acct-datalist');
+  dl.innerHTML = load('accounts').map(a => `<option value="${a.name}">`).join('');
+  if (editId) {
+    const o = load('opps').find(o => o.id === editId);
+    if (o) {
+      document.getElementById('opp-name').value        = o.name || '';
+      document.getElementById('opp-company').value     = o.company || '';
+      document.getElementById('opp-initiative').value  = o.initiative || '';
+      document.getElementById('opp-stage').value       = o.stage || 'Qualifying';
+      document.getElementById('opp-amount').value      = o.amount || '';
+      document.getElementById('opp-close-date').value  = o.closeDate || '';
+      document.getElementById('opp-owner').value       = o.owner || 'max';
+      document.getElementById('opp-region').value      = o.region || '';
+      document.getElementById('opp-techs').value       = o.technicians || '';
+      document.getElementById('opp-next-action').value = o.nextAction || '';
+      document.getElementById('opp-notes').value       = o.notes || '';
+    }
+  } else {
+    ['opp-name','opp-company','opp-amount','opp-techs','opp-next-action','opp-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('opp-stage').value      = 'Qualifying';
+    document.getElementById('opp-initiative').value = '';
+    document.getElementById('opp-owner').value      = 'max';
+    document.getElementById('opp-region').value     = '';
+    document.getElementById('opp-close-date').value = '';
+  }
+  openModal('opp-modal');
+}
+
+function openLeadModal(editId) {
+  editingId = editId || null;
+  document.getElementById('lead-modal-title').textContent = editId ? 'Edit Lead' : 'New Lead';
+  if (!editId) {
+    ['lead-first','lead-last','lead-company','lead-title','lead-email','lead-phone','lead-notes','lead-conference'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('lead-initiative').value = '';
+    document.getElementById('lead-source').value = '';
+    document.getElementById('lead-rating').value = 'Warm';
+  } else {
+    const l = load('leads').find(l => l.id === editId);
+    if (l) {
+      document.getElementById('lead-first').value      = l.firstName || '';
+      document.getElementById('lead-last').value       = l.lastName || '';
+      document.getElementById('lead-company').value    = l.company || '';
+      document.getElementById('lead-title').value      = l.title || '';
+      document.getElementById('lead-email').value      = l.email || '';
+      document.getElementById('lead-phone').value      = l.phone || '';
+      document.getElementById('lead-initiative').value = l.initiative || '';
+      document.getElementById('lead-source').value     = l.source || '';
+      document.getElementById('lead-rating').value     = l.rating || 'Warm';
+      document.getElementById('lead-owner').value      = l.owner || 'max';
+      document.getElementById('lead-notes').value      = l.notes || '';
+      document.getElementById('lead-conference').value = l.conference || '';
+    }
+  }
+  openModal('lead-modal');
+}
+
+function openAcctModal(editId) {
+  editingId = editId || null;
+  document.getElementById('acct-modal-title').textContent = editId ? 'Edit Account' : 'New Account';
+  if (!editId) {
+    ['acct-name','acct-contact','acct-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('acct-industry').value   = '';
+    document.getElementById('acct-region').value     = '';
+    document.getElementById('acct-initiative').value = '';
+  } else {
+    const a = load('accounts').find(a => a.id === editId);
+    if (a) {
+      document.getElementById('acct-name').value       = a.name || '';
+      document.getElementById('acct-industry').value   = a.industry || '';
+      document.getElementById('acct-region').value     = a.region || '';
+      document.getElementById('acct-contact').value    = a.contact || '';
+      document.getElementById('acct-initiative').value = a.initiative || '';
+      document.getElementById('acct-notes').value      = a.notes || '';
+    }
+  }
+  openModal('acct-modal');
+}
+
+function openActivityModal() {
+  editingId = null;
+  ['act-notes','act-contact','act-next'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('act-type').value    = 'Meeting';
+  document.getElementById('act-date').value    = today();
+  document.getElementById('act-owner').value   = 'max';
+  document.getElementById('act-finding').value = '';
+  // Populate opp select
+  const sel = document.getElementById('act-opp');
+  const open = load('opps').filter(o => o.stage !== 'Closed Won' && o.stage !== 'Closed Lost');
+  sel.innerHTML = '<option value="">— No linked opportunity —</option>' +
+    open.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+  openModal('activity-modal');
+}
+
+function openConfModal(editId) {
+  editingId = editId || null;
+  if (!editId) {
+    document.getElementById('conf-notes').value         = '';
+    document.getElementById('conf-leads-entered').value = '0';
+    document.getElementById('conf-leads-target').value  = '5';
+    document.getElementById('conf-return').value        = today();
+    document.getElementById('conf-owner').value         = 'max';
+  } else {
+    const c = load('conferences').find(c => c.id === editId);
+    if (c) {
+      document.getElementById('conf-name').value          = c.name || '';
+      document.getElementById('conf-return').value        = c.returnDate || '';
+      document.getElementById('conf-owner').value         = c.owner || 'max';
+      document.getElementById('conf-leads-entered').value = c.leadsEntered || 0;
+      document.getElementById('conf-leads-target').value  = c.leadsTarget || 5;
+      document.getElementById('conf-notes').value         = c.notes || '';
+    }
+  }
+  openModal('conf-modal');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SAVE FUNCTIONS
+// ══════════════════════════════════════════════════════════════════════
+function saveOpp() {
+  const name = document.getElementById('opp-name').value.trim();
+  const init = document.getElementById('opp-initiative').value;
+  const stage = document.getElementById('opp-stage').value;
+  if (!name) { toast('Opportunity name is required', 'error'); return; }
+  if (!init) { toast('BU Initiative is required', 'error'); return; }
+
+  const opps = load('opps');
+  const record = {
+    id:           editingId || uid(),
+    name,
+    company:      document.getElementById('opp-company').value.trim(),
+    initiative:   init,
+    stage,
+    amount:       Number(document.getElementById('opp-amount').value) || 0,
+    closeDate:    document.getElementById('opp-close-date').value,
+    owner:        document.getElementById('opp-owner').value,
+    region:       document.getElementById('opp-region').value,
+    technicians:  document.getElementById('opp-techs').value.trim(),
+    nextAction:   document.getElementById('opp-next-action').value.trim(),
+    notes:        document.getElementById('opp-notes').value.trim(),
+    lastActivity: today(),
+    created:      editingId ? (opps.find(o=>o.id===editingId)||{}).created || today() : today(),
+    modified:     today(),
+  };
+
+  if (editingId) {
+    save('opps', opps.map(o => o.id === editingId ? record : o));
+    toast('Opportunity updated');
+  } else {
+    opps.push(record);
+    save('opps', opps);
+    toast('Opportunity created');
+    // Auto-create account if new company
+    if (record.company) ensureAccount(record.company, record.initiative);
+  }
+  closeModal('opp-modal');
+  renderPipeline();
+  updateSidebarCounts();
+}
+
+function saveLead() {
+  const first = document.getElementById('lead-first').value.trim();
+  const last  = document.getElementById('lead-last').value.trim();
+  const comp  = document.getElementById('lead-company').value.trim();
+  const init  = document.getElementById('lead-initiative').value;
+  if (!first || !last) { toast('First and last name are required', 'error'); return; }
+  if (!comp)  { toast('Company is required', 'error'); return; }
+  if (!init)  { toast('BU Initiative is required', 'error'); return; }
+
+  const leads = load('leads');
+  const record = {
+    id:         editingId || uid(),
+    firstName:  first,
+    lastName:   last,
+    company:    comp,
+    title:      document.getElementById('lead-title').value.trim(),
+    email:      document.getElementById('lead-email').value.trim(),
+    phone:      document.getElementById('lead-phone').value.trim(),
+    initiative: init,
+    source:     document.getElementById('lead-source').value,
+    rating:     document.getElementById('lead-rating').value,
+    owner:      document.getElementById('lead-owner').value,
+    notes:      document.getElementById('lead-notes').value.trim(),
+    conference: document.getElementById('lead-conference').value.trim(),
+    created:    editingId ? (leads.find(l=>l.id===editingId)||{}).created || today() : today(),
+    converted:  editingId ? (leads.find(l=>l.id===editingId)||{}).converted || false : false,
+  };
+
+  if (editingId) {
+    save('leads', leads.map(l => l.id === editingId ? record : l));
+    toast('Lead updated');
+  } else {
+    leads.push(record);
+    save('leads', leads);
+    toast('Lead saved');
+    if (record.company) ensureAccount(record.company, record.initiative);
+  }
+  closeModal('lead-modal');
+  renderLeads();
+  updateSidebarCounts();
+}
+
+function saveLeadAndConvert() {
+  saveLead();
+  // After saving, open opp modal pre-populated
+  const leads = load('leads');
+  const l = leads[leads.length-1];
+  if (!l) return;
+  openOppModal();
+  document.getElementById('opp-company').value    = l.company || '';
+  document.getElementById('opp-initiative').value = l.initiative || '';
+  document.getElementById('opp-owner').value      = l.owner || 'max';
+}
+
+function convertLead(leadId) {
+  const lead = load('leads').find(l => l.id === leadId);
+  if (!lead) return;
+  // Mark as converted
+  const leads = load('leads').map(l => l.id === leadId ? {...l, converted:true} : l);
+  save('leads', leads);
+  // Open opp modal pre-filled
+  openOppModal();
+  document.getElementById('opp-company').value    = lead.company || '';
+  document.getElementById('opp-initiative').value = lead.initiative || '';
+  document.getElementById('opp-owner').value      = lead.owner || 'max';
+  toast(`${lead.firstName} ${lead.lastName} — opening opportunity form`, 'info');
+}
+
+function saveAcct() {
+  const name = document.getElementById('acct-name').value.trim();
+  if (!name) { toast('Account name is required', 'error'); return; }
+  const accts = load('accounts');
+  const record = {
+    id:         editingId || uid(),
+    name,
+    industry:   document.getElementById('acct-industry').value,
+    region:     document.getElementById('acct-region').value,
+    contact:    document.getElementById('acct-contact').value.trim(),
+    initiative: document.getElementById('acct-initiative').value,
+    notes:      document.getElementById('acct-notes').value.trim(),
+    created:    editingId ? (accts.find(a=>a.id===editingId)||{}).created || today() : today(),
+  };
+  if (editingId) {
+    save('accounts', accts.map(a => a.id === editingId ? record : a));
+    toast('Account updated');
+  } else {
+    accts.push(record);
+    save('accounts', accts);
+    toast('Account created');
+  }
+  closeModal('acct-modal');
+  renderAccounts();
+}
+
+function saveActivity() {
+  const notes = document.getElementById('act-notes').value.trim();
+  if (!notes) { toast('Notes are required', 'error'); return; }
+  const acts = load('activities');
+  const oppId = document.getElementById('act-opp').value;
+  const record = {
+    id:         uid(),
+    type:       document.getElementById('act-type').value,
+    date:       document.getElementById('act-date').value,
+    contact:    document.getElementById('act-contact').value.trim(),
+    oppId:      oppId || null,
+    owner:      document.getElementById('act-owner').value,
+    finding:    document.getElementById('act-finding').value,
+    notes,
+    nextAction: document.getElementById('act-next').value.trim(),
+    created:    today(),
+  };
+  acts.push(record);
+  save('activities', acts);
+  // Update opportunity lastActivity
+  if (oppId) {
+    const opps = load('opps').map(o => o.id === oppId ? {...o, lastActivity:record.date} : o);
+    save('opps', opps);
+  }
+  // 3X flag alert
+  if (record.finding) {
+    toast(`⚠ ${record.finding} finding logged — 3X Composite opportunity flagged!`, 'info');
+  } else {
+    toast('Activity logged');
+  }
+  closeModal('activity-modal');
+  renderActivities();
+  renderPipeline();
+}
+
+function saveConf() {
+  const name = document.getElementById('conf-name').value;
+  const confs = load('conferences');
+  const record = {
+    id:           editingId || uid(),
+    name,
+    returnDate:   document.getElementById('conf-return').value,
+    owner:        document.getElementById('conf-owner').value,
+    leadsEntered: Number(document.getElementById('conf-leads-entered').value) || 0,
+    leadsTarget:  Number(document.getElementById('conf-leads-target').value) || 5,
+    notes:        document.getElementById('conf-notes').value.trim(),
+    created:      editingId ? (confs.find(c=>c.id===editingId)||{}).created || today() : today(),
+  };
+  if (editingId) {
+    save('conferences', confs.map(c => c.id === editingId ? record : c));
+    toast('Conference updated');
+  } else {
+    confs.push(record);
+    save('conferences', confs);
+    toast('Conference logged');
+  }
+  closeModal('conf-modal');
+  renderConferences();
+}
+
+// ── Auto-create account on new company ───────────────────────────────
+function ensureAccount(name, initiative) {
+  const accts = load('accounts');
+  const exists = accts.some(a => a.name.toLowerCase() === name.toLowerCase());
+  if (!exists) {
+    accts.push({id:uid(), name, initiative, created:today()});
+    save('accounts', accts);
+  }
+}
+
+// ── Delete ────────────────────────────────────────────────────────────
+function deleteRecord(key, id) {
+  if (!confirm('Delete this record?')) return;
+  save(key, load(key).filter(r => r.id !== id));
+  toast('Deleted', 'info');
+  renderPipeline(); renderLeads(); renderAccounts(); renderActivities(); renderConferences();
+  updateSidebarCounts();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// DETAIL PANEL
+// ══════════════════════════════════════════════════════════════════════
+function openDetail(type, id) {
+  const panel   = document.getElementById('detail-panel');
+  const backdrop = document.getElementById('detail-backdrop');
+  const title   = document.getElementById('dp-title');
+  const sub     = document.getElementById('dp-subtitle');
+  const body    = document.getElementById('dp-body');
+
+  if (type === 'opp') {
+    const o = load('opps').find(o => o.id === id);
+    if (!o) return;
+    title.textContent = o.name || 'Unnamed';
+    sub.textContent   = o.company + (o.region ? ' · ' + o.region : '');
+    const acts = load('activities').filter(a => a.oppId === id)
+      .sort((a,b) => (b.date||'').localeCompare(a.date||''));
+    body.innerHTML = `
+      <div class="dp-section">
+        <div class="dp-section-title">Opportunity Details</div>
+        ${[
+          ['Initiative', initTag(o.initiative) || '—'],
+          ['Stage', stageBadge(o.stage)],
+          ['Amount', `<span style="font-family:var(--mono)">${fmtMoney(o.amount)}</span>`],
+          ['Close Date', fmtDate(o.closeDate)],
+          ['Owner', OWNERS[o.owner]||o.owner||'—'],
+          ['Technicians', o.technicians||'—'],
+          ['Last Activity', o.lastActivity ? daysAgo(o.lastActivity)+'d ago' : '—'],
+        ].map(([k,v]) => `<div class="dp-row"><span class="dp-key">${k}</span><span class="dp-val">${v}</span></div>`).join('')}
+      </div>
+      ${o.nextAction ? `<div class="dp-section"><div class="dp-section-title">Next Action</div><div style="font-size:.8rem;color:#FCD34D;padding:.35rem 0">${o.nextAction}</div></div>` : ''}
+      ${o.notes ? `<div class="dp-section"><div class="dp-section-title">Notes</div><div style="font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.6">${o.notes}</div></div>` : ''}
+      <div class="dp-section">
+        <div class="dp-section-title">Activity History (${acts.length})</div>
+        ${acts.length ? acts.map(a => `
+          <div class="activity-item">
+            <div class="activity-meta"><span>${fmtDate(a.date)}</span><span>${a.type}</span><span>${OWNERS[a.owner]||a.owner||''}</span></div>
+            <div class="activity-text">${a.notes||''}</div>
+            ${a.nextAction ? `<div style="font-size:.7rem;color:#FCD34D;margin-top:.2rem">→ ${a.nextAction}</div>` : ''}
+          </div>`).join('') : '<div style="font-size:.75rem;color:var(--muted)">No activities logged yet</div>'}
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:.5rem">
+        <button class="btn btn-primary btn-sm" onclick="openOppModal('${id}');closeDetail()">✏ Edit</button>
+        <button class="btn btn-ghost btn-sm" onclick="openActivityModal()">+ Log Activity</button>
+      </div>`;
+  }
+
+  if (type === 'lead') {
+    const l = load('leads').find(l => l.id === id);
+    if (!l) return;
+    title.textContent = l.firstName + ' ' + l.lastName;
+    sub.textContent   = l.title ? l.title + ' · ' + l.company : l.company;
+    body.innerHTML = `
+      <div class="dp-section">
+        <div class="dp-section-title">Lead Details</div>
+        ${[
+          ['Company', l.company||'—'],
+          ['Initiative', initTag(l.initiative)||'—'],
+          ['Source', l.source||'—'],
+          ['Rating', l.rating||'—'],
+          ['Owner', OWNERS[l.owner]||l.owner||'—'],
+          ['Email', l.email||'—'],
+          ['Phone', l.phone||'—'],
+          ['Conference', l.conference||'—'],
+          ['Created', fmtDate(l.created)],
+          ['Status', l.converted ? '<span style="color:#34D399">Converted</span>' : 'Open'],
+        ].map(([k,v]) => `<div class="dp-row"><span class="dp-key">${k}</span><span class="dp-val">${v}</span></div>`).join('')}
+      </div>
+      ${l.notes ? `<div class="dp-section"><div class="dp-section-title">Notes</div><div style="font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.6">${l.notes}</div></div>` : ''}
+      <div style="margin-top:1rem;display:flex;gap:.5rem">
+        <button class="btn btn-primary btn-sm" onclick="convertLead('${id}');closeDetail()">→ Convert to Opportunity</button>
+      </div>`;
+  }
+
+  if (type === 'account') {
+    const a = load('accounts').find(a => a.id === id);
+    if (!a) return;
+    title.textContent = a.name;
+    sub.textContent   = [a.industry, a.region].filter(Boolean).join(' · ');
+    const relOpps = load('opps').filter(o => (o.company||'').toLowerCase() === (a.name||'').toLowerCase());
+    body.innerHTML = `
+      <div class="dp-section">
+        <div class="dp-section-title">Account Details</div>
+        ${[
+          ['Industry', a.industry||'—'],
+          ['Region', a.region||'—'],
+          ['Initiative', initTag(a.initiative)||'—'],
+          ['Primary Contact', a.contact||'—'],
+        ].map(([k,v]) => `<div class="dp-row"><span class="dp-key">${k}</span><span class="dp-val">${v}</span></div>`).join('')}
+      </div>
+      <div class="dp-section">
+        <div class="dp-section-title">Opportunities (${relOpps.length})</div>
+        ${relOpps.map(o => `<div style="display:flex;align-items:center;gap:.5rem;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.04)">
+          <span style="font-size:.78rem;color:#fff;flex:1">${o.name}</span>
+          ${stageBadge(o.stage)}
+          <span style="font-family:var(--mono);font-size:.7rem;color:var(--sky)">${fmtMoney(o.amount)}</span>
+        </div>`).join('') || '<div style="font-size:.75rem;color:var(--muted)">No opportunities yet</div>'}
+      </div>
+      ${a.notes ? `<div class="dp-section"><div class="dp-section-title">Notes</div><div style="font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.6">${a.notes}</div></div>` : ''}`;
+  }
+
+  panel.classList.add('open');
+  backdrop.style.display = 'block';
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('detail-backdrop').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SIDEBAR COUNTS
+// ══════════════════════════════════════════════════════════════════════
+function updateSidebarCounts() {
+  const opps  = load('opps');
+  const leads = load('leads');
+  const open  = opps.filter(o => o.stage !== 'Closed Won' && o.stage !== 'Closed Lost');
+  const stale = open.filter(isStale);
+
+  const set = (id, val, cls) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val || '';
+    el.className = 'sl-badge' + (cls ? ' '+cls : '');
+    el.style.display = val ? '' : 'none';
+  };
+
+  set('sb-stale-count', stale.length || '', stale.length > 0 ? 'red' : '');
+  set('sb-lead-count',  leads.filter(l => !l.converted).length || '', '');
+
+  const inits = {
+    'Mining NDT':  'sb-mining-count',
+    'Pipeline DA': 'sb-pipeline-count',
+    'Nuclear/OPG': 'sb-nuclear-count',
+    'Powerline':   'sb-power-count',
+    '3X Composite':'sb-3x-count',
+  };
+  Object.entries(inits).forEach(([init, id]) => {
+    const count = open.filter(o => o.initiative === init).length;
+    set(id, count || '', '');
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════════════════
+function exportJSON() {
+  const data = {
+    exported:    new Date().toISOString(),
+    opportunities: load('opps'),
+    leads:       load('leads'),
+    accounts:    load('accounts'),
+    activities:  load('activities'),
+    conferences: load('conferences'),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `BU_Services_CRM_${today()}.json`;
+  a.click();
+  toast('CRM data exported');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Date
+  document.getElementById('nav-date').textContent =
+    new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+
+  // Load shared team data from Supabase (seeds demo data if empty)
+  try { checkSyncState(); } catch(e) { console.warn('checkSyncState:', e.message); }
+  initCRMData().catch(function(e) { console.warn('initCRMData failed:', e.message); });
+  try { subscribeToRecordChanges(); } catch(e) { console.warn('subscribeToRecordChanges:', e.message); }
+});
+
+
+// Global error handler — surfaces real error behind "Script error"
+window.addEventListener('unhandledrejection', function(e) {
+  console.error('CRM unhandled rejection:', e.reason);
+});
+
+
+// ── SUPABASE CREDENTIALS ─────────────────────────────────────────────────────
+var _SB_URL   = 'https://tbcoktkpjwdvnhqtuups.supabase.co';
+var _SB_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiY29rdGtwandkdm5ocXR1dXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MDM1OTIsImV4cCI6MjA5MjM3OTU5Mn0.8Zw75YQYmNPXKoLE_bK23Vs2j3ZeqCUwAYUFt5-8YWs';
+var _SB_TABLE = 'crm_sync';
+
+// ── setSyncStatus / checkSyncState (defined first — called by syncToActuals) ──
+function setSyncStatus(state, time) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if (!dot || !lbl) return;
+  const map = {
+    synced:  ['#22C55E', 'none',                             'Synced ' + (time||''),   'rgba(34,197,94,.7)'],
+    syncing: ['#FCD34D', 'livepulse 1s ease-in-out infinite','Syncing…',           'rgba(252,211,77,.7)'],
+    error:   ['#EF4444', 'none',                             'Offline — local',   'rgba(239,68,68,.7)'],
+    idle:    ['rgba(255,255,255,.2)', 'none',                'Sync',                   'rgba(255,255,255,.3)'],
+  };
+  const [bg, anim, text, col] = map[state] || map.idle;
+  dot.style.background  = bg;
+  dot.style.animation   = anim;
+  lbl.textContent       = text;
+  lbl.style.color       = col;
+}
+
+async function checkSyncState() {
+  try {
+    const row = await sbRead('pipeline_sync');
+    if (row && row.data && row.data._synced) {
+      const t = new Date(row.data._synced).toLocaleTimeString('en-CA',
+        {hour:'2-digit', minute:'2-digit', hour12:false});
+      setSyncStatus('synced', t);
+      localStorage.setItem('crm_actuals_sync', JSON.stringify(row.data));
+    }
+  } catch(e) {
+    const raw = localStorage.getItem('crm_actuals_sync');
+    if (raw) {
+      try {
+        const obj = JSON.parse(raw);
+        if (obj._synced) {
+          const t = new Date(obj._synced).toLocaleDateString('en-CA',
+            {month:'short', day:'numeric'});
+          setSyncStatus('synced', t);
+        }
+      } catch(e2) {}
+    }
+  }
+}
+
+// ── Pipeline sync helpers ─────────────────────────────────────────────────────
+async function sbWrite(id, payload) {
+  const res = await fetch(_SB_URL + '/rest/v1/' + _SB_TABLE, {
+    method: 'POST',
+    headers: { 'apikey': _SB_KEY, 'Authorization': 'Bearer ' + _SB_KEY,
+      'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ id, data: payload, updated_at: new Date().toISOString() })
+  });
+  if (!res.ok) { const b = await res.text(); throw new Error('sbWrite ' + res.status + ': ' + b.slice(0,100)); }
+  return true;
+}
+
+async function sbRead(id) {
+  const res = await fetch(_SB_URL + '/rest/v1/' + _SB_TABLE + '?id=eq.' + id + '&select=data,updated_at&limit=1',
+    { headers: { 'apikey': _SB_KEY, 'Authorization': 'Bearer ' + _SB_KEY } });
+  if (!res.ok) throw new Error('sbRead ' + res.status);
+  const rows = await res.json();
+  return rows.length ? rows[0] : null;
+}
+
+function sbSubscribe(callback) {
+  const wsUrl = _SB_URL.replace('https://','wss://') + '/realtime/v1/websocket?apikey=' + _SB_KEY + '&vsn=1.0.0';
+  let ws, hb, rt;
+  function connect() {
+    if (window.location.protocol === 'file:') {
+      console.log('CRM: Real-time disabled on file:// — open via HTTP for live sync');
+      return;
+    }
+    try {
+      ws = new WebSocket(wsUrl);
+      ws.onopen = function() {
+        ws.send(JSON.stringify({ topic: 'realtime:public:' + _SB_TABLE, event: 'phx_join', ref: '1',
+          payload: { config: { broadcast: { self: false },
+            postgres_changes: [{ event: '*', schema: 'public', table: _SB_TABLE }] } } }));
+        hb = setInterval(function() {
+          if (ws.readyState === 1) ws.send(JSON.stringify({ topic:'phoenix', event:'heartbeat', payload:{}, ref:'hb' }));
+        }, 25000);
+      };
+      ws.onmessage = function(e) {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.event === 'postgres_changes') {
+            const rec = msg.payload && msg.payload.data && msg.payload.data.record;
+            if (rec && rec.data) callback(rec.data);
+          }
+        } catch(err) {}
+      };
+      ws.onclose = function() { clearInterval(hb); rt = setTimeout(connect, 4000); };
+      ws.onerror = function() { ws.close(); };
+    } catch(err) { rt = setTimeout(connect, 4000); }
+  }
+  connect();
+  return function() { clearInterval(hb); clearTimeout(rt); try{ ws.close(); }catch(e){} };
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SUPABASE FULL CRM LAYER  v3.0
+// All five record types (opps, leads, accounts, activities, conferences)
+// read and write from crm_records table in Supabase.
+// localStorage used as offline cache — syncs on reconnect.
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Core CRUD against crm_records ─────────────────────────────────────────────
+
+async function sbSaveRecord(recordType, id, data) {
+  const res = await fetch(_SB_URL + '/rest/v1/crm_records', {
+    method:  'POST',
+    headers: {
+      'apikey':        _SB_KEY,
+      'Authorization': 'Bearer ' + _SB_KEY,
+      'Content-Type':  'application/json',
+      'Prefer':        'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify({
+      id,
+      record_type: recordType,
+      owner:       data.owner || data.ownerId || '',
+      data,
+      updated_at:  new Date().toISOString(),
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('sbSaveRecord ' + res.status + ': ' + err.slice(0, 200));
+  }
+  return true;
+}
+
+async function sbDeleteRecord(id) {
+  const res = await fetch(
+    _SB_URL + '/rest/v1/crm_records?id=eq.' + encodeURIComponent(id),
+    {
+      method:  'DELETE',
+      headers: {
+        'apikey':        _SB_KEY,
+        'Authorization': 'Bearer ' + _SB_KEY,
+      }
+    }
+  );
+  if (!res.ok) throw new Error('sbDeleteRecord ' + res.status);
+  return true;
+}
+
+async function sbLoadRecords(recordType) {
+  const res = await fetch(
+    _SB_URL + '/rest/v1/crm_records?record_type=eq.' + recordType + '&select=data&order=created_at.asc',
+    {
+      headers: {
+        'apikey':        _SB_KEY,
+        'Authorization': 'Bearer ' + _SB_KEY,
+        'Accept':        'application/json',
+      }
+    }
+  );
+  if (!res.ok) throw new Error('sbLoadRecords ' + res.status);
+  const rows = await res.json();
+  return rows.map(r => r.data);
+}
+
+// ── Unified load() — Supabase first, localStorage fallback ────────────────────
+
+const _localLoad  = key => { try { return JSON.parse(localStorage.getItem('bucrm_'+key)||'[]'); } catch(e){ return []; } };
+const _localSave  = (key, val) => localStorage.setItem('bucrm_'+key, JSON.stringify(val));
+
+// Map CRM keys to record_type values
+const KEY_TO_TYPE = {
+  opps:        'opp',
+  leads:       'lead',
+  accounts:    'account',
+  activities:  'activity',
+  conferences: 'conference',
+};
+
+// Async load from Supabase with localStorage fallback
+async function loadRemote(key) {
+  const type = KEY_TO_TYPE[key];
+  if (!type) return _localLoad(key);
+  try {
+    const records = await sbLoadRecords(type);
+    // Update local cache
+    _localSave(key, records);
+    return records;
+  } catch(e) {
+    console.warn('loadRemote fallback to localStorage for ' + key + ':', e.message);
+    return _localLoad(key);
+  }
+}
+
+// Synchronous load — reads from localStorage cache (populated on init)
+function load(key) {
+  return _localLoad(key);
+}
+
+// ── Unified save() — writes to localStorage + Supabase ───────────────────────
+
+function _saveToStorage(key, val) {
+  _localSave(key, val);
+}
+
+let _syncTimer = null;
+function save(key, val) {
+  // Write to localStorage immediately (synchronous — UI updates instantly)
+  _localSave(key, val);
+
+  // Write individual changed records to Supabase asynchronously
+  const type = KEY_TO_TYPE[key];
+  if (type) {
+    // Find which records changed vs what's in Supabase cache
+    // For simplicity: upsert all records in this key
+    (async () => {
+      try {
+        const records = Array.isArray(val) ? val : [val];
+        await Promise.all(records.map(r => sbSaveRecord(type, r.id, r)));
+      } catch(e) {
+        console.warn('Supabase write failed, localStorage only:', e.message);
+      }
+    })();
+  }
+
+  // Trigger pipeline aggregate sync after 1.5s
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(syncToActuals, 1500);
+}
+
+// ── deleteRecord — remove from both Supabase and localStorage ─────────────────
+// Override the original deleteRecord to also remove from Supabase
+const _origDeleteRecord = typeof deleteRecord === 'function' ? deleteRecord : null;
+
+async function deleteRecord(key, id) {
+  if (!confirm('Delete this record?')) return;
+
+  // Remove from localStorage
+  _localSave(key, _localLoad(key).filter(r => r.id !== id));
+
+  // Remove from Supabase
+  try {
+    await sbDeleteRecord(id);
+  } catch(e) {
+    console.warn('Supabase delete failed:', e.message);
+  }
+
+  toast('Deleted', 'info');
+  renderPipeline(); renderLeads(); renderAccounts(); renderActivities(); renderConferences();
+  updateSidebarCounts();
+}
+
+// ── Init: load all records from Supabase into localStorage cache ──────────────
+
+async function initCRMData() {
+  setLoadingState(true);
+  try {
+    const [opps, leads, accounts, activities, conferences] = await Promise.all([
+      loadRemote('opps'),
+      loadRemote('leads'),
+      loadRemote('accounts'),
+      loadRemote('activities'),
+      loadRemote('conferences'),
+    ]);
+
+    // Cache is already updated by loadRemote
+    // Re-render with fresh data
+    renderPipeline();
+    renderLeads();
+    renderAccounts();
+    renderActivities();
+    renderConferences();
+    updateSidebarCounts();
+
+    const total = opps.length + leads.length + accounts.length;
+    if (total > 0) {
+      toast('Loaded ' + opps.length + ' opps · ' + leads.length + ' leads from team database', 'info');
+    } else {
+      // Empty database — seed demo data
+      seedDemoData();
+    }
+    console.log('CRM: Supabase data loaded —', opps.length, 'opps,', leads.length, 'leads');
+
+  } catch(e) {
+    console.warn('CRM: Supabase load failed, using local data:', e.message);
+    toast('Working offline — showing local data', 'info');
+  } finally {
+    setLoadingState(false);
+  }
+}
+
+function setLoadingState(loading) {
+  const dot   = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  if (!dot || !label) return;
+  if (loading) {
+    dot.style.background  = '#FCD34D';
+    dot.style.animation   = 'livepulse 1s ease-in-out infinite';
+    label.textContent     = 'Loading…';
+    label.style.color     = 'rgba(252,211,77,.7)';
+  }
+}
+
+// Subscribe to real-time record changes from other team members
+function subscribeToRecordChanges() {
+  const wsUrl = _SB_URL.replace('https://','wss://') +
+    '/realtime/v1/websocket?apikey=' + _SB_KEY + '&vsn=1.0.0';
+  let ws, hb, rt;
+
+  function connect() {
+    try {
+      ws = new WebSocket(wsUrl);
+      ws.onopen = function() {
+        // Subscribe to crm_records changes
+        ws.send(JSON.stringify({
+          topic: 'realtime:public:crm_records',
+          event: 'phx_join', ref: 'crm1',
+          payload: { config: { broadcast: { self: false },
+            postgres_changes: [{ event: '*', schema: 'public', table: 'crm_records' }] }}
+        }));
+        // Also keep pipeline_sync subscription
+        ws.send(JSON.stringify({
+          topic: 'realtime:public:crm_sync',
+          event: 'phx_join', ref: 'sync1',
+          payload: { config: { broadcast: { self: false },
+            postgres_changes: [{ event: '*', schema: 'public', table: 'crm_sync' }] }}
+        }));
+        hb = setInterval(() => {
+          if (ws.readyState === 1)
+            ws.send(JSON.stringify({ topic:'phoenix', event:'heartbeat', payload:{}, ref:'hb' }));
+        }, 25000);
+      };
+      ws.onmessage = function(e) {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.event !== 'postgres_changes') return;
+          const rec = msg.payload && msg.payload.data && msg.payload.data.record;
+          if (!rec) return;
+
+          // crm_records change — update local cache and re-render
+          if (rec.record_type) {
+            const keyMap = { opp:'opps', lead:'leads', account:'accounts',
+                             activity:'activities', conference:'conferences' };
+            const key = keyMap[rec.record_type];
+            if (key) {
+              const existing = _localLoad(key);
+              const eventType = msg.payload.data.type; // INSERT | UPDATE | DELETE
+              let updated;
+              if (eventType === 'DELETE') {
+                updated = existing.filter(r => r.id !== rec.id);
+              } else {
+                const idx = existing.findIndex(r => r.id === rec.id);
+                if (idx > -1) { updated = [...existing]; updated[idx] = rec.data; }
+                else { updated = [...existing, rec.data]; }
+              }
+              _localSave(key, updated);
+              // Re-render affected view
+              if (key === 'opps')        renderPipeline();
+              if (key === 'leads')       renderLeads();
+              if (key === 'accounts')    renderAccounts();
+              if (key === 'activities')  renderActivities();
+              if (key === 'conferences') renderConferences();
+              updateSidebarCounts();
+              console.log('CRM: Real-time update —', eventType, rec.record_type);
+            }
+          }
+        } catch(err) {}
+      };
+      ws.onclose = () => { clearInterval(hb); rt = setTimeout(connect, 4000); };
+      ws.onerror = () => ws.close();
+    } catch(err) { rt = setTimeout(connect, 4000); }
+  }
+  connect();
+}
+
+
+async function syncToActuals() {
+  setSyncStatus('syncing');
+  try {
+    const opps  = load('opps');
+    const leads = load('leads');
+    const now   = new Date().toISOString().slice(0,10);
+    const INIT_MAP = {
+      'Mining NDT':'mining','Pipeline DA':'pipeline','Powerline':'powerline',
+      'Nuclear/OPG':'nuclear','3X Composite':'x3','Base Business':'nucleom',
+    };
+    const isStale = (o) => {
+      if (o.stage === 'Closed Won' || o.stage === 'Closed Lost') return false;
+      const d = o.lastActivity || o.created;
+      if (!d) return false;
+      return Math.round((Date.now() - new Date(d).getTime()) / 86400000) >= 30;
+    };
+    const openOpps = opps.filter(o => o.stage !== 'Closed Won' && o.stage !== 'Closed Lost');
+    const wonOpps  = opps.filter(o => o.stage === 'Closed Won');
+    const thisMonth = now.slice(0,7);
+    const thisYear  = now.slice(0,4);
+    const wonMTD = wonOpps.filter(o => (o.closeDate||'').startsWith(thisMonth));
+    const wonYTD = wonOpps.filter(o => (o.closeDate||'').startsWith(thisYear));
+
+    const pipelineByInit = {};
+    Object.entries(INIT_MAP).forEach(([init,key]) => {
+      const t = openOpps.filter(o=>o.initiative===init).reduce((s,o)=>s+Number(o.amount||0),0);
+      pipelineByInit[key+'_pipeline'] = parseFloat((t/1e6).toFixed(4));
+    });
+
+    const INIT_PROP = {
+      'Mining NDT':'proposals_mining','Pipeline DA':'proposals_pipeline',
+      'Powerline':'proposals_powerline','Nuclear/OPG':'proposals_nuclear',
+      '3X Composite':'proposals_x3','Base Business':'proposals_base',
+    };
+    const proposalsByInit = {};
+    Object.entries(INIT_PROP).forEach(([init,key]) => {
+      const io = openOpps.filter(o=>o.initiative===init);
+      const ic = opps.filter(o=>o.initiative===init&&(o.stage==='Closed Won'||o.stage==='Closed Lost'));
+      const iw = wonMTD.filter(o=>o.initiative===init);
+      proposalsByInit[key] = {
+        count_open:       io.length,
+        count_stalled:    io.filter(o=>isStale(o)).length,
+        count_won_mtd:    iw.length,
+        count_lost_mtd:   0,
+        oldest_open_days: io.length>0 ? Math.max(...io.map(o=>Math.round((Date.now()-new Date(o.created||now).getTime())/86400000)||0)) : 0,
+        avg_days_to_close:0,
+        value_open_cad:   io.reduce((s,o)=>s+Number(o.amount||0),0),
+        value_won_mtd_cad:iw.reduce((s,o)=>s+Number(o.amount||0),0),
+        conversion_rate:  ic.length>0?Math.round(ic.filter(o=>o.stage==='Closed Won').length/ic.length*100)/100:0,
+        last_updated:     now,
+      };
+    });
+
+    const totalOpen    = openOpps.length;
+    const totalStalled = openOpps.filter(o=>isStale(o)).length;
+    const totalValue   = openOpps.reduce((s,o)=>s+Number(o.amount||0),0);
+    const allClosed    = opps.filter(o=>o.stage==='Closed Won'||o.stage==='Closed Lost');
+
+    const OWNER_NAMES = {
+      max:'Emmanuel Aggrey',vinoth:'Vinoth Tharma',rick:'Rick Carlton',
+      mathieu:'Mathieu Beauchesne',olivier:'Olivier Marcotte',jon:'Jon Eustace',
+    };
+    const owner_pipeline = {};
+    Object.keys(OWNER_NAMES).forEach(id => {
+      const owned = openOpps.filter(o=>o.owner===id);
+      owner_pipeline[id] = {
+        name:OWNER_NAMES[id],
+        open_count:    owned.length,
+        open_value:    owned.reduce((s,o)=>s+Number(o.amount||0),0),
+        stale_count:   owned.filter(o=>isStale(o)).length,
+        won_mtd:       wonMTD.filter(o=>o.owner===id).length,
+        won_mtd_value: wonMTD.filter(o=>o.owner===id).reduce((s,o)=>s+Number(o.amount||0),0),
+      };
+    });
+
+    const hubActions = JSON.parse(localStorage.getItem('pt_actions')||'[]');
+    const aOpen = hubActions.filter(a=>!a.done);
+    const bySrc = s => aOpen.filter(a=>a.source===s).length;
+    const confLeads = leads.filter(l=>l.conference&&(l.created||'').startsWith(thisYear));
+    const oppsFromLeads = opps.filter(o=>leads.some(l=>l.converted&&l.company===o.company));
+
+    const payload = {
+      _source:'BU_Services_CRM', _synced:new Date().toISOString(), _version:'3.0',
+      ...pipelineByInit, ...proposalsByInit,
+      proposals_summary:{
+        total_open:totalOpen, total_stalled:totalStalled, total_value_open:totalValue,
+        total_won_mtd:wonMTD.length, total_won_mtd_value:wonMTD.reduce((s,o)=>s+Number(o.amount||0),0),
+        total_won_ytd:wonYTD.length, total_won_ytd_value:wonYTD.reduce((s,o)=>s+Number(o.amount||0),0),
+        avg_conversion_rate:allClosed.length>0?Math.round(allClosed.filter(o=>o.stage==='Closed Won').length/allClosed.length*100)/100:0,
+        stalled_alert:totalStalled>3, last_updated:now,
+      },
+      recon_nuc:{
+        sf_closed_won_mtd:wonMTD.filter(o=>o.initiative==='Nuclear/OPG').reduce((s,o)=>s+Number(o.amount||0),0),
+        sf_closed_won_ytd:wonYTD.filter(o=>o.initiative==='Nuclear/OPG').reduce((s,o)=>s+Number(o.amount||0),0),
+        bc_invoiced_mtd:0,bc_invoiced_ytd:0,variance_mtd:0,variance_ytd:0,
+        variance_pct_mtd:0,callout_gap_mtd:0,last_sf_pull:now,last_bc_pull:now,last_updated:now,
+      },
+      recon_nor:{
+        sf_closed_won_mtd:wonMTD.filter(o=>['rick','jason','joel_c'].includes(o.owner)).reduce((s,o)=>s+Number(o.amount||0),0),
+        sf_closed_won_ytd:wonYTD.filter(o=>['rick','jason','joel_c'].includes(o.owner)).reduce((s,o)=>s+Number(o.amount||0),0),
+        bc_invoiced_mtd:0,bc_invoiced_ytd:0,variance_mtd:0,variance_ytd:0,
+        variance_pct_mtd:0,callout_gap_mtd:0,last_sf_pull:now,last_bc_pull:now,last_updated:now,
+      },
+      recon_summary:{total_sf_ytd:wonYTD.reduce((s,o)=>s+Number(o.amount||0),0),total_bc_ytd:0,total_variance_ytd:0,last_updated:now},
+      conf_summary_partial:{leads_ytd:confLeads.length,opps_ytd:oppsFromLeads.length,opp_value_ytd:oppsFromLeads.reduce((s,o)=>s+Number(o.amount||0),0),last_updated:now},
+      owner_pipeline,
+      actions_commercial:bySrc('commercial'),actions_ops:bySrc('ops'),
+      actions_gate:bySrc('gate'),actions_finance:bySrc('finance'),
+      actions_hr:bySrc('other'),actions_eurazeo:0,
+      actions_overdue:aOpen.filter(a=>a.due&&(new Date(a.due+'T00:00:00')-new Date(now+'T00:00:00'))<0).length,
+    };
+
+    const hub = {
+      pipeline_total_cad:totalValue,
+      pipeline_total_M:parseFloat((totalValue/1e6).toFixed(2)),
+      open_opps:totalOpen, stale_opps:totalStalled,
+      won_mtd:wonMTD.length,
+      won_mtd_value:wonMTD.reduce((s,o)=>s+Number(o.amount||0),0),
+      open_leads:leads.filter(l=>!l.converted).length,
+      last_synced:now,
+    };
+
+    await Promise.all([sbWrite('pipeline_sync', payload), sbWrite('hub_summary', hub)]);
+    localStorage.setItem('crm_actuals_sync', JSON.stringify(payload));
+    localStorage.setItem('crm_hub_summary',  JSON.stringify(hub));
+
+    const t = new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit',hour12:false});
+    setSyncStatus('synced', t);
+    toast('Synced — ' + totalOpen + ' open opps · $' + (totalValue/1e6).toFixed(1) + 'M pipeline', 'success');
+    updateSidebarCounts();
+
+  } catch(err) {
+    console.warn('syncToActuals failed:', err.message);
+    setSyncStatus('error');
+  }
+}
+
+function setLoadingState(loading) {
+  const dot   = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  if (!dot || !label) return;
+  if (loading) {
+    dot.style.background  = '#FCD34D';
+    dot.style.animation   = 'livepulse 1s ease-in-out infinite';
+    label.textContent     = 'Loading…';
+    label.style.color     = 'rgba(252,211,77,.7)';
+  }
+}
+
+function toggleStatusPanel() {
+  const panel = document.getElementById('status-panel');
+  const btn   = document.getElementById('status-btn');
+  if (panel.classList.toggle('open')) {
+    runConnectionTest();
+    btn.style.display = 'none';
+  } else {
+    btn.style.display = 'flex';
+  }
+}
+
+async function runConnectionTest() {
+  // Test 1: Supabase REST reachable
+  const sbDot = document.getElementById('sp-supabase-dot');
+  const sbVal = document.getElementById('sp-supabase-val');
+  const rtDot = document.getElementById('sp-realtime-dot');
+  const rtVal = document.getElementById('sp-realtime-val');
+  const recDot = document.getElementById('sp-records-dot');
+  const recVal = document.getElementById('sp-records-val');
+  const ccDot  = document.getElementById('sp-cc-dot');
+  const ccVal  = document.getElementById('sp-cc-val');
+  const btnDot = document.getElementById('status-btn-dot');
+  const btnLbl = document.getElementById('status-btn-label');
+
+  if (sbDot) { sbDot.className = 'sp-dot sp-dot-amber'; sbVal.textContent = 'testing…'; }
+
+  try {
+    const start = Date.now();
+    const res = await fetch(_SB_URL + '/rest/v1/crm_records?select=id&limit=1', {
+      headers: { 'apikey': _SB_KEY, 'Authorization': 'Bearer ' + _SB_KEY }
+    });
+    const ms = Date.now() - start;
+    if (res.ok) {
+      const rows = await res.json();
+      if (sbDot) { sbDot.className = 'sp-dot sp-dot-green'; sbVal.textContent = ms + 'ms'; }
+
+      // Count records
+      const countRes = await fetch(
+        _SB_URL + '/rest/v1/crm_records?select=record_type',
+        { headers: { 'apikey': _SB_KEY, 'Authorization': 'Bearer ' + _SB_KEY,
+          'Prefer': 'count=exact' } }
+      );
+      if (countRes.ok) {
+        const countRows = await countRes.json();
+        const opps = countRows.filter(r=>r.record_type==='opp').length;
+        const leads = countRows.filter(r=>r.record_type==='lead').length;
+        if (recDot) { recDot.className = 'sp-dot sp-dot-green'; recVal.textContent = opps + ' opps · ' + leads + ' leads'; }
+        if (btnDot) { btnDot.className = 'status-btn-dot green'; btnLbl.textContent = 'Live'; }
+      }
+    } else {
+      if (sbDot) { sbDot.className = 'sp-dot sp-dot-red'; sbVal.textContent = 'HTTP ' + res.status; }
+      if (btnDot) { btnDot.className = 'status-btn-dot red'; btnLbl.textContent = 'Offline'; }
+    }
+  } catch(e) {
+    if (sbDot) { sbDot.className = 'sp-dot sp-dot-red'; sbVal.textContent = 'blocked'; }
+    if (rtDot) { rtDot.className = 'sp-dot sp-dot-red'; rtVal.textContent = 'requires https://'; }
+    if (recDot) { recDot.className = 'sp-dot sp-dot-grey'; recVal.textContent = 'local only'; }
+    if (btnDot) { btnDot.className = 'status-btn-dot red'; btnLbl.textContent = 'file:// — no sync'; }
+  }
+
+  // Check CC last sync
+  try {
+    const row = await sbRead('pipeline_sync');
+    if (row && row.data && row.data._synced) {
+      const t = new Date(row.data._synced).toLocaleTimeString('en-CA',
+        {hour:'2-digit', minute:'2-digit', hour12:false});
+      if (ccDot) { ccDot.className = 'sp-dot sp-dot-green'; ccVal.textContent = t; }
+    } else {
+      if (ccDot) { ccDot.className = 'sp-dot sp-dot-grey'; ccVal.textContent = 'not synced yet'; }
+    }
+  } catch(e) {
+    if (ccDot) { ccDot.className = 'sp-dot sp-dot-grey'; ccVal.textContent = '—'; }
+  }
+
+  // WebSocket test
+  try {
+    if (window.location.protocol === 'file:') {
+      if (rtDot) { rtDot.className = 'sp-dot sp-dot-red'; rtVal.textContent = 'needs https://'; }
+    } else {
+      if (rtDot) { rtDot.className = 'sp-dot sp-dot-green'; rtVal.textContent = 'active'; }
+    }
+  } catch(e) {}
+}
+
+
+
+// ── Demo seed data ────────────────────────────────────────────────────
+function seedDemoData() {
+  const opps = [
+    {id:uid(),name:'Teck Highland Valley — Robotic UT — 2026',company:'Teck Highland Valley Copper Operations',initiative:'Mining NDT',stage:'Proposing',amount:185000,closeDate:'2026-07-15',owner:'max',region:'Western (BC/AB/SK)',notes:'Strong relationship. RFQ submitted May 2. Decision expected mid-July.',lastActivity:'2026-04-18',created:'2026-03-10'},
+    {id:uid(),name:'Vale Sudbury — Mining NDT MSA — 2026',company:'Vale Sudbury Operations',initiative:'Mining NDT',stage:'Qualifying',amount:320000,closeDate:'2026-09-30',owner:'vinoth',region:'Central (ON/MB)',notes:'Initial meeting at CEN CAN Expo. Very interested in PAUT capability.',lastActivity:'2026-04-15',created:'2026-04-01'},
+    {id:uid(),name:'OPG Darlington — Outage Inspection MSA',company:'OPG Darlington Nuclear',initiative:'Nuclear/OPG',stage:'Qualifying',amount:750000,closeDate:'2026-12-31',owner:'vinoth',region:'Central (ON/MB)',notes:'Vinoth leading with Jon supporting at executive level. Vendor approval track in progress.',lastActivity:'2026-04-10',created:'2026-02-15'},
+    {id:uid(),name:'Pembina Pipeline — DA Programme 2026',company:'Pembina Pipeline Corporation',initiative:'Pipeline DA',stage:'Negotiating',amount:420000,closeDate:'2026-06-30',owner:'rick',region:'Western (BC/AB/SK)',notes:'Technical proposal approved. Commercial terms under review.',lastActivity:'2026-04-19',created:'2026-03-01'},
+    {id:uid(),name:'Hydro One — Powerline Pilot Q3',company:'Hydro One Networks',initiative:'Powerline',stage:'Proposing',amount:95000,closeDate:'2026-08-01',owner:'mathieu',region:'Central (ON/MB)',notes:'Pilot scope agreed in principle. Mathieu to confirm instrument availability.',lastActivity:'2026-04-12',created:'2026-03-20'},
+    {id:uid(),name:'Enbridge Northern Gateway — 3X Composite Repair',company:'Enbridge Northern Gateway',initiative:'3X Composite',stage:'Closed Won',amount:67000,closeDate:'2026-04-01',owner:'max',region:'Western (BC/AB/SK)',notes:'ABSA Step 1 in place. Scope executed April. Invoice issued.',lastActivity:'2026-04-05',created:'2026-03-05'},
+    {id:uid(),name:'Agnico Eagle Abitibi — PAUT — 2026',company:'Agnico Eagle Mines',initiative:'Mining NDT',stage:'Qualifying',amount:210000,closeDate:'2026-10-15',owner:'vinoth',region:'Quebec / Eastern',notes:'Met at IPEIA. Vinoth following up on proposal request.',lastActivity:'2026-03-15',created:'2026-03-11'},
+    {id:uid(),name:'TC Energy NGTL — Integrity Assessment',company:'TC Energy NGTL',initiative:'Pipeline DA',stage:'Qualifying',amount:380000,closeDate:'2026-11-30',owner:'rick',region:'Western (BC/AB/SK)',notes:'Early stage. Rick leading technical discussion at IPC in Sep.',lastActivity:'2026-03-20',created:'2026-03-15'},
+  ];
+
+  const leads = [
+    {id:uid(),firstName:'Sarah',lastName:'Morrison',company:'Kinross Gold Corporation',title:'Integrity Manager',email:'s.morrison@kinross.com',initiative:'Mining NDT',source:'CIM Vancouver 2026',rating:'Hot',owner:'max',notes:'Specifically asked about robotic UT for tailings infrastructure. Wants a proposal within 30 days.',conference:'CIM Vancouver 2026',created:'2026-05-06',converted:false},
+    {id:uid(),firstName:'Patrick',lastName:'Dubois',company:'Glencore Sudbury Operations',title:'VP Maintenance',email:'p.dubois@glencore.com',initiative:'Mining NDT',source:'CEN CAN Expo 2026',rating:'Warm',owner:'vinoth',notes:'Interested in ECA for copper smelter. Follow up scheduled for May 20.',created:'2026-04-10',converted:false},
+  ];
+
+  const accounts = [
+    {id:uid(),name:'Teck Highland Valley Copper Operations',industry:'Mining',region:'Western (BC/AB/SK)',initiative:'Mining NDT',contact:'Dave Chen · Asset Engineer',created:'2026-03-01'},
+    {id:uid(),name:'Vale Sudbury Operations',industry:'Mining',region:'Central (ON/MB)',initiative:'Mining NDT',created:'2026-04-01'},
+    {id:uid(),name:'OPG Darlington Nuclear',industry:'Nuclear / Utility',region:'Central (ON/MB)',initiative:'Nuclear/OPG',contact:'Procurement — vendor approval track in progress',created:'2026-02-15'},
+    {id:uid(),name:'Pembina Pipeline Corporation',industry:'Pipeline / Midstream',region:'Western (BC/AB/SK)',initiative:'Pipeline DA',created:'2026-03-01'},
+    {id:uid(),name:'Hydro One Networks',industry:'Power / Transmission',region:'Central (ON/MB)',initiative:'Powerline',created:'2026-03-20'},
+    {id:uid(),name:'Enbridge Northern Gateway',industry:'Pipeline / Midstream',region:'Western (BC/AB/SK)',initiative:'3X Composite',created:'2026-03-05'},
+  ];
+
+  save('opps', opps);
+  save('leads', leads);
+  save('accounts', accounts);
+  toast('Demo data loaded — replace with your real pipeline', 'info');
+}
+</script>
+<!-- ── LIVE STATUS BUTTON + PANEL ── -->
+<button class="status-btn" id="status-btn" onclick="toggleStatusPanel()">
+  <span class="status-btn-dot grey" id="status-btn-dot"></span>
+  <span id="status-btn-label">System Status</span>
+</button>
+
+<div class="status-panel" id="status-panel">
+  <div class="sp-title">
+    System Status
+    <button class="sp-close" onclick="toggleStatusPanel()">✕</button>
+  </div>
+  <div class="sp-row">
+    <span class="sp-dot sp-dot-grey" id="sp-supabase-dot"></span>
+    <span class="sp-label">Supabase DB</span>
+    <span class="sp-val" id="sp-supabase-val">checking…</span>
+  </div>
+  <div class="sp-row">
+    <span class="sp-dot sp-dot-grey" id="sp-realtime-dot"></span>
+    <span class="sp-label">Real-time sync</span>
+    <span class="sp-val" id="sp-realtime-val">—</span>
+  </div>
+  <div class="sp-row">
+    <span class="sp-dot sp-dot-grey" id="sp-records-dot"></span>
+    <span class="sp-label">Team records</span>
+    <span class="sp-val" id="sp-records-val">—</span>
+  </div>
+  <div class="sp-row">
+    <span class="sp-dot sp-dot-grey" id="sp-cc-dot"></span>
+    <span class="sp-label">CC last sync</span>
+    <span class="sp-val" id="sp-cc-val">—</span>
+  </div>
+  <div style="margin-top:.65rem;display:flex;gap:.4rem">
+    <button class="btn btn-primary btn-sm" style="flex:1" onclick="runConnectionTest()">Test Connection</button>
+    <button class="btn btn-ghost btn-sm" style="flex:1" onclick="syncToActuals()">Force Sync</button>
+  </div>
+</div>
+</body>
+</html>

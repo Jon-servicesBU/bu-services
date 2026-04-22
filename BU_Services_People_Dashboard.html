@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BU Services — People & Capacity</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0A1F5C; --blue:#1A5CA8; --sky:#00AEEF; --orange:#E97132;
+  --green:#16A34A; --red:#DC2626; --amber:#D97706;
+  --bg:#080F1E; --surface:#0D1528; --surface2:#111C35; --border:rgba(255,255,255,.07);
+  --border2:rgba(255,255,255,.12); --text:#E2E8F0; --muted:#64748B; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+
+/* ── NAV ── */
+
+
+
+.nav-links{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;flex:1}
+.nav-links::-webkit-scrollbar{display:none}
+
+
+
+.nav-back{margin-left:auto;font-size:.68rem;font-weight:600;color:var(--sky);
+  background:rgba(0,174,239,.1);border:1px solid rgba(0,174,239,.25);border-radius:6px;
+  padding:.25rem .75rem;text-decoration:none;white-space:nowrap;transition:all .15s}
+.nav-back:hover{background:rgba(0,174,239,.2)}
+
+/* ── PAGE HEADER ── */
+.page-hdr{background:linear-gradient(135deg,#060D1A 0%,#0D1A3A 60%,#0A1F5C 100%);
+  padding:2rem 2rem 1.5rem;border-bottom:1px solid var(--border)}
+.page-hdr .eyebrow{font-size:.65rem;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--sky);margin-bottom:.5rem}
+.page-hdr h1{font-size:1.75rem;font-weight:700;color:#fff;letter-spacing:-.3px;margin-bottom:.4rem}
+.page-hdr .sub{font-size:.8rem;color:var(--muted)}
+.page-meta{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.2);margin-top:.6rem}
+
+/* ── UPLOAD BANNER ── */
+.upload-banner{margin:1rem 2rem;background:rgba(0,174,239,.05);border:1px solid rgba(0,174,239,.15);
+  border-radius:8px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.upload-banner-text{font-size:.72rem;color:var(--muted);flex:1}
+.upload-banner-text strong{color:var(--sky)}
+.upload-btn{font-size:.68rem;font-weight:600;padding:.35rem .9rem;border-radius:6px;
+  background:var(--sky);color:var(--navy);border:none;cursor:pointer;transition:opacity .15s}
+.upload-btn:hover{opacity:.85}
+.upload-status{font-family:var(--mono);font-size:.65rem;color:var(--sky)}
+
+/* ── SECTION WRAPPER ── */
+.page-body{max-width:1440px;margin:0 auto;padding:0 2rem 4rem}
+.section{padding:2rem 0}
+.section + .section{border-top:1px solid var(--border)}
+.sec-hdr{margin-bottom:1.5rem}
+.sec-title{font-size:1rem;font-weight:700;color:#fff;letter-spacing:-.2px;
+  display:flex;align-items:center;gap:.6rem;margin-bottom:.25rem}
+.sec-title .icon{font-size:1rem;opacity:.8}
+.sec-sub{font-size:.75rem;color:var(--muted)}
+
+/* ── KPI STRIP ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;
+  background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem}
+.kpi{background:var(--surface);padding:1rem 1.2rem}
+.kpi-val{font-size:1.6rem;font-weight:700;color:#fff;letter-spacing:-.5px;line-height:1;font-family:var(--mono)}
+.kpi-val.g{color:#4ADE80}.kpi-val.a{color:#FCD34D}.kpi-val.r{color:#F87171}
+.kpi-lbl{font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:1px;margin-top:.35rem}
+.kpi-sub{font-size:.65rem;color:rgba(255,255,255,.25);margin-top:.1rem}
+
+/* ── UTILIZATION CHARTS ── */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.office-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem}
+.office-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;transition:border-color .2s}
+.office-card:hover{border-color:var(--border2)}
+.oc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.oc-name{font-size:.8rem;font-weight:600;color:#fff}
+.oc-badge{font-family:var(--mono);font-size:.75rem;font-weight:700;padding:.15rem .55rem;border-radius:5px}
+.oc-badge.g{background:rgba(22,163,74,.2);color:#4ADE80}
+.oc-badge.a{background:rgba(217,119,6,.2);color:#FCD34D}
+.oc-badge.r{background:rgba(220,38,38,.2);color:#F87171}
+.oc-badge.n{background:rgba(255,255,255,.06);color:var(--muted)}
+.spark{display:flex;align-items:flex-end;gap:2px;height:32px}
+.spark-b{flex:1;border-radius:1px 1px 0 0;transition:opacity .15s}
+.office-card:hover .spark-b{opacity:.7}
+.oc-stats{display:flex;gap:1rem;margin-top:.6rem}
+.oc-stat-val{font-family:var(--mono);font-size:.8rem;font-weight:600;color:#fff}
+.oc-stat-lbl{font-family:var(--mono);font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+
+/* ── ROSTER ── */
+.roster-controls{display:flex;flex-wrap:wrap;gap:.75rem;align-items:flex-start;margin-bottom:1.25rem}
+.filter-group{display:flex;flex-direction:column;gap:.4rem}
+.filter-group-label{font-family:var(--mono);font-size:.58rem;color:var(--muted);
+  letter-spacing:1.5px;text-transform:uppercase}
+.pills{display:flex;gap:.3rem;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.7rem;font-weight:500;
+  padding:.3rem .75rem;border-radius:20px;cursor:pointer;border:1px solid var(--border2);
+  background:rgba(255,255,255,.03);color:var(--muted);transition:all .18s;user-select:none;white-space:nowrap}
+.pill:hover{background:rgba(255,255,255,.07);color:var(--text);border-color:rgba(255,255,255,.2)}
+.pill.on{border-color:transparent;color:#fff}
+.pill.on.p-all{background:rgba(0,174,239,.2);color:var(--sky);border-color:rgba(0,174,239,.35)}
+.pill.on.p-edm{background:rgba(59,91,219,.25);color:#93C5FD;border-color:rgba(99,131,235,.3)}
+.pill.on.p-gte{background:rgba(5,150,105,.2);color:#6EE7B7;border-color:rgba(5,150,105,.3)}
+.pill.on.p-hq{background:rgba(109,40,217,.2);color:#C4B5FD;border-color:rgba(139,92,246,.3)}
+.pill.on.p-mtl{background:rgba(220,38,38,.2);color:#FCA5A5;border-color:rgba(239,68,68,.3)}
+.pill.on.p-que{background:rgba(26,92,168,.25);color:#BAE6FD;border-color:rgba(56,130,220,.3)}
+.pill.on.p-hi{background:rgba(22,163,74,.2);color:#4ADE80;border-color:rgba(34,197,94,.3)}
+.pill.on.p-lo{background:rgba(217,119,6,.2);color:#FCD34D;border-color:rgba(245,158,11,.3)}
+.pill.on.p-zero{background:rgba(220,38,38,.2);color:#F87171;border-color:rgba(239,68,68,.3)}
+.pill.on.p-ann{background:rgba(217,119,6,.15);color:#FDE68A;border-color:rgba(251,191,36,.3)}
+.pill.on.p-mgmt{background:rgba(100,116,139,.2);color:#CBD5E1;border-color:rgba(148,163,184,.3)}
+.pill.on.p-gen{background:rgba(100,116,139,.2);color:#CBD5E1;border-color:rgba(148,163,184,.3)}
+.pill .pdot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.8;flex-shrink:0}
+
+/* Mgr toggle */
+.mgr-wrap{display:flex;align-items:center;gap:.6rem;padding:.4rem 1rem;
+  background:rgba(233,113,50,.06);border:1px solid rgba(233,113,50,.18);
+  border-radius:8px;cursor:pointer;transition:all .18s;align-self:flex-end}
+.mgr-wrap:hover{background:rgba(233,113,50,.12);border-color:rgba(233,113,50,.3)}
+.mgr-switch{position:relative;width:32px;height:17px;flex-shrink:0}
+.mgr-switch input{opacity:0;width:0;height:0;position:absolute}
+.mgr-switch .track{position:absolute;inset:0;border-radius:9px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15);transition:all .2s;cursor:pointer}
+.mgr-switch input:checked+.track{background:var(--orange);border-color:var(--orange)}
+.mgr-switch .thumb{position:absolute;top:2px;left:2px;width:11px;height:11px;
+  border-radius:50%;background:#fff;transition:transform .2s;pointer-events:none;
+  box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.mgr-switch input:checked~.thumb{transform:translateX(15px)}
+.mgr-label{font-size:.7rem;font-weight:500;color:#E97132}
+
+/* Search */
+.roster-search{background:var(--surface);border:1px solid var(--border2);
+  border-radius:8px;color:var(--text);font-family:var(--mono);font-size:.72rem;
+  padding:.4rem .9rem;width:200px;outline:none;transition:border-color .15s;align-self:flex-end}
+.roster-search:focus{border-color:var(--sky)}
+.roster-search::placeholder{color:var(--muted)}
+
+/* Zero alert */
+.zero-alert{display:flex;align-items:center;gap:.75rem;padding:.7rem 1.1rem;
+  background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);
+  border-left:3px solid var(--red);border-radius:0 8px 8px 0;margin-bottom:1rem;font-size:.75rem}
+.za-label{color:#F87171;font-weight:600}
+.za-detail{color:var(--muted)}
+.za-off{font-family:var(--mono);font-size:.65rem;color:rgba(255,255,255,.4)}
+
+/* Table */
+.tbl-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.tbl{width:100%;border-collapse:collapse}
+.tbl thead{background:var(--surface2)}
+.tbl th{padding:.55rem 1rem;font-family:var(--mono);font-size:.58rem;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap;
+  cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
+.tbl th:hover{color:var(--text)}
+.tbl th.s{color:var(--sky)}
+.tbl th .arr{opacity:.35;margin-left:3px;font-size:.55rem}
+.tbl th.s .arr{opacity:1}
+.tbl tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s}
+.tbl tbody tr:last-child{border-bottom:none}
+.tbl tbody tr:hover{background:rgba(255,255,255,.025)}
+.tbl td{padding:.5rem 1rem;vertical-align:middle;white-space:nowrap}
+.tbl tr.dimmed td{opacity:.3}
+/* Name */
+.emp-name{font-size:.78rem;font-weight:500;color:var(--text)}
+.ann-dot{display:inline-flex;align-items:center;justify-content:center;
+  width:15px;height:15px;border-radius:4px;background:rgba(251,191,36,.15);
+  color:#FBBF24;font-size:.52rem;font-weight:700;margin-left:.35rem;cursor:help}
+/* Office badge */
+.ob{display:inline-block;font-family:var(--mono);font-size:.58rem;font-weight:600;
+  letter-spacing:.5px;padding:.12rem .5rem;border-radius:4px}
+.ob-EDM{background:rgba(59,91,219,.2);color:#93C5FD}
+.ob-GTE{background:rgba(5,150,105,.18);color:#6EE7B7}
+.ob-HQ{background:rgba(109,40,217,.18);color:#C4B5FD}
+.ob-MTL{background:rgba(220,38,38,.18);color:#FCA5A5}
+.ob-QUE{background:rgba(26,92,168,.2);color:#BAE6FD}
+.ob-GEN{background:rgba(100,116,139,.15);color:#CBD5E1}
+/* Util */
+.uv{font-family:var(--mono);font-size:.75rem;font-weight:600}
+.uv.g{color:#4ADE80}.uv.a{color:#FCD34D}.uv.r{color:#F87171}.uv.n{color:rgba(255,255,255,.18)}
+/* Mini spark */
+.mspark{display:inline-flex;align-items:flex-end;gap:1.5px;height:18px;padding:1px 0}
+.ms{width:4px;border-radius:1px 1px 0 0}
+/* Hrs */
+.hrs{font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.35)}
+.hrs.has{color:rgba(255,255,255,.6)}
+/* Type label */
+.type-lbl{font-family:var(--mono);font-size:.58rem;color:rgba(255,255,255,.2)}
+/* Footer */
+.tbl-footer{display:flex;justify-content:space-between;padding:.5rem 0;
+  font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.2)}
+
+
+
+
+
+
+
+.hmap td.hc:hover{filter:brightness(1.3)}
+
+
+
+
+.hmap tr.grp td{border-top:2px solid rgba(255,255,255,.08)!important}
+
+/* ── PEOPLE / TENURE ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:700px){.two-col{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem}
+.card-title{font-size:.75rem;font-weight:600;color:#fff;margin-bottom:1rem;letter-spacing:.2px}
+.tenure-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.55rem}
+.ten-lbl{font-family:var(--mono);font-size:.65rem;color:var(--muted);width:65px;flex-shrink:0}
+.ten-track{flex:1;height:20px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.ten-fill{height:100%;border-radius:3px}
+.ten-count{font-family:var(--mono);font-size:.7rem;font-weight:600;width:28px;text-align:right;flex-shrink:0}
+.ten-pct{font-family:var(--mono);font-size:.6rem;color:var(--muted);width:34px;flex-shrink:0}
+.risk-card{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);
+  border-radius:10px;padding:1.25rem}
+.risk-num{font-family:var(--mono);font-size:2.2rem;font-weight:700;color:#F87171;line-height:1;margin-bottom:.4rem}
+.risk-title{font-size:.75rem;font-weight:600;color:#F87171;margin-bottom:.5rem}
+.risk-desc{font-size:.72rem;color:var(--muted);line-height:1.6}
+
+/* ── VACATION ── */
+.vac-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:.75rem}
+.vac-stat{background:var(--surface);padding:1rem 1.2rem}
+.vac-val{font-family:var(--mono);font-size:1.5rem;font-weight:700;color:#fff;line-height:1}
+.vac-val.w{color:#FCD34D}
+.vac-lbl{font-size:.65rem;font-weight:500;color:var(--muted);text-transform:uppercase;
+  letter-spacing:1px;margin-top:.3rem}
+.vac-sub{font-size:.62rem;color:rgba(255,255,255,.2);margin-top:.1rem}
+.vac-note{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.25);
+  background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px;padding:.6rem .9rem}
+
+/* ── ANNIVERSARIES ── */
+.ann-toolbar{display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem}
+.ann-counts{display:flex;gap:1px;background:var(--border);border-radius:8px;overflow:hidden}
+.ann-count{background:var(--surface);padding:.4rem .9rem;text-align:center;min-width:70px}
+.ann-count-val{font-family:var(--mono);font-size:1.1rem;font-weight:700;color:#fff}
+.ann-count-lbl{font-family:var(--mono);font-size:.55rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1px;margin-top:.1rem}
+.ann-count-val.ms{color:var(--orange)}
+.ann-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:.6rem}
+.ac{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:.9rem 1.1rem;display:flex;align-items:center;gap:.9rem;transition:all .18s}
+.ac:hover{border-color:var(--border2);transform:translateY(-1px)}
+.ac.ms-card{border-color:rgba(233,113,50,.25);background:rgba(233,113,50,.04)}
+.ac.ms-card::before{content:'';display:block;position:absolute;width:0}
+.ac-wrap{position:relative;overflow:hidden;border-radius:10px}
+.ac.ms-card{position:relative}
+.ac.ms-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--orange),#FBBF24 50%,transparent)}
+.ac-days{min-width:52px;text-align:center;flex-shrink:0}
+.ac-n{font-family:var(--mono);font-size:1.5rem;font-weight:700;line-height:1}
+.ac-n.today{color:var(--orange);font-size:1.2rem}
+.ac-n.hot{color:#F87171}
+.ac-n.warm{color:#FCD34D}
+.ac-n.cool{color:#4ADE80}
+.ac-u{font-family:var(--mono);font-size:.55rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1px;margin-top:.2rem}
+.ac-info{flex:1;min-width:0}
+.ac-name{font-size:.8rem;font-weight:600;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ac-sub{font-size:.65rem;color:var(--muted);margin-top:.25rem;font-family:var(--mono)}
+.ms-badge{display:inline-flex;align-items:center;gap:.25rem;
+  background:rgba(233,113,50,.15);border:1px solid rgba(233,113,50,.25);
+  border-radius:8px;padding:.1rem .45rem;font-size:.58rem;font-weight:700;
+  color:var(--orange);letter-spacing:.4px;margin-left:.4rem;vertical-align:middle}
+.yr-tag{display:inline-block;background:rgba(255,255,255,.06);border-radius:4px;
+  padding:.08rem .4rem;font-family:var(--mono);font-size:.58rem;
+  color:rgba(255,255,255,.35);margin-left:.35rem;vertical-align:middle}
+
+/* Vacation cell in roster */
+.vac-cell{display:flex;flex-direction:column;gap:2px;min-width:68px}
+.vac-num{font-family:var(--mono);font-size:.7rem;font-weight:600;line-height:1}
+.vac-num.vac-hi{color:#F87171}
+.vac-num.vac-mid{color:#FCD34D}
+.vac-num.vac-lo{color:rgba(255,255,255,.4)}
+.vac-bar-track{width:100%;height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.vac-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.vac-bar-fill.vac-hi{background:#DC2626}
+.vac-bar-fill.vac-mid{background:#D97706}
+.vac-bar-fill.vac-lo{background:rgba(255,255,255,.2)}
+
+/* Per-employee util exclusion */
+.excl-btn{display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:5px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);cursor:pointer;font-size:.65rem;
+  transition:all .15s;flex-shrink:0;user-select:none;vertical-align:middle}
+.excl-btn:hover{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.1);color:#F87171}
+.excl-btn.excluded{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#F87171}
+.excl-btn.excluded:hover{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.4);color:#4ADE80}
+.tbl tr.excluded-row td{opacity:.35}
+.tbl tr.excluded-row td:last-child{opacity:1}
+.excl-summary{display:flex;align-items:center;gap:.5rem;padding:.35rem .85rem;
+  background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);
+  border-radius:8px;font-size:.7rem;color:#F87171;cursor:pointer;transition:all .15s;white-space:nowrap}
+.excl-summary:hover{background:rgba(239,68,68,.12)}
+.excl-summary.none{background:transparent;border-color:var(--border);color:var(--muted);cursor:default}
+
+/* Mgr toggle */
+.mgr-wrap{display:flex;align-items:center;gap:.6rem;padding:.35rem .9rem;
+  background:rgba(233,113,50,.06);border:1px solid rgba(233,113,50,.18);
+  border-radius:8px;cursor:pointer;transition:all .18s}
+.mgr-wrap:hover{background:rgba(233,113,50,.12);border-color:rgba(233,113,50,.3)}
+.mgr-switch{position:relative;width:32px;height:17px;flex-shrink:0}
+.mgr-switch input{opacity:0;width:0;height:0;position:absolute}
+.mgr-switch .track{position:absolute;inset:0;border-radius:9px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15);transition:all .2s;cursor:pointer}
+.mgr-switch input:checked+.track{background:var(--orange);border-color:var(--orange)}
+.mgr-switch .thumb{position:absolute;top:2px;left:2px;width:11px;height:11px;
+  border-radius:50%;background:#fff;transition:transform .2s;pointer-events:none;
+  box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.mgr-switch input:checked~.thumb{transform:translateX(15px)}
+.mgr-label{font-size:.7rem;font-weight:500;color:#E97132}
+
+
+/* ── SYSTEM BAR (fixed, below topnav) ──────────────────────────── */
+.sysbar{
+  position:sticky;
+  z-index:99;
+  background:rgba(5,12,25,.98);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;
+  padding:0 1.25rem;
+  gap:.5rem;
+  height:36px;
+  backdrop-filter:blur(8px);
+}
+.sysbar-label{
+  font-size:.6rem;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:rgba(255,255,255,.2);
+  margin-right:.35rem;white-space:nowrap;
+  font-family:'Courier New',monospace}
+.sysbtn{
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.22rem .7rem;border-radius:20px;
+  font-size:.7rem;font-weight:700;
+  text-decoration:none;cursor:pointer;
+  border:1.5px solid;transition:all .18s;
+  white-space:nowrap;font-family:inherit;
+  background:none}
+.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7)}
+.sysbtn-hub:hover,.sysbtn-hub.active{
+  background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);
+  color:#00AEEF;box-shadow:0 0 8px rgba(0,174,239,.2)}
+.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7)}
+.sysbtn-people:hover,.sysbtn-people.active{
+  background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);
+  color:#FCD34D;box-shadow:0 0 8px rgba(201,134,10,.2)}
+.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7)}
+.sysbtn-meetings:hover,.sysbtn-meetings.active{
+  background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);
+  color:#6EE7B7;box-shadow:0 0 8px rgba(22,163,74,.2)}
+.sysbtn-cc{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.4)}
+.sysbtn-cc:hover,.sysbtn-cc.active{
+  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);
+  color:rgba(255,255,255,.85)}
+.sysbtn.current{
+  cursor:default;pointer-events:none}
+.sysbtn-hub.current{
+  background:rgba(0,174,239,.12);border-color:rgba(0,174,239,.5);
+  color:#00AEEF;opacity:1}
+.sysbtn-people.current{
+  background:rgba(201,134,10,.12);border-color:rgba(201,134,10,.5);
+  color:#FCD34D;opacity:1}
+.sysbtn-meetings.current{
+  background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.5);
+  color:#6EE7B7;opacity:1}
+.sysbtn-cc.current{
+  background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);
+  color:rgba(255,255,255,.7);opacity:1}
+
+/* ── UNIFIED TOPNAV ─────────────────────────────────────────────────── */
+.unav{
+  position:sticky;top:0;z-index:100;
+  height:48px;
+  background:rgba(8,16,32,.98);
+  border-bottom:1px solid rgba(0,174,239,.3);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;
+  padding:0 1.5rem;
+  gap:0;
+}
+.unav-brand{
+  display:flex;align-items:baseline;gap:.5rem;
+  flex-shrink:0;margin-right:1.25rem}
+.unav-brand-name{
+  font-size:.82rem;font-weight:800;
+  color:#fff;letter-spacing:-.01em;
+  white-space:nowrap}
+.unav-brand-sep{
+  color:rgba(255,255,255,.18);font-size:.75rem;margin:0 .1rem}
+.unav-brand-page{
+  font-size:.72rem;font-weight:600;
+  color:var(--sky,#00AEEF);
+  white-space:nowrap}
+.unav-links{
+  display:flex;align-items:center;gap:0;
+  flex:1;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none}
+.unav-links::-webkit-scrollbar{display:none}
+.unav-links a{
+  padding:.25rem .7rem;
+  font-size:.72rem;font-weight:600;
+  color:rgba(255,255,255,.45);
+  text-decoration:none;white-space:nowrap;
+  border-radius:4px;transition:all .15s;
+  cursor:pointer;border:none;background:none;
+  font-family:inherit}
+.unav-links a:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.06)}
+.unav-links a.active{color:#fff;background:rgba(0,174,239,.15)}
+.unav-date{
+  font-size:.65rem;color:rgba(255,255,255,.25);
+  font-family:'Courier New',monospace;
+  white-space:nowrap;margin-left:.75rem;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<nav class="unav"><div class="unav-brand"><span class="unav-brand-name">BU Services</span><span class="unav-brand-sep">·</span><span class="unav-brand-page">People &amp; Capacity</span></div><div class="unav-links"><a href="#util">Utilization</a><a href="#roster">Roster</a><a href="#people">People</a><a href="#vacation">Vacation</a><a href="#anniversaries">Anniversaries</a></div></nav>
+<div class="sysbar"><span class="sysbar-label">BU Services</span><a class="sysbtn sysbtn-hub" href="BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a><span class="sysbtn sysbtn-people current">👥 People</span><a class="sysbtn sysbtn-meetings" href="BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a><a class="sysbtn sysbtn-cc" href="BU_Services_Command_Centre.html" target="buservices">📊 Command Centre</a></div>
+
+<div class="page-hdr">
+  <div class="eyebrow">Ekoscan Integrity Group — BU Services</div>
+  <h1>People &amp; Capacity Dashboard</h1>
+  <div class="sub">Utilization · Headcount · Tenure · Vacation — Business Central live data</div>
+  <div class="page-meta" id="page-meta"></div>
+</div>
+
+<div class="upload-banner">
+  <div class="upload-banner-text"><strong>Refresh data</strong> — upload BC exports to update all figures.
+    Once Power Automate is live, this updates automatically every Sunday.</div>
+  <div style="display:flex;align-items:center;gap:.75rem">
+    <input type="file" id="bc-upload" accept=".xlsx" multiple style="display:none" onchange="handleUpload(this.files)">
+    <button class="upload-btn" onclick="document.getElementById('bc-upload').click()">↑ Upload BC Files</button>
+    <span class="upload-status" id="upload-status"></span>
+  </div>
+</div>
+
+<div class="page-body">
+
+<!-- ── UTILIZATION ── -->
+<div class="section" id="util">
+  <div class="sec-hdr">
+    <div class="sec-title"><span class="icon">📊</span> Utilization</div>
+    <div class="sec-sub">Non-billable cost hours ÷ total paid hours · lower = better · 13 rolling weeks · week ending <span id="util-week"></span></div>
+  </div>
+  <div class="kpi-strip" id="util-kpis"></div>
+
+  <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:.75rem 0">
+    <div class="pills" id="off-pills">
+      <span class="pill p-all on" onclick="setOff('all',this)">All offices</span>
+      <span class="pill p-edm" onclick="setOff('EDM',this)"><span class="pdot"></span>Edmonton</span>
+      <span class="pill p-gte" onclick="setOff('GTE',this)"><span class="pdot"></span>Whitby/GTE</span>
+      <span class="pill p-hq"  onclick="setOff('HQ',this)"><span class="pdot"></span>QC HQ</span>
+      <span class="pill p-mtl" onclick="setOff('MTL',this)"><span class="pdot"></span>Montréal</span>
+      <span class="pill p-que" onclick="setOff('QUE',this)"><span class="pdot"></span>Quebec City</span>
+      <span class="pill p-gen" onclick="setOff('GEN',this)"><span class="pdot"></span>General/Cross</span>
+    </div>
+    <label class="mgr-wrap" title="Exclude managers and admin from all utilization calculations">
+      <div class="mgr-switch">
+        <input type="checkbox" id="mgr-toggle" onchange="onMgrToggle()">
+        <span class="track"></span>
+        <span class="thumb"></span>
+      </div>
+      <span class="mgr-label">Excl. Mgr / Admin</span>
+    </label>
+  </div>
+
+  <div class="office-grid" id="office-grid"></div>
+</div>
+
+<!-- ── ROSTER ── -->
+<div class="section" id="roster">
+  <div class="sec-hdr">
+    <div class="sec-title"><span class="icon">👥</span> Employee Roster</div>
+    <div class="sec-sub">All 126 employees · sortable · filterable</div>
+  </div>
+  <div class="roster-controls">
+
+    <div class="filter-group">
+      <div class="pills" id="stat-pills">
+        <span class="pill p-all on" onclick="setStat('all',this)">All</span>
+        <span class="pill p-zero" onclick="setStat('highvac',this)">🏖 High vac</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap">
+      <input type="text" class="roster-search" id="roster-search" placeholder="Search name…" oninput="renderRoster()">
+
+      <div class="excl-summary none" id="excl-summary" onclick="clearAllExclusions()">No exclusions</div>
+
+    </div>
+  </div>
+  <div id="zero-alert"></div>
+  <div id="excl-clear-row" style="display:none;margin-bottom:.5rem;padding:.5rem 1rem;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:8px;align-items:center;justify-content:space-between">
+    <span style="font-size:.72rem;color:#F87171" id="excl-clear-label"></span>
+    <button onclick="clearAllExclusions()" style="font-size:.68rem;font-weight:600;
+      padding:.25rem .75rem;border-radius:6px;background:rgba(239,68,68,.15);
+      border:1px solid rgba(239,68,68,.35);color:#F87171;cursor:pointer">
+      ↩ Reset all exclusions
+    </button>
+  </div>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr>
+        <th style="width:36px"></th>
+        <th onclick="doSort('name')">Name <span class="arr">↕</span></th>
+        <th>Role type</th>
+        <th onclick="doSort('office')">Office <span class="arr">↕</span></th>
+        <th onclick="doSort('dept')">Dept <span class="arr">↕</span></th>
+        <th onclick="doSort('overhead_avg')" class="s">Overhead% (13wk) <span class="arr">↓</span></th>
+        <th onclick="doSort('cum_util')">Cum. util% <span class="arr">↕</span></th>
+        <th onclick="doSort('bill_13wk')">Bill hrs (13wk) <span class="arr">↕</span></th>
+        <th onclick="doSort('vac_hrs_13wk')">Vac hrs (13wk) <span class="arr">↕</span></th>
+        <th onclick="doSort('vac_solde')">Vac liability <span class="arr">↕</span></th>
+      </tr></thead>
+      <tbody id="roster-body"></tbody>
+    </table>
+  </div>
+  <div class="tbl-footer"><span id="roster-count"></span><span>⚑ = operational note from Alex · click column headers to sort</span></div>
+</div>
+
+<!-- ── HEATMAP ── -->
+<div class="section" id="people">
+  <div class="sec-hdr">
+    <div class="sec-title"><span class="icon">🏢</span> People &amp; Tenure</div>
+    <div class="sec-sub">Headcount · tenure distribution · retention risk — active employees as of <span id="people-date"></span></div>
+  </div>
+  <div class="kpi-strip" id="people-kpis"></div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Tenure distribution</div>
+      <div id="tenure-bars"></div>
+    </div>
+    <div class="risk-card">
+      <div class="risk-title">⚠ Retention Risk</div>
+      <div class="risk-num" id="risk-num"></div>
+      <div class="risk-desc" id="risk-desc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── VACATION ── -->
+<div class="section" id="vacation">
+  <div class="sec-hdr">
+    <div class="sec-title"><span class="icon">🏖</span> Vacation Liability</div>
+    <div class="sec-sub">Unionized · balance sheet exposure · source: BC Vacation export · as of 2026-04-04</div>
+  </div>
+  <div class="vac-strip" id="vac-strip"></div>
+  <div class="vac-note">
+    <strong style="color:var(--sky)">Source:</strong> Unionizeds vacation bank (Bank 306) · Actif employees only ·
+    Non-unionized balances now included · unionized: $43K · non-unionized: $132K · total liability: $175K ·
+    <strong style="color:var(--sky)">PA path:</strong> PA P7 writes to <code>vac_liability_syn_cad</code> in actuals.json every Sunday
+  </div>
+</div>
+
+<!-- ── ANNIVERSARIES ── -->
+<div class="section" id="anniversaries">
+  <div class="sec-hdr">
+    <div class="sec-title"><span class="icon">🎂</span> Anniversaries &amp; Milestones</div>
+    <div class="sec-sub">Upcoming work anniversaries · ⭐ = 5/10/15/20-year milestone · for Carol-Anne Lindsay</div>
+  </div>
+  <div class="ann-toolbar">
+    <div class="pills" id="ann-pills">
+      <span class="pill p-all on" onclick="setAnn('90',this)">Next 90 days</span>
+      <span class="pill p-hi"    onclick="setAnn('180',this)">Next 6 months</span>
+      <span class="pill p-ann"   onclick="setAnn('ms',this)">⭐ Milestones only</span>
+    </div>
+    <div class="ann-counts" id="ann-counts"></div>
+  </div>
+  <div class="ann-grid" id="ann-grid"></div>
+</div>
+
+</div><!-- page-body -->
+
+<script>
+var DATA = {"people_updated":"2026-04-07","headcount_active":133,"tenure_avg_years":3.2,"tenure_buckets":{"under_1yr":60,"yr_1_3":20,"yr_3_5":21,"yr_5_10":22,"yr_10_plus":10},"retention_risk_under_1yr":60,"vac_liability_total_cad":175478.0,"vac_liability_syn_cad":43312.0,"vac_liability_nonsyn_cad":132167.0,"vac_avg_weeks_syn":0.4,"vac_high_balance_count":11,"util_week_ending":"2026-03-29","util_total_latest":59.2,"util_13wk_avg":50.0,"util_target":15.0,"util_13wk_trend":[{"date":"2026-03-29","util":59.2,"bill":1046.0,"tot":2878.5},{"date":"2026-03-22","util":59.4,"bill":1418.5,"tot":3699.25},{"date":"2026-03-15","util":52.0,"bill":1913.5,"tot":4057.5},{"date":"2026-03-08","util":53.9,"bill":1799.75,"tot":4094.5},{"date":"2026-03-01","util":50.3,"bill":2003.0,"tot":4242.0},{"date":"2026-02-22","util":45.1,"bill":2362.5,"tot":4394.0},{"date":"2026-02-15","util":42.3,"bill":2554.25,"tot":4537.0},{"date":"2026-02-08","util":39.9,"bill":2863.5,"tot":4843.5},{"date":"2026-02-01","util":38.3,"bill":3021.75,"tot":4962.25},{"date":"2026-01-25","util":53.1,"bill":1737.5,"tot":3809.25},{"date":"2026-01-18","util":48.3,"bill":2029.5,"tot":3943.25},{"date":"2026-01-11","util":52.8,"bill":1652.25,"tot":3666.25},{"date":"2026-01-04","util":55.4,"bill":1445.25,"tot":3457.5}],"util_by_office":{"EDM":{"latest":66.7,"avg_13wk":68.3,"trend":[{"date":"2026-03-29","util":66.7,"bill":36.5},{"date":"2026-03-22","util":67.6,"bill":83.0},{"date":"2026-03-15","util":60.9,"bill":107.0},{"date":"2026-03-08","util":60.4,"bill":99.5},{"date":"2026-03-01","util":81.3,"bill":44.0},{"date":"2026-02-22","util":78.2,"bill":44.0},{"date":"2026-02-15","util":61.1,"bill":65.0},{"date":"2026-02-08","util":35.2,"bill":222.0},{"date":"2026-02-01","util":35.7,"bill":262.5},{"date":"2026-01-25","util":73.9,"bill":40.0},{"date":"2026-01-18","util":89.8,"bill":15.0},{"date":"2026-01-11","util":100.0,"bill":0.0},{"date":"2026-01-04","util":76.9,"bill":0.0}]},"GTE":{"latest":67.0,"avg_13wk":46.0,"trend":[{"date":"2026-03-29","util":67.0,"bill":34.0},{"date":"2026-03-22","util":51.2,"bill":78.0},{"date":"2026-03-15","util":49.0,"bill":133.0},{"date":"2026-03-08","util":59.0,"bill":90.5},{"date":"2026-03-01","util":50.2,"bill":118.0},{"date":"2026-02-22","util":47.5,"bill":119.0},{"date":"2026-02-15","util":43.4,"bill":129.0},{"date":"2026-02-08","util":32.8,"bill":252.0},{"date":"2026-02-01","util":20.3,"bill":291.0},{"date":"2026-01-25","util":40.5,"bill":164.5},{"date":"2026-01-18","util":35.9,"bill":189.5},{"date":"2026-01-11","util":44.8,"bill":127.0},{"date":"2026-01-04","util":56.6,"bill":121.5}]},"HQ":{"latest":88.2,"avg_13wk":88.8,"trend":[{"date":"2026-03-29","util":88.2,"bill":94.5},{"date":"2026-03-22","util":97.4,"bill":23.5},{"date":"2026-03-15","util":88.2,"bill":87.5},{"date":"2026-03-08","util":91.4,"bill":28.25},{"date":"2026-03-01","util":85.0,"bill":78.0},{"date":"2026-02-22","util":83.0,"bill":119.0},{"date":"2026-02-15","util":83.7,"bill":101.25},{"date":"2026-02-08","util":87.1,"bill":52.0},{"date":"2026-02-01","util":96.4,"bill":34.75},{"date":"2026-01-25","util":93.7,"bill":61.0},{"date":"2026-01-18","util":90.5,"bill":88.0},{"date":"2026-01-11","util":87.9,"bill":71.75},{"date":"2026-01-04","util":82.2,"bill":86.25}]},"MTL":{"latest":46.9,"avg_13wk":37.7,"trend":[{"date":"2026-03-29","util":46.9,"bill":295.0},{"date":"2026-03-22","util":50.0,"bill":343.0},{"date":"2026-03-15","util":33.5,"bill":547.5},{"date":"2026-03-08","util":43.9,"bill":456.5},{"date":"2026-03-01","util":24.3,"bill":682.5},{"date":"2026-02-22","util":25.0,"bill":729.0},{"date":"2026-02-15","util":29.8,"bill":524.0},{"date":"2026-02-08","util":27.0,"bill":506.5},{"date":"2026-02-01","util":30.5,"bill":497.0},{"date":"2026-01-25","util":52.9,"bill":230.5},{"date":"2026-01-18","util":35.1,"bill":395.5},{"date":"2026-01-11","util":42.1,"bill":308.0},{"date":"2026-01-04","util":48.7,"bill":234.5}]},"QUE":{"latest":33.1,"avg_13wk":22.0,"trend":[{"date":"2026-03-29","util":33.1,"bill":510.0},{"date":"2026-03-22","util":29.6,"bill":777.5},{"date":"2026-03-15","util":27.4,"bill":861.0},{"date":"2026-03-08","util":28.1,"bill":895.5},{"date":"2026-03-01","util":30.3,"bill":872.5},{"date":"2026-02-22","util":21.4,"bill":1143.5},{"date":"2026-02-15","util":13.4,"bill":1569.5},{"date":"2026-02-08","util":14.0,"bill":1631.0},{"date":"2026-02-01","util":11.7,"bill":1738.5},{"date":"2026-01-25","util":17.8,"bill":1151.0},{"date":"2026-01-18","util":17.4,"bill":1148.0},{"date":"2026-01-11","util":19.5,"bill":983.5},{"date":"2026-01-04","util":22.9,"bill":859.5}]}},"util_hq":88.2,"util_montreal":46.9,"util_central":33.1,"util_edmonton":66.7,"util_vancouver":67.0,"employees":[{"office":"GEN","dept":"","name":"Althouse, Brooklyn","annotations":[],"is_mgr_admin":true,"util_latest":62.5,"util_trend":[62.5,4.2,48.8,13.6,7.5,58.5,26.6,18.2,7.1,81.2,2.0,50.0,0.0],"bill_latest":12.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":76.1,"cum_util_raw":76.1,"over_capacity":false,"overhead_avg":27.2,"bill_13wk":395.5,"vac_hrs_13wk":0.0},{"office":"GEN","dept":"","name":"Belter, Gary Lee","annotations":[],"is_mgr_admin":false,"util_latest":15.5,"util_trend":[15.5,100.0,100.0,100.0,100.0,100.0,100.0,100.0,50.0,100.0,100.0,100.0,100.0],"bill_latest":43.5,"zero_hours":false,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":13.0,"cum_util_raw":13.0,"over_capacity":false,"overhead_avg":87.5,"bill_13wk":67.5,"vac_hrs_13wk":0.0},{"office":"GEN","dept":"","name":"Davies, Wendy","annotations":[],"is_mgr_admin":false,"util_latest":80.0,"util_trend":[80.0,80.0,100.0,60.0,40.0,100.0,100.0,40.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":8.0,"zero_hours":false,"vac_weeks":3.2,"vac_solde":3129.0,"is_syn":false,"cum_util":15.4,"cum_util_raw":15.4,"over_capacity":false,"overhead_avg":84.6,"bill_13wk":80.0,"vac_hrs_13wk":0.0},{"office":"GEN","dept":"","name":"Djordjevic, Joel","annotations":[],"is_mgr_admin":true,"util_latest":95.0,"util_trend":[null,null,95.0,100.0,100.0,27.5,100.0,100.0,50.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":-0.5,"vac_solde":0.0,"is_syn":false,"cum_util":6.5,"cum_util_raw":6.5,"over_capacity":false,"overhead_avg":85.2,"bill_13wk":31.0,"vac_hrs_13wk":40.0},{"office":"GEN","dept":"","name":"Eustace, Jonathan","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[null,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.9,"vac_solde":0.0,"is_syn":false,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"GEN","dept":"","name":"Pier-Hughes Fortin","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,0.0,null,11.1,4.8,null,null,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":12.7,"cum_util_raw":12.7,"over_capacity":false,"overhead_avg":7.0,"bill_13wk":66.0,"vac_hrs_13wk":0.0},{"office":"GEN","dept":"","name":"Randriamiarisoa, Mitia","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"GEN","dept":"","name":"Reichenbach, Keith","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[null,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":1.0,"vac_solde":0.0,"is_syn":false,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"GEN","dept":"","name":"Rioux, Jonathan","annotations":[],"is_mgr_admin":false,"util_latest":50.0,"util_trend":[50.0,49.3,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,3.7],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":100.0,"cum_util_raw":143.4,"over_capacity":true,"overhead_avg":9.8,"bill_13wk":642.5,"vac_hrs_13wk":72.0},{"office":"GEN","dept":"","name":"Scott, Benjamin","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,0.0,0.0,3.6,0.0,0.0,0.0,0.0,0.0,0.0,0.0,20.0,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":3.1,"vac_solde":6967.0,"is_syn":true,"cum_util":100.0,"cum_util_raw":100.6,"over_capacity":true,"overhead_avg":1.9,"bill_13wk":523.0,"vac_hrs_13wk":0.0},{"office":"GEN","dept":"","name":"Scully, Declan","annotations":[],"is_mgr_admin":false,"util_latest":58.3,"util_trend":[58.3,59.3,30.2,80.0,34.9,41.4,83.3,80.0,17.2,95.2,13.2,0.0,100.0],"bill_latest":12.5,"zero_hours":false,"vac_weeks":3.0,"vac_solde":6930.0,"is_syn":true,"cum_util":63.6,"cum_util_raw":63.6,"over_capacity":false,"overhead_avg":49.2,"bill_13wk":320.0,"vac_hrs_13wk":17.0},{"office":"GEN","dept":"","name":"Thon, Aur\u00e9lien","annotations":[],"is_mgr_admin":false,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,null,null,null,null,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"GEN","dept":"","name":"Ward, Diane","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,0.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":7.7,"cum_util_raw":7.7,"over_capacity":false,"overhead_avg":92.3,"bill_13wk":40.0,"vac_hrs_13wk":0.0},{"office":"EDM","dept":"ADM","name":"Cadwell, Kourtney","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,50.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":92.8,"bill_13wk":0.0,"vac_hrs_13wk":37.5},{"office":"EDM","dept":"OPS","name":"Aggrey, Emmanuel","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[null,100.0,100.0,100.0,100.0,100.0,44.8,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":2.8,"cum_util_raw":2.8,"over_capacity":false,"overhead_avg":93.6,"bill_13wk":14.0,"vac_hrs_13wk":18.0},{"office":"EDM","dept":"","name":"Al-Obaidi, Sinan","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,null,null,0.0,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":8.8,"cum_util_raw":8.8,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":45.5,"vac_hrs_13wk":0.0},{"office":"EDM","dept":"","name":"Assadi, Mahmoud","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,null,0.0,null,null,null,100.0,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":7.3,"cum_util_raw":7.3,"over_capacity":false,"overhead_avg":17.4,"bill_13wk":38.0,"vac_hrs_13wk":0.0},{"office":"EDM","dept":"","name":"Babineau, Eric","annotations":[],"is_mgr_admin":false,"util_latest":50.0,"util_trend":[50.0,71.4,44.4,null,100.0,100.0,68.8,0.0,11.3,null,100.0,null,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":26.9,"cum_util_raw":26.9,"over_capacity":false,"overhead_avg":56.6,"bill_13wk":125.0,"vac_hrs_13wk":56.0},{"office":"EDM","dept":"","name":"Campbell, Bryan","annotations":[],"is_mgr_admin":false,"util_latest":91.2,"util_trend":[91.2,0.0,0.0,0.0,100.0,null,null,null,null,null,null,null,null],"bill_latest":3.5,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":26.9,"cum_util_raw":26.9,"over_capacity":false,"overhead_avg":21.6,"bill_13wk":140.0,"vac_hrs_13wk":0.0},{"office":"EDM","dept":"","name":"Carlton, Rick","annotations":[],"is_mgr_admin":false,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.7,"vac_solde":0.0,"is_syn":false,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"EDM","dept":"","name":"Chetoui, Amen Allah","annotations":[],"is_mgr_admin":false,"util_latest":100.0,"util_trend":[null,100.0,100.0,100.0,100.0,null,38.5,0.0,18.0,78.4,60.5,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":21.6,"cum_util_raw":21.6,"over_capacity":false,"overhead_avg":70.0,"bill_13wk":112.5,"vac_hrs_13wk":0.0},{"office":"EDM","dept":"","name":"Cryenest, Ethan","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,0.0,0.0,0.0,0.0,0.0,0.0,6.4,17.5,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":68.0,"cum_util_raw":68.0,"over_capacity":false,"overhead_avg":4.1,"bill_13wk":353.5,"vac_hrs_13wk":0.0},{"office":"EDM","dept":"","name":"Retzlaff-Bear, Ashonti","annotations":[],"is_mgr_admin":false,"util_latest":15.4,"util_trend":[15.4,91.7,null,null,100.0,null,null,0.0,0.0,100.0,100.0,null,null],"bill_latest":33.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":18.8,"cum_util_raw":18.8,"over_capacity":false,"overhead_avg":32.4,"bill_13wk":98.0,"vac_hrs_13wk":0.0},{"office":"EDM","dept":"","name":"Xie, Peng","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,null,0.0,0.0,0.0,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":17.7,"cum_util_raw":17.7,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":92.0,"vac_hrs_13wk":0.0},{"office":"GTE","dept":"OPS","name":"Eliasu, Ali","annotations":[],"is_mgr_admin":false,"util_latest":20.0,"util_trend":[null,20.0,60.0,83.3,100.0,100.0,22.2,12.5,0.0,0.0,0.0,0.0,90.9],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":61.3,"cum_util_raw":61.3,"over_capacity":false,"overhead_avg":39.1,"bill_13wk":319.0,"vac_hrs_13wk":0.0},{"office":"GTE","dept":"","name":"Ilic, Filip","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,0.0,null,null,null,null,null,null,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":1.9,"cum_util_raw":1.9,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":10.0,"vac_hrs_13wk":0.0},{"office":"GTE","dept":"","name":"Misheal, Guisef","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,0.0,0.0,null,null,null,null,null,null,null,null,null,null],"bill_latest":20.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":13.5,"cum_util_raw":13.5,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":70.0,"vac_hrs_13wk":0.0},{"office":"GTE","dept":"","name":"Misheal, Johnpaul","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,null,null,null,null,null,null,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":9.0,"cum_util_raw":9.0,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":47.0,"vac_hrs_13wk":0.0},{"office":"GTE","dept":"","name":"Morrison, Reece","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":57.9,"cum_util_raw":57.9,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":301.0,"vac_hrs_13wk":0.0},{"office":"GTE","dept":"","name":"Tharmakulasingam, Vinoth","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,95.0,100.0,100.0,100.0,87.5,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":10.7,"vac_solde":19216.0,"is_syn":false,"cum_util":1.3,"cum_util_raw":1.3,"over_capacity":false,"overhead_avg":98.7,"bill_13wk":7.0,"vac_hrs_13wk":0.0},{"office":"GTE","dept":"","name":"Viteri, Cesar","annotations":[],"is_mgr_admin":false,"util_latest":67.4,"util_trend":[67.4,85.0,100.0,64.2,97.5,66.3,93.8,95.0,85.0,80.0,77.5,65.9,96.2],"bill_latest":14.0,"zero_hours":false,"vac_weeks":3.3,"vac_solde":0.0,"is_syn":false,"cum_util":17.8,"cum_util_raw":17.8,"over_capacity":false,"overhead_avg":82.4,"bill_13wk":92.5,"vac_hrs_13wk":0.0},{"office":"GTE","dept":"","name":"West, Mitch","annotations":[],"is_mgr_admin":false,"util_latest":60.0,"util_trend":[null,null,60.0,60.0,0.0,0.0,55.6,100.0,0.0,100.0,100.0,90.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.5,"vac_solde":0.0,"is_syn":false,"cum_util":32.4,"cum_util_raw":32.4,"over_capacity":false,"overhead_avg":59.9,"bill_13wk":158.0,"vac_hrs_13wk":32.0},{"office":"GTE","dept":"","name":"White, Dillon","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":100.0,"cum_util_raw":104.1,"over_capacity":true,"overhead_avg":0.0,"bill_13wk":541.5,"vac_hrs_13wk":0.0},{"office":"GTE","dept":"","name":"Williams, Gregory","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,null,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":57.9,"cum_util_raw":57.9,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":301.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"ADM","name":"Beauchesne, Mathieu","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,58.8,100.0,100.0,100.0,100.0,100.0,100.0,100.0,83.3],"bill_latest":0.0,"zero_hours":true,"vac_weeks":4.2,"vac_solde":15696.0,"is_syn":true,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":93.8,"bill_13wk":0.0,"vac_hrs_13wk":36.0},{"office":"HQ","dept":"","name":"Beaulieu, Matthieu","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"De Blois, Jean-Valery","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Desjardins, Claudya","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[null,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Dorval, Cynthia","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Fleury, Laurent","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Lachance, Ren\u00e9e","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Lemay, Kassandra","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Marcotte, Mathieu","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":19.6,"vac_solde":24475.0,"is_syn":false,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Marcotte, Olivier","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[null,null,null,null,100.0,100.0,83.3,83.3,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":95.7,"bill_13wk":0.0,"vac_hrs_13wk":16.0},{"office":"HQ","dept":"","name":"P\u00e9chard, Sarah-Kim","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"St-Jacques, Claudia","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,58.8,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":93.8,"bill_13wk":0.0,"vac_hrs_13wk":28.0},{"office":"HQ","dept":"ENG","name":"Bouchy, Sevan","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[null,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Boudreault-Leclerc, Francis","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,59.3,74.1,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,83.3],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":3.7,"cum_util_raw":3.7,"over_capacity":false,"overhead_avg":92.7,"bill_13wk":18.5,"vac_hrs_13wk":22.0},{"office":"HQ","dept":"","name":"Carmichael, \u00c9ric","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Chaboty, Aubin","annotations":[],"is_mgr_admin":true,"util_latest":96.0,"util_trend":[96.0,100.0,100.0,100.0,100.0,0.0,0.0,100.0,100.0,100.0,100.0,81.3,88.3],"bill_latest":1.5,"zero_hours":false,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":17.9,"cum_util_raw":17.9,"over_capacity":false,"overhead_avg":81.2,"bill_13wk":93.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Claveau, Julien","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Falardeau, Timoth\u00e9","annotations":[],"is_mgr_admin":true,"util_latest":34.8,"util_trend":[34.8,67.9,35.1,100.0,23.6,13.0,30.8,29.0,90.0,50.0,69.0,50.0,51.3],"bill_latest":30.0,"zero_hours":false,"vac_weeks":6.1,"vac_solde":792.0,"is_syn":false,"cum_util":65.8,"cum_util_raw":65.8,"over_capacity":false,"overhead_avg":47.4,"bill_13wk":292.0,"vac_hrs_13wk":76.0},{"office":"HQ","dept":"","name":"Herv\u00e9-C\u00f4te, Hugo","annotations":[],"is_mgr_admin":false,"util_latest":42.0,"util_trend":[42.0,100.0,100.0,98.8,52.5,50.0,50.0,50.0,95.0,70.0,21.3,4.2,0.0],"bill_latest":29.0,"zero_hours":false,"vac_weeks":0.5,"vac_solde":0.0,"is_syn":true,"cum_util":43.8,"cum_util_raw":43.8,"over_capacity":false,"overhead_avg":54.4,"bill_13wk":185.5,"vac_hrs_13wk":96.0},{"office":"HQ","dept":"","name":"Laurey, Pascal","annotations":[],"is_mgr_admin":false,"util_latest":40.0,"util_trend":[40.0,100.0,62.5,40.0,60.0,20.0,80.0,80.0,40.0,50.0,80.0,60.0,50.0],"bill_latest":24.0,"zero_hours":false,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":39.5,"cum_util_raw":39.5,"over_capacity":false,"overhead_avg":58.2,"bill_13wk":180.0,"vac_hrs_13wk":64.0},{"office":"HQ","dept":"","name":"Pinard, Adam","annotations":[],"is_mgr_admin":false,"util_latest":75.0,"util_trend":[75.0,98.8,95.0,71.4,50.0,50.0,62.5,100.0,90.0,97.5,47.8,100.0,90.0],"bill_latest":10.0,"zero_hours":false,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":11.4,"cum_util_raw":11.4,"over_capacity":false,"overhead_avg":74.4,"bill_13wk":45.5,"vac_hrs_13wk":120.0},{"office":"HQ","dept":"","name":"St-Laurent, Alexia","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"","name":"Talbot, Francis","annotations":[],"is_mgr_admin":false,"util_latest":100.0,"util_trend":[100.0,87.5,81.2,90.6,69.6,100.0,56.9,100.0,98.1,100.0,100.0,93.1,8.1],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":14.8,"cum_util_raw":14.8,"over_capacity":false,"overhead_avg":83.1,"bill_13wk":74.8,"vac_hrs_13wk":16.0},{"office":"HQ","dept":"HHR","name":"Martel, Rosalie","annotations":[],"is_mgr_admin":false,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"MRK","name":"Tremblay, Shanny","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"HQ","dept":"OPS","name":"Cyr, Alexandre","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[null,100.0,53.6,100.0,100.0,100.0,100.0,50.0,100.0,80.0,73.9,71.4,80.8],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":8.1,"cum_util_raw":8.1,"over_capacity":false,"overhead_avg":80.7,"bill_13wk":36.5,"vac_hrs_13wk":72.0},{"office":"HQ","dept":"OPS","name":"Blanchet, Marc-Antoine","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":5.5,"vac_solde":5769.0,"is_syn":false,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"ADM","name":"Larivi\u00e8re, Andr\u00e9","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":2.5,"vac_solde":0.0,"is_syn":false,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"ENG","name":"Perreault, Vincent","annotations":[],"is_mgr_admin":false,"util_latest":31.0,"util_trend":[31.0,0.0,0.0,90.0,8.8,59.2,37.8,null,71.4,65.6,72.5,62.5,11.8],"bill_latest":30.0,"zero_hours":false,"vac_weeks":4.6,"vac_solde":0.0,"is_syn":false,"cum_util":62.3,"cum_util_raw":62.3,"over_capacity":false,"overhead_avg":40.8,"bill_13wk":301.0,"vac_hrs_13wk":37.0},{"office":"MTL","dept":"OPS","name":"Bordeleau, Dominic","annotations":[],"is_mgr_admin":false,"util_latest":67.4,"util_trend":[67.4,30.7,5.8,7.3,44.3,51.4,65.0,29.7,26.5,88.3,0.0,22.2,70.3],"bill_latest":7.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":65.4,"cum_util_raw":65.4,"over_capacity":false,"overhead_avg":35.8,"bill_13wk":335.0,"vac_hrs_13wk":8.0},{"office":"MTL","dept":"","name":"Boudreault, Carole","annotations":[],"is_mgr_admin":false,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":2.1,"vac_solde":0.0,"is_syn":false,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Caron, Dominic","annotations":[],"is_mgr_admin":false,"util_latest":48.7,"util_trend":[48.7,48.7,null,25.9,0.0,0.0,null,null,44.4,null,null,50.0,null],"bill_latest":2.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":38.0,"cum_util_raw":38.0,"over_capacity":false,"overhead_avg":35.2,"bill_13wk":136.0,"vac_hrs_13wk":162.0},{"office":"MTL","dept":"","name":"Charest, David","annotations":[],"is_mgr_admin":false,"util_latest":81.2,"util_trend":[81.2,89.2,86.4,100.0,23.9,0.0,0.0,0.0,0.0,28.6,44.4,100.0,80.0],"bill_latest":6.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":61.4,"cum_util_raw":61.4,"over_capacity":false,"overhead_avg":42.0,"bill_13wk":315.5,"vac_hrs_13wk":6.0},{"office":"MTL","dept":"","name":"Cloutier, Migael","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,69.6,0.0,0.0,0.0,42.1,0.0,null,null,null,0.0,0.0,0.0],"bill_latest":43.5,"zero_hours":false,"vac_weeks":1.5,"vac_solde":1289.0,"is_syn":true,"cum_util":53.8,"cum_util_raw":53.8,"over_capacity":false,"overhead_avg":10.3,"bill_13wk":280.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Delisle, Am\u00e9lie","annotations":[],"is_mgr_admin":false,"util_latest":50.0,"util_trend":[50.0,38.5,30.8,0.0,0.0,2.9,0.0,0.0,0.0,45.7,57.1,21.6,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":86.7,"cum_util_raw":86.7,"over_capacity":false,"overhead_avg":18.6,"bill_13wk":402.5,"vac_hrs_13wk":56.0},{"office":"MTL","dept":"","name":"Duchesne, Fran\u00e7ois","annotations":[],"is_mgr_admin":false,"util_latest":12.6,"util_trend":[12.6,71.1,9.1,95.0,15.4,56.4,null,null,null,null,null,null,null],"bill_latest":41.5,"zero_hours":false,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":33.2,"cum_util_raw":33.2,"over_capacity":false,"overhead_avg":40.5,"bill_13wk":172.5,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Gendreau, Craig","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,0.0,null,37.5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":52.0,"cum_util_raw":52.0,"over_capacity":false,"overhead_avg":1.1,"bill_13wk":270.5,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Gervais, Gabriel","annotations":[],"is_mgr_admin":false,"util_latest":100.0,"util_trend":[100.0,100.0,11.3,63.2,null,null,null,null,null,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":10.4,"cum_util_raw":10.4,"over_capacity":false,"overhead_avg":48.8,"bill_13wk":54.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Grenon, Samuel","annotations":[],"is_mgr_admin":false,"util_latest":62.5,"util_trend":[null,62.5,18.4,10.6,15.7,35.6,29.3,10.4,52.0,29.8,44.2,28.6,50.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":70.3,"cum_util_raw":70.3,"over_capacity":false,"overhead_avg":32.3,"bill_13wk":337.5,"vac_hrs_13wk":40.0},{"office":"MTL","dept":"","name":"Kerrebyn, J\u00e9r\u00e9mie","annotations":[],"is_mgr_admin":false,"util_latest":58.3,"util_trend":[58.3,27.6,37.5,0.0,1.8,0.0,0.0,0.0,0.0,6.1,0.0,null,null],"bill_latest":4.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":69.5,"cum_util_raw":69.5,"over_capacity":false,"overhead_avg":12.1,"bill_13wk":344.5,"vac_hrs_13wk":24.0},{"office":"MTL","dept":"","name":"Kozak, Andrii","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,null],"bill_latest":36.0,"zero_hours":false,"vac_weeks":4.2,"vac_solde":7618.0,"is_syn":true,"cum_util":67.8,"cum_util_raw":67.8,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":352.5,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Laesser, St\u00e9phane","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,0.0,25.0,0.0,0.0,null,null,null,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":15.2,"cum_util_raw":15.2,"over_capacity":false,"overhead_avg":2.5,"bill_13wk":79.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Landry, Dylan","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,0.0,0.0,0.0,0.0,0.0,0.0,21.7,0.0,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":50.2,"cum_util_raw":50.2,"over_capacity":false,"overhead_avg":3.3,"bill_13wk":261.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Larvor, Mathilde","annotations":[],"is_mgr_admin":false,"util_latest":92.5,"util_trend":[92.5,null,87.5,79.3,96.9,null,null,null,null,null,null,null,null],"bill_latest":3.0,"zero_hours":false,"vac_weeks":0.2,"vac_solde":0.0,"is_syn":false,"cum_util":3.3,"cum_util_raw":3.3,"over_capacity":false,"overhead_avg":87.6,"bill_13wk":17.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Luu, Brandon","annotations":[],"is_mgr_admin":false,"util_latest":5.3,"util_trend":[null,null,null,null,null,5.3,0.0,null,null,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":10.6,"cum_util_raw":10.6,"over_capacity":false,"overhead_avg":3.5,"bill_13wk":55.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Montplaisir, Jonathan","annotations":[],"is_mgr_admin":false,"util_latest":27.4,"util_trend":[27.4,75.0,13.8,47.2,15.8,0.0,44.0,23.1,2.5,16.3,0.0,48.8,60.4],"bill_latest":34.5,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":94.4,"cum_util_raw":94.4,"over_capacity":false,"overhead_avg":26.6,"bill_13wk":483.5,"vac_hrs_13wk":8.0},{"office":"MTL","dept":"","name":"Paquin Thiffault, Joey","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,0.0,0.0,0.0,0.0,0.0,0.0,100.0,0.0,0.0,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":48.5,"cum_util_raw":48.5,"over_capacity":false,"overhead_avg":1.6,"bill_13wk":252.0,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Reyes, Rudolph","annotations":[],"is_mgr_admin":false,"util_latest":12.6,"util_trend":[12.6,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,60.0,0.0,0.0,0.0],"bill_latest":55.5,"zero_hours":false,"vac_weeks":3.0,"vac_solde":0.0,"is_syn":false,"cum_util":100.0,"cum_util_raw":109.9,"over_capacity":true,"overhead_avg":5.3,"bill_13wk":571.5,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Rodrigue, Steven","annotations":[],"is_mgr_admin":false,"util_latest":16.7,"util_trend":[16.7,0.0,0.0,0.0,0.0,0.0,39.7,40.0,2.2,4.8,0.0,0.0,0.0],"bill_latest":32.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":98.1,"cum_util_raw":98.1,"over_capacity":false,"overhead_avg":9.9,"bill_13wk":482.5,"vac_hrs_13wk":28.0},{"office":"MTL","dept":"","name":"St-Louis Rodrigue, Eric","annotations":[],"is_mgr_admin":false,"util_latest":100.0,"util_trend":[null,100.0,100.0,100.0,90.0,100.0,100.0,100.0,100.0,100.0,100.0,50.0,87.9],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":1.9,"cum_util_raw":1.9,"over_capacity":false,"overhead_avg":91.9,"bill_13wk":9.5,"vac_hrs_13wk":32.0},{"office":"MTL","dept":"PMG","name":"Avignon, Gina","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,87.5,67.5,77.5,96.9,null,null,null,null,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.3,"vac_solde":0.0,"is_syn":false,"cum_util":5.3,"cum_util_raw":5.3,"over_capacity":false,"overhead_avg":84.4,"bill_13wk":27.5,"vac_hrs_13wk":0.0},{"office":"MTL","dept":"","name":"Defrasne, Manon","annotations":[],"is_mgr_admin":false,"util_latest":50.0,"util_trend":[null,50.0,65.0,60.0,62.5,39.3,45.0,65.0,51.2,65.0,60.0,65.0,51.2],"bill_latest":0.0,"zero_hours":true,"vac_weeks":2.7,"vac_solde":0.0,"is_syn":false,"cum_util":40.3,"cum_util_raw":40.3,"over_capacity":false,"overhead_avg":56.5,"bill_13wk":209.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"ADM","name":"Lachance, Nicolas","annotations":[],"is_mgr_admin":true,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Ouellet, Lorianne","annotations":[],"is_mgr_admin":false,"util_latest":100.0,"util_trend":[100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0,100.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":0.0,"cum_util_raw":0.0,"over_capacity":false,"overhead_avg":100.0,"bill_13wk":0.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"ENG","name":"Francoeur, Simon","annotations":[],"is_mgr_admin":false,"util_latest":48.7,"util_trend":[48.7,24.2,39.1,9.1,1.9,48.4,0.0,0.0,0.0,44.2,12.5,35.4,4.4],"bill_latest":14.0,"zero_hours":false,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":98.4,"cum_util_raw":98.4,"over_capacity":false,"overhead_avg":18.6,"bill_13wk":398.5,"vac_hrs_13wk":115.0},{"office":"QUE","dept":"","name":"H\u00e9bert, David","annotations":[],"is_mgr_admin":true,"util_latest":72.9,"util_trend":[72.9,80.0,0.0,100.0,100.0,100.0,100.0,65.0,37.5,25.0,38.8,100.0,100.0],"bill_latest":5.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":30.6,"cum_util_raw":30.6,"over_capacity":false,"overhead_avg":69.4,"bill_13wk":156.5,"vac_hrs_13wk":8.0},{"office":"QUE","dept":"","name":"Martel, Jean-Fran\u00e7ois","annotations":[],"is_mgr_admin":true,"util_latest":41.9,"util_trend":[41.9,27.1,50.0,36.4,50.0,28.4,60.0,67.5,35.6,61.9,47.6,41.7,70.5],"bill_latest":20.5,"zero_hours":false,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":55.6,"cum_util_raw":55.6,"over_capacity":false,"overhead_avg":46.7,"bill_13wk":226.5,"vac_hrs_13wk":112.5},{"office":"QUE","dept":"","name":"Moreault, Elie","annotations":[],"is_mgr_admin":false,"util_latest":60.0,"util_trend":[60.0,100.0,90.0,77.8,66.7,75.0,3.2,1.4,0.0,16.3,23.8,8.5,20.0],"bill_latest":16.0,"zero_hours":false,"vac_weeks":1.9,"vac_solde":4105.0,"is_syn":true,"cum_util":73.8,"cum_util_raw":73.8,"over_capacity":false,"overhead_avg":35.9,"bill_13wk":378.0,"vac_hrs_13wk":8.0},{"office":"QUE","dept":"","name":"Popov, Valentyn","annotations":[],"is_mgr_admin":false,"util_latest":77.1,"util_trend":[null,77.1,100.0,75.0,66.7,67.9,0.0,0.0,0.0,0.0,41.7,0.0,24.5],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":75.2,"cum_util_raw":75.2,"over_capacity":false,"overhead_avg":34.8,"bill_13wk":346.0,"vac_hrs_13wk":60.0},{"office":"QUE","dept":"","name":"V\u00e9ronneau Dufresne, \u00c9liane","annotations":[],"is_mgr_admin":false,"util_latest":75.0,"util_trend":[75.0,45.0,70.6,50.0,42.5,63.7,100.0,100.0,66.7,50.6,100.0,75.0,83.8],"bill_latest":10.0,"zero_hours":false,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":26.2,"cum_util_raw":26.2,"over_capacity":false,"overhead_avg":69.7,"bill_13wk":126.0,"vac_hrs_13wk":39.0},{"office":"QUE","dept":"OPS","name":"Abruzzese, Scott","annotations":[],"is_mgr_admin":false,"util_latest":48.5,"util_trend":[48.5,0.0,0.0,50.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":8.5,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":100.0,"cum_util_raw":110.1,"over_capacity":true,"overhead_avg":5.9,"bill_13wk":546.0,"vac_hrs_13wk":24.0},{"office":"QUE","dept":"","name":"Ahmadi, Aref","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,null,0.0,0.0,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":97.0,"cum_util_raw":97.0,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":504.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Ball, Eric","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":48.0,"zero_hours":false,"vac_weeks":6.7,"vac_solde":14603.0,"is_syn":true,"cum_util":100.0,"cum_util_raw":166.5,"over_capacity":true,"overhead_avg":0.0,"bill_13wk":866.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Beaudin, Shaun","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,null,null,null,null],"bill_latest":44.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":93.3,"cum_util_raw":93.3,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":485.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Bourgault, Jo\u00ebl","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,0.0,null,null,0.0,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":4.6,"cum_util_raw":4.6,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":24.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Braun, Hardy","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":11.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":100.0,"cum_util_raw":108.0,"over_capacity":true,"overhead_avg":0.0,"bill_13wk":561.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Braun, Ofir","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":100.0,"cum_util_raw":120.7,"over_capacity":true,"overhead_avg":0.0,"bill_13wk":627.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Casselman, Jared","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,0.0,0.0,0.0,0.0,0.0,0.0,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":73.5,"cum_util_raw":73.5,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":382.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Delin, Craig","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":78.4,"cum_util_raw":78.4,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":407.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Dhawan, Amit","annotations":[],"is_mgr_admin":false,"util_latest":64.0,"util_trend":[64.0,100.0,100.0,100.0,100.0,25.9,null,null,null,null,null,null,null],"bill_latest":9.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":9.4,"cum_util_raw":9.4,"over_capacity":false,"overhead_avg":80.1,"bill_13wk":49.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Ducharme, S\u00e9bastien","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,0.0,null,null,0.0,null,0.0,0.0,0.0,0.0,0.0,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":68.3,"cum_util_raw":68.3,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":355.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Edmunds, Kiley","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":84.5,"cum_util_raw":84.5,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":439.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Farrell, Michael","annotations":[],"is_mgr_admin":false,"util_latest":50.0,"util_trend":[null,null,null,null,50.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":80.8,"cum_util_raw":80.8,"over_capacity":false,"overhead_avg":0.2,"bill_13wk":419.5,"vac_hrs_13wk":1.0},{"office":"QUE","dept":"","name":"Keosseuian, Raffi","annotations":[],"is_mgr_admin":false,"util_latest":50.0,"util_trend":[null,50.0,50.0,50.0,50.0,60.0,60.0,50.0,53.8,50.0,50.0,50.0,50.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":10.3,"vac_solde":17018.0,"is_syn":false,"cum_util":43.8,"cum_util_raw":43.8,"over_capacity":false,"overhead_avg":51.9,"bill_13wk":212.0,"vac_hrs_13wk":36.0},{"office":"QUE","dept":"","name":"Khan, Muhammad Khalid Asad","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,0.0,4.5,0.0,0.0,0.0,0.0,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":19.0,"vac_solde":41764.0,"is_syn":true,"cum_util":43.7,"cum_util_raw":43.7,"over_capacity":false,"overhead_avg":0.9,"bill_13wk":227.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Mesh, Benjamin","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,0.0,0.0,0.0,0.0,0.0,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":64.8,"cum_util_raw":64.8,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":337.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Milliard, JF","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,null,null,null,null,null,null,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":4.6,"cum_util_raw":4.6,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":24.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Moisan, Phylip","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,0.0,0.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":55.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":100.0,"cum_util_raw":130.2,"over_capacity":true,"overhead_avg":0.0,"bill_13wk":677.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Pearson, Jonathan","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null],"bill_latest":44.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":98.0,"cum_util_raw":98.0,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":509.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Perreault Magny, Guillaume","annotations":[],"is_mgr_admin":false,"util_latest":15.6,"util_trend":[15.6,46.5,45.0,70.0,72.2,25.0,0.0,49.3,80.0,53.3,0.0,0.0,26.7],"bill_latest":27.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":58.2,"cum_util_raw":58.2,"over_capacity":false,"overhead_avg":34.3,"bill_13wk":302.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Peters, Mark","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":44.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":100.0,"cum_util_raw":121.8,"over_capacity":true,"overhead_avg":0.0,"bill_13wk":633.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Picard, Marc-Andr\u00e9","annotations":[],"is_mgr_admin":false,"util_latest":50.0,"util_trend":[null,null,null,50.0,50.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":98.0,"cum_util_raw":98.0,"over_capacity":false,"overhead_avg":10.8,"bill_13wk":449.0,"vac_hrs_13wk":62.0},{"office":"QUE","dept":"","name":"Plunkett, Jason","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,null,null,null,0.0,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":0.2,"cum_util_raw":0.2,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":1.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Sobolev, Igor","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,null,null],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":96.4,"cum_util_raw":96.4,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":501.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Tingley, Brent","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[null,null,null,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":false,"cum_util":83.0,"cum_util_raw":83.0,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":431.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Whyte, Jared","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,0.0,0.0,null,0.0,0.0,null,null,0.0,null,null,null,null],"bill_latest":55.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":73.7,"cum_util_raw":73.7,"over_capacity":false,"overhead_avg":0.0,"bill_13wk":383.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Wilson, Joshua","annotations":[],"is_mgr_admin":false,"util_latest":0.0,"util_trend":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":44.0,"zero_hours":false,"vac_weeks":0.0,"vac_solde":0.0,"is_syn":true,"cum_util":100.0,"cum_util_raw":133.1,"over_capacity":true,"overhead_avg":0.0,"bill_13wk":692.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"PMG","name":"Becker, Charlene","annotations":[],"is_mgr_admin":true,"util_latest":0.0,"util_trend":[null,null,0.0,0.0,0.0,16.7,20.0,0.0,0.0,0.0,0.0,0.0,0.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":77.6,"cum_util_raw":77.6,"over_capacity":false,"overhead_avg":3.6,"bill_13wk":397.5,"vac_hrs_13wk":7.5},{"office":"QUE","dept":"","name":"Christodoulou, Lisa","annotations":[],"is_mgr_admin":false,"util_latest":50.0,"util_trend":[null,null,null,null,null,null,null,50.0,50.0,50.0,50.0,40.0,40.0],"bill_latest":0.0,"zero_hours":true,"vac_weeks":null,"vac_solde":null,"is_syn":null,"cum_util":21.8,"cum_util_raw":21.8,"over_capacity":false,"overhead_avg":46.8,"bill_13wk":108.0,"vac_hrs_13wk":24.0},{"office":"QUE","dept":"","name":"Henry, Kristen","annotations":[],"is_mgr_admin":false,"util_latest":60.0,"util_trend":[60.0,40.0,60.0,40.0,40.0,40.0,40.0,40.0,40.0,40.0,40.0,40.0,40.0],"bill_latest":15.0,"zero_hours":false,"vac_weeks":2.5,"vac_solde":0.0,"is_syn":false,"cum_util":53.4,"cum_util_raw":53.4,"over_capacity":false,"overhead_avg":43.1,"bill_13wk":277.5,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Martel, \u00c9tienne","annotations":[],"is_mgr_admin":false,"util_latest":37.5,"util_trend":[null,37.5,50.0,41.2,56.2,33.8,36.2,48.8,36.2,100.0,100.0,100.0,16.7],"bill_latest":0.0,"zero_hours":true,"vac_weeks":1.3,"vac_solde":0.0,"is_syn":false,"cum_util":36.3,"cum_util_raw":36.3,"over_capacity":false,"overhead_avg":44.1,"bill_13wk":189.0,"vac_hrs_13wk":0.0},{"office":"QUE","dept":"","name":"Th\u00e9berge, Louis-Pier","annotations":[],"is_mgr_admin":true,"util_latest":16.7,"util_trend":[16.7,0.0,0.0,0.0,69.6,0.0,0.0,0.0,0.0,0.0,10.0,0.0,0.0],"bill_latest":40.0,"zero_hours":false,"vac_weeks":6.4,"vac_solde":6107.0,"is_syn":false,"cum_util":94.2,"cum_util_raw":94.2,"over_capacity":false,"overhead_avg":8.2,"bill_13wk":490.0,"vac_hrs_13wk":0.0}],"emb_employees":[{"name":"Olivier Marcotte","hire":"2010-01-01","years":16.3,"days_until":256,"milestone":null},{"name":"Mathieu Marcotte","hire":"2011-08-28","years":14.6,"days_until":130,"milestone":15},{"name":"ROCK SAMSON","hire":"2013-01-13","years":13.2,"days_until":268,"milestone":null},{"name":"SYLVAIN HUARD","hire":"2013-11-04","years":12.4,"days_until":198,"milestone":null},{"name":"Mathieu Beauchesne","hire":"2012-04-01","years":14.0,"days_until":346,"milestone":null},{"name":"Jean-Fran\u00e7ois Martel","hire":"2012-10-08","years":13.5,"days_until":171,"milestone":null},{"name":"Alexandre Cyr","hire":"2012-12-02","years":13.3,"days_until":226,"milestone":null},{"name":"Simon Gonzalez Sirois","hire":"2015-05-12","years":10.9,"days_until":22,"milestone":null},{"name":"Scott Abruzzese","hire":"2018-12-23","years":5.9,"days_until":247,"milestone":null},{"name":"Carl-Emmanuel Tr\u00e9panier","hire":"2016-06-13","years":9.8,"days_until":54,"milestone":10},{"name":"Simon Francoeur","hire":"2013-04-22","years":5.4,"days_until":2,"milestone":5},{"name":"St\u00e9phane Embarki","hire":"2018-01-04","years":8.3,"days_until":259,"milestone":null},{"name":"Samuel Grenon","hire":"2013-05-27","years":4.6,"days_until":37,"milestone":5},{"name":"J\u00e9r\u00e9mie Kerrebyn","hire":"2013-08-02","years":0.6,"days_until":104,"milestone":null},{"name":"Michael Legros","hire":"2018-06-20","years":1.9,"days_until":61,"milestone":null},{"name":"Louis-Philippe Dion","hire":"2018-07-30","years":7.7,"days_until":101,"milestone":null},{"name":"Ren\u00e9e Lachance","hire":"2015-03-02","years":11.1,"days_until":316,"milestone":null},{"name":"Sophie Ricard","hire":"2021-04-05","years":0.2,"days_until":350,"milestone":null},{"name":"Camille Ryo","hire":"2021-07-26","years":4.7,"days_until":97,"milestone":5},{"name":"Olivier D\u00e9ry","hire":"2022-05-02","years":3.9,"days_until":12,"milestone":null},{"name":"Francis Boudreault-Leclerc","hire":"2016-02-29","years":10.1,"days_until":null,"milestone":10},{"name":"Simon Trudeau","hire":"2022-09-08","years":3.6,"days_until":141,"milestone":null},{"name":"Elie Moreault","hire":"2016-02-29","years":4.7,"days_until":null,"milestone":5},{"name":"Ricardo Moran","hire":"2023-10-02","years":2.5,"days_until":165,"milestone":null},{"name":"Helene Tremblay","hire":"2024-04-02","years":2.0,"days_until":347,"milestone":null},{"name":"Robert Wong Penne","hire":"2024-05-14","years":1.9,"days_until":24,"milestone":null},{"name":"S\u00e9bastien Ducharme","hire":"2016-04-18","years":0.0,"days_until":363,"milestone":null},{"name":"Richard Martineau","hire":"2024-08-05","years":0.1,"days_until":107,"milestone":null},{"name":"Oussema Mekni","hire":"2024-09-09","years":1.6,"days_until":142,"milestone":null},{"name":"Alexandre Lachance","hire":"2025-03-10","years":1.1,"days_until":324,"milestone":null},{"name":"Maxime Germain-Tremblay","hire":"2025-05-12","years":0.9,"days_until":22,"milestone":null},{"name":"Loic Simard","hire":"2025-05-12","years":0.9,"days_until":22,"milestone":null},{"name":"Jean Fr\u00e9d\u00e9ric Legros","hire":"2025-06-09","years":0.8,"days_until":50,"milestone":null},{"name":"Phylip Moisan","hire":"2016-07-04","years":5.7,"days_until":75,"milestone":null},{"name":"Marcos Paulo Souza","hire":"2025-08-18","years":0.6,"days_until":120,"milestone":null},{"name":"Joey Boivin","hire":"2025-08-11","years":0.7,"days_until":113,"milestone":null},{"name":"M\u00e9gan Carrier","hire":"2025-12-03","years":0.3,"days_until":227,"milestone":null},{"name":"Clint Soya","hire":"2026-03-12","years":0.1,"days_until":326,"milestone":null},{"name":"Craig Gendreau","hire":"2018-12-23","years":0.0,"days_until":247,"milestone":null},{"name":"Shaun Beaudin","hire":"2019-06-19","years":0.2,"days_until":60,"milestone":null},{"name":"David H\u00e9bert","hire":"2017-05-15","years":4.3,"days_until":25,"milestone":null},{"name":"Nicolas Lachance","hire":"2017-10-13","years":8.5,"days_until":176,"milestone":null},{"name":"Am\u00e9lie Delisle","hire":"2017-11-13","years":1.3,"days_until":207,"milestone":null},{"name":"Timoth\u00e9 Falardeau","hire":"2018-01-08","years":0.8,"days_until":263,"milestone":null},{"name":"Emmanuel Aggrey","hire":"2018-01-15","years":8.2,"days_until":270,"milestone":null},{"name":"Laurent Fleury","hire":"2018-06-04","years":4.7,"days_until":45,"milestone":5},{"name":"Igor Sobolev","hire":"2018-06-18","years":0.2,"days_until":59,"milestone":null},{"name":"Eric St-Louis Rodrigue","hire":"2018-06-26","years":7.8,"days_until":67,"milestone":null},{"name":"Jonathan Pearson","hire":"2018-07-03","years":4.9,"days_until":74,"milestone":5},{"name":"Cynthia Dorval","hire":"2018-08-06","years":6.1,"days_until":108,"milestone":null},{"name":"Valentyn Popov","hire":"2018-11-05","years":7.4,"days_until":199,"milestone":null},{"name":"Joey Paquin Thiffault","hire":"2018-11-07","years":0.7,"days_until":201,"milestone":null},{"name":"Pascal Laurey","hire":"2018-11-26","years":7.4,"days_until":220,"milestone":null},{"name":"Raffi Keosseuian","hire":"2019-01-07","years":7.3,"days_until":262,"milestone":null},{"name":"Vinoth Tharmakulasingam","hire":"2018-12-07","years":7.3,"days_until":231,"milestone":null},{"name":"Joshua Wilson","hire":"2019-02-25","years":5.6,"days_until":311,"milestone":5},{"name":"Dominic Bordeleau","hire":"2019-03-25","years":6.0,"days_until":339,"milestone":null},{"name":"Jean-Valery De Blois","hire":"2019-04-08","years":1.4,"days_until":353,"milestone":null},{"name":"Carole Boudreault","hire":"2019-04-08","years":7.0,"days_until":353,"milestone":null},{"name":"Louis-Pier Th\u00e9berge","hire":"2019-04-29","years":1.2,"days_until":9,"milestone":null},{"name":"\u00c9liane V\u00e9ronneau Dufresne","hire":"2019-04-29","years":6.9,"days_until":9,"milestone":null},{"name":"Muhammad Khalid Asad Khan","hire":"2019-04-30","years":0.0,"days_until":10,"milestone":null},{"name":"Amit Dhawan","hire":"2019-07-15","years":0.1,"days_until":86,"milestone":null},{"name":"Hardy Braun","hire":"2019-09-10","years":6.6,"days_until":143,"milestone":null},{"name":"Aref Ahmadi","hire":"2019-09-16","years":0.3,"days_until":149,"milestone":null},{"name":"Adam Pinard-Th\u00e9berge","hire":"2019-10-15","years":2.2,"days_until":178,"milestone":null},{"name":"Claudia St-Jacques","hire":"2019-11-18","years":6.4,"days_until":212,"milestone":null},{"name":"\u00c9tienne Martel","hire":"2020-05-25","years":1.5,"days_until":35,"milestone":null},{"name":"Aubin Chaboty","hire":"2020-09-21","years":0.9,"days_until":154,"milestone":null},{"name":"David Charest","hire":"2020-10-26","years":5.5,"days_until":189,"milestone":5},{"name":"Charlene Becker","hire":"2020-11-16","years":4.0,"days_until":210,"milestone":null},{"name":"\u00c9ric Carmichael","hire":"2021-03-08","years":5.1,"days_until":322,"milestone":5},{"name":"Francis Talbot","hire":"2021-05-17","years":4.9,"days_until":27,"milestone":5},{"name":"Dominic Caron","hire":"2021-05-31","years":0.2,"days_until":41,"milestone":null},{"name":"Lisa Christodoulou","hire":"2021-06-21","years":4.8,"days_until":62,"milestone":5},{"name":"Andrii Kozak","hire":"2021-08-16","years":4.6,"days_until":118,"milestone":5},{"name":"Dylan Landry","hire":"2021-08-09","years":0.2,"days_until":111,"milestone":null},{"name":"Guillaume Perreault Magny","hire":"2021-08-30","years":0.5,"days_until":132,"milestone":null},{"name":"Eric Ball","hire":"2021-08-30","years":4.6,"days_until":132,"milestone":5},{"name":"Ofir Braun","hire":"2021-09-27","years":0.2,"days_until":160,"milestone":null},{"name":"Mark Peters","hire":"2021-09-19","years":4.6,"days_until":152,"milestone":5},{"name":"Cesar Viteri","hire":"2021-10-18","years":3.6,"days_until":181,"milestone":null},{"name":"Kourtney Cadwell","hire":"2021-12-20","years":4.3,"days_until":244,"milestone":null},{"name":"Jared Whyte","hire":"2022-02-17","years":0.2,"days_until":303,"milestone":null},{"name":"Vincent Perreault","hire":"2022-05-09","years":2.6,"days_until":19,"milestone":null},{"name":"Amen Allah Chetoui","hire":"2022-06-06","years":0.3,"days_until":47,"milestone":null},{"name":"Eric Babineau","hire":"2022-05-06","years":3.6,"days_until":16,"milestone":null},{"name":"Alexia St-Laurent","hire":"2022-07-18","years":3.7,"days_until":89,"milestone":null},{"name":"Julien Claveau","hire":"2022-10-31","years":3.4,"days_until":194,"milestone":null},{"name":"Steven Rodrigue","hire":"2020-10-31","years":0.5,"days_until":194,"milestone":null},{"name":"Andr\u00e9 Larivi\u00e8re","hire":"2023-01-16","years":3.2,"days_until":271,"milestone":null},{"name":"Manon Defrasne","hire":"2023-02-27","years":1.5,"days_until":313,"milestone":null},{"name":"Gabriel Gervais","hire":"2025-07-30","years":0.1,"days_until":101,"milestone":null},{"name":"St\u00e9phane Laesser","hire":"2023-03-14","years":0.1,"days_until":328,"milestone":null},{"name":"Kristen Henry","hire":"2023-03-27","years":3.0,"days_until":341,"milestone":null},{"name":"Migael Cloutier","hire":"2023-05-08","years":0.1,"days_until":18,"milestone":null},{"name":"Sevan Bouchy","hire":"2024-03-04","years":2.1,"days_until":318,"milestone":null},{"name":"Rudolph Reyes","hire":"2024-04-15","years":2.0,"days_until":360,"milestone":null},{"name":"Matthieu Beaulieu","hire":"2024-04-22","years":2.0,"days_until":2,"milestone":null},{"name":"Hugo Herv\u00e9-C\u00f4te","hire":"2024-08-12","years":1.7,"days_until":114,"milestone":null},{"name":"Filip Ilic","hire":"2024-10-20","years":0.1,"days_until":183,"milestone":null},{"name":"Jonathan Montplaisir","hire":"2024-11-20","years":1.4,"days_until":214,"milestone":null},{"name":"Kassandra Lemay","hire":"2024-11-18","years":1.4,"days_until":212,"milestone":null},{"name":"Lorianne Ouellet","hire":"2025-03-20","years":1.1,"days_until":334,"milestone":null},{"name":"Sarah-Kim P\u00e9chard","hire":"2025-05-20","years":0.9,"days_until":30,"milestone":null},{"name":"Marc-Antoine Blanchet","hire":"2025-08-03","years":0.7,"days_until":105,"milestone":null},{"name":"Mitia Randriamiarisoa","hire":"2025-09-11","years":0.6,"days_until":144,"milestone":null},{"name":"Ali Eliasu","hire":"2025-10-01","years":0.5,"days_until":164,"milestone":null},{"name":"Mitch West","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Claudya Desjardins","hire":"2025-11-24","years":0.4,"days_until":218,"milestone":null},{"name":"Shanny Tremblay","hire":"2025-12-01","years":0.4,"days_until":225,"milestone":null},{"name":"Jonathan Eustace","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Joel Djordjevic","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Diane Ward","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Brooklyn Althouse","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Gary Belter","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Keith Reichenbach","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Rosalie Martel","hire":"2025-12-02","years":0.4,"days_until":226,"milestone":null},{"name":"Wendy Davies","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Declan Scully","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Jonathan Rioux","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Benjamin Scott","hire":"2025-12-21","years":0.3,"days_until":245,"milestone":null},{"name":"Ethan Cryenest","hire":"2026-02-01","years":0.2,"days_until":287,"milestone":null},{"name":"Ashonti Retzlaff-Bear","hire":"2026-01-26","years":0.2,"days_until":281,"milestone":null},{"name":"Rick Carlton","hire":"2026-02-01","years":0.2,"days_until":287,"milestone":null},{"name":"Aurelien Thon","hire":"2026-03-02","years":0.1,"days_until":316,"milestone":null},{"name":"Francois Duchesne","hire":"2026-02-23","years":0.1,"days_until":309,"milestone":null},{"name":"Gina Avignon","hire":"2026-03-05","years":0.1,"days_until":319,"milestone":null},{"name":"Mathilde Larvor","hire":"2026-03-05","years":0.1,"days_until":319,"milestone":null},{"name":"Bryan Campbell","hire":"2026-03-04","years":0.1,"days_until":318,"milestone":null},{"name":"Guisef Misheal","hire":"2026-03-20","years":0.1,"days_until":334,"milestone":null},{"name":"Genevi\u00e8ve Pelletier","hire":"2026-04-01","years":0.0,"days_until":346,"milestone":null},{"name":"Benoit-Joseph Dupuis","hire":"2026-03-30","years":0.0,"days_until":344,"milestone":null}],"vac_employees":[{"name":"Ball, Eric","weeks":6.7,"solde":14603.0,"type":"Unionized"},{"name":"Beauchesne, Mathieu","weeks":4.2,"solde":15696.0,"type":"Unionized"},{"name":"Moreault, Elie","weeks":1.9,"solde":4105.0,"type":"Unionized"},{"name":"Cyr, Alexandre","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Montplaisir, Jonathan","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"H\u00e9bert, David","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Khan, Muhammad Khalid Asad","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Kozak, Andrii","weeks":4.2,"solde":7618.0,"type":"Unionized"},{"name":"Bordeleau, Dominic","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Ducharme, S\u00e9bastien","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Cloutier, Migael","weeks":1.5,"solde":1289.0,"type":"Unionized"},{"name":"Popov, Valentyn","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Marcotte, Olivier","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Eliasu, Ali","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Abruzzese, Scott","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Scully, Declan","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Kerrebyn, J\u00e9r\u00e9mie","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Charest, David","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Wilson, Joshua","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"St-Louis Rodrigue, Eric","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Grenon, Samuel","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Duchesne, Francois","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Moisan, Phylip","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Campbell, Bryan","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Chetoui, Amen Allah","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Rodrigue, Steven","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Rioux, Jonathan","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Ahmadi, Aref","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Althouse, Brooklyn","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Babineau, Eric","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Beaudin, Shaun","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Braun, Hardy","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Braun, Ofir","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Caron, Dominic","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Cryenest, Ethan","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Delisle, Am\u00e9lie","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Dhawan, Amit","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Gendreau, Craig","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Gervais, Gabriel","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Herv\u00e9-C\u00f4te, Hugo","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Ilic, Filip","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Laesser, St\u00e9phane","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Landry, Dylan","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Misheal, Guisef","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Paquin Thiffault, Joey","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Pearson, Jonathan","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Perreault Magny, Guillaume","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Peters, Mark","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Retzlaff-Bear, Ashonti","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Scott, Benjamin","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Sobolev, Igor","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Whyte, Jared","weeks":0.0,"solde":0.0,"type":"Unionized"},{"name":"Khan, Muhammad Khalid Asad","weeks":19.0,"solde":41764.0,"type":"Non-unionized"},{"name":"Tharmakulasingam, Vinoth","weeks":10.7,"solde":19216.0,"type":"Non-unionized"},{"name":"Marcotte, Mathieu","weeks":19.6,"solde":24475.0,"type":"Non-unionized"},{"name":"Keosseuian, Raffi","weeks":10.3,"solde":17018.0,"type":"Non-unionized"},{"name":"Blanchet, Marc-Antoine","weeks":5.5,"solde":5769.0,"type":"Non-unionized"},{"name":"Falardeau, Timoth\u00e9","weeks":6.1,"solde":792.0,"type":"Non-unionized"},{"name":"Th\u00e9berge, Louis-Pier","weeks":6.4,"solde":6107.0,"type":"Non-unionized"},{"name":"Perreault, Vincent","weeks":4.6,"solde":0.0,"type":"Non-unionized"},{"name":"Scott, Benjamin","weeks":3.1,"solde":6967.0,"type":"Non-unionized"},{"name":"Scully, Declan","weeks":3.0,"solde":6930.0,"type":"Non-unionized"},{"name":"Viteri, Cesar","weeks":3.3,"solde":0.0,"type":"Non-unionized"},{"name":"Reyes, Rudolph","weeks":3.0,"solde":0.0,"type":"Non-unionized"},{"name":"Davies, Wendy","weeks":3.2,"solde":3129.0,"type":"Non-unionized"},{"name":"Defrasne, Manon","weeks":2.7,"solde":0.0,"type":"Non-unionized"},{"name":"Henry, Kristen","weeks":2.5,"solde":0.0,"type":"Non-unionized"},{"name":"Larivi\u00e8re, Andr\u00e9","weeks":2.5,"solde":0.0,"type":"Non-unionized"},{"name":"Reichenbach, Keith","weeks":1.0,"solde":0.0,"type":"Non-unionized"},{"name":"Boudreault, Carole","weeks":2.1,"solde":0.0,"type":"Non-unionized"},{"name":"Eustace, Jonathan","weeks":0.9,"solde":0.0,"type":"Non-unionized"},{"name":"Carlton, Rick","weeks":0.7,"solde":0.0,"type":"Non-unionized"},{"name":"Martel, \u00c9tienne","weeks":1.3,"solde":0.0,"type":"Non-unionized"},{"name":"West, Mitch","weeks":0.5,"solde":0.0,"type":"Non-unionized"},{"name":"Belter, Gary","weeks":0.4,"solde":0.0,"type":"Non-unionized"},{"name":"Herv\u00e9-C\u00f4te, Hugo","weeks":0.5,"solde":0.0,"type":"Non-unionized"},{"name":"Thon, Aurelien","weeks":0.3,"solde":0.0,"type":"Non-unionized"},{"name":"Avignon, Gina","weeks":0.3,"solde":0.0,"type":"Non-unionized"},{"name":"Larvor, Mathilde","weeks":0.2,"solde":0.0,"type":"Non-unionized"}],"cum_util_company":40.5,"cum_util_by_office":{"EDM":18.2,"GTE":35.7,"HQ":6.9,"MTL":45.6,"QUE":69.6},"cum_util_target":75.0,"capacity_hrs_13wk":520.0};
+
+// ── GLOBALS ──────────────────────────────────────────────────────────────────
+var EMPS   = DATA.employees    || [];
+var VACEMP = DATA.vac_employees|| [];
+var EMBEMP = DATA.emb_employees|| [];
+var offFilter    = 'all';
+var statFilter   = 'all';
+var sortCol      = 'util_latest';
+var sortAsc      = false;
+var annFilter    = '90';
+var EXCLUDED     = {};   // name -> true, persisted across renders
+var exclMgr      = false; // exclude managers/admin from util calculations
+var visRows      = [];   // current visible roster rows — global so onclick can reference
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('page-meta').textContent =
+  'Source: BC export · Week ending ' + DATA.util_week_ending +
+  ' · Updated ' + DATA.people_updated + ' · Jon Eustace CEO NA';
+var utilWk = document.getElementById('util-week');
+if(utilWk) utilWk.textContent = DATA.util_week_ending;
+var pdEl = document.getElementById('people-date');
+if(pdEl) pdEl.textContent = DATA.people_updated;
+
+// nav scroll
+var navAs = document.querySelectorAll('.unav-links a');
+var secIds = ['util','roster','people','vacation','anniversaries'];
+var secs = secIds.map(function(id){ return document.getElementById(id); });
+window.addEventListener('scroll', function(){
+  var y = window.scrollY + 80;
+  var active = 0;
+  secs.forEach(function(s,i){ if(s && s.offsetTop <= y) active = i; });
+  navAs.forEach(function(a,i){ a.classList.toggle('active', i===active); });
+}, {passive:true});
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function utilColor(v, target) {
+  // Overhead %: lower is better
+  if(v===null||v===undefined) return 'rgba(255,255,255,.07)';
+  if(v <= target)       return '#14532D';   // green — low overhead
+  if(v <= target * 3)   return '#78350F';   // amber — medium
+  return '#7F1D1D';                         // red — high overhead
+}
+function utilClass(v, t) {
+  // Overhead %: lower is better. t = max acceptable (e.g. 15%)
+  if(v===null||v===undefined) return 'n';
+  if(v <= t)       return 'g';   // at or under target — green
+  if(v <= t * 3)   return 'a';   // moderate overhead — amber
+  return 'r';                    // high overhead — red
+}
+function mspark(trend, h) {
+  if(!trend||!trend.length) return '';
+  var mx = Math.max.apply(null, trend.map(function(v){ return v||0; })) || 1;
+  var t  = DATA.util_target||85;
+  return trend.map(function(v){
+    var ht = v ? Math.max(2, Math.round((v/mx)*h)) : 2;
+    var c  = utilColor(v, t);
+    return '<span class="ms" style="width:4px;height:'+ht+'px;background:'+c+';border-radius:1px 1px 0 0;display:inline-block"></span>';
+  }).join('');
+}
+
+// ── UTILIZATION ───────────────────────────────────────────────────────────────
+function getPool() {
+  return EMPS.filter(function(e){
+    if(EXCLUDED[e.name]) return false;
+    if(exclMgr && e.is_mgr_admin) return false;
+    if(offFilter !== 'all' && e.office !== offFilter) return false;
+    return true;
+  });
+}
+function calcUtil() {
+  // 13-week cumulative overhead: total non-bill / total paid across all weeks and pool
+  // overhead_avg per employee = non_13wk / paid_13wk, stored directly
+  var pool = getPool().filter(function(e){ return e.overhead_avg!==null && e.overhead_avg!==undefined; });
+  if(!pool.length) return DATA.util_total_latest||0;
+  // Weighted average: weight each employee by their total paid hours (bill_13wk is a proxy)
+  // Exact: use overhead_avg * weight where weight = bill_13wk + non_13wk + vac_hrs_13wk
+  // We have bill_13wk and vac_hrs_13wk stored. non_13wk = overhead_avg/100 * paid_13wk
+  // paid_13wk = bill_13wk / (1 - overhead_avg/100) ... circular
+  // Simplest correct approach: simple average of overhead_avg across pool employees
+  // (matches what the roster column shows and is consistent)
+  return Math.round(pool.reduce(function(s,e){ return s+(e.overhead_avg||0); },0)/pool.length*10)/10;
+}
+function calcCumUtil() {
+  // Cumulative util for current pool: bill_13wk / (capacity - vac)
+  var pool = getPool();
+  var CAPACITY_13WK = DATA.capacity_hrs_13wk || 520.0;
+  var totalBill = pool.reduce(function(s,e){ return s + (e.bill_13wk||0); }, 0);
+  var totalVac  = pool.reduce(function(s,e){
+    // estimate vac from capacity difference: cap - (cap * (1 - overhead_avg/100))
+    // simpler: use vac weeks from vac file if available, else 0
+    return s + (e.vac_weeks ? e.vac_weeks * 40 : 0);
+  }, 0);
+  var capLessVac = Math.max(1, pool.length * CAPACITY_13WK - totalVac);
+  return Math.round(totalBill / capLessVac * 1000) / 10;
+}
+function calc13wkAvg() {
+  // Average across all 13 weeks and all non-excluded employees with data that week
+  var pool = getPool();
+  var weekTotals = [];
+  for(var w=0; w<13; w++) {
+    var vals = pool.map(function(e){ return e.util_trend && e.util_trend[w]; })
+                   .filter(function(v){ return v!==null && v!==undefined; });
+    if(vals.length) weekTotals.push(vals.reduce(function(s,v){ return s+v; },0)/vals.length);
+  }
+  if(!weekTotals.length) return DATA.util_13wk_avg||0;
+  return Math.round(weekTotals.reduce(function(s,v){ return s+v; },0)/weekTotals.length*10)/10;
+}
+function onMgrToggle() {
+  exclMgr = document.getElementById('mgr-toggle').checked;
+  renderUtil();
+  renderRoster();
+}
+function xclRow(btn) {
+  var idx = parseInt(btn.getAttribute('data-idx'));
+  if(visRows && visRows[idx]) toggleExclusion(visRows[idx].name);
+}
+function toggleExclusion(name) {
+  if(EXCLUDED[name]) { delete EXCLUDED[name]; }
+  else               { EXCLUDED[name] = true; }
+  updateExclSummary();
+  renderUtil();
+  renderRoster();
+}
+function clearAllExclusions() {
+  EXCLUDED = {};
+  updateExclSummary();
+  renderUtil();
+  renderRoster();
+}
+function updateExclSummary() {
+  var el = document.getElementById('excl-summary');
+  var n  = Object.keys(EXCLUDED).length;
+  if(!el) return;
+  if(n === 0) {
+    el.className = 'excl-summary none';
+    el.innerHTML = 'No exclusions';
+  } else {
+    el.className = 'excl-summary';
+    el.innerHTML = '<strong>'+n+'</strong> excluded from util &nbsp;·&nbsp; click to reset all';
+    var lbl = document.getElementById('excl-clear-label');
+    if(lbl) lbl.textContent = Object.keys(EXCLUDED).map(function(k){ return k.split(',')[0]; }).join(', ')+' — individually excluded from utilization';
+  }
+  // Also show/hide the clear-row at top of table body
+  var cr = document.getElementById('excl-clear-row');
+  if(cr) cr.style.display = n > 0 ? '' : 'none';
+}
+
+function renderUtil() {
+  var t   = DATA.util_target||85;
+  var cur = calcUtil();
+  var nexcl = Object.keys(EXCLUDED).length;
+  var pool = getPool();
+  var wd   = pool.filter(function(e){ return e.util_latest!==null; }).length;
+  var cumUtil   = calcCumUtil();
+  var cumTarget = DATA.cum_util_target||75;
+  var OLABELS = {all:'Company',EDM:'Edmonton',GTE:'Whitby/GTE',HQ:'QC HQ',MTL:'Montréal',QUE:'Quebec City',GEN:'General'};
+  var offLabel = OLABELS[offFilter]||offFilter;
+  var mgrNote  = exclMgr ? ' · excl. mgr/admin' : '';
+  var kpis = [
+    {v:(cur||0).toFixed(1)+'%', l:'Overhead % — '+offLabel, s:'13-wk avg · non-bill ÷ total paid'+mgrNote+(nexcl?' · '+nexcl+' excl':''), c:utilClass(cur,t)},
+    {v:cumUtil.toFixed(1)+'%', l:'Utilization — '+offLabel, s:'Billable ÷ (2000h capacity − vacation) · 13 wks'+mgrNote, c:cumUtil>=cumTarget?'g':cumUtil>=cumTarget*.8?'a':'r'},
+    {v:cumTarget+'%', l:'Utilization target', s:'Minimum billable rate goal', c:''},
+  ];
+  document.getElementById('util-kpis').innerHTML = kpis.map(function(k){
+    return '<div class="kpi"><div class="kpi-val '+k.c+'">'+k.v+'<\/div><div class="kpi-lbl">'+k.l+'<\/div><div class="kpi-sub">'+k.s+'<\/div><\/div>';
+  }).join('');
+
+
+
+  // Office grid
+  var og = document.getElementById('office-grid');
+  var OLABELS = {EDM:'Edmonton',GTE:'Whitby / GTE',HQ:'QC Headquarters',MTL:'Montréal',QUE:'Quebec City Ops'};
+  if(og && DATA.util_by_office) {
+    og.innerHTML = Object.keys(DATA.util_by_office).map(function(off){
+      var o   = DATA.util_by_office[off];
+      var lat = o.latest;
+      var avg = o.avg_13wk;
+      var tr  = o.trend||[];
+      var bc  = utilClass(lat, t);
+      var mx2 = Math.max.apply(null, tr.map(function(w){ return w.util||0; }))||1;
+      var sparks = tr.map(function(w){
+        var ht = w.util ? Math.max(2, Math.round((w.util/mx2)*32)) : 2;
+        return '<span class="spark-b" style="flex:1;height:'+ht+'px;background:'+utilColor(w.util,t)+'" title="'+(w.week||'')+': '+(w.util||'—')+'%"><\/span>';
+      }).join('');
+      return '<div class="office-card">'+
+        '<div class="oc-hdr">'+
+          '<span class="oc-name">'+(OLABELS[off]||off)+'<\/span>'+
+          '<span class="oc-badge '+bc+'">'+(lat!==null?lat+'%':'—')+'<\/span>'+
+        '<\/div>'+
+        '<div class="spark">'+sparks+'<\/div>'+
+        '<div class="oc-stats">'+
+          '<div><div class="oc-stat-val">'+(lat!==null?lat+'%':'—')+'<\/div><div class="oc-stat-lbl">Overhead%<\/div><\/div>'+
+          '<div><div class="oc-stat-val">'+((DATA.cum_util_by_office&&DATA.cum_util_by_office[off])||'—')+'%<\/div><div class="oc-stat-lbl">Cum. util<\/div><\/div>'+
+        '<\/div>'+
+      '<\/div>';
+    }).join('');
+  }
+}
+
+// ── ROSTER ───────────────────────────────────────────────────────────────────
+// ── VAC CELL ────────────────────────────────────────────────────────────────
+function vacLiability(e) {
+  var s = e.vac_solde;
+  if(s === null || s === undefined || s === 0) {
+    return '<span style="font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.15)">—<\/span>';
+  }
+  var cls = s >= 10000 ? 'vac-hi' : s >= 3000 ? 'vac-mid' : 'vac-lo';
+  return '<span class="vac-num '+cls+'" style="font-size:.68rem">$'+
+    Math.round(s).toLocaleString('en-CA')+'<\/span>';
+}
+
+function setOff(v, el) {
+  offFilter = v;
+  document.querySelectorAll('#off-pills .pill').forEach(function(p){ p.classList.remove('on'); });
+  el.classList.add('on');
+  renderUtil();
+  renderRoster();
+}
+function setStat(v, el) {
+  statFilter = v;
+  document.querySelectorAll('#stat-pills .pill').forEach(function(p){ p.classList.remove('on'); });
+  el.classList.add('on');
+  renderRoster();
+}
+function doSort(col) {
+  sortAsc = sortCol===col ? !sortAsc : true;
+  sortCol = col;
+  document.querySelectorAll('.tbl th').forEach(function(th){ th.classList.remove('s'); if(th.querySelector('.arr')) th.querySelector('.arr').textContent='↕'; });
+  var idx = [null,'name',null,'office','dept','overhead_avg','cum_util','bill_13wk','vac_hrs_13wk','vac_solde'];
+  var ths = document.querySelectorAll('.tbl th');
+  idx.forEach(function(c,i){ if(c===col&&ths[i]){ ths[i].classList.add('s'); ths[i].querySelector('.arr').textContent=sortAsc?'↑':'↓'; }});
+  renderRoster();
+}
+
+
+function renderRoster() {
+  var t   = DATA.util_target||85;
+  var srch= (document.getElementById('roster-search').value||'').toLowerCase();
+  var rows= EMPS.filter(function(e){
+    if(offFilter!=='all' && e.office!==offFilter) return false;
+    if(srch && !e.name.toLowerCase().includes(srch)) return false;
+    if(statFilter==='hi'   && !(e.util_latest>=80)) return false;
+    if(statFilter==='lo'   && !(e.util_latest!==null && e.util_latest<40)) return false;
+    if(statFilter==='zero' && e.bill_13wk>0) return false;
+    if(statFilter==='highvac' && !(e.vac_hrs_13wk>=40)) return false;
+    return true;
+  });
+  rows.sort(function(a,b){
+    var av=a[sortCol], bv=b[sortCol];
+    if(av===null||av===undefined) av=sortAsc?1e9:-1e9;
+    if(bv===null||bv===undefined) bv=sortAsc?1e9:-1e9;
+    if(typeof av==='string') av=av.toLowerCase();
+    if(typeof bv==='string') bv=bv.toLowerCase();
+    return sortAsc?(av>bv?1:-1):(av<bv?1:-1);
+  });
+
+  // Zero alert
+  var zeros = getPool().filter(function(e){ return e.zero_hours; });
+  var zaEl  = document.getElementById('zero-alert');
+  if(zaEl) {
+    if(zeros.length) {
+      var byOff={};
+      zeros.forEach(function(e){ byOff[e.office]=(byOff[e.office]||0)+1; });
+      var offStr=Object.keys(byOff).map(function(o){ return o+' '+byOff[o]; }).join('  ·  ');
+      zaEl.innerHTML='<div class="zero-alert"><span class="za-label">'+zeros.length+' technicians with zero billable hours last week<\/span><span class="za-off">'+offStr+'<\/span><\/div>';
+    } else { zaEl.innerHTML=''; }
+  }
+
+  var tbody = document.getElementById('roster-body');
+  var cntEl = document.getElementById('roster-count');
+  var poolSize = getPool().length;
+  if(cntEl) cntEl.textContent = rows.length+' / '+EMPS.length+' employees'+(exclMgr?' · mgr/admin excl.':'')+(offFilter!=='all'?' · '+offFilter:'');
+  // Inject clear-row at top of table if exclusions active
+  var cr = document.getElementById('excl-clear-row');
+  if(cr) cr.style.display = Object.keys(EXCLUDED).length > 0 ? '' : 'none';
+  if(!tbody) return;
+
+  visRows = rows;
+  tbody.innerHTML = rows.map(function(e,ri){
+    var uc  = utilClass(e.overhead_avg!==null&&e.overhead_avg!==undefined?e.overhead_avg:e.util_latest, t);
+    var uStr= e.overhead_avg!==null&&e.overhead_avg!==undefined?e.overhead_avg+'%':'—';
+    var dimCls = EXCLUDED[e.name] ? ' class="excluded-row"' : '';
+    var hrsCls = e.bill_13wk>0 ? 'hrs has' : 'hrs';
+    var typeStr= e.is_mgr_admin ? 'Mgr/Admin' : 'Tech/Ops';
+    var xBtn='<td style="width:36px;text-align:center">'
+      +'<button class="excl-btn'+(EXCLUDED[e.name]?' excluded':'')+'"'
+      +' data-idx="'+ri+'" onclick="xclRow(this)"'
+      +' title="'+(EXCLUDED[e.name]?'Re-include':'Exclude from util avg')+'"'
+      +'>'+(EXCLUDED[e.name]?'\u21A9':'\u2715')+'<\/button><\/td>';
+    return '<tr'+dimCls+'>'+xBtn+
+      '<td><span class="emp-name">'+e.name+'<\/span><\/td>'+
+      '<td><span class="type-lbl">'+typeStr+'<\/span><\/td>'+
+      '<td><span class="ob ob-'+e.office+'">'+e.office+'<\/span><\/td>'+
+      '<td style="font-family:var(--mono);font-size:.65rem;color:var(--muted)">'+e.dept+'<\/td>'+
+      '<td><span class="uv '+uc+'">'+uStr+'<\/span><\/td>'+
+      '<td><span class="uv '+(e.cum_util===null||e.cum_util===undefined?'n':e.cum_util>=75?'g':e.cum_util>=60?'a':'r')+'"'+' title="'+(e.over_capacity?'Over standard capacity · '+e.cum_util_raw+'%':'Cumulative utilization rate')+'">'+(e.cum_util!==null&&e.cum_util!==undefined?(e.over_capacity?'✦ ':'')+(e.over_capacity?e.cum_util_raw:e.cum_util)+'%':'—')+'<\/span><\/td>'+
+      '<td><span class="'+hrsCls+'" title="Total billable hours over 13 weeks">'+(e.bill_13wk||'—')+(e.bill_13wk?'h':'')+'<\/span><\/td>'+
+      '<td><span class="hrs'+(e.vac_hrs_13wk>0?' has':'')+'">'+(e.vac_hrs_13wk||'—')+(e.vac_hrs_13wk?'h':'')+'<\/span><\/td>'+
+      '<td>'+vacLiability(e)+'<\/td>'+
+      '<\/tr>';
+  }).join('');
+}
+
+
+// ── PEOPLE / TENURE ──────────────────────────────────────────────────────────
+function renderPeople() {
+  document.getElementById('people-kpis').innerHTML = [
+    {v:DATA.headcount_active, l:'Active employees', s:'All active Nucleom staff', c:''},
+    {v:DATA.tenure_avg_years+' yrs', l:'Avg tenure', s:'Across all active staff', c:DATA.tenure_avg_years<2?'r':DATA.tenure_avg_years<4?'a':'g'},
+    {v:DATA.retention_risk_under_1yr, l:'Under 1 year', s:Math.round(DATA.retention_risk_under_1yr/DATA.headcount_active*100)+'% of workforce', c:'r'},
+    {v:DATA.headcount_active-DATA.retention_risk_under_1yr, l:'1+ year tenure', s:'Established employees', c:'g'},
+  ].map(function(k){
+    return '<div class="kpi"><div class="kpi-val '+k.c+'">'+k.v+'<\/div><div class="kpi-lbl">'+k.l+'<\/div><div class="kpi-sub">'+k.s+'<\/div><\/div>';
+  }).join('');
+
+  var total = DATA.headcount_active;
+  var buckets = DATA.tenure_buckets||{};
+  var rows = [
+    {k:'under_1yr',l:'< 1 yr', fill:'#991B1B', tc:'#F87171'},
+    {k:'yr_1_3',   l:'1–3 yrs',fill:'#92400E', tc:'#FCD34D'},
+    {k:'yr_3_5',   l:'3–5 yrs',fill:'#14532D', tc:'#4ADE80'},
+    {k:'yr_5_10',  l:'5–10 yrs',fill:'#155E75',tc:'#67E8F9'},
+    {k:'yr_10_plus',l:'10+ yrs',fill:'#1E3A5F',tc:'#BAE6FD'},
+  ];
+  document.getElementById('tenure-bars').innerHTML = rows.map(function(r){
+    var n = buckets[r.k]||0;
+    var pct = Math.round(n/total*100);
+    return '<div class="tenure-row">'+
+      '<span class="ten-lbl">'+r.l+'<\/span>'+
+      '<div class="ten-track"><div class="ten-fill" style="width:'+pct+'%;background:'+r.fill+'"><\/div><\/div>'+
+      '<span class="ten-count" style="color:'+r.tc+'">'+n+'<\/span>'+
+      '<span class="ten-pct">'+pct+'%<\/span>'+
+    '<\/div>';
+  }).join('');
+
+  var riskPct = Math.round(DATA.retention_risk_under_1yr/total*100);
+  document.getElementById('risk-num').textContent = DATA.retention_risk_under_1yr+' employees';
+  document.getElementById('risk-desc').innerHTML =
+    '<strong style="color:#F87171">'+riskPct+'%<\/strong> of the active workforce has been with Nucleom less than 1 year. '+
+    'This concentration of new hires increases delivery risk. Monitor through Carol-Anne Lindsay — flag to Jon if under-1yr count grows above '+Math.round(total*.45)+'.';
+}
+
+// ── VACATION ─────────────────────────────────────────────────────────────────
+function renderVacation() {
+  document.getElementById('vac-strip').innerHTML = [
+    {v:'$'+(DATA.vac_liability_total_cad||0).toLocaleString('en-CA',{maximumFractionDigits:0}), l:'Total liability', s:'Both unionized + non-unionized · CAD', w:(DATA.vac_liability_total_cad||0)>100000},
+    {v:'$'+(DATA.vac_liability_syn_cad||0).toLocaleString('en-CA',{maximumFractionDigits:0}), l:'Unionized liability', s:'Hourly workers · CAD', w:false},
+    {v:'$'+(DATA.vac_liability_nonsyn_cad||0).toLocaleString('en-CA',{maximumFractionDigits:0}), l:'Non-unionized liability', s:'Salaried staff · CAD', w:(DATA.vac_liability_nonsyn_cad||0)>100000},
+    {v:DATA.vac_high_balance_count, l:'High balance', s:'> 4 weeks accrued (all staff)', w:DATA.vac_high_balance_count>5},
+  ].map(function(k){
+    return '<div class="vac-stat"><div class="vac-val'+(k.w?' w':'')+'" >'+k.v+'<\/div><div class="vac-lbl">'+k.l+'<\/div><div class="vac-sub">'+k.s+'<\/div><\/div>';
+  }).join('');
+}
+
+// ── ANNIVERSARIES ─────────────────────────────────────────────────────────────
+function setAnn(v, el) {
+  annFilter = v;
+  document.querySelectorAll('#ann-pills .pill').forEach(function(p){ p.classList.remove('on'); });
+  el.classList.add('on');
+  renderAnniversaries();
+}
+function renderAnniversaries() {
+  var all90 = EMBEMP.filter(function(e){ return e.days_until!==null&&e.days_until<=90; });
+  var all180= EMBEMP.filter(function(e){ return e.days_until!==null&&e.days_until<=180; });
+  var allMs = EMBEMP.filter(function(e){ return !!e.milestone; });
+  var cnt   = document.getElementById('ann-counts');
+  if(cnt) cnt.innerHTML =
+    '<div class="ann-count"><div class="ann-count-val">'+all90.length+'<\/div><div class="ann-count-lbl">90 days<\/div><\/div>'+
+    '<div class="ann-count"><div class="ann-count-val">'+all180.length+'<\/div><div class="ann-count-lbl">6 months<\/div><\/div>'+
+    '<div class="ann-count"><div class="ann-count-val ms">'+allMs.length+'<\/div><div class="ann-count-lbl">Milestones<\/div><\/div>';
+
+  var emps = EMBEMP.filter(function(e){ return e.days_until!==null; });
+  if(annFilter==='90')   emps=emps.filter(function(e){ return e.days_until<=90; });
+  if(annFilter==='180')  emps=emps.filter(function(e){ return e.days_until<=180; });
+  if(annFilter==='ms')   emps=emps.filter(function(e){ return !!e.milestone; });
+  emps.sort(function(a,b){ return a.days_until-b.days_until; });
+
+  var grid = document.getElementById('ann-grid');
+  if(!grid) return;
+  if(!emps.length) { grid.innerHTML='<div style="color:var(--muted);padding:1.5rem;text-align:center">No anniversaries in this range.<\/div>'; return; }
+  grid.innerHTML = emps.map(function(e){
+    var nc = e.days_until===0?'today':e.days_until<=14?'hot':e.days_until<=45?'warm':'cool';
+    var ds = e.days_until===0?'Today':e.days_until+'d';
+    var us = e.days_until===0?'🎉':'away';
+    var msBadge = e.milestone ? '<span class="ms-badge">★ '+e.milestone+' yr<\/span>' : '';
+    var yrTag   = '<span class="yr-tag">'+e.years+' yrs<\/span>';
+    var msCls   = e.milestone ? ' ms-card' : '';
+    return '<div class="ac'+msCls+'">'+
+      '<div class="ac-days"><div class="ac-n '+nc+'">'+ds+'<\/div><div class="ac-u">'+us+'<\/div><\/div>'+
+      '<div class="ac-info">'+
+        '<div class="ac-name">'+e.name+msBadge+yrTag+'<\/div>'+
+        '<div class="ac-sub">Hired '+(e.hire?e.hire.slice(0,7):'—')+'<\/div>'+
+      '<\/div>'+
+    '<\/div>';
+  }).join('');
+}
+
+// ── UPLOAD STUB ───────────────────────────────────────────────────────────────
+function handleUpload(files) {
+  var s = document.getElementById('upload-status');
+  s.textContent = 'Processing '+files.length+' file(s)...';
+  setTimeout(function(){ s.textContent = '⚠ Manual parsing coming soon — use PA flow for auto-update'; }, 1500);
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
+renderUtil();
+renderRoster();
+renderPeople();
+renderVacation();
+renderAnniversaries();
+</script>
+</body>
+</html>

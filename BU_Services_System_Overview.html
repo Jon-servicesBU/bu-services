@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BU Services — System Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#161C60;--navy2:#0D1040;--white:#fff;--body:#384660;
+  --lgrey:#F0F3FA;--mgrey:#DDE3F0;
+  --green:#196B24;--green2:#22882F;--green-l:#E8F5E9;
+  --amber:#C9860A;--amber-l:#FFF8E1;
+  --red:#CC2222;--red-l:#FFEBEE;
+  --blue:#0A3A6B;--blue-l:#E8F4FD;
+  --teal:#0D5050;--teal-l:#E1F5EE;
+  --dyn:#4B1D8F;--dyn-l:#EDE9FE;
+  --orange:#C9520A;--orange-l:#FFF3EC;
+  --fd:'Barlow Condensed',sans-serif;
+  --fs:'Barlow',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fs);font-size:0.95rem;color:var(--body);background:#F5F7FC;line-height:1.7;}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--navy);padding:0 2.5rem;height:56px;display:flex;align-items:center;gap:1.5rem;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--green2);}
+.topbar-brand{font-family:var(--fd);font-size:1rem;font-weight:900;color:#fff;letter-spacing:1px;white-space:nowrap;}
+.topbar-sep{width:1px;height:20px;background:rgba(255,255,255,0.15);}
+.topbar-nav{display:flex;gap:0;overflow-x:auto;;scrollbar-width:none;-ms-overflow-style:none}
+.topbar-nav::-webkit-scrollbar{display:none}
+.topbar-nav a{font-family:var(--fd);font-size:0.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.45);padding:0 0.85rem;height:56px;line-height:56px;text-decoration:none;border-bottom:3px solid transparent;margin-bottom:-3px;white-space:nowrap;transition:color .15s,border-color .15s;}
+.topbar-nav a:hover{color:#fff;}
+.topbar-nav a.act{color:#fff;border-bottom-color:var(--green2);}
+.topbar-right{margin-left:auto;font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.25);white-space:nowrap;}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(160deg,var(--navy2) 0%,var(--navy) 100%);padding:3.5rem 2.5rem 3rem;border-bottom:1px solid rgba(255,255,255,0.06);}
+.hero-eyebrow{font-family:var(--mono);font-size:0.65rem;font-weight:500;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.6rem;}
+.hero h1{font-family:var(--fd);font-size:2.8rem;font-weight:900;color:#fff;line-height:1.05;margin-bottom:0.5rem;}
+.hero h1 em{color:var(--green2);font-style:normal;}
+.hero-sub{font-size:1rem;color:rgba(255,255,255,0.55);max-width:700px;margin-bottom:2rem;line-height:1.65;}
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;max-width:860px;}
+.kpi{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:0.9rem 1rem;}
+.kpi-val{font-family:var(--fd);font-size:1.6rem;font-weight:900;color:#fff;line-height:1;}
+.kpi-lbl{font-size:0.68rem;color:rgba(255,255,255,0.35);margin-top:0.25rem;line-height:1.4;}
+
+/* ── PAGE LAYOUT ── */
+.page{max-width:1100px;margin:0 auto;padding:2.5rem 2.5rem 5rem;}
+
+/* ── SECTION HEADERS ── */
+.sec-hdr{display:flex;align-items:baseline;gap:1rem;margin:3rem 0 1.25rem;padding-bottom:0.6rem;border-bottom:2px solid var(--mgrey);}
+.sec-hdr h2{font-family:var(--fd);font-size:1.5rem;font-weight:900;color:var(--navy);}
+.sec-hdr .sec-sub{font-size:0.78rem;color:rgba(0,0,0,0.3);font-family:var(--mono);}
+.sec-eyebrow{font-family:var(--mono);font-size:0.6rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,0.25);margin-bottom:0.3rem;}
+
+/* ── STATUS PILLS ── */
+.pill{display:inline-flex;align-items:center;gap:0.3rem;font-family:var(--mono);font-size:0.62rem;font-weight:600;padding:0.15rem 0.55rem;border-radius:4px;}
+.pill-green{background:var(--green-l);color:var(--green);}
+.pill-amber{background:var(--amber-l);color:var(--amber);}
+.pill-blue{background:var(--blue-l);color:var(--blue);}
+.pill-grey{background:var(--lgrey);color:#666;}
+.pill-red{background:var(--red-l);color:var(--red);}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+
+/* ── CARDS ── */
+.card-grid{display:grid;gap:0.85rem;}
+.card-grid-2{grid-template-columns:1fr 1fr;}
+.card-grid-3{grid-template-columns:1fr 1fr 1fr;}
+.card{background:#fff;border:1px solid var(--mgrey);border-radius:10px;overflow:hidden;}
+.card-top{height:4px;}
+.card-body{padding:1.1rem 1.25rem;}
+.card-title{font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.25rem;}
+.card-sub{font-size:0.75rem;color:rgba(0,0,0,0.4);margin-bottom:0.75rem;}
+.card-desc{font-size:0.83rem;color:var(--body);line-height:1.65;}
+.card-footer{padding:0.55rem 1.25rem;background:var(--lgrey);border-top:1px solid var(--mgrey);font-size:0.72rem;color:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:space-between;}
+
+/* ── DOC LIST ── */
+.doc-list{display:grid;gap:0.5rem;}
+.doc-row{background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:0.75rem 1rem;display:flex;align-items:center;gap:0.85rem;}
+.doc-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);font-size:0.6rem;font-weight:700;color:#fff;}
+.doc-name{font-family:var(--fd);font-size:0.9rem;font-weight:700;color:var(--navy);flex:1;}
+.doc-desc{font-size:0.76rem;color:rgba(0,0,0,0.4);}
+
+/* ── DATA FLOW ── */
+.flow-row{display:flex;align-items:center;gap:0;margin-bottom:0.5rem;flex-wrap:wrap;}
+.flow-box{padding:0.4rem 0.85rem;border-radius:5px;font-family:var(--mono);font-size:0.7rem;font-weight:600;white-space:nowrap;}
+.flow-arrow{font-size:0.9rem;color:var(--mgrey);padding:0 0.4rem;flex-shrink:0;}
+.flow-note{font-size:0.75rem;color:rgba(0,0,0,0.35);margin-left:0.5rem;}
+
+/* ── PENDING ITEMS ── */
+.pending-list{display:grid;gap:0.5rem;}
+.pending-item{background:#fff;border-left:4px solid var(--amber);border-radius:0 8px 8px 0;padding:0.85rem 1.1rem;border-top:1px solid var(--mgrey);border-right:1px solid var(--mgrey);border-bottom:1px solid var(--mgrey);}
+.pending-item.critical{border-left-color:var(--red);}
+.pending-item.info{border-left-color:var(--blue);}
+.pending-title{font-family:var(--fd);font-size:0.95rem;font-weight:800;color:var(--navy);margin-bottom:0.25rem;display:flex;align-items:center;gap:0.5rem;}
+.pending-body{font-size:0.82rem;color:var(--body);line-height:1.6;}
+.pending-owner{font-family:var(--mono);font-size:0.65rem;color:rgba(0,0,0,0.35);margin-top:0.35rem;}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+.data-table th{background:var(--navy2);color:#fff;font-family:var(--fd);font-size:0.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.55rem 0.75rem;text-align:left;}
+.data-table td{padding:0.5rem 0.75rem;border-bottom:1px solid var(--lgrey);color:var(--body);vertical-align:top;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:nth-child(even) td{background:var(--lgrey);}
+.tbl-wrap{border:1px solid var(--mgrey);border-radius:8px;overflow:hidden;margin:0.75rem 0;}
+
+/* ── CALLOUT ── */
+.callout{border-radius:8px;padding:1rem 1.25rem;margin:1rem 0;}
+.callout-green{background:var(--green-l);border-left:4px solid var(--green2);}
+.callout-amber{background:var(--amber-l);border-left:4px solid var(--amber);}
+.callout-blue{background:var(--blue-l);border-left:4px solid var(--blue);}
+.callout-red{background:var(--red-l);border-left:4px solid var(--red);}
+.callout-title{font-family:var(--fd);font-size:0.85rem;font-weight:800;margin-bottom:0.3rem;}
+.callout-body{font-size:0.82rem;line-height:1.65;}
+
+/* ── STEP LIST ── */
+.step-list{display:grid;gap:0.5rem;margin:0.75rem 0;}
+.step{display:flex;gap:0.85rem;background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:0.85rem 1rem;}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fd);font-size:0.85rem;font-weight:900;color:#fff;background:var(--navy);margin-top:0.1rem;}
+.step-body{flex:1;}
+.step-title{font-family:var(--fd);font-size:0.9rem;font-weight:800;color:var(--navy);margin-bottom:0.2rem;}
+.step-desc{font-size:0.82rem;color:var(--body);line-height:1.6;}
+
+/* ── INITIATIVE CARDS ── */
+.init-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.65rem;margin:0.75rem 0;}
+.init-card{background:#fff;border:1px solid var(--mgrey);border-radius:8px;overflow:hidden;}
+.init-hdr{padding:0.65rem 0.85rem;color:#fff;font-family:var(--fd);}
+.init-num{font-size:0.65rem;font-weight:700;letter-spacing:1px;opacity:0.7;margin-bottom:0.1rem;}
+.init-name{font-size:0.82rem;font-weight:900;line-height:1.2;}
+.init-body{padding:0.65rem 0.85rem;}
+.init-row{display:flex;justify-content:space-between;font-size:0.72rem;padding:0.18rem 0;border-bottom:1px solid var(--lgrey);}
+.init-row:last-child{border-bottom:none;}
+.init-lbl{color:rgba(0,0,0,0.4);}
+.init-val{font-family:var(--mono);font-weight:600;color:var(--navy);}
+
+/* ── JSON FIELDS ── */
+.field-group{margin:0.75rem 0;}
+.field-group-title{font-family:var(--mono);font-size:0.65rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,0.3);border-bottom:1px solid var(--mgrey);padding-bottom:0.3rem;margin-bottom:0.5rem;}
+.field-chips{display:flex;flex-wrap:wrap;gap:0.35rem;}
+.field-chip{font-family:var(--mono);font-size:0.68rem;padding:0.18rem 0.55rem;border-radius:4px;border:1px solid;}
+
+/* ── FOOTER ── */
+.doc-footer{background:var(--navy2);padding:1.5rem 2.5rem;text-align:center;margin-top:3rem;}
+.doc-footer p{font-size:0.72rem;color:rgba(255,255,255,0.25);}
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<nav class="topbar">
+  <div class="topbar-brand">BU Services</div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-nav">
+    <a href="#overview" class="act">Overview</a>
+    <a href="#plan">Master Plan</a>
+    <a href="#command-centre">Command Centre</a>
+    <a href="#people">Management Hub</a>
+    <a href="#deck">Deck Automation</a>
+    <a href="#data-flow">Data Flow</a>
+    <a href="#done">What's Done</a>
+    <a href="#pending">What's Pending</a>
+    <a href="#howto">How To Connect</a>
+    <a href="#files">All Files</a>
+  </div>
+  <div class="topbar-right">Ekoscan Integrity Group &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; April 2026</div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-eyebrow">Ekoscan Integrity Group &nbsp;·&nbsp; North America</div>
+  <h1>BU Services<br><em>System Overview</em></h1>
+  <p class="hero-sub">Everything built, how it connects, what is still pending, and exactly what to do next. One document covering the master plan, the Command Centre, the data integrations, and the meeting and operational infrastructure.</p>
+  <div class="kpi-strip">
+    <div class="kpi"><div class="kpi-val">$92.8M</div><div class="kpi-lbl">2030 total revenue target</div></div>
+    <div class="kpi"><div class="kpi-val">$50.4M</div><div class="kpi-lbl">2026 forecast base + initiatives</div></div>
+    <div class="kpi"><div class="kpi-val">5</div><div class="kpi-lbl">Growth initiatives</div></div>
+    <div class="kpi"><div class="kpi-val">110</div><div class="kpi-lbl">Fields in actuals.json</div></div>
+    <div class="kpi"><div class="kpi-val">13</div><div class="kpi-lbl">Automatable deck slides (of 22)</div></div>
+  </div>
+</div>
+
+<!-- ── PAGE ── -->
+<div class="page">
+
+<!-- ────────────────────────────────────────────────────────────────────
+     SECTION 1 — OVERVIEW
+──────────────────────────────────────────────────────────────────────── -->
+<div id="overview" class="sec-hdr"><h2>What Has Been Built</h2><span class="sec-sub">full system summary</span></div>
+
+<p style="font-size:0.9rem;line-height:1.75;margin-bottom:1.25rem;">
+  This system is a fully integrated commercial management platform for BU Services (Nucleom + Nortech). It was built in three layers: the strategic documents that define the plan, the Command Centre portal that tracks execution in real time, and the data infrastructure that keeps it current automatically. The three layers are designed to work independently — if any one piece is unavailable, the others continue to function.
+</p>
+
+<div class="callout callout-blue">
+  <div class="callout-title" style="color:var(--blue);">The core idea in one sentence</div>
+  <div class="callout-body">A set of HTML documents anyone can open in a browser, a single JSON file that carries all live data, a Power Automate flow that writes to that file every Sunday, a People &amp; Capacity Dashboard showing overhead %, utilization, and vacation liability for all 126 employees in real time, and a people management system that gives every person a clear lane — so the business runs with structure, visibility, and shared accountability without anyone manually chasing information.</div>
+</div>
+
+<div style="margin-top:1.5rem;" class="card-grid card-grid-2">
+  <div class="card">
+    <div class="card-top" style="background:#196B24;"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Layer 1</div>
+      <div class="card-title">The Commercial Plan</div>
+      <div class="card-desc">Eleven HTML documents covering the master plan, five initiative plans, and three audience variants. Contain strategy, financial targets, gate criteria, risk register, execution sprints, ownership matrix, and governance cadence. Read in a browser, linked from the Command Centre.</div>
+    </div>
+    <div class="card-footer"><span class="pill pill-green"><span class="pill-dot"></span>COMPLETE</span><span>11 documents</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:#161C60;"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Layer 2</div>
+      <div class="card-title">The Command Centre</div>
+      <div class="card-desc">A single HTML portal with 15 sections: Revenue Foundation, Initiative Progress, Revenue by Region, Revenue by Month, Deck Report, Meeting Health, Gate Milestones, Risk Register, Document Library, Conference ROI, Proposal Health, Revenue Reconciliation, Nuclear Outage Calendar, Weekly Email Digest, and System Status. Reads actuals.json on load. Updates instantly when the file changes.</div>
+    </div>
+    <div class="card-footer"><span class="pill pill-green"><span class="pill-dot"></span>COMPLETE</span><span>15 sections live</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:#C9860A;"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Layer 3</div>
+      <div class="card-title">The Data Infrastructure</div>
+      <div class="card-desc">actuals.json on SharePoint. Power Automate Sunday flow querying Salesforce. Manual update process for Nortech and utilisation. Three pending connections: Dynamics 365 for invoiced actuals, SharePoint Lists for meeting actions, OneNote for meeting minutes.</div>
+    </div>
+    <div class="card-footer"><span class="pill pill-amber"><span class="pill-dot"></span>MOSTLY LIVE</span><span>3 pending</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:var(--teal)"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Layer 4</div>
+      <div class="card-title">The People &amp; Operations Layer</div>
+      <div class="card-desc">The Management Hub, Meeting Hub, 16 role briefs, three weekly rhythm card sets, and the onboarding one-pager. Covers the full org structure, individual mandates, the Mon–Sun operating rhythm, 9 standing meeting agendas with the 2026 gate schedule, and a complete document library. Designed to work independently — the org and role structure is self-contained even before the data integrations are live.</div>
+    </div>
+    <div class="card-footer"><span class="pill pill-green"><span class="pill-dot"></span>COMPLETE</span><span>Ready to distribute</span></div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────────────────
+     SECTION 2 — MASTER PLAN
+──────────────────────────────────────────────────────────────────────── -->
+<div id="plan" class="sec-hdr"><h2>The Master Commercial Plan</h2><span class="sec-sub">what it contains</span></div>
+
+<p style="font-size:0.9rem;line-height:1.75;margin-bottom:1.25rem;">
+  The master plan is a five-year commercial strategy for BU Services covering 2026–2030. It targets $92.8M total revenue by 2030 through a combination of growing base business (Nucleom and Nortech) and five new growth initiatives. The plan was built to transform BU Services and covers strategy, financial modelling, execution, governance, HR, and risk.
+</p>
+
+<div class="tbl-wrap">
+  <table class="data-table">
+    <thead><tr><th>Revenue layer</th><th>2026 target</th><th>2027</th><th>2028</th><th>2029</th><th>2030</th><th>5-year total</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Base business (Nucleom + Nortech)</strong></td><td>$47.2M</td><td>$53.1M</td><td>$58.0M</td><td>$59.9M</td><td>$55.4M</td><td>$273.6M</td></tr>
+      <tr><td>+ Five growth initiatives</td><td>$3.2M</td><td>$18.6M</td><td>$25.7M</td><td>$32.6M</td><td>$37.4M</td><td>$117.5M</td></tr>
+      <tr><td><strong>BU Services total</strong></td><td><strong>$50.4M</strong></td><td><strong>$71.7M</strong></td><td><strong>$83.7M</strong></td><td><strong>$92.5M</strong></td><td><strong>$92.8M</strong></td><td><strong>$391.1M</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="init-grid">
+  <div class="init-card">
+    <div class="init-hdr" style="background:#C9860A;">
+      <div class="init-num">INITIATIVE 01</div>
+      <div class="init-name">Canadian Mining NDT</div>
+    </div>
+    <div class="init-body">
+      <div class="init-row"><span class="init-lbl">2026 target</span><span class="init-val">$0.41M</span></div>
+      <div class="init-row"><span class="init-lbl">5-year</span><span class="init-val">$17.9M</span></div>
+      <div class="init-row"><span class="init-lbl">Owner</span><span class="init-val">Vinoth / Max</span></div>
+    </div>
+  </div>
+  <div class="init-card">
+    <div class="init-hdr" style="background:#368CD9;">
+      <div class="init-num">INITIATIVE 02</div>
+      <div class="init-name">Pipeline Integrity DA</div>
+    </div>
+    <div class="init-body">
+      <div class="init-row"><span class="init-lbl">2026 target</span><span class="init-val">$2.00M</span></div>
+      <div class="init-row"><span class="init-lbl">5-year</span><span class="init-val">$30.0M</span></div>
+      <div class="init-row"><span class="init-lbl">Owner</span><span class="init-val">Rick Carlton</span></div>
+    </div>
+  </div>
+  <div class="init-card">
+    <div class="init-hdr" style="background:#E97132;">
+      <div class="init-num">INITIATIVE 03</div>
+      <div class="init-name">Powerline Inspection</div>
+    </div>
+    <div class="init-body">
+      <div class="init-row"><span class="init-lbl">2026 target</span><span class="init-val">$0.37M</span></div>
+      <div class="init-row"><span class="init-lbl">5-year</span><span class="init-val">$10.2M</span></div>
+      <div class="init-row"><span class="init-lbl">Owner</span><span class="init-val">Mathieu / Vinoth</span></div>
+    </div>
+  </div>
+  <div class="init-card">
+    <div class="init-hdr" style="background:#22882F;">
+      <div class="init-num">INITIATIVE 04</div>
+      <div class="init-name">Nuclear / OPG</div>
+    </div>
+    <div class="init-body">
+      <div class="init-row"><span class="init-lbl">2026 target</span><span class="init-val">$0.30M</span></div>
+      <div class="init-row"><span class="init-lbl">5-year</span><span class="init-val">$47.9M</span></div>
+      <div class="init-row"><span class="init-lbl">Owner</span><span class="init-val">Olivier / Vinoth</span></div>
+    </div>
+  </div>
+  <div class="init-card">
+    <div class="init-hdr" style="background:#6B3FA0;">
+      <div class="init-num">INITIATIVE 05</div>
+      <div class="init-name">3X Composite Repair</div>
+    </div>
+    <div class="init-body">
+      <div class="init-row"><span class="init-lbl">2026 target</span><span class="init-val">$0.05M</span></div>
+      <div class="init-row"><span class="init-lbl">5-year</span><span class="init-val">$11.4M</span></div>
+      <div class="init-row"><span class="init-lbl">Owner</span><span class="init-val">Vinoth / Max</span></div>
+    </div>
+  </div>
+</div>
+
+<p style="font-size:0.82rem;color:rgba(0,0,0,0.45);margin-top:0.5rem;">All figures CAD. Base business targets assume organic growth on existing Nucleom and Nortech accounts. Initiative figures are incremental new revenue only.</p>
+
+<div style="margin-top:1.5rem;">
+  <h3 style="font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Plan documents — three audience versions</h3>
+  <div class="tbl-wrap">
+    <table class="data-table">
+      <thead><tr><th>File</th><th>Use for</th><th>What's different</th></tr></thead>
+      <tbody>
+        <tr><td><code>Master_Commercial_Plan_v8.html</code></td><td>Jon Eustace, Olivier, Mathieu, EIG, Eurazeo</td><td>Full plan including Stage 2 (margin and workforce restructuring) with all named employees</td></tr>
+        <tr><td><code>Master_Commercial_Plan_v8_External.html</code></td><td>Lower managers, commercial team</td><td>Stage 2 included but employees numbered 1–28 — names and HR details removed</td></tr>
+        <tr><td><code>Master_Commercial_Plan_v8_NoStage2.html</code></td><td>Broader distribution, potential partners</td><td>Stage 2 section omitted entirely — safe for wider sharing</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────────────────
+     SECTION 3 — COMMAND CENTRE
+──────────────────────────────────────────────────────────────────────── -->
+<div id="command-centre" class="sec-hdr"><h2>The Command Centre</h2><span class="sec-sub">what each section does</span></div>
+
+<p style="font-size:0.9rem;line-height:1.75;margin-bottom:1.25rem;">
+  <code>BU_Services_Command_Centre.html</code> — open in any browser. Ten sections accessible from the sticky top navigation. All live data comes from <code>actuals.json</code> on SharePoint. If that file is unavailable, the portal falls back to CONFIG defaults silently. Gates, risks, and plan narrative are edited directly in the HTML file — everything else is automated.
+</p>
+
+<div class="card-grid" style="grid-template-columns:1fr 1fr;gap:0.65rem;">
+  <div class="card">
+    <div class="card-top" style="background:#161C60;"></div>
+    <div class="card-body">
+      <div class="card-title">Revenue Foundation <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>LIVE</span></div>
+      <div class="card-desc" style="margin-top:0.4rem;">Two entity cards — Nucleom (Salesforce live badge) and Nortech (manual entry badge). Each shows Closed Won YTD, Open Pipeline, combined total, progress bar against $29.3M / $17.9M forecast, and a RAG status based on pro-rated year-to-date pace. Below the cards: a cumulative stacked bar showing the full 2026 revenue picture across all seven entities.</div>
+    </div>
+    <div class="card-footer"><span>Source: actuals.json — nucleom, nortech fields</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:#196B24;"></div>
+    <div class="card-body">
+      <div class="card-title">Initiative Progress <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>LIVE</span></div>
+      <div class="card-desc" style="margin-top:0.4rem;">Five initiative cards showing actuals vs. 2026 target, colour-coded status chips (On Track / Gate / At Risk / Complete), owner names, and links to each initiative's standalone plan document. Progress bars update from actuals.json mining, pipeline, powerline, nuclear, x3 fields every Sunday.</div>
+    </div>
+    <div class="card-footer"><span>Source: actuals.json — mining, pipeline, powerline, nuclear, x3</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:#0D5050;"></div>
+    <div class="card-body">
+      <div class="card-title">Nucleom Revenue by Region <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>LIVE</span></div>
+      <div class="card-desc" style="margin-top:0.4rem;">Five region cards — HQ Québec City, Montréal, Central, Edmonton, Vancouver. Each shows Closed Won, Open Pipeline, share of base, weekly crew utilisation %, and a Revenue RAG. A proportional share bar across the top shows how Closed Won is split across regions. <em>Note: region field API name still to be confirmed with Salesforce admin — sfValue placeholders in CONFIG.</em></div>
+    </div>
+    <div class="card-footer"><span>Source: actuals.json — region_* and util_* fields</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:#C9860A;"></div>
+    <div class="card-body">
+      <div class="card-title">Revenue by Month <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>LIVE</span></div>
+      <div class="card-desc" style="margin-top:0.4rem;">Stacked bar chart and table — Jan through Dec 2026 — showing Nucleom, Nortech, and all five initiatives per month. Three view modes: Chart, Both (default), Table. Salesforce fields read from monthly.2026_XX object. Dynamics dyn_* fields will populate once Dynamics connection is confirmed — these will be the most accurate actuals as they include callout jobs.</div>
+    </div>
+    <div class="card-footer"><span>Source: actuals.json — monthly object (12 months × 15 fields)</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:#4B1D8F;"></div>
+    <div class="card-body">
+      <div class="card-title">Meeting Health <span class="pill pill-amber" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>PENDING LISTS</span></div>
+      <div class="card-desc" style="margin-top:0.4rem;">Seven meeting cards — one per recurring meeting series. Each shows open action count with a large coloured number and RAG status (green = 0, amber = 1–3, red = 4+ or any overdue). An overdue actions banner appears across the top if any actions are past due date. Reads from SharePoint Meeting Actions list via Power Automate. Will show zeros until the list is created and populated.</div>
+    </div>
+    <div class="card-footer"><span>Source: actuals.json — actions_* fields · Requires SharePoint List setup</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:#384660;"></div>
+    <div class="card-body">
+      <div class="card-title">Gate Milestones <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>LIVE</span></div>
+      <div class="card-desc" style="margin-top:0.4rem;">Table of all gate milestones across the five initiatives. Colour-coded dots — green (complete), amber (in progress), grey (upcoming), red (overdue). Updated manually by editing the gates array in the Command Centre CONFIG block. Not automated — Jon Eustace or Olivier Marcotte updates gate status when a milestone is hit or slips.</div>
+    </div>
+    <div class="card-footer"><span>Source: Command Centre CONFIG — gates array · Manual edit</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:#CC2222;"></div>
+    <div class="card-body">
+      <div class="card-title">Risk Register <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>LIVE</span></div>
+      <div class="card-desc" style="margin-top:0.4rem;">All active risks with level (Critical/High/Medium), status (monitoring/triggered/resolved), trigger condition, mitigation owner, and contingency plan summary. Updated manually in the CONFIG risks array. The Email Digest only surfaces triggered risks, so the Monday digest is only alarming when something is actually wrong.</div>
+    </div>
+    <div class="card-footer"><span>Source: Command Centre CONFIG — risks array · Manual edit</span></div>
+  </div>
+  <div class="card">
+    <div class="card-top" style="background:#0A3A6B;"></div>
+    <div class="card-body">
+      <div class="card-title">Email Digest <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>LIVE</span></div>
+      <div class="card-desc" style="margin-top:0.4rem;">Auto-generates a formatted HTML email from the live data — KPI tiles, initiative progress bars, open gates, triggered risks, and crew utilisation by region. Click "Copy HTML for Outlook" and paste into a new Outlook email. Designed to send every Monday before the 9AM Commercial Leadership meeting. A separate Power Automate flow can be built to send it automatically (see Pending Items).</div>
+    </div>
+    <div class="card-footer"><span>Source: All actuals.json fields · Manual send or Power Automate scheduled</span></div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────────────────
+     SECTION 3B — MANAGEMENT HUB
+──────────────────────────────────────────────────────────────────────── -->
+<div id="people">
+<div class="sec-hdr"><h2>The Management Hub</h2><span class="sec-sub">what each section does</span></div>
+<p style="font-size:.9rem;color:var(--body);line-height:1.7;margin-bottom:1.25rem;">
+  <code>BU_Services_Management_Hub.html</code> — open in any browser. Four sections accessible from a sticky top navigation. The single front door for the entire people management system: org structure, role briefs, weekly rhythms, meeting agendas, and the full document library. Cross-linked to the Command Centre via a nav button.
+</p>
+
+<div class="card-grid card-grid-2" style="margin-bottom:1rem;">
+
+  <div class="card">
+    <div class="card-top" style="background:var(--blue)"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Section 1</div>
+      <div class="card-title">Org &amp; Roles</div>
+      <div class="card-sub">Clickable org chart — every person has a panel</div>
+      <div class="card-desc">
+        Interactive org chart covering the full BU Services reporting structure from EIG level (Jon Eustace, Olivier Marcotte, Jeremy Irwin) through Mathieu Beauchesne, Alex Cyr, Francis Boudreault-Leclerc, all seven ops directors and Rick Carlton, the PI group (Joel Carlton), the commercial team (Emmanuel Aggrey, Vinoth Tharma), and Éric Carmichael on a dotted line. Clicking any card opens a detail panel showing that person's mandate, initiative responsibilities, weekly rhythm summary, and quick links to their role brief and rhythm card. <strong>16 role briefs</strong> are accessible from this section.
+      </div>
+    </div>
+    <div class="card-footer"><span>Source: PEOPLE JS object in Management Hub · Edit directly in HTML</span><span class="pill pill-green"><span class="pill-dot"></span>Live</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-top" style="background:var(--teal)"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Section 2</div>
+      <div class="card-title">Weekly Flow</div>
+      <div class="card-sub">Full Mon–Sun team calendar across all roles</div>
+      <div class="card-desc">
+        A day-by-day view of the entire team's weekly operating rhythm — what every group does on every day, with time estimates, system touchpoints (Salesforce, actuals.json, utilisation tracker), and cross-references to the relevant meeting agendas. Three rhythm card sets underpin this section: <strong>Commercial Team</strong> (Max &amp; Vinoth), <strong>Ops Team</strong> (Alex Cyr + 6 ops directors), and <strong>PI Team</strong> (Rick &amp; Joel Carlton). Each rhythm card is available as both interactive HTML and a printable Word document.
+      </div>
+    </div>
+    <div class="card-footer"><span>Source: FLOW_DAYS JS object · 3 rhythm card sets (HTML + DOCX)</span><span class="pill pill-green"><span class="pill-dot"></span>Live</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-top" style="background:var(--green)"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Section 3</div>
+      <div class="card-title">Meetings</div>
+      <div class="card-sub">Links to full Meeting Hub — 9 agendas + gate schedule</div>
+      <div class="card-desc">
+        Routes to <code>BU_Services_Meeting_Hub.html</code> which contains <strong>9 standing meeting agendas</strong>: Commercial Leadership (Mon 9AM), Commercial Team (Tue 8AM), Ops Leadership (Wed 9AM), Gate Review (last Fri of month), Finance &amp; Reporting (1st Mon), Nuclear Outage Planning, PI Group Sync, EIG / Eurazeo Review, and Salesforce Friday reminder. The 2026 Gate Review schedule is embedded with flagged dates (December 25). The hub also carries a Salesforce Friday entry reminder tab.
+      </div>
+    </div>
+    <div class="card-footer"><span>Source: BU_Services_Meeting_Hub.html · 9 agendas · 2026 gate dates</span><span class="pill pill-green"><span class="pill-dot"></span>Live</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-top" style="background:var(--dyn)"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Section 4</div>
+      <div class="card-title">Document Library</div>
+      <div class="card-sub">All files in 7 organised groups</div>
+      <div class="card-desc">
+        The complete document library for the people management system, organised into seven groups: Role Briefs (16 individuals), Weekly Rhythm Cards (Commercial, Ops, PI — HTML &amp; DOCX), Meeting &amp; Agenda Resources, Integration &amp; Setup Guides, Commercial Plans (master + 5 initiatives), Operational Trackers, and a Team Onboarding group. The <strong>Onboarding One-Pager</strong> (<code>BU_Services_Onboarding_One_Pager.html</code>) is linked here — a 5-minute read covering all five initiatives, the team, the three portals, the weekly rhythm, five non-negotiable rules, and key contacts.
+      </div>
+    </div>
+    <div class="card-footer"><span>Source: DOC_GROUPS JS object · 7 groups · updated April 2026</span><span class="pill pill-green"><span class="pill-dot"></span>Live</span></div>
+  </div>
+
+</div>
+
+<div class="sec-hdr" style="margin-top:2rem;"><h2>The 16 Role Briefs</h2><span class="sec-sub">who has one and what it covers</span></div>
+<p style="font-size:.9rem;color:var(--body);line-height:1.7;margin-bottom:1rem;">
+  Every person in the BU Services org structure has a role brief — a two-page DOCX covering their mandate, initiative responsibilities, weekly rhythm, key protocols, and what they are explicitly <em>not</em> responsible for. Distribute printed at rollout.
+</p>
+<div class="tbl-wrap">
+<table class="data-table">
+  <thead><tr><th>Person</th><th>Title</th><th>Key focus</th></tr></thead>
+  <tbody>
+    <tr><td>Jon Eustace</td><td>CEO North America, EIG</td><td>Overall P&amp;L, EIG / Eurazeo reporting, gate approvals, Nuclear track sponsor</td></tr>
+    <tr><td>Olivier Marcotte</td><td>CRO, BU Services</td><td>Nuclear / OPG Aecon and new build track, Commercial team line management</td></tr>
+    <tr><td>Jeremy Irwin</td><td>Director of Finance, EIG NA</td><td>actuals.json manual entries (Nortech, budgets, EUR rate), Eurazeo quarterly pack</td></tr>
+    <tr><td>Mathieu Beauchesne</td><td>EVP</td><td>Nucleom operations, Powerline initiative lead, Dynamics BC Q&amp;A, direct reports: Alex Cyr, Francis B-L, Louis-Pier T</td></tr>
+    <tr><td>Alex Cyr</td><td>Sr. Operations Director</td><td>All ops directors, utilisation tracker, crew deployment decisions</td></tr>
+    <tr><td>Francis Boudreault-Leclerc</td><td>Engineering &amp; Technical Manager</td><td>Technical lead for all 5 initiatives — procedures, qualification, engineering oversight</td></tr>
+    <tr><td>Emmanuel Aggrey</td><td>Commercial Director West</td><td>Mining NDT West, Pipeline DA co-own, 3X Composite West, Nortech Western CA</td></tr>
+    <tr><td>Vinoth Tharma</td><td>Commercial Director East</td><td>Mining NDT East, Nuclear OPG MSA maintenance, Powerline East, 3X East</td></tr>
+    <tr><td>Eric Rodrigue</td><td>Operations Director — Quebec</td><td>QC crew delivery, existing client relationships, support Vinoth on availability</td></tr>
+    <tr><td>Joel Djordjevic</td><td>Operations Director — Central</td><td>Central delivery, Nuclear outage readiness (OPG Darlington &amp; Pickering)</td></tr>
+    <tr><td>Keith Reichenbach</td><td>Operations Director — Western</td><td>Western delivery, Pipeline DA territory coordination with Rick &amp; Max</td></tr>
+    <tr><td>Brook Althouse</td><td>Northern Operations Manager</td><td>Remote and fly-in/fly-out sites, Mining NDT logistics feasibility sign-off</td></tr>
+    <tr><td>Louis-Pier Théberge</td><td>Ops Director Nuclear &amp; Program Lead</td><td>OPG MSA/maintenance ops delivery (Vinoth + Jon track), Aecon programme (Olivier track)</td></tr>
+    <tr><td>Jason Borza</td><td>Operations Director — Nortech</td><td>Nortech delivery, PI group bolt-on coordination, weekly briefing to Emmanuel Aggrey</td></tr>
+    <tr><td>Rick Carlton</td><td>Pipeline Integrity Lead</td><td>Pipeline DA commercial co-ownership with Max, Pembina &amp; Tidewater relationships, reports to Alex Cyr</td></tr>
+    <tr><td>Joel Carlton</td><td>PI Operations Manager</td><td>Dedicated PI technician pool, reports to Rick Carlton, works with Jason Borza</td></tr>
+    <tr><td>Éric Carmichael</td><td>Commercial Systems Manager</td><td>Go-live build — PA flows, SF integration, BC connector, SP Meeting Lists. Dotted line to Jon.</td></tr>
+  </tbody>
+</table>
+</div>
+
+</div><!-- /id="people" -->
+
+
+<!-- ────────────────────────────────────────────────────────────────────
+     SECTION 4 — DATA FLOW
+──────────────────────────────────────────────────────────────────────── -->
+<div id="deck" class="sec-hdr"><h2>INT BU Bi-Weekly Deck — Automation</h2><span class="sec-sub">what can be auto-populated vs. what stays manual</span></div>
+
+<p style="font-size:0.9rem;line-height:1.75;margin-bottom:1.25rem;">
+  The INT BU Business Review deck is a 22-slide bi-weekly presentation for the French Executive team. The Command Centre and actuals.json have been extended to carry all the data needed to auto-populate the data-driven slides. A Power Automate deck-generation flow reads actuals.json on the morning of each review and produces a pre-filled PowerPoint — then Jon or Olivier adds narrative commentary on the manual slides before sending.
+</p>
+
+<div class="callout callout-blue" style="margin-bottom:1.25rem;">
+  <div class="callout-title" style="color:var(--blue);">How deck generation works</div>
+  <div class="callout-body">A scheduled Power Automate flow runs on the morning of each bi-weekly review. Step 1: it copies all current actuals.json values to the prev_* fields (creating the delta for the variations slide). Step 2: it fetches fresh data from Salesforce and Dynamics. Step 3: it calls a Python script (python-pptx) that reads the template and writes all data fields into the correct slide positions. Step 4: the completed deck lands in the SharePoint BU Services folder, ready for Jon to add commentary. Total generation time: under 2 minutes.</div>
+</div>
+
+<h3 style="font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Slide-by-slide automation status</h3>
+<div class="tbl-wrap">
+  <table class="data-table">
+    <thead><tr><th>Slide</th><th>Content</th><th>Status</th><th>Data source</th></tr></thead>
+    <tbody>
+      <tr><td>1 — Title</td><td>Date, logo</td><td><span class="pill pill-green">Auto</span></td><td>System date</td></tr>
+      <tr><td>2 — Performance table</td><td>Invoiced, Bookings, Commit, Upside, Budget, Sure Forecast per entity (k€)</td><td><span class="pill pill-green">Auto</span></td><td>actuals.json: nucleom, nortech, bookings_*, commit_*, budget_*, eur_rate</td></tr>
+      <tr><td>3 — Q1 Variations</td><td>Delta vs. previous review per entity</td><td><span class="pill pill-green">Auto</span></td><td>actuals.json: prev_* snapshot fields — copied by deck-gen flow before each run</td></tr>
+      <tr><td>4 — Booking/Commit/Upside detail</td><td>Line-by-line deal narrative per entity</td><td><span class="pill pill-grey">Manual</span></td><td>Commercial owner judgment — cannot be automated</td></tr>
+      <tr><td>5 — Invoicing vs. Budget variations</td><td>Variance amounts + explanations</td><td><span class="pill pill-grey">Manual</span></td><td>Numbers from Dynamics (auto); explanatory text is manual</td></tr>
+      <tr><td>6 — YTD P&amp;L by Brand</td><td>P&amp;L table sourced from EIG analysis file</td><td><span class="pill pill-grey">Manual</span></td><td>EIG finance model — out of scope unless EIG shares API access</td></tr>
+      <tr><td>7 — Q1 INT Land forecast</td><td>Forecast table from EIG model</td><td><span class="pill pill-grey">Manual</span></td><td>Same as slide 6</td></tr>
+      <tr><td>8 — KPI Summary</td><td>Chargeable hours, rate, utilisation, cost, margin NUC &amp; NOR</td><td><span class="pill pill-amber">Partial</span></td><td>actuals.json kpi_ref (FY24/25 averages: static ✓) · monthly kpi fields (need Dynamics + payroll)</td></tr>
+      <tr><td>9 — Chargeable Hours chart</td><td>Monthly hours NUC &amp; NOR vs. FY averages</td><td><span class="pill pill-amber">Partial</span></td><td>monthly.nuc_hours — needs Dynamics connection live</td></tr>
+      <tr><td>10 — Hourly Rate chart</td><td>Monthly effective rate NUC &amp; NOR</td><td><span class="pill pill-amber">Partial</span></td><td>monthly.nuc_rate — derived from dyn_nucleom ÷ nuc_hours once Dynamics live</td></tr>
+      <tr><td>11 — Utilisation Rate chart</td><td>Monthly utilisation % NUC &amp; NOR vs. FY averages</td><td><span class="pill pill-green">Auto</span></td><td>monthly.nuc_util / nor_util — enter from util workbook or Dynamics</td></tr>
+      <tr><td>12 — Hourly Cost chart</td><td>Monthly cost per hour NUC &amp; NOR</td><td><span class="pill pill-amber">Partial</span></td><td>monthly.nuc_cost — requires payroll data source (D365 payroll or manual entry)</td></tr>
+      <tr><td>13 — Gross Margin chart</td><td>Monthly gross margin % NUC &amp; NOR</td><td><span class="pill pill-amber">Partial</span></td><td>monthly.nuc_margin — derived once nuc_cost is populated</td></tr>
+      <tr><td>14 — Performance charts</td><td>Invoiced YTD vs. FY26 budget waterfall</td><td><span class="pill pill-green">Auto</span></td><td>actuals.json: nucleom, nortech, budget_*, dyn_* monthly fields</td></tr>
+      <tr><td>15 — Cash positions</td><td>Monthly cash balances per entity (k€)</td><td><span class="pill pill-amber">Partial</span></td><td>actuals.json: cash object — Agicap API (automated) or Mathieu manual entry</td></tr>
+      <tr><td>16 — NUC Recovery action plan</td><td>Strategic actions, owners, deadlines</td><td><span class="pill pill-grey">Manual</span></td><td>Management judgment — pre-populated template, Jon/Olivier update commentary</td></tr>
+      <tr><td>17 — Operational Efficiency table</td><td>Initiative status, Q1 cost, 2026 impact</td><td><span class="pill pill-green">Auto</span></td><td>actuals.json: ebitda_initiatives array — update status in Command Centre CONFIG</td></tr>
+      <tr><td>18 — EBITDA optimisation table</td><td>Cost savings per initiative with status</td><td><span class="pill pill-green">Auto</span></td><td>actuals.json: ebitda_initiatives array — same source as slide 17</td></tr>
+      <tr><td>19–22 — Ops, Quality, People</td><td>Section narrative, quality metrics, people updates</td><td><span class="pill pill-grey">Manual</span></td><td>Sourced from EIG quality system, ops team, HR — manual narrative</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 style="font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 0.75rem;">What still needs to be done before deck generation is built</h3>
+
+<div class="pending-list">
+  <div class="pending-item critical">
+    <div class="pending-title"><span style="background:var(--red);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">REQUIRED</span>Enter annual budget figures per entity</div>
+    <div class="pending-body">Open actuals.json on SharePoint. Set <code>budget_nuc</code>, <code>budget_nor</code>, <code>budget_int</code>, <code>budget_arcndt</code> to the 2026 annual budget targets from the EIG/Eurazeo plan (in $M CAD). Also set <code>eur_rate</code> to the current CAD/EUR rate (currently 0.72 — update if materially different). These are static — enter once per year. Without these, the budget comparison column on slide 2 shows dashes.</div>
+    <div class="pending-owner">Owner: Mathieu Beauchesne · Time: 5 minutes · Edit actuals.json directly on SharePoint</div>
+  </div>
+  <div class="pending-item critical">
+    <div class="pending-title"><span style="background:var(--red);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">REQUIRED</span>Add Salesforce Bookings, Commit, and Upside queries to Power Automate Sunday flow</div>
+    <div class="pending-body">Three new Salesforce Get Records queries to add to the existing Sunday flow: (1) Bookings — all Opportunities created this year regardless of stage; (2) Commit — Opportunities at stage "Commit" or probability ≥ 75%; (3) Upside — Opportunities at probability 25–74%. Each produces one sum written to <code>bookings_nuc</code>, <code>commit_nuc</code>, <code>upside_nuc</code> in actuals.json. NOR equivalents remain manual (Mathieu). Estimated build time: 45 minutes. Requires confirming the exact stage names used in your Salesforce instance with the SF admin.</div>
+    <div class="pending-owner">Owner: Power Automate builder · Time: 45 min · Prerequisite: confirm SF stage names for Commit and Upside with SF admin</div>
+  </div>
+  <div class="pending-item">
+    <div class="pending-title"><span style="background:var(--amber);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">REQUIRED FOR KPI SLIDES</span>Dynamics connection live + payroll data for hourly cost</div>
+    <div class="pending-body">Slides 8–13 (KPI charts) require monthly chargeable hours and hourly cost per entity. Hours come from Dynamics once the integration is complete (see Dynamics Integration Guide). Hourly cost requires either: (A) payroll data from Dynamics 365 F&O if payroll is managed there, or (B) two manual fields per month — <code>nuc_cost</code> and <code>nor_cost</code> — entered by Mathieu from the payroll report. Option B takes 2 minutes per month and unblocks slides 8–13 immediately. The FY24 and FY25 reference averages are already in actuals.json <code>kpi_ref</code> — those slides will show historical averages the moment you open the deck even before current data is entered.</div>
+    <div class="pending-owner">Owner: Mathieu Beauchesne (manual cost entry) or IT admin (Dynamics payroll query) · Manual option unblocks immediately</div>
+  </div>
+  <div class="pending-item info">
+    <div class="pending-title"><span style="background:var(--blue);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">OPTIONAL</span>Agicap API for cash positions (slide 15)</div>
+    <div class="pending-body">If you have Agicap API credentials, a Power Automate HTTP action can pull the four cash balances automatically on the morning of each review. If not, Mathieu enters four numbers manually into the <code>cash</code> object in actuals.json — takes 2 minutes. The cash object structure is already defined in actuals.json.</div>
+    <div class="pending-owner">Owner: Mathieu Beauchesne (manual) or IT admin (Agicap API) · Manual works immediately</div>
+  </div>
+  <div class="pending-item info">
+    <div class="pending-title"><span style="background:var(--blue);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">READY TO BUILD</span>Deck generation flow — python-pptx + Power Automate</div>
+    <div class="pending-body">Once the required items above are complete, the deck generation tool can be built. It consists of: (1) a Power Automate scheduled flow triggered on the morning of each bi-weekly review that copies current actuals to prev_* fields, then fetches fresh data; (2) a Python script using python-pptx that reads the INT BU template deck and writes all data fields into the correct text boxes and chart data series; (3) the output .pptx file saved to the SharePoint BU Services folder. The template structure has been analysed — slides 2, 3, 11, 14, 17, 18 can be fully auto-populated immediately. Slides 8–13 activate once Dynamics/payroll data flows in. Slide 15 activates once cash data is entered.</div>
+    <div class="pending-owner">Owner: Power Automate builder + Claude · Time: ~3 hours to build once data prerequisites are met · Prerequisite: budget figures + SF Bookings/Commit/Upside queries</div>
+  </div>
+</div>
+
+<div id="data-flow" class="sec-hdr"><h2>The Data Flow</h2><span class="sec-sub">how actuals.json gets its values</span></div>
+
+<p style="font-size:0.9rem;line-height:1.75;margin-bottom:1.25rem;">
+  <code>actuals.json</code> is the single file that connects all data sources to the Command Centre. It lives in the BU Services Command Centre SharePoint folder alongside the HTML files. Power Automate writes to it every Sunday at 7 PM ET. The Command Centre reads it on every page load. If the file is missing or unreadable, the portal uses the CONFIG defaults silently.
+</p>
+
+<div style="background:#fff;border:1px solid var(--mgrey);border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1rem;">
+  <p style="font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(0,0,0,0.3);margin-bottom:1rem;">Sunday 7 PM ET — Power Automate flow</p>
+
+  <div class="flow-row">
+    <span class="flow-box" style="background:var(--blue-l);color:var(--blue);">Salesforce</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:#EDE9FE;color:#4B1D8F;">Power Automate</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:var(--amber-l);color:var(--amber);">actuals.json</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:var(--lgrey);color:var(--navy);">Command Centre</span>
+    <span class="flow-note">Closed Won + pipeline by initiative and region (17 fields) · automated</span>
+  </div>
+  <div class="flow-row" style="margin-top:0.5rem;">
+    <span class="flow-box" style="background:#EDE9FE;color:#4B1D8F;">Dynamics 365</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:#EDE9FE;color:#4B1D8F;">Power Automate</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:var(--amber-l);color:var(--amber);">actuals.json</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:var(--lgrey);color:var(--navy);">Command Centre</span>
+    <span class="flow-note" style="color:var(--red);">Monthly invoiced actuals incl. callout jobs (8 dyn_ fields per month) · PENDING SETUP</span>
+  </div>
+  <div class="flow-row" style="margin-top:0.5rem;">
+    <span class="flow-box" style="background:var(--teal-l);color:var(--teal);">Utilisation Tracker</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:#EDE9FE;color:#4B1D8F;">Power Automate</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:var(--amber-l);color:var(--amber);">actuals.json</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:var(--lgrey);color:var(--navy);">Command Centre</span>
+    <span class="flow-note">Weekly billable % per region (5 util fields) · automated once file on SharePoint</span>
+  </div>
+  <div class="flow-row" style="margin-top:0.5rem;">
+    <span class="flow-box" style="background:var(--teal-l);color:var(--teal);">Meeting Actions List</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:#EDE9FE;color:#4B1D8F;">Power Automate</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:var(--amber-l);color:var(--amber);">actuals.json</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box" style="background:var(--lgrey);color:var(--navy);">Command Centre</span>
+    <span class="flow-note" style="color:var(--red);">Open action counts per meeting series (8 fields) · PENDING LIST CREATION</span>
+  </div>
+
+  <div style="border-top:1px solid var(--mgrey);margin-top:0.85rem;padding-top:0.85rem;">
+    <p style="font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(0,0,0,0.3);margin-bottom:0.5rem;">Manual updates (not automated)</p>
+    <div class="flow-row">
+      <span class="flow-box" style="background:var(--lgrey);color:#666;">Mathieu B.</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-box" style="background:var(--amber-l);color:var(--amber);">actuals.json</span>
+      <span class="flow-note">Nortech invoiced revenue + pipeline · First Monday each month · 10 min</span>
+    </div>
+    <div class="flow-row" style="margin-top:0.35rem;">
+      <span class="flow-box" style="background:var(--lgrey);color:#666;">Ops leads</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-box" style="background:var(--teal-l);color:var(--teal);">Utilisation Tracker.xlsx</span>
+      <span class="flow-note">Billable hours by region · Every Wednesday before 9AM Ops meeting</span>
+    </div>
+    <div class="flow-row" style="margin-top:0.35rem;">
+      <span class="flow-box" style="background:var(--lgrey);color:#666;">Jon / Olivier</span>
+      <span class="flow-arrow">→</span>
+      <span class="flow-box" style="background:var(--lgrey);color:var(--navy);">CC HTML file</span>
+      <span class="flow-note">Gate status, risk status, plan narrative · Edit CONFIG block in text editor · As needed</span>
+    </div>
+  </div>
+</div>
+
+<div style="background:#fff;border:1px solid var(--mgrey);border-radius:10px;padding:1.25rem 1.5rem;">
+  <p style="font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(0,0,0,0.3);margin-bottom:0.85rem;">actuals.json — key field groups (110 total)</p>
+  <div class="field-group">
+    <div class="field-group-title">Base business (4) — Salesforce automated</div>
+    <div class="field-chips">
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">nucleom</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">nucleom_pipeline</span>
+      <span class="field-chip" style="background:var(--lgrey);color:var(--navy);border-color:var(--mgrey);">nortech</span>
+      <span class="field-chip" style="background:var(--lgrey);color:var(--navy);border-color:var(--mgrey);">nortech_pipeline</span>
+    </div>
+  </div>
+  <div class="field-group">
+    <div class="field-group-title">Initiatives (5) — Salesforce automated</div>
+    <div class="field-chips">
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">mining</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">pipeline</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">powerline</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">nuclear</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">x3</span>
+    </div>
+  </div>
+  <div class="field-group">
+    <div class="field-group-title">Regions (10) — Salesforce automated · sfValue to confirm</div>
+    <div class="field-chips">
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_hq</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_hq_pipeline</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_montreal</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_montreal_pipeline</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_central</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_central_pipeline</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_edmonton</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_edmonton_pipeline</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_vancouver</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">region_vancouver_pipeline</span>
+    </div>
+  </div>
+  <div class="field-group">
+    <div class="field-group-title">Utilisation (7) — manual Wednesday + SharePoint Excel</div>
+    <div class="field-chips">
+      <span class="field-chip" style="background:var(--teal-l);color:var(--teal);border-color:#9FE1CB;">util_hq</span>
+      <span class="field-chip" style="background:var(--teal-l);color:var(--teal);border-color:#9FE1CB;">util_montreal</span>
+      <span class="field-chip" style="background:var(--teal-l);color:var(--teal);border-color:#9FE1CB;">util_central</span>
+      <span class="field-chip" style="background:var(--teal-l);color:var(--teal);border-color:#9FE1CB;">util_edmonton</span>
+      <span class="field-chip" style="background:var(--teal-l);color:var(--teal);border-color:#9FE1CB;">util_vancouver</span>
+      <span class="field-chip" style="background:var(--teal-l);color:var(--teal);border-color:#9FE1CB;">util_target</span>
+      <span class="field-chip" style="background:var(--teal-l);color:var(--teal);border-color:#9FE1CB;">util_week</span>
+    </div>
+  </div>
+  <div class="field-group">
+    <div class="field-group-title">Meeting health (8) — SharePoint Meeting Actions List · pending</div>
+    <div class="field-chips">
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">actions_commercial</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">actions_ops</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">actions_nuclear</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">actions_gate</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">actions_finance</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">actions_hr</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">actions_eurazeo</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">actions_overdue</span>
+    </div>
+  </div>
+  <div class="field-group">
+    <div class="field-group-title">Technician deployments (5) — Salesforce Phase 2 · activates after 6-week rollout</div>
+    <div class="field-chips">
+      <span class="field-chip" style="background:#E8F4FD;color:#0A3A6B;border-color:#B5D4F4;">tech_deployments_hq</span>
+      <span class="field-chip" style="background:#E8F4FD;color:#0A3A6B;border-color:#B5D4F4;">tech_deployments_montreal</span>
+      <span class="field-chip" style="background:#E8F4FD;color:#0A3A6B;border-color:#B5D4F4;">tech_deployments_central</span>
+      <span class="field-chip" style="background:#E8F4FD;color:#0A3A6B;border-color:#B5D4F4;">tech_deployments_edmonton</span>
+      <span class="field-chip" style="background:#E8F4FD;color:#0A3A6B;border-color:#B5D4F4;">tech_deployments_vancouver</span>
+    </div>
+  </div>
+  <div class="field-group">
+    <div class="field-group-title">Monthly (1 object, 12 months × 15 fields) — Salesforce + Dynamics</div>
+    <div class="field-chips">
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">monthly.2026_XX.nucleom</span>
+      <span class="field-chip" style="background:var(--blue-l);color:var(--blue);border-color:#B5D4F4;">…nortech, mining, pipeline, powerline, nuclear, x3</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">dyn_nucleom</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">dyn_nortech</span>
+      <span class="field-chip" style="background:#EDE9FE;color:#4B1D8F;border-color:#C4B5FD;">dyn_mining … dyn_base</span>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────────────────
+     SECTION 5 — WHAT IS DONE
+──────────────────────────────────────────────────────────────────────── -->
+<div id="done" class="sec-hdr"><h2>What Is Complete</h2><span class="sec-sub">ready to use now</span></div>
+
+<div class="card-grid card-grid-2">
+  <div>
+    <p style="font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(0,0,0,0.3);margin-bottom:0.5rem;">Commercial plan documents</p>
+    <div class="doc-list">
+      <div class="doc-row"><div class="doc-icon" style="background:#196B24;">HTML</div><div><div class="doc-name">Master Commercial Plan v8</div><div class="doc-desc">3 versions · full, external, no-stage-2</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#C9860A;">HTML</div><div><div class="doc-name">5 Initiative Plans</div><div class="doc-desc">Mining, Pipeline, Powerline, Nuclear, 3X</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#161C60;">HTML</div><div><div class="doc-name">Execution Attack Plan v1</div><div class="doc-desc">Sprint tables, risk register, contingencies</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#0D5050;">HTML</div><div><div class="doc-name">Meeting Hub</div><div class="doc-desc">Schedule + 7 agendas + SF reminder tab</div></div><span class="pill pill-green">Done</span></div>
+    </div>
+    <p style="font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(0,0,0,0.3);margin:1rem 0 0.5rem;">Operational tools</p>
+    <div class="doc-list">
+      <div class="doc-row"><div class="doc-icon" style="background:#161C60;">XLSX</div><div><div class="doc-name">Utilisation Tracker</div><div class="doc-desc">26 weeks · 5 regions · CGSB qualification tab</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#196B24;">XLSX</div><div><div class="doc-name">Review Comments Workbook</div><div class="doc-desc">5 tabs · dependent dropdowns · consolidation script</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#C9860A;">XLSX</div><div><div class="doc-name">Dynamics Q&A Workbook</div><div class="doc-desc">10 questions · who to ask · flow placeholders</div></div><span class="pill pill-green">Done</span></div>
+    </div>
+  </div>
+  <div>
+    <p style="font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(0,0,0,0.3);margin-bottom:0.5rem;">Integration + automation</p>
+    <div class="doc-list">
+      <div class="doc-row"><div class="doc-icon" style="background:#00547A;">PA</div><div><div class="doc-name">Power Automate Sunday Flow</div><div class="doc-desc">Salesforce queries · actuals.json write · Monday digest</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#161C60;">JSON</div><div><div class="doc-name">actuals.json (110 fields)</div><div class="doc-desc">All field groups defined · Dynamics placeholders ready</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#22882F;">CMD</div><div><div class="doc-name">Command Centre</div><div class="doc-desc">15 sections · all render correctly · no script errors</div></div><span class="pill pill-green">Done</span></div>
+    </div>
+    <p style="font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(0,0,0,0.3);margin:1rem 0 0.5rem;">Setup guides (reference)</p>
+    <div class="doc-list">
+      <div class="doc-row"><div class="doc-icon" style="background:#161C60;">DOC</div><div><div class="doc-name">Salesforce Integration Guide</div><div class="doc-desc">BU_Initiative__c field · Power Automate build steps</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#4B1D8F;">DOC</div><div><div class="doc-name">Dynamics Integration Guide</div><div class="doc-desc">Architecture · OData queries · placeholders</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#0D5050;">DOC</div><div><div class="doc-name">Meeting Tracking Setup Guide</div><div class="doc-desc">OneNote structure · SharePoint Lists · Power Automate</div></div><span class="pill pill-green">Done</span></div>
+      <div class="doc-row"><div class="doc-icon" style="background:#00547A;">DOC</div><div><div class="doc-name">SF Technician Resource Tracking</div><div class="doc-desc">Two-phase rollout · Assigned Technicians field · validation rule formula · Power Automate queries · Service Resources roadmap.</div></div><span class="pill pill-green">Reference</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────────────────
+     SECTION 6 — WHAT IS PENDING
+──────────────────────────────────────────────────────────────────────── -->
+<div id="pending" class="sec-hdr"><h2>What Is Still Pending</h2><span class="sec-sub">three items to complete</span></div>
+
+<p style="font-size:0.9rem;line-height:1.75;margin-bottom:1.25rem;">
+  There are exactly three pending items. Everything else is built and working. None of these three are blockers — the Command Centre operates without them, it just shows zeros in those sections. Complete them in order of priority.
+</p>
+
+<div class="pending-list">
+  <div class="pending-item critical">
+    <div class="pending-title"><span style="background:var(--red);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">PRIORITY 1</span>Salesforce region field — confirm sfValue with your Salesforce admin</div>
+    <div class="pending-body">The five region cards in the Command Centre (HQ, Montréal, Central, Edmonton, Vancouver) have placeholder <code>sfValue</code> entries in the CONFIG. The Power Automate regional queries use <code>REGION_FIELD__c = 'HQ'</code> style filters — these will fail silently until the exact API field name and picklist values are confirmed. The region revenue cards will show $0.00 until this is fixed, even though Salesforce has the data.<br><br>Fix: Ask your Salesforce admin for (1) the API field name for Region on the Opportunity or Account object, and (2) the exact picklist values for each of the five regions. Update the five <code>sfValue</code> entries in the <code>regions</code> CONFIG array in <code>BU_Services_Command_Centre.html</code> and update the Power Automate regional queries.</div>
+    <div class="pending-owner">Owner: Jon Eustace → Salesforce admin · Time: 30 minutes · Guide: Salesforce Integration Guide addendum Section 8</div>
+  </div>
+
+  <div class="pending-item critical">
+    <div class="pending-title"><span style="background:var(--amber);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">PRIORITY 2</span>Dynamics 365 connection — answer 10 questions, then 2-hour Power Automate build</div>
+    <div class="pending-body">Dynamics 365 is the source of truth for all invoiced revenue including callout jobs that don't make it into Salesforce. The monthly revenue chart has <code>dyn_nucleom</code> through <code>dyn_base</code> fields ready in actuals.json — they are all 0.00 until the connection is built.<br><br>The most critical question: does Dynamics already tag invoices with a project category that maps to Mining / Pipeline / Powerline / Nuclear / 3X / Base Business? If yes, the initiative split in the monthly chart is automatic. If no, all Dynamics revenue arrives as one total per entity and the initiative split remains manual.<br><br>Fix: Complete the <code>BU_Services_Dynamics_QA_Workbook.xlsx</code> — all 10 questions answered. Then use the Dynamics Integration Guide to build the Power Automate branch. Until then, Mathieu Beauchesne updates <code>dyn_nucleom</code> and <code>dyn_nortech</code> manually on the first Monday of each month using the Interim Manual Process tab in the workbook.</div>
+    <div class="pending-owner">Owner: Mathieu Beauchesne (questions) + IT admin or Dynamics partner (build) · Time: Q&A 1hr + build 2hrs · Guide: BU_Services_Dynamics_Integration_Guide.docx + QA workbook</div>
+  </div>
+
+  <div class="pending-item info">
+    <div class="pending-title"><span style="background:var(--blue);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">PRIORITY 3</span>Meeting tracking — OneNote notebook + SharePoint Lists + Power Automate branch</div>
+    <div class="pending-body">The Meeting Health section in the Command Centre shows seven cards (one per meeting series) with open action counts. All eight <code>actions_*</code> fields in actuals.json are currently 0 because the SharePoint Meeting Actions list has not been created yet. The OneNote notebook for meeting minutes also does not exist yet.<br><br>This is the lowest priority because the Command Centre still works completely without it — the Meeting Health cards just show zero. It becomes valuable once the team is running the seven recurring meetings consistently and needs action tracking visibility at the Monday Commercial meeting.<br><br>Fix: Follow <code>BU_Services_Meeting_Tracking_Setup.docx</code> — 3 parts, approximately 2 hours 15 minutes total. Part 1: create the OneNote notebook and link to Teams recurring meetings (30 min). Part 2: create the two SharePoint Lists — Meeting Log and Meeting Actions (45 min). Part 3: add the meeting health branch to the existing Sunday Power Automate flow (60 min).</div>
+    <div class="pending-owner">Owner: Any M365 user can do Parts 1 and 2 · IT involvement needed only for Part 3 if Power Automate permissions are restricted · Time: 2hr 15min total · Guide: BU_Services_Meeting_Tracking_Setup.docx</div>
+  </div>
+
+  <div class="pending-item" style="border-left-color:#00547A;">
+    <div class="pending-title"><span style="background:#00547A;color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">TWO-PHASE ROLLOUT</span>Salesforce technician resource tracking — deliberate phased timeline, not a gap</div>
+    <div class="pending-body">The utilisation workbook (manual Wednesday update by ops leads) is the current authoritative source for crew utilisation %. A Salesforce-driven approach has been designed and is ready to activate on a deliberate schedule.<br><br><strong>Phase 1 (activate now):</strong> Ask your Salesforce admin to add the <code>Assigned_Technicians__c</code> text field to the Opportunity page layout. No enforcement, no validation rule. Commercial owners fill it in voluntarily when closing deals. Monitor compliance at Monday Commercial meetings for 4–6 weeks.<br><br><strong>Phase 2 (activate after 6 weeks if compliance &gt; 80%):</strong> Add the Salesforce validation rule that blocks Closed Won unless the field is populated (with an exception for Base Business deals under $5,000). Add Power Automate queries to pull <code>tech_deployments_*</code> counts into actuals.json. The manual utilisation workbook continues to run alongside as the accurate billable percentage source — the Salesforce data adds an automatic deployment activity layer.</div>
+    <div class="pending-owner">Owner: Jon Eustace → Salesforce admin (Phase 1 field, 10 min) · Commercial team (habit, 6 weeks) · Salesforce admin (Phase 2 rule, 15 min) · Guide: BU_Services_SF_Technician_Tracking.docx</div>
+  </div>
+</div>
+
+<!-- ────────────────────────────────────────────────────────────────────
+     SECTION 7 — HOW TO CONNECT
+──────────────────────────────────────────────────────────────────────── -->
+<div id="howto" class="sec-hdr"><h2>How to Connect Everything</h2><span class="sec-sub">step by step for each pending item</span></div>
+
+<h3 style="font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.75rem;">Connecting Salesforce regions (30 minutes)</h3>
+<div class="step-list">
+  <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Ask your Salesforce admin for two things</div><div class="step-desc">The API field name for Region on the Opportunity or Account object (e.g. <code>Region__c</code>, <code>Office__c</code>, <code>Territory__c</code>) and the exact picklist values for the five regions. They can find this in Setup → Object Manager → Opportunity → Fields & Relationships.</div></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Update the Command Centre CONFIG</div><div class="step-desc">Open <code>BU_Services_Command_Centre.html</code> in a text editor (Notepad, VS Code). Press Ctrl+F and search for <code>regions: [</code>. Update the five <code>sfValue</code> entries to match the exact Salesforce picklist values. Save the file.</div></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Update the Power Automate regional queries</div><div class="step-desc">In the existing Sunday flow, find the ten regional Get Records actions. Update <code>REGION_FIELD__c</code> with the correct API field name and update each filter value to match the confirmed picklist values. If Region is on Account rather than Opportunity, change to <code>Account.REGION_FIELD__c</code>. Save and test the flow.</div></div></div>
+</div>
+
+<h3 style="font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 0.75rem;">Connecting Dynamics 365 (answer Q&A first, then 2 hours)</h3>
+<div class="step-list">
+  <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Complete the Dynamics Q&A Workbook</div><div class="step-desc">Open <code>BU_Services_Dynamics_QA_Workbook.xlsx</code>. Fill in all blue cells in the <code>Q1–Q10 Answers</code> tab. Use the <code>Who To Ask</code> tab to delegate — most questions go to Mathieu Beauchesne or your IT admin. Until every cell is marked Confirmed, proceed with the interim manual process.</div></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Interim: Mathieu updates actuals.json manually each month</div><div class="step-desc">On the first working Monday of each month, Mathieu runs the monthly invoice report from Dynamics, converts to $M CAD, and updates <code>dyn_nucleom</code> and <code>dyn_nortech</code> in the monthly object of actuals.json on SharePoint. See the <code>Interim Manual Process</code> tab in the Q&A workbook for the 8-step checklist.</div></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Build the Power Automate Dynamics branch</div><div class="step-desc">Once all 10 questions are confirmed, follow Section 3 of <code>BU_Services_Dynamics_Integration_Guide.docx</code>. Add five new actions to the existing Sunday flow: Get Dynamics Nucleom Invoiced, Compose Sum Nucleom, Get Dynamics Nortech Invoiced, Compose Sum Nortech, and (if project dimension exists) five initiative queries. Add the 10 new fields to the Build JSON Compose action using the placeholders in the <code>Flow Placeholders</code> tab of the Q&A workbook.</div></div></div>
+</div>
+
+<h3 style="font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 0.75rem;">Setting up meeting tracking (2 hours 15 minutes)</h3>
+<div class="step-list">
+  <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Part 1: Create the OneNote notebook (30 min)</div><div class="step-desc">Go to onenote.com → New notebook → Name: "BU Services — Meeting Tracking". Create seven sections, one per meeting series. Share with leadership team. Then open each recurring Teams meeting, click the Notes tab, and link it to the correct OneNote section. From that point, Teams auto-creates a dated page whenever a meeting starts.</div></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Part 2: Create the two SharePoint Lists (45 min)</div><div class="step-desc">In SharePoint → New → List. Create <code>BU Services Meeting Log</code> (10 columns including Meeting Series, Date, Status, Action Count) and <code>BU Services Meeting Actions</code> (9 columns including Owner, Due Date, Status). Create three filtered views for Meeting Actions: Open Actions, My Actions, Overdue. Full column specifications are in Section 2 of <code>BU_Services_Meeting_Tracking_Setup.docx</code>.</div></div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Part 3: Add meeting health to the Sunday flow (60 min)</div><div class="step-desc">Open the existing Sunday Power Automate flow. Add a Get Items action reading from the Meeting Actions list filtered to open/in-progress actions. Add seven Compose actions counting actions per meeting series. Add a Compose counting overdue actions. Update the Build JSON action with the eight new actions_* fields. Full expressions are in Section 3 of the Meeting Tracking Setup Guide.</div></div></div>
+</div>
+<div class="conn-item" style="border-left:4px solid #0D5050;background:rgba(13,80,80,.08);padding:.85rem 1rem;border-radius:6px;margin:.75rem 0;">
+  <div style="font-family:var(--mono);font-size:.8rem;font-weight:700;color:#7EEAEA;margin-bottom:.35rem;">Conference Cost Flow — NEW (Step 2b in Go-Live Roadmap)</div>
+  <div style="font-size:.82rem;color:var(--text-muted,#A8B8D0);line-height:1.7;">
+    <strong>What it does:</strong> Connects the Conference Action Tracker (Excel) to the Command Centre's Conference ROI section. Shanny enters actual costs → Power Automate reads Monday 7AM → writes conf_* keys to actuals.json → Command Centre displays Conference ROI automatically.<br>
+    <strong>Who builds it:</strong> Éric Carmichael (~2.5 hrs total).<br>
+    <strong>Guide:</strong> BU_Services_Conference_Cost_Integration_Guide.docx<br>
+    <strong>Status:</strong> Schema and UI already built. Éric needs to: (1) name Excel tables, (2) build Monday PA flow, (3) build Teams Adaptive Card for SF outcomes.
+  </div>
+</div>
+
+
+<!-- ────────────────────────────────────────────────────────────────────
+     SECTION 8 — ALL FILES
+──────────────────────────────────────────────────────────────────────── -->
+<div id="files" class="sec-hdr"><h2>Complete File Reference</h2><span class="sec-sub">everything in the outputs folder</span></div>
+
+<div class="tbl-wrap">
+  <table class="data-table">
+    <thead><tr><th>File</th><th>Type</th><th>Purpose</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>BU_Services_Command_Centre.html</code></td><td>Portal</td><td>The main hub. Open this first. 10 sections, reads actuals.json on load.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>actuals.json</code></td><td>Data</td><td>110-field JSON file on SharePoint. Single source of truth. Power Automate writes Sundays. Covers revenue, pipeline, conference costs, proposal health, revenue reconciliation, and nuclear outage calendar.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>Master_Commercial_Plan_v8.html</code></td><td>Plan</td><td>Full master plan. Jon, Olivier, Mathieu, EIG, Eurazeo.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>Master_Commercial_Plan_v8_External.html</code></td><td>Plan</td><td>Employees numbered 1–28. Lower managers and commercial team.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>Master_Commercial_Plan_v8_NoStage2.html</code></td><td>Plan</td><td>Stage 2 omitted. Broader distribution.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>Execution_Attack_Plan_v1.html</code></td><td>Plan</td><td>Full sprint tables, risk register, contingencies. Links to Meeting Hub and Command Centre.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>NDT_Mining_Commercial_Plan_v4.html</code></td><td>Plan</td><td>Initiative 01 — Mining NDT. 17 sections, target accounts, service offering.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>PI_Commercial_Plan_v2.html</code></td><td>Plan</td><td>Initiative 02 — Pipeline Integrity DA. Carlton team, Pembina strategy, rig CAPEX.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>Powerline_Commercial_Plan.html</code></td><td>Plan</td><td>Initiative 03 — Powerline Inspection. LineCore/LineOhm/LineRay, Hydro-Québec.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>Nuclear_OPG_Commercial_Plan_v2.html</code></td><td>Plan</td><td>Initiative 04 — Nuclear/OPG. MSA renewal strategy, rate card, win scenarios.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>3X_Composite_Repair_Commercial_Plan.html</code></td><td>Plan</td><td>Initiative 05 — 3X Composite. ABSA pathway, pricing, existing track record.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>BU_Services_Meeting_Hub.html</code></td><td>Operations</td><td>Combined schedule + 7 meeting agendas + Salesforce Friday reminder tab.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>BU_Services_Utilisation_Tracker.xlsx</code></td><td>Operations</td><td>26-week utilisation tracker (5 regions) + CGSB qualification tracker. Upload to SharePoint.</td><td><span class="pill pill-green">Ready</span></td></tr>
+      <tr><td><code>BU_Services_Review_Comments.xlsx</code></td><td>Operations</td><td>Formal review tool for collecting feedback on all 11 documents.</td><td><span class="pill pill-green">Ready</span></td></tr>
+      <tr><td><code>BU_Services_Dynamics_QA_Workbook.xlsx</code></td><td>Setup</td><td>10 questions for Mathieu and IT admin. Who to ask, flow placeholders, interim process.</td><td><span class="pill pill-amber">Action required</span></td></tr>
+      <tr><td><code>BU_Services_Salesforce_Integration_Guide.docx</code></td><td>Guide</td><td>BU_Initiative__c field setup, Power Automate build steps, all SOQL queries.</td><td><span class="pill pill-green">Reference</span></td></tr>
+      <tr><td><code>BU_Services_Dynamics_Integration_Guide.docx</code></td><td>Guide</td><td>Architecture, OData queries, Power Automate branch, placeholders.</td><td><span class="pill pill-green">Reference</span></td></tr>
+      <tr><td><code>BU_Services_Meeting_Tracking_Setup.docx</code></td><td>Guide</td><td>OneNote structure, SharePoint Lists columns, Power Automate meeting health flow.</td><td><span class="pill pill-green">Reference</span></td></tr>
+      <tr><td><code>BU_Services_Base_Revenue_Integration.docx</code></td><td>Guide</td><td>Nucleom and Nortech base revenue — Salesforce queries, manual Nortech process, RAG logic.</td><td><span class="pill pill-green">Reference</span></td></tr>
+      <tr><td><code>BU_Services_SF_Technician_Tracking.docx</code></td><td>Guide</td><td>Two-phase Salesforce technician field rollout · validation rule formula · Power Automate tech deployment queries · Service Resources roadmap.</td><td><span class="pill pill-green">Reference</span></td></tr>
+      <tr><td><code>INT_BU_Business_Review_April_13.pptx</code></td><td>Template</td><td>Source deck template for auto-generation. 22 slides. Stored in SharePoint BU Services folder alongside actuals.json.</td><td><span class="pill pill-amber">Template — in use</span></td></tr>
+      <tr><td><code>generate_int_bu_deck.py</code></td><td>Script</td><td>Python deck generation script. Reads actuals.json + template .pptx, writes all automatable slides, outputs dated .pptx. Run via command line or Power Automate Azure Function. Requires python-pptx and openpyxl.</td><td><span class="pill pill-green">Ready</span></td></tr>
+      <tr><td><code>INT_BU_Review_Generated.pptx</code></td><td>Output</td><td>Sample generated deck produced from the script with zeroed actuals.json — shows correct structure with [PENDING] placeholders where data not yet entered.</td><td><span class="pill pill-green">Sample output</span></td></tr>
+    
+      <!-- ── CONFERENCE SYSTEM (NEW April 2026) ── -->
+      <tr><td colspan="4" style="background:rgba(13,80,80,.15);padding:.5rem .75rem;font-family:var(--mono);font-size:.65rem;font-weight:700;color:#7EEAEA;letter-spacing:.06em;text-transform:uppercase;">Conference Programme — added April 2026</td></tr>
+      <tr><td><code>BU_Services_Conference_Action_Plan.html</code></td><td>Portal</td><td>Visual conference approval portal for Jon. 19 conferences — past 5 as completed logs, future 14 with Approve/Hold/Reject buttons. Approval decisions saved to browser localStorage. Includes embedded Excel download buttons. Open in Chrome.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>BU_Services_Conference_Action_Tracker.xlsx</code></td><td>Excel</td><td>5-tab workbook: How To Use · Action Tracker (72 action items, owners, status dropdowns, CF) · Dashboard (auto-updating completion by owner/month) · Year Calendar (all 19 conferences, approval dropdown Col M, logistics owner Col P) · Attendee Action Plan (leads + opportunities per person per conference). Shanny enters actual costs in Year Calendar Col S.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>BU_Services_Conference_Budget_2026.xlsx</code></td><td>Excel</td><td>Formula-driven cost model. All assumptions editable (salary, flight rates from YQB, hotel rates). Budget model per conference + strategic summary. Used for budget estimates; Col S of Action Tracker records actuals.</td><td><span class="pill pill-green">Live</span></td></tr>
+      <tr><td><code>BU_Services_Conference_Cost_Integration_Guide.docx</code></td><td>Guide</td><td>Éric's step-by-step build guide for the conference cost Power Automate flow. Covers: data architecture, actuals.json schema, PA flow build (Monday 7AM, reads Excel → writes conf_* keys), Teams Adaptive Card for SF outcomes, testing checklist, conference key reference table (all 19 conf_ keys), and what Shanny/Jeremy do week-to-week.</td><td><span class="pill pill-amber">Éric to action</span></td></tr>
+      <tr><td><code>actuals.json</code> (updated)</td><td>Data</td><td>Now has 21 new conf_* keys (one per conference) with full schema: budget_est, actual_total, actual_flights, actual_hotels, actual_booth, actual_registration, actual_freight, actual_personnel, leads_captured, opps_created, opp_value_cad, sf_entry_done, approval, variance, cost_per_lead, cost_per_opp. Also has conf_cost_assumptions (all flight/hotel rates from YQB) and conf_summary rollup. Éric's PA flow populates the actuals from Excel.</td><td><span class="pill pill-amber">Schema ready — awaiting PA flow</span></td></tr>
+
+      <!-- ── PEOPLE MANAGEMENT SYSTEM (NEW April 2026) ── -->
+      <tr><td colspan="4" style="background:rgba(13,80,80,.1);padding:.5rem .75rem;font-family:var(--mono,monospace);font-size:.65rem;font-weight:700;color:#0D5050;letter-spacing:.06em;text-transform:uppercase;">People Management System — Management Hub, Meeting Hub, Role Briefs, Rhythms, Onboarding</td></tr>
+      <tr><td><code>BU_Services_Management_Hub.html</code></td><td>Portal</td><td>Single front door for the people management system. Four sections: Org &amp; Roles (17-person clickable org chart, person detail panels), Weekly Flow (Mon–Sun team calendar), Meetings (links to Meeting Hub — 9 agendas + SF Friday reminder), Document Library (7 groups, all files linked). Cross-linked to Command Centre.</td><td><span class="pill pill-green"><span class="pill-dot"></span>Live</span></td></tr>
+      <tr><td><code>BU_Services_Meeting_Hub.html</code></td><td>Portal</td><td>9 standing meeting agendas: Commercial Leadership (Mon 9AM), Commercial Team (Tue 8AM), Ops Leadership (Wed 9AM), Gate Review (last Fri of month), Finance &amp; Reporting (1st Mon), Nuclear Outage Planning, PI Group Sync, EIG/Eurazeo Review, Salesforce Friday reminder. 2026 Gate Review schedule with Dec 25 flagged.</td><td><span class="pill pill-green"><span class="pill-dot"></span>Live</span></td></tr>
+      <tr><td><code>BU_Services_Onboarding_One_Pager.html</code></td><td>Operations</td><td>New team member overview — 5 min read. All 5 initiatives, the team, 3 portals, weekly rhythm, 5 non-negotiable rules, key contacts. Linked from Management Hub document library.</td><td><span class="pill pill-green"><span class="pill-dot"></span>Ready</span></td></tr>
+      <tr><td colspan="4" style="background:rgba(26,92,168,.06);padding:.4rem .75rem;font-family:var(--mono,monospace);font-size:.62rem;font-weight:600;letter-spacing:1px;color:var(--blue);">Role Briefs — 13 individual briefs · 2 pages each · distribute printed at rollout</td></tr>
+
+      <!-- Role Briefs -->
+      <tr><td><code>BU_Services_Max_Aggrey_Role_Brief.docx</code></td><td>Role Brief</td><td>Commercial Director West. Mining NDT West, Pipeline DA (co-own with Rick Carlton), 3X Composite West, Nortech Western Canada commercial responsibility. Salesforce ownership, weekly rhythm, Nortech Jason Borza coordination protocol.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Vinoth_Tharma_Role_Brief.docx</code></td><td>Role Brief</td><td>Commercial Director East. Mining NDT East, Nuclear/OPG MSA and maintenance track (Jon supports, Olivier owns Aecon/SMR separately), Powerline with Mathieu B, 3X East. CNA 2026: Jon attends. Vinoth from 2027.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Alex_Cyr_Role_Brief.docx</code></td><td>Role Brief</td><td>Sr. Operations Director — BU Services level. Above all regional ops directors. Direct reports: Eric Rodrigue, Joel Djordjevic, Keith Reichenbach, Brook Althouse, Jason Borza, Rick Carlton. Coordinates with Louis-Pier Théberge (reports to Mathieu B).</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Eric_Rodrigue_Role_Brief.docx</code></td><td>Role Brief</td><td>Operations Director — Quebec. Maintain existing client relationships. Deliver current work. Support Vinoth Tharma on crew availability. New clients belong to Vinoth.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Joel_Djordjevic_Role_Brief.docx</code></td><td>Role Brief</td><td>Operations Director — Central. Maintain existing Central Canada client relationships. Nuclear outage readiness highest-complexity item — OPG Darlington and Pickering in region. New clients belong to Vinoth.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Keith_Reichenbach_Role_Brief.docx</code></td><td>Role Brief</td><td>Operations Director — Western. Maintain existing Western client relationships. Pipeline DA flagship initiative in territory — coordinate with Rick Carlton and Jason Borza. New Pipeline DA clients co-owned Max and Rick.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Brook_Althouse_Role_Brief.docx</code></td><td>Role Brief</td><td>Northern Operations Manager. Remote and fly-in/fly-out sites. Mining NDT primary initiative. Any Northern quote requires logistics feasibility sign-off before commercial lead submits it.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Louis_Pier_Theberge_Role_Brief.docx</code></td><td>Role Brief</td><td>Operations Director Nuclear Sector and Program Lead New Build and Refurb. Reports to Mathieu B. Two tracks: MSA/maintenance ops delivery (Vinoth + Jon) and Aecon/new build/refurb programme lead (Olivier Marcotte).</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Jason_Borza_Role_Brief.docx</code></td><td>Role Brief</td><td>Operations Director — Nortech. Reports to Alex Cyr. PI group is bolt-on (Joel Carlton manages, separate crew pool). Weekly briefing to Emmanuel Aggrey is Nortech commercial intelligence feed until Salesforce integration.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Rick_Carlton_Role_Brief.docx</code></td><td>Role Brief</td><td>Pipeline Integrity Lead — Ops Team level, reports to Alex Cyr, Edmonton-based, Nucleom-paid. Co-owns new Pipeline DA commercial relationships with Emmanuel Aggrey. Western Canada first then continental. Joel Carlton manages PI group day-to-day.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Joel_Carlton_Role_Brief.docx</code></td><td>Role Brief</td><td>PI Operations Manager — Nortech. Manages dedicated bolt-on PI technician pool. PI crew work exclusively in pipeline integrity — do not cross into core Nortech business. Reports to Rick Carlton. PI technician pool operates separately from core Nortech business.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <!-- Jeremy Irwin Role Brief -->
+      <tr>
+        <td><code>BU_Services_Jeremy_Irwin_Role_Brief.docx</code></td>
+        <td>Role Brief</td>
+        <td>Director of Finance, EIG NA. Peer alongside Jon Eustace at EIG level. Enters Nortech revenue, annual budgets, and EUR/CAD rate into actuals.json. Prepares financial data for Eurazeo quarterly pack. Works with Charles Recape on EIG model.</td>
+        <td><span class="pill pill-green">Ready to distribute</span></td>
+      </tr>
+
+      <!-- Rhythm Cards sub-header -->
+      <tr><td colspan="4" style="background:rgba(26,92,168,.06);padding:.4rem .75rem;font-family:var(--mono,monospace);font-size:0.62rem;font-weight:600;letter-spacing:1px;color:var(--blue);">Weekly Rhythm Cards — 3 teams · HTML + DOCX versions</td></tr>
+      <!-- Weekly Rhythm Cards -->
+      <tr><td><code>BU_Services_Commercial_Team_Rhythm.html</code></td><td>Rhythm Card</td><td>Weekly rhythm reference card for Emmanuel Aggrey and Vinoth Tharma. Day-by-day calendar with tasks, time estimates, guide references, monthly tasks, standing triggers, and systems owned. Interactive HTML version — open in any browser.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Commercial_Team_Rhythm.docx</code></td><td>Rhythm Card</td><td>Word version of Commercial Team Weekly Rhythm — printable, distributable to Max and Vinoth.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Ops_Team_Rhythm.html</code></td><td>Rhythm Card</td><td>Weekly rhythm reference card for all 7 ops team members: Alex Cyr, Eric Rodrigue, Joel Djordjevic, Keith Reichenbach, Brook Althouse, Louis-Pier Théberge, Jason Borza. Interactive HTML version.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_Ops_Team_Rhythm.docx</code></td><td>Rhythm Card</td><td>Word version of Ops Team Weekly Rhythm — printable, distributable to all ops directors.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_PI_Team_Rhythm.html</code></td><td>Rhythm Card</td><td>Weekly rhythm reference card for Rick Carlton and Joel Carlton. PI group bolt-on structure, Pipeline DA co-ownership with Emmanuel Aggrey, field findings protocol. Interactive HTML version.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+      <tr><td><code>BU_Services_PI_Team_Rhythm.docx</code></td><td>Rhythm Card</td><td>Word version of PI Team Weekly Rhythm — printable, distributable to Rick and Joel Carlton.</td><td><span class="pill pill-green">Ready to distribute</span></td></tr>
+
+      <!-- Management Hub -->
+      <tr><td><code>BU_Services_Management_Hub.html</code></td><td>Portal</td><td>Single front door for the entire people management system. Four sections: Org and Roles (clickable org chart with mandate panels and document links), Weekly Flow (full Mon-Sun team calendar), Meeting Hub (link to full Meeting Hub with 9 standing agenda templates + SF Friday reminder), Document Library (all files in 7 groups). Cross-linked to Command Centre. Open in any browser.</td><td><span class="pill pill-green">Ready — upload to SharePoint</span></td></tr>
+    
+      <!-- ── New deliverables added Apr 2026 ── -->
+      <tr>
+        <td><code>BU_Services_Systems_Map.html</code></td>
+        <td>Portal</td>
+        <td>Complete system overview — three portals, data flow, document index. All new deliverables linked. Use as the system onboarding starting point.</td>
+        <td><span class="pill pill-green">Live</span></td>
+      </tr>
+      <tr>
+        <td><code>BU_Services_Onboarding_One_Pager.html</code></td>
+        <td>Operations</td>
+        <td>New team member overview — 5 min read covering what BU Services is, all 5 initiatives, the team, 3 portals, weekly rhythm, 5 non-negotiable rules, key documents, and contacts.</td>
+        <td><span class="pill pill-green">Ready to distribute</span></td>
+      </tr>
+      <tr>
+        <td><code>BU_Services_Eurazeo_Quarterly_Pack_Template.docx</code></td>
+        <td>Reporting</td>
+        <td>Quarterly Eurazeo / EIG reporting template — 6 sections pre-structured: Executive Summary, Financial Performance (CAD + EUR), CAPEX, FCF, Initiative Progress (all 5), Risk Register, EIG Approval Items, Next Quarter Priorities. Prepared by Jeremy Irwin + Charles Recape.</td>
+        <td><span class="pill pill-green">Ready</span></td>
+      </tr>
+      <tr>
+        <td><code>BU_Services_Salesforce_Backfill_Tracker.html</code></td>
+        <td>Setup</td>
+        <td>Interactive checklist for auditing BU_Initiative__c on all 2026 Salesforce opportunities before go-live. Includes SOQL query, progress bar, per-opp initiative dropdown, bulk actions, CSV export. Share with Emmanuel Aggrey, Vinoth Tharma, and Rick Carlton.</td>
+        <td><span class="pill pill-amber">Action required</span></td>
+      </tr>
+      <tr>
+        <td><code>BU_Services_Power_Automate_Build_Guide.docx</code></td>
+        <td>Guide</td>
+        <td>Complete Power Automate build guide for the Sunday 7PM scheduled flow. Contains all 5 SOQL query templates, step-by-step PA flow structure, actuals.json field mapping table, SharePoint file locations, testing checklist, troubleshooting table, and annual reset instructions.</td>
+        <td><span class="pill pill-blue">Éric to action</span></td>
+      </tr>
+      <tr>
+        <td><code>BU_Services_actuals_json_Reference.html</code></td>
+        <td>Reference</td>
+        <td>Annotated reference for all 110 fields in actuals.json. Colour-coded by owner: Power Automate (green), Jeremy Irwin manual (amber), Jon Eustace (blue). Includes copyable all-zeros starter template for year-start setup.</td>
+        <td><span class="pill pill-green">Ready</span></td>
+      </tr>
+      <tr>
+        <td><code>BU_Services_Eric_GoLive_File_Map.html</code></td>
+        <td>Reference</td>
+        <td>File-by-file go-live reference for Éric Carmichael — every file he needs organised by build step (Step 0–5), with exact filenames, descriptions, and action chips (READ / BUILD / UPLOAD). Cross-linked to Go-Live Roadmap.</td>
+        <td><span class="pill pill-blue">Éric reference</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="callout callout-green" style="margin-top:1.5rem;">
+  <div class="callout-title" style="color:var(--green);">One rule: everything in the same folder</div>
+  <div class="callout-body">All HTML files must stay in the same SharePoint folder. The Command Centre uses relative links — if any file is moved out of the folder, the Document Library links will break. The actuals.json file must also be in the same folder for the Power Automate write and Command Centre read to work. When you add a new file, put it in the same folder and update the documents array in the Command Centre CONFIG.</div>
+</div>
+
+</div><!-- /page -->
+
+<!-- ── FOOTER ── -->
+<div class="doc-footer">
+  <p>BU Services System Overview &nbsp;·&nbsp; Ekoscan Integrity Group &nbsp;·&nbsp; Jon Eustace, CEO North America &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; April 2026</p>
+</div>
+
+<script>
+// Scroll spy
+var sections = ['overview','plan','command-centre','deck','data-flow','done','pending','howto','files'];
+var links = document.querySelectorAll('.topbar-nav a');
+window.addEventListener('scroll', function() {
+  var current = '';
+  sections.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top <= 80) current = id;
+  });
+  links.forEach(function(a) {
+    a.classList.toggle('act', a.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>

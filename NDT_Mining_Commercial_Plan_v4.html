@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU - Services | NDT Commercial Plan: Canadian Mining 2026–2030</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --navy:   #161C60;
+  --navy2:  #1E2580;
+  --blue:   #368CD9;
+  --blue2:  #5AAAE8;
+  --orange: #E97132;
+  --green:  #196B24;
+  --green2: #22882F;
+  --dark:   #0B1035;
+  --mid:    #F0F3FA;
+  --light:  #F7F9FD;
+  --lgrey:  #DDE3F0;
+  --body:   #384660;
+  --text:   #1A2540;
+  --white:  #FFFFFF;
+  --shadow: 0 4px 20px rgba(22,28,96,0.12);
+  --fd: 'Barlow Condensed','Arial Narrow',sans-serif;
+  --fb: 'Barlow','Segoe UI',Arial,sans-serif;
+}
+
+body { font-family: var(--fb); font-size: 15.5px; line-height: 1.7; color: var(--text); background: var(--light); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 200; background: var(--navy); border-bottom: 3px solid var(--orange); display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; height: 52px; }
+.nav-brand { font-family: var(--fd); font-size: 0.95rem; font-weight: 700; letter-spacing: 1.5px; color: var(--white); text-transform: uppercase; white-space: nowrap; }
+.nav-brand em { color: var(--blue); font-style: normal; }
+.nav-links { display: flex; list-style: none; }
+.nav-links a { display: block; padding: 0 1rem; height: 52px; line-height: 52px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; color: rgba(255,255,255,0.5); text-decoration: none; text-transform: uppercase; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: color 0.15s, border-color 0.15s; }
+.nav-links a:hover { color: var(--white); border-bottom-color: var(--blue2); }
+
+/* HERO */
+.hero { background: var(--dark); position: relative; overflow: hidden; padding: 5rem 2.5rem 4rem; }
+.hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(22,28,96,0.98) 0%, rgba(11,16,53,0.90) 60%, rgba(18,42,110,0.75) 100%); }
+.hero::after { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(54,140,217,0.04) 60px,rgba(54,140,217,0.04) 61px), repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(54,140,217,0.04) 60px,rgba(54,140,217,0.04) 61px); pointer-events: none; }
+.hero-bg { position: absolute; right: -2rem; top: 50%; transform: translateY(-50%); font-family: var(--fd); font-weight: 900; font-size: min(22vw,300px); line-height: 1; color: rgba(54,140,217,0.05); letter-spacing: -8px; pointer-events: none; user-select: none; white-space: nowrap; z-index: 1; }
+.hero-inner { position: relative; z-index: 2; max-width: 1140px; margin: 0 auto; display: grid; grid-template-columns: 1fr 260px; gap: 3rem; align-items: center; }
+.hero-label { display: inline-block; font-family: var(--fd); font-size: 0.72rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); background: rgba(233,113,50,0.12); border: 1px solid rgba(233,113,50,0.3); border-radius: 3px; padding: 0.25rem 0.65rem; margin-bottom: 1.1rem; }
+.hero h1 { font-family: var(--fd); font-weight: 900; font-size: clamp(2.8rem,5vw,4.2rem); line-height: 0.95; letter-spacing: -1px; color: var(--white); text-transform: uppercase; }
+.hero h1 span { display: block; color: var(--blue); }
+.hero-rule { width: 3.5rem; height: 4px; background: linear-gradient(90deg,var(--orange),transparent); border-radius: 2px; margin: 1.1rem 0; }
+.hero-sub { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; margin-bottom: 0.85rem; }
+.hero-desc { font-size: 1rem; font-weight: 300; color: rgba(170,190,220,0.9); max-width: 520px; line-height: 1.65; }
+.hero-stats { display: flex; flex-direction: column; gap: 0.75rem; }
+.hstat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid var(--blue); border-radius: 6px; padding: 0.9rem 1.1rem; }
+.hstat.s2 { border-left-color: var(--orange); }
+.hstat.s3 { border-left-color: var(--green2); }
+.hstat-val { font-family: var(--fd); font-size: 1.9rem; font-weight: 900; line-height: 1; color: var(--white); }
+.hstat.s2 .hstat-val { color: #F28B4E; }
+.hstat.s3 .hstat-val { color: #3DDB50; }
+.hstat-lbl { font-size: 0.72rem; color: rgba(255,255,255,0.38); margin-top: 0.2rem; line-height: 1.4; }
+
+/* LAYOUT */
+.wrap { max-width: 1140px; margin: 0 auto; padding: 0 2.5rem; }
+
+/* SECTION HEADERS */
+.sec-hdr { background: var(--navy); margin-top: 3rem; position: relative; overflow: hidden; }
+.sec-hdr::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 40%; background: linear-gradient(90deg,transparent,rgba(54,140,217,0.06)); pointer-events: none; }
+.sec-hdr-in { max-width: 1140px; margin: 0 auto; padding: 1.2rem 2.5rem; display: flex; align-items: center; gap: 1rem; position: relative; z-index: 1; }
+.sec-num { flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 50%; background: var(--orange); color: var(--white); font-family: var(--fd); font-size: 0.95rem; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.sec-title { color: var(--white); font-family: var(--fd); font-size: 1.2rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+.sec-sub { color: rgba(255,255,255,0.38); font-size: 0.8rem; margin-top: 0.1rem; }
+.sec-body { background: var(--white); padding: 2.5rem 0 3rem; }
+.sec-body p { font-size: 0.975rem; color: var(--body); line-height: 1.75; margin-bottom: 0.9rem; font-weight: 400; }
+
+/* SUBSECTION TITLE */
+.sub-title { font-family: var(--fd); font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--navy); margin: 2rem 0 0.75rem; display: flex; align-items: center; gap: 0.6rem; }
+.sub-title::after { content: ''; flex: 1; height: 1px; background: var(--lgrey); }
+
+/* CARDS */
+.crow { display: grid; gap: 1.25rem; margin: 1.5rem 0; }
+.c3 { grid-template-columns: repeat(3,1fr); }
+.c2 { grid-template-columns: repeat(2,1fr); }
+.c4 { grid-template-columns: repeat(4,1fr); }
+
+.kcard { border-radius: 8px; padding: 1.5rem 1.4rem; position: relative; overflow: hidden; }
+.kcard::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kcard.navy { background: var(--navy); color: var(--white); box-shadow: var(--shadow); }
+.kcard.navy::before { background: var(--blue2); }
+.kcard.blue { background: var(--blue); color: var(--white); box-shadow: var(--shadow); }
+.kcard.blue::before { background: rgba(255,255,255,0.3); }
+.kcard.orange { background: var(--orange); color: var(--white); box-shadow: var(--shadow); }
+.kcard.orange::before { background: rgba(255,255,255,0.3); }
+.kcard.lined { background: var(--white); border: 1.5px solid var(--lgrey); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.kcard.lined::before { background: var(--orange); }
+.kcard h3 { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.3px; margin-bottom: 0.5rem; color: var(--white); }
+.kcard.lined h3 { color: var(--navy); }
+.kcard p { font-size: 0.9rem; line-height: 1.65; color: rgba(255,255,255,0.88); margin: 0; }
+.kcard.lined p { color: var(--body); }
+.kcard-rule { width: 2rem; height: 2px; background: rgba(255,255,255,0.3); border-radius: 1px; margin: 0.65rem 0; }
+
+/* TOOL PANELS */
+.tool-block { margin: 2.25rem 0; }
+.tool-hdg { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 0.65rem; border-bottom: 2px solid var(--lgrey); }
+.tool-accent { width: 4px; height: 1.8rem; border-radius: 2px; flex-shrink: 0; }
+.tool-hdg h3 { font-family: var(--fd); font-size: 1.2rem; font-weight: 700; letter-spacing: 0.3px; color: var(--navy); text-transform: uppercase; }
+.tool-panel { display: grid; grid-template-columns: 1fr 1fr; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(22,28,96,0.1); }
+.tp-l { background: var(--mid); padding: 1.6rem 1.8rem; }
+.tp-r { background: var(--navy); padding: 1.6rem 1.8rem; }
+.tp-lbl { font-family: var(--fd); font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.6rem; color: var(--blue); }
+.tp-r .tp-lbl { color: var(--orange); }
+.tp-desc { font-size: 0.875rem; color: var(--body); line-height: 1.65; margin-bottom: 1.1rem; }
+
+/* Spec table */
+.stbl { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.stbl tr { border-bottom: 1px solid var(--lgrey); }
+.stbl tr:last-child { border-bottom: none; }
+.stbl td { padding: 0.45rem 0.7rem; vertical-align: middle; }
+.stbl td:first-child { font-weight: 600; color: var(--white); background: var(--navy); width: 45%; font-size: 0.8rem; }
+.stbl tr:nth-child(even) td:first-child { background: #1E2580; }
+.stbl td:last-child { color: var(--text); background: var(--white); }
+.stbl tr:nth-child(even) td:last-child { background: #EEF3FA; }
+
+/* Advantage list */
+.adv-list { list-style: none; }
+.adv-item { display: flex; gap: 0.8rem; margin-bottom: 1rem; }
+.adv-item:last-child { margin-bottom: 0; }
+.adv-bar { flex-shrink: 0; width: 3px; border-radius: 2px; margin-top: 3px; min-height: 2.5rem; background: var(--blue2); }
+.adv-item.ora .adv-bar { background: var(--orange); }
+.adv-title { font-size: 0.875rem; font-weight: 700; color: var(--blue2); margin-bottom: 0.15rem; display: block; }
+.adv-item.ora .adv-title { color: #F28B4E; }
+.adv-body { font-size: 0.83rem; color: rgba(170,190,220,0.85); line-height: 1.55; }
+
+/* CALLOUTS */
+.callout { border-radius: 8px; padding: 1.05rem 1.35rem; margin: 1.3rem 0; font-size: 0.92rem; line-height: 1.65; display: flex; gap: 0.85rem; align-items: flex-start; }
+.callout-icon { flex-shrink: 0; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 900; margin-top: 0.1rem; color: var(--white); }
+.callout.cgr  { background: #D8F0DC; border-left: 4px solid var(--green2); color: #0C3312; }
+.callout.cgr  .callout-icon { background: var(--green2); }
+.callout.cor  { background: #FDE8D5; border-left: 4px solid var(--orange); color: #5C2400; }
+.callout.cor  .callout-icon { background: var(--orange); }
+.callout.cbl  { background: #DBEEFF; border-left: 4px solid var(--blue); color: #0C2F60; }
+.callout.cbl  .callout-icon { background: var(--blue); }
+.callout.cnv  { background: #E8EEF8; border-left: 4px solid var(--navy); color: var(--navy); }
+.callout.cnv  .callout-icon { background: var(--navy); }
+.callout strong { display: block; font-weight: 700; margin-bottom: 0.2rem; font-size: 0.92rem; }
+
+/* DEPLOY */
+.deploy-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; margin: 1.5rem 0; }
+.dcard { border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+.dcard-hd { padding: 1.1rem 1.3rem; }
+.dcard-hd.navy   { background: var(--navy); }
+.dcard-hd.blue   { background: var(--blue); }
+.dcard-hd.orange { background: var(--orange); }
+.dcard-hd h3 { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; color: var(--white); text-transform: uppercase; }
+.dcard-hd p { color: rgba(255,255,255,0.6); font-size: 0.78rem; font-style: italic; margin-top: 0.2rem; }
+.dcard-bd { background: var(--mid); padding: 1.1rem 1.3rem; font-size: 0.87rem; color: var(--body); line-height: 1.6; }
+.dtags { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+.dtag { font-size: 0.7rem; font-weight: 700; padding: 0.22rem 0.7rem; border-radius: 20px; border: 1.5px solid; text-transform: uppercase; letter-spacing: 0.5px; }
+.dtag.navy   { color: var(--navy);   border-color: var(--navy); }
+.dtag.blue   { color: var(--blue);   border-color: var(--blue); }
+.dtag.orange { color: var(--orange); border-color: var(--orange); }
+
+/* MARKET */
+.mstats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin: 1.75rem 0; }
+.mstat { background: var(--navy); border-radius: 10px; padding: 1.2rem 1.1rem; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+.mstat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; }
+.mstat:nth-child(1)::after { background: var(--blue); }
+.mstat:nth-child(2)::after { background: var(--orange); }
+.mstat:nth-child(3)::after { background: var(--green2); }
+.mstat:nth-child(4)::after { background: #9B59B6; }
+.mstat-val { font-family: var(--fd); font-size: 1.65rem; font-weight: 900; color: var(--white); line-height: 1.1; }
+.mstat-lbl { font-size: 0.75rem; color: rgba(255,255,255,0.42); margin-top: 0.3rem; line-height: 1.4; }
+
+.driver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin: 1rem 0; }
+.driver { background: var(--white); border-radius: 8px; padding: 1rem 1.1rem 1rem 1.3rem; border-left: 4px solid var(--blue); box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-size: 0.875rem; }
+.driver:nth-child(2) { border-left-color: var(--orange); }
+.driver:nth-child(3) { border-left-color: var(--green2); }
+.driver:nth-child(4) { border-left-color: #9B59B6; }
+.driver strong { display: block; color: var(--navy); font-size: 0.9rem; font-weight: 700; margin-bottom: 0.35rem; }
+.driver span { color: var(--body); line-height: 1.55; }
+
+/* TABLES */
+.ctbl, .rtbl, .ntbl { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.875rem; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 12px rgba(22,28,96,0.08); }
+.ctbl thead th, .rtbl thead th, .ntbl thead th { background: var(--navy); color: var(--white); padding: 0.75rem 1rem; text-align: left; font-family: var(--fd); font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+.ctbl tbody td, .ntbl tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--lgrey); color: var(--text); vertical-align: middle; }
+.ctbl tbody tr:nth-child(even) td, .ntbl tbody tr:nth-child(even) td { background: var(--mid); }
+.ctbl tbody tr:last-child td, .ntbl tbody tr:last-child td { border-bottom: none; }
+
+.rtbl thead th:not(:first-child) { text-align: right; }
+.rtbl tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--lgrey); color: var(--text); }
+.rtbl tbody td:not(:first-child) { text-align: right; font-weight: 600; color: var(--navy); }
+.rtbl tbody tr:nth-child(even) td { background: var(--mid); }
+.rtbl tbody tr:last-child td { border-bottom: none; }
+.rtbl tfoot td { background: var(--orange); color: var(--white); font-weight: 700; padding: 0.85rem 1rem; font-size: 0.95rem; }
+.rtbl tfoot td:not(:first-child) { text-align: right; font-size: 1rem; }
+
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: var(--white); font-family: var(--fd); letter-spacing: 0.5px; }
+.badge.p1 { background: var(--green); }
+.badge.p2 { background: var(--blue); }
+.badge.p3 { background: var(--orange); }
+
+/* PHASES */
+.phases { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; margin: 1.5rem 0; }
+.phase { border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+.phase-hd { padding: 1.1rem 1.3rem; }
+.phase-hd.navy   { background: var(--navy); }
+.phase-hd.blue   { background: var(--blue); }
+.phase-hd.green  { background: var(--green); }
+.phase-hd h3 { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; color: var(--white); text-transform: uppercase; }
+.phase-hd p { color: rgba(255,255,255,0.6); font-size: 0.8rem; font-style: italic; margin-top: 0.2rem; }
+.phase-bd { background: var(--mid); padding: 1.2rem 1.3rem; }
+.phase-bd ol { padding-left: 1.2rem; font-size: 0.87rem; color: var(--body); line-height: 1.65; }
+.phase-bd ol li { margin-bottom: 0.55rem; }
+.phase-bd ol li:last-child { margin-bottom: 0; }
+
+.step-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--orange); color: var(--white); font-size: 0.78rem; font-weight: 700; font-family: var(--fd); flex-shrink: 0; }
+
+/* FOOTER */
+.footer { background: var(--dark); border-top: 3px solid var(--orange); padding: 2.5rem; margin-top: 3.5rem; }
+.footer-in { max-width: 1140px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+.footer-brand { font-family: var(--fd); font-size: 1rem; font-weight: 700; color: var(--white); letter-spacing: 1px; text-transform: uppercase; line-height: 1.4; }
+.footer-brand span { color: var(--blue); }
+.footer-meta { font-size: 0.8rem; color: rgba(255,255,255,0.3); line-height: 1.6; text-align: right; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .hero-inner, .footer-in { grid-template-columns: 1fr; }
+  .hero-stats { flex-direction: row; flex-wrap: wrap; }
+  .hstat { flex: 1; min-width: 140px; }
+  .c3,.c4,.deploy-grid,.phases,.mstats { grid-template-columns: repeat(2,1fr); }
+  .tool-panel { grid-template-columns: 1fr; }
+  .driver-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .footer-meta { text-align: left; }
+}
+@media (max-width: 560px) {
+  .c3,.c4,.deploy-grid,.phases,.mstats,.c2 { grid-template-columns: 1fr; }
+  .hero { padding: 3rem 1.5rem 2.5rem; }
+  .wrap, .sec-hdr-in { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+
+/* ── MINING ADDITIONS ── */
+:root { --gold: #C9860A; }
+p.lead { font-size:1.05rem; font-weight:400; color:var(--navy); line-height:1.75; margin-bottom:1.1rem; border-left:3px solid var(--orange); padding-left:1.1rem; }
+h3.subsection { font-family:var(--fd); font-size:1rem; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:var(--navy); margin:2rem 0 0.85rem; display:flex; align-items:center; gap:0.6rem; }
+h3.subsection::after { content:''; flex:1; height:1px; background:var(--lgrey); }
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin:1.5rem 0; }
+.stat-card { background:var(--navy); border-radius:10px; padding:1.2rem 1.1rem; position:relative; overflow:hidden; box-shadow:var(--shadow); }
+.stat-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:var(--blue); }
+.stat-card.gold::after { background:#F0C040; } .stat-card.green::after { background:var(--green2); }
+.stat-card .val { font-family:var(--fd); font-size:1.8rem; font-weight:900; color:var(--white); line-height:1.1; }
+.stat-card.gold .val { color:#F0C040; } .stat-card.navy .val { color:var(--blue2); }
+.stat-card .lbl { font-size:0.75rem; color:rgba(255,255,255,0.42); margin-top:0.3rem; line-height:1.4; }
+.info-box { border-radius:8px; margin:1.25rem 0; overflow:hidden; box-shadow:0 2px 8px rgba(22,28,96,0.07); }
+.info-box.green { border-left:4px solid var(--green2); } .info-box.amber { border-left:4px solid #C87800; }
+.info-box.navy  { border-left:4px solid var(--navy); }  .info-box.orange{ border-left:4px solid var(--orange); }
+.box-header { font-family:var(--fd); font-size:0.78rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:0.7rem 1.2rem; }
+.info-box.green  .box-header { background:var(--green2); color:var(--white); }
+.info-box.amber  .box-header { background:#C87800; color:var(--white); }
+.info-box.navy   .box-header { background:var(--navy); color:var(--white); }
+.info-box.orange .box-header { background:var(--orange); color:var(--white); }
+.box-body { padding:0.5rem 0; }
+.box-item { padding:0.55rem 1.2rem 0.55rem 1.7rem; font-size:0.875rem; color:var(--text); line-height:1.6; border-bottom:1px solid rgba(22,28,96,0.06); position:relative; }
+.box-item:last-child { border-bottom:none; }
+.box-item::before { content:"›"; position:absolute; left:0.7rem; color:var(--green2); font-weight:700; font-size:1rem; line-height:1.6; }
+.info-box.amber .box-item::before { color:#C87800; } .info-box.navy .box-item::before { color:var(--navy); }
+.info-box.orange .box-item::before { color:var(--orange); }
+.data-table { width:100%; border-collapse:collapse; margin:1.5rem 0; font-size:0.875rem; border-radius:8px; overflow:hidden; box-shadow:0 2px 12px rgba(22,28,96,0.08); }
+.data-table thead th { background:var(--navy); color:var(--white); padding:0.75rem 1rem; text-align:left; font-family:var(--fd); font-size:0.78rem; letter-spacing:1px; text-transform:uppercase; font-weight:700; }
+.data-table tbody td { padding:0.7rem 1rem; border-bottom:1px solid var(--lgrey); color:var(--text); vertical-align:top; }
+.data-table tbody tr:nth-child(even) td { background:var(--mid); }
+.data-table tbody tr:last-child td { border-bottom:none; }
+.company-card { background:var(--white); border:1.5px solid var(--lgrey); border-radius:10px; padding:1.5rem 1.6rem; margin:1.25rem 0; box-shadow:0 2px 10px rgba(22,28,96,0.06); border-top:3px solid var(--blue); }
+.company-card h4 { font-family:var(--fd); font-size:1.1rem; font-weight:700; color:var(--navy); margin-bottom:0.3rem; letter-spacing:0.3px; text-transform:uppercase; }
+.company-card .tagline { font-size:0.8rem; color:#8899AA; font-style:italic; margin-bottom:0.85rem; }
+.company-card p { font-size:0.9rem; color:var(--body); line-height:1.65; margin-bottom:0.75rem; }
+.doc-list { list-style:none; padding:0; }
+.doc-list li { font-size:0.875rem; color:var(--body); padding:0.4rem 0 0.4rem 1.2rem; border-bottom:1px solid var(--lgrey); position:relative; }
+.doc-list li:last-child { border-bottom:none; }
+.doc-list li::before { content:"›"; position:absolute; left:0; color:var(--blue); font-weight:700; }
+.office-tags { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.85rem; }
+.office-tag { font-size:0.72rem; font-weight:600; font-family:var(--fd); letter-spacing:0.5px; padding:0.2rem 0.65rem; border-radius:20px; background:var(--mid); color:var(--navy); border:1px solid var(--lgrey); }
+.target-card { background:var(--white); border-radius:10px; overflow:hidden; box-shadow:var(--shadow); margin:1.25rem 0; border:1px solid var(--lgrey); }
+.target-card-header { background:var(--navy); padding:1rem 1.3rem; display:flex; align-items:center; justify-content:space-between; }
+.target-card-header h4 { font-family:var(--fd); font-size:1.05rem; font-weight:700; color:var(--white); letter-spacing:0.3px; text-transform:uppercase; }
+.priority-stars { color:#F0C040; font-size:0.9rem; letter-spacing:2px; }
+.target-card-body { padding:1.3rem 1.4rem; }
+.target-meta { display:grid; grid-template-columns:repeat(3,1fr); gap:0.75rem 1.5rem; margin-bottom:1rem; }
+.target-meta-item label { display:block; font-family:var(--fd); font-size:0.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--blue); margin-bottom:0.2rem; }
+.target-meta-item span { font-size:0.875rem; font-weight:600; color:var(--navy); }
+.target-card-body p { font-size:0.875rem; color:var(--body); line-height:1.65; margin-bottom:0.6rem; }
+.chart-wrap { background:var(--white); border:1px solid var(--lgrey); border-radius:10px; padding:1.5rem; margin:1.5rem 0; box-shadow:0 2px 12px rgba(22,28,96,0.06); }
+.chart-title { font-family:var(--fd); font-size:0.95rem; font-weight:700; color:var(--navy); letter-spacing:0.5px; text-transform:uppercase; margin-bottom:0.3rem; }
+.chart-sub { font-size:0.8rem; color:var(--body); margin-bottom:1rem; }
+.chart-caption { font-size:0.78rem; color:#8899AA; margin-top:0.85rem; line-height:1.5; font-style:italic; }
+.hero-bg { position:absolute; right:-2rem; top:50%; transform:translateY(-50%); font-family:var(--fd); font-weight:900; font-size:min(20vw,280px); line-height:1; color:rgba(201,134,10,0.06); letter-spacing:-6px; pointer-events:none; user-select:none; white-space:nowrap; z-index:1; }
+.hero-conf { display:inline-block; margin-top:1.1rem; font-family:var(--fd); font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.12); border-radius:3px; padding:0.2rem 0.6rem; }
+.hstat.sg { border-left-color:#C9860A; } .hstat.sg .hstat-val { color:#F0C040; }
+@media(max-width:900px){ .stat-grid,.mstats{grid-template-columns:repeat(2,1fr);} .target-meta{grid-template-columns:1fr 1fr;} }
+@media(max-width:560px){ .stat-grid,.mstats,.target-meta{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<!-- Master plan context banner -->
+<div style="background:#0a0f1a;border-bottom:2px solid rgba(54,140,217,0.3);padding:0;">
+  <div style="max-width:1140px;margin:0 auto;">
+    <!-- Label row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="padding:0.55rem 1rem;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(54,140,217,0.7);">BU Services Full Picture</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2026</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2027</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2028</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2029</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2030</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">Full plan</div>
+    </div>
+    <!-- Base row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="padding:0.45rem 1rem;font-size:0.72rem;color:rgba(185,142,224,0.65);">Base business</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$47.2M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$53.1M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$58.0M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$59.9M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$55.4M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.2);border-left:1px solid rgba(255,255,255,0.04);">existing</div>
+    </div>
+    <!-- Initiatives row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="padding:0.45rem 1rem;font-size:0.72rem;color:rgba(61,219,80,0.65);">+ 5 growth initiatives</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$3.2M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$18.6M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$25.7M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$32.6M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$37.4M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.2);border-left:1px solid rgba(255,255,255,0.04);">this plan</div>
+    </div>
+    <!-- Total row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;background:rgba(255,255,255,0.03);">
+      <div style="padding:0.5rem 1rem;font-family:var(--fd,'Barlow',sans-serif);font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Total BU Services</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$50.4M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$71.7M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$83.7M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$92.5M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:#3DDB50;border-left:1px solid rgba(255,255,255,0.06);">$92.8M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.25);border-left:1px solid rgba(255,255,255,0.06);">combined</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SIDEBAR ─────────────────────────────────────────────────────────── -->
+<nav class="nav">
+  <div class="nav-brand">BU SERVICES <em>|</em> EKOSCAN INTEGRITY GROUP</div>
+  <ul class="nav-links">
+    <li><a href="#s1">Summary</a></li>
+    <li><a href="#s4">Customers</a></li>
+    <li><a href="#s5">Market</a></li>
+    <li><a href="#s6">Services</a></li>
+    <li><a href="#s7">Targets</a></li>
+    <li><a href="#s8">Go-to-Market</a></li>
+    <li><a href="#s9">Pricing</a></li>
+    <li><a href="#s10">Revenue</a></li>
+    <li><a href="#s15">Next Steps</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true">MINING</div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-label">Commercial Plan &mdash; 2026 to 2030</div>
+      <h1>NDT SERVICES<span>CANADIAN MINING</span></h1>
+      <div class="hero-rule"></div>
+      <p class="hero-sub">Nucleom Inc.&ensp;&middot;&ensp;Nortech Advanced NDT&ensp;&middot;&ensp;BU Services&ensp;&middot;&ensp;Ekoscan Integrity Group</p>
+      <p class="hero-desc">Grinding mill open gear inspection through grease using Eddy Current Array technology &mdash; combined with robotic UT shell surveys. The only complete Canadian mill health program, already live across 12 active accounts spanning Canadian mining, oil sands, international operations, and cement plants.</p>
+      <div class="hero-conf">Confidential</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat sg">
+        <div class="hstat-val">US$4K+</div>
+        <div class="hstat-lbl">Gold per oz in 2025 &mdash; best annual gain since 1979</div>
+      </div>
+      <div class="hstat s2">
+        <div class="hstat-val">$3M+</div>
+        <div class="hstat-lbl">CAD daily production value at risk per large gold mine</div>
+      </div>
+      <div class="hstat s3">
+        <div class="hstat-val">4–8 hr</div>
+        <div class="hstat-lbl">ECA inspection vs. 12–48 hrs for traditional methods</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val">$17.9M</div>
+        <div class="hstat-lbl">Cumulative 5-year revenue target 2026–2030</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sec-hdr" id="s1">
+  <div class="sec-hdr-in">
+    <div class="sec-num">01</div>
+    <div><div class="sec-title">Executive Summary</div><div class="sec-sub">Market context, strategic objectives, and key metrics</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <div class="stat-grid">
+    <div class="stat-card gold">
+      <div class="val">US$4K+</div>
+      <div class="lbl">Gold price per oz in 2025, best annual gain since 1979</div>
+    </div>
+    <div class="stat-card navy">
+      <div class="val">US$5K</div>
+      <div class="lbl">J.P. Morgan forecast for gold by Q4 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="val">$3M+</div>
+      <div class="lbl">CAD daily production value at risk at a large gold mine</div>
+    </div>
+    <div class="stat-card green">
+      <div class="val">4–8 hr</div>
+      <div class="lbl">ECA inspection vs. 12–48 hrs for traditional methods</div>
+    </div>
+  </div>
+
+  <p class="lead">Precious metals are at historic highs. Gold surpassed US$4,000 per ounce for the first time in 2025, a 66% annual gain — its strongest performance since 1979 — and J.P. Morgan projects prices toward US$5,000/oz by Q4 2026. Silver hit multi-decade highs above US$60/oz. In this environment, every hour a grinding mill is offline represents lost ounces at prices that make each unplanned downtime event dramatically more expensive than at any prior point in mining history.</p>
+
+  <p>Grinding mills are the productive core of mineral processing operations in Canada, and their large open gear drives rank among the most failure-prone, highest-consequence components on any mine site. At current gold prices, a single unplanned SAG or ball mill shutdown at a major Canadian gold mine can cost CAD $500,000–$1,500,000 per day in lost production value alone, before emergency repair costs, replacement parts, and mobilization premiums. For a precious metals operation running at full capacity in a record-price environment, gear failure is not just a maintenance problem — it is a revenue crisis.</p>
+
+  <p>The solution is early detection, deployed frequently and quickly without extended mill downtime. That technology is <strong>Eddy Current Array (ECA) inspection through grease</strong>, and the BU - Services is already delivering it. ECA through-grease gear inspections are live and operational across <strong>12 active accounts</strong> spanning Canadian gold, silver, iron ore, oil sands, and cement operations, plus an international program in Suriname &mdash; with proven results across a diverse range of mill types and operating environments. This is not a new concept being introduced to the market; it is a validated, in-service inspection program being strategically scaled to reach every major mining operator in Canada.</p>
+
+  <p>Powered by the <strong>SG NDT Micro S2G2</strong> ECA instrument and EMMA software for gear inspection, and advanced <strong>robotic ultrasonic testing (UT)</strong> systems for mill shell, trunnion, and head thickness measurement, — manufactured by a fellow Ekoscan Integrity Group company in Lévis, Québec — and delivered by the BU - Services team of Nucleom Inc. and Nortech Advanced NDT operating across seven Canadian offices, this commercial plan defines the strategy, targets, and revenue roadmap to grow this service from its current customer base to full-scale penetration of the Canadian mining sector across the 2026–2030 plan period.</p>
+
+  <p>The mining sector focus is deliberate. Mining offers high-margin, specialized inspection work structurally insulated from the cyclical pressures of oil and gas. Critically, the BU - Services' integrated program — combining ECA gear inspection with robotic UT shell thickness surveys — delivers far greater value per mobilization than any single-technology competitor can offer, driving both higher revenue per site visit and stronger client retention. By building a dominant position in mining gear inspection, the BU - Services is diversifying its revenue base into a market that is both resilient and technically underserved.</p>
+
+  <div class="info-box green">
+    <div class="box-header">Key Strategic Objectives</div>
+    <div class="box-body">
+      <div class="box-item">Scale Nucleom Inc.'s proven ECA through-grease gear inspection service (already live across 12 active accounts spanning Canadian mining, oil sands, cement, and international operations) to all major Canadian mining and industrial operators</div>
+      <div class="box-item">Diversify revenue away from oil and gas cyclicality by building a dominant, recurring-revenue position in the structurally resilient Canadian mining sector</div>
+      <div class="box-item">Leverage existing customer results, data, and case studies as the primary sales tool for new account development</div>
+      <div class="box-item">Grow from current customer base to 15+ active mining clients by end of Year 1; 30+ by end of Year 2</div>
+      <div class="box-item">Achieve CAD $1.9M in annual revenue by Year 2 (2027) and CAD $3.6M+ by Year 3 (2028) — reflecting a realistic sales cycle of 6–12 months for new mining clients and a planned slower 2026 build as the commercial team establishes vendor qualifications and initial contracts</div>
+      <div class="box-item">Convert all current customers to formal annual or semi-annual condition monitoring contracts</div>
+      <div class="box-item">Establish the BU - Services as the recognized standard for grinding mill gear health management in Canada</div>
+      <div class="box-item">Cross-sell robotic UT mill shell, trunnion, and head thickness surveys to all active ECA gear inspection clients — maximizing revenue per mobilization and delivering the most comprehensive mill health program available in Canada</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 2: CORPORATE STRUCTURE ──────────────────────────────────── -->
+<div class="sec-hdr" id="s2">
+  <div class="sec-hdr-in">
+    <div class="sec-num">02</div>
+    <div><div class="sec-title">Corporate Structure &amp; The BU - Services</div><div class="sec-sub">Ekoscan Integrity Group, Nucleom Inc., and Nortech Advanced NDT</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p>Ekoscan Integrity Group (EIG), founded in 2010 and headquartered in France, is a European leader in advanced non-destructive testing solutions. Through a series of strategic acquisitions including Nucleom Inc. (2025) and Nortech Advanced NDT (December 2024), EIG has built a vertically integrated NDT powerhouse. Arcanite Inc. has since amalgamated with Nucleom Inc., operating under the Nucleom brand.</p>
+
+  <p>Within EIG's North American operations, Nucleom Inc. and Nortech Advanced NDT collectively form the <strong>BU - Services</strong>: the integrated service delivery business unit responsible for executing on-site NDT programs, including this grinding mill ECA gear inspection program.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:22%">Entity</th>
+        <th style="width:58%">Role within EIG Group</th>
+        <th style="width:20%">Location</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Ekoscan Integrity Group (EIG)</td>
+        <td>Parent company: European NDT leader; strategy, innovation, capital, and global expansion. Backed by Eurazeo (French PE). Founded 2010.</td>
+        <td>France</td>
+      </tr>
+      <tr>
+        <td>BU - Services<br><small style="font-weight:400;color:var(--gray-500)">(Nucleom Inc. + Nortech Advanced NDT)</small></td>
+        <td>Canadian integrated services business unit providing field inspection execution, engineering, and client delivery. The primary commercial entity for the mining ECA gear inspection program.</td>
+        <td>QC&nbsp;• MB&nbsp;• ON&nbsp;• BC&nbsp;• AB</td>
+      </tr>
+      <tr>
+        <td>SG NDT</td>
+        <td>ECA instrument &amp; probe manufacturer within EIG. Designs the Micro S2G2 instrument and EMMA software used for gear inspections. Founded 2012, Lévis QC.</td>
+        <td>Lévis, QC, Canada</td>
+      </tr>
+      <tr>
+        <td>EKOSCAN / Socomate</td>
+        <td>EIG product divisions: ultrasonic probes, scanners, and electronics. Technology backbone for the group.</td>
+        <td>France</td>
+      </tr>
+      <tr>
+        <td>INTACT</td>
+        <td>European services division of EIG. TaaS model for asset integrity. Sister unit providing technology transfer and cross-group methodology.</td>
+        <td>France / Europe</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="subsection">2.1 — BU - Services: The Two Canadian Companies</h3>
+  <p>Following the amalgamation of Arcanite Inc. into Nucleom Inc., the BU - Services operates through two distinct Canadian companies:</p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:22%">Company</th>
+        <th style="width:53%">Expertise &amp; Key Contribution</th>
+        <th style="width:25%">Offices</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Nucleom Inc.<br><small style="font-weight:400;color:var(--gray-500)">Founded 2009<br>Arcanite amalgamated 2024/25<br>Acquired by EIG 2025</small></td>
+        <td>Canada's fastest-growing advanced NDT company (#183 Globe &amp; Mail, 236% 3-yr growth). Deep expertise in ECA, Phased Array UT, pipeline inspection, pulsed eddy current (CUI), and drone inspection. CGSB-recognized RTO; ISO 9001:2015. Delivers the active ECA gear inspection program across 12 active accounts spanning Canadian mining, oil sands, cement, and international operations.</td>
+        <td>Quebec City, QC<br>Montreal, QC<br>Oakville, ON<br>Thunder Bay, ON<br>Vancouver, BC<br>Houston, TX (USA)</td>
+      </tr>
+      <tr>
+        <td>Nortech Advanced NDT<br><small style="font-weight:400;color:var(--gray-500)">Founded 2016<br>Acquired by EIG Dec 2024</small></td>
+        <td>Western Canada NDT specialist with deep roots in Alberta oil &amp; gas and mining. Services: UAV drone inspections, UT, RT, and engineering. Strong oilfield client relationships across Western Canada.</td>
+        <td>Edmonton, AB<br>Fort St. John, BC (via Rockx)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── SECTION 3: COMPANY PROFILES ─────────────────────────────────────── -->
+<div class="sec-hdr" id="s3">
+  <div class="sec-hdr-in">
+    <div class="sec-num">03</div>
+    <div><div class="sec-title">BU - Services: Company Profiles</div><div class="sec-sub">Nucleom Inc., Nortech Advanced NDT, SG NDT, and EIG</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <div class="company-card">
+    <h4>3.1 &nbsp; Nucleom Inc. — The Amalgamated Field Service Lead</h4>
+    <div class="tagline">Founded 2009, Quebec City &nbsp;|&nbsp; Arcanite Inc. amalgamated into Nucleom January 1, 2026 &nbsp;|&nbsp; Acquired by EIG 2025</div>
+    <p>Nucleom Inc. is the <strong>lead company for the Mining NDT initiative</strong> within the BU Services platform, driving the commercial program and holding the ECA through-grease grinding mill gear inspection program IP and track record. Nortech Advanced NDT supports as Western Canada delivery partner — covering Edmonton, AB and Fort St. John, BC (via Rockx, a permanent Nortech subcontractor operating the Fort St. John, BC office) for Alberta oil sands operations and northeastern BC. One of Canada's most recognized advanced NDT companies, ranking #183 on the Globe and Mail's Top Growing Companies list with 236% three-year revenue growth, Nucleom delivers the active ECA gear inspection program across mining, oil sands, and cement sectors, with active customers across 12 active accounts spanning Canadian mining, oil sands, cement, and international operations.</p>
+    <ul class="doc-list">
+      <li>Active ECA through-grease gear inspection program delivering results across 12 active accounts spanning Canadian mining, oil sands, cement, and international operations</li>
+      <li>Deep expertise in Eddy Current Array (ECA), Phased Array UT (PAUT), pulsed eddy current (CUI), and conventional ECT across industrial, nuclear, and pipeline sectors</li>
+      <li>CGSB-recognized Training Organization (RTO) for NDT certification; technicians qualified to the highest Canadian standards</li>
+      <li>Recognized Training Academy by Olympus NDT; qualified by Natural Resources Canada (NRCan) NDTCB</li>
+      <li>ISO 9001:2015 and CSA-compliant Quality Management System</li>
+      <li><strong>Oakville (ON):</strong> same-day mobilization to Vale Clarabelle Mill, Glencore Strathcona Mill, and the Sudbury basin</li>
+      <li><strong>Thunder Bay (ON):</strong> gateway to Northwestern Ontario gold operations including Agnico Eagle Detour Lake</li>
+      <li><strong>Vancouver (BC):</strong> direct access to Teck Highland Valley Copper and HudBay Copper Mountain</li>
+    </ul>
+    <div class="office-tags">
+      <span class="office-tag">Quebec City, QC</span>
+      <span class="office-tag">Montreal, QC</span>
+      <span class="office-tag">Oakville, ON</span>
+      <span class="office-tag">Thunder Bay, ON</span>
+      <span class="office-tag">Vancouver, BC</span>
+      <span class="office-tag">Houston, TX</span>
+    </div>
+  </div>
+
+  <div class="company-card" style="border-left-color:var(--green)">
+    <h4>3.2 &nbsp; Nortech Advanced NDT — Western Canada &amp; Alberta Specialist</h4>
+    <div class="tagline">Founded 2016, Edmonton, AB &nbsp;|&nbsp; Acquired by EIG December 2024</div>
+    <p>Nortech Advanced NDT is a Western Canada specialist with deep roots in Alberta's oil and gas and mining sectors. Within the Mining NDT initiative, Nortech supports the Nucleom-led program through its Edmonton, AB office for Alberta oil sands mine accounts, and via its Fort St. John, BC presence — operated through <strong>Rockx</strong>, a permanent Nortech subcontractor — for northeastern BC operations. Vancouver is a Nucleom office providing BC copper mine coverage.</p>
+    <ul class="doc-list">
+      <li><strong>Edmonton (AB) — Nortech:</strong> primary access for Alberta oil sands processing mill operators (Suncor, Cenovus, Syncrude, CNRL) and Saskatchewan potash and uranium operations</li>
+      <li><strong>Fort St. John (BC) — Nortech / Rockx:</strong> Nortech's northeastern BC presence operated through Rockx, a permanent Nortech subcontractor operating the Fort St. John, BC office. Covers Peace Country oil and gas operators and northeastern BC mining operations</li>
+      <li>UAV drone inspection capability enabling visual inspection of elevated mill structures and pinion housings without scaffolding</li>
+      <li>Extensive Western Canada mining experience in gold, oil sands, manufacturing, and fabrication</li>
+      <li>Digital reporting aligned with the BU's delivery model powered by SG NDT EMMA software</li>
+      <li>Established Alberta and BC client relationships providing warm introductions to Western Canada mining operators</li>
+    </ul>
+    <div class="office-tags">
+      <span class="office-tag">Edmonton, AB</span>
+      <span class="office-tag">Fort St. John, BC (via Rockx)</span>
+    </div>
+  </div>
+
+  <h3 class="subsection">3.3 — SG NDT: The ECA Instrument &amp; Probe Manufacturer</h3>
+  <p>SG NDT was founded in 2012 in Lévis, Québec by Rock Samson and Hervé Gac — two founders with a combined 60+ years of NDT experience, including founding-level roles at R/D Tech (now Evident/Olympus). SG NDT is a Canadian-born, globally deployed manufacturer of eddy current array instruments, probes, and software — now part of Ekoscan Integrity Group. The BU - Services deploys SG NDT's instruments as a sister company within the same group, providing exclusive access to instrument optimization and custom probe design.</p>
+
+  <h4 class="mini-head">Micro S2G2 — Multi-Technology ECA Instrument</h4>
+  <ul class="doc-list">
+    <li>Ultra-compact and field-rugged — critical for mine site deployment and confined space access around large gear drives</li>
+    <li>Supports ECA, Remote-Field (RFT), Near-Field (NFA), and Magnetic Flux Leakage (MFL) from a single instrument</li>
+    <li>Designed for demanding industrial environments; offered in surface array and tubing configurations — surface array directly applicable to gear tooth scanning</li>
+  </ul>
+
+  <h4 class="mini-head">EMMA Software — ElectroMagnetic Measurement &amp; Analysis</h4>
+  <ul class="doc-list">
+    <li>Proprietary data acquisition, analysis, and reporting software running on desktop, laptop, and tablet PCs — enabling field analysis at the mine site</li>
+    <li>Supports ECA, RFT, NFT, and MFL through a single platform; encoder-supported full gear ring C-scan mapping</li>
+    <li>Advanced 3D visualization and customizable report layout; simple calibration for efficient mine site mobilization</li>
+  </ul>
+
+  <h4 class="mini-head">Custom ECA Probes</h4>
+  <ul class="doc-list">
+    <li>Custom rigid ECA probes manufactured in-house at SG NDT for specific gear tooth geometries — purpose-built for each mill type</li>
+    <li>Flexible PCB cushioned probes for large-radius surface inspection conforming to gear tooth curvature</li>
+  </ul>
+
+  <h3 class="subsection">3.4 — Ekoscan Integrity Group: The Strategic Parent</h3>
+  <p>Founded in 2010 in France, Ekoscan Integrity Group is a European leader in advanced NDT across aerospace, nuclear, oil &amp; gas, renewables, railways, and hydrogen sectors. Backed by Eurazeo (French PE) for accelerated international expansion with North America as a strategic growth target.</p>
+  <div class="stat-grid" style="margin-top:1rem">
+    <div class="stat-card"><div class="val">500+</div><div class="lbl">Employees across 9 locations in 4 countries</div></div>
+    <div class="stat-card"><div class="val">50+</div><div class="lbl">Countries served worldwide</div></div>
+    <div class="stat-card navy"><div class="val">7</div><div class="lbl">Patents and patent applications in NDT technologies</div></div>
+    <div class="stat-card gold"><div class="val">30+</div><div class="lbl">Custom innovation solutions per year</div></div>
+  </div>
+</div>
+
+<!-- ── SECTION 4: REFERENCE CUSTOMERS ──────────────────────────────────── -->
+<div class="sec-hdr" id="s4">
+  <div class="sec-hdr-in">
+    <div class="sec-num">04</div>
+    <div><div class="sec-title">Current Reference Customers</div><div class="sec-sub">Active accounts generating revenue today</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p class="lead">The ECA through-grease grinding mill gear inspection service is not a concept under development — it is a <strong>live, operational service being delivered today</strong>. These four active customers represent the most powerful commercial asset available: proven performance at operating mines, with named references ready for new client discussions.</p>
+
+  <div class="info-box green">
+    <div class="box-header">Active Customers &mdash; Mining &amp; Oil Sands</div>
+    <div class="box-body">
+      <div class="box-item"><strong>Wesdome Gold Mines</strong> — Active ECA through-grease gear inspections at Canadian gold mining operations <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: $129K &nbsp;|&nbsp; 2025: $85K</em></div>
+      <div class="box-item"><strong>Barrick Gold</strong> — Active ECA through-grease gear inspections at Canadian operations; one of the world's largest gold producers <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: $92K &nbsp;|&nbsp; 2025: $110K</em></div>
+      <div class="box-item"><strong>Magris Talc</strong> — Active ECA through-grease gear inspections supporting mill reliability at Canadian talc processing operations <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: — &nbsp;|&nbsp; 2025: $21K</em></div>
+      <div class="box-item"><strong>Suncor Energy &mdash; Base Plant</strong> — Active ECA through-grease gear inspections at Suncor's Base Plant oil sands upgrading facility, Fort McMurray, Alberta <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: $344K &nbsp;|&nbsp; 2025: $609K</em></div>
+      <div class="box-item"><strong>Cenovus Energy</strong> — ECA gear inspection program supporting grinding mill reliability at Cenovus oil sands operations, Alberta <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: $466K &nbsp;|&nbsp; 2025: $170K</em></div>
+      <div class="box-item"><strong>ArcelorMittal &mdash; Mining Canada</strong> — Active ECA through-grease gear inspections at ArcelorMittal iron ore mining and processing operations, Canada <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: $106K &nbsp;|&nbsp; 2025: $113K</em></div>
+      <div class="box-item"><strong>Agnico Eagle &mdash; Meadowbank</strong> — Active ECA gear inspections at Agnico Eagle's Meadowbank gold mine complex, Nunavut <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; Combined Agnico Eagle total: 2024: $107K &nbsp;|&nbsp; 2025: $230K (across all sites)</em></div>
+      <div class="box-item"><strong>Agnico Eagle &mdash; Detour Lake</strong> — Active ECA gear inspections at Agnico Eagle's Detour Lake gold mine, Northern Ontario <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; See Agnico Eagle total above</em></div>
+      <div class="box-item"><strong>Minerai de Fer du Qu&eacute;bec (MFQ)</strong> — Active ECA through-grease gear inspections at iron ore grinding operations, Qu&eacute;bec <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: — &nbsp;|&nbsp; 2025: $89K</em></div>
+    </div>
+  </div>
+
+  <div class="info-box orange">
+    <div class="box-header">Active Customers &mdash; International</div>
+    <div class="box-body">
+      <div class="box-item"><strong>IAMGOLD &mdash; Suriname Operations</strong> — Active ECA through-grease gear inspections at IAMGOLD's Suriname gold mining operations <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: $18K &nbsp;|&nbsp; 2025: —</em></div>
+</div>
+  </div>
+
+  <div class="info-box blue">
+    <div class="box-header">Active Customers &mdash; Cement</div>
+    <div class="box-body">
+      <div class="box-item"><strong>Heidelberg Materials (Essroc Canada)</strong> — Active ECA through-grease gear inspections at Canadian cement plant grinding mills <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: $64K &nbsp;|&nbsp; 2025: $110K</em></div>
+      <div class="box-item"><strong>St. Mary's Cement (Votorantim)</strong> — Active ECA through-grease gear inspections at St. Mary's cement plant, Ontario <em style="color:var(--mgrey,#8899AA);font-size:0.8rem;">&nbsp;|&nbsp; 2024: $78K &nbsp;|&nbsp; 2025: $362K</em></div>
+    </div>
+  </div>
+
+  <div class="callout cnv">
+    <div class="callout-icon">&#9432;</div>
+    <div><strong>Current revenue per account will be added</strong> &mdash; Revenue figures per account are shown below — combined 2024 total: CAD ~$1.77M | combined 2025 annualised total: CAD ~$1.99M.</div>
+  </div>
+
+  <table class="data-table" style="margin-top:1.5rem">
+    <thead>
+      <tr>
+        <th>What Current Customers Provide</th>
+        <th>Commercial Value</th>
+        <th>How It Accelerates Growth</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Named reference accounts at operating mines</td>
+        <td>Eliminates technology skepticism — this is field-proven, not theoretical</td>
+        <td>New prospects can speak directly to peers across 12 active accounts spanning gold, silver, iron ore, talc, oil sands, cement, and international operations</td>
+      </tr>
+      <tr>
+        <td>Multi-year inspection data and trending baselines</td>
+        <td>Demonstrates the long-term value of condition monitoring vs. one-off inspections</td>
+        <td>Sells the program, not just the service — contract renewals and expansions</td>
+      </tr>
+      <tr>
+        <td>Documented defect findings and severity classifications</td>
+        <td>Quantifies the risk reduction delivered — the ROI case is real, not hypothetical</td>
+        <td>Case studies with AMBER/RED findings drive urgency in prospect conversations</td>
+      </tr>
+      <tr>
+        <td>Operational protocol refinement across mine types</td>
+        <td>Inspection procedures, probe configurations, and EMMA reporting are field-optimized</td>
+        <td>New client deployments benefit from lessons learned — faster mobilization, higher first-pass quality</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── SECTION 5: MARKET OPPORTUNITY ───────────────────────────────────── -->
+<div class="sec-hdr" id="s5">
+  <div class="sec-hdr-in">
+    <div class="sec-num">05</div>
+    <div><div class="sec-title">Market Opportunity</div><div class="sec-sub">Canadian grinding mill TAM and the gear failure problem</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p>The decision to focus this commercial plan on the Canadian mining sector is not simply a matter of market size — it is a deliberate strategic choice to pursue a high-margin, specialized inspection segment structurally resistant to the commodity cycles that periodically compress oil and gas NDT spending.</p>
+
+  <div class="info-box">
+    <div class="box-header">Why Mining: Strategic Diversification from Oil &amp; Gas Cyclicality</div>
+    <div class="box-body">
+      <div class="box-item"><strong>RECORD PRECIOUS METALS PRICES:</strong> Gold surpassed US$4,000/oz in 2025 (up 66%), with J.P. Morgan forecasting US$5,000/oz by Q4 2026. Silver hit multi-decade highs above US$60/oz. At these price levels, every hour of unplanned mill downtime carries production losses that dwarf the cost of any inspection program</div>
+      <div class="box-item"><strong>OIL &amp; GAS EXPOSURE:</strong> A significant portion of Canadian NDT revenue is tied to oil and gas capital spending — acutely sensitive to WTI price, regulatory changes, and energy transition pressures — creating revenue volatility that is difficult to manage</div>
+      <div class="box-item"><strong>MINING IS COUNTER-CYCLICAL TO O&amp;G:</strong> Gold, copper, and critical minerals demand is driven by financial markets, electrification, and industrial output, not energy prices. Mining capital spending often accelerates during the same periods that oil and gas contracts</div>
+      <div class="box-item"><strong>HIGH-MARGIN SPECIALIZATION:</strong> Grinding mill ECA gear inspection is a specialized, technically complex service with limited competition and pricing power unavailable in commodity NDT markets</div>
+      <div class="box-item"><strong>RECURRING REVENUE MODEL:</strong> Annual and semi-annual condition monitoring contracts create predictable, program-based revenue not dependent on project cycles or turnaround seasons</div>
+      <div class="box-item"><strong>CRITICAL MINERALS TAILWIND:</strong> Canada's federal and provincial governments are actively supporting mining expansion for copper, lithium, nickel, and cobalt supply chains, driving sustained capital investment in new grinding circuits through 2030 and beyond</div>
+    </div>
+  </div>
+
+  <h3 class="subsection">5.1 — The Canadian Mining Landscape</h3>
+  <p>Canada produces 60 minerals and metals at almost 200 mines. The BU - Services' expanded office network positions it within driving distance of every major Canadian mining region.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Province / Region</th><th>Primary Commodities</th><th>Key Operators (Examples)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>British Columbia</td><td>Copper, Gold, Molybdenum</td><td>Teck Resources, First Quantum, HudBay (Copper Mountain)</td></tr>
+      <tr><td>Ontario</td><td>Gold, Nickel, Copper</td><td>Barrick, Vale, Newmont, Agnico Eagle, HudBay</td></tr>
+      <tr><td>Quebec</td><td>Gold, Iron Ore, Lithium, Copper</td><td>Agnico Eagle, ArcelorMittal, Nouveau Monde Graphite</td></tr>
+      <tr><td>Saskatchewan</td><td>Potash, Uranium</td><td>Nutrien, Cameco, K+S Potash Canada</td></tr>
+      <tr><td>Alberta (Oil Sands)</td><td>Bitumen processing mills</td><td><strong>Suncor Base Plant ✓</strong>, <strong>Cenovus ✓</strong>, Syncrude, CNRL, MEG Energy</td></tr>
+      <tr><td>Manitoba / NWT / Nunavut</td><td>Nickel, Copper, Diamonds, Gold</td><td>Vale, HudBay, De Beers Canada, Agnico Eagle</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="subsection">5.2 — Total Addressable Market: Canadian Grinding Mill Count</h3>
+  <p>No single government registry publishes a precise count of Canadian grinding mills. The following is a bottom-up estimate based on NRCan 2024 mine count data and typical mill circuit configurations.</p>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Canadian Grinding Mill Addressable Market by Segment</div>
+    <div class="chart-sub">Estimated mill count at midpoint of range — bottom-up estimate from NRCan 2024 data</div>
+    <canvas id="tamChart" height="200"></canvas>
+    <div class="chart-caption">Figure 1: Total estimated: 200–350 grinding mills with open gear drives in Canada &nbsp;|&nbsp; TAM at annual inspection frequency: CAD $4M–$7.5M/year</div>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Mining Segment</th><th style="width:18%">Est. Sites</th><th style="width:18%">Mills / Site</th><th style="width:18%">Est. Total Mills</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Hard rock metal mines (ON, QC, BC, MB)</td><td>~80 sites</td><td>2–3</td><td>160–240</td></tr>
+      <tr><td>Oil sands processing (Alberta)</td><td>8–10 sites</td><td>3–5</td><td>25–50</td></tr>
+      <tr><td>Potash &amp; uranium (Saskatchewan)</td><td>~10 sites</td><td>2–4</td><td>20–40</td></tr>
+      <tr><td>Remote operations (NWT, Nunavut, NL)</td><td>5–8 sites</td><td>1–3</td><td>10–20</td></tr>
+      <tr><td><strong>TOTAL ESTIMATED</strong></td><td>N/A</td><td>N/A</td><td><strong>~200–350 mills</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="info-box green">
+    <div class="box-header">Total Addressable Market (TAM): ECA Gear Inspection in Canada</div>
+    <div class="box-body">
+      <div class="box-item">Conservative mill count estimate: 200–350 large grinding mills with open gear drives in Canada</div>
+      <div class="box-item">Annual inspection revenue per mill (BU - Services pricing): CAD $14,000–$22,000 per visit</div>
+      <div class="box-item">TAM at annual frequency: CAD $4M–$7.5M per year; at semi-annual frequency: CAD $6M–$12M+ per year</div>
+      <div class="box-item">Starting point: <strong>12 active customers</strong> already generating revenue &mdash; spanning Canadian gold, iron ore, talc, oil sands, cement, and international operations in Suriname</div>
+      <div class="box-item">Year 2 target of CAD $1.9M represents approximately 22–28% market share; Year 3 target of CAD $3.6M+ represents 38–45% market share. 2026 is deliberately modeled conservatively at $410K — new commercial team, 6–12 month mining vendor qualification cycles, and contract pipeline that begins generating revenue from Q3 2026 onward. The primary revenue ramp is weighted into 2027.</div>
+      <div class="box-item">Source: bottom-up estimate from NRCan 2024 data (almost 200 mines) and Ontario Mining Association 2025 census (28 active metal mines in Ontario alone)</div>
+    </div>
+  </div>
+
+  <h3 class="subsection">5.3 — The Grinding Mill Gear Problem</h3>
+  <p>With gold trading above US$4,000/oz in 2026 and silver at multi-decade highs, a large Canadian gold mine processing 20,000–77,000 tonnes per day generates revenue of CAD $800,000 to over $3,000,000 per day. Every hour the mill is stopped represents an immediate, irreversible revenue loss. Open gear drives on large SAG, AG, and ball mills are subject to extreme cyclic loading, abrasive contamination, thermal cycling, and misalignment — all driving gear tooth fatigue. Traditional inspection methods compound the problem:</p>
+
+  <div class="info-box amber">
+    <div class="box-header">Traditional Inspection Limitations — Compounded by High Metal Prices</div>
+    <div class="box-body">
+      <div class="box-item">Visual / MT / PT inspection requires full grease removal and cleaning — 12 to 48 hours of total mill downtime per inspection event (including degreasing, cleaning, inspection, and re-greasing)</div>
+      <div class="box-item">At current gold prices, a 12–48 hour traditional gear inspection at a large gold mine costs CAD $600,000–$3,000,000 in lost production, before any inspection fee is paid</div>
+      <div class="box-item">These methods are only viable on bare metal surfaces — grease is a complete showstopper for MT/PT techniques</div>
+      <div class="box-item">Inspections are therefore infrequent (every 2–3 years), incomplete (spot checks not full coverage), and often reactive (after a problem is suspected)</div>
+      <div class="box-item">Unplanned gear failure: 5–21 days total downtime + CAD $500K–$2M in emergency repair. At 2026 precious metals prices, 21 days of lost production at a major gold mine exceeds CAD $20M in revenue impact</div>
+    </div>
+  </div>
+
+  <h3 class="subsection">5.4 — The ECA Through-Grease Solution</h3>
+  <p>ECA technology, configured with appropriate probe frequency and lift-off compensation by SG NDT's engineering team, penetrates typical open gear grease films to detect surface and near-surface gear tooth defects without grease removal. The Micro S2G2 produces full C-scan tooth maps, enabling 100% gear ring coverage and direct trend comparison between inspections.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th style="width:26%">Parameter</th><th>ECA Through-Grease vs. Traditional Inspection</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Mill Downtime Required</td><td><strong>4–8 hours</strong> (probe positioning only) vs. 12–48 hours (full degreasing + cleaning + inspection + re-greasing)</td></tr>
+      <tr><td>Grease Removal</td><td>Not required vs. mandatory for MT / PT / visual</td></tr>
+      <tr><td>Gear Coverage</td><td>100% tooth-by-tooth C-scan vs. spot visual checks</td></tr>
+      <tr><td>Defect Detection Stage</td><td>Early-stage pitting, spalling, surface cracks vs. late-stage visible damage only</td></tr>
+      <tr><td>Data Format</td><td>Digital C-scan file for trending over time vs. subjective written / photographic records</td></tr>
+      <tr><td>Inspection Frequency</td><td>Every 6 months vs. every 2–3 years (traditional)</td></tr>
+      <tr><td>Production Impact</td><td>Inspection during scheduled maintenance window vs. dedicated extended downtime event</td></tr>
+      <tr><td>Safety</td><td>Minimal confined space exposure vs. extensive LOTO + degreasing procedures</td></tr>
+      <tr><td>Structural Assessment</td><td>Combined with robotic UT shell/trunnion/head survey in same mobilization — complete mill health picture in one visit</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── SECTION 6: SERVICE OFFERING ─────────────────────────────────────── -->
+<div class="sec-hdr" id="s6">
+  <div class="sec-hdr-in">
+    <div class="sec-num">06</div>
+    <div><div class="sec-title">Service Offering</div><div class="sec-sub">ECA gear inspection, robotic UT, and the Integrated Mill Health Program</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p>The BU - Services delivers an integrated grinding mill inspection program combining two complementary technologies — ECA through-grease gear inspection and advanced robotic ultrasonic testing (UT) for mill shell, trunnion, and head thickness measurement. These two services are designed to be delivered during the same mobilization event, maximizing the value of every site visit and minimizing total mill downtime. Together they provide a complete picture of grinding mill health: surface condition of gear teeth, and structural wall thickness of the pressure-bearing components.</p>
+
+  <h3 class="subsection">6.1 — Core Service: ECA Gear Inspection Through Grease</h3>
+  <h4 class="mini-head">Scope of Work per Inspection</h4>
+  <ul class="doc-list">
+    <li>Pre-inspection consultation: gear geometry review, historical maintenance data, grease type characterization, Micro S2G2 probe frequency and configuration selection</li>
+    <li>On-site mobilization with SG NDT Micro S2G2 instrument and application-specific ECA surface probes</li>
+    <li>Calibration on reference standards at site prior to inspection commencement</li>
+    <li>Full ring gear scan: 100% tooth-by-tooth data acquisition using encoded C-scan with EMMA software</li>
+    <li>On-site data review and preliminary findings briefing with maintenance team</li>
+    <li>Office data analysis: EMMA advanced visualization + senior BU - Services technician review + defect severity classification</li>
+    <li>Formal inspection report: C-scan gear maps, defect distribution, severity grading, and recommended actions</li>
+    <li>Client debrief: findings presentation with maintenance planning guidance</li>
+  </ul>
+
+  <h4 class="mini-head">Deliverables</h4>
+  <ul class="doc-list">
+    <li>Full digital C-scan tooth maps (EMMA format) with defect distribution and severity imaging</li>
+    <li>Trending comparison report vs. previous baseline — quantifying defect progression rate</li>
+    <li>Risk classification: GREEN / AMBER / RED per tooth zone with recommended maintenance window</li>
+    <li>7-year digital data archive retained by the BU - Services enabling long-term trending</li>
+  </ul>
+
+  <h3 class="subsection" id="s6b">6.2 — Advanced Robotic UT: Mill Shell, Trunnion &amp; Head Thickness</h3>
+  <p>The same mobilization that enables ECA gear inspection also creates an opportunity to deploy robotic ultrasonic testing on the grinding mill's structural components. SAG, AG, and ball mill shells, trunnions, and heads are subject to continuous wear, corrosion, and fatigue loading that progressively reduces wall thickness — often undetected until failure or during costly scheduled maintenance. The BU - Services deploys advanced robotic UT scanning systems to perform <strong>comprehensive wall thickness mapping</strong> of these components without requiring entry into the mill or extended downtime.</p>
+
+  <div class="info-box green">
+    <div class="box-header">Why Robotic UT on Mills — The Business Case</div>
+    <div class="box-body">
+      <div class="box-item"><strong>Shell thickness loss is silent and cumulative:</strong> Abrasive slurry, corrosion, and cyclic stress reduce shell wall thickness progressively. Operators rarely know actual remaining thickness without a formal UT survey — and by the time visual pitting is apparent, remaining life may already be critically short</div>
+      <div class="box-item"><strong>Catastrophic consequence:</strong> A shell breach or trunnion failure on a large SAG mill is a multi-month repair event. At 2026 precious metals prices, lost production during an unplanned shell repair easily exceeds CAD $10M–$50M+ depending on the mine's daily throughput and commodity price</div>
+      <div class="box-item"><strong>Same mobilization, dramatically higher value:</strong> When the BU - Services is already on site for ECA gear inspection, adding a robotic UT shell scan requires no additional travel cost, no additional HSE induction, and minimal incremental downtime — delivering exceptional ROI</div>
+      <div class="box-item"><strong>Regulatory and insurance pressure:</strong> Many mine operators are under increasing pressure from insurers and provincial regulators to demonstrate active pressure vessel and structural component monitoring programs</div>
+    </div>
+  </div>
+
+  <h4 class="mini-head">Components Inspected</h4>
+  <table class="data-table">
+    <thead>
+      <tr><th>Component</th><th>Inspection Method</th><th>What We Measure / Detect</th><th>Why It Matters</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Mill Shell</strong><br><small>(cylindrical body)</small></td>
+        <td>Robotic encoded UT scanning — full circumferential and axial coverage</td>
+        <td>Wall thickness map across full shell length; localized thinning zones; corrosion pitting depth; erosion profiles at liner bolt holes</td>
+        <td>Shell is the highest surface-area wear component; thinning is non-uniform and concentrates at liner attachment points and slurry discharge zones</td>
+      </tr>
+      <tr>
+        <td><strong>Trunnions</strong><br><small>(feed &amp; discharge ends)</small></td>
+        <td>Robotic UT with phased array or conventional probes; encoded scanning on rotating surface</td>
+        <td>Wall thickness; fatigue cracking at trunnion-shell interface; corrosion in internal bore surface</td>
+        <td>Trunnion failures are catastrophic and extremely expensive to repair; early detection of thickness loss or cracking prevents total loss of the component</td>
+      </tr>
+      <tr>
+        <td><strong>Mill Heads / End Plates</strong><br><small>(feed &amp; discharge heads)</small></td>
+        <td>Phased Array UT (PAUT) or conventional UT grid scanning</td>
+        <td>Wall thickness at head-shell weld zones; HAZ cracking; thinning near discharge openings</td>
+        <td>Weld zones at head-shell junctions are high-stress fatigue initiation sites; thickness loss here precedes weld cracking and structural failure</td>
+      </tr>
+      <tr>
+        <td><strong>Shell Liner Bolt Holes</strong><br><small>(wear zones)</small></td>
+        <td>Focused UT probes on bolt hole perimeter</td>
+        <td>Local thickness at bolt hole perimeters; fatigue cracking around holes; wall thinning from slurry erosion</td>
+        <td>Liner bolt holes are the highest stress concentration points on the shell — the most common initiation point for shell cracking and perforation</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4 class="mini-head">Robotic UT Technology &amp; Approach</h4>
+  <p>The BU - Services employs advanced robotic and semi-robotic UT scanning systems capable of traversing the external curved surface of grinding mill shells with encoded position tracking. This enables full coverage wall thickness maps — not just spot readings — with millimetre-level spatial resolution and digital traceability.</p>
+  <ul class="doc-list">
+    <li><strong>Robotic / semi-robotic scanners:</strong> Magnetic-wheeled or track-guided robotic crawlers traverse the external shell surface, maintaining probe contact and encoder position for full coverage digital maps</li>
+    <li><strong>Phased Array UT (PAUT):</strong> Multi-element array probes provide simultaneous thickness profiling across a wide scan swath — dramatically faster than single-element grid scanning and capable of detecting planar flaws and cracking</li>
+    <li><strong>Conventional UT thickness gauging:</strong> For targeted spot-check zones, accessible head regions, and trunnion bore mapping</li>
+    <li><strong>Data output:</strong> Full colour coded thickness C-scan maps with minimum wall thickness identification, corrosion rate estimation (when comparative data exists), and remaining life assessment against original design wall thickness</li>
+    <li><strong>Digital data delivery:</strong> All scan data and reports delivered through EMMA software with full digital traceability and client access</li>
+    <li><strong>No mill entry required:</strong> All scanning performed externally — no confined space entry, no LOTO of the grinding circuit beyond the ECA gear inspection window already in place</li>
+  </ul>
+
+  <h4 class="mini-head">Deliverables — Robotic UT Shell Survey</h4>
+  <ul class="doc-list">
+    <li>Full-coverage wall thickness C-scan maps for shell, trunnion, and/or heads — colour coded by remaining thickness vs. original specification</li>
+    <li>Minimum thickness identification with GPS-referenced location mapping on mill drawing</li>
+    <li>Corrosion rate estimation (mm/year) where comparative data from previous surveys is available</li>
+    <li>Remaining life assessment and recommended next inspection interval</li>
+    <li>Risk classification: GREEN / AMBER / RED zones with recommended maintenance priority</li>
+    <li>Formal written report with photographs, scan data, and engineering commentary</li>
+    <li>7-year digital data archive for long-term trending and regulatory documentation</li>
+  </ul>
+
+  <h3 class="subsection">6.3 — The Integrated Mill Health Program</h3>
+  <p>The most compelling commercial offering is the <strong>Integrated Mill Health Program</strong> — a single annual or semi-annual mobilization that delivers both ECA gear inspection and robotic UT shell/trunnion/head scanning in one site visit. This combined program gives maintenance engineers and mine managers a complete structural and mechanical health picture of their grinding mills, delivered under one contract, one report, and one mobilization event.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th style="width:30%">Inspection Type</th><th style="width:35%">What It Covers</th><th>Technology Used</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>ECA Gear Inspection</strong> (Through Grease)</td>
+        <td>Open gear drive — ring gear, pinion, tooth surfaces</td>
+        <td>SG NDT Micro S2G2 ECA instrument, EMMA software</td>
+      </tr>
+      <tr>
+        <td><strong>Robotic UT Shell Scan</strong></td>
+        <td>Mill shell cylindrical body — full circumferential wall thickness map</td>
+        <td>Robotic / semi-robotic encoded scanner, PAUT or conventional UT</td>
+      </tr>
+      <tr>
+        <td><strong>Trunnion UT Survey</strong></td>
+        <td>Feed and discharge trunnions — wall thickness and fatigue crack detection</td>
+        <td>Encoded PAUT or conventional UT, robotic positioning</td>
+      </tr>
+      <tr>
+        <td><strong>Head &amp; Weld Zone UT</strong></td>
+        <td>Feed/discharge heads, head-shell weld zones, discharge openings</td>
+        <td>PAUT grid scan or conventional UT, manual encoded</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="subsection">6.4 — Service Tiers (Updated — Integrated Program)</h3>
+  <table class="data-table">
+    <thead>
+      <tr><th>Service Tier</th><th>Description</th><th>Ideal Client</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Baseline Survey</td>
+        <td>First-time full 360° ECA scan of a single mill establishing a gear health baseline. SG NDT Micro S2G2 deployment with EMMA C-scan report.</td>
+        <td>New clients; post-installation; post-repair reference baseline</td>
+      </tr>
+      <tr>
+        <td>Condition Monitoring Program</td>
+        <td>Semi-annual or annual ECA inspection with EMMA trend reporting across multiple mills under a single contract.</td>
+        <td>Operators with 3+ mills seeking an ongoing reliability program</td>
+      </tr>
+      <tr>
+        <td>Emergency Inspection</td>
+        <td>Priority deployment within 48–72 hours for suspected gear damage, abnormal vibration, or audible gear distress.</td>
+        <td>Clients experiencing abnormal mill behavior requiring urgent assessment</td>
+      </tr>
+      <tr>
+        <td>Multi-Site Master Agreement</td>
+        <td>Annual program management across multiple mine sites with consolidated reporting, budgeting, and scheduling. Leverages the BU - Services' 8-office national network (Quebec City, Montreal, Oakville, Thunder Bay, Vancouver — Nucleom; Edmonton, Fort St. John via Rockx — Nortech).</td>
+        <td>Tier 1 mining majors with assets in multiple provinces</td>
+      </tr>
+      <tr>
+        <td>Robotic UT Shell Thickness Survey</td>
+        <td>Full-coverage wall thickness mapping of mill shell, trunnion, and heads using robotic encoded UT. Colour-coded C-scan maps with remaining life assessment. Deliverable within the same mobilization as ECA gear inspection.</td>
+        <td>Any operator with mills 10+ years old or running above design throughput; operators under insurance or regulatory UT requirements</td>
+      </tr>
+      <tr>
+        <td>Integrated Mill Health Program</td>
+        <td>Combined ECA gear inspection + robotic UT shell/trunnion/head survey in a single mobilization event. One contract, one report, maximum information per downtime hour.</td>
+        <td>Operators seeking a complete annual mill health assessment program under one provider</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ── SECTION 6.5: ADDITIONAL MINING SERVICES ─────────────────────────── -->
+<div class="sec-hdr" id="s65">
+  <div class="sec-hdr-in">
+    <div class="sec-num">07</div>
+    <div><div class="sec-title">Additional Mining Services: Lifting Equipment &amp; Leaching Tanks</div><div class="sec-sub">Lifting equipment, wire rope, and PAUT leach tank inspection</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p>The relationships established through the Integrated Mill Health Program create a natural platform for expanding the BU - Services scope of work at each mine site. Canadian mining operations universally require three additional categories of inspection where the BU - Services is technically qualified and competitively positioned: lifting equipment inspection, wire rope inspection, and corrosion mapping of leaching and process tanks using Phased Array UT. These services can be added to existing annual agreements with minimal additional mobilization cost, directly increasing revenue per site visit and deepening client retention.</p>
+
+  <h3 class="subsection">Lifting Equipment Inspection</h3>
+  <p>Every Canadian mine site operates a fleet of lifting equipment, from overhead cranes and hoists in the mill building to mobile cranes, personnel hoists, and man riding equipment used in underground and surface operations. Lifting equipment is subject to mandatory periodic inspection requirements under provincial occupational health and safety regulations across all Canadian jurisdictions.</p>
+  <ul class="doc-list">
+    <li><strong>Mobile cranes:</strong> Mobile cranes and lattice boom cranes used for mill maintenance, liner changes, and heavy lifts</li>
+    <li><strong>Overhead cranes:</strong> Bridge cranes and gantry cranes in mill buildings, maintenance shops, and concentrate storage</li>
+    <li><strong>Underground hoists:</strong> Personnel hoists, man riding cages, and conveyances in underground mining operations</li>
+    <li><strong>Monorails and jibs:</strong> Monorail hoists, jib cranes, and chain blocks in processing plant and reagent areas</li>
+    <li><strong>Regulatory compliance:</strong> All inspections performed to CSA, ASME B30, and provincial OHS standards by certified inspectors</li>
+  </ul>
+
+  <h3 class="subsection">Wire Rope Inspection</h3>
+  <p>Wire ropes are used extensively throughout mine sites on hoisting systems, cranes, cable supported conveyances, and dragline equipment. Rope degradation (through broken wires, corrosion, fatigue, and wear) can be difficult to detect visually, particularly in internal rope structures. The BU - Services uses electromagnetic wire rope inspection (MRT/MFL) to perform full length rope assessments providing quantitative data on wire loss, cross sectional area reduction, and localized defects that visual inspection cannot detect.</p>
+  <ul class="doc-list">
+    <li><strong>Shaft hoisting ropes:</strong> Hoist ropes on shaft conveyances, friction hoists, and drum hoists in underground operations</li>
+    <li><strong>Crane ropes:</strong> Load lines, boom pendants, and hoist ropes on mobile and overhead cranes</li>
+    <li><strong>Technology:</strong> Electromagnetic MRT/MFL scanning providing full length quantitative wire loss mapping and LMA (loss of metallic area) profiling</li>
+    <li><strong>Regulatory basis:</strong> Compliant with CSA Z271, Ontario Mining Act Regulation 854, and applicable provincial hoisting regulations</li>
+  </ul>
+
+  <h3 class="subsection">PAUT Corrosion Mapping: Leaching Tanks &amp; Process Vessels</h3>
+  <p>Hydrometallurgical leaching operations (used in gold, copper, uranium, and nickel processing) rely on large volume tanks and agitated vessels continuously exposed to aggressive acidic or alkaline reagent environments. The BU - Services delivers Phased Array Ultrasonic Testing (PAUT) corrosion mapping of these vessels, producing full coverage wall thickness C-scan maps from the exterior surface without vessel entry, draining, or extended downtime.</p>
+  <ul class="doc-list">
+    <li><strong>Leach tanks (CIL/CIP):</strong> Carbon-in-leach and carbon-in-pulp tanks in gold processing circuits, typically 8 to 15 m diameter with highly corrosive cyanide-bearing pulp</li>
+    <li><strong>Acid leach vessels:</strong> Atmospheric and pressure leach vessels in copper SX-EW and uranium in-situ recovery operations</li>
+    <li><strong>Thickeners and CCD trains:</strong> Thickener tanks, paste thickeners, and counter-current decantation vessels in tailings circuits</li>
+    <li><strong>Reagent storage:</strong> Sulfuric acid, caustic soda, and cyanide solution tanks where wall integrity directly affects environmental compliance</li>
+    <li><strong>PAUT methodology:</strong> Full circumferential and vertical scan coverage from exterior; colour coded C-scan thickness maps; corrosion rate estimation; no vessel entry required</li>
+    <li><strong>Deliverables:</strong> Remaining life assessment, GREEN/AMBER/RED risk zone classification, and written engineering report with 7-year digital archive</li>
+  </ul>
+
+  <h3 class="subsection">Indicative Pricing: Additional Mining Services (CAD)</h3>
+  <table class="data-table">
+    <thead>
+      <tr><th>Service</th><th style="width:20%">Indicative Price</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Lifting Equipment Inspection (per site visit)</td><td>$4,500 – $12,000</td><td>Number and class of devices; includes written report and compliance certificate; per provincial OHS requirements</td></tr>
+      <tr><td>Wire Rope Inspection (per rope / per visit)</td><td>$1,800 – $4,500 per rope</td><td>Electromagnetic MRT/MFL full length scan; LMA profile; condition report with remaining life assessment</td></tr>
+      <tr><td>PAUT Corrosion Mapping — Leach Tanks / Process Vessels (per vessel)</td><td>$18,000 – $35,000</td><td>Full-coverage wall thickness C-scan; corrosion rate estimation; remaining life report; GREEN/AMBER/RED classification; no vessel entry</td></tr>
+      <tr><td>Additional Services Package (Lifting + Wire Rope + PAUT Tank, per site)</td><td>$30,000 – $55,000</td><td>Combined scope covering lifting equipment, wire ropes, and 1 to 2 process vessels; significant discount vs. individual line items</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ── SECTION 6.6: CEMENT PLANTS ─────────────────────────────────────── -->
+<div class="sec-hdr" id="s66">
+  <div class="sec-hdr-in">
+    <div class="sec-num">07B</div>
+    <div><div class="sec-title">Cement Plant Inspection &mdash; ECA Gear &amp; PAUT Shell</div><div class="sec-sub">Applying the Integrated Mill Health Program to Canada&rsquo;s cement manufacturing sector</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p class="lead">Canada&rsquo;s cement industry operates large grinding mills — raw material mills, clinker ball mills, and finish grinding circuits — that share the same failure modes as mining mills: open gear drive degradation and progressive shell wall thinning. The same ECA through-grease gear inspection and robotic UT shell survey program that protects gold and copper mines applies directly to cement plant grinding circuits, with minimal methodology adaptation.</p>
+
+    <div class="info-box blue">
+      <div class="box-header">Why Cement Plants Are a Natural Extension</div>
+      <div class="box-body">
+        <div class="box-item"><strong>Same equipment, same failure modes:</strong> Cement raw mills, ball mills, and vertical roller mills use identical open gear drives and cylindrical shell construction to mining mills — the ECA and PAUT methodology transfers directly with no new instrument or technique development required.</div>
+        <div class="box-item"><strong>High unplanned downtime cost:</strong> A kiln line shutdown caused by a grinding mill gear failure or shell breach stops the entire cement production circuit. At current cement pricing, a 24-hour unplanned shutdown at a large plant represents CAD $200,000–$600,000 in lost production value before repair costs.</div>
+        <div class="box-item"><strong>Underserved market:</strong> Cement operators are not traditionally targeted by advanced NDT providers. Most rely on OEM service visits for gear inspection, which are infrequent, not data-driven, and do not produce quantitative condition trending. ECA through-grease inspection is largely unknown in the Canadian cement sector — a clear first-mover opportunity.</div>
+        <div class="box-item"><strong>Recurring revenue profile:</strong> Cement plants operate continuously 24/7 for 10–11 months per year with one or two planned maintenance windows. Annual condition monitoring contracts are well-suited to the cement operational model.</div>
+        <div class="box-item"><strong>Existing relationships:</strong> Several current and target mining clients (Teck, Agnico Eagle, Barrick) have affiliated or co-located processing facilities where cement-like grinding circuits are used in mineral processing — creating warm referral paths.</div>
+      </div>
+    </div>
+
+    <h3 class="subsection">The Canadian Cement Market</h3>
+    <p>Canada has approximately 15 integrated cement plants operating grinding mills, owned primarily by Lafarge Canada (Holcim), St. Marys Cement (Votorantim), Essroc Canada (Italcementi/HeidelbergMaterials), and CRH Canada. Collectively these plants operate an estimated 40–70 grinding mills (raw mills, ball mills, finish mills) with open gear drives. Additional standalone grinding terminals and slag grinding facilities add further addressable units.</p>
+
+    <table class="data-table">
+      <thead><tr><th>Operator</th><th>Plants (Canada)</th><th>Est. Mills</th><th>Key Locations</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Lafarge Canada (Holcim)</strong></td><td>~6 integrated</td><td>12–18</td><td>Bath ON, Richmond BC, Exshaw AB, Joliette QC</td><td><span class="badge p1">P1</span></td></tr>
+        <tr><td><strong>St. Marys Cement (Votorantim)</strong></td><td>2 integrated</td><td>4–8</td><td>St. Marys ON, Bowmanville ON</td><td><span class="badge p1">P1</span></td></tr>
+        <tr><td><strong>Essroc Canada (HeidelbergMaterials)</strong></td><td>2 integrated</td><td>4–6</td><td>Picton ON, Hagersville ON</td><td><span class="badge p2">P2</span></td></tr>
+        <tr><td><strong>CRH Canada</strong></td><td>2–3 integrated</td><td>4–8</td><td>Mississauga ON, Delta BC</td><td><span class="badge p2">P2</span></td></tr>
+        <tr><td><strong>Slag / grinding terminals</strong></td><td>~5</td><td>5–10</td><td>Hamilton ON, Port Colborne ON, various</td><td><span class="badge p3">P3</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="subsection">Service Scope &mdash; Cement Plant Inspection</h3>
+    <div class="crow c2">
+      <div class="kcard navy">
+        <h3>ECA Gear Inspection &mdash; Cement Mills</h3>
+        <div class="kcard-rule"></div>
+        <p>Through-grease ECA inspection of open gear drives on raw mills, ball mills, and finish mills. Identical methodology to mining. No grease removal, no gear cleaning, no production stop. Annual or semi-annual condition monitoring. Detects tooth fatigue, surface pitting, and subsurface cracking before visible damage.</p>
+      </div>
+      <div class="kcard blue">
+        <h3>Robotic UT Shell Survey &mdash; Cement Mills</h3>
+        <div class="kcard-rule"></div>
+        <p>Full circumferential wall thickness mapping on cement ball mill shells and trunnions using encoded PAUT or conventional UT robotic scanners. Detects progressive shell thinning from clinker abrasion, liner wear transmission, and corrosion-fatigue. Same mobilisation as ECA inspection — single visit, integrated report.</p>
+      </div>
+    </div>
+
+    <h3 class="subsection">Cement-Specific Considerations</h3>
+    <table class="data-table">
+      <thead><tr><th>Factor</th><th>Mining Mills</th><th>Cement Mills</th><th>Impact on Methodology</th></tr></thead>
+      <tbody>
+        <tr><td>Shell diameter</td><td>16–40 ft</td><td>8–18 ft</td><td>Smaller diameter — same robotic scanner, adjusted access protocol</td></tr>
+        <tr><td>Process environment</td><td>Wet slurry / ore</td><td>Dry clinker / raw meal</td><td>Dryer environment; reduced corrosion — gear wear is primary failure mode</td></tr>
+        <tr><td>Operating schedule</td><td>Continuous (variable)</td><td>Continuous (kiln-linked)</td><td>Limited inspection windows; advance planning with plant maintenance team required</td></tr>
+        <tr><td>Gear lubrication</td><td>Open gear grease</td><td>Open gear grease (identical)</td><td>Through-grease ECA methodology unchanged</td></tr>
+        <tr><td>Regulatory environment</td><td>Mining Act / provincial</td><td>No sector-specific NDT mandate</td><td>Value proposition is reliability / cost avoidance, not regulatory compliance</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="subsection">Revenue Potential &mdash; Cement Sector (CAD)</h3>
+    <div class="callout cgr">
+      <div class="callout-icon">&#9650;</div>
+      <div><strong>Cement Sector Upside: Not Currently in Revenue Forecast</strong>Cement plant revenue is not included in the 5-year mining forecast. It represents incremental upside on the existing service platform with no additional instrument investment. A dedicated cement sector outreach program — 3 to 5 targeted operators — could generate $200K–$500K in annual recurring revenue within 18 months of first engagement.</div>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Service</th><th>Indicative Price (CAD)</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>ECA gear inspection — cement ball mill (per mill)</td><td>$14,000 – $20,000</td><td>Slightly lower than large mining mills due to smaller diameter; same day-rate structure</td></tr>
+        <tr><td>Robotic UT shell survey — cement mill (per mill)</td><td>$18,000 – $32,000</td><td>Same methodology as mining; scope varies with shell length and trunnion inclusion</td></tr>
+        <tr><td>Integrated ECA + UT program (per mill, combined)</td><td>$28,000 – $45,000</td><td>Single mobilization; combined ECA gear + UT shell; integrated report</td></tr>
+        <tr><td>Annual condition monitoring program (3-mill site)</td><td>$85,000 – $130,000</td><td>Annual visit covering 3 mills; ECA + UT + trending report; multi-year contract preferred</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="subsection">Go-to-Market &mdash; Cement Sector</h3>
+    <ul class="doc-list">
+      <li><strong>Lead with mining references:</strong> Barrick and Wesdome case studies demonstrate the program on a credible peer audience — cement plant engineers will recognise the same equipment and failure modes</li>
+      <li><strong>Target maintenance / reliability engineers directly:</strong> Cement plant decisions are made at the plant reliability level, not corporate procurement — direct outreach to plant engineers is more effective than national account approaches</li>
+      <li><strong>Priority geography:</strong> Ontario plants first (St. Marys, Essroc, CRH) leveraging Oakville and Thunder Bay offices; BC plants (Lafarge Richmond, Delta) via Vancouver office; Alberta (Lafarge Exshaw) via Edmonton office</li>
+      <li><strong>Entry offer:</strong> Single-mill baseline survey at no-obligation introductory rate — demonstrate the data output before pursuing annual contract discussion</li>
+      <li><strong>Timeline:</strong> Cement sector outreach recommended to begin Q3 2027 once mining program is established and commercial team has capacity — cement is a natural growth lever once mining TAM penetration is underway</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ── SECTION 6.6: LAND AND EXPAND STRATEGY ─────────────────────────────── -->
+<div class="sec-hdr" id="s68">
+  <div class="sec-hdr-in">
+    <div class="sec-num">08</div>
+    <div><div class="sec-title">Land and Expand: The Upsell Strategy</div><div class="sec-sub">Building full-program revenue from a single entry service</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p class="lead">The BU - Services commercial approach is built on a deliberate land and expand model. The grinding mill inspection program (ECA gear inspection and robotic UT shell/trunnion/head surveys) is the entry point into each client relationship.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card" style="border-top-color:var(--steel)">
+      <div class="val" style="font-size:1.4rem">Step 1</div>
+      <div class="lbl"><strong>Entry: ECA Gear Inspection</strong><br>$18K–$52K/mill. Opens the door, completes vendor qualification, delivers live findings. Becomes the annual condition monitoring contract.</div>
+    </div>
+    <div class="stat-card" style="border-top-color:var(--navy-mid)">
+      <div class="val" style="font-size:1.4rem">Step 2</div>
+      <div class="lbl"><strong>Robotic UT Shell Survey</strong><br>+$22K–$38K/mill. Same mobilization add on. No extra travel. Shell, trunnion and head thickness mapping. Integrated Mill Health Program.</div>
+    </div>
+    <div class="stat-card" style="border-top-color:var(--gold)">
+      <div class="val" style="font-size:1.4rem">Step 3</div>
+      <div class="lbl"><strong>Lifting Equipment and Wire Rope</strong><br>+$6K–$17K/visit. Mandatory OHS inspections the mine must procure regardless. Incumbent NDT provider wins this naturally.</div>
+    </div>
+    <div class="stat-card green" style="border-top-color:var(--green)">
+      <div class="val" style="font-size:1.4rem">Step 4</div>
+      <div class="lbl"><strong>PAUT Leach Tank Corrosion Mapping</strong><br>+$18K–$35K/vessel. Highest-value upsell. No vessel entry needed. Proposed once technical credibility is established.</div>
+    </div>
+  </div>
+
+  <div class="info-box green" style="margin-top:1.5rem">
+    <div class="box-header">Revenue Per Client: The Full Program Value</div>
+    <div class="box-body">
+      <div class="box-item"><strong>ECA gear inspection only (3 mills):</strong> CAD $42,000 – $84,000 per year</div>
+      <div class="box-item"><strong>+ Robotic UT shell/trunnion/head surveys:</strong> CAD $108,000 – $240,000 per year</div>
+      <div class="box-item"><strong>+ Lifting equipment and wire rope inspections:</strong> CAD $120,000 – $280,000 per year</div>
+      <div class="box-item"><strong>+ PAUT leach tank surveys (2 vessels):</strong> CAD $156,000 – $350,000 per year from a single mine site in a single annual program</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 7: TARGET MARKET ─────────────────────────────────────────── -->
+<div class="sec-hdr" id="s7">
+  <div class="sec-hdr-in">
+    <div class="sec-num">09</div>
+    <div><div class="sec-title">Target Market &amp; Customer Segmentation</div><div class="sec-sub">Tier 1–3 operators, commodity focus, and geographic reach</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p>Primary targets are Canadian mine sites running large SAG or ball mills (typically 18 ft diameter and above) with open gear drives. The BU - Services' Edmonton (Nortech) and Vancouver (Nucleom) offices provide direct local presence for Alberta oil sands and BC copper operations, while Thunder Bay and Oakville serve Northwestern and Southern Ontario mine corridors.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Customer Segment</th><th>Rationale &amp; Approach</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Tier 1 Mining Majors<br><small style="font-weight:400;color:var(--gray-500)">(Barrick, Agnico Eagle, Teck, Vale, Newmont)</small></td>
+        <td>High mill count; existing corporate reliability programs ripe for technology upgrade. Target corporate reliability/asset integrity directors. Multi-site contracts possible. Ekoscan Integrity Group's European track record supports vendor qualification.</td>
+      </tr>
+      <tr>
+        <td>Tier 2 Mid-Cap Producers<br><small style="font-weight:400;color:var(--gray-500)">(HudBay, First Quantum, Eldorado, Lundin)</small></td>
+        <td>Often underserved by large service providers; site-level decision-making allows faster sales cycles. High receptivity to ROI-based selling. Target maintenance superintendents and site reliability engineers.</td>
+      </tr>
+      <tr>
+        <td>Oil Sands Operators<br><small style="font-weight:400;color:var(--gray-500)">(Suncor, Cenovus, Syncrude)</small></td>
+        <td>Large-diameter mills in bitumen froth treatment and processing. Extreme downtime sensitivity. Edmonton (Nortech) and Vancouver (Nucleom) offices provide regional presence.</td>
+      </tr>
+      <tr>
+        <td>Potash &amp; Uranium Operators<br><small style="font-weight:400;color:var(--gray-500)">(Nutrien, Cameco, K+S)</small></td>
+        <td>Highly regulated environments where predictive maintenance is culturally embedded. Gear failures particularly costly given remote locations and specialized spare part lead times.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="subsection">7.2 — Key Decision Makers</h3>
+  <ul class="doc-list">
+    <li><strong>Reliability Engineer / Predictive Maintenance Technologist</strong> — primary technical champion; evaluates inspection methods</li>
+    <li><strong>Maintenance Superintendent</strong> — approves work scopes and mobilization; cares about downtime minimization</li>
+    <li><strong>Mine Manager / General Manager</strong> — P&L owner; approves based on risk reduction and ROI</li>
+    <li><strong>Corporate Reliability / Asset Integrity Director (Tier 1)</strong> — approves vendor qualification and national agreements</li>
+    <li><strong>Procurement / Supply Chain</strong> — manages supplier qualification; responds to capability statements and references</li>
+  </ul>
+</div>
+
+<!-- ── SECTION 8: GO-TO-MARKET ──────────────────────────────────────────── -->
+<div class="sec-hdr" id="s8">
+  <div class="sec-hdr-in">
+    <div class="sec-num">10</div>
+    <div><div class="sec-title">Go-to-Market Strategy</div><div class="sec-sub">Phased entry, sales channels, and account development approach</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <div class="info-box green">
+    <div class="box-header">The BU - Services Competitive Advantage</div>
+    <div class="box-body">
+      <div class="box-item"><strong>PROVEN IN THE FIELD:</strong> ECA through-grease gear inspections are already live at Wesdome Gold, Barrick Gold, Magris Talc, Suncor, Cenovus, and Agnico Eagle among others. Robotic UT shell and structural surveys complement every ECA visit with no additional mobilization cost. No competitor can point to an equivalent operational track record in the Canadian mining market</div>
+      <div class="box-item"><strong>INTEGRATED GROUP CAPABILITY:</strong> The BU - Services deploys SG NDT Micro S2G2 instruments and probes built by a sister company in the same group — enabling exclusive equipment optimization and custom probe development unavailable to any competitor</div>
+      <div class="box-item"><strong>NATIONAL COVERAGE:</strong> Nucleom and Nortech together span 8 offices across Canada (Quebec City, Montreal, Oakville, Thunder Bay, Vancouver — Nucleom; Edmonton, Fort St. John via Rockx — Nortech) plus Houston — coast-to-coast mobilization capability with bilingual EN/FR service</div>
+      <div class="box-item"><strong>STRATEGIC REVENUE RESILIENCE:</strong> Mining gear inspection generates high-margin, recurring-contract revenue structurally insulated from oil and gas commodity cycles — designed to strengthen the BU's financial position during O&amp;G downturns</div>
+      <div class="box-item"><strong>GLOBAL PARENT EXPERTISE:</strong> Backed by Ekoscan Integrity Group, a globally recognized NDT innovator with 40+ years of expertise, 7 patents, and Eurazeo-backed growth capital, bringing European NDT leadership to Canadian mining</div>
+    </div>
+  </div>
+
+  <h3 class="subsection">8.2 — Phased Sales Strategy</h3>
+
+  <table class="data-table">
+    <thead>
+      <tr><th style="width:28%">Phase</th><th>Key Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Phase 1:</strong> Formalise &amp; Build Pipeline<br><small style="font-weight:400;color:var(--gray-500)">Months 1–6</small></td>
+        <td>Convert all 12 active accounts to formal annual or semi-annual condition monitoring contracts — prioritising Wesdome, Barrick, Suncor, Agnico Eagle, and Cenovus as highest-value targets. Document findings into 2–3 formal case studies with ROI quantification. Initiate outreach to Top 5 priority targets using existing customer references as credibility anchors.</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 2:</strong> Accelerated Market Expansion<br><small style="font-weight:400;color:var(--gray-500)">Months 7–18</small></td>
+        <td>Deploy case studies from current customers in targeted direct outreach to reliability engineers. Present at CIM Annual Conference 2026 — lead with field results, not generic technology positioning. Focus 2026 on vendor qualification at 3–5 new accounts; convert to full contracts in H1 2027. Mining procurement cycles of 6–12 months mean 2026 revenues are intentionally conservative — the pipeline built in 2026 generates the 2027 ramp. Target 5+ multi-mill program agreements signed by Q4 2026 for January 2027 start.</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 3:</strong> Program Scale<br><small style="font-weight:400;color:var(--gray-500)">Months 19–60 (Years 2–5)</small></td>
+        <td>Convert all trial clients to recurring semi-annual or annual contracts. Embed the full additional services package (lifting equipment, wire rope, PAUT leach tank mapping) as a standard component of all new and renewed annual agreements. Target 80%+ of active clients receiving at least one additional service line by end of Year 3. Pursue preferred vendor agreements with 2+ Tier 1 operators.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="subsection">8.3 — Marketing Channels</h3>
+  <ul class="doc-list">
+    <li>Direct technical outreach using the BU - Services' existing mining client contacts and Ekoscan group networks</li>
+    <li>Conference presence: CIM Annual Conference, PDAC, Canadian Institute for Mining Maintenance (CIMM)</li>
+    <li>LinkedIn technical content: reliability case studies, ECA technology explainers, mining gear failure case histories</li>
+    <li>Trade publications: CIM Magazine, Canadian Mining Journal, Mining.com</li>
+    <li>OEM and mill manufacturer referrals: gear OEMs (Renk, David Brown, NGC) as referral partners</li>
+    <li>Ekoscan Integrity Group's global customer base: existing mining clients of the group in Europe providing warm references for Canadian discussions</li>
+  </ul>
+</div>
+
+
+
+<!-- ── SECTION 9: PRICING MODEL ─────────────────────────────────────────── -->
+<div class="sec-hdr" id="s9">
+  <div class="sec-hdr-in">
+    <div class="sec-num">11</div>
+    <div><div class="sec-title">Pricing Model</div><div class="sec-sub">Service tiers, per-mill rates, and program pricing</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <h3 class="subsection">9.1 — Indicative Pricing (CAD)</h3>
+  <table class="data-table">
+    <thead>
+      <tr><th>Service</th><th style="width:22%">Indicative Price (CAD)</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Baseline Survey: Single Mill</td>
+        <td>$18,000 – $28,000</td>
+        <td>Includes mobilization, full Micro S2G2 ECA scan, EMMA C-scan report, and debrief</td>
+      </tr>
+      <tr>
+        <td>Robotic UT Shell Thickness Survey (per mill)</td>
+        <td>$22,000 – $38,000</td>
+        <td>Includes shell, trunnion, and head scanning; full C-scan thickness maps; remaining life report. Significant discount when combined with ECA gear inspection in same mobilization.</td>
+      </tr>
+      <tr>
+        <td>Integrated Mill Health Program (ECA + UT, per mill)</td>
+        <td>$32,000 – $52,000</td>
+        <td>Combined ECA gear inspection + full robotic UT shell/trunnion/head survey. ~25–30% savings vs. separate mobilizations. Recommended for all active condition monitoring clients.</td>
+      </tr>
+      <tr>
+        <td>Condition Monitoring: Per Mill (Annual)</td>
+        <td>$14,000 – $22,000</td>
+        <td>Per inspection visit; volume discounts for 3+ mill programs</td>
+      </tr>
+      <tr>
+        <td>Condition Monitoring: Per Mill (Semi-Annual)</td>
+        <td>$24,000 – $36,000</td>
+        <td>Two visits per year; recommended for mills with existing AMBER findings</td>
+      </tr>
+      <tr>
+        <td>Emergency Inspection (48 to 72 hr response)</td>
+        <td>$28,000 – $45,000</td>
+        <td>Includes priority mobilization premium; available through the BU - Services' national office network</td>
+      </tr>
+      <tr>
+        <td>Multi-Site Master Agreement (5+ mills)</td>
+        <td>Negotiated</td>
+        <td>Target: 15–20% discount vs. per mill rate; annual commitment</td>
+      </tr>
+      <tr>
+        <td>Custom Probe Development (SG NDT)</td>
+        <td>$8,000 – $18,000 one-time</td>
+        <td>Amortized across inspections; required for non-standard gear geometries</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="subsection">9.2 — Alternative: Time &amp; Material Pricing</h3>
+
+  <p>While fixed-price program agreements are the preferred commercial model for condition monitoring clients, the BU&nbsp;–&nbsp;Services also offers Time &amp; Material (T&amp;M) engagements for clients who require scope flexibility, prefer to procure services in accordance with their existing contractor frameworks, or are undertaking a first-engagement baseline survey prior to committing to an annual program.</p>
+
+  <p>The rates below reflect actual T&amp;M estimates issued by Nucleom Inc. (formerly Arcanite Inc., amalgamated January 1, 2026) for active mining NDE programs at Lake Shore Gold / Timmins, ON operations — providing a transparent reference for clients evaluating T&amp;M vs. fixed-price options.</p>
+
+  <div class="callout cbl" style="margin-bottom:1.5rem;">
+    <div class="callout-icon">i</div>
+    <div><strong>When to use T&amp;M vs. Fixed Price</strong>Fixed-price programs deliver greater budget certainty and typically represent a 15–25% saving vs. equivalent T&amp;M over a full annual program. T&amp;M is recommended for: initial baseline surveys at new sites; projects with variable or undefined scope (e.g. bolt UT counts not yet confirmed); clients whose procurement rules require a competitive T&amp;M structure; and emergency or supplementary inspections outside the standing program.</div>
+  </div>
+
+  <!-- T&M Rate Card -->
+  <div class="tool-block">
+    <div class="tool-hdg">
+      <div class="tool-accent" style="background:var(--blue);"></div>
+      <h3>Labour Rate Card — BU Services / Nucleom Inc.</h3>
+    </div>
+    <table class="ctbl">
+      <thead>
+        <tr><th>Role</th><th>Regular Time</th><th>Overtime</th><th>Double Time</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>2-Person Advanced NDE Crew</strong><br><small style="color:var(--body);font-weight:400;">ECA / Phased Array / Eddy Current</small></td>
+          <td>$220 / hr</td>
+          <td>$330 / hr</td>
+          <td>$440 / hr</td>
+        </tr>
+        <tr>
+          <td><strong>Advanced NDE Technician</strong><br><small style="color:var(--body);font-weight:400;">Offsite reporting &amp; data analysis</small></td>
+          <td>$135 / hr</td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><strong>CGSB Technician</strong><br><small style="color:var(--body);font-weight:400;">Conventional NDE (UT, MPI)</small></td>
+          <td>$120 / hr</td>
+          <td>$180 / hr</td>
+          <td>$240 / hr</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Expenses & Equipment -->
+  <div class="tool-block">
+    <div class="tool-hdg">
+      <div class="tool-accent" style="background:var(--orange);"></div>
+      <h3>Expenses &amp; Equipment</h3>
+    </div>
+    <table class="ctbl">
+      <thead>
+        <tr><th>Item</th><th>Rate</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>All-Inclusive Equipment Package</td><td>$1,200 / day</td><td>Micro S2G2 ECA instrument, EMMA software, all probes and ancillary equipment</td></tr>
+        <tr><td>Subsistence — Meals &amp; Accommodations</td><td>$215–$225 / person-day</td><td>Remote mine site rate; applies to all field days including travel days</td></tr>
+        <tr><td>Service Truck</td><td>$60 / day</td><td>When required for equipment transport to site</td></tr>
+        <tr><td>Mileage</td><td>$1.15 / km</td><td>Round-trip from nearest BU Services office (e.g. Oakville ON for Timmins-area sites)</td></tr>
+        <tr><td>Consumables (MPI &amp; UT)</td><td>$35 / unit</td><td>Fluorescent MPI, UT couplant, and related consumables</td></tr>
+        <tr><td>Demob Meals</td><td>$75 / person</td><td>Demobilization travel day</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Reference Estimates -->
+  <h3 class="subsection">Reference Estimates — Active Mining Engagements</h3>
+  <p>The following two estimates, issued for Lake Shore Gold operations in Timmins, ON, illustrate the T&amp;M model applied to a typical multi-technology mill inspection program. They serve as a realistic cost reference for clients and as a basis for building fixed-price equivalents.</p>
+
+  <div class="crow c2" style="margin:1.5rem 0;">
+
+    <!-- Estimate 25222 -->
+    <div class="dcard">
+      <div class="dcard-hd navy">
+        <h3>Estimate 25222 &mdash; Multi-Technology Mill Program</h3>
+        <p>Lake Shore Gold Corporation &nbsp;|&nbsp; Timmins, ON &nbsp;|&nbsp; Issued: 14 Aug 2025</p>
+      </div>
+      <div class="dcard-bd">
+        <p style="margin-bottom:0.75rem;"><strong style="color:var(--navy);">Scope:</strong> 2-person Advanced NDE crew + 1 CGSB Technician over 2 field days</p>
+        <ul style="margin:0 0 1rem 1.1rem;font-size:0.87rem;line-height:1.7;color:var(--body);">
+          <li>ECA gear tooth inspection — large diameter gear &amp; pinion (ECA through-grease)</li>
+          <li>A-scan UT shell &amp; flange thickness inspection</li>
+          <li>A-scan UT trunnions &amp; heads (feed and discharge)</li>
+          <li>UT of ~308 bolts on shell exterior</li>
+          <li>Offsite data analysis &amp; detailed final reports (×3, within 30 days)</li>
+        </ul>
+        <table class="stbl" style="margin-bottom:0.75rem;">
+          <tr><td>Field Days</td><td>2 days</td></tr>
+          <tr><td>NDE Crew Labour (RT/OT/DT)</td><td>$6,820</td></tr>
+          <tr><td>CGSB Tech Labour (RT/OT/DT)</td><td>$3,720</td></tr>
+          <tr><td>Offsite Reporting (12 hrs @ $135)</td><td>$1,620</td></tr>
+          <tr><td>Equipment Package (2 days)</td><td>$2,400</td></tr>
+          <tr><td>Subsistence + Meals</td><td>$1,515</td></tr>
+          <tr><td>Mileage (1,500 km)</td><td>$1,725</td></tr>
+        </table>
+        <div style="background:var(--navy);color:var(--white);border-radius:5px;padding:0.65rem 1rem;display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
+          <span style="font-family:var(--fd);font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:0.7;">Total (CAD)</span>
+          <span style="font-family:var(--fd);font-size:1.4rem;font-weight:900;">$17,800</span>
+        </div>
+        <div class="dtags" style="margin-top:0.85rem;">
+          <span class="dtag navy">ECA Gear</span>
+          <span class="dtag blue">A-scan UT</span>
+          <span class="dtag navy">Bolt UT</span>
+          <span class="dtag orange">CGSB Tech</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estimate 25193 -->
+    <div class="dcard">
+      <div class="dcard-hd blue">
+        <h3>Estimate 25193 &mdash; Bull Gear ECA + Ball Mill UT</h3>
+        <p>Accounts Payable (Timmins, ON) &nbsp;|&nbsp; Issued: 13 Jun 2025</p>
+      </div>
+      <div class="dcard-bd">
+        <p style="margin-bottom:0.75rem;"><strong style="color:var(--navy);">Scope:</strong> 2-person Advanced NDE crew over 4 field days (Oakville ↔ Timmins)</p>
+        <ul style="margin:0 0 1rem 1.1rem;font-size:0.87rem;line-height:1.7;color:var(--body);">
+          <li>ECA inspection — 16&prime; diameter bull gear, 164 gear teeth</li>
+          <li>Fluorescent MPI — 17 pinion teeth</li>
+          <li>UT thickness survey — mill shell &amp; air tank</li>
+          <li>Offsite data analysis &amp; final ECA report (Day 5)</li>
+        </ul>
+        <table class="stbl" style="margin-bottom:0.75rem;">
+          <tr><td>Field Days</td><td>4 days (+ 1 reporting)</td></tr>
+          <tr><td>NDE Crew Labour (RT/OT/DT)</td><td>$10,120</td></tr>
+          <tr><td>Offsite Reporting (10 hrs @ $135)</td><td>$1,350</td></tr>
+          <tr><td>Equipment Package (3 days)</td><td>$3,600</td></tr>
+          <tr><td>Subsistence (8 person-days)</td><td>$1,800</td></tr>
+          <tr><td>Service Truck (4 days)</td><td>$240</td></tr>
+          <tr><td>Consumables (MPI &amp; UT)</td><td>$210</td></tr>
+          <tr><td>Mileage (2,000 km)</td><td>$2,300</td></tr>
+        </table>
+        <div style="background:var(--blue);color:var(--white);border-radius:5px;padding:0.65rem 1rem;display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem;">
+          <span style="font-family:var(--fd);font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:0.8;">Total (CAD)</span>
+          <span style="font-family:var(--fd);font-size:1.4rem;font-weight:900;">$19,620</span>
+        </div>
+        <div class="dtags" style="margin-top:0.85rem;">
+          <span class="dtag blue">ECA Bull Gear</span>
+          <span class="dtag orange">Fluorescent MPI</span>
+          <span class="dtag navy">UT Shell</span>
+        </div>
+        <p style="font-size:0.78rem;color:#999;margin-top:0.75rem;font-style:italic;">Note: Estimate 25193 expired Jul 13, 2025. Rates remain valid as reference; a refreshed quote is required for active procurement.</p>
+      </div>
+    </div>
+
+  </div><!-- end crow -->
+
+  <!-- T&M vs Fixed Price Comparison -->
+  <h3 class="subsection">T&amp;M vs. Fixed-Price: Decision Framework</h3>
+  <table class="ctbl">
+    <thead>
+      <tr><th>Factor</th><th>Time &amp; Material</th><th>Fixed-Price Program</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Budget certainty</strong></td>
+        <td>Variable — final cost depends on scope as executed</td>
+        <td>Fixed per-mill or per-visit rate; no surprises</td>
+      </tr>
+      <tr>
+        <td><strong>Scope flexibility</strong></td>
+        <td>Fully flexible — additional bolts, findings-driven UT, extra mills added in real time</td>
+        <td>Defined scope; change orders for significant additions</td>
+      </tr>
+      <tr>
+        <td><strong>Typical cost (2-day, single mill)</strong></td>
+        <td>$17,000 – $22,000</td>
+        <td>$14,000 – $22,000 (condition monitoring rate)</td>
+      </tr>
+      <tr>
+        <td><strong>Procurement fit</strong></td>
+        <td>Preferred by clients with existing T&amp;M contractor frameworks</td>
+        <td>Preferred for annual program budgeting and MSA structures</td>
+      </tr>
+      <tr>
+        <td><strong>Best suited for</strong></td>
+        <td>First-engagement baseline surveys; undefined bolt / finding counts; emergency response</td>
+        <td>Recurring condition monitoring; multi-mill sites; master service agreements</td>
+      </tr>
+      <tr>
+        <td><strong>Volume discount</strong></td>
+        <td>Rate card applies; negotiated day-rate reductions for extended programs</td>
+        <td>15–20% vs. T&amp;M equivalent for 3+ mill annual programs</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout cgr">
+    <div class="callout-icon">✓</div>
+    <div><strong>Recommended path for new clients</strong>Enter via T&amp;M baseline survey (single mill, $17K–$22K). Upon delivery of the baseline report, propose conversion to a fixed-price annual condition monitoring program — locking in budget certainty for the client and recurring revenue for BU Services.</div>
+  </div>
+
+  <h3 class="subsection">9.3 — ROI Framing for Clients</h3>
+  <p>At current precious metals prices, the financial case for proactive ECA gear inspection has never been stronger. Gold surpassed US$4,000/oz in 2025 — its best annual performance since 1979 — and J.P. Morgan projects prices toward US$5,000/oz by Q4 2026. Silver hit multi-decade highs above US$60/oz. The production value at risk during any unplanned mill shutdown is dramatically higher than at any point in recent mining history.</p>
+
+  <div class="chart-wrap">
+    <div class="chart-title">ECA Inspection Investment vs. Cost of Failure</div>
+    <div class="chart-sub">Indicative cost comparison at current precious metals prices — illustrative midpoints, CAD</div>
+    <canvas id="roiChart" height="160"></canvas>
+    <div class="chart-caption">Figure 2: At 2026 precious metals prices, avoiding ONE unplanned gear failure event returns 30x–180x on the annual ECA inspection investment. * Traditional inspection includes production loss during 12–48 hr degreasing + inspection window.</div>
+  </div>
+
+  <div class="info-box">
+    <div class="box-header">Client ROI Illustration: Precious Metals Mine, 5-Mill Site</div>
+    <div class="box-body">
+      <div class="box-item">Gold price context: surpassed US$4,000/oz in 2025 (best annual gain since 1979); J.P. Morgan forecasts US$5,000/oz by Q4 2026 — each unplanned shutdown hour is worth more than ever before</div>
+      <div class="box-item">Production value at risk: a large Canadian gold mine producing 200,000+ oz/year loses approximately CAD $2,200–$5,500 per minute of unplanned mill downtime at current gold prices</div>
+      <div class="box-item">Unplanned gear failure event: 5–21 days total downtime + CAD $500K–$2M emergency repair = total event cost of CAD $3M–$20M+ at 2026 precious metals prices</div>
+      <div class="box-item">ECA inspection advantage: 4–8 hour inspection window vs. 12–48 hours for traditional methods (including degreasing and re-greasing), saving 8–40 hours of production per inspection event</div>
+      <div class="box-item">Annual ECA inspection program for 5-mill site: approximately CAD $90,000–$110,000</div>
+      <div class="box-item">Return from avoiding ONE unplanned gear failure per year: <strong>30x–180x</strong> on inspection investment at current precious metals prices</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 10: REVENUE PROJECTIONS ─────────────────────────────────── -->
+<div class="sec-hdr" id="s10">
+  <div class="sec-hdr-in">
+    <div class="sec-num">12</div>
+    <div><div class="sec-title">Revenue Projections</div><div class="sec-sub">Five-year forecast 2026–2030 across all service lines</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <h3 class="subsection">10.1 — Three-Year Revenue Forecast</h3>
+
+  <table class="rtbl">
+    <thead>
+      <tr><th>Revenue Stream</th><th style="width:13%">Year 1 (2026)</th><th style="width:13%">Year 2 (2027)</th><th style="width:13%">Year 3 (2028)</th><th style="width:13%">Year 4 (2029)</th><th style="width:13%">Year 5 (2030)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Baseline surveys (new clients)</td><td>$140,000</td><td>$380,000</td><td>$360,000</td><td>$310,000</td><td>$275,000</td></tr>
+      <tr><td>Condition monitoring programs (recurring)</td><td>$80,000</td><td>$620,000</td><td>$1,320,000</td><td>$2,050,000</td><td>$2,760,000</td></tr>
+      <tr><td>Emergency inspections</td><td>$60,000</td><td>$160,000</td><td>$200,000</td><td>$235,000</td><td>$265,000</td></tr>
+      <tr><td>Multi-site master agreements</td><td>N/A</td><td>$180,000</td><td>$480,000</td><td>$740,000</td><td>$980,000</td></tr>
+      <tr><td>Custom probe development (SG NDT pass-through)</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td><td>N/A</td></tr>
+      <tr><td>Robotic UT shell / trunnion / head surveys</td><td>$60,000</td><td>$300,000</td><td>$680,000</td><td>$960,000</td><td>$1,200,000</td></tr>
+      <tr><td>Lifting equipment inspections</td><td>$18,000</td><td>$60,000</td><td>$120,000</td><td>$185,000</td><td>$250,000</td></tr>
+      <tr><td>Wire rope inspections (MRT/MFL)</td><td>$22,000</td><td>$70,000</td><td>$140,000</td><td>$220,000</td><td>$295,000</td></tr>
+      <tr><td>PAUT corrosion mapping — leach / process tanks</td><td>$30,000</td><td>$140,000</td><td>$320,000</td><td>$500,000</td><td>$695,000</td></tr>
+      </tbody>
+      <tfoot><tr><td>TOTAL &mdash; All Service Lines</td><td>$410,000</td><td>$1,910,000</td><td>$3,620,000</td><td>$5,200,000</td><td>$6,720,000</td></tr></tfoot>
+  </table>
+
+  <div class="chart-wrap">
+    <div class="chart-title">Five-Year Revenue Forecast by Stream: 2026–2030 (All Service Lines)</div>
+    <div class="chart-sub">Five years: 2026–2030 across all service lines. 2026 conservatively modeled; primary ramp weighted to 2027. Year 5 annual revenue: $6.72M. Cumulative: CAD $17.86M</div>
+    <canvas id="revenueChart" height="200"></canvas>
+    <div class="chart-caption">Figure 3: Five-year revenue forecast 2026–2030 across all service lines. Year 1 (2026): $410K — conservative build reflecting new commercial team, 6–12 month mining sales cycles, and vendor qualification lead times. Year 2 (2027): $1.91M — primary ramp year as H2 2026 pipeline converts. Year 3 (2028): $3.62M (full program embedded in 20+ agreements). Year 4 (2029): $5.20M (dominant position, preferred vendor agreements). Year 5 (2030): $6.72M (condition monitoring $2.76M, Robotic UT $1.20M, PAUT tanks $695K). Cumulative 5-year total: CAD $17.86M.</div>
+  </div>
+</div>
+
+<!-- ── SECTION 11: COMPETITIVE LANDSCAPE ───────────────────────────────── -->
+<div class="sec-hdr" id="s11">
+  <div class="sec-hdr-in">
+    <div class="sec-num">13</div>
+    <div><div class="sec-title">Competitive Landscape</div><div class="sec-sub">Market positioning and differentiation</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p>The through-grease ECA inspection market for large grinding mill gear drives remains relatively underpenetrated in Canada. Most current inspection providers rely on traditional methods requiring grease removal, or offer conventional (non-array) eddy current with limited surface coverage and no digital trending capability.</p>
+
+  <table class="data-table">
+    <thead>
+      <tr><th>Competitor Type</th><th>Their Approach</th><th>BU - Services Advantage</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Traditional MT / PT firms</td>
+        <td>Full degreasing, cleaning, MT/PT application, inspection, and re-greasing. 12–48 hours total downtime.</td>
+        <td>60–80% faster; no grease removal; full digital C-scan record; more frequent inspections achievable</td>
+      </tr>
+      <tr>
+        <td>Vibration monitoring OEMs</td>
+        <td>Continuous online vibration sensors on mill bearings and structure</td>
+        <td>Complementary — not a replacement. ECA provides direct gear tooth surface imaging; vibration is a lagging indicator that triggers action too late</td>
+      </tr>
+      <tr>
+        <td>Generic UT / PAUT contractors</td>
+        <td>Ultrasonic tooth root inspection for subsurface cracks</td>
+        <td>ECA is superior for surface defect detection (pitting, spalling). Combined ECA + PAUT program possible through the BU - Services</td>
+      </tr>
+      <tr>
+        <td>US or European NDT specialists</td>
+        <td>Occasional cross-border deployments for large operators</td>
+        <td>Local presence (7 Canadian offices); faster mobilization; lower travel costs; Canadian regulatory expertise; bilingual EN/FR service</td>
+      </tr>
+      <tr>
+        <td>In-house mine maintenance teams</td>
+        <td>Visual inspection during scheduled maintenance</td>
+        <td>The BU - Services provides independent, certified, documented inspection with digital data archive — a governance and insurance advantage</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── SECTION 12: IMPLEMENTATION PLAN ─────────────────────────────────── -->
+<div class="sec-hdr" id="s12">
+  <div class="sec-hdr-in">
+    <div class="sec-num">14</div>
+    <div><div class="sec-title">Implementation Plan</div><div class="sec-sub">Quarterly execution roadmap</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <table class="data-table">
+    <thead>
+      <tr><th style="width:26%">Phase</th><th style="width:16%">Timeline</th><th>Key Actions</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Phase 0:</strong> Setup &amp; Readiness</td>
+        <td>Months 1–2</td>
+        <td>Finalize SG NDT Micro S2G2 probe configuration for target gear geometries; develop standard inspection procedure; build capability statement; prepare EMMA report templates; identify top 5 target mine sites</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 1:</strong> Formalise Customers &amp; Build Pipeline</td>
+        <td>Months 2–6</td>
+        <td>Convert existing four customers to formal condition monitoring contracts; produce 2–3 case studies with ROI quantification; initiate outreach to Top 5 targets using current customer references</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 2:</strong> Active Growth</td>
+        <td>Months 7–18</td>
+        <td>Deploy case studies in targeted outreach; exhibit at CIM 2026 Annual Conference; pursue 5–8 multi-mill condition monitoring contracts; begin emergency response program promotion</td>
+      </tr>
+      <tr>
+        <td><strong>Phase 3:</strong> Program Scale</td>
+        <td>Months 19–60</td>
+        <td>Convert trial clients to long-term annual agreements; pursue preferred vendor status with Tier 1 operators; expand to oil sands and potash; evaluate PAUT gear root inspection service addition</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── SECTION 13: RISK MANAGEMENT ─────────────────────────────────────── -->
+<div class="sec-hdr" id="s13">
+  <div class="sec-hdr-in">
+    <div class="sec-num">15</div>
+    <div><div class="sec-title">Risk Management</div><div class="sec-sub">Key risks and mitigation strategies</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <table class="data-table">
+    <thead>
+      <tr><th style="width:35%">Risk</th><th>Mitigation Strategy</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Client budget constraints / capital deferral</td>
+        <td>Lead with CAD ROI model (avoid one failure = 30–180x return); position as cost avoidance not cost addition; offer phased entry with single-mill baseline survey</td>
+      </tr>
+      <tr>
+        <td>Grease type or thickness variability affecting ECA performance</td>
+        <td>Pre-inspection grease characterization; SG NDT Micro S2G2 probe frequency optimization per application; explicit scope limitations stated in proposals; conservative defect sizing protocols</td>
+      </tr>
+      <tr>
+        <td>Competitor response or price undercutting</td>
+        <td>Differentiate on data quality (EMMA C-scans), speed, full gear ring coverage, and long-term data archive value; Micro S2G2 instrument advantage from SG NDT integration</td>
+      </tr>
+      <tr>
+        <td>Technician availability for remote mine site mobilization</td>
+        <td>Leverage the BU - Services' 8-office national network (Quebec City, Montreal, Oakville, Thunder Bay, Vancouver — Nucleom; Edmonton, Fort St. John via Rockx — Nortech); cross-train ECA technicians; build inspection schedule in advance with clients</td>
+      </tr>
+      <tr>
+        <td>Client skepticism of through-grease capability</td>
+        <td>Reference SG NDT's proven Micro S2G2 instrument performance; offer live demonstration on client gear; provide published technical data on lift-off compensation; reference Wesdome, Barrick, Suncor, Agnico Eagle, Cenovus</td>
+      </tr>
+      <tr>
+        <td>Remote site HSE and access requirements</td>
+        <td>Standard BU - Services HSE pre-qualification process; site-specific induction procedures; logistics coordination built into mobilization planning and pricing</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ── SECTION 14: TOP 5 TARGET CLIENTS ────────────────────────────────── -->
+<div class="sec-hdr" id="s14">
+  <div class="sec-hdr-in">
+    <div class="sec-num">16</div>
+    <div><div class="sec-title">Top 5 Priority Target Clients</div><div class="sec-sub">Teck, Vale, Agnico Eagle, HudBay, Glencore</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p>Based on mill count, production scale, geographic proximity to BU - Services offices, and strategic fit, the following five clients are recommended as initial priority targets. Together they represent an estimated 30–40 grinding mills and potential annual inspection revenue of CAD $500,000–$800,000.</p>
+
+  <div class="target-card">
+    <div class="target-card-header">
+      <h4>#1 — Teck Resources: Highland Valley Copper, BC</h4>
+      <div class="priority-stars">★★★★★</div>
+    </div>
+    <div class="target-card-body">
+      <div class="target-meta">
+        <div class="target-meta-item"><label>Mill Count</label><span>13 mills (2 AG + 3 SAG + 8 ball)</span></div>
+        <div class="target-meta-item"><label>Annual Revenue Potential</label><span>CAD $182K–$286K</span></div>
+        <div class="target-meta-item"><label>Nearest BU Office</label><span>Vancouver, BC (Nucleom)</span></div>
+      </div>
+      <p style="font-size:0.875rem">Canada's largest base metal mine, processing 155,000 tpd. The single largest concentration of open gear drives in Canada — 13 grinding mills at one site. Actively investing in mill optimization technology. Highland Valley Copper Mine Life Extension Project underway signals long-term commitment.</p>
+      <p style="font-size:0.875rem;color:var(--gray-500)"><strong>Entry strategy:</strong> Approach Teck HVC reliability/maintenance team via Vancouver office; offer 2–3 mill baseline survey at introductory rate as proof of concept.</p>
+    </div>
+  </div>
+
+  <div class="target-card">
+    <div class="target-card-header">
+      <h4>#2 — Vale Base Metals: Clarabelle Mill, Sudbury, ON</h4>
+      <div class="priority-stars">★★★★☆</div>
+    </div>
+    <div class="target-card-body">
+      <div class="target-meta">
+        <div class="target-meta-item"><label>Mill Count</label><span>4–6 mills at Clarabelle</span></div>
+        <div class="target-meta-item"><label>Annual Revenue Potential</label><span>CAD $70K–$130K</span></div>
+        <div class="target-meta-item"><label>Nearest BU Office</label><span>Oakville, ON (Nucleom) ~4 hrs</span></div>
+      </div>
+      <p style="font-size:0.875rem">Vale's Clarabelle Mill in Sudbury, commissioned in 1971, runs a SAG mill and ball mill circuit processing nickel-copper ore from multiple Sudbury underground mines. Aging, high-utilization asset — the highest-risk gear profile for fatigue. One of the world's largest integrated nickel mining complexes.</p>
+      <p style="font-size:0.875rem;color:var(--gray-500)"><strong>Entry strategy:</strong> Leverage Nucleom's existing Ontario client relationships; approach Vale Sudbury reliability and maintenance engineering team; position as complement to existing predictive maintenance program.</p>
+    </div>
+  </div>
+
+  <div class="target-card">
+    <div class="target-card-header">
+      <h4>#3 — Agnico Eagle Mines: Detour Lake Mine, ON</h4>
+      <div class="priority-stars">★★★★☆</div>
+    </div>
+    <div class="target-card-body">
+      <div class="target-meta">
+        <div class="target-meta-item"><label>Mill Count</label><span>2 mills + multi-site upside</span></div>
+        <div class="target-meta-item"><label>Annual Revenue Potential</label><span>CAD $30K–$45K single site; $160K–$220K national program</span></div>
+        <div class="target-meta-item"><label>Nearest BU Office</label><span>Thunder Bay, ON (Nucleom)</span></div>
+      </div>
+      <p style="font-size:0.875rem">Canada's largest gold mine by production — record mill throughput of 77,022 tpd in Q4 2024, well above design capacity. Agnico is actively investing in mill optimization including SAG retention time improvement and ball mill upgrades. Pushing throughput above design stresses gear drives maximally. Multi-site national agreement potential across LaRonde QC, Canadian Malartic QC, Meadowbank NU, and more.</p>
+      <p style="font-size:0.875rem;color:var(--gray-500)"><strong>Entry strategy:</strong> Start at Detour Lake via Thunder Bay office; pitch multi-site national program across all Canadian Agnico operations to corporate reliability team in Toronto.</p>
+    </div>
+  </div>
+
+  <div class="target-card">
+    <div class="target-card-header">
+      <h4>#4 — HudBay Minerals: Copper Mountain (BC) + Snow Lake (MB)</h4>
+      <div class="priority-stars">★★★★☆</div>
+    </div>
+    <div class="target-card-body">
+      <div class="target-meta">
+        <div class="target-meta-item"><label>Mill Count</label><span>5–7 total Canadian mills</span></div>
+        <div class="target-meta-item"><label>Annual Revenue Potential</label><span>CAD $80K–$155K</span></div>
+        <div class="target-meta-item"><label>Nearest BU Offices</label><span>Vancouver (BC) + Thunder Bay (MB)</span></div>
+      </div>
+      <p style="font-size:0.875rem">HudBay's Copper Mountain mine near Princeton, BC runs a 45,000 tpd grinding and flotation circuit. Since acquiring Copper Mountain in 2023, HudBay spent two years stabilizing mill reliability — achieving record mill availability of 95% in Q3 2024. A team that just lived through mill reliability pain is acutely aware of downtime cost. Expanding to 50,000 tpd by 2027 increases gear load further.</p>
+      <p style="font-size:0.875rem;color:var(--gray-500)"><strong>Entry strategy:</strong> Lead with Copper Mountain BC via Vancouver office; emphasize "protect what you just fixed" ROI narrative; upsell to Snow Lake in Year 2.</p>
+    </div>
+  </div>
+
+  <div class="target-card">
+    <div class="target-card-header">
+      <h4>#5 — Glencore: Strathcona Mill, Sudbury INO, ON</h4>
+      <div class="priority-stars">★★★☆☆</div>
+    </div>
+    <div class="target-card-body">
+      <div class="target-meta">
+        <div class="target-meta-item"><label>Mill Count</label><span>3–5 mills at Strathcona</span></div>
+        <div class="target-meta-item"><label>Annual Revenue Potential</label><span>CAD $50K–$110K</span></div>
+        <div class="target-meta-item"><label>Nearest BU Office</label><span>Oakville, ON (Nucleom) ~4 hrs</span></div>
+      </div>
+      <p style="font-size:0.875rem">Glencore's Strathcona Mill processes ore from Fraser Mine as well as third-party custom feed from external operators — high utilization across multiple ore streams. Glencore is investing $1.3B in the Onaping Depth Project at Craig Mine, signalling long-term Sudbury commitment. Note: Kidd Creek Mine confirmed closing end of 2026; Sudbury INO (Strathcona) is the correct target.</p>
+      <p style="font-size:0.875rem;color:var(--gray-500)"><strong>Entry strategy:</strong> Coordinate Sudbury outreach alongside Vale (same Oakville office corridor); target Glencore Sudbury INO reliability and maintenance management.</p>
+    </div>
+  </div>
+
+  <div class="info-box green">
+    <div class="box-header">Top 5 Targets Summary</div>
+    <div class="box-body">
+      <div class="box-item">#1 Teck — Highland Valley Copper, BC &nbsp;|&nbsp; 13 mills &nbsp;|&nbsp; CAD $182K–$286K/yr &nbsp;|&nbsp; Vancouver office</div>
+      <div class="box-item">#2 Vale — Clarabelle Mill, Sudbury ON &nbsp;|&nbsp; 4–6 mills &nbsp;|&nbsp; CAD $70K–$130K/yr &nbsp;|&nbsp; Oakville office</div>
+      <div class="box-item">#3 Agnico Eagle — Detour Lake, ON &nbsp;|&nbsp; 2 mills + multi-site upside &nbsp;|&nbsp; CAD $30K–$45K/yr single site &nbsp;|&nbsp; Thunder Bay office</div>
+      <div class="box-item">#4 HudBay — Copper Mountain BC + Snow Lake MB &nbsp;|&nbsp; 5–7 mills &nbsp;|&nbsp; CAD $80K–$155K/yr &nbsp;|&nbsp; Vancouver + Thunder Bay</div>
+      <div class="box-item">#5 Glencore — Strathcona Mill, Sudbury ON &nbsp;|&nbsp; 3–5 mills &nbsp;|&nbsp; CAD $50K–$110K/yr &nbsp;|&nbsp; Oakville office</div>
+      <div class="box-item"><strong>Combined Year 1 potential from Top 5 targets: CAD $200,000–$380,000</strong> — reflecting realistic 6–12 month sales and vendor qualification cycles; full program revenue from these accounts weighted into 2027</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 15: CONCLUSION ───────────────────────────────────────────── -->
+<div class="sec-hdr" id="s15">
+  <div class="sec-hdr-in">
+    <div class="sec-num">17</div>
+    <div><div class="sec-title">Conclusion &amp; Next Steps</div><div class="sec-sub">Recommended immediate actions</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+  <p class="lead">The BU - Services is not asking the Canadian mining industry to take a chance on a new inspection technology. The ECA through-grease grinding mill gear inspection service is already proven — live across 12 active accounts including Wesdome Gold, Barrick Gold, Suncor, Cenovus, Agnico Eagle, and ArcelorMittal, with real defect findings, documented results, and customers who can speak to the value it delivers.</p>
+
+  <p>This commercial plan is a scale-up strategy with a deliberate dual purpose: to grow a high-value, technically specialized service across Canada's major mining operators, and to build a structurally resilient revenue stream that insulates the BU - Services from the cyclical pressures of oil and gas spending. Mining is not a secondary market — it is the strategic growth platform that will define the BU's financial stability and competitive differentiation through 2030 and beyond.</p>
+
+  <p>The technology works. The protocols are optimised. The SG NDT Micro S2G2 instruments are field-proven. The team spans seven Canadian offices. The reference customers are ready to be cited. The market is not waiting to be convinced — it is waiting to be reached.</p>
+
+  <div class="info-box green">
+    <div class="box-header">Immediate Next Steps</div>
+    <div class="box-body">
+      <div class="box-item">1. Formalise contracts with all 12 active accounts — prioritising Wesdome Gold, Barrick Gold, Suncor, Agnico Eagle, and Cenovus — convert active engagements to annual/semi-annual condition monitoring agreements</div>
+      <div class="box-item">2. Produce 2–3 case studies from current customer findings — these are the primary sales tool for every new account approach</div>
+      <div class="box-item">3. Initiate outreach to Teck Highland Valley Copper (Vancouver office) and Vale/Glencore Sudbury (Oakville office) — lead with Barrick and Wesdome results as peer references</div>
+      <div class="box-item">4. Engage Agnico Eagle Detour Lake reliability team (Thunder Bay office) — current gold mining customer references are directly relevant</div>
+      <div class="box-item">5. Commission SG NDT Micro S2G2 custom probe configurations for any new gear geometries at target accounts not already covered by current customer programs</div>
+      <div class="box-item">6. Register for CIM 2026 Annual Conference — submit field results paper using anonymised data from current customer inspections</div>
+    </div>
+  </div>
+
+  <div style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--rule);display:flex;gap:3rem;flex-wrap:wrap">
+    <div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-500);margin-bottom:0.2rem">BU - Services</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:0.875rem;color:var(--navy-mid)">Nucleom Inc. &amp; Nortech Advanced NDT</div>
+    </div>
+    <div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-500);margin-bottom:0.2rem">ECA Technology</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:0.875rem;color:var(--navy-mid)">SG NDT Micro S2G2 &amp; EMMA Software</div>
+    </div>
+    <div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray-500);margin-bottom:0.2rem">Parent Company</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:0.875rem;color:var(--navy-mid)">Ekoscan Integrity Group &mdash; France</div>
+    </div>
+  </div>
+</div>
+
+
+</div><!-- .main -->
+
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+
+  // ── CHART 1: TAM Horizontal Bar ──────────────────────────────────────
+  const tamCtx = document.getElementById('tamChart');
+  if (tamCtx) {
+    new Chart(tamCtx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: [
+          'Remote Operations (NWT, Nunavut, NL)',
+          'Potash & Uranium (Saskatchewan)',
+          'Oil Sands Processing (Alberta)',
+          'Hard Rock Metal Mines (ON, QC, BC, MB)'
+        ],
+        datasets: [{
+          data: [15, 30, 37.5, 200],
+          backgroundColor: ['#7AB3D8','#A8C8E8','#2B6CB0','#0E2545'],
+          borderRadius: 3,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                var ranges = ['10–20 mills','20–40 mills','25–50 mills','160–240 mills'];
+                return '  ' + ranges[ctx.dataIndex];
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            max: 260,
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: { font: { size: 11 }, color: '#6B7280' },
+            title: { display: true, text: 'Estimated Mill Count (midpoint)', font: { size: 11 }, color: '#6B7280' }
+          },
+          y: {
+            grid: { display: false },
+            ticks: { font: { size: 11 }, color: '#374151' }
+          }
+        }
+      }
+    });
+  }
+
+  // ── CHART 2: ROI Comparison Bar ───────────────────────────────────────
+  const roiCtx = document.getElementById('roiChart');
+  if (roiCtx) {
+    new Chart(roiCtx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: [
+          'Annual ECA Inspection Program (5 mills)',
+          'Traditional Inspection (5 mills, 12–48 hr downtime each)',
+          'One Unplanned Gear Failure Event (production + repair)'
+        ],
+        datasets: [{
+          data: [100, 350, 5000],
+          backgroundColor: ['#1A5C35','#2B6CB0','#C0392B'],
+          borderRadius: 4,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                var labels = ['~CAD $100K','~CAD $350K*','~CAD $5M+'];
+                return '  ' + labels[ctx.dataIndex];
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: {
+              font: { size: 11 },
+              color: '#6B7280',
+              callback: function(v) {
+                return v >= 1000 ? '$' + (v/1000).toFixed(1) + 'M' : '$' + v + 'K';
+              }
+            }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 10 }, color: '#374151' }
+          }
+        }
+      }
+    });
+  }
+
+  // ── CHART 3: Revenue Grouped Bar ──────────────────────────────────────
+  const revCtx = document.getElementById('revenueChart');
+  if (revCtx) {
+    new Chart(revCtx.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: [
+          'Baseline Surveys',
+          'Condition Monitoring',
+          'Emergency Inspections',
+          'Multi-Site Agreements',
+          'Robotic UT Shell/Trunnion',
+          'Lifting Equipment',
+          'Wire Rope Inspections',
+          'PAUT Leach Tanks',
+          'Custom Probe Dev.'
+        ],
+        datasets: [
+          {
+            label: 'Year 1 (2026)',
+            data: [140, 80, 60, 0, 60, 18, 22, 30, 0],
+            backgroundColor: '#2B6CB0',
+            borderRadius: 3,
+            borderSkipped: false,
+          },
+          {
+            label: 'Year 2 (2027)',
+            data: [380, 620, 160, 180, 300, 60, 70, 140, 0],
+            backgroundColor: '#C8850C',
+            borderRadius: 3,
+            borderSkipped: false,
+          },
+          {
+            label: 'Year 3 (2028)',
+            data: [360, 1320, 200, 480, 680, 120, 140, 320, 0],
+            backgroundColor: '#1A5C35',
+            borderRadius: 3,
+            borderSkipped: false,
+          },
+          {
+            label: 'Year 4 (2029)',
+            data: [310, 2050, 235, 740, 960, 185, 220, 500, 0],
+            backgroundColor: '#8B2500',
+            borderRadius: 3,
+            borderSkipped: false,
+          },
+          {
+            label: 'Year 5 (2030)',
+            data: [275, 2760, 265, 980, 1200, 250, 295, 695, 0],
+            backgroundColor: '#0D7A8C',
+            borderRadius: 3,
+            borderSkipped: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: { font: { size: 11 }, color: '#374151', boxWidth: 12, padding: 16 }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) {
+                return '  ' + ctx.dataset.label + ': $' + ctx.raw + 'K';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: {
+              font: { size: 11 },
+              color: '#6B7280',
+              callback: function(v) { return '$' + v + 'K'; }
+            },
+            title: { display: true, text: 'Revenue (CAD $000s)', font: { size: 11 }, color: '#6B7280' }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { font: { size: 10 }, color: '#374151' }
+          }
+        }
+      }
+    });
+  }
+
+  // ── SIDEBAR ACTIVE STATE ──────────────────────────────────────────────
+  var sections = document.querySelectorAll('[id]');
+  var navLinks = document.querySelectorAll('.nav-links a');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        navLinks.forEach(function(a) {
+          a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(function(s) { observer.observe(s); });
+
+});
+</script>
+<footer class="footer">
+  <div class="footer-in">
+    <div class="footer-brand">NDT SERVICES &mdash; CANADIAN MINING<br><span>COMMERCIAL PLAN 2026&ndash;2030</span></div>
+    <div class="footer-meta">Nucleom Inc. &nbsp;|&nbsp; Nortech Advanced NDT &nbsp;|&nbsp; BU Services<br>Ekoscan Integrity Group &nbsp;|&nbsp; Jon Eustace, CEO &mdash; North America &nbsp;|&nbsp; April 2026 &nbsp;|&nbsp; CONFIDENTIAL</div>
+  </div>
+</footer>
+
+<!-- FINANCIAL SUMMARY — CANADIAN MINING NDT -->
+<div id="fin-mining" style="background:var(--mid);border-top:3px solid #C9860A;margin:2.5rem 0 0;padding:0;">
+  <div style="background:#1a1000;padding:0.7rem 2.5rem;">
+    <div style="max-width:1140px;margin:0 auto;display:flex;align-items:center;gap:1rem;">
+      <div style="font-family:var(--fd);font-size:0.62rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#C9860A;white-space:nowrap;">Financial Model</div>
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.45);">Canadian Mining NDT — gross margin, EBITDA, CAPEX &amp; staffing. Part of the BU Services Master Commercial Plan financial model. All figures $000 CAD.</div>
+    </div>
+  </div>
+  <div style="max-width:1140px;margin:0 auto;padding:1.5rem 2.5rem 2rem;">
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #C9860A;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">5-Yr Revenue</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">$17,860K</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #C9860A80;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">Gross Margin</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">40%</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #C9860A80;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">5-Yr EBITDA</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">$5,494K</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid var(--orange);">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">Total CAPEX</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">$400K</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #F0C040;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">Peak Headcount</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">9.5 FTE</div>
+      </div>
+    </div>
+
+    <!-- P&L table -->
+    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:1.25rem;">
+      <thead>
+        <tr style="background:var(--navy);">
+          <th style="text-align:left;padding:0.55rem 0.9rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">($000 CAD)</th>
+          <th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2026</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2027</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2028</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2029</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2030</th>
+          <th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">5-Year</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;font-weight:700;color:var(--navy);">Revenue</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$410</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$1,910</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$3,620</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$5,200</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$6,720</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;color:var(--navy);">$17,860</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;color:var(--body);">Gross Profit <span style="color:rgba(0,0,0,0.4);font-size:0.78rem;">(40%)</span></td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;">$164</td><td style="padding:0.5rem 0.6rem;text-align:right;">$764</td><td style="padding:0.5rem 0.6rem;text-align:right;">$1,448</td><td style="padding:0.5rem 0.6rem;text-align:right;">$2,080</td><td style="padding:0.5rem 0.6rem;text-align:right;">$2,688</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;">$7,144</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;color:var(--body);">SG&amp;A / Overhead</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(80)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(220)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(360)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(450)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(540)</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(1,650)</td>
+        </tr>
+        <tr style="background:#1a1000;border-top:2px solid #C9860A;">
+          <td style="padding:0.6rem 0.9rem;font-weight:900;color:var(--white);">EBITDA</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#C9860A;">$84</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#C9860A;">$544</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#C9860A;">$1,088</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#C9860A;">$1,630</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#C9860A;">$2,148</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#C9860A;">$5,494</td>
+        </tr>
+        <tr style="background:#1a1000;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <td style="padding:0.35rem 0.9rem 0.35rem 1.3rem;font-size:0.78rem;color:rgba(255,255,255,0.4);">EBITDA %</td>
+          <td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">20.5%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">28.5%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">30.1%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">31.3%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">32.0%</td>
+          <td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">30.8%</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;color:var(--body);">CAPEX</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(130)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(90)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(130)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(25)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(25)</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(400)</td>
+        </tr>
+        <tr style="background:var(--navy);border-top:2px solid var(--blue2);">
+          <td style="padding:0.6rem 0.9rem;font-weight:900;color:var(--white);">Free Cash Flow</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;color:#FF6B6B;font-weight:900;">(46)</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#C9860A;font-weight:900;">454</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#C9860A;font-weight:900;">958</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#C9860A;font-weight:900;">1,605</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#C9860A;font-weight:900;">2,123</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;color:#C9860A;font-weight:900;">5,094</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Margin note -->
+    <div style="background:#1a1000;border-left:4px solid #C9860A;border-radius:0 5px 5px 0;padding:0.75rem 1rem;font-size:0.8rem;color:rgba(255,255,255,0.6);line-height:1.65;margin-bottom:1.25rem;">
+      <strong style="color:var(--white);">Margin basis:</strong> ECA through-grease gear inspection is a specialist service with no direct Canadian competitor. SG NDT instruments are sourced via EIG internal pricing. Day rates of $14K–$20K per mill inspection reflect the high value-to-downtime ratio — a single unplanned mill shutdown costs clients $500K–$1.5M/day.
+    </div>
+
+    <!-- CAPEX and Staffing side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+      <!-- CAPEX detail -->
+      <div style="border-radius:6px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--navy);padding:0.55rem 0.9rem;font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.6);">CAPEX Detail</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+          
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2026 — $130K</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">1× SG NDT Micro S2G2 ECA instrument (~$45K, EIG internal pricing) + 1× robotic UT system (~$85K). Existing fleet covers launch accounts.</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2027 — $90K</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">2× additional ECA instruments as Eastern and Western dedicated crews scale nationally.</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2028 — $130K</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">1× ECA + 1× robotic UT for full national crew coverage.</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2029–2030 — $25K/yr</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">Probe replacement and instrument maintenance only.</td>
+        </tr>
+        </table>
+      </div>
+
+      <!-- Staffing -->
+      <div style="border-radius:6px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--navy);padding:0.55rem 0.9rem;font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.6);">Incremental Staffing</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+          <thead>
+            <tr style="background:#1a2040;">
+              <th style="text-align:left;padding:0.45rem 0.7rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">Year</th>
+              <th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2026</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2027</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2028</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2029</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2030</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+              <td style="padding:0.45rem 0.7rem;color:var(--body);font-size:0.78rem;">FTE added</td>
+              
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+1.5</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+2.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+3.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+2.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+1.0</td>
+            </tr>
+            <tr style="background:var(--navy);">
+              <td style="padding:0.45rem 0.7rem;font-weight:700;color:var(--white);font-size:0.78rem;">Cumul.</td>
+              
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">1.5</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">3.5</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">6.5</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">8.5</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">9.5</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="background:var(--mid);padding:0.65rem 0.9rem;font-size:0.78rem;color:var(--body);line-height:1.6;">
+          <strong>FTE (Full-Time Equivalent):</strong> One FTE = one person at full-time hours. A 0.5 FTE is a part-time or shared-role allocation. <strong>Utilisation target: 85%</strong> for all field and technical staff (billable hours as a percentage of available hours). Management and administrative roles are excluded from the utilisation target. Loaded cost includes salary, benefits (30–32% load), certifications, and vehicle allowances where applicable.<br><br><strong>Loaded cost: $95K/yr avg.</strong> CGSB EC2/UT2 technicians + 0.5 FTE mining BD specialist. Existing crew handles current 12 accounts; incremental hires support national expansion into new sites.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABSA Qualification — Full Detail | 3X Composite Repair | BU Services</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600;700&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+:root{
+  --navy:#161C60; --navy2:#1E2580; --blue:#368CD9; --blue2:#5AAAE8;
+  --orange:#E97132; --green:#196B24; --green2:#22882F;
+  --purp:#6B3FA0; --purp2:#8B5CC8; --purp3:#B98EE0;
+  --dark:#0D1140; --mid:#F0F3FA; --light:#F7F9FD; --lgrey:#DDE3F0;
+  --body:#384660; --text:#1A2540; --white:#FFFFFF;
+  --shadow:0 4px 20px rgba(22,28,96,0.12);
+  --fd:'Barlow Condensed','Arial Narrow',sans-serif;
+  --fb:'Barlow','Segoe UI',Arial,sans-serif;
+}
+body{font-family:var(--fb);font-size:15.5px;line-height:1.7;color:var(--text);background:var(--light);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+
+/* ── NAV ── */
+.nav{position:sticky;top:0;z-index:200;background:var(--navy);border-bottom:3px solid var(--purp2);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:52px;box-shadow:0 2px 12px rgba(0,0,0,0.25);}
+.nav-brand{font-family:var(--fd);font-size:0.9rem;font-weight:700;letter-spacing:1.5px;color:var(--white);text-transform:uppercase;}
+.nav-brand em{color:var(--purp3);font-style:normal;}
+.nav-links{display:flex;list-style:none;gap:0;}
+.nav-links a{display:block;padding:0 0.8rem;height:52px;line-height:52px;font-size:0.72rem;font-weight:600;letter-spacing:0.5px;color:rgba(255,255,255,0.45);text-decoration:none;text-transform:uppercase;border-bottom:3px solid transparent;margin-bottom:-3px;transition:color 0.15s,border-color 0.15s;}
+.nav-links a:hover,.nav-links a.active{color:var(--white);border-bottom-color:var(--purp3);}
+.nav-back{font-family:var(--fd);font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-decoration:none;color:rgba(255,255,255,0.4);transition:color 0.15s;}
+.nav-back:hover{color:var(--purp3);}
+
+/* ── HERO ── */
+.hero{background:var(--dark);position:relative;overflow:hidden;padding:4.5rem 2.5rem 3.5rem;}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(22,28,96,0.98) 0%,rgba(11,16,53,0.92) 55%,rgba(40,15,80,0.80) 100%);}
+.hero::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(139,92,200,0.04) 80px,rgba(139,92,200,0.04) 81px),repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(139,92,200,0.04) 80px,rgba(139,92,200,0.04) 81px);pointer-events:none;}
+.hero-diagonal{position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 320px 200px 0;border-color:transparent rgba(107,63,160,0.07) transparent transparent;pointer-events:none;z-index:1;}
+.hero-inner{position:relative;z-index:2;max-width:1100px;margin:0 auto;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:0.6rem;font-family:var(--fd);font-size:0.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--purp3);background:rgba(107,63,160,0.15);border:1px solid rgba(107,63,160,0.3);border-radius:3px;padding:0.25rem 0.75rem;margin-bottom:1rem;animation:fadeUp 0.6s ease both;}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--purp2);}
+.hero h1{font-family:var(--fd);font-weight:900;font-size:clamp(2.4rem,4vw,3.6rem);line-height:0.95;letter-spacing:-0.5px;color:var(--white);text-transform:uppercase;animation:fadeUp 0.6s 0.08s ease both;}
+.hero h1 span{display:block;color:var(--purp3);}
+.hero-rule{width:3rem;height:4px;background:linear-gradient(90deg,var(--purp2),transparent);border-radius:2px;margin:1rem 0;animation:fadeUp 0.5s 0.15s ease both;}
+.hero-desc{font-size:1.05rem;font-weight:400;color:rgba(185,142,224,0.85);max-width:620px;line-height:1.72;animation:fadeUp 0.5s 0.2s ease both;}
+.hero-meta{margin-top:0.6rem;font-size:0.82rem;color:rgba(255,255,255,0.3);font-style:italic;animation:fadeUp 0.5s 0.25s ease both;}
+.hero-status{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem;animation:fadeUp 0.6s 0.32s ease both;}
+.hstat{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-top:3px solid var(--purp2);border-radius:8px;padding:1rem 1.1rem;transition:background 0.2s,transform 0.2s;}
+.hstat:hover{background:rgba(255,255,255,0.07);transform:translateY(-2px);}
+.hstat.done{border-top-color:var(--green2);}
+.hstat.active{border-top-color:var(--orange);}
+.hstat.total{border-top-color:var(--blue2);}
+.hstat-val{font-family:var(--fd);font-size:1.8rem;font-weight:900;color:var(--white);line-height:1;}
+.hstat.done .hstat-val{color:#3DDB50;}
+.hstat.active .hstat-val{color:#F28B4E;}
+.hstat.total .hstat-val{color:var(--blue2);}
+.hstat-lbl{font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:0.3rem;line-height:1.45;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1100px;margin:0 auto;padding:0 2.5rem;}
+
+/* ── SECTION HEADERS ── */
+.sec-hdr{background:var(--navy);margin-top:2.5rem;position:relative;overflow:hidden;}
+.sec-hdr::after{content:'';position:absolute;right:0;top:0;bottom:0;width:40%;background:linear-gradient(90deg,transparent,rgba(139,92,200,0.07));}
+.sec-hdr::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purp2),transparent 60%);}
+.sec-hdr-in{max-width:1100px;margin:0 auto;padding:1.1rem 2.5rem;display:flex;align-items:center;gap:1rem;position:relative;z-index:1;}
+.sec-num{flex-shrink:0;width:2rem;height:2rem;border-radius:50%;background:var(--purp);color:var(--white);font-family:var(--fd);font-size:0.85rem;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.sec-title{color:var(--white);font-family:var(--fd);font-size:1.15rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
+.sec-sub{color:rgba(255,255,255,0.38);font-size:0.8rem;margin-top:0.1rem;}
+.sec-body{background:var(--white);padding:2.5rem 0 3rem;}
+.sec-body p{font-size:0.975rem;color:var(--body);line-height:1.75;margin-bottom:0.9rem;}
+.sub-title{font-family:var(--fd);font-size:1.05rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--navy);margin:2.2rem 0 0.9rem;display:flex;align-items:center;gap:0.6rem;}
+.sub-title::after{content:'';flex:1;height:1px;background:var(--lgrey);}
+
+/* ── STEP CARDS ── */
+.steps-grid{display:flex;flex-direction:column;gap:0;border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin:1.5rem 0;}
+.step-card{display:grid;grid-template-columns:72px 1fr;gap:0;border-bottom:1px solid var(--lgrey);}
+.step-card:last-child{border-bottom:none;}
+.step-card.done .step-num-col{background:var(--green2);}
+.step-card.pending .step-num-col{background:var(--navy);}
+.step-card.pending-active .step-num-col{background:var(--purp);}
+.step-num-col{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.2rem 0.5rem;gap:0.3rem;}
+.step-n{font-family:var(--fd);font-size:1.8rem;font-weight:900;color:var(--white);line-height:1;}
+.step-badge{font-size:0.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.65);}
+.step-card.done .step-badge{color:rgba(255,255,255,0.85);}
+.step-body{padding:1.3rem 1.5rem;background:var(--white);}
+.step-card.done .step-body{background:#F0FAF2;}
+.step-card.pending-active .step-body{background:#F8F4FF;}
+.step-title{font-family:var(--fd);font-size:1.05rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:0.5rem;}
+.step-card.done .step-title{color:var(--green);}
+.step-card.pending-active .step-title{color:var(--purp);}
+.step-detail{font-size:0.9rem;color:var(--body);line-height:1.7;}
+.step-detail strong{color:var(--navy);}
+.step-card.done .step-detail strong{color:var(--green);}
+.step-card.pending-active .step-detail strong{color:var(--purp);}
+.step-sub{margin-top:0.75rem;padding-top:0.7rem;border-top:1px solid var(--lgrey);display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;}
+.step-sub-item{background:var(--mid);border-radius:6px;padding:0.6rem 0.8rem;border-left:3px solid var(--lgrey);}
+.step-card.done .step-sub-item{background:#E0F5E4;border-left-color:var(--green2);}
+.step-card.pending-active .step-sub-item{background:#EDE4FF;border-left-color:var(--purp2);}
+.step-sub-item .k{font-family:var(--fd);font-size:0.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--body);margin-bottom:0.2rem;}
+.step-sub-item .v{font-size:0.85rem;color:var(--text);font-weight:600;}
+
+/* ── STATUS BADGE ── */
+.sbadge{display:inline-flex;align-items:center;gap:0.4rem;padding:0.22rem 0.65rem;border-radius:4px;font-size:0.78rem;font-weight:700;font-family:var(--fd);letter-spacing:0.3px;}
+.sbadge::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.sbadge.done{background:#D4F5DA;color:#0D4A18;}
+.sbadge.done::before{background:var(--green2);}
+.sbadge.active{background:#EDE4FF;color:#3D1580;}
+.sbadge.active::before{background:var(--purp2);}
+.sbadge.pending{background:var(--mid);color:var(--navy);}
+.sbadge.pending::before{background:var(--lgrey);}
+
+/* ── INFO PANELS ── */
+.info-panel{border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin:1.5rem 0;border:1.5px solid var(--lgrey);}
+.info-panel-hdr{background:var(--navy);padding:0.8rem 1.4rem;display:flex;align-items:center;gap:0.75rem;}
+.info-panel-hdr .label{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);}
+.info-panel-hdr .title{font-family:var(--fd);font-size:1rem;font-weight:900;color:var(--white);text-transform:uppercase;letter-spacing:0.3px;}
+.info-panel-body{background:var(--white);}
+.info-row{padding:0.9rem 1.4rem;border-bottom:1px solid var(--lgrey);font-size:0.9rem;color:var(--body);line-height:1.65;}
+.info-row:last-child{border-bottom:none;}
+.info-row strong{color:var(--navy);}
+.info-row .tag{display:inline-block;font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0.1rem 0.5rem;border-radius:3px;margin-right:0.4rem;vertical-align:middle;}
+.tag-done{background:#D4F5DA;color:var(--green);}
+.tag-active{background:#EDE4FF;color:var(--purp);}
+.tag-pending{background:var(--mid);color:var(--body);}
+.tag-note{background:#FDE8D5;color:#5C2400;}
+
+/* ── CALLOUTS ── */
+.callout{border-radius:8px;padding:1.05rem 1.35rem;margin:1.3rem 0;font-size:0.92rem;line-height:1.65;display:flex;gap:0.85rem;align-items:flex-start;}
+.callout-icon{flex-shrink:0;width:1.5rem;height:1.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;margin-top:0.1rem;color:var(--white);}
+.callout.cbl{background:#DBEEFF;border-left:4px solid var(--blue);color:#0C2F60;}
+.callout.cbl .callout-icon{background:var(--blue);}
+.callout.cgr{background:#D8F0DC;border-left:4px solid var(--green2);color:#0C3312;}
+.callout.cgr .callout-icon{background:var(--green2);}
+.callout.cor{background:#FDE8D5;border-left:4px solid var(--orange);color:#5C2400;}
+.callout.cor .callout-icon{background:var(--orange);}
+.callout.cpur{background:#EDE4FF;border-left:4px solid var(--purp);color:#2D0E60;}
+.callout.cpur .callout-icon{background:var(--purp);}
+.callout strong{display:block;font-weight:700;margin-bottom:0.2rem;}
+
+/* ── BOXES ── */
+.box{border-radius:8px;margin:1.25rem 0;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.box-hdr{font-family:var(--fd);font-size:0.78rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0.7rem 1.2rem;color:var(--white);}
+.box.green .box-hdr{background:var(--green2);}
+.box.purp  .box-hdr{background:var(--purp);}
+.box.navy  .box-hdr{background:var(--navy);}
+.box-body{border:1.5px solid var(--lgrey);border-top:none;border-radius:0 0 8px 8px;}
+.box-item{padding:0.6rem 1.2rem 0.6rem 1.7rem;font-size:0.9rem;color:var(--text);line-height:1.65;border-bottom:1px solid rgba(22,28,96,0.06);position:relative;}
+.box-item:last-child{border-bottom:none;}
+.box-item::before{content:"›";position:absolute;left:0.7rem;font-weight:700;font-size:1rem;line-height:1.6;}
+.box.green .box-item::before{color:var(--green2);}
+.box.purp  .box-item::before{color:var(--purp);}
+.box.navy  .box-item::before{color:var(--navy);}
+
+/* ── LIMITS TABLE ── */
+.limits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0;}
+.limit-card{border-radius:8px;overflow:hidden;box-shadow:var(--shadow);}
+.limit-hdr{background:var(--navy);padding:0.65rem 1rem;}
+.limit-hdr .k{font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);}
+.limit-val{font-family:var(--fd);font-size:1.4rem;font-weight:900;color:var(--purp3);margin-top:0.15rem;}
+.limit-body{background:var(--white);border:1.5px solid var(--lgrey);border-top:none;border-radius:0 0 8px 8px;padding:0.75rem 1rem;}
+.limit-body p{font-size:0.85rem;color:var(--body);line-height:1.6;margin:0;}
+.limit-note{font-size:0.78rem;color:var(--green2);font-weight:600;margin-top:0.4rem;font-style:italic;}
+
+/* ── PROVINCE TABLE ── */
+.prov-table{width:100%;border-collapse:collapse;margin:1.5rem 0;border-radius:8px;overflow:hidden;box-shadow:var(--shadow);}
+.prov-table thead th{background:var(--navy);color:var(--white);padding:0.75rem 1rem;text-align:left;font-family:var(--fd);font-size:0.78rem;letter-spacing:0.8px;text-transform:uppercase;font-weight:700;}
+.prov-table tbody td{padding:0.75rem 1rem;border-bottom:1px solid var(--lgrey);font-size:0.9rem;line-height:1.55;vertical-align:top;}
+.prov-table tbody tr:nth-child(even) td{background:var(--mid);}
+.prov-table tbody tr:last-child td{border-bottom:none;}
+.prov-table tbody tr:hover td{background:#EEF2FB;}
+.prov-table td.province{font-weight:700;color:var(--navy);}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity 0.5s ease,transform 0.5s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* ── FOOTER ── */
+.footer{background:var(--dark);border-top:3px solid var(--purp2);padding:2rem 2.5rem;margin-top:3rem;}
+.footer-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:2rem;}
+.footer-brand{font-family:var(--fd);font-size:0.95rem;font-weight:700;color:var(--white);letter-spacing:1px;text-transform:uppercase;}
+.footer-brand span{color:var(--purp3);}
+.footer-meta{font-size:0.8rem;color:rgba(255,255,255,0.3);line-height:1.6;text-align:right;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){.hero-status{grid-template-columns:repeat(2,1fr);}.step-sub{grid-template-columns:1fr 1fr;}.nav-links{display:none;}.limits-grid{grid-template-columns:1fr;}}
+@media(max-width:560px){.hero{padding:3rem 1.5rem 2.5rem;}.wrap{padding-left:1.5rem;padding-right:1.5rem;}.step-card{grid-template-columns:56px 1fr;}.step-sub{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">BU SERVICES <em>|</em> 3X COMPOSITE REPAIR</div>
+  <ul class="nav-links">
+    <li><a href="#s1">Overview</a></li>
+    <li><a href="#s2">6-Step Process</a></li>
+    <li><a href="#s3">Regulatory Limits</a></li>
+    <li><a href="#s4">Provincial Map</a></li>
+    <li><a href="#s5">Non-Pressure Track</a></li>
+    <li><a href="#s6">Revenue Impact</a></li>
+  </ul>
+  <a href="3X_Composite_Repair_Commercial_Plan.html" class="nav-back">← Back to 3X Plan</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-diagonal" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">ABSA Qualification — Full Detail — April 2026</div>
+    <h1>CANADIAN COMPOSITE<span>REPAIR REGULATION</span></h1>
+    <div class="hero-rule"></div>
+    <p class="hero-desc">ABSA (Alberta Boilers Safety Association) is the national gatekeeper for composite repair of pressure equipment in Canada. Qualification unlocks Alberta, BC, Saskatchewan, Ontario, and Quebec — representing the full Canadian pressure equipment market. BU Services is actively progressing through the six-step process.</p>
+    <p class="hero-meta">Nortech Advanced NDT (lead) &ensp;·&ensp; Nucleom Inc. (support) &ensp;·&ensp; ECS Manual written to AB-539 standard &ensp;·&ensp; Ekoscan Integrity Group</p>
+    <div class="hero-status">
+      <div class="hstat done">
+        <div class="hstat-val">Step 1</div>
+        <div class="hstat-lbl">QMS Registration — Accepted<br>Applied as Arcanite ✓</div>
+      </div>
+      <div class="hstat active">
+        <div class="hstat-val">Steps 2–5</div>
+        <div class="hstat-lbl">In progress — QMS cert,<br>procedures, installer qual.</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-val">Step 6</div>
+        <div class="hstat-lbl">Per-repair applications<br>500 psi / 250°C / piping only</div>
+      </div>
+      <div class="hstat total">
+        <div class="hstat-val">~$500K</div>
+        <div class="hstat-lbl">Live WC quotes waiting<br>on Step 6 clearance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ S1: OVERVIEW ══ -->
+<div class="sec-hdr" id="s1">
+  <div class="sec-hdr-in">
+    <div class="sec-num">01</div>
+    <div><div class="sec-title">Why ABSA Matters</div><div class="sec-sub">The national gatekeeper — one approval unlocks the entire Canadian pressure equipment market</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>In Alberta and BC, composite repair of pressure equipment — piping, vessels, and tanks — requires provincial regulatory approval before installation. <strong>ABSA (Alberta Boilers Safety Association)</strong> is the primary authority in Canada. Once ABSA approval is obtained, the other provincial regulators follow: TSASK (Saskatchewan), TSBC (BC), TSSA (Ontario), and RBQ (Quebec). Getting ABSA right unlocks the entire Canadian pressure equipment market in a single qualification process.</p>
+    <p>This is the single most commercially significant regulatory milestone for BU Services' 3X composite repair program. The majority of Western Canada clients who have seen the 3X product offer have indicated the same response:</p>
+
+    <div class="callout cpur" style="margin:1.5rem 0;">
+      <div class="callout-icon">"</div>
+      <div style="font-size:1.05rem;font-style:italic;color:var(--purp);">"Circle back when you have ABSA approval."<br><span style="font-size:0.88rem;font-style:normal;color:var(--body);display:block;margin-top:0.4rem;">— Consistent client response across Western Canada pipeline and oil sands operators</span></div>
+    </div>
+
+    <p>This is not a rejection — it is a commercially precise statement that the demand exists and the client is willing to buy, but the regulatory prerequisite must be met first. BU Services is actively working through the six-step qualification process. Eastern Canada (Nucleom) operates without ABSA constraints and is proceeding with pressure equipment programs now.</p>
+
+    <div class="sub-title">Current Position at a Glance</div>
+    <div class="info-panel reveal">
+      <div class="info-panel-hdr">
+        <span class="label">ABSA Status</span>
+        <span class="title">Nortech + Nucleom Qualification — April 2026</span>
+        <span class="sbadge done" style="margin-left:auto;">Step 1 Complete ✓</span>
+      </div>
+      <div class="info-panel-body">
+        <div class="info-row"><span class="tag tag-done">DONE</span><strong>Step 1 — QMS Registration (AB-29):</strong> Applied under Arcanite entity with the ECS Manual packaged. ABSA accepted the application. Now re-submitting under Nortech (existing ABSA-approved QMS) and Nucleom (QMS being drafted from Nortech program; Nucleom will require an in-person ABSA audit for certification).</div>
+        <div class="info-row"><span class="tag tag-active">ACTIVE</span><strong>Steps 2–5 — QMS Cert through Lead Installer Qualification:</strong> In progress. Nortech's existing ABSA QMS is the foundation. Nucleom QMS is being drafted. Once certified, ECS manual is re-submitted, procedure applications are filed, competency is demonstrated, and lead installer AB-539 qualifications are confirmed.</div>
+        <div class="info-row"><span class="tag tag-pending">PENDING</span><strong>Step 6 — Per-Repair Applications:</strong> Once all preceding steps are complete, each Western Canada pressure equipment repair requires its own individual ABSA application and approval. No blanket permits. This is the operational endpoint.</div>
+        <div class="info-row"><span class="tag tag-note">PARALLEL</span><strong>Eastern Canada — No ABSA Required:</strong> Nucleom operates without ABSA constraints in Ontario, Quebec, Atlantic Canada, and other eastern provinces. Mining, cement, nuclear balance-of-plant, and pipeline programs in Eastern Canada can proceed with pressure equipment applications now.</div>
+        <div class="info-row"><span class="tag tag-note">PARALLEL</span><strong>Non-Pressure Track Active Now:</strong> Non-registered systems (e.g. Petronas water lines, Fort St. John via Rockx) and non-pressure applications require no regulatory approval. BU Services is generating revenue on this track in Western Canada now, ahead of ABSA clearance.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ S2: 6-STEP PROCESS ══ -->
+<div class="sec-hdr" id="s2">
+  <div class="sec-hdr-in">
+    <div class="sec-num">02</div>
+    <div><div class="sec-title">The Six-Step ABSA Qualification Process</div><div class="sec-sub">Step 1 accepted — Steps 2–6 in progress — written to AB-539 standard throughout</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>ABSA qualification for engineered composite repair systems (ECS) follows a defined six-step process. The ECS Manual has been written specifically to the AB-539 standard — using ABSA's own language throughout — to ensure compatibility at every step. BU Services is navigating this process through two parallel tracks: Nortech (existing ABSA-approved QMS as the foundation) and Nucleom (QMS in development).</p>
+
+    <div class="steps-grid reveal">
+
+      <!-- Step 1 -->
+      <div class="step-card done">
+        <div class="step-num-col">
+          <div class="step-n">1</div>
+          <div class="step-badge">DONE ✓</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Company QMS Registration — Form AB-29</div>
+          <div class="step-detail">
+            <strong>What it is:</strong> ABSA requires a registered Quality Management System before any ECS work can proceed. Application is made via Form AB-29. The applicant company's QMS is evaluated against ABSA's requirements for engineered composite system providers.<br><br>
+            <strong>What happened:</strong> Applied as Arcanite Inc. with the full ECS Manual packaged. ABSA reviewed and accepted the application — Step 1 is complete. Arcanite has since amalgamated with Nucleom Inc., operating under the Nucleom brand.<br><br>
+            <strong>Current action:</strong> Re-submitting under <strong>Nortech Advanced NDT</strong> (which already holds an ABSA-approved QMS from its existing operations — this is the fastest path) and simultaneously under <strong>Nucleom Inc.</strong> (QMS is being drafted from the Nortech program; Nucleom will require an in-person ABSA audit for certification as a new applicant).
+          </div>
+          <div class="step-sub">
+            <div class="step-sub-item"><div class="k">Original applicant</div><div class="v">Arcanite Inc. (now Nucleom)</div></div>
+            <div class="step-sub-item"><div class="k">ABSA decision</div><div class="v">Accepted ✓</div></div>
+            <div class="step-sub-item"><div class="k">Current status</div><div class="v">Re-submitting Nortech + Nucleom</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-card pending-active">
+        <div class="step-num-col">
+          <div class="step-n">2</div>
+          <div class="step-badge">ACTIVE</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">QMS Certification + ISI Application</div>
+          <div class="step-detail">
+            <strong>What it is:</strong> Once QMS registration is accepted, ABSA conducts a formal certification review. For new applicants (Nucleom), this includes an in-person audit. For Nortech, the existing certified QMS significantly reduces the audit burden. Upon QMS certification, BU Services simultaneously applies for ISI (In-Service Inspection) status — which permits visual and physical inspection under API 510 (pressure vessels) and API 570 (piping).<br><br>
+            <strong>Why ISI matters:</strong> ISI registration is a prerequisite for performing the competency demonstrations required in Steps 3 and 4. It also expands BU Services' scope of authority for inspection work alongside the composite repair program.<br><br>
+            <strong>Current action:</strong> Nortech QMS re-submission in progress. Nucleom QMS being drafted from the Nortech program — the intent is to run both companies through the process simultaneously to maximize coverage.
+          </div>
+          <div class="step-sub">
+            <div class="step-sub-item"><div class="k">Nortech path</div><div class="v">Existing certified QMS — re-submission</div></div>
+            <div class="step-sub-item"><div class="k">Nucleom path</div><div class="v">New QMS — in-person audit required</div></div>
+            <div class="step-sub-item"><div class="k">ISI standard</div><div class="v">API 510 (vessels) + API 570 (piping)</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-card pending-active">
+        <div class="step-num-col">
+          <div class="step-n">3</div>
+          <div class="step-badge">NEXT</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Procedure Applications — 3 Consolidated Submissions</div>
+          <div class="step-detail">
+            <strong>What it is:</strong> Each individual composite repair procedure must be submitted to and approved by ABSA before it can be used. A standard approach would require one application per product per defect type — a very large number of individual submissions.<br><br>
+            <strong>3X Engineering's consolidation strategy:</strong> 3X has developed a streamlined approach that reduces the total number of required submissions to <strong>three consolidated procedures</strong>, while still achieving broad coverage across the product range. This is a significant efficiency gain and reduces total audit scope considerably:<br><br>
+            <strong>Procedure 1 — Type A Internal Defect:</strong> Covers internal corrosion, wall thinning, and erosion defects on pressure piping. Primary application for ILI dig programs and PAUT survey findings.<br>
+            <strong>Procedure 2 — Type A External Defect:</strong> Covers external corrosion, mechanical damage, and dents on pressure piping. Applies to the vast majority of pipeline anomaly remediation work.<br>
+            <strong>Procedure 3 — Type B Internal/External Combined:</strong> Combined procedure covering complex defect scenarios involving both internal and external deterioration. Broadest coverage in a single submission.
+          </div>
+          <div class="step-sub">
+            <div class="step-sub-item"><div class="k">Submission 1</div><div class="v">Type A — Internal defects</div></div>
+            <div class="step-sub-item"><div class="k">Submission 2</div><div class="v">Type A — External defects</div></div>
+            <div class="step-sub-item"><div class="k">Submission 3</div><div class="v">Type B — Combined internal/external</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-card pending">
+        <div class="step-num-col">
+          <div class="step-n">4</div>
+          <div class="step-badge">PENDING</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Competency Demonstration</div>
+          <div class="step-detail">
+            <strong>What it is:</strong> ABSA requires a physical demonstration that BU Services installation technicians can correctly install composite repair systems across all applicable piping component geometries referenced in the approved procedures. This is a practical, hands-on qualification — not a written exam.<br><br>
+            <strong>Components that must be demonstrated:</strong><br>
+            • <strong>Straight pipe</strong> — the standard case; included in all procedures<br>
+            • <strong>Elbows</strong> — 90° and 45° elbows; the wrap geometry is more complex<br>
+            • <strong>Tees</strong> — branch connections; requires specific overlapping technique<br>
+            • <strong>Small attachment fittings</strong> — valves, flanges, and instrumentation connections<br><br>
+            <strong>3X lead tech support:</strong> For the first demonstrations and first installations of each product type, a 3X Engineering lead technician will be on site with the BU Services crew. This ensures quality, satisfies any competency observation requirements, and builds internal capability.
+          </div>
+          <div class="step-sub">
+            <div class="step-sub-item"><div class="k">Straight pipe</div><div class="v">Standard case — all procedures</div></div>
+            <div class="step-sub-item"><div class="k">Elbows + tees</div><div class="v">Complex geometry — required</div></div>
+            <div class="step-sub-item"><div class="k">Fittings</div><div class="v">Attachment connections — required</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step-card pending">
+        <div class="step-num-col">
+          <div class="step-n">5</div>
+          <div class="step-badge">PENDING</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Lead Installer Qualification — AB-539</div>
+          <div class="step-detail">
+            <strong>What it is:</strong> ABSA AB-539 governs the qualification of lead installers for engineered composite systems. Each BU Services crew requires a qualified lead installer for ABSA-permitted work in Western Canada.<br><br>
+            <strong>Key experience requirement:</strong> Lead installers must have a minimum of <strong>3 years of field experience</strong> in composite repair installation. Assistant installers require 6 months. This is a documented experience threshold — not a test — but it must be verifiable and submitted to ABSA.<br><br>
+            <strong>Why the ECS manual was written this way:</strong> The ECS Manual was deliberately written to the AB-539 standard, using ABSA's own language throughout. This alignment was intentional — it means that when BU Services installers are assessed against AB-539 criteria, they are working within a system already calibrated to those requirements.<br><br>
+            <strong>Current assessment:</strong> BU Services is reviewing which of its 20 certified 3X installers meet the 3-year threshold. Nortech's Western Canada technicians with oil and gas composite repair field experience are the primary candidates for lead installer designation.
+          </div>
+          <div class="step-sub">
+            <div class="step-sub-item"><div class="k">Lead installer req.</div><div class="v">3 years minimum field experience</div></div>
+            <div class="step-sub-item"><div class="k">Assistant req.</div><div class="v">6 months minimum experience</div></div>
+            <div class="step-sub-item"><div class="k">ECS manual</div><div class="v">Written to AB-539 standard throughout</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 6 -->
+      <div class="step-card pending">
+        <div class="step-num-col">
+          <div class="step-n">6</div>
+          <div class="step-badge">ENDPOINT</div>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Per-Repair ABSA Applications</div>
+          <div class="step-detail">
+            <strong>What it is:</strong> Even after all company-level qualification steps are complete, each individual Western Canada pressure equipment composite repair still requires its own ABSA application and approval before installation can begin. <strong>There is no blanket approval.</strong> Every repair is applied for individually, with the specific defect data, pipe specifications, REA FEA output, and proposed repair design submitted to ABSA for sign-off.<br><br>
+            <strong>This is the commercial gate:</strong> Until Step 6 is operational, BU Services cannot invoice for pressure equipment composite repair work in Western Canada — regardless of how willing the client is. The ~$500K in live quotes are waiting here.<br><br>
+            <strong>Regulatory parameters — what ABSA permits:</strong> The current ABSA framework for engineered composite systems covers pressure piping only, with the following limits. <em>Note: these are regulatory limits, not technical product limits — 3X products are rated well beyond each of these thresholds:</em>
+          </div>
+          <div class="step-sub">
+            <div class="step-sub-item"><div class="k">Max pressure</div><div class="v">500 psi (3.45 MPa)</div></div>
+            <div class="step-sub-item"><div class="k">Max temperature</div><div class="v">250°C (482°F)</div></div>
+            <div class="step-sub-item"><div class="k">Scope</div><div class="v">Piping only — vessels excluded</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end steps-grid -->
+  </div>
+</div>
+
+
+<!-- ══ S3: REGULATORY LIMITS ══ -->
+<div class="sec-hdr" id="s3">
+  <div class="sec-hdr-in">
+    <div class="sec-num">03</div>
+    <div><div class="sec-title">Regulatory Parameters &amp; Technical Context</div><div class="sec-sub">ABSA limits are regulatory constraints — 3X products are rated beyond each threshold</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>Once Step 6 is operational, every Western Canada pressure equipment repair must be individually submitted to ABSA with the specific repair design. The current ABSA framework for engineered composite systems carries three operational limits. These are <strong>regulatory parameters</strong> — they reflect the current scope of ABSA's approval framework for ECS, not the technical capability of 3X products, which exceed all three thresholds.</p>
+
+    <div class="limits-grid reveal">
+      <div class="limit-card">
+        <div class="limit-hdr">
+          <div class="k">Maximum Pressure</div>
+          <div class="limit-val">500 psi</div>
+        </div>
+        <div class="limit-body">
+          <p>3.45 MPa. Covers the vast majority of pipeline operating pressures for midstream gathering and transmission systems, as well as most oil and gas process piping. High-pressure applications above 500 psi require separate regulatory pathway.</p>
+          <div class="limit-note">3X products rated well above 500 psi — regulatory limit only</div>
+        </div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-hdr">
+          <div class="k">Maximum Temperature</div>
+          <div class="limit-val">250°C</div>
+        </div>
+        <div class="limit-body">
+          <p>482°F. Covers pipeline service conditions comprehensively, including most process piping in oil sands and refining. The R3X resin system family includes elevated temperature variants (R3X95, R3X150+) designed for high-temperature installations.</p>
+          <div class="limit-note">3X R3X150+ resin rated beyond 250°C — regulatory limit only</div>
+        </div>
+      </div>
+      <div class="limit-card">
+        <div class="limit-hdr">
+          <div class="k">Scope</div>
+          <div class="limit-val">Piping Only</div>
+        </div>
+        <div class="limit-body">
+          <p>Pressure vessels are excluded from the current ABSA ECS framework. This means leach tanks, process vessels, and storage tanks in Western Canada require a separate regulatory pathway. TANKiT® and STOPKiT® VESSEL applications in Western Canada fall outside current ABSA scope — Eastern Canada (Nucleom) is not subject to this restriction.</p>
+          <div class="limit-note">Vessels excluded from ABSA ECS scope — Eastern Canada unrestricted</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout cgr reveal">
+      <div class="callout-icon">✓</div>
+      <div><strong>Commercial Implication</strong> — The 500 psi / 250°C / piping-only constraints still cover the vast majority of BU Services' Western Canada pipeline DA target market. Pembina and Tidewater transmission lines, CNRL and Suncor oil sands process piping, and the majority of ILI dig programs all operate within these parameters. The ABSA framework, once unlocked, is immediately applicable to the majority of live quotes in the pipeline.</div>
+    </div>
+
+    <div class="callout cor reveal">
+      <div class="callout-icon">!</div>
+      <div><strong>Competitive Intelligence</strong> — Acuren (Fort McMurray, AB) is known to be using 3X products for composite repair work in Western Canada. BU Services has sought information on how Acuren achieved ABSA approval. No insight has been obtained to date — Acuren may hold a proprietary qualification path or a legacy approval that predates the current ABSA framework. BU Services is proceeding independently from scratch with its own ECS manual, written to the current AB-539 standard.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ S4: PROVINCIAL MAP ══ -->
+<div class="sec-hdr" id="s4">
+  <div class="sec-hdr-in">
+    <div class="sec-num">04</div>
+    <div><div class="sec-title">Provincial Regulatory Map</div><div class="sec-sub">ABSA unlocks national coverage — provincial regulators follow once ABSA is in place</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>Canada's provincial boiler and pressure vessel regulators each govern composite repair in their own jurisdiction. ABSA (Alberta) is the de facto national standard — other regulators accept ABSA-qualified ECS systems with minimal additional requirements. Achieving ABSA qualification is therefore a national enabler, not just an Alberta license.</p>
+
+    <table class="prov-table reveal">
+      <thead>
+        <tr><th>Regulator</th><th>Province</th><th>Relationship to ABSA</th><th>BU Services Path</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="province">ABSA</td>
+          <td>Alberta</td>
+          <td>Primary national standard. Governing body for ECS under AB-539. All other regulators reference ABSA approval.</td>
+          <td><span class="sbadge active">In progress — Step 1 ✓</span></td>
+        </tr>
+        <tr>
+          <td class="province">TSBC</td>
+          <td>British Columbia</td>
+          <td>Technical Safety BC. Accepts ABSA-qualified ECS systems. Once ABSA Step 6 is operational, TSBC registration follows directly. Petronas non-registered systems (Fort St. John) are outside TSBC scope entirely.</td>
+          <td><span class="sbadge pending">Follows ABSA clearance</span></td>
+        </tr>
+        <tr>
+          <td class="province">TSASK</td>
+          <td>Saskatchewan</td>
+          <td>Technical Safety Authority of Saskatchewan. Recognises ABSA-qualified ECS programs. Potash and uranium mine piping applications (Nutrien, Cameco) covered once ABSA is in place.</td>
+          <td><span class="sbadge pending">Follows ABSA clearance</span></td>
+        </tr>
+        <tr>
+          <td class="province">TSSA</td>
+          <td>Ontario</td>
+          <td>Technical Standards and Safety Authority. Composite repair of pressure piping covered under TSSA's own framework, but ABSA-qualified ECS systems are accepted as equivalent. Nucleom's Eastern Canada programs may proceed under TSSA independently without ABSA.</td>
+          <td><span class="sbadge done">Eastern Canada — active now via Nucleom</span></td>
+        </tr>
+        <tr>
+          <td class="province">RBQ</td>
+          <td>Quebec</td>
+          <td>Régie du bâtiment du Québec. Quebec has its own pressure equipment framework but accepts ABSA-equivalent ECS qualifications. Nucleom's Quebec City home base and bilingual capabilities make RBQ-governed programs a natural fit alongside TSSA work.</td>
+          <td><span class="sbadge done">Eastern Canada — active now via Nucleom</span></td>
+        </tr>
+        <tr>
+          <td class="province">BCSA / OBC</td>
+          <td>Atlantic Provinces</td>
+          <td>New Brunswick, Nova Scotia, PEI, and Newfoundland each have provincial authorities that reference national standards. ABSA-qualified programs are accepted. Atlantic Canada is lower priority commercially but covered by the same qualification pathway.</td>
+          <td><span class="sbadge pending">Covered under national qualification</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ══ S5: NON-PRESSURE TRACK ══ -->
+<div class="sec-hdr" id="s5">
+  <div class="sec-hdr-in">
+    <div class="sec-num">05</div>
+    <div><div class="sec-title">Active Revenue While Qualifying</div><div class="sec-sub">Non-pressure and non-registered applications — no ABSA required — active now</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>BU Services is not waiting on ABSA to generate Western Canada 3X revenue. Two parallel commercial tracks are active now and producing results without any regulatory constraint.</p>
+
+    <div class="box green reveal">
+      <div class="box-hdr">Non-Pressure &amp; Non-Registered Applications — Active Western Canada Track</div>
+      <div class="box-body">
+        <div class="box-item"><strong>Petronas — Northeastern BC (Fort St. John via Rockx):</strong> Petronas operates several pipeline systems in northeastern BC that are <strong>not registered with TSBC</strong> as pressure equipment. Non-registered systems fall entirely outside ABSA/TSBC scope — 3X products can be installed with no regulatory approval required. Nortech is establishing STOPKiT® and REINFORCEKiT® 4D inventory at the Fort St. John, BC office — operated through <strong>Rockx</strong>, a permanent Nortech subcontractor — to service ongoing leak repair and composite wrap activities on Petronas water lines. This is active, near-term revenue with zero regulatory barrier. The goal is to use Petronas as a beachhead to identify other non-registered system operators in the Peace Country region.</div>
+        <div class="box-item"><strong>Structural applications:</strong> REINFORCEKiT® STRUCTURE and BEAM used on transmission tower structural members, industrial steel columns, and beam reinforcement programs are not governed by pressure equipment regulation. Structural composite repair falls under structural engineering standards and does not require ABSA registration. These applications are immediately available to Nucleom (powerline tower programs) and Nortech (industrial facility structural work) without any regulatory constraint.</div>
+        <div class="box-item"><strong>Client meetings, demonstrations &amp; trade shows:</strong> BU Services is actively conducting site visits, product demonstrations, and executive meetings at energy company head offices across Western Canada. The consistent client response — "circle back when you have ABSA approval" — confirms that relationships are warm and the commercial pipeline is being built ahead of the regulatory clearance. These conversations accelerate the conversion timeline once Step 6 is cleared.</div>
+        <div class="box-item"><strong>Field technician and inspector offer:</strong> BU Services NDT field technicians and inspectors actively present 3X composite repair as a direct solution when identifying damage during inspection programs — turning findings into repair quotations in real time. This organic lead generation requires no separate commercial effort and operates across all sectors regardless of ABSA status.</div>
+      </div>
+    </div>
+
+    <div class="box purp reveal" style="margin-top:1.5rem;">
+      <div class="box-hdr">Eastern Canada — Nucleom Proceeds Without ABSA Constraints</div>
+      <div class="box-body">
+        <div class="box-item"><strong>No ABSA required east of Manitoba:</strong> TSSA (Ontario) and RBQ (Quebec) govern pressure equipment composite repair in Eastern Canada independently of ABSA. Nucleom, based in Quebec City with offices in Montreal, Oakville, and Thunder Bay, can immediately execute composite repair programs at Eastern Canada mining accounts, cement plants, and nuclear balance-of-plant without waiting for ABSA clearance.</div>
+        <div class="box-item"><strong>Immediate Eastern Canada targets:</strong> All 16 active mining accounts with Eastern Canada operations — including Wesdome, Barrick (Ontario), Agnico Eagle Meadowbank/Detour Lake, Magris Talc, Pan American Silver, and ArcelorMittal Mining — are reachable by Nucleom under TSSA/RBQ framework immediately. Heidelberg Materials (Essroc) and St. Mary's Cement are similarly accessible for vessel and structural repair programs without ABSA.</div>
+        <div class="box-item"><strong>Nuclear balance-of-plant:</strong> OPG sites are subject to nuclear-specific regulatory frameworks, not ABSA. REINFORCEKiT® STRUCTURE applications on non-safety-class structural members at Darlington and Pickering can be pursued through Nucleom's existing OPG vendor qualification and unionized workforce credentials.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ S6: REVENUE IMPACT ══ -->
+<div class="sec-hdr" id="s6">
+  <div class="sec-hdr-in">
+    <div class="sec-num">06</div>
+    <div><div class="sec-title">Revenue Impact of ABSA Clearance</div><div class="sec-sub">The pipeline is built — the qualification process is the timeline gating factor, not the market</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>The commercial case for completing ABSA qualification is unusually straightforward. Demand is confirmed, relationships are established, and quotes are outstanding. Regulatory clearance is the only remaining gating factor.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin:1.5rem 0;" class="reveal">
+      <div style="background:var(--navy);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--purp);padding:0.75rem 1.3rem;">
+          <div style="font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.65);">Live Quotes — Waiting on Step 6</div>
+        </div>
+        <div style="padding:1.1rem 1.3rem;">
+          <div style="font-family:var(--fd);font-size:2.4rem;font-weight:900;color:var(--purp3);line-height:1;">~$500K</div>
+          <div style="font-size:0.875rem;color:rgba(255,255,255,0.6);margin-top:0.4rem;line-height:1.65;">CAD in submitted 3X quotes across Western Canada pipeline and oil sands clients. Quotes reflect genuine client purchase intent — the primary conversion barrier is ABSA Step 6, not willingness to buy. This revenue converts directly and immediately once per-repair applications can be processed.</div>
+        </div>
+      </div>
+      <div style="background:var(--navy);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--green2);padding:0.75rem 1.3rem;">
+          <div style="font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.65);">Track Record — Already Completed</div>
+        </div>
+        <div style="padding:1.1rem 1.3rem;">
+          <div style="font-family:var(--fd);font-size:2.4rem;font-weight:900;color:#3DDB50;line-height:1;">~$450K</div>
+          <div style="font-size:0.875rem;color:rgba(255,255,255,0.6);margin-top:0.4rem;line-height:1.65;">CAD in 3X installations already completed: Air Liquide USA (REINFORCEKiT® 4D, $110K), Air Liquide France ($300K), British Columbia STOPKiT® installations (multiple sites), and Eastman Chemical USA. The product works, BU Services technicians are certified and experienced, and the delivery model is proven.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-title">Confirmed 5-Year Revenue Forecast — ABSA-Aware</div>
+    <p>The forecast below is conservative and deliberately built around the ABSA constraint. 2026 revenue is minimal — framework establishment, technician certification, and non-pressure programs only. Western Canada pressure equipment ramps from 2028, once ABSA Steps 2–6 are expected to be complete. Eastern Canada (Nucleom) and non-pressure applications are included from 2027 and drive the early ramp.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--lgrey);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin:1rem 0 1.5rem;" class="reveal">
+      <div style="background:var(--navy);padding:1rem 0.9rem;text-align:center;border-right:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.35rem;">2026</div>
+        <div style="font-family:var(--fd);font-size:1.3rem;font-weight:900;color:rgba(255,255,255,0.5);">$50K</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.3);margin-top:0.25rem;line-height:1.4;">Framework only<br>Non-pressure</div>
+      </div>
+      <div style="background:var(--navy);padding:1rem 0.9rem;text-align:center;border-right:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.35rem;">2027</div>
+        <div style="font-family:var(--fd);font-size:1.3rem;font-weight:900;color:var(--white);">$600K</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:0.25rem;line-height:1.4;">Eastern Canada<br>+ non-pressure ramp</div>
+      </div>
+      <div style="background:var(--navy);padding:1rem 0.9rem;text-align:center;border-right:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.35rem;">2028</div>
+        <div style="font-family:var(--fd);font-size:1.3rem;font-weight:900;color:var(--white);">$1,850K</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:0.25rem;line-height:1.4;">WC pressure eq.<br>ABSA Step 6 active</div>
+      </div>
+      <div style="background:var(--navy);padding:1rem 0.9rem;text-align:center;border-right:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.35rem;">2029</div>
+        <div style="font-family:var(--fd);font-size:1.3rem;font-weight:900;color:var(--white);">$4,250K</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:0.25rem;line-height:1.4;">Full national<br>program ramp</div>
+      </div>
+      <div style="background:var(--navy);padding:1rem 0.9rem;text-align:center;border-right:1px solid rgba(255,255,255,0.08);">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.35rem;">2030</div>
+        <div style="font-family:var(--fd);font-size:1.3rem;font-weight:900;color:var(--white);">$4,650K</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.35);margin-top:0.25rem;line-height:1.4;">Full platform<br>run rate</div>
+      </div>
+      <div style="background:var(--purp);padding:1rem 0.9rem;text-align:center;">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:0.35rem;">5-Year Total</div>
+        <div style="font-family:var(--fd);font-size:1.3rem;font-weight:900;color:var(--white);">$11.4M</div>
+        <div style="font-size:0.7rem;color:rgba(255,255,255,0.65);margin-top:0.25rem;line-height:1.4;">Conservative<br>ABSA-aware base</div>
+      </div>
+    </div>
+
+    <div class="callout cpur reveal">
+      <div class="callout-icon">▲</div>
+      <div><strong>The Revenue Unlock</strong> — The $500K in live quotes represents demand ready to convert the moment ABSA Step 6 is operational. Combined with the Petronas non-pressure stream (Nortech / Rockx, Fort St. John) and Eastern Canada (Nucleom) pressure equipment programs proceeding without ABSA constraints, BU Services is positioned for a concentrated revenue acceleration event when approval is obtained. The pipeline is built. The clients are engaged. The qualification process is the only gating factor — not the market, not the product, and not the commercial team.</div>
+    </div>
+
+    <div class="sub-title">Immediate Next Steps — ABSA Actions</div>
+    <table class="prov-table reveal">
+      <thead>
+        <tr><th>#</th><th>Action</th><th>Owner</th><th>Target</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:700;color:var(--purp);">1</td>
+          <td>Re-submit ECS Manual under Nortech QMS to ABSA (Step 2). Nortech holds an existing ABSA-approved QMS — this is the fastest path to certification.</td>
+          <td>Jon Eustace / Nortech QMS Lead</td>
+          <td>Q2 2026</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:var(--purp);">2</td>
+          <td>Draft Nucleom QMS from Nortech program. Schedule in-person ABSA audit for Nucleom certification. Run both companies through the process simultaneously.</td>
+          <td>Jon Eustace / Nucleom Technical</td>
+          <td>Q2–Q3 2026</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:var(--purp);">3</td>
+          <td>Submit 3 consolidated procedure applications (Type A Internal, Type A External, Type B Combined) once QMS is certified. 3X Engineering Technical to support submission.</td>
+          <td>Nortech / 3X Engineering Technical</td>
+          <td>Q3 2026</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:var(--purp);">4</td>
+          <td>Identify lead installers meeting the AB-539 3-year experience threshold. Prioritise Nortech Western Canada technicians with composite repair or pressure piping field history.</td>
+          <td>Nortech Operations / HR</td>
+          <td>Q2 2026</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700;color:var(--purp);">5</td>
+          <td>Establish Fort St. John STOPKiT® / REINFORCEKiT® 4D inventory at Nortech Fort St. John office (via Rockx) for Petronas non-pressure programs. No ABSA required. First revenue targeted Q2–Q3 2026.</td>
+          <td>Max Aggrey / Nortech Operations</td>
+          <td>Q2 2026</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-in">
+    <div class="footer-brand">BU SERVICES &nbsp;|&nbsp; <span>3X Composite Repair</span></div>
+    <div class="footer-meta">Nortech Advanced NDT &nbsp;|&nbsp; Nucleom Inc. &nbsp;|&nbsp; Ekoscan Integrity Group &nbsp;|&nbsp; Jon Eustace, CEO — North America<br>April 2026 &nbsp;|&nbsp; CONFIDENTIAL &nbsp;|&nbsp; <a href="3X_Composite_Repair_Commercial_Plan.html" style="color:var(--purp3);">← 3X Commercial Plan</a></div>
+  </div>
+</footer>
+
+<script>
+const els = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);} });
+}, {threshold:0.07,rootMargin:'0px 0px -40px 0px'});
+els.forEach(el => obs.observe(el));
+const nav = document.querySelector('.nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>20),{passive:true});
+const secs = document.querySelectorAll('[id^="s"]');
+const links = document.querySelectorAll('.nav-links a');
+const sObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.remove('active'));const a=document.querySelector('.nav-links a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});
+},{threshold:0.3});
+secs.forEach(s=>sObs.observe(s));
+</script>
+</body>
+</html>

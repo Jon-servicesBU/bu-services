@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BU Services — Go-Live Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#161C60;--navy2:#0D1040;--navy3:#1E2878;
+  --green:#196B24;--green2:#22882F;--greenl:#E8F5E9;
+  --amber:#C9860A;--amberl:#FFF8E1;
+  --red:#CC2222;--redl:#FFEBEE;
+  --blue:#0A3A6B;--bluel:#E8F4FD;
+  --purple:#533FA7;--purpl:#EEEDFE;
+  --lgrey:#F0F3FA;--mgrey:#DDE3F0;--dgrey:#8896B0;
+  --white:#fff;--body:#384660;
+  --sf:#00547A;--pa:#4B2067;--bc:#196B24;--sp:#004578;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Barlow',sans-serif;font-size:.92rem;color:var(--body);background:#F2F4FB;line-height:1.7}
+.nav{background:var(--navy2);height:52px;display:flex;align-items:center;padding:0 1.5rem;gap:1rem;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--amber)}
+.nav-brand{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:900;color:#fff;white-space:nowrap}
+.nav-sep{width:1px;height:18px;background:rgba(255,255,255,.12)}
+.nav-links{display:flex;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none;-ms-overflow-style:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{font-family:'Barlow Condensed',sans-serif;font-size:.67rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.4);padding:0 .65rem;height:52px;line-height:52px;text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-3px;white-space:nowrap;transition:color .15s,border-color .15s}
+.nav-links a:hover{color:#fff}
+.nav-links a.act{color:#fff;border-bottom-color:var(--amber)}
+.nav-right{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.2);white-space:nowrap}
+.hero{background:linear-gradient(155deg,var(--navy2) 0%,var(--navy3) 60%,#1a3060 100%);padding:3rem 2rem 2.5rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")}
+.hero-inner{max-width:1100px;margin:0 auto;position:relative}
+.hero-eye{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase;margin-bottom:.5rem}
+.hero-h1{font-family:'Barlow Condensed',sans-serif;font-size:2.9rem;font-weight:900;color:#fff;line-height:1.05;margin-bottom:.4rem}
+.hero-h1 em{color:var(--amber);font-style:normal}
+.hero-sub{font-size:.95rem;color:rgba(255,255,255,.5);max-width:680px;margin-bottom:1.5rem;line-height:1.65}
+.hero-alert{display:inline-flex;align-items:center;gap:.5rem;background:rgba(204,34,34,.15);border:1px solid rgba(204,34,34,.3);border-radius:6px;padding:.45rem .85rem;margin-bottom:1.25rem}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 2s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.hero-alert-text{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:rgba(255,255,255,.6)}
+.hero-kpis{display:flex;gap:.6rem;flex-wrap:wrap}
+.hk{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.6rem 1rem}
+.hk-v{font-family:'Barlow Condensed',sans-serif;font-size:1.5rem;font-weight:900;color:#fff;line-height:1}
+.hk-l{font-size:.62rem;color:rgba(255,255,255,.3);margin-top:.15rem;line-height:1.35}
+.page{max-width:1100px;margin:0 auto;padding:2rem 2rem 6rem}
+.sh{display:flex;align-items:center;gap:.85rem;margin:2.75rem 0 1.1rem;padding-bottom:.55rem;border-bottom:2px solid var(--mgrey)}
+.sh-num{font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:900;color:var(--mgrey);line-height:1;flex-shrink:0}
+.sh h2{font-family:'Barlow Condensed',sans-serif;font-size:1.45rem;font-weight:900;color:var(--navy)}
+.sh-sub{font-size:.7rem;color:var(--dgrey);font-family:'IBM Plex Mono',monospace;margin-top:.15rem}
+.callout{border-radius:8px;padding:.9rem 1.1rem;margin:.85rem 0;border-left:4px solid}
+.c-green{background:var(--greenl);border-color:var(--green2)}
+.c-amber{background:var(--amberl);border-color:var(--amber)}
+.c-blue{background:var(--bluel);border-color:var(--blue)}
+.c-red{background:var(--redl);border-color:var(--red)}
+.c-title{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;margin-bottom:.2rem}
+.c-body{font-size:.82rem;line-height:1.65}
+code{font-family:'IBM Plex Mono',monospace;font-size:.79rem;background:rgba(0,0,0,.07);padding:.1rem .35rem;border-radius:3px}
+.badge{display:inline-flex;align-items:center;font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:.1rem .45rem;border-radius:3px;white-space:nowrap}
+.b-notstarted{background:var(--lgrey);color:var(--dgrey)}
+.b-eric{background:var(--amberl);color:var(--amber)}
+.b-manual{background:var(--purpl);color:var(--purple)}
+.b-built{background:var(--bluel);color:var(--blue)}
+.phases{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem;margin:1.25rem 0}
+.phase{border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.phase-hdr{padding:.8rem 1rem;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:800;color:#fff;display:flex;align-items:flex-start;gap:.6rem}
+.phase-body{background:#fff;border:1px solid var(--mgrey);border-top:none;border-radius:0 0 10px 10px;padding:.8rem .95rem}
+.pi{display:flex;align-items:flex-start;gap:.45rem;padding:.28rem 0;border-bottom:1px solid var(--lgrey);font-size:.8rem;line-height:1.5}
+.pi:last-child{border-bottom:none;padding-bottom:0}
+.pi-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:.48rem}
+.conn-card{background:#fff;border:1px solid var(--mgrey);border-radius:10px;overflow:hidden;margin-bottom:.9rem}
+.conn-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin:1.25rem 0}
+.conn-hdr{padding:.8rem 1.1rem;display:flex;align-items:center;gap:.75rem;border-bottom:1px solid var(--lgrey)}
+.conn-icon{width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:900;color:#fff;flex-shrink:0;letter-spacing:.5px}
+.conn-title{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;color:var(--navy);line-height:1.2}
+.conn-body{padding:.85rem 1.1rem}
+.conn-body p{font-size:.82rem;color:var(--body);line-height:1.65;margin-bottom:.65rem}
+.task{border-left:3px solid var(--mgrey);padding:.5rem 0 .5rem .85rem;margin-bottom:.55rem}
+.task:last-child{margin-bottom:0}
+.task-hdr{display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;flex-wrap:wrap}
+.task-title{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;color:var(--navy)}
+.task-time{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--amber);background:var(--amberl);padding:.08rem .35rem;border-radius:3px}
+.task-body{font-size:.8rem;color:var(--body);line-height:1.6}
+.task-result{font-size:.74rem;color:var(--green);font-weight:600;margin-top:.22rem}
+.doc-link{display:inline-flex;align-items:center;gap:.3rem;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--blue);background:var(--bluel);padding:.1rem .45rem;border-radius:3px;text-decoration:none;margin-top:.3rem;border:1px solid rgba(10,58,107,.15)}
+.doc-link:hover{background:#C8DEF5}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin:.75rem 0}
+.info-box{background:var(--lgrey);border-radius:7px;padding:.75rem .9rem}
+.info-box-title{font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:800;color:var(--navy);margin-bottom:.2rem}
+.info-box-body{font-size:.78rem;color:var(--body);line-height:1.55}
+.deck-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem;margin:1rem 0}
+.dtile{border-radius:6px;padding:.5rem .6rem;border:1px solid transparent}
+.dtile-num{font-family:'IBM Plex Mono',monospace;font-size:.58rem;opacity:.5;margin-bottom:.08rem}
+.dtile-title{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;line-height:1.25;margin-bottom:.15rem}
+.dtile-dep{font-size:.6rem;line-height:1.3;font-family:'IBM Plex Mono',monospace}
+.dt-ready{background:var(--greenl);border-color:#9FE1CB;color:var(--green)}
+.dt-dep{background:var(--amberl);border-color:#FAC775;color:var(--amber)}
+.dt-manual{background:var(--lgrey);border-color:var(--mgrey);color:var(--dgrey)}
+.manual-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin:1.1rem 0}
+.mc{background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:.85rem 1rem}
+.mc-hdr{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;color:var(--navy);margin-bottom:.18rem}
+.mc-who{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--dgrey);margin-bottom:.3rem}
+.mc-body{font-size:.79rem;color:var(--body);line-height:1.6}
+.mc-time{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--amber);background:var(--amberl);padding:.08rem .35rem;border-radius:3px;margin-top:.35rem}
+.timeline{padding-left:1.75rem;margin:1.25rem 0;position:relative}
+.timeline::before{content:'';position:absolute;left:.4rem;top:.5rem;bottom:.5rem;width:2px;background:var(--mgrey)}
+.tl-item{position:relative;margin-bottom:1.4rem}
+.tl-item::before{content:'';position:absolute;left:-1.55rem;top:.35rem;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid var(--mgrey)}
+.tl-now::before{background:var(--amber);border-color:var(--amber);box-shadow:0 0 0 4px var(--amberl)}
+.tl-future::before{background:var(--lgrey);border-color:var(--mgrey)}
+.tl-date{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--dgrey);margin-bottom:.12rem}
+.tl-title{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:.2rem}
+.tl-body{font-size:.81rem;color:var(--body);line-height:1.65}
+.tl-tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-top:.4rem}
+.tl-tag{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;padding:.1rem .4rem;border-radius:3px;letter-spacing:.5px;text-transform:uppercase}
+.stbl{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.79rem}
+.stbl th{background:var(--navy2);color:rgba(255,255,255,.65);font-family:'Barlow Condensed',sans-serif;font-size:.64rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:.45rem .7rem;text-align:left}
+.stbl td{padding:.5rem .7rem;border-bottom:1px solid var(--lgrey);vertical-align:top}
+.stbl tr:nth-child(even) td{background:var(--lgrey)}
+.stbl tr:last-child td{border-bottom:none}
+.stbl-doc{font-family:'IBM Plex Mono',monospace;font-size:.67rem;color:var(--blue)}
+
+.badge-conf{background:#0D5050;color:#7EEAEA;font-family:var(--mono);font-size:.65rem;font-weight:700;padding:.18rem .5rem;border-radius:4px;display:inline-block;}
+.flow-diagram{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:.85rem 0;padding:.75rem 1rem;background:rgba(0,0,0,.2);border-radius:8px;}
+.flow-box{font-family:var(--mono);font-size:.68rem;font-weight:600;padding:.35rem .65rem;border-radius:6px;white-space:nowrap;text-align:center;line-height:1.4;}
+.flow-box.input{background:#DCFCE7;color:#16A34A;}
+.flow-box.process{background:#DBEAFE;color:#1A5CA8;}
+.flow-box.output{background:#EDE9FE;color:#6D28D9;}
+.flow-box.display{background:#FEF3C7;color:#C9860A;}
+.flow-arrow{color:#6678A0;font-size:.9rem;font-weight:700;}
+.conf-task-row{display:grid;grid-template-columns:1fr 100px 80px 1fr;gap:.5rem;padding:.42rem .75rem;border-radius:6px;margin:.2rem 0;font-size:.8rem;align-items:start;}
+.conf-task-row:nth-child(odd){background:rgba(255,255,255,.03);}
+
+
+.nav-file-map{display:inline-flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:600;color:var(--amber);background:var(--amberl);border:1px solid #F5C84A;border-radius:4px;padding:.22rem .6rem;text-decoration:none;white-space:nowrap;margin-left:.75rem}
+.nav-file-map:hover{background:#FDE68A}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">BU Services</div>
+  <div class="nav-sep"></div>
+  <div class="nav-links">
+    <a href="#state">Current State</a>
+    <a href="#data-flow">Data Flow</a>
+    <a href="#step0">Step 0: SharePoint</a>
+    <a href="#step1">Step 1: Salesforce</a>
+    <a href="#step2">Step 2: Power Automate</a>
+    <a href="#step2b" style="color:#7EEAEA;">Step 2b: Conferences</a>
+    <a href="#addons" style="color:#A78BFA;">Add-Ons</a>
+    <a href="#step3">Step 3: Business Central</a>
+    <a href="#step4">Step 4: SP Lists</a>
+    <a href="#step5">Step 5: Deck &amp; Email</a>
+    <a href="#manual">Manual Inputs</a>
+    <a href="#deck">Deck Slides</a>
+    <a href="#timeline">Timeline</a>
+  </div>
+  <div class="nav-right">Go-Live Roadmap · April 2026 · Confidential</div>
+  <a class="nav-file-map" href="BU_Services_Eric_GoLive_File_Map.html" target="buservices">&#128193; File Map &#8594;</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eye">BU Services · Ekoscan Integrity Group · Commercial Management System</div>
+    <div class="hero-h1">Go-Live <em>Roadmap</em></div>
+    <p class="hero-sub">Everything has been designed, built as documents and scripts, and documented with step-by-step guides. Nothing is connected yet. This roadmap shows exactly what needs to happen, in what order, and who does each step.</p>
+    <div class="hero-alert"><div class="pulse"></div><div class="hero-alert-text">Status: Built &amp; ready to deploy — no live connections yet</div></div>
+    <div class="hero-kpis">
+      <div class="hk"><div class="hk-v" style="color:#6AABDD">Built</div><div class="hk-l">All docs, data structures<br>+ scripts ready to deploy</div></div>
+      <div class="hk"><div class="hk-v" style="color:var(--amber)">0</div><div class="hk-l">Live connections<br>in your systems yet</div></div>
+      <div class="hk"><div class="hk-v">~13 hrs</div><div class="hk-l">Éric's total build<br>time to full go-live</div></div>
+      <div class="hk"><div class="hk-v">135</div><div class="hk-l">Fields defined in<br>actuals.json</div></div>
+      <div class="hk"><div class="hk-v">13/22</div><div class="hk-l">Deck slides that<br>will auto-populate</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- SECTION 1 -->
+<div id="state" class="sh"><div class="sh-num">01</div><div><h2>Where Things Stand Today</h2><div class="sh-sub">what has been built vs what has been connected</div></div></div>
+
+<div class="callout c-blue">
+  <div class="c-title" style="color:var(--blue)">The distinction: built vs connected</div>
+  <div class="c-body">Everything in the "Built" columns below exists as a file in your outputs folder right now — designed, structured, and ready. What is missing is the implementation step: uploading files to SharePoint, creating fields in Salesforce, building the Power Automate flows. The guides for every implementation step have been written. None of it requires new design decisions. It is all execution.</div>
+</div>
+
+<div class="phases">
+  <div class="phase">
+    <div class="phase-hdr" style="background:var(--blue)"><div><div style="font-size:.62rem;opacity:.65;margin-bottom:2px">BUILT — READY TO DEPLOY</div>Documents &amp; Data Structures</div></div>
+    <div class="phase-body">
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>actuals.json</strong> — 135-field data bridge, structured, not yet on SharePoint</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>Command Centre</strong> — 11-section portal, reads actuals.json, not yet deployed</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>Execution Tracker</strong> — 38 actions, 6 gates, 6 risks, standalone HTML</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>11 plan documents</strong> — master plan, 5 initiative plans, execution plan, playbooks</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--sky)"></div><div><strong>People &amp; Capacity Dashboard</strong> — overhead %, cumulative utilization, vacation liability · 126-employee roster · BC live data · P6/P7/P8 PA guide v2 built</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>Deck generation script</strong> — python-pptx, reads actuals.json, outputs .pptx</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>Utilisation Tracker xlsx</strong> — 26-week, 5 regions, 520 formulas</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>FY24/FY25 KPI averages</strong> — pre-loaded in actuals.json</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>7 EBITDA initiatives</strong> — pre-loaded in actuals.json with statuses</div></div>
+    </div>
+  </div>
+  <div class="phase">
+    <div class="phase-hdr" style="background:var(--green)"><div><div style="font-size:.62rem;opacity:.65;margin-bottom:2px">BUILT — GUIDES WRITTEN</div>Implementation Guides (how-to docs)</div></div>
+    <div class="phase-body">
+      <div class="pi"><div class="pi-dot" style="background:var(--green2)"></div><div><strong>SharePoint Setup Guide</strong> — folder structure, upload checklist, sharing</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--green2)"></div><div><strong>Salesforce Integration Guide</strong> — field creation, all SOQL queries, PA build</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--green2)"></div><div><strong>SF Technician Tracking Guide</strong> — Phase 1 field + Phase 2 validation rule</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--green2)"></div><div><strong>Dynamics Integration Guide</strong> — BC connector, OData queries, PA branch</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--green2)"></div><div><strong>Dynamics QA Workbook</strong> — 10 questions for Mathieu before Éric can build BC</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--green2)"></div><div><strong>Meeting Tracking Setup Guide</strong> — OneNote, 2 SP Lists, PA meeting branch</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--green2)"></div><div><strong>Éric Meeting Agenda deck</strong> — 18-slide technical briefing, all 7 tasks explained</div></div>
+    </div>
+  </div>
+  <div class="phase">
+    <div class="phase-hdr" style="background:var(--red)"><div><div style="font-size:.62rem;opacity:.65;margin-bottom:2px">NOT STARTED — NEEDS DOING</div>Live Connections (nothing connected yet)</div></div>
+    <div class="phase-body">
+      <div class="pi"><div class="pi-dot" style="background:var(--red)"></div><div>SharePoint folder created and all files uploaded</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--red)"></div><div>Salesforce BU_Initiative__c picklist field added</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--red)"></div><div>Sunday Power Automate flow built (SF → actuals.json)</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--red)"></div><div>Monday email digest PA flow built</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--red)"></div><div>Business Central PA connector built (Steps P1–P5)
+    BC People PA connector built (P6/P7/P8) — guide v2 complete</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--red)"></div><div>SharePoint Meeting Lists created</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--red)"></div><div>Deck generation scheduled in Power Automate</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--red)"></div><div>Budget figures, cash, Nortech data entered in actuals.json</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: DATA FLOW -->
+<div id="data-flow" class="sh"><div class="sh-num">02</div><div><h2>How Data Will Flow Once Connected</h2><div class="sh-sub">every source writes to actuals.json — everything else reads from it</div></div></div>
+
+<p style="font-size:.87rem;line-height:1.7;margin-bottom:1rem">The entire system is built around one principle: <strong>actuals.json is the single source of truth — 110 fields covering revenue, pipeline, conferences, proposal health, revenue reconciliation, and nuclear outage calendar.</strong> Power Automate writes to it every Sunday. The Command Centre, deck script, and email all read from it. Nothing connects to anything else directly.</p>
+
+<div style="background:#fff;border:1px solid var(--mgrey);border-radius:10px;padding:1.5rem;margin:1.25rem 0;overflow-x:auto">
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dgrey);margin-bottom:1.25rem">DATA SOURCES → actuals.json → OUTPUTS (all connections pending)</div>
+
+  <div style="display:grid;grid-template-columns:190px 52px 215px 52px 1fr;align-items:center;gap:0;margin-bottom:.65rem">
+    <div style="background:var(--bluel);border:1.5px dashed var(--sf);border-radius:7px;padding:.55rem .8rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;color:var(--sf)">☁ Salesforce</div>
+      <div style="font-size:.65rem;color:var(--body);margin-top:.1rem;line-height:1.4">Closed Won · Pipeline<br>Bookings · Commit · Upside</div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;background:var(--redl);color:var(--red);padding:.05rem .3rem;border-radius:2px;display:inline-block;margin-top:.2rem">Step 1+2 pending</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;position:relative;height:50px">
+      <div style="position:absolute;left:4px;right:18px;border-top:2px dashed var(--red);opacity:.55"></div>
+      <div style="position:absolute;right:4px;border:5px solid transparent;border-left:8px solid var(--red);border-right:none;opacity:.55"></div>
+    </div>
+    <div style="background:var(--amberl);border:2.5px solid var(--amber);border-radius:8px;padding:.65rem 1rem;text-align:center">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:900;color:var(--amber)">⚙ actuals.json</div>
+      <div style="font-size:.67rem;color:var(--body);margin-top:.1rem">135 fields · Updated weekly by PA<br>Single source of truth</div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;background:var(--redl);color:var(--red);padding:.05rem .3rem;border-radius:2px;display:inline-block;margin-top:.2rem">Not on SharePoint yet</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;position:relative;height:50px">
+      <div style="position:absolute;left:4px;right:18px;border-top:2px dashed var(--red);opacity:.55"></div>
+      <div style="position:absolute;right:4px;border:5px solid transparent;border-left:8px solid var(--red);border-right:none;opacity:.55"></div>
+    </div>
+    <div style="background:var(--lgrey);border:1.5px dashed var(--navy);border-radius:7px;padding:.55rem .8rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;color:var(--navy)">⊞ Command Centre</div>
+      <div style="font-size:.65rem;color:var(--body);margin-top:.1rem;line-height:1.4">11-section portal<br>Opens from SharePoint</div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;background:var(--redl);color:var(--red);padding:.05rem .3rem;border-radius:2px;display:inline-block;margin-top:.2rem">Not on SP yet</span>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:190px 52px 215px 52px 1fr;align-items:center;gap:0;margin-bottom:.65rem">
+    <div style="background:#E1F5EE;border:1.5px dashed var(--bc);border-radius:7px;padding:.55rem .8rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;color:var(--bc)">⊡ Business Central</div>
+      <div style="font-size:.65rem;color:var(--body);margin-top:.1rem;line-height:1.4">Invoiced revenue · Hours<br>Hourly rate · Callout jobs</div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;background:var(--redl);color:var(--red);padding:.05rem .3rem;border-radius:2px;display:inline-block;margin-top:.2rem">Step 3 pending</span>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;position:relative;height:50px">
+      <div style="position:absolute;left:4px;right:18px;border-top:2px dashed var(--red);opacity:.55"></div>
+      <div style="position:absolute;right:4px;border:5px solid transparent;border-left:8px solid var(--red);border-right:none;opacity:.55"></div>
+    </div>
+    <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--amber)">↑ same file ↑</div>
+    <div style="display:flex;align-items:center;justify-content:center;position:relative;height:50px">
+      <div style="position:absolute;left:4px;right:18px;border-top:2px dashed var(--red);opacity:.55"></div>
+      <div style="position:absolute;right:4px;border:5px solid transparent;border-left:8px solid var(--red);border-right:none;opacity:.55"></div>
+    </div>
+    <div style="background:var(--lgrey);border:1.5px dashed var(--purple);border-radius:7px;padding:.55rem .8rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;color:var(--purple)">⊡ Deck Generator</div>
+      <div style="font-size:.65rem;color:var(--body);margin-top:.1rem;line-height:1.4">python-pptx script<br>Outputs INT BU .pptx</div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;background:var(--redl);color:var(--red);padding:.05rem .3rem;border-radius:2px;display:inline-block;margin-top:.2rem">Step 5 — not scheduled yet</span>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:190px 52px 215px 52px 1fr;align-items:center;gap:0">
+    <div style="display:flex;flex-direction:column;gap:.4rem">
+      <div style="background:var(--lgrey);border:1.5px dashed var(--sp);border-radius:7px;padding:.4rem .7rem">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.74rem;font-weight:800;color:var(--sp)">☰ SP Meeting Lists</div>
+        <div style="font-size:.63rem;color:var(--body)">Meeting Log · Actions</div>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:.57rem;background:var(--redl);color:var(--red);padding:.04rem .28rem;border-radius:2px;display:inline-block;margin-top:.15rem">Step 4 pending</span>
+      </div>
+      <div style="background:var(--lgrey);border:1.5px solid var(--dgrey);border-radius:7px;padding:.4rem .7rem">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.74rem;font-weight:800;color:var(--dgrey)">✏ Manual Entry</div>
+        <div style="font-size:.63rem;color:var(--body)">Budgets · Cash · Nortech</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;position:relative;height:80px">
+      <div style="position:absolute;left:4px;right:18px;border-top:2px dashed var(--dgrey);opacity:.3"></div>
+      <div style="position:absolute;right:4px;border:5px solid transparent;border-left:8px solid var(--dgrey);border-right:none;opacity:.3"></div>
+    </div>
+    <div style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--amber)">↑ same file ↑</div>
+    <div style="display:flex;align-items:center;justify-content:center;position:relative;height:80px">
+      <div style="position:absolute;left:4px;right:18px;border-top:2px dashed var(--red);opacity:.55"></div>
+      <div style="position:absolute;right:4px;border:5px solid transparent;border-left:8px solid var(--red);border-right:none;opacity:.55"></div>
+    </div>
+    <div style="background:var(--lgrey);border:1.5px dashed var(--amber);border-radius:7px;padding:.55rem .8rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;color:var(--amber)">📧 Monday Email</div>
+      <div style="font-size:.65rem;color:var(--body);margin-top:.1rem;line-height:1.4">Formatted HTML digest<br>Commercial leadership</div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;background:var(--redl);color:var(--red);padding:.05rem .3rem;border-radius:2px;display:inline-block;margin-top:.2rem">Step 2 — not built yet</span>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:1.5rem;margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--lgrey);flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--dgrey)"><div style="width:22px;border-top:2px dashed var(--red)"></div>Connection not built yet</div>
+    <div style="display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--dgrey)"><div style="width:22px;height:2px;background:var(--green2)"></div>Will be live once connected</div>
+  </div>
+</div>
+
+<!-- STEP 0 -->
+<div id="step0" class="sh"><div class="sh-num">Step 0</div><div><h2>Upload to SharePoint First</h2><div class="sh-sub">do this before anything else — Jon or Éric · 10 minutes</div></div></div>
+
+<div class="callout c-amber">
+  <div class="c-title" style="color:var(--amber)">Everything else depends on this being done first</div>
+  <div class="c-body">actuals.json must be on SharePoint before the Sunday PA flow can write to it. The Command Centre must be on SharePoint before it can display data. The deck generation template must be on SharePoint before scheduling. Upload everything first — then build the connections.<br><br><strong>Critical constraint:</strong> <code>actuals.json</code> and <code>BU_Services_Command_Centre.html</code> must be in the same root folder. The portal uses a relative path to fetch the data file.</div>
+</div>
+
+<div class="conn-card">
+  <div class="conn-hdr">
+    <div class="conn-icon" style="background:var(--sp)">SP</div>
+    <div><div class="conn-title">Create folder structure and upload all files</div><span class="badge b-notstarted" style="margin-top:4px">Not started · 10 min</span></div>
+  </div>
+  <div class="conn-body">
+    <p>Create the folder <code>BU Services — Commercial System</code> in SharePoint Documents with 3 subfolders: <code>Commercial Plans</code>, <code>Integration Guides — Eric</code>, <code>Review Decks</code>. Upload all output files to the correct folders per the setup guide checklist.</p>
+    <div class="task" style="border-left-color:var(--sp)">
+      <div class="task-hdr"><span class="task-title">After upload: enter budget figures + EUR rate in actuals.json (5 min — Mathieu)</span></div>
+      <div class="task-body">Open actuals.json in SharePoint and enter <code>budget_nuc</code>, <code>budget_nor</code>, <code>budget_int</code>, <code>budget_arcndt</code> from the EIG annual plan. Confirm <code>eur_rate</code> (currently 0.72). This is the only data entry needed before the first PA run produces meaningful output.</div>
+      <div class="task-result">↳ System is deployed and ready for connection steps below</div>
+      <a class="doc-link" href="BU_Services_SharePoint_Setup_Guide.docx">📄 BU_Services_SharePoint_Setup_Guide.docx — full upload checklist, exact folder names, sharing permissions, 14-item printable checklist</a>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div id="step1" class="sh"><div class="sh-num">Step 1</div><div><h2>Salesforce Setup</h2><div class="sh-sub">owner: Éric Carmichael · ~80 min total · must be done before Step 2</div></div></div>
+
+<div class="callout c-blue">
+  <div class="c-title" style="color:var(--blue)">Why Salesforce comes before Power Automate</div>
+  <div class="c-body">The Sunday PA flow queries Salesforce using the <code>BU_Initiative__c</code> field as a filter — to separate Mining deals from Pipeline deals from Powerline deals etc. That field does not exist in Salesforce yet. Éric must create it before the PA flow can be built. P1 (field creation) is the prerequisite for Step 2.</div>
+</div>
+
+<div class="conn-grid">
+  <div class="conn-card" style="margin-bottom:0">
+    <div class="conn-hdr">
+      <div class="conn-icon" style="background:var(--sf)">SF</div>
+      <div><div class="conn-title">Create BU_Initiative__c Picklist Field</div><span class="badge b-eric" style="margin-top:4px">Éric · 20 min</span></div>
+    </div>
+    <div class="conn-body">
+      <p>One new custom picklist field on the Opportunity object. No packages, no code — just a field.</p>
+      <div class="task" style="border-left-color:var(--sf)">
+        <div class="task-hdr"><span class="task-title">SF Setup → Object Manager → Opportunity → Fields → New → Picklist</span><span class="task-time">20 min</span></div>
+        <div class="task-body">Field Label: <code>BU Initiative</code> · API Name: <code>BU_Initiative__c</code><br>Values (exact): <code>Mining</code> · <code>Pipeline</code> · <code>Powerline</code> · <code>Nuclear</code> · <code>3X</code> · <code>Base Business</code><br>Add to Opportunity page layout. Visible to all profiles using Opportunities.</div>
+        <div class="task-result">↳ Required before any PA flow queries can be built</div>
+        <a class="doc-link" href="BU_Services_Salesforce_Integration_Guide.docx">📄 BU_Services_Salesforce_Integration_Guide.docx — field creation steps</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn-card" style="margin-bottom:0">
+    <div class="conn-hdr">
+      <div class="conn-icon" style="background:var(--sf)">SF</div>
+      <div><div class="conn-title">Confirm Region Field API Name + Picklist Values</div><span class="badge b-eric" style="margin-top:4px">Éric · 10 min</span></div>
+    </div>
+    <div class="conn-body">
+      <p>The regional revenue cards in the Command Centre need the exact API name of your existing Region field. Not a new field — just confirm what's already there.</p>
+      <div class="task" style="border-left-color:var(--sf)">
+        <div class="task-hdr"><span class="task-title">Object Manager → find Region field → note API name + 5 picklist values</span><span class="task-time">10 min</span></div>
+        <div class="task-body">Note the exact API name (e.g. <code>Region__c</code>) and the 5 region values: HQ, Montréal, Central, Edmonton, Vancouver. Éric enters these into the Command Centre CONFIG (<code>sfValue</code> fields) and PA flow filter expressions in Step 2.</div>
+        <div class="task-result">↳ Regional revenue cards in Command Centre display correctly</div>
+        <a class="doc-link" href="BU_Services_Salesforce_Integration_Guide.docx">📄 BU_Services_Salesforce_Integration_Guide.docx — Region field section</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn-card" style="margin-bottom:0">
+    <div class="conn-hdr">
+      <div class="conn-icon" style="background:var(--sf)">SF</div>
+      <div><div class="conn-title">Add Assigned_Technicians__c Field (Phase 1)</div><span class="badge b-eric" style="margin-top:4px">Éric · 5 min</span></div>
+    </div>
+    <div class="conn-body">
+      <p>Optional Long Text field on Opportunity for commercial owners to record assigned technicians at deal close. No validation rule yet — Phase 1 is just visibility.</p>
+      <div class="task" style="border-left-color:var(--sf)">
+        <div class="task-hdr"><span class="task-title">Object Manager → Opportunity → New → Text Area Long (500 chars)</span><span class="task-time">5 min</span></div>
+        <div class="task-body">API Name: <code>Assigned_Technicians__c</code> · Add to page layout near Stage. Monitor compliance for 6 weeks, then activate Phase 2 validation rule if &gt;80% populated.</div>
+        <div class="task-result">↳ Crew deployment tracking begins. Phase 2 guide already written.</div>
+        <a class="doc-link" href="BU_Services_SF_Technician_Tracking.docx">📄 BU_Services_SF_Technician_Tracking.docx — Phase 1 + Phase 2 validation rule formula</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn-card" style="margin-bottom:0">
+    <div class="conn-hdr">
+      <div class="conn-icon" style="background:var(--sf)">SF</div>
+      <div><div class="conn-title">Backfill BU Initiative on 2026 YTD Opportunities</div><span class="badge b-notstarted" style="margin-top:4px">Commercial team · 30–60 min</span></div>
+    </div>
+    <div class="conn-body">
+      <p>Once the field exists, the commercial team backfills it on all 2026 Closed Won and open pipeline deals so the first PA run produces accurate YTD figures rather than starting from zero.</p>
+      <div class="task" style="border-left-color:var(--sf)">
+        <div class="task-hdr"><span class="task-title">Vinoth, Emmanuel, Rick, Olivier — update 2026 opportunities with BU Initiative value</span><span class="task-time">30–60 min</span></div>
+        <div class="task-body">Use SF list view with mass edit or deal by deal. Ensure every 2026 Closed Won and active pipeline deal has the correct <code>BU_Initiative__c</code> value assigned.</div>
+        <div class="task-result">↳ First Sunday PA run shows accurate 2026 YTD revenue by initiative</div>
+        <a class="doc-link" href="BU_Services_Salesforce_Integration_Guide.docx">📄 BU_Services_Salesforce_Integration_Guide.docx — backfill instructions</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="callout c-amber" style="margin-top:.5rem">
+  <div class="c-title" style="color:var(--amber)">Also this week — Mathieu: complete the Dynamics Q&A Workbook (30 min)</div>
+  <div class="c-body">The Dynamics QA Workbook contains 10 questions Éric needs about your Business Central environment before he can build the BC connector in Step 3. Mathieu fills in the yellow cells: BC environment URL, legal entity codes, API version, whether invoices are tagged with project dimensions. The most critical is Q8 — project dimensions determine whether initiative-level revenue split is automatic or manual. Éric cannot start Step 3 without this workbook. <a class="doc-link" href="BU_Services_Dynamics_QA_Workbook.xlsx" style="display:inline-flex;margin:0 0 0 .5rem">📄 BU_Services_Dynamics_QA_Workbook.xlsx</a></div>
+</div>
+
+<!-- STEP 2 -->
+<div id="step2" class="sh"><div class="sh-num">Step 2</div><div><h2>Build the Power Automate Flows</h2><div class="sh-sub">owner: Éric Carmichael · ~3 hrs total · prerequisite: Steps 0 + 1 complete</div></div></div>
+
+<div class="callout c-amber">
+  <div class="c-title" style="color:var(--amber)">Prerequisite: Step 1 must be complete before Step 2 can start</div>
+  <div class="c-body">The Sunday PA flow queries Salesforce using <code>BU_Initiative__c</code> as a filter. If that field doesn't exist yet in Salesforce, the Get Records actions will fail on build. Complete Step 1 first.</div>
+</div>
+
+<div class="conn-card">
+  <div class="conn-hdr">
+    <div class="conn-icon" style="background:var(--pa)">PA</div>
+    <div><div class="conn-title">Sunday 7PM ET Scheduled Flow — the core automation</div><span class="badge b-eric" style="margin-top:4px">Éric · ~2 hrs</span></div>
+  </div>
+  <div class="conn-body">
+    <p>This is the central automation that powers the entire system. It runs every Sunday at 7PM ET, queries Salesforce for all revenue and pipeline data, assembles a JSON payload, and writes actuals.json to SharePoint. Every downstream output — Command Centre, deck, email — depends on this flow.</p>
+    <div class="three-col">
+      <div class="info-box">
+        <div class="info-box-title">Closed Won queries (6)</div>
+        <div class="info-box-body">One Get Records action per initiative (Mining, Pipeline, Powerline, Nuclear, 3X) + one for Base Business. Filter: <code>StageName = 'Closed Won' AND CloseDate = THIS_YEAR AND BU_Initiative__c = '[value]'</code>. Sum Amount. Writes <code>rev_mining</code>, <code>rev_pipeline</code> etc. to actuals.json.</div>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">Pipeline queries (3)</div>
+        <div class="info-box-body">Bookings: all Opps created this year. Commit: probability ≥ 75%. Upside: probability 25–74%. Writes <code>bookings_nuc</code>, <code>commit_nuc</code>, <code>upside_nuc</code> to actuals.json. Nortech equivalents remain manual — Nortech not in Salesforce.</div>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">Regional queries (10)</div>
+        <div class="info-box-body">Closed Won + pipeline per region (HQ, Montréal, Central, Edmonton, Vancouver) using the Region field API name confirmed in Step 1. Writes <code>region_hq</code>, <code>region_montreal</code>, etc. Final Compose action assembles full JSON payload and writes actuals.json to SharePoint.</div>
+      </div>
+    </div>
+    <a class="doc-link" href="BU_Services_Salesforce_Integration_Guide.docx">📄 BU_Services_Salesforce_Integration_Guide.docx — full PA flow build with every action, SOQL queries, and Compose expressions</a>
+  </div>
+</div>
+
+<div class="conn-grid">
+  <div class="conn-card" style="margin-bottom:0">
+    <div class="conn-hdr">
+      <div class="conn-icon" style="background:var(--pa)">PA</div>
+      <div><div class="conn-title">Monday 7AM Email Digest Flow</div><span class="badge b-eric" style="margin-top:4px">Éric · ~45 min</span></div>
+    </div>
+    <div class="conn-body">
+      <p>A separate scheduled flow: every Monday 7AM ET it reads actuals.json, formats a KPI summary into HTML, and sends to the commercial leadership group before the 9AM meeting.</p>
+      <div class="task" style="border-left-color:var(--pa)">
+        <div class="task-hdr"><span class="task-title">Scheduled flow: Mon 7AM → read actuals.json → send HTML email</span><span class="task-time">45 min</span></div>
+        <div class="task-body">Trigger: Recurrence — Monday 7AM ET. SP Get File Content → actuals.json. Parse JSON. Outlook Send Email with HTML body using parsed values. Recipients: Jon, Olivier, Vinoth, Emmanuel, Rick, Mathieu, Alex.</div>
+        <div class="task-result">↳ KPI digest in inbox every Monday before the commercial meeting</div>
+        <a class="doc-link" href="BU_Services_Salesforce_Integration_Guide.docx">📄 BU_Services_Salesforce_Integration_Guide.docx — email digest section</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn-card" style="margin-bottom:0">
+    <div class="conn-hdr">
+      <div class="conn-icon" style="background:var(--pa)">PA</div>
+      <div><div class="conn-title">Update Command Centre CONFIG with sfValues</div><span class="badge b-eric" style="margin-top:4px">Éric · 15 min</span></div>
+    </div>
+    <div class="conn-body">
+      <p>The Command Centre HTML has 5 placeholder <code>sfValue</code> entries in the CONFIG block at the top of the file. Once the Region field API name is confirmed in Step 1, update these before uploading the HTML to SharePoint.</p>
+      <div class="task" style="border-left-color:var(--pa)">
+        <div class="task-hdr"><span class="task-title">Open Command Centre HTML → Ctrl+F "regions: [" → update 5 sfValue entries</span><span class="task-time">15 min</span></div>
+        <div class="task-body">Set each <code>sfValue</code> to the exact picklist value in Salesforce (e.g. <code>"HQ"</code>, <code>"Montreal"</code>). Save and re-upload to SharePoint root folder (same location as actuals.json).</div>
+        <div class="task-result">↳ Regional revenue cards show correct filtered values from Salesforce</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STEP 2b: CONFERENCE COST FLOW ══ -->
+<div class="sh" id="step2b"><div class="sh-num"><span class="badge-conf">2b</span></div><div><h2>Conference Cost Flow — Excel → actuals.json → Command Centre</h2><div class="sh-sub">owner: Éric Carmichael · ~2.5 hrs · runs parallel to Step 2 · contributes to ~11.5 hrs total Éric build time · guide: BU_Services_Conference_Cost_Integration_Guide.docx</div></div></div>
+
+<div class="callout" style="border-left:4px solid #16A34A;background:rgba(22,163,74,.08);margin:.85rem 0;">
+  <div class="c-title" style="color:#16A34A;">NEW — Conference cost tracking added April 2026</div>
+  <div class="c-body">This step connects the Conference Action Tracker (Excel) to the Command Centre's Conference ROI section. It runs independently of the core Sunday PA flow and can be built in parallel with Steps 2–5. Conference costs, leads, and opportunities will appear automatically in the Command Centre once this is live.</div>
+</div>
+
+<div class="conn-card">
+  <div class="conn-hdr">
+    <div class="conn-icon" style="background:#0D5050;">📊</div>
+    <div><div class="conn-title">How It Works — Plain English</div><span class="badge" style="background:#0D5050;color:#7EEAEA;margin-top:4px;">Not started — Éric builds this</span></div>
+  </div>
+  <div class="conn-body">
+    <p>Four layers. Shanny only touches Layer 1. The Command Centre only reads Layer 4. They never interact directly.</p>
+    <div class="flow-diagram">
+      <div class="flow-box input">📋 Excel Tracker<br>Shanny enters actual cost<br>Year Calendar Col S</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box process">☁️ SharePoint<br>File lives here<br>PA reads Monday 7am</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box process">⚙️ Power Automate<br>Reads Excel → writes<br>conf_* to actuals.json</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box output">📄 actuals.json<br>Bridge file on SP<br>conf_ipeia, conf_cna…</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box display">🖥 Command Centre<br>Conference ROI section<br>reads JSON on load</div>
+    </div>
+    <p><strong style="color:#16A34A;">Shanny's job:</strong> After each BU Services conference — open Excel tracker on SharePoint → Year Calendar tab → enter total actual cost in Column S. That's it. She does not touch actuals.json or the Command Centre. Shanny is responsible for BU Services shows only (IPEIA, Halifax, CNA, T&D, CIM, Mining, API Insp., Cigre, CEN CAN, IPC, IPCE, API Tank). NOT responsible for Ekoscan BU shows (PPIM, NDTMA, AMPP, COFREND, API Insp. EIG).</p>
+    <p><strong style="color:#1A5CA8;">Power Automate's job:</strong> Every Monday at 7AM ET, reads Column S from the Year Calendar, maps each conference name to its <code>conf_</code> key in actuals.json (e.g. "IPEIA 2026" → "conf_ipeia"), writes the actual cost. Derived values (variance, cost per lead) are calculated automatically in the Command Centre JavaScript — Éric does not need to calculate them.</p>
+    <p><strong style="color:#6D28D9;">Salesforce outcomes:</strong> Leads and opps come separately from Salesforce, not from Excel. Éric builds a Teams Adaptive Card that triggers after each conference end date, asks Jon for lead/opp counts, and the card response writes directly to actuals.json. This is the v1 approach — a Salesforce connector can be added in v2.</p>
+  </div>
+</div>
+
+<div class="three-col" style="margin-top:.85rem;">
+  <div class="info-box">
+    <div class="info-box-title">What Éric builds (2.5 hrs)</div>
+    <div class="info-box-body">
+      <strong>1. Prep Excel (5 min)</strong><br>
+      Open tracker → Table Design → name Action Tracker table "ActionTrackerTable", Year Calendar table "CalendarTable". Add Col S header "Total Actual (CAD)" to Year Calendar.<br><br>
+      <strong>2. Monday PA flow (~2 hrs)</strong><br>
+      Recurrence trigger (Mon 7AM ET) → List rows from CalendarTable → for each row: read Col C (conference name) + Col S (actual) + Col M (approval) → map to conf_ key → update matching key in actuals.json on SharePoint.<br><br>
+      <strong>3. Teams Adaptive Card (~30 min)</strong><br>
+      After each conference end date: send card to Jon asking for leads/opps counts → card response writes to actuals.json conf_ record (leads_captured, opps_created, opp_value_cad).
+    </div>
+  </div>
+  <div class="info-box">
+    <div class="info-box-title">Files already delivered</div>
+    <div class="info-box-body">
+      <strong style="color:#16A34A;">actuals.json</strong> — conference section already added. All 19 conf_* keys with full schema (budget_est, actual_total, actual_flights, actual_hotels, actual_booth, actual_registration, actual_freight, actual_personnel, leads_captured, opps_created, opp_value_cad, sf_entry_done, approval etc.) are defined and waiting for data.<br><br>
+      <strong style="color:#16A34A;">Command Centre</strong> — Conference Programme section already built. Will automatically display Conference ROI data once actuals.json is populated.<br><br>
+      <strong style="color:#16A34A;">Integration Guide</strong> — BU_Services_Conference_Cost_Integration_Guide.docx contains the full schema reference, PA flow build instructions, conference key mapping table, testing checklist, and a clear description of what Shanny and Jeremy do week-to-week.
+    </div>
+  </div>
+  <div class="info-box">
+    <div class="info-box-title">Testing checklist</div>
+    <div class="info-box-body">
+      After building:<br><br>
+      ☐ Enter a test cost in Year Calendar Col S for IPEIA (e.g. $55,000)<br>
+      ☐ Run the PA flow manually (Test button)<br>
+      ☐ Check actuals.json on SharePoint — conf_ipeia.actual_total should = 55000<br>
+      ☐ Open Command Centre in Chrome — Conference Programme section should show $55K for IPEIA<br>
+      ☐ If Command Centre shows dashes only: verify actuals.json is in the same SharePoint folder as the Command Centre HTML (CORS requirement)<br>
+      ☐ Enable Monday 7AM schedule<br>
+      ☐ Shanny enters actual costs for IPEIA, Halifax (completed shows) to populate first real data
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+<!-- STEP 3 -->
+<div id="step3" class="sh"><div class="sh-num">Step 3</div><div><h2>Business Central Connection</h2><div class="sh-sub">Mathieu: Q&A workbook first · then Éric: ~2 hrs build</div></div></div>
+
+<div class="callout c-amber">
+  <div class="c-title" style="color:var(--amber)">Mathieu must complete the Q&A workbook before Éric can build this</div>
+  <div class="c-body">Without the BC environment URL, legal entity codes, and API details, Éric cannot configure the Dynamics 365 connector in Power Automate. The workbook takes Mathieu 30 minutes and unblocks several hours of Éric's work.</div>
+</div>
+
+<div class="conn-card">
+  <div class="conn-hdr">
+    <div class="conn-icon" style="background:var(--bc)">BC</div>
+    <div><div class="conn-title">Add Business Central Branch to Sunday PA Flow</div><span class="badge b-eric" style="margin-top:4px">Éric · ~2 hrs (after Q&A workbook)</span></div>
+  </div>
+  <div class="conn-body">
+    <p>Business Central holds invoiced revenue including callout jobs that never enter Salesforce. Once connected, monthly <code>dyn_nucleom</code> and <code>dyn_nortech</code> fields populate automatically — the revenue figures that feed the monthly KPI charts and deck slides 8–14.</p>
+    <div class="three-col">
+      <div class="info-box">
+        <div class="info-box-title">Step 3a — Mathieu (30 min)</div>
+        <div class="info-box-body">Complete the Q&A Workbook. Fill yellow cells: BC environment URL, Nucleom and Nortech legal entity codes, API version, project dimension structure. Most critical: Q8 — whether invoices are tagged with project dimensions determines if initiative-level split is automatic.</div>
+        <a class="doc-link" href="BU_Services_Dynamics_QA_Workbook.xlsx" style="margin-top:.5rem">📄 BU_Services_Dynamics_QA_Workbook.xlsx</a>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">Step 3b — Éric (~90 min)</div>
+        <div class="info-box-body">Add parallel BC branch to Sunday PA flow using the D365 Business Central connector. Query posted sales invoices: legal entity + posting date = current month. Sum by entity. Writes <code>dyn_nucleom</code>, <code>dyn_nortech</code>, and monthly <code>dyn_*</code> fields. If project dimensions exist, split by initiative automatically.</div>
+        <a class="doc-link" href="BU_Services_Dynamics_Integration_Guide.docx" style="margin-top:.5rem">📄 BU_Services_Dynamics_Integration_Guide.docx</a>
+      </div>
+      <div class="info-box" style="background:var(--greenl);border:1px solid #9FE1CB">
+        <div class="info-box-title" style="color:var(--green)">Interim option — available now</div>
+        <div class="info-box-body">While Step 3 is being built, Jeremy Irwin (Director of Finance, EIG NA) enters 2 numbers per month into actuals.json: <code>dyn_nucleom</code> and <code>dyn_nortech</code> from the BC monthly invoice report. Takes 5 minutes. This activates the monthly KPI charts on deck slides 8–14 without waiting for the full connector.</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;color:var(--green);margin-top:.35rem">5 min/month · starts immediately</div>
+      </div>
+    </div>
+    <div class="task-result" style="font-size:.8rem;margin-top:.25rem">↳ Monthly invoiced revenue including callout jobs. Deck slides 8–14 auto-populate. The gap between SF Closed Won and actual invoiced revenue becomes visible.</div>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div id="step4" class="sh"><div class="sh-num">Step 4</div><div><h2>SharePoint Meeting Lists</h2><div class="sh-sub">owner: Éric Carmichael · ~2 hrs 15 min total · can run in parallel with Step 3</div></div></div>
+
+<div class="conn-card">
+  <div class="conn-hdr">
+    <div class="conn-icon" style="background:var(--sp)">SP</div>
+    <div><div class="conn-title">Create 2 SharePoint Lists + PA Meeting Health Branch</div><span class="badge b-eric" style="margin-top:4px">Éric · 2 hrs 15 min</span></div>
+  </div>
+  <div class="conn-body">
+    <p>The Meeting Health section in the Command Centre shows open action counts per meeting series with overdue alerts. Currently all 8 <code>actions_*</code> fields in actuals.json are zero. They populate once the two SharePoint Lists exist and the PA branch reads from them.</p>
+    <div class="three-col">
+      <div class="info-box">
+        <div class="info-box-title">Part 1 — OneNote (30 min)</div>
+        <div class="info-box-body">Create "BU Services — Meeting Tracking" notebook in Teams. Create 7 sections: Commercial Weekly, Ops Weekly, Nuclear Steering, Gate Reviews, Financial Review, HR &amp; Retention, Eurazeo/EIG. Link each section to the corresponding Teams recurring meeting so notes auto-page by date.</div>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">Part 2 — SP Lists (45 min)</div>
+        <div class="info-box-body">Create <strong>BU Services Meeting Log</strong> (10 columns: Meeting_Series, Meeting_Date, Chair, Attendees, Key_Decisions, Next_Meeting, Notes_Link, Status, Created_By, Follow_Up_Count) and <strong>BU Services Meeting Actions</strong> (9 columns: Action, Owner, DueDate, Meeting_Series, Status, Priority, Notes, Created_Date, Completed_Date). 3 filtered views: Open, My Actions, Overdue.</div>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">Part 3 — PA Branch (60 min)</div>
+        <div class="info-box-body">Add meeting health branch to Sunday PA flow. 7 Get Items actions — each filters Meeting Actions by Meeting_Series, counts Open/In Progress. 1 action counts Overdue (DueDate &lt; today AND Status ≠ Complete). Writes <code>actions_commercial</code> through <code>actions_overdue</code> to actuals.json.</div>
+      </div>
+    </div>
+    <a class="doc-link" href="BU_Services_Meeting_Tracking_Setup.docx">📄 BU_Services_Meeting_Tracking_Setup.docx — exact column names and types, filtered view setup, all PA filter expressions</a>
+    <div class="task-result" style="margin-top:.5rem">↳ Meeting Health section in Command Centre shows live open action counts per meeting series with overdue alerts</div>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div id="step5" class="sh"><div class="sh-num">Step 5</div><div><h2>Schedule the Deck Generation</h2><div class="sh-sub">owner: Éric Carmichael · 15 min · the script is already written</div></div></div>
+
+<div class="conn-card">
+  <div class="conn-hdr">
+    <div class="conn-icon" style="background:var(--purple)">PY</div>
+    <div><div class="conn-title">Schedule generate_int_bu_deck.py for Bi-Weekly Review Mornings</div><span class="badge b-eric" style="margin-top:4px">Éric · 15 min</span></div>
+  </div>
+  <div class="conn-body">
+    <p>The deck generation script is fully written and tested. It reads actuals.json, fills all automatable slides in the INT BU review template, and outputs a dated .pptx. The only missing step is scheduling it to run automatically on the morning of each bi-weekly review.</p>
+    <div class="task" style="border-left-color:var(--purple)">
+      <div class="task-hdr"><span class="task-title">Create a scheduled PA flow: every other Monday at 6AM ET</span><span class="task-time">15 min</span></div>
+      <div class="task-body">
+        <strong>Option A — Azure Function (preferred):</strong> Wrap the script in an Azure Function. PA HTTP action calls the endpoint, passing SharePoint paths for template and actuals.json. Function runs the script and saves output to <code>Review Decks/INT_BU_Review_YYYY_MM_DD.pptx</code>.<br><br>
+        <strong>Option B — PA Desktop Flow:</strong> Run script locally on a machine that is on during review mornings. Less reliable than Option A but simpler to set up.
+      </div>
+      <div class="task-result">↳ Bi-weekly review deck pre-populated in SharePoint every review morning. Jon adds narrative to the 4 manual slides, sends. ~2 min prep vs ~60 min manual.</div>
+      <a class="doc-link" href="generate_int_bu_deck.py">📄 generate_int_bu_deck.py — python generate_int_bu_deck.py --template [path] --actuals [path] --output [path]</a>
+    </div>
+  </div>
+</div>
+
+<!-- MANUAL INPUTS -->
+<div id="manual" class="sh"><div class="sh-num">06</div><div><h2>Manual Inputs — Jon, Jeremy &amp; Mathieu</h2><div class="sh-sub">Data entries not requiring Éric — all quick and infrequent</div></div></div>
+
+<div class="manual-grid">
+  <div class="mc">
+    <div class="mc-hdr">🎯 Annual Budget Figures</div>
+    <div class="mc-who">Mathieu · Once per year (January)</div>
+    <div class="mc-body">Open actuals.json on SharePoint. Enter <code>budget_nuc</code>, <code>budget_nor</code>, <code>budget_int</code>, <code>budget_arcndt</code> in $M CAD from the EIG annual plan. Also confirm <code>eur_rate</code> (currently 0.72 — update if materially different). Do this as soon as files are on SharePoint.</div>
+    <div class="mc-time">5 min · once/year · unlocks deck slide 2 budget column</div>
+  </div>
+  <div class="mc">
+    <div class="mc-hdr">📊 Monthly KPI Cost Data</div>
+    <div class="mc-who">Mathieu · 1st Monday each month</div>
+    <div class="mc-body">Only needed if payroll is not accessible through Business Central (confirm in Q&A workbook Q4). Enter <code>nuc_cost</code> and <code>nor_cost</code> — average hourly payroll cost per entity in EUR, from the monthly payroll report.</div>
+    <div class="mc-time">2 min/month · unlocks deck slides 12 &amp; 13</div>
+  </div>
+  <div class="mc">
+    <div class="mc-hdr">🏗 Nortech Pipeline Data</div>
+    <div class="mc-who">Jeremy · Monthly</div>
+    <div class="mc-body">Nortech is not in Salesforce so this will always be a manual entry. Enter <code>bookings_nor</code>, <code>commit_nor</code>, and <code>upside_nor</code> from Nortech's internal pipeline report. Feeds the NOR columns in the Command Centre and deck slide 2.</div>
+    <div class="mc-time">3 min/month · NOR pipeline visibility</div>
+  </div>
+  <div class="mc">
+    <div class="mc-hdr">💵 Cash Positions</div>
+    <div class="mc-who">Jeremy · Monthly (or Agicap API)</div>
+    <div class="mc-body">Enter <code>cash.YYYY_MM.nuc</code>, <code>nor</code>, <code>int</code>, <code>arcndt</code> from Agicap or EIG ND monthly report. Four numbers. If Agicap has a REST API, Éric can automate this entirely — worth confirming with IT admin.</div>
+    <div class="mc-time">2 min/month · unlocks deck slide 15</div>
+  </div>
+  <div class="mc">
+    <div class="mc-hdr">⚙ EBITDA Initiative Statuses</div>
+    <div class="mc-who">Jon or Olivier · As decisions are made</div>
+    <div class="mc-body">When a cost-saving initiative status changes (e.g. NOR IT consolidation → Confirmed), update the <code>status</code> field in the <code>ebitda_initiatives</code> array in actuals.json. Flows directly to deck slides 17 and 18.</div>
+    <div class="mc-time">1 min per change</div>
+  </div>
+</div>
+
+<!-- DECK SLIDES -->
+<div id="deck" class="sh"><div class="sh-num">07</div><div><h2>INT BU Deck — Slide Automation Status</h2><div class="sh-sub">22 slides · which auto-populate and what each depends on</div></div></div>
+
+<div style="display:flex;gap:.85rem;flex-wrap:wrap;margin-bottom:1rem">
+  <div style="display:flex;align-items:center;gap:.4rem;font-size:.79rem"><div style="width:12px;height:12px;background:var(--greenl);border:1px solid #9FE1CB;border-radius:2px"></div>Auto once Steps 0–2 done</div>
+  <div style="display:flex;align-items:center;gap:.4rem;font-size:.79rem"><div style="width:12px;height:12px;background:var(--amberl);border:1px solid #FAC775;border-radius:2px"></div>Auto once specific dependency met</div>
+  <div style="display:flex;align-items:center;gap:.4rem;font-size:.79rem"><div style="width:12px;height:12px;background:var(--lgrey);border:1px solid var(--mgrey);border-radius:2px"></div>Always manual — narrative or external source</div>
+</div>
+
+<div class="deck-grid">
+  <div class="dtile dt-ready"><div class="dtile-num">01</div><div class="dtile-title">Title</div><div class="dtile-dep">Date auto-populates</div></div>
+  <div class="dtile dt-dep"><div class="dtile-num">02</div><div class="dtile-title">Performance Table</div><div class="dtile-dep">Step 2 (SF) + budget entry</div></div>
+  <div class="dtile dt-ready"><div class="dtile-num">03</div><div class="dtile-title">Q1 Variations</div><div class="dtile-dep">prev_* snapshot built in</div></div>
+  <div class="dtile dt-manual"><div class="dtile-num">04</div><div class="dtile-title">Deal Narratives</div><div class="dtile-dep">Always manual</div></div>
+  <div class="dtile dt-manual"><div class="dtile-num">05</div><div class="dtile-title">Invoicing Variations</div><div class="dtile-dep">Narrative manual</div></div>
+  <div class="dtile dt-manual"><div class="dtile-num">06</div><div class="dtile-title">YTD P&amp;L</div><div class="dtile-dep">EIG model</div></div>
+  <div class="dtile dt-manual"><div class="dtile-num">07</div><div class="dtile-title">Land Forecast</div><div class="dtile-dep">EIG model</div></div>
+  <div class="dtile dt-dep"><div class="dtile-num">08</div><div class="dtile-title">KPI Summary</div><div class="dtile-dep">Step 3 (BC) + payroll</div></div>
+  <div class="dtile dt-dep"><div class="dtile-num">09</div><div class="dtile-title">Chargeable Hours</div><div class="dtile-dep">Step 3 (BC)</div></div>
+  <div class="dtile dt-dep"><div class="dtile-num">10</div><div class="dtile-title">Hourly Rate</div><div class="dtile-dep">Step 3 (BC)</div></div>
+  <div class="dtile dt-dep"><div class="dtile-num">11</div><div class="dtile-title">Utilisation Chart</div><div class="dtile-dep">Workbook manual entry</div></div>
+  <div class="dtile dt-dep"><div class="dtile-num">12</div><div class="dtile-title">Hourly Cost</div><div class="dtile-dep">Payroll data</div></div>
+  <div class="dtile dt-dep"><div class="dtile-num">13</div><div class="dtile-title">Gross Margin</div><div class="dtile-dep">Step 3 + payroll</div></div>
+  <div class="dtile dt-dep"><div class="dtile-num">14</div><div class="dtile-title">Performance Charts</div><div class="dtile-dep">Budget entry + Step 2</div></div>
+  <div class="dtile dt-dep"><div class="dtile-num">15</div><div class="dtile-title">Cash Positions</div><div class="dtile-dep">Monthly cash entry</div></div>
+  <div class="dtile dt-manual"><div class="dtile-num">16</div><div class="dtile-title">NUC Recovery</div><div class="dtile-dep">Always manual</div></div>
+  <div class="dtile dt-ready"><div class="dtile-num">17</div><div class="dtile-title">Efficiency Table</div><div class="dtile-dep">Pre-loaded</div></div>
+  <div class="dtile dt-ready"><div class="dtile-num">18</div><div class="dtile-title">EBITDA Table</div><div class="dtile-dep">Pre-loaded</div></div>
+  <div class="dtile dt-manual"><div class="dtile-num">19</div><div class="dtile-title">Ops Update</div><div class="dtile-dep">Always manual</div></div>
+  <div class="dtile dt-manual"><div class="dtile-num">20</div><div class="dtile-title">Quality / HSE</div><div class="dtile-dep">EIG quality system</div></div>
+  <div class="dtile dt-manual"><div class="dtile-num">21</div><div class="dtile-title">Quality Highlights</div><div class="dtile-dep">Always manual</div></div>
+  <div class="dtile dt-manual"><div class="dtile-num">22</div><div class="dtile-title">People</div><div class="dtile-dep">Always manual</div></div>
+</div>
+
+<!-- TIMELINE -->
+<div id="timeline" class="sh"><div class="sh-num">08</div><div><h2>Recommended Timeline</h2><div class="sh-sub">full system live in ~3 weeks — critical path below</div></div></div>
+
+<div class="callout c-blue">
+  <div class="c-title" style="color:var(--blue)">Critical path: what blocks what</div>
+  <div class="c-body">Step 0 (SharePoint upload) must happen first — nothing else works without files in place. Step 1 (Salesforce fields) must be done before Step 2 (PA flows) can be built. Mathieu must complete the Q&A Workbook before Éric can start Step 3. Steps 3, 4, and 5 can run in parallel once their prerequisites are met.</div>
+</div>
+
+<div class="timeline" style="margin-top:1.25rem">
+  <div class="tl-item tl-now">
+    <div class="tl-date">This week — Day 1</div>
+    <div class="tl-title">Step 0: Upload to SharePoint + enter budgets</div>
+    <div class="tl-body">Jon or Éric creates the folder structure and uploads all files (10 min). Jeremy Irwin (Director of Finance) enters the annual budget figures and EUR rate into actuals.json on SharePoint (5 min). This unblocks every other step.</div>
+    <div class="tl-tags">
+      <span class="tl-tag" style="background:var(--bluel);color:var(--blue)">Step 0 · 10 min</span>
+      <span class="tl-tag" style="background:var(--purpl);color:var(--purple)">Budgets entered · 5 min</span>
+    </div>
+  </div>
+  <div class="tl-item tl-now">
+    <div class="tl-date">This week — Days 2–3</div>
+    <div class="tl-title">Step 1: Salesforce setup (Éric) + Q&A Workbook (Mathieu, in parallel)</div>
+    <div class="tl-body"><strong>Éric (35 min):</strong> Create BU_Initiative__c field (20 min), confirm Region field (10 min), add Assigned_Technicians__c (5 min). <strong>Commercial team (30–60 min):</strong> backfill 2026 opportunities. <strong>Mathieu (30 min, in parallel):</strong> Complete Dynamics QA Workbook — blocks Step 3.</div>
+    <div class="tl-tags">
+      <span class="tl-tag" style="background:var(--amberl);color:var(--amber)">Step 1 · 35 min Éric</span>
+      <span class="tl-tag" style="background:var(--greenl);color:var(--green)">Q&A workbook · 30 min Mathieu</span>
+    </div>
+  </div>
+  <div class="tl-item tl-future">
+    <div class="tl-date">Week 2</div>
+    <div class="tl-title">Step 2: Build PA flows (~3 hrs) + Step 2b: Conference Cost flow (~2.5 hrs, parallel) (~3 hrs)</div>
+    <div class="tl-body">Éric builds the Sunday 7PM scheduled flow (~2 hrs) and Monday 7AM email digest (~45 min). Also updates Command Centre sfValues (15 min). After the first Sunday run — actuals.json is live with Salesforce data, email digest is working, Command Centre shows real numbers.</div>
+    <div class="tl-tags">
+      <span class="tl-tag" style="background:var(--amberl);color:var(--amber)">Step 2 · ~3 hrs</span>
+    </div>
+  </div>
+  <div class="tl-item tl-future">
+    <div class="tl-date">Week 2–3 (parallel)</div>
+    <div class="tl-title">Step 3: Business Central (~2 hrs) + Step 4: SharePoint Lists (~2 hrs 15 min)</div>
+    <div class="tl-body">These two steps can run in parallel — they don't depend on each other. <strong>Step 3:</strong> Éric builds BC connector (needs Q&A workbook done). Mathieu enters monthly BC data manually as interim in the meantime. <strong>Step 4:</strong> Éric creates OneNote structure, 2 SP Lists, and PA meeting health branch.</div>
+    <div class="tl-tags">
+      <span class="tl-tag" style="background:var(--amberl);color:var(--amber)">Step 3 · ~2 hrs</span>
+      <span class="tl-tag" style="background:var(--amberl);color:var(--amber)">Step 4 · ~2 hrs 15 min</span>
+      <span class="tl-tag" style="background:var(--greenl);color:var(--green)">Run in parallel ✓</span>
+    </div>
+  </div>
+  <div class="tl-item tl-future">
+    <div class="tl-date">Week 3</div>
+    <div class="tl-title">Step 5: Schedule deck generation (15 min) → Full system live</div>
+    <div class="tl-body">Éric schedules the deck generation script. System fully live: actuals.json updates every Sunday from Salesforce, Business Central, and SharePoint Lists. Command Centre shows live data across all 11 sections. Bi-weekly review deck generates automatically every review morning. Monday email delivers KPIs to inboxes before the 9AM meeting.</div>
+    <div class="tl-tags">
+      <span class="tl-tag" style="background:var(--amberl);color:var(--amber)">Step 5 · 15 min</span>
+      <span class="tl-tag" style="background:var(--greenl);color:var(--green)">Full system live ✓</span>
+    </div>
+  </div>
+  <div class="tl-item tl-future">
+    <div class="tl-date">Week 7+ — conditional</div>
+    <div class="tl-title">Salesforce Technician Tracking Phase 2 (30 min)</div>
+    <div class="tl-body">Review Assigned_Technicians__c compliance at the Commercial Leadership meeting. If &gt;80% of Closed Won deals have the field filled: Éric activates the validation rule (blocks Closed Won without it) and adds 5 PA queries writing crew deployment counts per region to actuals.json. Regional cards in Command Centre then show automated deployment tracking.</div>
+    <div class="tl-tags">
+      <span class="tl-tag" style="background:var(--lgrey);color:var(--dgrey)">Conditional · 30 min Éric</span>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY TABLE -->
+<div style="margin-top:2.5rem">
+  
+<!-- ══ ADD-ON STEPS ══ -->
+<div class="sh" id="addons"><div class="sh-num" style="background:#6D28D9">＋</div>
+  <div><h2>Commercial Add-Ons — Build After Phase 1 is Live</h2>
+  <div class="sh-sub">Three add-on modules · each extends actuals.json + Command Centre · all guides ready</div></div>
+</div>
+
+<div class="callout" style="border-left:4px solid #16A34A;background:rgba(22,163,74,.08);margin:.85rem 0 1.5rem;">
+  <div class="c-title" style="color:#16A34A;">People management system — complete, no build work required</div>
+  <div class="c-body">All 11 role briefs, 6 weekly rhythm cards (HTML + Word), and the Management Hub are already built and ready to distribute to the team. These files are independent of the go-live critical path — they do not require Éric's involvement and can be shared immediately. See <strong>BU_Services_Management_Hub.html</strong> for the single front door linking everything together.</div>
+</div>
+
+<div class="callout" style="border-left:4px solid #6D28D9;background:rgba(109,40,217,.08);margin:.85rem 0;">
+  <div class="c-title" style="color:#A78BFA;">These add-ons are separate from the go-live critical path</div>
+  <div class="c-body">Build these AFTER Step 1 (Salesforce) is live. They extend the system without blocking it. The actuals.json schema is already updated with all required keys. The Command Centre already has the three new sections waiting for data.</div>
+</div>
+
+<div class="conn-card" style="margin:.75rem 0;">
+  <div class="conn-hdr"><div class="conn-icon" style="background:#6D28D9;">📈</div>
+    <div><div class="conn-title">Add-On 1 — Proposal Tracker</div>
+    <span class="badge b-eric">Éric · ~1.5 hrs · after Step 1</span></div>
+  </div>
+  <div class="conn-body">
+    <p><strong>What it adds:</strong> Proposal Health section in Command Centre — open proposals, stalled deals (&gt;30 days no activity), conversion rates, oldest proposal age — per initiative. Stalled deal alert fires in Monday email if any initiative has &gt;2 stalled proposals.</p>
+    <p><strong>How:</strong> Add 18 Salesforce Get Records queries to the existing Sunday PA flow (3 per initiative × 6 initiatives). Write results to <code>proposals_*</code> keys in actuals.json. No new Salesforce fields needed — builds on <code>BU_Initiative__c</code>.</p>
+    <p><strong>Guide:</strong> BU_Services_Proposal_Tracker_Guide.docx</p>
+  </div>
+</div>
+
+<div class="conn-card" style="margin:.75rem 0;">
+  <div class="conn-hdr"><div class="conn-icon" style="background:#0D5050;">⚖️</div>
+    <div><div class="conn-title">Add-On 2 — Quote-to-Cash Reconciliation</div>
+    <span class="badge b-eric">Éric · ~45 min · build alongside P4 BC connector</span></div>
+  </div>
+  <div class="conn-body">
+    <p><strong>What it adds:</strong> Revenue Reconciliation section in Command Centre — Salesforce Closed Won vs Business Central Invoiced, monthly variance bars, YTD gap, alert if &gt;10% variance. Positive gap = callout jobs not in SF. Negative gap = data quality issue.</p>
+    <p><strong>How:</strong> While building the BC connector (Step 3), add 10 extra fields to the Build JSON step: SF MTD/YTD totals + BC MTD/YTD totals per entity. Variance is calculated in Power Automate expressions. Zero additional queries beyond what P4 already requires.</p>
+    <p><strong>Guide:</strong> BU_Services_Quote_Cash_Recon_Guide.docx</p>
+  </div>
+</div>
+
+<div class="conn-card" style="margin:.75rem 0;">
+  <div class="conn-hdr"><div class="conn-icon" style="background:#B45309;">☢️</div>
+    <div><div class="conn-title">Add-On 3 — Nuclear Outage Calendar</div>
+    <span class="badge" style="background:#92400E;color:#FCD34D;">Jon/Olivier · no PA flow needed</span></div>
+  </div>
+  <div class="conn-body">
+    <p><strong>What it adds:</strong> Nuclear Outage Calendar section in Command Centre — upcoming OPG/Bruce Power/NB Power outage windows, days until each outage, RAG status (Green ≥90d / Amber 30-89d / Red &lt;30d), contract status, commercial lead and specialist contact per outage.</p>
+    <p><strong>How:</strong> No PA flow needed. Jon and Olivier edit the <code>nuclear_outages[]</code> array in actuals.json on SharePoint directly. Days until and RAG status calculated automatically by Command Centre on page load. Three outages pre-loaded — Jon/Olivier to review and confirm.</p>
+    <p><strong>Action for Jon + Olivier:</strong> Review the 3 pre-loaded outage records in actuals.json and confirm dates, contract status, and estimated values. Add further outage records as they become known.</p>
+    <p><strong>Guide:</strong> BU_Services_Nuclear_Outage_Calendar_Guide.docx</p>
+  </div>
+</div>
+
+<div class="sh" style="margin-top:0"><div class="sh-num">09</div><div><h2>Complete Task Summary</h2><div class="sh-sub">every step in order — owner, time, and guide document</div></div></div>
+  <table class="stbl">
+    <thead><tr><th>Step</th><th>Task</th><th>Owner</th><th>Time</th><th>Unlocks</th><th>Guide document</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge b-notstarted">Step 0</span></td><td><strong>Upload all files to SharePoint</strong></td><td>Jon / Éric</td><td>10 min</td><td>Everything — nothing else works without this</td><td class="stbl-doc">BU_Services_SharePoint_Setup_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Enter budget figures + EUR rate</strong></td><td>Jeremy Irwin</td><td>5 min</td><td>Deck slide 2 % Perf/Budget column</td><td class="stbl-doc">Edit actuals.json on SharePoint</td></tr>
+      <tr><td><span class="badge b-eric">Step 1</span></td><td><strong>Create BU_Initiative__c picklist field in Salesforce</strong></td><td>Éric</td><td>20 min</td><td>Required before PA flow can be built</td><td class="stbl-doc">BU_Services_Salesforce_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Confirm Region field API name + picklist values</strong></td><td>Éric</td><td>10 min</td><td>Regional revenue cards in Command Centre</td><td class="stbl-doc">BU_Services_Salesforce_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Add Assigned_Technicians__c field (Phase 1)</strong></td><td>Éric</td><td>5 min</td><td>Crew deployment tracking begins</td><td class="stbl-doc">BU_Services_SF_Technician_Tracking.docx</td></tr>
+      <tr><td></td><td><strong>Backfill 2026 opportunities with BU Initiative value</strong></td><td>Vinoth, Emmanuel, Rick, Olivier</td><td>30–60 min</td><td>Accurate YTD figures from first PA run</td><td class="stbl-doc">BU_Services_Salesforce_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Complete Dynamics Q&A Workbook</strong></td><td>Mathieu</td><td>30 min</td><td>Unblocks Step 3 — Éric cannot build BC without this</td><td class="stbl-doc">BU_Services_Dynamics_QA_Workbook.xlsx</td></tr>
+      <tr><td><span class="badge b-eric">Step 2</span></td><td><strong>Build Sunday PA flow (SF queries → actuals.json)</strong></td><td>Éric</td><td>~2 hrs</td><td>Core automation live — Salesforce data updating weekly</td><td class="stbl-doc">BU_Services_Salesforce_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Build Monday email digest PA flow</strong></td><td>Éric</td><td>45 min</td><td>Weekly KPI email to commercial leadership</td><td class="stbl-doc">BU_Services_Salesforce_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Update Command Centre CONFIG sfValues</strong></td><td>Éric</td><td>15 min</td><td>Regional cards display correct Salesforce values</td><td class="stbl-doc">Command Centre HTML — Ctrl+F "regions: ["</td></tr>
+            <tr><td><span class="badge-conf">Step 2b</span></td><td><strong>Add Col S to Year Calendar; name Excel tables (ActionTrackerTable, CalendarTable)</strong></td><td>Éric</td><td>7 min</td><td>PA connector requires named tables</td><td class="stbl-doc">BU_Services_Conference_Cost_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>SF Salesforce Conference Entry Guide — distribute to all conference attendees</strong></td><td>All attendees + Éric</td><td>Reference</td><td>Clear Salesforce entry instructions, 48h rule, BU_Initiative__c guide, Éric&#39;s SF config checklist</td><td class="stbl-doc">BU_Services_SF_Conference_Entry_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Build Monday 7AM PA flow — Excel Year Calendar → actuals.json conf_ keys</strong></td><td>Éric</td><td>~2 hrs</td><td>Conference actuals appear in Command Centre automatically</td><td class="stbl-doc">BU_Services_Conference_Cost_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Build Teams Adaptive Card for Salesforce outcomes (leads/opps) per conference</strong></td><td>Éric</td><td>~30 min</td><td>Cost per lead + cost per opp KPIs live in Command Centre</td><td class="stbl-doc">BU_Services_Conference_Cost_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Test: enter cost → run flow → verify Conference ROI in Command Centre</strong></td><td>Éric + Shanny</td><td>15 min</td><td>End-to-end data flow confirmed</td><td class="stbl-doc">BU_Services_Conference_Cost_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Shanny backfills actuals for IPEIA, Halifax (completed shows)</strong></td><td>Shanny</td><td>10 min</td><td>First real data in Conference ROI section</td><td class="stbl-doc">Year Calendar Col S in Excel tracker</td></tr>
+      <tr><td><span style="background:#6D28D9;color:#EDE9FE;font-family:var(--mono);font-size:.65rem;font-weight:700;padding:.18rem .5rem;border-radius:4px;display:inline-block;">Add-On 1</span></td><td><strong>Add 18 SF proposal queries to Sunday PA flow</strong></td><td>Éric</td><td>~1.5 hrs</td><td>Proposal Health section live in Command Centre</td><td class="stbl-doc">BU_Services_Proposal_Tracker_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Quote-to-Cash recon fields — add to P4 BC flow (zero extra queries)</strong></td><td>Éric</td><td>~45 min</td><td>Revenue Reconciliation section live</td><td class="stbl-doc">BU_Services_Quote_Cash_Recon_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Nuclear outage data — Jon/Olivier review 3 pre-loaded outage records in actuals.json</strong></td><td>Jon / Olivier</td><td>15 min</td><td>Nuclear Outage Calendar section live</td><td class="stbl-doc">BU_Services_Nuclear_Outage_Calendar_Guide.docx</td></tr>
+      <tr><td><span class="badge b-eric">Step 3</span></td><td><strong>Business Central PA connector</strong></td><td>Éric (needs Q&A first)</td><td>~2 hrs</td><td>Monthly KPI charts, callout revenue, deck slides 8–14</td><td class="stbl-doc">BU_Services_Dynamics_Integration_Guide.docx</td></tr>
+      <tr><td></td><td><strong>Monthly BC data (interim manual)</strong></td><td>Jeremy Irwin</td><td>5 min/mo</td><td>Slides 8–14 immediately while Step 3 is building</td><td class="stbl-doc">Edit actuals.json monthly object</td></tr>
+      <tr><td><span class="badge b-eric">Step 4</span></td><td><strong>Create 2 SP Lists + PA meeting health branch</strong></td><td>Éric</td><td>2h 15m</td><td>Meeting Health section in Command Centre</td><td class="stbl-doc">BU_Services_Meeting_Tracking_Setup.docx</td></tr>
+      <tr><td><span class="badge b-eric">Step 5</span></td><td><strong>Schedule deck generation script</strong></td><td>Éric</td><td>15 min</td><td>Bi-weekly review deck auto-generates every review morning</td><td class="stbl-doc">generate_int_bu_deck.py</td></tr>
+      <tr><td><span class="badge b-manual">Monthly</span></td><td><strong>Nortech pipeline data (ongoing)</strong></td><td>Jeremy Irwin</td><td>3 min/mo</td><td>NOR columns in Command Centre + deck slide 2</td><td class="stbl-doc">Edit actuals.json — bookings_nor, commit_nor, upside_nor</td></tr>
+      <tr><td><span class="badge b-manual">Monthly</span></td><td><strong>Cash positions (ongoing)</strong></td><td>Jeremy Irwin</td><td>2 min/mo</td><td>Deck slide 15 cash table</td><td class="stbl-doc">Edit actuals.json — cash.YYYY_MM.*</td></tr>
+      <tr><td><span class="badge b-notstarted">Week 7+</span></td><td><strong>SF technician validation rule Phase 2</strong></td><td>Éric (conditional)</td><td>30 min</td><td>Automated crew deployment tracking per region</td><td class="stbl-doc">BU_Services_SF_Technician_Tracking.docx — Phase 2</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+<div style="background:var(--navy2);padding:1.25rem 2rem;text-align:center;margin-top:0">
+  <p style="font-size:.71rem;color:rgba(255,255,255,.22)">BU Services Commercial Management System — Go-Live Roadmap &nbsp;·&nbsp; Jon Eustace, CEO North America &nbsp;·&nbsp; Ekoscan Integrity Group &nbsp;·&nbsp; Confidential — April 2026</p>
+</div>
+
+<script>
+var links=document.querySelectorAll('.nav-links a');
+var ids=['state','data-flow','step0','step1','step2','step3','step4','step5','manual','deck','timeline'];
+window.addEventListener('scroll',function(){
+  var cur='';
+  ids.forEach(function(id){var el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<=70)cur=id;});
+  links.forEach(function(a){a.classList.toggle('act',a.getAttribute('href')==='#'+cur);});
+});
+</script>
+</body>
+</html>

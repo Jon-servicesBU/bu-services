@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU - Services | Pipeline Integrity DA Commercial Plan 2026–2030</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --navy:   #161C60;
+  --navy2:  #1E2580;
+  --blue:   #368CD9;
+  --blue2:  #5AAAE8;
+  --orange: #E97132;
+  --green:  #196B24;
+  --green2: #22882F;
+  --dark:   #0B1035;
+  --mid:    #F0F3FA;
+  --light:  #F7F9FD;
+  --lgrey:  #DDE3F0;
+  --body:   #384660;
+  --text:   #1A2540;
+  --white:  #FFFFFF;
+  --shadow: 0 4px 20px rgba(22,28,96,0.12);
+  --fd: 'Barlow Condensed','Arial Narrow',sans-serif;
+  --fb: 'Barlow','Segoe UI',Arial,sans-serif;
+}
+
+body { font-family: var(--fb); font-size: 15.5px; line-height: 1.7; color: var(--text); background: var(--light); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 200; background: var(--navy); border-bottom: 3px solid var(--orange); display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; height: 52px; }
+.nav-brand { font-family: var(--fd); font-size: 0.95rem; font-weight: 700; letter-spacing: 1.5px; color: var(--white); text-transform: uppercase; white-space: nowrap; }
+.nav-brand em { color: var(--blue); font-style: normal; }
+.nav-links { display: flex; list-style: none; }
+.nav-links a { display: block; padding: 0 1rem; height: 52px; line-height: 52px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; color: rgba(255,255,255,0.5); text-decoration: none; text-transform: uppercase; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: color 0.15s, border-color 0.15s; }
+.nav-links a:hover { color: var(--white); border-bottom-color: var(--blue2); }
+
+/* HERO */
+.hero { background: var(--dark); position: relative; overflow: hidden; padding: 5rem 2.5rem 4rem; }
+.hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(22,28,96,0.98) 0%, rgba(11,16,53,0.90) 60%, rgba(18,42,110,0.75) 100%); }
+.hero::after { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(54,140,217,0.04) 60px,rgba(54,140,217,0.04) 61px), repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(54,140,217,0.04) 60px,rgba(54,140,217,0.04) 61px); pointer-events: none; }
+.hero-bg { position: absolute; right: -2rem; top: 50%; transform: translateY(-50%); font-family: var(--fd); font-weight: 900; font-size: min(22vw,300px); line-height: 1; color: rgba(54,140,217,0.05); letter-spacing: -8px; pointer-events: none; user-select: none; white-space: nowrap; z-index: 1; }
+.hero-inner { position: relative; z-index: 2; max-width: 1140px; margin: 0 auto; display: grid; grid-template-columns: 1fr 260px; gap: 3rem; align-items: center; }
+.hero-label { display: inline-block; font-family: var(--fd); font-size: 0.72rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); background: rgba(233,113,50,0.12); border: 1px solid rgba(233,113,50,0.3); border-radius: 3px; padding: 0.25rem 0.65rem; margin-bottom: 1.1rem; }
+.hero h1 { font-family: var(--fd); font-weight: 900; font-size: clamp(2.8rem,5vw,4.2rem); line-height: 0.95; letter-spacing: -1px; color: var(--white); text-transform: uppercase; }
+.hero h1 span { display: block; color: var(--blue); }
+.hero-rule { width: 3.5rem; height: 4px; background: linear-gradient(90deg,var(--orange),transparent); border-radius: 2px; margin: 1.1rem 0; }
+.hero-sub { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; margin-bottom: 0.85rem; }
+.hero-desc { font-size: 1rem; font-weight: 300; color: rgba(170,190,220,0.9); max-width: 520px; line-height: 1.65; }
+.hero-stats { display: flex; flex-direction: column; gap: 0.75rem; }
+.hstat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid var(--blue); border-radius: 6px; padding: 0.9rem 1.1rem; }
+.hstat.s2 { border-left-color: var(--orange); }
+.hstat.s3 { border-left-color: var(--green2); }
+.hstat-val { font-family: var(--fd); font-size: 1.9rem; font-weight: 900; line-height: 1; color: var(--white); }
+.hstat.s2 .hstat-val { color: #F28B4E; }
+.hstat.s3 .hstat-val { color: #3DDB50; }
+.hstat-lbl { font-size: 0.72rem; color: rgba(255,255,255,0.38); margin-top: 0.2rem; line-height: 1.4; }
+
+/* LAYOUT */
+.wrap { max-width: 1140px; margin: 0 auto; padding: 0 2.5rem; }
+
+/* SECTION HEADERS */
+.sec-hdr { background: var(--navy); margin-top: 3rem; position: relative; overflow: hidden; }
+.sec-hdr::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 40%; background: linear-gradient(90deg,transparent,rgba(54,140,217,0.06)); pointer-events: none; }
+.sec-hdr-in { max-width: 1140px; margin: 0 auto; padding: 1.2rem 2.5rem; display: flex; align-items: center; gap: 1rem; position: relative; z-index: 1; }
+.sec-num { flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 50%; background: var(--orange); color: var(--white); font-family: var(--fd); font-size: 0.95rem; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.sec-title { color: var(--white); font-family: var(--fd); font-size: 1.2rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+.sec-sub { color: rgba(255,255,255,0.38); font-size: 0.8rem; margin-top: 0.1rem; }
+.sec-body { background: var(--white); padding: 2.5rem 0 3rem; }
+.sec-body p { font-size: 0.975rem; color: var(--body); line-height: 1.75; margin-bottom: 0.9rem; font-weight: 400; }
+
+/* SUBSECTION TITLE */
+.sub-title { font-family: var(--fd); font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--navy); margin: 2rem 0 0.75rem; display: flex; align-items: center; gap: 0.6rem; }
+.sub-title::after { content: ''; flex: 1; height: 1px; background: var(--lgrey); }
+
+/* CARDS */
+.crow { display: grid; gap: 1.25rem; margin: 1.5rem 0; }
+.c3 { grid-template-columns: repeat(3,1fr); }
+.c2 { grid-template-columns: repeat(2,1fr); }
+.c4 { grid-template-columns: repeat(4,1fr); }
+
+.kcard { border-radius: 8px; padding: 1.5rem 1.4rem; position: relative; overflow: hidden; }
+.kcard::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kcard.navy { background: var(--navy); color: var(--white); box-shadow: var(--shadow); }
+.kcard.navy::before { background: var(--blue2); }
+.kcard.blue { background: var(--blue); color: var(--white); box-shadow: var(--shadow); }
+.kcard.blue::before { background: rgba(255,255,255,0.3); }
+.kcard.orange { background: var(--orange); color: var(--white); box-shadow: var(--shadow); }
+.kcard.orange::before { background: rgba(255,255,255,0.3); }
+.kcard.lined { background: var(--white); border: 1.5px solid var(--lgrey); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.kcard.lined::before { background: var(--orange); }
+.kcard h3 { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.3px; margin-bottom: 0.5rem; color: var(--white); }
+.kcard.lined h3 { color: var(--navy); }
+.kcard p { font-size: 0.9rem; line-height: 1.65; color: rgba(255,255,255,0.88); margin: 0; }
+.kcard.lined p { color: var(--body); }
+.kcard-rule { width: 2rem; height: 2px; background: rgba(255,255,255,0.3); border-radius: 1px; margin: 0.65rem 0; }
+
+/* TOOL PANELS */
+.tool-block { margin: 2.25rem 0; }
+.tool-hdg { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 0.65rem; border-bottom: 2px solid var(--lgrey); }
+.tool-accent { width: 4px; height: 1.8rem; border-radius: 2px; flex-shrink: 0; }
+.tool-hdg h3 { font-family: var(--fd); font-size: 1.2rem; font-weight: 700; letter-spacing: 0.3px; color: var(--navy); text-transform: uppercase; }
+.tool-panel { display: grid; grid-template-columns: 1fr 1fr; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(22,28,96,0.1); }
+.tp-l { background: var(--mid); padding: 1.6rem 1.8rem; }
+.tp-r { background: var(--navy); padding: 1.6rem 1.8rem; }
+.tp-lbl { font-family: var(--fd); font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.6rem; color: var(--blue); }
+.tp-r .tp-lbl { color: var(--orange); }
+.tp-desc { font-size: 0.875rem; color: var(--body); line-height: 1.65; margin-bottom: 1.1rem; }
+
+/* Spec table */
+.stbl { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.stbl tr { border-bottom: 1px solid var(--lgrey); }
+.stbl tr:last-child { border-bottom: none; }
+.stbl td { padding: 0.45rem 0.7rem; vertical-align: middle; }
+.stbl td:first-child { font-weight: 600; color: var(--white); background: var(--navy); width: 45%; font-size: 0.8rem; }
+.stbl tr:nth-child(even) td:first-child { background: #1E2580; }
+.stbl td:last-child { color: var(--text); background: var(--white); }
+.stbl tr:nth-child(even) td:last-child { background: #EEF3FA; }
+
+/* Advantage list */
+.adv-list { list-style: none; }
+.adv-item { display: flex; gap: 0.8rem; margin-bottom: 1rem; }
+.adv-item:last-child { margin-bottom: 0; }
+.adv-bar { flex-shrink: 0; width: 3px; border-radius: 2px; margin-top: 3px; min-height: 2.5rem; background: var(--blue2); }
+.adv-item.ora .adv-bar { background: var(--orange); }
+.adv-title { font-size: 0.875rem; font-weight: 700; color: var(--blue2); margin-bottom: 0.15rem; display: block; }
+.adv-item.ora .adv-title { color: #F28B4E; }
+.adv-body { font-size: 0.83rem; color: rgba(170,190,220,0.85); line-height: 1.55; }
+
+/* CALLOUTS */
+.callout { border-radius: 8px; padding: 1.05rem 1.35rem; margin: 1.3rem 0; font-size: 0.92rem; line-height: 1.65; display: flex; gap: 0.85rem; align-items: flex-start; }
+.callout-icon { flex-shrink: 0; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 900; margin-top: 0.1rem; color: var(--white); }
+.callout.cgr  { background: #D8F0DC; border-left: 4px solid var(--green2); color: #0C3312; }
+.callout.cgr  .callout-icon { background: var(--green2); }
+.callout.cor  { background: #FDE8D5; border-left: 4px solid var(--orange); color: #5C2400; }
+.callout.cor  .callout-icon { background: var(--orange); }
+.callout.cbl  { background: #DBEEFF; border-left: 4px solid var(--blue); color: #0C2F60; }
+.callout.cbl  .callout-icon { background: var(--blue); }
+.callout.cnv  { background: #E8EEF8; border-left: 4px solid var(--navy); color: var(--navy); }
+.callout.cnv  .callout-icon { background: var(--navy); }
+.callout strong { display: block; font-weight: 700; margin-bottom: 0.2rem; font-size: 0.92rem; }
+
+/* DEPLOY */
+.deploy-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; margin: 1.5rem 0; }
+.dcard { border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+.dcard-hd { padding: 1.1rem 1.3rem; }
+.dcard-hd.navy   { background: var(--navy); }
+.dcard-hd.blue   { background: var(--blue); }
+.dcard-hd.orange { background: var(--orange); }
+.dcard-hd h3 { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; color: var(--white); text-transform: uppercase; }
+.dcard-hd p { color: rgba(255,255,255,0.6); font-size: 0.78rem; font-style: italic; margin-top: 0.2rem; }
+.dcard-bd { background: var(--mid); padding: 1.1rem 1.3rem; font-size: 0.87rem; color: var(--body); line-height: 1.6; }
+.dtags { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+.dtag { font-size: 0.7rem; font-weight: 700; padding: 0.22rem 0.7rem; border-radius: 20px; border: 1.5px solid; text-transform: uppercase; letter-spacing: 0.5px; }
+.dtag.navy   { color: var(--navy);   border-color: var(--navy); }
+.dtag.blue   { color: var(--blue);   border-color: var(--blue); }
+.dtag.orange { color: var(--orange); border-color: var(--orange); }
+
+/* MARKET */
+.mstats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin: 1.75rem 0; }
+.mstat { background: var(--navy); border-radius: 10px; padding: 1.2rem 1.1rem; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+.mstat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; }
+.mstat:nth-child(1)::after { background: var(--blue); }
+.mstat:nth-child(2)::after { background: var(--orange); }
+.mstat:nth-child(3)::after { background: var(--green2); }
+.mstat:nth-child(4)::after { background: #9B59B6; }
+.mstat-val { font-family: var(--fd); font-size: 1.65rem; font-weight: 900; color: var(--white); line-height: 1.1; }
+.mstat-lbl { font-size: 0.75rem; color: rgba(255,255,255,0.42); margin-top: 0.3rem; line-height: 1.4; }
+
+.driver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin: 1rem 0; }
+.driver { background: var(--white); border-radius: 8px; padding: 1rem 1.1rem 1rem 1.3rem; border-left: 4px solid var(--blue); box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-size: 0.875rem; }
+.driver:nth-child(2) { border-left-color: var(--orange); }
+.driver:nth-child(3) { border-left-color: var(--green2); }
+.driver:nth-child(4) { border-left-color: #9B59B6; }
+.driver strong { display: block; color: var(--navy); font-size: 0.9rem; font-weight: 700; margin-bottom: 0.35rem; }
+.driver span { color: var(--body); line-height: 1.55; }
+
+/* TABLES */
+.ctbl, .rtbl, .ntbl { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.875rem; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 12px rgba(22,28,96,0.08); }
+.ctbl thead th, .rtbl thead th, .ntbl thead th { background: var(--navy); color: var(--white); padding: 0.75rem 1rem; text-align: left; font-family: var(--fd); font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+.ctbl tbody td, .ntbl tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--lgrey); color: var(--text); vertical-align: middle; }
+.ctbl tbody tr:nth-child(even) td, .ntbl tbody tr:nth-child(even) td { background: var(--mid); }
+.ctbl tbody tr:last-child td, .ntbl tbody tr:last-child td { border-bottom: none; }
+
+.rtbl thead th:not(:first-child) { text-align: right; }
+.rtbl tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--lgrey); color: var(--text); }
+.rtbl tbody td:not(:first-child) { text-align: right; font-weight: 600; color: var(--navy); }
+.rtbl tbody tr:nth-child(even) td { background: var(--mid); }
+.rtbl tbody tr:last-child td { border-bottom: none; }
+.rtbl tfoot td { background: var(--orange); color: var(--white); font-weight: 700; padding: 0.85rem 1rem; font-size: 0.95rem; }
+.rtbl tfoot td:not(:first-child) { text-align: right; font-size: 1rem; }
+
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: var(--white); font-family: var(--fd); letter-spacing: 0.5px; }
+.badge.p1 { background: var(--green); }
+.badge.p2 { background: var(--blue); }
+.badge.p3 { background: var(--orange); }
+
+/* PHASES */
+.phases { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; margin: 1.5rem 0; }
+.phase { border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+.phase-hd { padding: 1.1rem 1.3rem; }
+.phase-hd.navy   { background: var(--navy); }
+.phase-hd.blue   { background: var(--blue); }
+.phase-hd.green  { background: var(--green); }
+.phase-hd h3 { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; color: var(--white); text-transform: uppercase; }
+.phase-hd p { color: rgba(255,255,255,0.6); font-size: 0.8rem; font-style: italic; margin-top: 0.2rem; }
+.phase-bd { background: var(--mid); padding: 1.2rem 1.3rem; }
+.phase-bd ol { padding-left: 1.2rem; font-size: 0.87rem; color: var(--body); line-height: 1.65; }
+.phase-bd ol li { margin-bottom: 0.55rem; }
+.phase-bd ol li:last-child { margin-bottom: 0; }
+
+.step-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--orange); color: var(--white); font-size: 0.78rem; font-weight: 700; font-family: var(--fd); flex-shrink: 0; }
+
+/* FOOTER */
+.footer { background: var(--dark); border-top: 3px solid var(--orange); padding: 2.5rem; margin-top: 3.5rem; }
+.footer-in { max-width: 1140px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+.footer-brand { font-family: var(--fd); font-size: 1rem; font-weight: 700; color: var(--white); letter-spacing: 1px; text-transform: uppercase; line-height: 1.4; }
+.footer-brand span { color: var(--blue); }
+.footer-meta { font-size: 0.8rem; color: rgba(255,255,255,0.3); line-height: 1.6; text-align: right; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .hero-inner, .footer-in { grid-template-columns: 1fr; }
+  .hero-stats { flex-direction: row; flex-wrap: wrap; }
+  .hstat { flex: 1; min-width: 140px; }
+  .c3,.c4,.deploy-grid,.phases,.mstats { grid-template-columns: repeat(2,1fr); }
+  .tool-panel { grid-template-columns: 1fr; }
+  .driver-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .footer-meta { text-align: left; }
+}
+@media (max-width: 560px) {
+  .c3,.c4,.deploy-grid,.phases,.mstats,.c2 { grid-template-columns: 1fr; }
+  .hero { padding: 3rem 1.5rem 2.5rem; }
+  .wrap, .sec-hdr-in { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+
+/* ── PI-SPECIFIC ADDITIONS ── */
+p.lead { font-size:1.05rem; font-weight:400; color:var(--navy); line-height:1.75; margin-bottom:1.1rem; border-left:3px solid var(--orange); padding-left:1.1rem; }
+h3.subsection { font-family:var(--fd); font-size:1rem; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:var(--navy); margin:2rem 0 0.85rem; display:flex; align-items:center; gap:0.6rem; }
+h3.subsection::after { content:''; flex:1; height:1px; background:var(--lgrey); }
+
+/* stat-grid / stat-card */
+.stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin:1.5rem 0; }
+.stat-card { background:var(--navy); border-radius:10px; padding:1.2rem 1.1rem; position:relative; overflow:hidden; box-shadow:var(--shadow); }
+.stat-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:var(--blue); }
+.stat-card.steel::after { background:var(--blue2); }
+.stat-card.rust::after  { background:var(--orange); }
+.stat-card.green::after { background:var(--green2); }
+.stat-card .val { font-family:var(--fd); font-size:1.7rem; font-weight:900; color:var(--white); line-height:1.1; }
+.stat-card.rust  .val { color:#F28B4E; }
+.stat-card.green .val { color:#3DDB50; }
+.stat-card .lbl { font-size:0.75rem; color:rgba(255,255,255,0.42); margin-top:0.3rem; line-height:1.4; }
+
+/* info-box */
+.info-box { border-radius:8px; margin:1.25rem 0; overflow:hidden; box-shadow:0 2px 8px rgba(22,28,96,0.07); border-left:4px solid var(--green2); }
+.info-box.amber { border-left-color:#C87800; }
+.info-box.orange{ border-left-color:var(--orange); }
+.info-box.blue  { border-left-color:var(--blue); }
+.info-box.navy  { border-left-color:var(--navy); }
+.box-header { font-family:var(--fd); font-size:0.78rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:0.7rem 1.2rem; background:var(--green2); color:var(--white); }
+.info-box.amber  .box-header { background:#C87800; }
+.info-box.orange .box-header { background:var(--orange); }
+.info-box.blue   .box-header { background:var(--blue); }
+.info-box.navy   .box-header { background:var(--navy); }
+.box-item { padding:0.55rem 1.2rem 0.55rem 1.7rem; font-size:0.875rem; color:var(--text); line-height:1.6; border-bottom:1px solid rgba(22,28,96,0.06); position:relative; }
+.box-item:last-child { border-bottom:none; }
+.box-item::before { content:"›"; position:absolute; left:0.7rem; color:var(--green2); font-weight:700; font-size:1rem; line-height:1.6; }
+.info-box.amber  .box-item::before { color:#C87800; }
+.info-box.orange .box-item::before { color:var(--orange); }
+.info-box.blue   .box-item::before { color:var(--blue); }
+.info-box.navy   .box-item::before { color:var(--navy); }
+
+/* data-table */
+.data-table { width:100%; border-collapse:collapse; margin:1.5rem 0; font-size:0.875rem; border-radius:8px; overflow:hidden; box-shadow:0 2px 12px rgba(22,28,96,0.08); }
+.data-table thead th { background:var(--navy); color:var(--white); padding:0.75rem 1rem; text-align:left; font-family:var(--fd); font-size:0.78rem; letter-spacing:1px; text-transform:uppercase; font-weight:700; }
+.data-table tbody td { padding:0.7rem 1rem; border-bottom:1px solid var(--lgrey); color:var(--text); vertical-align:top; }
+.data-table tbody tr:nth-child(even) td { background:var(--mid); }
+.data-table tbody tr:last-child td { border-bottom:none; }
+.data-table tbody td.steel { font-weight:700; color:var(--blue); }
+.data-table tbody td.rust  { font-weight:700; color:var(--orange); }
+.data-table tbody td.green { font-weight:700; color:var(--green); }
+
+/* doc-list */
+.doc-list { list-style:none; padding:0; margin:0.75rem 0 1.25rem; }
+.doc-list li { font-size:0.9rem; color:var(--body); padding:0.45rem 0 0.45rem 1.3rem; border-bottom:1px solid var(--lgrey); position:relative; line-height:1.6; }
+.doc-list li:last-child { border-bottom:none; }
+.doc-list li::before { content:"›"; position:absolute; left:0; color:var(--blue); font-weight:700; font-size:1.1rem; line-height:1.55; }
+
+/* person cards (Carlton team) */
+.person-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin:1.5rem 0; }
+.person-card { border-radius:10px; overflow:hidden; box-shadow:var(--shadow); }
+.person-header { padding:1rem 1.3rem; }
+.person-card.rick .person-header { background:var(--navy); border-top:3px solid var(--blue); }
+.person-card.joel .person-header { background:var(--navy); border-top:3px solid var(--orange); }
+.person-name { font-family:var(--fd); font-size:1.1rem; font-weight:900; color:var(--white); letter-spacing:1px; text-transform:uppercase; }
+.person-role { font-size:0.8rem; color:rgba(255,255,255,0.55); margin-top:0.2rem; font-style:italic; }
+.person-body { background:var(--mid); padding:1.1rem 1.3rem; }
+.person-body ul { list-style:none; padding:0; }
+.person-body ul li { font-size:0.875rem; color:var(--body); padding:0.4rem 0 0.4rem 1.2rem; border-bottom:1px solid var(--lgrey); position:relative; line-height:1.55; }
+.person-body ul li:last-child { border-bottom:none; }
+.person-body ul li::before { content:"›"; position:absolute; left:0; color:var(--blue); font-weight:700; }
+
+/* carlton-box (hero callout) */
+.carlton-box { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-left:3px solid var(--orange); border-radius:6px; padding:0.85rem 1.1rem; margin-top:1.25rem; }
+.carlton-box .label { font-family:var(--fd); font-size:0.68rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--orange); margin-bottom:0.45rem; }
+.carlton-box .rick, .carlton-box .joel { font-size:0.85rem; color:rgba(255,255,255,0.75); line-height:1.55; padding:0.25rem 0; }
+.carlton-box .rick::before { content:"✓ "; color:var(--blue2); font-weight:700; }
+.carlton-box .joel::before { content:"✓ "; color:#F28B4E; font-weight:700; }
+
+/* scenario table colored cells */
+.scenario-navy td:last-child { background:var(--navy)!important; color:var(--white)!important; font-weight:700; }
+.scenario-orange td:last-child { background:var(--orange)!important; color:var(--white)!important; font-weight:700; }
+.scenario-green td:last-child { background:var(--green)!important; color:var(--white)!important; font-weight:700; }
+
+/* hero-bg teal override for PI */
+.hero-bg { position:absolute; right:-2rem; top:50%; transform:translateY(-50%); font-family:var(--fd); font-weight:900; font-size:min(18vw,260px); line-height:1; color:rgba(54,140,217,0.05); letter-spacing:-6px; pointer-events:none; user-select:none; white-space:nowrap; z-index:1; }
+.hero-conf { display:inline-block; margin-top:1.1rem; font-family:var(--fd); font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.12); border-radius:3px; padding:0.2rem 0.6rem; }
+
+/* service grid */
+.service-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin:1.5rem 0; }
+
+@media(max-width:900px){
+  .stat-grid,.service-grid { grid-template-columns:repeat(2,1fr); }
+  .person-grid { grid-template-columns:1fr; }
+}
+@media(max-width:560px){
+  .stat-grid,.service-grid { grid-template-columns:1fr; }
+}
+
+/* ── SCENARIO CARDS ── */
+.scenario-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin:1.5rem 0; }
+.scenario-card { border-radius:10px; overflow:hidden; box-shadow:var(--shadow); }
+.sc-header { font-family:var(--fd); font-size:0.78rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:0.75rem 1.2rem; color:var(--white); }
+.scenario-card.conservative .sc-header { background:var(--navy); }
+.scenario-card.mid          .sc-header { background:var(--blue); }
+.scenario-card.aggressive   .sc-header { background:var(--green); }
+.sc-rows { background:var(--mid); padding:0.5rem 0; }
+.sc-yr { display:flex; justify-content:space-between; align-items:center; padding:0.5rem 1.2rem; border-bottom:1px solid var(--lgrey); font-size:0.875rem; }
+.sc-yr:last-child { border-bottom:none; }
+.yr-label { color:var(--body); }
+.yr-val { font-family:var(--fd); font-weight:700; font-size:1rem; color:var(--navy); }
+.sc-total { padding:0.7rem 1.2rem; font-family:var(--fd); font-size:0.9rem; font-weight:700; color:var(--white); text-align:right; }
+.scenario-card.conservative .sc-total { background:var(--navy); }
+.scenario-card.mid          .sc-total { background:var(--blue); }
+.scenario-card.aggressive   .sc-total { background:var(--green); }
+
+/* ── SERVICE CARDS ── */
+.service-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin:1.5rem 0; }
+.service-card { border-radius:10px; overflow:hidden; box-shadow:var(--shadow); }
+.svc-top { background:var(--navy); padding:1rem 1.2rem; border-top:3px solid var(--blue); }
+.service-card.steel  .svc-top { border-top-color:var(--blue2); background:var(--navy2); }
+.service-card.green  .svc-top { border-top-color:var(--green2); }
+.service-card.gold   .svc-top { border-top-color:#C9860A; }
+.service-card.teal   .svc-top { border-top-color:var(--orange); }
+.svc-title { font-family:var(--fd); font-size:1.05rem; font-weight:900; color:var(--white); letter-spacing:0.5px; display:block; text-transform:uppercase; }
+.svc-price { font-family:var(--fd); font-size:0.82rem; font-weight:700; color:rgba(255,255,255,0.55); display:block; margin-top:0.1rem; }
+.svc-sub { font-size:0.75rem; color:rgba(255,255,255,0.4); margin-top:0.25rem; font-style:italic; }
+.svc-body { background:var(--mid); padding:1.1rem 1.2rem; font-size:0.875rem; color:var(--body); line-height:1.65; }
+
+/* ── PHASE LIST (GTM) ── */
+.phase-list { display:flex; flex-direction:column; gap:1.25rem; margin:1.5rem 0; }
+.phase-card { border-radius:10px; overflow:hidden; box-shadow:var(--shadow); }
+.phase-num { display:flex; align-items:center; gap:1rem; background:var(--navy); padding:1rem 1.3rem; }
+.phase-card.p2 .phase-num { background:var(--blue); }
+.phase-card.p3 .phase-num { background:var(--green); }
+.pn { font-family:var(--fd); font-size:1.5rem; font-weight:900; color:var(--white); width:2rem; text-align:center; }
+.pt { font-family:var(--fd); font-size:1rem; font-weight:700; color:var(--white); text-transform:uppercase; letter-spacing:0.5px; }
+.pm { font-size:0.78rem; color:rgba(255,255,255,0.5); font-style:italic; margin-left:auto; }
+.phase-body { background:var(--mid); padding:1.2rem 1.3rem; }
+.phase-body h4 { font-family:var(--fd); font-size:0.95rem; font-weight:700; color:var(--navy); text-transform:uppercase; letter-spacing:0.3px; margin-bottom:0.75rem; }
+.phase-body ul { list-style:none; padding:0; }
+.phase-body ul li { font-size:0.875rem; color:var(--body); padding:0.4rem 0 0.4rem 1.2rem; border-bottom:1px solid var(--lgrey); position:relative; line-height:1.55; }
+.phase-body ul li:last-child { border-bottom:none; }
+.phase-body ul li::before { content:"›"; position:absolute; left:0; color:var(--blue); font-weight:700; }
+.phase-card.p2 .phase-body ul li::before { color:var(--blue2); }
+.phase-card.p3 .phase-body ul li::before { color:var(--green2); }
+
+/* risk table coloured levels */
+.data-table tbody td.rust  { font-weight:700; color:var(--orange); }
+.data-table tbody td.steel { font-weight:700; color:var(--blue); }
+
+@media(max-width:900px) {
+  .scenario-grid, .service-grid { grid-template-columns:1fr; }
+}
+
+
+.scenario-navy td:last-child { background:var(--navy)!important; color:var(--white)!important; font-weight:700; }
+.scenario-orange td:last-child { background:var(--orange)!important; color:var(--white)!important; font-weight:700; }
+.scenario-green td:last-child { background:var(--green)!important; color:var(--white)!important; font-weight:700; }
+
+
+/* scenario-card modifiers */
+.conservative .sc-header, .conservative .sc-total { background:var(--navy); }
+.mid .sc-header, .mid .sc-total { background:var(--blue); }
+.aggressive .sc-header, .aggressive .sc-total { background:var(--green); }
+/* service-card modifiers */
+.gold  .svc-top { border-top-color:#C9860A; background:#4A2E00; }
+.teal  .svc-top { border-top-color:var(--orange); background:#1A3040; }
+
+</style>
+</head>
+<body>
+<!-- Master plan context banner -->
+<div style="background:#0a0f1a;border-bottom:2px solid rgba(54,140,217,0.3);padding:0;">
+  <div style="max-width:1140px;margin:0 auto;">
+    <!-- Label row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="padding:0.55rem 1rem;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(54,140,217,0.7);">BU Services Full Picture</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2026</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2027</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2028</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2029</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2030</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">Full plan</div>
+    </div>
+    <!-- Base row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="padding:0.45rem 1rem;font-size:0.72rem;color:rgba(185,142,224,0.65);">Base business</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$47.2M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$53.1M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$58.0M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$59.9M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$55.4M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.2);border-left:1px solid rgba(255,255,255,0.04);">existing</div>
+    </div>
+    <!-- Initiatives row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="padding:0.45rem 1rem;font-size:0.72rem;color:rgba(61,219,80,0.65);">+ 5 growth initiatives</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$3.2M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$18.6M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$25.7M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$32.6M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$37.4M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.2);border-left:1px solid rgba(255,255,255,0.04);">this plan</div>
+    </div>
+    <!-- Total row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;background:rgba(255,255,255,0.03);">
+      <div style="padding:0.5rem 1rem;font-family:var(--fd,'Barlow',sans-serif);font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Total BU Services</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$50.4M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$71.7M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$83.7M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$92.5M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:#3DDB50;border-left:1px solid rgba(255,255,255,0.06);">$92.8M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.25);border-left:1px solid rgba(255,255,255,0.06);">combined</div>
+    </div>
+  </div>
+</div>
+<nav class="nav">
+  <div class="nav-brand">BU SERVICES <em>|</em> PIPELINE INTEGRITY</div>
+  <ul class="nav-links">
+    <li><a href="#s1">Summary</a></li>
+    <li><a href="#s2">Opportunity</a></li>
+    <li><a href="#s3">The Team</a></li>
+    <li><a href="#s4">Services</a></li>
+    <li><a href="#s5">Market</a></li>
+    <li><a href="#s7">Go-to-Market</a></li>
+    <li><a href="#s8">Pricing</a></li>
+    <li><a href="#s9">Revenue</a></li>
+    <li><a href="#s12">Next Steps</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true">DA</div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-label">Commercial Plan &mdash; 2026 to 2030</div>
+      <h1>PIPELINE INTEGRITY<span>DIRECT ASSESSMENT</span></h1>
+      <div class="hero-rule"></div>
+      <p class="hero-sub">Nucleom Inc.&ensp;&middot;&ensp;Nortech Advanced NDT&ensp;&middot;&ensp;BU Services&ensp;&middot;&ensp;Ekoscan Integrity Group</p>
+      <p class="hero-desc">DA Digs &bull; ECDA &bull; ICDA &bull; SCCDA &bull; ILI Verification &bull; PAUT/UT &bull; FFS Assessment &bull; Canada-wide &bull; No Pigging required.</p>
+      <div class="carlton-box">
+        <div class="label">PI Practice Led By</div>
+        <div class="rick">Rick Carlton &mdash; PI Manager &nbsp;|&nbsp; Onboarded &nbsp;|&nbsp; Vendor meetings active: Pembina &amp; Tidewater</div>
+        <div class="joel">Joel Carlton &mdash; PI Operations Manager &nbsp;|&nbsp; 2 PI rigs mid-May &bull; 4 rigs for Tidewater summer dig &bull; Ramp to 6 rigs Q3 2026</div>
+      </div>
+      <div class="hero-conf">Confidential</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat">
+        <div class="hstat-val">$200M+</div>
+        <div class="hstat-lbl">Estimated annual Canadian DA dig market</div>
+      </div>
+      <div class="hstat s2">
+        <div class="hstat-val">5,000+</div>
+        <div class="hstat-lbl">DA digs per year on Canadian transmission networks</div>
+      </div>
+      <div class="hstat s3">
+        <div class="hstat-val">$30M</div>
+        <div class="hstat-lbl">Mid-case 5-year cumulative revenue target 2026–2030</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sec-hdr" id="s1">
+  <div class="sec-hdr-in">
+    <div class="sec-num">01</div>
+    <div><div class="sec-title">Executive Summary</div><div class="sec-sub">DA market context, revenue scenarios, and strategic objectives</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <p>Canadian pipeline operators face a growing and non-deferrable integrity management challenge. CSA Z662 and the Canada Energy Regulator (CER) mandate systematic direct assessment programs for all transmission and distribution pipelines where inline inspection pigging is not feasible or not elected. The DA market represents a multi-hundred-million dollar annual spend across Canada, driven by aging infrastructure, increasing regulatory scrutiny, and the financial consequences of pipeline incidents.</p>
+  <p>Rick Carlton (Pipeline Integrity Manager) and Joel Carlton (Pipeline Integrity Operations Manager) are now onboarded and operational. Vendor qualification meetings and contract discussions are already underway with Pembina Pipelines and Tidewater Midstream. Two fully equipped PI service rigs are being prepared and will be operational by mid-May 2026. Four rigs are targeting readiness for a potential Tidewater summer dig program, with a ramp to six operational PI rigs by Q3 2026 subject to program awards.</p>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="val">$200M+</div><div class="lbl">Estimated annual Canadian DA dig market (surveys + excavations + PAUT + FFS)</div></div>
+    <div class="stat-card"><div class="val">5,000+</div><div class="lbl">Estimated direct assessment digs per year on Canadian transmission networks</div></div>
+    <div class="stat-card steel"><div class="val">$500K–$4M</div><div class="lbl">Year 1 revenue potential from Pembina and Tidewater — dependent on program award timing in next few weeks</div></div>
+    <div class="stat-card steel"><div class="val">$30M</div><div class="lbl">Mid-case 5-year cumulative revenue (2026–2030) from DA programs across BC, AB, and national expansion</div></div>
+  </div>
+  <h3 class="subsection">Key Objectives</h3>
+  <ul class="doc-list">
+    <li>Convert active contract discussions at Pembina Pipelines and Tidewater Midstream into executed programs &mdash; vendor qualification and initial scope discussions are already underway</li>
+    <li>Achieve MSA status with both Pembina and Tidewater by end of Year 1</li>
+    <li>Build revenue to CAD $4M+ annually by Year 2 and $10M+ by Year 5 (mid-case)</li>
+    <li>Deliver all four DA disciplines: ECDA, ICDA, SCCDA, and ILI verification dig programs</li>
+    <li>Establish BU - Services as a recognized independent pipeline integrity specialist differentiated by advanced PAUT/UT technology from within the Ekoscan Integrity Group</li>
+  </ul>
+  <h3 class="subsection">Revenue Summary: Three Scenarios</h3>
+  <table class="data-table">
+    <thead><tr><th>Scenario</th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>Year 4</th><th>Year 5</th><th>5-Year Total</th></tr></thead>
+    <tbody>
+      <tr class="scenario-navy"><td>Conservative</td><td>$750K</td><td>$1.5M</td><td>$2.5M</td><td>$3.5M</td><td>$4.5M</td><td>$12.75M</td></tr>
+      <tr class="scenario-orange"><td>Mid-Case</td><td>$2.0M</td><td>$4.0M</td><td>$6.0M</td><td>$8.0M</td><td>$10.0M</td><td>$30M</td></tr>
+      <tr class="scenario-green"><td>Aggressive</td><td>$4.0M</td><td>$7.0M</td><td>$10.0M</td><td>$13.0M</td><td>$16.0M</td><td>$50M</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S2 OPPORTUNITY -->
+<div class="sec-hdr" id="s2">
+  <div class="sec-hdr-in">
+    <div class="sec-num">02</div>
+    <div><div class="sec-title">The Opportunity</div><div class="sec-sub">Market size, regulatory drivers, and tailwinds</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <p>Canada operates one of the most extensive pipeline networks in the world, with over 840,000 km of pipelines carrying natural gas, crude oil, NGL, and refined products. For pipelines where ILI is not conducted, CSA Z662 Clause 10 mandates a systematic DA process. DA programs are not optional, not deferrable, and cannot be avoided by any regulated operator.</p>
+  <h3 class="subsection">Market Size</h3>
+  <ul class="doc-list">
+    <li>Canada has 73,000+ km of CER-regulated transmission pipelines, plus 770,000+ km of provincially regulated distribution and gathering systems</li>
+    <li>Conservative estimate: 5,000+ direct assessment digs per year across Canadian transmission lines</li>
+    <li>Average dig program value (pre-survey + excavation + PAUT + FFS): CAD $12,000 to $35,000 per dig</li>
+    <li>Total Canadian DA dig market estimated at CAD $200M to $400M+ annually</li>
+    <li>BC and Alberta represent the largest concentration of midstream infrastructure outside Ontario, with Pembina, Tidewater, TC Energy, and ATCO among the largest spenders</li>
+  </ul>
+  <h3 class="subsection">Regulatory Drivers</h3>
+  <ul class="doc-list">
+    <li><strong>CSA Z662:</strong> mandatory integrity management provisions including DA program requirements for unpigged lines</li>
+    <li><strong>CER OPR-99:</strong> operators must file and maintain integrity management programs with CER oversight and audit authority</li>
+    <li><strong>CEPA integrity management protocols:</strong> industry standard above regulatory minimum</li>
+    <li><strong>Increased CER audit activity</strong> since 2016 has intensified operator urgency around defensible, documented DA programs</li>
+    <li><strong>Provincial regulators</strong> (AER in Alberta, BCOGC in BC) maintain parallel requirements, expanding the addressable market beyond CER jurisdiction</li>
+  </ul>
+</div>
+
+<!-- S3 CARLTON TEAM -->
+<div class="sec-hdr" id="s3">
+  <div class="sec-hdr-in">
+    <div class="sec-num">03</div>
+    <div><div class="sec-title">The Pipeline Integrity Practice: Rick &amp; Joel Carlton</div><div class="sec-sub">Rick and Joel Carlton — qualifications, active accounts, rig ramp</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <p class="lead">Pipeline Integrity DA is led by Nortech Advanced NDT within the BU Services platform, with Nucleom providing support. Rick and Joel Carlton are onboarded and operational, with vendor qualification meetings and MSA discussions active at Pembina Pipelines and Tidewater Midstream — both Nortech clients. Nortech's field delivery base spans Edmonton, AB and Fort St. John, BC (operated through Rockx, a permanent Nortech subcontractor). Two PI service rigs are being prepared for mid-May 2026, with four targeting readiness for a Tidewater summer dig program and a ramp to six rigs by Q3 2026.</p>
+  <div class="person-grid">
+    <div class="person-card rick">
+      <div class="person-header"><div class="person-name">RICK CARLTON</div><div class="person-role">Pipeline Integrity Manager</div></div>
+      <div class="person-body"><ul>
+        <li>30+ years in Canadian pipeline integrity</li>
+        <li>Former Applus RTD &mdash; Canada&rsquo;s dominant DA contractor; knows their pricing, methods, and AVL contacts personally</li>
+        <li>Former ECHO NDE &mdash; established field delivery track record as a contractor</li>
+        <li>Former Pembina Pipelines (operator-side) &mdash; defined integrity programs, qualified vendors, awarded contracts</li>
+        <li>Active personal relationships at Pembina Pipelines and Tidewater Midstream &mdash; warm, current, ready to convert</li>
+      </ul></div>
+    </div>
+    <div class="person-card joel">
+      <div class="person-header"><div class="person-name">JOEL CARLTON</div><div class="person-role">Pipeline Integrity Operations Manager</div></div>
+      <div class="person-body"><ul>
+        <li>Day-to-day operations leadership for all DA field programs</li>
+        <li>Direct field experience in ECDA, ILI verification dig execution</li>
+        <li>Pembina and Tidewater relationships at the operational level &mdash; complements Rick&rsquo;s management-level access</li>
+        <li>Responsible for QA/QC, CSA Z662-compliant reporting, and program scheduling</li>
+        <li>Field crew coordination, equipment deployment, HSE compliance</li>
+      </ul></div>
+    </div>
+  </div>
+  <div class="info-box">
+    <div class="box-header">Why the Carlton Team Changes the Competitive Equation</div>
+    <div class="box-item">Vendor qualification is the primary barrier to entry in pipeline integrity &mdash; typically 12 to 24 months for a new entrant. Rick and Joel Carlton eliminate this barrier entirely at Pembina and Tidewater.</div>
+    <div class="box-item">Rick and Joel are already in active discussions with both operators. The qualification process is underway, not pending. Vendor meetings are scheduled and contract scopes are being defined.</div>
+    <div class="box-item">Two PI service rigs will be operational by mid-May 2026. Four rigs are being prepared for a Tidewater summer dig program. Subject to awards, six rigs operational by Q3 2026.</div>
+  </div>
+</div>
+
+<!-- S4 SERVICE OFFERING -->
+<div class="sec-hdr" id="s4">
+  <div class="sec-hdr-in">
+    <div class="sec-num">04</div>
+    <div><div class="sec-title">Service Offering</div><div class="sec-sub">ECDA, ICDA, SCCDA, ILI verification, PAUT/UT, FFS assessment</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <p>The BU - Services delivers the full suite of direct assessment disciplines required by CSA Z662 and CER regulations, combined with advanced PAUT/UT technology from the Ekoscan Integrity Group. All services are delivered without pigging.</p>
+  <div class="service-grid">
+    <div class="service-card">
+      <div class="svc-top"><span class="svc-title">ECDA</span><span class="svc-price">From $4.5K/day</span><div class="svc-sub">External Corrosion Direct Assessment</div></div>
+      <div class="svc-body">Complete 4-step ECDA per NACE SP0502 and CSA Z662: pre-assessment, indirect examination (CIS, ACVG, DCVG, PCM), direct examination at excavations, post-assessment with CSA Z662-compliant documentation.</div>
+    </div>
+    <div class="service-card steel">
+      <div class="svc-top"><span class="svc-title">ICDA</span><span class="svc-price">From $10K/segment</span><div class="svc-sub">Internal Corrosion Direct Assessment</div></div>
+      <div class="svc-body">ICDA per NACE SP0206 (dry gas) and SP0208 (liquid): flow modelling, MSL identification, direct examination digs, UT/PAUT wall thickness mapping, corrosion rate estimation and reporting.</div>
+    </div>
+    <div class="service-card green">
+      <div class="svc-top"><span class="svc-title">SCCDA</span><span class="svc-price">From $12K/segment</span><div class="svc-sub">Stress Corrosion Cracking Direct Assessment</div></div>
+      <div class="svc-body">SCCDA per NACE SP0204 and CSA Z662 Annex N: terrain analysis, CP shielding evaluation, coating assessment, PAUT crack detection at excavations, SCC severity classification.</div>
+    </div>
+    <div class="service-card gold">
+      <div class="svc-top"><span class="svc-title">ILI Verification Digs</span><span class="svc-price">$8K–$18K/dig</span><div class="svc-sub">ILI Tool Verification Programs</div></div>
+      <div class="svc-body">End-to-end ILI verification: pre-dig review, anomaly prioritization, excavation attendance, PAUT corrosion mapping vs. ILI calls, FFS assessment per ASME B31G/Modified B31G, run/repair recommendation, regulatory documentation.</div>
+    </div>
+    <div class="service-card teal">
+      <div class="svc-top"><span class="svc-title">PAUT / UT Mapping</span><span class="svc-price">$5.5K–$8.5K/day</span><div class="svc-sub">Corrosion Mapping at Excavations</div></div>
+      <div class="svc-body">Full-coverage encoded PAUT scans at excavations. C-scan thickness maps colour-coded vs. nominal specification. Crack detection capability (TOFD/tandem). SG NDT instrument technology advantage within Ekoscan group.</div>
+    </div>
+    <div class="service-card">
+      <div class="svc-top"><span class="svc-title">FFS Assessment</span><span class="svc-price">$3.5K–$8K/report</span><div class="svc-sub">Fitness-for-Service / Remaining Life</div></div>
+      <div class="svc-body">ASME B31G, Modified B31G, CSA Z662 Annex O Level 1 and Level 2. Remaining life calculation, pressure derating recommendations, remediation options. Engineering sign-off. Included in ILI dig program pricing.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S5 TARGET MARKET -->
+<div class="sec-hdr" id="s5">
+  <div class="sec-hdr-in">
+    <div class="sec-num">05</div>
+    <div><div class="sec-title">Target Market</div><div class="sec-sub">Transmission operators, pipeline segments, and geographic priority</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <p>Primary entry market is BC and Alberta, leveraging Rick and Joel Carlton&rsquo;s established relationships with Pembina Pipelines and Tidewater Midstream. National expansion follows via MSA structures.</p>
+  <table class="data-table">
+    <thead><tr><th>Operator</th><th>Network</th><th>Annual Revenue Potential</th><th>Entry Strategy</th><th>Priority</th></tr></thead>
+    <tbody>
+      <tr><td>Pembina Pipelines</td><td>18,000+ km AB/BC/SK</td><td class="rust">$500K–$2M+/yr</td><td>Onboarded &#10004; Vendor meetings active. Contract discussions underway now.</td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td></tr>
+      <tr><td>Tidewater Midstream</td><td>BC/AB gathering</td><td class="rust">$200K–$1M/yr</td><td>Onboarded &#10004; Active discussions. 4 rigs being prepared for Tidewater summer dig program.</td><td>&#9733;&#9733;&#9733;&#9733;&#9733;</td></tr>
+      <tr><td>TC Energy</td><td>93,000 km national gas</td><td class="steel">$1M–$3M+/yr</td><td>Carlton network; CER compliance driver</td><td>&#9733;&#9733;&#9733;&#9733;&#9734;</td></tr>
+      <tr><td>Enbridge</td><td>Mainline + gas distribution</td><td class="steel">$1M–$4M+/yr</td><td>Largest integrity spend in Canada; Carlton team (Nortech) relationships; Nucleom technical depth</td><td>&#9733;&#9733;&#9733;&#9733;&#9734;</td></tr>
+      <tr><td>ATCO Gas / FortisBC</td><td>Gas distribution AB/BC</td><td>$200K–$800K/yr</td><td>Regulatory-driven ECDA/ICDA on distribution systems</td><td>&#9733;&#9733;&#9733;&#9734;&#9734;</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S6 COMPETITIVE LANDSCAPE -->
+<div class="sec-hdr" id="s6">
+  <div class="sec-hdr-in">
+    <div class="sec-num">06</div>
+    <div><div class="sec-title">Competitive Landscape</div><div class="sec-sub">Market positioning and competitive differentiation</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <p>Pipeline integrity DA in Canada is dominated by a small number of established contractors with deep operator relationships. Acuren (formerly Applus RTD) is the dominant player. Rick Carlton&rsquo;s career at Applus RTD and ECHO NDE means the BU - Services enters with detailed competitive intelligence on pricing, methods, and specific weaknesses of the incumbent players.</p>
+  <table class="data-table">
+    <thead><tr><th>Competitor</th><th>Approach</th><th>BU - Services Advantage</th></tr></thead>
+    <tbody>
+      <tr><td>Acuren (formerly Applus RTD)</td><td>Dominant incumbent; pigging-focused with DA as secondary capability</td><td>Rick Carlton was Applus RTD &mdash; knows their pricing, methods, and AVL contacts personally. Independent DA specialist positioning.</td></tr>
+      <tr><td>WestCan Integrity</td><td>Strong AB/BC regional player; ECDA and ICDA field surveys</td><td>Carlton team relationships at Pembina and Tidewater are stronger. PAUT/UT technology advantage at the dig face.</td></tr>
+      <tr><td>Bureau Veritas</td><td>Global generalist; Canadian PI is one of many service lines</td><td>Carlton team brings dedicated PI leadership. Ekoscan PAUT/UT depth is superior to BV field operations.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S7 GO-TO-MARKET -->
+<div class="sec-hdr" id="s7">
+  <div class="sec-hdr-in">
+    <div class="sec-num">07</div>
+    <div><div class="sec-title">Go-to-Market Strategy</div><div class="sec-sub">Phase 1 Pembina/Tidewater to national DA platform 2026–2030</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <div class="phase-list">
+    <div class="phase-card">
+      <div class="phase-num"><div class="pn">1</div><div class="pt">Anchor Activation</div><div class="pm">In Progress</div></div>
+      <div class="phase-body"><h4>Phase 1: Anchor Account Activation &mdash; In Progress</h4><ul>
+        <li>Vendor qualification and contract discussions already underway at Pembina Pipelines and Tidewater Midstream &#10004;</li>
+        <li>MSA negotiations active; rate cards and scope definitions being finalized at both accounts</li>
+        <li>Two PI service rigs operational by mid-May 2026; four rigs being prepared for potential Tidewater summer dig program</li>
+        <li>Ramp to six operational PI field rigs by Q3 2026 subject to program award confirmation</li>
+      </ul></div>
+    </div>
+    <div class="phase-card p2">
+      <div class="phase-num"><div class="pn">2</div><div class="pt">Scope Expansion</div><div class="pm">Months 7–24</div></div>
+      <div class="phase-body"><h4>Phase 2: Scope Expansion and New Account Development</h4><ul>
+        <li>Convert Phase 1 completions into multi-year MSA renewals with expanded scope (add SCCDA, ICDA)</li>
+        <li>Initiate TC Energy and Enbridge outreach using Pembina and Tidewater as peer references</li>
+        <li>Target ATCO Gas and FortisBC for gas distribution ECDA/ICDA programs</li>
+        <li>Standardize national reporting templates and PAUT data delivery packages</li>
+      </ul></div>
+    </div>
+    <div class="phase-card p3">
+      <div class="phase-num"><div class="pn">3</div><div class="pt">National Scale</div><div class="pm">Months 25–60</div></div>
+      <div class="phase-body"><h4>Phase 3: National Scale and Recurring Revenue</h4><ul>
+        <li>Secure national MSA with TC Energy and/or Enbridge across multiple business units and regions</li>
+        <li>Expand to SK, MB, and ON markets via referrals from Pembina and TC Energy regional teams</li>
+        <li>Target gas distribution utilities for distribution-class ECDA and ICDA recurring programs</li>
+        <li>Lock in multi-year program agreements covering 3 to 5-year regulatory integrity cycles</li>
+      </ul></div>
+    </div>
+  </div>
+</div>
+
+<!-- S8 PRICING -->
+<div class="sec-hdr" id="s8">
+  <div class="sec-hdr-in">
+    <div class="sec-num">08</div>
+    <div><div class="sec-title">Pricing Model</div><div class="sec-sub">Per-dig, program, and retainer pricing by service type</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <table class="data-table">
+    <thead><tr><th>Service</th><th>Indicative Rate (CAD)</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>ECDA Field Survey (CIS, ACVG/DCVG)</td><td>$4,500 – $6,500/day</td><td>2-person crew + survey equipment. Per-km also available: $800–$1,500/km for CIS.</td></tr>
+      <tr><td>ILI Verification Dig (per dig)</td><td>$8,000 – $18,000/dig</td><td>Pre-dig review + excavation attendance + PAUT + preliminary FFS. Fixed price per dig program.</td></tr>
+      <tr><td>PAUT / UT Corrosion Mapping</td><td>$5,500 – $8,500/day</td><td>Premium rate for encoded PAUT capability. Typically 1–2 days per excavation.</td></tr>
+      <tr><td>FFS / Engineering Assessment</td><td>$3,500 – $8,000/report</td><td>CSA Z662 Annex O, ASME B31G / Modified B31G. Included in ILI dig program pricing.</td></tr>
+      <tr><td>SCCDA Program (per segment)</td><td>$12,000 – $28,000/segment</td><td>Full 4-step SCCDA: pre-assessment, terrain analysis, indirect exam, 2–4 direct exam digs, post-assessment report.</td></tr>
+      <tr><td>ICDA Program (per segment)</td><td>$10,000 – $22,000/segment</td><td>Flow modelling, MSL identification, 2–3 direct exam digs, post-assessment report.</td></tr>
+      <tr><td>Multi-Segment MSA Program (annual)</td><td>Negotiated</td><td>Target: 10–15% discount vs. per-segment rates; annual volume commitment.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S9 REVENUE -->
+<div class="sec-hdr" id="s9">
+  <div class="sec-hdr-in">
+    <div class="sec-num">09</div>
+    <div><div class="sec-title">Revenue Projections</div><div class="sec-sub">Conservative, mid-case, and aggressive scenarios 2026–2030</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <p>Three scenarios are presented reflecting the range of outcomes from current commercial discussions with Pembina and Tidewater. Year 1 is directly dependent on program award timing in the near-term meetings underway.</p>
+  <div class="scenario-grid">
+    <div class="scenario-card conservative">
+      <div class="sc-header">CONSERVATIVE</div>
+      <div class="sc-rows">
+        <div class="sc-yr"><div class="yr-label">Year 1 (2026)</div><div class="yr-val">$750K</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 2 (2027)</div><div class="yr-val">$1.5M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 3 (2028)</div><div class="yr-val">$2.5M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 4 (2029)</div><div class="yr-val">$3.5M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 5 (2030)</div><div class="yr-val">$4.5M</div></div>
+      </div>
+      <div class="sc-total">5-Year Total: $12.75M</div>
+    </div>
+    <div class="scenario-card mid">
+      <div class="sc-header">MID-CASE</div>
+      <div class="sc-rows">
+        <div class="sc-yr"><div class="yr-label">Year 1 (2026)</div><div class="yr-val">$2.0M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 2 (2027)</div><div class="yr-val">$4.0M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 3 (2028)</div><div class="yr-val">$6.0M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 4 (2029)</div><div class="yr-val">$8.0M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 5 (2030)</div><div class="yr-val">$10.0M</div></div>
+      </div>
+      <div class="sc-total">5-Year Total: $30M</div>
+    </div>
+    <div class="scenario-card aggressive">
+      <div class="sc-header">AGGRESSIVE</div>
+      <div class="sc-rows">
+        <div class="sc-yr"><div class="yr-label">Year 1 (2026)</div><div class="yr-val">$4.0M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 2 (2027)</div><div class="yr-val">$7.0M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 3 (2028)</div><div class="yr-val">$10.0M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 4 (2029)</div><div class="yr-val">$13.0M</div></div>
+        <div class="sc-yr"><div class="yr-label">Year 5 (2030)</div><div class="yr-val">$16.0M</div></div>
+      </div>
+      <div class="sc-total">5-Year Total: $50M</div>
+    </div>
+  </div>
+  <h3 class="subsection">Mid-Case Revenue by Service Stream</h3>
+  <table class="rtbl">
+    <thead><tr><th>Revenue Stream</th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>Year 4</th><th>Year 5</th></tr></thead>
+    <tbody>
+      <tr><td>ECDA field surveys</td><td>$120,000</td><td>$380,000</td><td>$720,000</td><td>$1,080,000</td><td>$1,440,000</td></tr>
+      <tr><td>ILI verification dig programs</td><td>$480,000</td><td>$1,200,000</td><td>$2,160,000</td><td>$3,120,000</td><td>$4,200,000</td></tr>
+      <tr><td>PAUT / UT corrosion mapping (premium)</td><td>$180,000</td><td>$480,000</td><td>$840,000</td><td>$1,200,000</td><td>$1,560,000</td></tr>
+      <tr><td>FFS / engineering assessments</td><td>$120,000</td><td>$300,000</td><td>$480,000</td><td>$660,000</td><td>$840,000</td></tr>
+      <tr><td>SCCDA programs</td><td>$60,000</td><td>$240,000</td><td>$480,000</td><td>$720,000</td><td>$960,000</td></tr>
+      <tr><td>ICDA programs</td><td>$40,000</td><td>$160,000</td><td>$320,000</td><td>$480,000</td><td>$640,000</td></tr>
+      <tr><td>Multi-segment MSA programs</td><td>N/A</td><td>$240,000</td><td>$1,000,000</td><td>$1,740,000</td><td>$2,360,000</td></tr>
+    </tbody>
+    <tfoot><tr><td>TOTAL (Mid-Case)</td><td>$1,000,000</td><td>$3,000,000</td><td>$6,000,000</td><td>$9,000,000</td><td>$12,000,000</td></tr></tfoot>
+  </table>
+</div>
+
+<!-- S10 IMPLEMENTATION -->
+<div class="sec-hdr" id="s10">
+  <div class="sec-hdr-in">
+    <div class="sec-num">10</div>
+    <div><div class="sec-title">Implementation Plan</div><div class="sec-sub">Quarterly execution milestones</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <table class="data-table">
+    <thead><tr><th>Phase</th><th>Timeline</th><th>Key Activities</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 0: Mobilization</td><td>Complete &#10004;</td><td>Rick and Joel Carlton onboarded and operational. QMS, insurance, and HSE in place. PI rig preparation underway: 2 rigs mid-May, 4 rigs for Tidewater summer program, ramp to 6 rigs Q3 2026.</td></tr>
+      <tr><td>Phase 1: Anchor Activation</td><td>In Progress (Q2 2026)</td><td>Vendor qualification and contract discussions underway at Pembina and Tidewater. 2 PI rigs ready mid-May; 4 rigs for Tidewater summer dig program. Ramp to 6 rigs by Q3 2026.</td></tr>
+      <tr><td>Phase 2: Scope Expansion</td><td>Months 7–24</td><td>MSA renewals with expanded scope. TC Energy and Enbridge outreach. ATCO Gas / FortisBC distribution programs targeted.</td></tr>
+      <tr><td>Phase 3: National Scale</td><td>Months 25–60</td><td>National MSA with TC Energy/Enbridge. SK, MB, ON expansion. Multi-year recurring program agreements locked in.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S11 RISK -->
+<div class="sec-hdr" id="s11">
+  <div class="sec-hdr-in">
+    <div class="sec-num">11</div>
+    <div><div class="sec-title">Risk Management</div><div class="sec-sub">Key risks and mitigation strategies</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <table class="data-table">
+    <thead><tr><th>Risk</th><th>Level</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>Key person dependency (Rick Carlton)</td><td class="rust">HIGH</td><td>Joel Carlton provides operational continuity. Rick and Joel are now active in the business; program methodologies and operator relationships are being documented into BU - Services institutional knowledge from the outset.</td></tr>
+      <tr><td>Vendor qualification delays</td><td class="steel">MEDIUM</td><td>Rick Carlton&rsquo;s relationships accelerate qualification to weeks. Pre-position all QMS, insurance, and HSE documentation for immediate submission.</td></tr>
+      <tr><td>Commodity downturn reducing CAPEX</td><td class="steel">MEDIUM</td><td>DA is primarily regulatory-driven, not discretionary. CSA Z662 and CER requirements cannot be deferred regardless of commodity price.</td></tr>
+      <tr><td>Competitive response from Acuren</td><td class="steel">MEDIUM</td><td>BU - Services competitive advantage is personal relationships, not price. Acuren cannot replicate Rick Carlton&rsquo;s Pembina and Tidewater access.</td></tr>
+      <tr><td>Regulatory change (CSA Z662 revision)</td><td>LOW</td><td>CSA Z662 revisions historically increase DA requirements. Regulatory change is more likely to expand the addressable market than to contract it.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- S12 CONCLUSION -->
+<div class="sec-hdr" id="s12">
+  <div class="sec-hdr-in">
+    <div class="sec-num">12</div>
+    <div><div class="sec-title">Conclusion and Next Steps</div><div class="sec-sub">Immediate next actions and accountabilities</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+  <p>The pipeline integrity direct assessment market in Canada is large, growing, and non-discretionary. The BU - Services enters this market with the single most valuable asset available: Rick Carlton and Joel Carlton, two experienced professionals with warm, active relationships at the exact operators most likely to award immediate programs.</p>
+  <p>This is not a plan waiting for a starting pistol. Rick and Joel Carlton are onboarded and active. Vendor qualification meetings and contract discussions are underway at Pembina Pipelines and Tidewater Midstream right now. Two PI service rigs will be operational by mid-May 2026, four are being prepared for a potential Tidewater summer dig program, and the BU - Services is ready to scale to six operational field rigs by Q3 2026 as program awards confirm. This is a re-activation plan with a superior technical platform behind it.</p>
+  <h3 class="subsection">Immediate Next Steps</h3>
+  <ul class="doc-list">
+    <li>Rick and Joel Carlton onboarded and operational &#10004;</li>
+    <li>Vendor qualification and contract discussions underway at Pembina Pipelines and Tidewater Midstream &#10004;</li>
+    <li>Finalize MSAs at both accounts; 2 PI rigs operational mid-May 2026; 4 rigs ready for Tidewater summer dig program</li>
+    <li>Mobilize first programs on MSA execution; scale to 6 operational PI rigs by Q3 2026 subject to program awards</li>
+    <li>Initiate TC Energy outreach via Carlton network; target approved vendor list submission within 6 months</li>
+    <li>Establish BU - Services QMS to CSA Z662 and CER documentation standards</li>
+  </ul>
+  <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid var(--lgrey); text-align:center; color:var(--body); font-size:0.82rem;">
+    Nucleom Inc. &nbsp;|&nbsp; nucleom.ca &nbsp;|&nbsp; Quebec City, QC, Canada<br>
+    Ekoscan Integrity Group &nbsp;|&nbsp; ekoscanintegrity.com &nbsp;|&nbsp; France
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-in">
+    <div class="footer-brand">PIPELINE INTEGRITY &mdash; DIRECT ASSESSMENT<br><span>COMMERCIAL PLAN 2026&ndash;2030</span></div>
+    <div class="footer-meta">Nucleom Inc. &nbsp;|&nbsp; Nortech Advanced NDT &nbsp;|&nbsp; BU Services<br>Ekoscan Integrity Group &nbsp;|&nbsp; Jon Eustace, CEO &mdash; North America &nbsp;|&nbsp; April 2026 &nbsp;|&nbsp; CONFIDENTIAL</div>
+  </div>
+</footer>
+
+<!-- FINANCIAL SUMMARY — PIPELINE INTEGRITY DA -->
+<div id="fin-pipeline" style="background:var(--mid);border-top:3px solid var(--blue2);margin:2.5rem 0 0;padding:0;">
+  <div style="background:#0a1020;padding:0.7rem 2.5rem;">
+    <div style="max-width:1140px;margin:0 auto;display:flex;align-items:center;gap:1rem;">
+      <div style="font-family:var(--fd);font-size:0.62rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--blue2);white-space:nowrap;">Financial Model</div>
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.45);">Pipeline Integrity DA — gross margin, EBITDA, CAPEX &amp; staffing. Part of the BU Services Master Commercial Plan financial model. All figures $000 CAD.</div>
+    </div>
+  </div>
+  <div style="max-width:1140px;margin:0 auto;padding:1.5rem 2.5rem 2rem;">
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid var(--blue2);">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">5-Yr Revenue</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">$30,000K</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #368CD980;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">Gross Margin</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">33%</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #368CD980;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">5-Yr EBITDA</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">$8,080K</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid var(--orange);">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">Total CAPEX</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">$1,440K</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #F0C040;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">Peak Headcount</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">15.0 FTE</div>
+      </div>
+    </div>
+
+    <!-- P&L table -->
+    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:1.25rem;">
+      <thead>
+        <tr style="background:var(--navy);">
+          <th style="text-align:left;padding:0.55rem 0.9rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">($000 CAD)</th>
+          <th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2026</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2027</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2028</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2029</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2030</th>
+          <th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">5-Year</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;font-weight:700;color:var(--navy);">Revenue</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$2,000</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$4,000</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$6,000</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$8,000</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$10,000</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;color:var(--navy);">$30,000</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;color:var(--body);">Gross Profit <span style="color:rgba(0,0,0,0.4);font-size:0.78rem;">(33%)</span></td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;">$660</td><td style="padding:0.5rem 0.6rem;text-align:right;">$1,320</td><td style="padding:0.5rem 0.6rem;text-align:right;">$1,980</td><td style="padding:0.5rem 0.6rem;text-align:right;">$2,640</td><td style="padding:0.5rem 0.6rem;text-align:right;">$3,300</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;">$9,900</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;color:var(--body);">SG&amp;A / Overhead</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(180)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(280)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(380)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(460)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(520)</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(1,820)</td>
+        </tr>
+        <tr style="background:#0a1020;border-top:2px solid var(--blue2);">
+          <td style="padding:0.6rem 0.9rem;font-weight:900;color:var(--white);">EBITDA</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#368CD9;">$480</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#368CD9;">$1,040</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#368CD9;">$1,600</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#368CD9;">$2,180</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#368CD9;">$2,780</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#368CD9;">$8,080</td>
+        </tr>
+        <tr style="background:#0a1020;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <td style="padding:0.35rem 0.9rem 0.35rem 1.3rem;font-size:0.78rem;color:rgba(255,255,255,0.4);">EBITDA %</td>
+          <td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">24.0%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">26.0%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">26.7%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">27.3%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">27.8%</td>
+          <td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">26.9%</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;color:var(--body);">CAPEX</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(720)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(360)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(180)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(90)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(90)</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(1,440)</td>
+        </tr>
+        <tr style="background:var(--navy);border-top:2px solid var(--blue2);">
+          <td style="padding:0.6rem 0.9rem;font-weight:900;color:var(--white);">Free Cash Flow</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;color:#FF6B6B;font-weight:900;">(240)</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#368CD9;font-weight:900;">680</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#368CD9;font-weight:900;">1,420</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#368CD9;font-weight:900;">2,090</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#368CD9;font-weight:900;">2,690</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;color:#368CD9;font-weight:900;">6,640</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Margin note -->
+    <div style="background:#0a1020;border-left:4px solid var(--blue2);border-radius:0 5px 5px 0;padding:0.75rem 1rem;font-size:0.8rem;color:rgba(255,255,255,0.6);line-height:1.65;margin-bottom:1.25rem;">
+      <strong style="color:var(--white);">Margin basis:</strong> Pipeline DA carries the lowest GM of the four initiatives — it is the most equipment-intensive service and operates in a competitive market. Excavation costs are partially client-direct or pass-through. The business case is volume-driven: at $12K–$35K per dig and 5,000+ mandatory digs per year across Canadian networks, the addressable market is large and non-deferrable under CSA Z662.
+    </div>
+
+    <!-- CAPEX and Staffing side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+      <!-- CAPEX detail -->
+      <div style="border-radius:6px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--navy);padding:0.55rem 0.9rem;font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.6);">CAPEX Detail</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+          
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2026 — $720K</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">4× PI service rigs fully equipped at ~$180K each (truck, OmniScan/Focus PX PAUT instrument, ECDA/ICDA survey equipment, safety kit). 2 rigs operational mid-May; 2 more targeting Tidewater summer dig program.</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2027 — $360K</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">2× additional rigs as Pembina + Tidewater MSAs scale to full programme volume.</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2028 — $180K</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">1× rig + PAUT instrument refresh.</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2029–2030 — $90K/yr</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">Fleet maintenance, probe and wedge replacement.</td>
+        </tr>
+        </table>
+      </div>
+
+      <!-- Staffing -->
+      <div style="border-radius:6px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--navy);padding:0.55rem 0.9rem;font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.6);">Incremental Staffing</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+          <thead>
+            <tr style="background:#1a2040;">
+              <th style="text-align:left;padding:0.45rem 0.7rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">Year</th>
+              <th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2026</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2027</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2028</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2029</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2030</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+              <td style="padding:0.45rem 0.7rem;color:var(--body);font-size:0.78rem;">FTE added</td>
+              
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+4.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+4.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+3.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+2.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+2.0</td>
+            </tr>
+            <tr style="background:var(--navy);">
+              <td style="padding:0.45rem 0.7rem;font-weight:700;color:var(--white);font-size:0.78rem;">Cumul.</td>
+              
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">4.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">8.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">11.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">13.0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">15.0</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="background:var(--mid);padding:0.65rem 0.9rem;font-size:0.78rem;color:var(--body);line-height:1.6;">
+          <strong>FTE (Full-Time Equivalent):</strong> One FTE = one person at full-time hours. A 0.5 FTE is a part-time or shared-role allocation. <strong>Utilisation target: 85%</strong> for all field and technical staff (billable hours as a percentage of available hours). Management and administrative roles are excluded from the utilisation target. Loaded cost includes salary, benefits (30–32% load), certifications, and vehicle allowances where applicable.<br><br><strong>Loaded cost: $85K/yr avg.</strong> PAUT/UT Level 2 field technicians, 2 per PI service rig. Rick Carlton (PI Manager) and Joel Carlton (Operations Manager) already onboarded and costed in the base business — not counted here.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

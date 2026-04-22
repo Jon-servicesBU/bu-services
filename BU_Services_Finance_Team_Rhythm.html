@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — Finance Team Rhythm</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A1F5C;--blue:#1A5CA8;--sky:#00AEEF;--amber:#C9860A;
+  --green:#196B24;--orange:#E97132;--red:#CC2222;--purp:#5A3FA0;
+  --mid:rgba(255,255,255,.1);--dgrey:#6678A0;
+  --mono:'IBM Plex Mono',monospace;--fd:'Barlow Condensed',sans-serif;
+}
+body{background:#07112A;color:#E8EEF8;font-family:'Barlow',sans-serif;font-size:14px;min-height:100vh}
+
+/* NAV */
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(7,17,42,.97);border-bottom:2px solid var(--amber);padding:0 2rem;display:flex;align-items:center;height:52px;gap:1rem}
+.brand{font-size:.78rem;font-weight:800;color:var(--amber);letter-spacing:2px;text-transform:uppercase;white-space:nowrap}
+.nav-sep{width:1px;height:20px;background:rgba(255,255,255,.2)}
+.nav-links{display:flex;gap:0;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{padding:.4rem .9rem;font-size:.72rem;font-weight:600;color:#A8B8D0;text-decoration:none;border-bottom:2px solid transparent;height:52px;line-height:52px;white-space:nowrap;transition:color .15s,border-color .15s}
+.nav-links a:hover,.nav-links a.active{color:var(--amber);border-bottom-color:var(--amber)}
+.nav-btn{color:var(--sky);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;text-decoration:none;flex-shrink:0}
+.nav-btn:hover{background:rgba(0,174,239,.22)}
+.nav-date{font-family:var(--mono);font-size:.65rem;color:var(--dgrey);white-space:nowrap}
+
+/* PAGE HEADER */
+.page-hdr{background:linear-gradient(135deg,#07112A 0%,#0D2240 50%,#0A1F5C 100%);padding:2.5rem 2.5rem 2rem;border-bottom:1px solid rgba(201,134,10,.3);position:relative;overflow:hidden}
+.page-hdr::before{content:'';position:absolute;right:-60px;top:-60px;width:320px;height:320px;border-radius:50%;border:1px solid rgba(201,134,10,.1);pointer-events:none}
+.page-hdr::after{content:'';position:absolute;right:20px;top:20px;width:180px;height:180px;border-radius:50%;border:1px solid rgba(201,134,10,.07);pointer-events:none}
+.page-hdr .eh{font-size:.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:.4rem}
+.page-hdr h1{font-family:var(--fd);font-size:2.4rem;font-weight:900;color:#fff;letter-spacing:1px;margin-bottom:.3rem}
+.page-hdr .sub{font-size:.82rem;color:rgba(255,255,255,.5);margin-bottom:1.2rem}
+.owners-row{display:flex;gap:.75rem;flex-wrap:wrap}
+.owner-chip{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:.3rem .8rem;font-size:.72rem}
+.owner-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* SECTION */
+.wrap{max-width:1400px;margin:0 auto;padding:2rem 2.5rem}
+.sec-hdr{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.25rem;border-bottom:2px solid rgba(201,134,10,.25);padding-bottom:.6rem}
+.sec-hdr h2{font-family:var(--fd);font-size:1.35rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.5px}
+.sec-hdr .sh-sub{font-size:.72rem;color:var(--dgrey)}
+hr.div{border:none;border-top:1px solid var(--mid);margin:2rem 0}
+
+/* WEEK GRID */
+.week-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:2rem}
+@media(max-width:900px){.week-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.week-grid{grid-template-columns:1fr}}
+
+.day-col{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+.day-hdr{padding:.6rem .85rem;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between}
+.day-name{font-family:var(--fd);font-size:.9rem;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.day-badge{font-size:.55rem;font-weight:700;padding:.15rem .45rem;border-radius:8px;text-transform:uppercase;letter-spacing:.6px}
+.badge-light{background:rgba(0,174,239,.15);color:var(--sky)}
+.badge-heavy{background:rgba(201,134,10,.2);color:#FCD34D}
+.badge-review{background:rgba(90,63,160,.2);color:#C4B5FD}
+.day-body{padding:.75rem .85rem;flex:1;display:flex;flex-direction:column;gap:.55rem}
+.day-empty{color:var(--dgrey);font-size:.72rem;font-style:italic;padding:.25rem 0}
+
+.task{display:flex;flex-direction:column;gap:.15rem}
+.task-who{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.6}
+.task-title{font-size:.78rem;font-weight:600;line-height:1.3}
+.task-desc{font-size:.68rem;color:rgba(255,255,255,.5);line-height:1.4}
+.task-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:.4rem;flex-shrink:0;vertical-align:middle;margin-top:-1px}
+
+/* MONTHLY CALENDAR */
+.monthly-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+@media(max-width:800px){.monthly-grid{grid-template-columns:1fr}}
+
+.month-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;overflow:hidden}
+.month-card-hdr{padding:.65rem .9rem;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:.6rem}
+.month-card-icon{font-size:.9rem}
+.month-card-title{font-family:var(--fd);font-size:.88rem;font-weight:700;color:#fff;flex:1}
+.month-card-when{font-family:var(--mono);font-size:.62rem;color:var(--dgrey)}
+.month-card-body{padding:.75rem .9rem}
+.month-task{display:flex;gap:.6rem;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.month-task:last-child{border-bottom:none}
+.month-num{font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--amber);width:16px;flex-shrink:0;padding-top:.05rem}
+.month-text{font-size:.75rem;line-height:1.4;color:rgba(255,255,255,.75)}
+.month-sub{font-size:.65rem;color:var(--dgrey);margin-top:.1rem}
+
+/* MEETING AGENDA */
+.meeting-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+@media(max-width:800px){.meeting-grid{grid-template-columns:1fr}}
+.meeting-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;overflow:hidden}
+.meeting-hdr{padding:.7rem 1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.meeting-title{font-family:var(--fd);font-size:.95rem;font-weight:800;color:#fff;margin-bottom:.2rem}
+.meeting-meta{display:flex;gap:.75rem;flex-wrap:wrap}
+.meeting-meta span{font-size:.65rem;color:var(--dgrey);font-family:var(--mono)}
+.meeting-meta strong{color:rgba(255,255,255,.6)}
+.agenda-list{padding:.75rem 1rem;display:flex;flex-direction:column;gap:.4rem}
+.agenda-item{display:flex;gap:.65rem;align-items:flex-start}
+.ai-num{background:var(--amber);color:var(--navy);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0;margin-top:.05rem}
+.ai-text{flex:1}
+.ai-title{font-size:.78rem;font-weight:600;color:#fff}
+.ai-owner{font-size:.65rem;color:var(--dgrey)}
+
+/* DATA NOTE */
+.data-note{background:rgba(0,174,239,.06);border:1px solid rgba(0,174,239,.15);border-radius:6px;padding:.65rem 1rem;font-size:.68rem;color:rgba(255,255,255,.45);font-family:var(--mono);margin-top:1rem}
+.data-note strong{color:var(--sky)}
+
+/* COLOUR LEGEND */
+.legend{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.leg-item{display:flex;align-items:center;gap:.4rem;font-size:.68rem;color:var(--dgrey)}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="brand">Finance Rhythm</div>
+  <div class="nav-sep"></div>
+  <div class="nav-links">
+    <a href="#weekly" class="active">Weekly</a>
+    <a href="#monthly">Monthly</a>
+    <a href="#meetings">Meetings</a>
+  </div>
+  <div class="nav-date" id="nav-date"></div>
+  <a class="nav-btn" href="BU_Services_Management_Hub.html" target="buservices">&#128101; Management Hub &#8594;</a>
+</nav>
+
+<div class="page-hdr">
+  <div class="eh">Ekoscan Integrity Group — BU Services</div>
+  <h1>Finance Team Rhythm</h1>
+  <div class="sub">Weekly &amp; monthly cadence — Jeremy Irwin · Renée Lachance · Jon Eustace</div>
+  <div class="owners-row">
+    <div class="owner-chip"><div class="owner-dot" style="background:var(--sky)"></div>Jeremy Irwin — Sr. Director, Finance, EIG NA</div>
+    <div class="owner-chip"><div class="owner-dot" style="background:var(--amber)"></div>Renée Lachance — Sr. Director, Finance &amp; Controller, Nucleom</div>
+    <div class="owner-chip"><div class="owner-dot" style="background:rgba(255,255,255,.4)"></div>Jon Eustace — CEO North America</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── WEEKLY ─────────────────────────────────────────────────────────── -->
+  <div id="weekly">
+    <div class="sec-hdr">
+      <h2>Weekly Rhythm</h2>
+      <span class="sh-sub">Standing tasks by day — Finance team</span>
+    </div>
+
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:var(--sky)"></div>Jeremy Irwin</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div>Renée Lachance</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(255,255,255,.4)"></div>Both / Jon</div>
+    </div>
+
+    <div class="week-grid" id="week-grid"></div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ── MONTHLY ────────────────────────────────────────────────────────── -->
+  <div id="monthly">
+    <div class="sec-hdr">
+      <h2>Monthly Cadence</h2>
+      <span class="sh-sub">Standing tasks by week of month</span>
+    </div>
+    <div class="monthly-grid" id="monthly-grid"></div>
+  </div>
+
+  <hr class="div">
+
+  <!-- ── MEETINGS ───────────────────────────────────────────────────────── -->
+  <div id="meetings">
+    <div class="sec-hdr">
+      <h2>Standing Meetings</h2>
+      <span class="sh-sub">Agenda templates for finance cadence meetings</span>
+    </div>
+    <div class="meeting-grid" id="meeting-grid"></div>
+  </div>
+
+  <div class="data-note">
+    <strong>actuals.json fields updated by Finance:</strong>
+    budget_nuc · budget_nor · budget_int · eur_rate · nucleom · nortech · arcndt_invoiced · int_invoiced · cash ·
+    monthly[2026_XX].nuc_hours · nuc_rate · nuc_util · nuc_cost · nuc_margin · nor_* equivalents ·
+    People fields (via BC exports): util_by_office · headcount_active · tenure_buckets · vac_liability_syn_cad
+  </div>
+</div>
+
+<script>
+document.getElementById('nav-date').textContent =
+  new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+
+// ── COLOURS ──────────────────────────────────────────────────────────────────
+var C = {
+  jeremy: '#00AEEF',
+  renee:  '#C9860A',
+  both:   'rgba(255,255,255,.45)',
+  jon:    'rgba(255,255,255,.3)',
+};
+
+// ── WEEKLY DATA ──────────────────────────────────────────────────────────────
+var DAYS = [
+  { name:'Monday', badge:'light', badgeTxt:'Review day', tasks:[
+    { who:'Jeremy', color:C.jeremy,
+      title:'Read weekly KPI email digest',
+      desc:'Review actuals.json-generated email. Flag any revenue anomalies to Jon before Commercial Meeting.' },
+    { who:'Renée', color:C.renee,
+      title:'BC data integrity check',
+      desc:'Spot-check BC postings from prior week — AP/AR entries, payroll batch confirmation.' },
+    { who:'Both', color:C.both,
+      title:'Finance standing sync (as needed)',
+      desc:'Quick alignment on any flags from the weekly email. Not a formal meeting — Slack or 15-min call.' },
+  ]},
+  { name:'Tuesday', badge:null, tasks:[
+    { who:'Renée', color:C.renee,
+      title:'Payroll coordination',
+      desc:'Coordinate with Cynthia Dorval on payroll accuracy, corrections, and upcoming payroll run.' },
+    { who:'Jeremy', color:C.jeremy,
+      title:'Nortech pipeline check',
+      desc:'Confirm Nortech bookings and actuals are current. Update actuals.json manually if needed.' },
+  ]},
+  { name:'Wednesday', badge:null, tasks:[
+    { who:'Renée', color:C.renee,
+      title:'AP/AR review',
+      desc:'Accounts payable: confirm outstanding invoices. Accounts receivable: flag overdue items to Jon.' },
+    { who:'Jeremy', color:C.jeremy,
+      title:'Revenue reconciliation watch',
+      desc:'Once P4 BC connector is live: review SF Closed Won vs BC Invoiced variance in Command Centre.' },
+  ]},
+  { name:'Thursday', badge:null, tasks:[
+    { who:'Both', color:C.both,
+      title:'Eurazeo pack items (quarterly)',
+      desc:'When in Eurazeo reporting week: Renée prepares Nucleom entity actuals; Jeremy assembles EIG-level pack.' },
+    { who:'Renée', color:C.renee,
+      title:'Vacation liability monitor',
+      desc:'Review syndiqués vacation bank balance. Flag any employee >4 weeks accrual to Carol-Anne and Jon.' },
+  ]},
+  { name:'Friday', badge:'heavy', badgeTxt:'Data day', tasks:[
+    { who:'Both', color:C.both,
+      title:'Confirm actuals.json is current',
+      desc:'Jeremy: verify Nortech actuals are entered. Renée: confirm BC exports landed correctly and PA flow ran without errors.' },
+    { who:'Jeremy', color:C.jeremy,
+      title:'Cash position update',
+      desc:'Update cash field in actuals.json if position has changed materially during the week.' },
+    { who:'Renée', color:C.renee,
+      title:'BC export health check',
+      desc:'Confirm Sunday 6PM BC scheduled exports are queued (Hours + Vacances). Monthly: confirm Embauche export for first Sunday of month.' },
+  ]},
+];
+
+var WEEKEND = [
+  { name:'Sunday', badge:'review', badgeTxt:'PA flow', tasks:[
+    { who:'Automated', color:'rgba(90,63,160,.8)',
+      title:'Power Automate flow runs',
+      desc:'7PM ET: PA parses BC exports and writes people fields to actuals.json. Renée\'s BC exports (6PM) must be in SharePoint before this runs.' },
+    { who:'Jeremy', color:C.jeremy,
+      title:'PA flow confirmation (optional)',
+      desc:'Check actuals.json people_updated date has refreshed. If errors, flag to Éric Carmichael Monday morning.' },
+  ]},
+];
+
+var wg = document.getElementById('week-grid');
+DAYS.forEach(function(day) {
+  var badge = day.badge
+    ? '<span class="day-badge badge-' + day.badge + '">' + day.badgeTxt + '</span>'
+    : '';
+  var tasks = day.tasks.map(function(t) {
+    return '<div class="task">' +
+      '<div class="task-who"><span class="task-dot" style="background:' + t.color + '"></span>' + t.who + '</div>' +
+      '<div class="task-title">' + t.title + '</div>' +
+      '<div class="task-desc">' + t.desc + '</div>' +
+    '</div>';
+  }).join('');
+  wg.innerHTML += '<div class="day-col">' +
+    '<div class="day-hdr">' +
+      '<span class="day-name" style="color:' + (day.name==='Sunday'?'#C4B5FD':day.name==='Friday'?'#FCD34D':'#fff') + '">' + day.name + '</span>' +
+      badge +
+    '</div>' +
+    '<div class="day-body">' + tasks + '</div>' +
+  '</div>';
+});
+
+// Sunday note
+var sundayCard = '<div class="day-col" style="grid-column:span 2;border-color:rgba(90,63,160,.3)">' +
+  '<div class="day-hdr"><span class="day-name" style="color:#C4B5FD">Sunday</span>' +
+  '<span class="day-badge badge-review">PA flow 7PM</span></div>' +
+  '<div class="day-body">' +
+  WEEKEND[0].tasks.map(function(t){
+    return '<div class="task"><div class="task-who"><span class="task-dot" style="background:' + t.color + '"></span>' + t.who + '</div>' +
+    '<div class="task-title">' + t.title + '</div><div class="task-desc">' + t.desc + '</div></div>';
+  }).join('') +
+  '</div></div>';
+wg.innerHTML += sundayCard;
+
+// ── MONTHLY DATA ─────────────────────────────────────────────────────────────
+var MONTHLY = [
+  { icon:'📅', title:'Week 1 — BC Data Entry', when:'First Monday of month',
+    tasks:[
+      { n:1, text:'Renée: BC Embauche export lands Sunday 6PM (first Sunday)', sub:'Feeds headcount, tenure, retention_risk fields via PA P8' },
+      { n:2, text:'Jeremy: Enter BC interim actuals into actuals.json', sub:'nucleom, nortech, arcndt_invoiced, int_invoiced, cash — until P4 connector is live' },
+      { n:3, text:'Renée: Provide Nucleom entity actuals to Jeremy', sub:'P&L actuals for Jeremy\'s EIG-level entry into actuals.json' },
+      { n:4, text:'Jeremy: Update monthly KPI fields', sub:'nuc_hours, nuc_rate, nuc_util, nuc_cost, nuc_margin (from Renée\'s BC data)' },
+    ]},
+  { icon:'💰', title:'Month-End Close', when:'Last week of month',
+    tasks:[
+      { n:1, text:'Renée: Nucleom P&L and balance sheet close in BC', sub:'All AP/AR posted, payroll reconciled, accruals entered' },
+      { n:2, text:'Renée: Vacation liability report — flag balances >4 weeks', sub:'Syndiqués Banque 306 — People Dashboard auto-updates via PA' },
+      { n:3, text:'Jeremy: Nortech month-end actuals entry', sub:'Manual — Nortech not in Salesforce or BC connector yet' },
+      { n:4, text:'Jeremy: Cash position update in actuals.json', sub:'Feeds Cash Positions section of Command Centre' },
+    ]},
+  { icon:'📊', title:'Quarterly — Eurazeo Pack', when:'First week of each quarter',
+    tasks:[
+      { n:1, text:'Renée: Nucleom entity actuals for Eurazeo pack', sub:'P&L, EBITDA, headcount — provided to Jeremy' },
+      { n:2, text:'Jeremy: Assemble EIG consolidated pack', sub:'NUC + NOR + INT actuals vs Eurazeo forecast — all 5 initiatives' },
+      { n:3, text:'Jeremy: Update budget_nuc / budget_nor / eur_rate in actuals.json', sub:'Annual review — update when Eurazeo revises plan' },
+      { n:4, text:'Jon: Quarterly gate review — finance inputs', sub:'Revenue vs plan, CAPEX releases, contingency scenarios' },
+    ]},
+];
+
+var mg = document.getElementById('monthly-grid');
+MONTHLY.forEach(function(m) {
+  var tasks = m.tasks.map(function(t) {
+    return '<div class="month-task">' +
+      '<div class="month-num">' + t.n + '</div>' +
+      '<div><div class="month-text">' + t.text + '</div>' +
+      (t.sub ? '<div class="month-sub">' + t.sub + '</div>' : '') +
+      '</div></div>';
+  }).join('');
+  mg.innerHTML += '<div class="month-card">' +
+    '<div class="month-card-hdr">' +
+      '<span class="month-card-icon">' + m.icon + '</span>' +
+      '<span class="month-card-title">' + m.title + '</span>' +
+      '<span class="month-card-when">' + m.when + '</span>' +
+    '</div>' +
+    '<div class="month-card-body">' + tasks + '</div>' +
+  '</div>';
+});
+
+// ── MEETINGS ─────────────────────────────────────────────────────────────────
+var MEETINGS = [
+  { title:'Monthly Finance Review', cadence:'Monthly · First week', chair:'Jon Eustace',
+    attendees:'Jon · Jeremy Irwin · Renée Lachance', color:'var(--amber)',
+    agenda:[
+      { n:1, t:'BC actuals — Nucleom', who:'Renée', d:'P&L actuals vs budget YTD. EBITDA snapshot. Any BC anomalies to flag.' },
+      { n:2, t:'Nortech & group financial data', who:'Jeremy', d:'Enter Nortech bookings and actuals into actuals.json. EIG consolidated view.' },
+      { n:3, t:'People Dashboard review', who:'Renée + Jeremy', d:'Utilization actuals by office. Vacation liability total. Retention risk count vs prior month.' },
+      { n:4, t:'Revenue reconciliation', who:'Jeremy', d:'SF Closed Won vs BC Invoiced variance. Any negative variance = data quality flag to investigate.' },
+      { n:5, t:'Cash positions', who:'Jeremy', d:'Current cash position vs prior month. Any covenant or working capital flags.' },
+      { n:6, t:'actuals.json update confirmation', who:'Jeremy', d:'Confirm all monthly fields are written. Verify Command Centre KPI section reflects latest data.' },
+    ]},
+  { title:'Quarterly Eurazeo Finance Prep', cadence:'Quarterly · Week before Eurazeo meeting', chair:'Jeremy Irwin',
+    attendees:'Jeremy · Renée · Jon (review)', color:'var(--purp)',
+    agenda:[
+      { n:1, t:'Nucleom entity actuals package', who:'Renée', d:'P&L, EBITDA, headcount, vacation liability — all sourced from BC.' },
+      { n:2, t:'Nortech actuals package', who:'Jeremy', d:'Manual compilation — revenue, margin, headcount.' },
+      { n:3, t:'Budget vs actual narrative', who:'Jeremy + Jon', d:'Why are we ahead/behind Eurazeo plan? Initiative-level commentary.' },
+      { n:4, t:'5-year plan progress', who:'Jeremy', d:'Revenue trajectory 2026–2030. Update chart in Command Centre Revenue Trajectory section.' },
+      { n:5, t:'Contingency scenarios', who:'Jon + Jeremy', d:'If >15% behind plan: which contingency lever is triggered? Document for board pack.' },
+    ]},
+  { title:'Finance + People Sync', cadence:'Monthly · Second week', chair:'Renée Lachance',
+    attendees:'Renée · Carol-Anne Lindsay · Jeremy (optional)', color:'var(--sky)',
+    agenda:[
+      { n:1, t:'Vacation liability review', who:'Renée', d:'Syndiqués bank balance vs prior month. High-balance employees (>4 wks) — HR action needed?' },
+      { n:2, t:'Headcount vs budget', who:'Renée + Carol-Anne', d:'Active headcount vs plan. New hires vs terminations since last review.' },
+      { n:3, t:'Payroll accuracy', who:'Renée', d:'Any payroll exceptions from prior month. Cynthia Dorval follow-up items.' },
+      { n:4, t:'Retention risk update', who:'Carol-Anne', d:'Under-1-year count from People Dashboard. Any commercial team retention flags for R-03.' },
+      { n:5, t:'BC export health', who:'Renée', d:'Confirm Hours/Vacances/Embauche exports ran correctly. Any data quality issues for Éric Carmichael.' },
+    ]},
+  { title:'BC Revenue Reconciliation Review', cadence:'Monthly · Once P4 connector is live', chair:'Jeremy Irwin',
+    attendees:'Jeremy · Renée · Éric Carmichael (if BC issues)', color:'var(--green)',
+    agenda:[
+      { n:1, t:'SF Closed Won vs BC Invoiced — Nucleom', who:'Jeremy', d:'Command Centre Reconciliation section. Any negative variance = investigate.' },
+      { n:2, t:'Callout/T&M work not in SF', who:'Jeremy + Renée', d:'Positive variance is normal (callout work). Quantify and document.' },
+      { n:3, t:'BC connector data quality', who:'Renée', d:'Any BC posting errors that would affect the PA connector output. Flag to Éric C.' },
+      { n:4, t:'Monthly KPI field accuracy', who:'Jeremy', d:'Confirm nuc_hours, nuc_rate, nuc_util, nuc_cost, nuc_margin match BC source data.' },
+    ]},
+];
+
+var meetg = document.getElementById('meeting-grid');
+MEETINGS.forEach(function(m) {
+  var items = m.agenda.map(function(a) {
+    return '<div class="agenda-item">' +
+      '<div class="ai-num">' + a.n + '</div>' +
+      '<div class="ai-text">' +
+        '<div class="ai-title">' + a.t + '</div>' +
+        '<div class="ai-owner">' + a.who + ' \u2014 ' + a.d + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  meetg.innerHTML += '<div class="meeting-card">' +
+    '<div class="meeting-hdr" style="border-left:4px solid ' + m.color + ';border-bottom:1px solid rgba(255,255,255,.08)">' +
+      '<div class="meeting-title">' + m.title + '</div>' +
+      '<div class="meeting-meta">' +
+        '<span><strong>Cadence:</strong> ' + m.cadence + '</span>' +
+        '<span><strong>Chair:</strong> ' + m.chair + '</span>' +
+        '<span>' + m.attendees + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="agenda-list">' + items + '</div>' +
+  '</div>';
+});
+
+// ── NAV SCROLL ────────────────────────────────────────────────────────────────
+var navLinks = document.querySelectorAll('.nav-links a');
+var sectionEls = ['weekly','monthly','meetings'].map(function(id){return document.getElementById(id);});
+window.addEventListener('scroll',function(){
+  var y = window.scrollY + 80;
+  var active = 0;
+  sectionEls.forEach(function(s,i){if(s&&s.offsetTop<=y)active=i;});
+  navLinks.forEach(function(l,i){l.classList.toggle('active',i===active);});
+},{passive:true});
+</script>
+</body>
+</html>

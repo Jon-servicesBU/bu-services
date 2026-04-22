@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BU Services — Commercial Playbook: Vinoth Tharma & Max Aggrey</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#161C60;--navy2:#0D1040;--white:#fff;--body:#384660;
+  --lgrey:#F0F3FA;--mgrey:#DDE3F0;
+  --green:#196B24;--green2:#22882F;--green-l:#E8F5E9;
+  --amber:#C9860A;--amber-l:#FFF8E1;
+  --red:#CC2222;--red-l:#FFEBEE;
+  --blue:#0A3A6B;--blue-l:#E8F4FD;
+  --teal:#0D5050;--teal-l:#E1F5EE;
+  --orange:#C9520A;--orange-l:#FFF3EC;
+  --fd:'Barlow Condensed',sans-serif;
+  --fs:'Barlow',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fs);font-size:0.95rem;color:var(--body);background:#F4F6FC;line-height:1.7}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--navy);padding:0 2.5rem;height:52px;display:flex;align-items:center;gap:1.5rem;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--green2)}
+.topbar-brand{font-family:var(--fd);font-size:0.95rem;font-weight:900;color:#fff;letter-spacing:1px;white-space:nowrap}
+.topbar-sep{width:1px;height:18px;background:rgba(255,255,255,0.15)}
+.topbar-nav{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.topbar-nav::-webkit-scrollbar{display:none}
+.topbar-nav a{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.45);padding:0 0.75rem;height:52px;line-height:52px;text-decoration:none;border-bottom:3px solid transparent;margin-bottom:-3px;white-space:nowrap;transition:color .15s,border-color .15s}
+.topbar-nav a:hover{color:#fff}
+.topbar-nav a.act{color:#fff;border-bottom-color:var(--green2)}
+.topbar-right{margin-left:auto;font-size:0.65rem;font-family:var(--mono);color:rgba(255,255,255,0.2);white-space:nowrap}
+
+/* ── HERO ── */
+.hero{background:var(--navy2);padding:3rem 2.5rem 2.5rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+.hero-eye{font-family:var(--mono);font-size:0.62rem;color:rgba(255,255,255,0.35);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem}
+.hero h1{font-family:var(--fd);font-size:2.6rem;font-weight:900;color:#fff;line-height:1.05;margin-bottom:0.4rem}
+.hero h1 span{color:var(--green2)}
+.hero-sub{font-size:0.95rem;color:rgba(255,255,255,0.5);max-width:760px;margin-bottom:1.75rem;line-height:1.65}
+.owner-chips{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.75rem}
+.owner-chip{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:0.6rem 1rem;display:flex;flex-direction:column;gap:0.1rem}
+.oc-name{font-family:var(--fd);font-size:0.9rem;font-weight:800;color:#fff}
+.oc-role{font-size:0.7rem;color:rgba(255,255,255,0.35)}
+.kpi-row{display:flex;gap:0.75rem;flex-wrap:wrap}
+.kpi{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:0.75rem 1rem}
+.kpi-val{font-family:var(--fd);font-size:1.5rem;font-weight:900;color:#fff;line-height:1}
+.kpi-lbl{font-size:0.65rem;color:rgba(255,255,255,0.3);margin-top:0.2rem}
+
+/* ── PAGE ── */
+.page{max-width:1080px;margin:0 auto;padding:2rem 2.5rem 5rem}
+
+/* ── SECTION HEADERS ── */
+.sec-hdr{display:flex;align-items:baseline;gap:0.85rem;margin:2.5rem 0 1rem;padding-bottom:0.5rem;border-bottom:2px solid var(--mgrey)}
+.sec-hdr h2{font-family:var(--fd);font-size:1.45rem;font-weight:900;color:var(--navy)}
+.sec-sub{font-size:0.72rem;color:rgba(0,0,0,0.28);font-family:var(--mono)}
+
+/* ── INITIATIVE HEADER BANNERS ── */
+.init-banner{border-radius:8px;padding:1.1rem 1.4rem;margin:1.5rem 0 1rem;display:flex;align-items:center;gap:1.5rem}
+.init-num{font-family:var(--fd);font-size:2rem;font-weight:900;opacity:0.5;line-height:1}
+.init-title{font-family:var(--fd);font-size:1.2rem;font-weight:900;line-height:1.2}
+.init-owners{font-size:0.75rem;opacity:0.75;margin-top:0.2rem}
+.init-targets{margin-left:auto;text-align:right;font-family:var(--mono);font-size:0.72rem;opacity:0.85}
+
+/* ── TASK CARDS ── */
+.week-label{font-family:var(--fd);font-size:0.7rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,0.25);margin:1.2rem 0 0.4rem}
+.tasks{display:grid;gap:0.5rem;margin-bottom:0.5rem}
+.task{background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:0;overflow:hidden;display:grid;grid-template-columns:4px 1fr}
+.task-bar{width:4px}
+.task-inner{padding:0.75rem 0.95rem}
+.task-hdr{display:flex;align-items:flex-start;gap:0.6rem;margin-bottom:0.35rem}
+.task-owner{font-family:var(--mono);font-size:0.62rem;font-weight:600;padding:0.12rem 0.45rem;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:0.05rem}
+.task-title{font-family:var(--fd);font-size:0.95rem;font-weight:800;color:var(--navy);line-height:1.25;flex:1}
+.task-body{font-size:0.82rem;color:var(--body);line-height:1.65}
+.task-body strong{color:var(--navy);font-weight:600}
+.task-meta{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem}
+.meta-chip{font-family:var(--mono);font-size:0.62rem;padding:0.12rem 0.5rem;border-radius:3px;border:1px solid var(--mgrey);color:rgba(0,0,0,0.35)}
+.meta-chip.deliverable{background:var(--green-l);color:var(--green);border-color:#9FE1CB}
+.meta-chip.blocker{background:var(--red-l);color:var(--red);border-color:#F09595}
+.meta-chip.target{background:var(--blue-l);color:var(--blue);border-color:#85B7EB}
+.meta-chip.revenue{background:var(--amber-l);color:var(--amber);border-color:#EF9F27}
+
+/* ── ACCOUNT TABLE ── */
+.acct-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:0.75rem 0}
+.acct-table th{background:var(--navy2);color:#fff;font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.5rem 0.7rem;text-align:left}
+.acct-table td{padding:0.45rem 0.7rem;border-bottom:1px solid var(--lgrey);vertical-align:top}
+.acct-table tr:nth-child(even) td{background:var(--lgrey)}
+.acct-table tr:last-child td{border-bottom:none}
+.tbl-wrap{border:1px solid var(--mgrey);border-radius:8px;overflow:hidden;margin:0.75rem 0}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+
+/* ── CALLOUTS ── */
+.callout{border-radius:8px;padding:0.9rem 1.1rem;margin:0.75rem 0}
+.callout-green{background:var(--green-l);border-left:4px solid var(--green2)}
+.callout-amber{background:var(--amber-l);border-left:4px solid var(--amber)}
+.callout-blue{background:var(--blue-l);border-left:4px solid var(--blue)}
+.callout-red{background:var(--red-l);border-left:4px solid var(--red)}
+.callout-title{font-family:var(--fd);font-size:0.85rem;font-weight:800;margin-bottom:0.25rem}
+.callout-body{font-size:0.82rem;line-height:1.65}
+
+/* ── PRIORITY MATRIX ── */
+.matrix{display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin:0.75rem 0}
+.matrix-card{background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:0.85rem 1rem}
+.matrix-hdr{font-family:var(--fd);font-size:0.82rem;font-weight:800;margin-bottom:0.5rem}
+
+/* ── WEEKLY RHYTHM ── */
+.rhythm-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.5rem;margin:0.75rem 0}
+.rhythm-day{background:#fff;border:1px solid var(--mgrey);border-radius:8px;overflow:hidden}
+.rhythm-day-hdr{padding:0.35rem 0.65rem;font-family:var(--fd);font-size:0.8rem;font-weight:800;color:#fff}
+.rhythm-day-body{padding:0.55rem 0.65rem;font-size:0.78rem;color:var(--body);line-height:1.55}
+
+/* ── FOOTER ── */
+.doc-footer{background:var(--navy2);padding:1.25rem 2.5rem;text-align:center;margin-top:3rem}
+.doc-footer p{font-size:0.7rem;color:rgba(255,255,255,0.2)}
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<nav class="topbar">
+  <div class="topbar-brand">BU Services</div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-nav">
+    <a href="#overview" class="act">Overview</a>
+    <a href="#rhythm">Weekly Rhythm</a>
+    <a href="#mining">Mining</a>
+    <a href="#powerline">Powerline</a>
+    <a href="#nuclear">Nuclear Support</a>
+    <a href="#x3">3X Composite</a>
+    <a href="#accounts">Account Map</a>
+    <a href="#rules">Rules of Engagement</a>
+  </div>
+  <div class="topbar-right">Confidential · Ekoscan Integrity Group · May 2026</div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-eye">BU Services · Commercial Execution · Confidential</div>
+  <h1>Commercial Playbook<br><span>Vinoth Tharma &amp; Max Aggrey</span></h1>
+  <p class="hero-sub">This is your personal execution guide — not the strategy document, not the investor plan. Every task below has your name on it, a deadline, a deliverable, and a revenue consequence. Read it once a week. Update Salesforce every Friday.</p>
+  <div class="owner-chips">
+    <div class="owner-chip">
+      <span class="oc-name">Vinoth Tharma</span>
+      <span class="oc-role">Commercial Lead — Eastern Canada + Nuclear Outage + Powerline East</span>
+    </div>
+    <div class="owner-chip">
+      <span class="oc-name">Max Aggrey</span>
+      <span class="oc-role">Commercial Lead — Western Canada + Powerline West + Pipeline Support</span>
+    </div>
+    <div class="owner-chip">
+      <span class="oc-name">Shanny Trembley</span>
+      <span class="oc-role">Escalation point for missed Salesforce updates — reports to Alex Cyr</span>
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-val">$410K</div><div class="kpi-lbl">Mining 2026 target</div></div>
+    <div class="kpi"><div class="kpi-val">$365K</div><div class="kpi-lbl">Powerline 2026 target</div></div>
+    <div class="kpi"><div class="kpi-val">$50K</div><div class="kpi-lbl">3X Composite 2026 target</div></div>
+    <div class="kpi"><div class="kpi-val">$300K</div><div class="kpi-lbl">Nuclear outage support 2026</div></div>
+    <div class="kpi"><div class="kpi-val">$1.125M</div><div class="kpi-lbl">Your combined 2026 target</div></div>
+    <div class="kpi"><div class="kpi-val">$17.1M</div><div class="kpi-lbl">Your combined 5-year target</div></div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 1 — OVERVIEW
+═══════════════════════════════════════════════════════════════════ -->
+<div id="overview" class="sec-hdr"><h2>How to Use This Playbook</h2><span class="sec-sub">read this first</span></div>
+
+<div class="matrix">
+  <div class="matrix-card">
+    <div class="matrix-hdr" style="color:var(--navy)">What this document is</div>
+    <p style="font-size:0.83rem;color:var(--body);line-height:1.65">A task-by-task commercial execution guide for Vinoth and Max. Every initiative you own is broken into weekly sprints with specific deliverables, target accounts, call scripts, and escalation points. The master plan tells you what to achieve. This document tells you what to do Monday morning.</p>
+  </div>
+  <div class="matrix-card">
+    <div class="matrix-hdr" style="color:var(--navy)">What this document is not</div>
+    <p style="font-size:0.83rem;color:var(--body);line-height:1.65">Not the full commercial plan — read the initiative plans for market analysis, pricing detail, and 5-year modelling. Not the Execution Attack Plan — that governs all 5 initiatives and all owners. This is your personal playbook. It assumes you have read the relevant initiative plans.</p>
+  </div>
+</div>
+
+<div class="callout callout-amber">
+  <div class="callout-title" style="color:var(--amber)">The one non-negotiable: Salesforce updated every Friday by 4 PM ET</div>
+  <div class="callout-body">Every deal you work, every conversation you have, every proposal you issue — it must be in Salesforce by Friday afternoon. Closed Won, stage changes, amounts, contact names, next steps. Power Automate runs Sunday at 7 PM and feeds the Command Centre. If your deals aren't in Salesforce, they don't exist in the system, and Jon Eustace walks into Monday's meeting with wrong numbers. Shanny Trembley monitors compliance and contacts you directly if your pipeline hasn't moved. No exceptions.</div>
+</div>
+
+<div style="margin-top:1.25rem;" class="callout callout-blue">
+  <div class="callout-title" style="color:var(--blue)">Your combined scope across all 5 initiatives</div>
+  <div class="callout-body">Between you, Vinoth and Max own commercial responsibility for four of the five BU Services initiatives: Mining NDT (co-lead), Powerline Inspection (Vinoth East / Max West), Nuclear outage commercial support (Vinoth), and 3X Composite Repair embedding (both). Pipeline DA is Rick Carlton's — your only role there is supporting Max's Western Canada pipeline operator outreach when Rick identifies targets that need local relationship development.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 2 — WEEKLY RHYTHM
+═══════════════════════════════════════════════════════════════════ -->
+<div id="rhythm" class="sec-hdr"><h2>Your Weekly Rhythm</h2><span class="sec-sub">what each day of the week looks like</span></div>
+
+<p style="font-size:0.88rem;color:var(--body);line-height:1.7;margin-bottom:1rem">A consistent weekly cadence is what separates commercial owners who hit their numbers from those who don't. Mining and powerline both have 6–12 month sales cycles. The only way to consistently convert accounts in 2027 is to consistently work your pipeline in 2026. This is the rhythm.</p>
+
+<div class="rhythm-grid">
+  <div class="rhythm-day">
+    <div class="rhythm-day-hdr" style="background:var(--navy)">Monday</div>
+    <div class="rhythm-day-body">
+      <strong>9AM: Commercial Leadership meeting.</strong> Come with: pipeline update per initiative, any new proposals issued last week, any deals advanced or stalled, early warning signals. Olivier Marcotte chairs.<br><br>
+      <strong>After meeting:</strong> Process any actions from the meeting into Salesforce same day. Review your weekly target list — who are you calling this week?
+    </div>
+  </div>
+  <div class="rhythm-day">
+    <div class="rhythm-day-hdr" style="background:var(--blue)">Tuesday–Wednesday</div>
+    <div class="rhythm-day-body">
+      <strong>Outreach days.</strong> 3–5 substantive client or prospect contacts per day. Phone calls preferred over email for new accounts. Email for follow-up, proposals, and confirmations.<br><br>
+      <strong>Wed 9AM:</strong> Ops & Delivery meeting (Vinoth attends for nuclear outage / ops coordination only). Alex Cyr chairs. Crew availability confirmed here — you need this before quoting field dates.
+    </div>
+  </div>
+  <div class="rhythm-day">
+    <div class="rhythm-day-hdr" style="background:var(--teal)">Thursday</div>
+    <div class="rhythm-day-body">
+      <strong>Proposal day.</strong> All proposals drafted and issued Thursday or earlier. No proposals sent Friday — clients don't read them before Monday.<br><br>
+      <strong>Pipeline review:</strong> Check your Salesforce pipeline. Anything stalled more than 14 days without activity gets a call today or tomorrow.
+    </div>
+  </div>
+  <div class="rhythm-day">
+    <div class="rhythm-day-hdr" style="background:var(--green)">Friday</div>
+    <div class="rhythm-day-body">
+      <strong>By 4 PM:</strong> Salesforce fully updated — all stages current, all amounts correct, all next steps logged. No exceptions.<br><br>
+      <strong>Weekly self-check:</strong> How many new proposals issued this week? How many accounts contacted? Is your pipeline growing or shrinking vs. last Friday?
+    </div>
+  </div>
+  <div class="rhythm-day">
+    <div class="rhythm-day-hdr" style="background:var(--amber)">Standing bi-weekly</div>
+    <div class="rhythm-day-body">
+      <strong>OKR 4 Commercial Check-in</strong> (Vinoth, Max, Shanny, Olivier): bi-weekly Tuesday 1PM ET. Pipeline review against KR 4.1 — $7M new business for Nucleom.<br><br>
+      <strong>Nuclear Steering:</strong> Vinoth attends bi-weekly Tuesday 10AM with Olivier, Louis-Pier, Jean-François. Report outage commercial progress and OPG relationship signals.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 3 — MINING NDT
+═══════════════════════════════════════════════════════════════════ -->
+<div id="mining" class="sec-hdr"><h2>Initiative 01 — Mining NDT</h2><span class="sec-sub">$410K 2026 · $17.9M 5-year · co-owned Vinoth (East) + Max (West)</span></div>
+
+<div class="init-banner" style="background:linear-gradient(135deg,#1a2860,#0D1040);color:#fff">
+  <div class="init-num">01</div>
+  <div>
+    <div class="init-title">Canadian Mining NDT — ECA Gear + Robotic UT</div>
+    <div class="init-owners">Vinoth Tharma (Eastern Canada) · Max Aggrey (Western Canada + Oil Sands)</div>
+    <div style="font-size:0.75rem;opacity:0.6;margin-top:0.3rem">Ops support: Eric Rodrigue (QC/HQ) · Joel Djordjevic (ON) · Brooke Althouse (N.ON) · Jason Borza (West)</div>
+  </div>
+  <div class="init-targets">
+    <div style="font-size:1.1rem;font-weight:900">$410K</div>
+    <div style="font-size:0.65rem;opacity:0.6">2026 target</div>
+    <div style="font-size:0.85rem;font-weight:700;margin-top:0.3rem">$17.9M</div>
+    <div style="font-size:0.65rem;opacity:0.6">5-year cumulative</div>
+  </div>
+</div>
+
+<div class="callout callout-green" style="margin-bottom:1rem">
+  <div class="callout-title" style="color:var(--green)">The core commercial argument — memorise this</div>
+  <div class="callout-body">Gold is above US$4,000/oz. A SAG mill shutdown at a major gold mine costs $500K–$1.5M per day in lost production at current prices. Our ECA through-grease gear inspection gives them a finding before the failure — not after. We are already live at 12 accounts including Barrick, Agnico Eagle, Suncor, and Wesdome. When a prospect says "we've never heard of this" — you say "Barrick has been running it for two years. Call their reliability engineer." That ends the conversation.</div>
+</div>
+
+<div class="week-label">Pre-Launch — By May 1 (complete or confirm status)</div>
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--navy)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F4FD;color:#0A3A6B">Vinoth</span>
+        <span class="task-title">Audit all 12 active accounts — confirm H1 inspection schedule and identify upsell opportunities</span>
+      </div>
+      <div class="task-body">Call or email each of the 12 active accounts. For each one confirm: (1) Is their next inspection scheduled and on the calendar? (2) Are they currently on annual or semi-annual cadence? (3) Have they had any AMBER or RED findings that warrant a frequency increase? (4) Have they added new mills since the last inspection that should be included? Document every answer in Salesforce. Identify the top 5 accounts where you can upsell from annual to semi-annual — a frequency upsell on a 3-mill account is worth an incremental $42K–$72K/year with no new client acquisition required.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: 12-account audit in Salesforce by May 1</span>
+        <span class="meta-chip revenue">Revenue impact: upsell = incremental $42K–$72K/account/year</span>
+      </div>
+    </div>
+  </div>
+  <div class="task">
+    <div class="task-bar" style="background:var(--green2)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F5E9;color:#196B24">Max</span>
+        <span class="task-title">Western Canada outreach — contact 5 new Alberta/BC mining targets</span>
+      </div>
+      <div class="task-body">Make first contact with all five targets. Initial call goal: 20 minutes with the maintenance superintendent or reliability engineer. Not a sales call — an introduction. <strong>Target 1: Barrick Hemlo expansion</strong> (ON — coordinate with Vinoth). <strong>Target 2: Newmont Coffee Mine</strong> (YT — new operation, high gear load). <strong>Target 3: Teck Highland Valley Copper</strong> (BC — 45,000 tpd, 4 SAG mills, direct Vancouver office access). <strong>Target 4: Nutrien Vanscoy Potash</strong> (SK — large ball mill circuit, no current ECA program). <strong>Target 5: Coeur Silvertip</strong> (BC — remote site, emergency response premium applies). Brief Jason Borza on Western field capacity for May deployments before any commitments are made.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: 5 first-contact calls logged in Salesforce by May 1</span>
+        <span class="meta-chip target">Target: Teck HV + Nutrien Vanscoy = highest priority — 8+ mills each</span>
+        <span class="meta-chip revenue">Combined TAM: $280K–$440K/year at program rates</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="week-label">Week 1 — May 1–12</div>
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--teal)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E1F5EE;color:#0D5050">Brooke / Vinoth</span>
+        <span class="task-title">Northern Ontario activation — schedule site visits at 3 priority accounts</span>
+      </div>
+      <div class="task-body">Brooke Althouse leads the Northern ON outreach; Vinoth provides commercial support and proposal sign-off. Three targets this week: <strong>Agnico Eagle Macassa</strong> (Kirkland Lake — existing relationship, scope expansion opportunity), <strong>Wesdome Eagle River</strong> (Wawa — active account, confirm 2026 inspection dates and discuss frequency upsell), <strong>IAMGOLD Côté Gold</strong> (new site — commenced production 2024, fresh mill fleet, first inspection window now open). Joel Djordjevic confirms Oakville crew availability for ON deployments. Proposals to follow within 5 business days of each call.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: 3 scheduled calls + proposals issued by May 9</span>
+        <span class="meta-chip target">Côté Gold: new site — first mover advantage, do not delay</span>
+      </div>
+    </div>
+  </div>
+  <div class="task">
+    <div class="task-bar" style="background:var(--amber)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#FFF8E1;color:#C9860A">Max</span>
+        <span class="task-title">Alberta oil sands expansion — brief Shan Switzer and cross-pitch Nortech crane clients</span>
+      </div>
+      <div class="task-body">Meet with Shan Switzer (Crane Manager, Nortech) this week. Shan's crane inspection clients at Suncor, Cenovus, CNRL, and Syncrude are the same sites where we inspect grinding mills. The ask is simple: Shan introduces us to the mill reliability team at any crane client we are not already inspecting. Prepare a one-page brief for Shan on ECA through-grease gear inspection with the Suncor and Cenovus results — he needs to understand what he is referring. Identify 3 specific Nortech crane clients where a warm introduction would open an ECA conversation. Log all in Salesforce.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: Shan briefed + 3 warm referral targets identified by May 9</span>
+        <span class="meta-chip target">Cross-sell: crane client with adjacent mill = fastest sales cycle</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="week-label">Week 2 — May 12–26</div>
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--navy)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F4FD;color:#0A3A6B">Vinoth</span>
+        <span class="task-title">Robotic UT pilot — schedule demo at Suncor Base Plant or Cenovus</span>
+      </div>
+      <div class="task-body">Francis Boudreault-Leclerc will confirm robotic UT commissioning status by May 1. Once confirmed, Vinoth schedules the first live demo at an existing account where we have a strong relationship and high-visibility mills. <strong>Preferred: Suncor Base Plant</strong> (highest 2025 revenue account at $609K — they know us, they trust us, and a successful demo gives us the strongest reference in the oil sands market). <strong>Alternative: Cenovus</strong>. The demo should run alongside a scheduled ECA inspection — same mobilisation, no additional cost. Proposal for the combined ECA + robotic UT program to be issued within 2 weeks of the demo. <strong>Price the robotic UT program separately as a line item</strong> — this makes the upsell visible and creates a recurring revenue stream on top of existing ECA contracts.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: Demo scheduled + proposal template ready by May 23</span>
+        <span class="meta-chip revenue">Robotic UT add-on: $18K–$35K per mobilisation on top of ECA</span>
+        <span class="meta-chip target">Demo site: Suncor Base Plant preferred</span>
+      </div>
+    </div>
+  </div>
+  <div class="task">
+    <div class="task-bar" style="background:var(--green2)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F5E9;color:#196B24">Max</span>
+        <span class="task-title">HudBay Copper Mountain and Teck Highland Valley — formal proposal by May 23</span>
+      </div>
+      <div class="task-body">Following first-contact calls from Week 0, both accounts should be at proposal stage by May 23. For HudBay Copper Mountain: 45,000 tpd grinding circuit, HudBay recently stabilised mill reliability after acquisition — they are acutely downtime-aware. Lead the proposal with the downtime cost argument at current copper prices ($4.50+/lb). For Teck Highland Valley: 4 SAG mills + 4 ball mills = 8 program mills. Annual program value $120K–$175K. Eric Rodrigue confirms Vancouver crew capacity for BC mobilisations before quoting field dates. Use Barrick and Wesdome case studies in both proposals.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: 2 formal proposals issued by May 23</span>
+        <span class="meta-chip revenue">Combined TAM: $225K–$350K/year — 2027 conversion target</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="week-label">Week 3 — May 26–June 9</div>
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--navy)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F4FD;color:#0A3A6B">Vinoth</span>
+        <span class="task-title">New site onboarding — target 3 new MSAs from Q1–Q2 outreach. $130K instrument order.</span>
+      </div>
+      <div class="task-body">By June 9, close 3 new signed MSAs or program agreements from the outreach pipeline built in May. These do not all need to be active inspections yet — a signed agreement for a September or Q4 inspection slot is a Closed Won in Salesforce at the contracted value. <strong>Priority targets for Vinoth:</strong> IAMGOLD Côté Gold, Wesdome Eagle River (upsell to semi-annual), and one additional Eastern Canadian target from the active pipeline. Once 3 new accounts confirmed, brief Jeremy Irwin to release the $130K ECA instrument order with SG NDT — this expands our fleet for H2 volume and 2027. Do not place the instrument order before 3 accounts are confirmed.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: 3 signed agreements by June 9</span>
+        <span class="meta-chip blocker">Instrument order gated on 3 new accounts — do not release early</span>
+        <span class="meta-chip revenue">3 new MSAs at average $45K/year = $135K incremental ARR</span>
+      </div>
+    </div>
+  </div>
+  <div class="task">
+    <div class="task-bar" style="background:var(--green2)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F5E9;color:#196B24">Max</span>
+        <span class="task-title">3X Composite embedding — add repair quotation to all 5 active mining inspection reports</span>
+      </div>
+      <div class="task-body">From this week forward, every inspection report issued to a mining client includes a composite repair quotation if any AMBER or RED findings are present. This is not a separate sales call — it is a line item in the report. Max coordinates with Keith Reichenbach on product selection (TANKiT® for leach tanks, REINFORCEKiT® 4D for process piping, REINFORCEKiT® PATCH for vessel wall loss). Target: 5 active mining inspection reports with embedded repair quotes by June 9. Log each as a 3X opportunity in Salesforce with a separate pipeline entry — this is revenue counted against the 3X initiative, not mining.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: 5 reports with embedded 3X quotes by June 9</span>
+        <span class="meta-chip revenue">3X conversion rate target: 15% of AMBER/RED findings → repair quote accepted</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="week-label">Week 4 — June 9–23</div>
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--amber)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#FFF8E1;color:#C9860A">Max</span>
+        <span class="task-title">Oil sands scope expansion pitch — Suncor and Cenovus full mill health program</span>
+      </div>
+      <div class="task-body">Following the robotic UT demo (Week 2), issue full program expansion proposals to Suncor Base Plant and Cenovus. The proposal should bundle: (1) existing ECA gear inspection program renewed at same terms, (2) robotic UT shell survey added as a new annual line item, (3) 3X composite repair as an on-call repair service for findings from either technology. Present all three as a single Integrated Mill Health Program with one annual mobilisation. The combined program for Suncor alone is worth $85K–$140K/year. Brief Joel Carlton on whether combined ECA + UT + repair mobilisations change crew requirements (they may need an extra tech on site).</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: Integrated proposals to Suncor + Cenovus by June 20</span>
+        <span class="meta-chip revenue">Suncor integrated program: $85K–$140K/year · Cenovus: $65K–$110K/year</span>
+      </div>
+    </div>
+  </div>
+  <div class="task">
+    <div class="task-bar" style="background:var(--navy)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F4FD;color:#0A3A6B">Vinoth + Max</span>
+        <span class="task-title">CIM Annual Conference preparation — register and plan client meetings</span>
+      </div>
+      <div class="task-body">CIM Annual Conference 2026 is the single best venue in Canada for mining client development. Both Vinoth and Max should attend. <strong>Preparation this week:</strong> (1) Register for the conference and book accommodation — do this immediately as blocks fill up. (2) Identify which target accounts have confirmed attendance — use LinkedIn and conference delegate list. (3) Book 30-minute client meetings in advance — do not rely on floor conversations. (4) Prepare a leave-behind one-pager: active account list with logos, Suncor/Cenovus results in one sentence each, pricing starting points. <strong>Goal at CIM: 5 new prospect meetings, 3 follow-up commitments from existing clients.</strong></div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: Registered + 5 meetings pre-booked by June 20</span>
+        <span class="meta-chip target">CIM is the fastest route to national mining accounts — do not skip it</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="week-label">Q3 2026 — July–September Milestones</div>
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--navy)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F4FD;color:#0A3A6B">Vinoth + Max</span>
+        <span class="task-title">5+ new accounts signed. H2 inspection schedule confirmed. Cement sector outreach initiated.</span>
+      </div>
+      <div class="task-body">By end of Q3: At least 5 new accounts signed (combined East + West). H2 inspection schedule confirmed and booked with Eric Rodrigue, Joel Djordjevic, Brooke Althouse, and Jason Borza across all regions. Robotic UT generating standalone revenue at a minimum of 2 accounts. <strong>Cement sector launch:</strong> Vinoth contacts 2 cement plant targets from the priority list — Essroc Canada (Picton, ON — Oakville access) and St. Marys Cement (Bowmanville, ON). Lead with mining references: Barrick gear inspection reports read exactly the same to a cement reliability engineer. Price: single-mill baseline survey at introductory rate to get through the door. Full program discussion after baseline data delivered.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Q3 gate: 5+ new accounts signed + 2 cement contacts initiated</span>
+        <span class="meta-chip revenue">Cement upside: $200K–$500K/year incremental — not in forecast</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 4 — POWERLINE
+═══════════════════════════════════════════════════════════════════ -->
+<div id="powerline" class="sec-hdr"><h2>Initiative 03 — Powerline Inspection</h2><span class="sec-sub">$365K 2026 · $10.2M 5-year · Vinoth (East) + Max (West)</span></div>
+
+<div class="init-banner" style="background:linear-gradient(135deg,#4B1D8F,#2A0B60);color:#fff">
+  <div class="init-num">03</div>
+  <div>
+    <div class="init-title">Powerline Inspection — LineCore / LineOhm / LineRay</div>
+    <div class="init-owners">Overall: Mathieu Beauchesne · Vinoth Tharma (East — Hydro One, OPG network) · Max Aggrey (West — AltaLink, ATCO, BC Hydro, 2027)</div>
+    <div style="font-size:0.75rem;opacity:0.6;margin-top:0.3rem">Ops: Eric Rodrigue (QC/HQ) · Jason Borza (AB/BC) · Hydro-Québec IP partnership provides instant national credibility</div>
+  </div>
+  <div class="init-targets">
+    <div style="font-size:1.1rem;font-weight:900">$365K</div>
+    <div style="font-size:0.65rem;opacity:0.6">2026 target</div>
+    <div style="font-size:0.85rem;font-weight:700;margin-top:0.3rem">$10.2M</div>
+    <div style="font-size:0.65rem;opacity:0.6">5-year cumulative</div>
+  </div>
+</div>
+
+<div class="callout callout-amber">
+  <div class="callout-title" style="color:var(--amber)">Critical first step: confirm EIG instrument model with Mathieu before any utility conversations</div>
+  <div class="callout-body">Before Vinoth or Max make any commitment to a utility client, Mathieu Beauchesne must confirm with EIG France whether BU Services is purchasing, leasing, or accessing the LineCore/LineOhm/LineRay instruments as EIG group assets. Do not quote a program start date until this is resolved. Eric Rodrigue is confirming instrument operational status independently — this is a separate question from ownership. If you are asked by a utility before this is resolved, say "We are finalising instrument availability for Q2 deployment." Do not overpromise.</div>
+</div>
+
+<div class="week-label">Pre-Launch + Week 1 (By May 12)</div>
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--navy)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F4FD;color:#0A3A6B">Vinoth</span>
+        <span class="task-title">Hydro One Transmission — issue formal pilot proposal for LineOhm splice assessment</span>
+      </div>
+      <div class="task-body">Vinoth issues the formal pilot proposal to Hydro One Transmission by May 12. <strong>Pilot scope:</strong> LineOhm splice assessment on 3–5 identified splice locations on Hydro One transmission lines (target: 115kV or 230kV circuits where splice failures represent documented risk). Program value: $80K–$120K pilot. <strong>Proposal must include:</strong> (1) the Hydro-Québec program reference (no specific HQ data — just "active program with Hydro-Québec since [year]"), (2) LineOhm technical summary in plain language (what it measures, what it finds, what deliverable looks like), (3) mobilisation timeline (confirm with Eric Rodrigue and Francis B-L before committing dates). Joel Djordjevic briefed on ON crew requirements for Hydro One pilot.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: Formal pilot proposal to Hydro One by May 12</span>
+        <span class="meta-chip revenue">Pilot value: $80K–$120K · converts to annual program $400K–$700K</span>
+        <span class="meta-chip blocker">Blocked if EIG instrument model not confirmed — escalate to Mathieu immediately</span>
+      </div>
+    </div>
+  </div>
+  <div class="task">
+    <div class="task-bar" style="background:var(--navy)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F4FD;color:#0A3A6B">Vinoth</span>
+        <span class="task-title">Initiate Hydro One vendor qualification process</span>
+      </div>
+      <div class="task-body">In parallel with the pilot proposal, begin Hydro One vendor prequalification. Submit to the Hydro One vendor portal (ISNetworld and Hydro One Vendor Portal). Required documents typically include: company insurance certificates, WSIB/WCB clearance, HSE pre-qualification questionnaire, quality management system certification (ISO 9001 — Nucleom has this), and capability statement. Vendor qualification takes 4–8 weeks at most utilities — start immediately. Do not wait for the pilot to be accepted before submitting vendor documents. Confirm the Hydro One vendor portal submission requirements directly with Hydro One procurement.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: Vendor portal submission initiated by May 16</span>
+        <span class="meta-chip blocker">6–8 week qualification lead time — delay here delays revenue 2 months</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="week-label">Week 3 — May 26–June 9</div>
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--green2)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F5E9;color:#196B24">Max</span>
+        <span class="task-title">AltaLink and ATCO Electric — open formal discussions for Alberta powerline entry</span>
+      </div>
+      <div class="task-body">Max opens the Alberta powerline commercial conversation targeting 2027. <strong>AltaLink</strong> (Calgary, AB — 13,000+ km of transmission, largest transmission-only utility in Canada). <strong>ATCO Electric</strong> (Edmonton, AB — 85,000+ km of transmission and distribution in northern Alberta). Both procurement via Nortech's existing Alberta relationships — Jason Borza has contacts in AB industrial operations that can provide warm introductions. Initial conversation goal: confirm their 2026–2027 capital inspection program, understand their current condition monitoring approach for conductor and splice integrity, and get on their vendor list for upcoming RFPs. No commitment on program delivery date until Mathieu confirms instrument availability and Jason Borza confirms crew capacity.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: 2 introductory calls logged by June 6</span>
+        <span class="meta-chip target">2027 revenue target — do not over-commit 2026 delivery dates</span>
+      </div>
+    </div>
+  </div>
+  <div class="task">
+    <div class="task-bar" style="background:var(--green2)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F5E9;color:#196B24">Max</span>
+        <span class="task-title">BC Hydro engagement — advance through Nortech Western team</span>
+      </div>
+      <div class="task-body">BC Hydro Transmission has active conductor assessment and dynamic line rating programs — a strong fit for LineCore (conductor current capacity assessment) and LineOhm (splice integrity). Max initiates contact through the Nortech Western team's existing relationships with BC Hydro's maintenance and operations groups. <strong>Target contact:</strong> BC Hydro's Asset Management or Engineering Services division. Primary pitch: conductor inspection and splice assessment as a complement to their existing visual inspection and thermal imaging program. Jason Borza confirms BC crew availability and any existing BC Hydro relationship context before the call.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: BC Hydro first contact initiated by June 6</span>
+        <span class="meta-chip target">BC Hydro is P1 British Columbia target — 18,000+ km transmission</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="week-label">Week 4 — June 9–23</div>
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--navy)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E8F4FD;color:#0A3A6B">Vinoth + Jon</span>
+        <span class="task-title">Hydro One pilot decision gate — confirm or redirect to AltaLink</span>
+      </div>
+      <div class="task-body">By June 23, Hydro One should have responded to the pilot proposal. Three scenarios: <strong>If accepted:</strong> Joel Djordjevic mobilises ON crew for summer window. Confirm field dates with Eric Rodrigue and Francis B-L. <strong>If deferred to Q3/Q4:</strong> Proceed with Q3 delivery — still counts toward 2026 target. Begin invoicing on data acceptance. <strong>If declined:</strong> Vinoth reports to Jon Eustace and Mathieu Beauchesne immediately. Max activates AltaLink pilot as Q3 alternative — Western Canada pilot replaces the Eastern one. Do not let a Hydro One decline stall the entire Powerline initiative. The EIG instrument model must also be finalised this week regardless of Hydro One outcome — Mathieu Beauchesne incorporates it into the financial plan.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: Decision outcome communicated to Jon + Mathieu by June 23</span>
+        <span class="meta-chip blocker">If declined — activate AltaLink pilot immediately, do not wait</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 5 — NUCLEAR OUTAGE SUPPORT
+═══════════════════════════════════════════════════════════════════ -->
+<div id="nuclear" class="sec-hdr"><h2>Initiative 04 — Nuclear / OPG (Vinoth's Role)</h2><span class="sec-sub">$300K 2026 outage support · Vinoth owns outage commercial · Olivier Marcotte owns MSA strategy</span></div>
+
+<div class="init-banner" style="background:linear-gradient(135deg,#0D5050,#063535);color:#fff">
+  <div class="init-num">04</div>
+  <div>
+    <div class="init-title">Nuclear / OPG — Vinoth's Specific Role</div>
+    <div class="init-owners">MSA strategy: Olivier Marcotte (CRO). Outage commercial execution: Vinoth Tharma. Technical: Louis-Pier Théberge.</div>
+    <div style="font-size:0.75rem;opacity:0.6;margin-top:0.3rem">Vinoth's focus: outage program revenue + OPG relationship building alongside Olivier. Not the MSA tender — that is Olivier and Jean-François.</div>
+  </div>
+  <div class="init-targets">
+    <div style="font-size:1.1rem;font-weight:900">$300K</div>
+    <div style="font-size:0.65rem;opacity:0.6">2026 outage target</div>
+  </div>
+</div>
+
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--teal)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E1F5EE;color:#0D5050">Vinoth</span>
+        <span class="task-title">OPG renewal dialogue — attend initial OPG contact meetings alongside Olivier Marcotte</span>
+      </div>
+      <div class="task-body">Vinoth attends all OPG relationship meetings as the outage delivery representative. Olivier leads commercial and MSA strategy; Vinoth's role is to demonstrate operational credibility and technical depth on outage execution. <strong>Your talking points:</strong> Outage deployment model, technician qualifications (CGSB levels), on-site vs. remote analysis capability (Joel Djordjevic's Oakville hub), and Aecon subcontract delivery experience. Do not discuss pricing or MSA terms — that is Olivier's domain. Your value in these meetings is demonstrating that we have the people and the process, not just the bid document.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Attend all OPG meetings Olivier schedules — log each in Salesforce</span>
+        <span class="meta-chip target">Nuclear Steering meeting: bi-weekly Tuesday 10AM — mandatory attendance</span>
+      </div>
+    </div>
+  </div>
+  <div class="task">
+    <div class="task-bar" style="background:var(--teal)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#E1F5EE;color:#0D5050">Vinoth</span>
+        <span class="task-title">Aecon subcontract — maximise 2026 outage revenue from existing Darlington/Pickering scope</span>
+      </div>
+      <div class="task-body">The Aecon NDT subcontract at Darlington SMR and Pickering Refurb is existing revenue that does not depend on the OPG MSA outcome. Vinoth's job is to ensure this revenue is maximised in 2026 by: (1) confirming current scope of work and billable hours with Louis-Pier Théberge, (2) identifying any scope expansion opportunities within the existing subcontract (additional inspection types, additional work packages), (3) ensuring all Aecon outage work is invoiced promptly — nuclear work is high-margin, do not let invoicing lag. Target: $300K from Aecon-related outage work in 2026 independently of the MSA outcome.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: Aecon scope confirmed + invoice schedule set by May 16</span>
+        <span class="meta-chip revenue">$300K 2026 target — achievable through Aecon regardless of MSA timeline</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 6 — 3X COMPOSITE REPAIR
+═══════════════════════════════════════════════════════════════════ -->
+<div id="x3" class="sec-hdr"><h2>Initiative 05 — 3X Composite Repair (Your Embedding Role)</h2><span class="sec-sub">$50K 2026 · $11.4M 5-year · Vinoth (East) + Max (West) — embed in every inspection program</span></div>
+
+<div class="init-banner" style="background:linear-gradient(135deg,#C9520A,#7A2A00);color:#fff">
+  <div class="init-num">05</div>
+  <div>
+    <div class="init-title">3X Composite Repair — Your Role is Embedding, Not Selling</div>
+    <div class="init-owners">Delivery: Keith Reichenbach (ABSA/tanks) · Joel Carlton (pipeline) · Keith Reichenbach leads overall. Your role: embed repair quotes into every inspection report with AMBER/RED findings.</div>
+  </div>
+  <div class="init-targets">
+    <div style="font-size:1.1rem;font-weight:900">$50K</div>
+    <div style="font-size:0.65rem;opacity:0.6">2026 target</div>
+    <div style="font-size:0.85rem;font-weight:700;margin-top:0.3rem">$11.4M</div>
+    <div style="font-size:0.65rem;opacity:0.6">5-year cumulative</div>
+  </div>
+</div>
+
+<div class="callout callout-green">
+  <div class="callout-title" style="color:var(--green)">3X does not require a new sales call — it requires a new paragraph in your existing report</div>
+  <div class="callout-body">Every time you deliver an inspection report that contains an AMBER or RED finding, you add a section called "Recommended Remediation" with a composite repair option. Keith Reichenbach provides the product specification and pricing. You add the section. The client already trusts you because you just found their problem. They now have a single vendor who found it and can fix it. The 3X revenue target is achievable without a single new client — it comes entirely from the 16+ active accounts already in your portfolio.</div>
+</div>
+
+<div class="tasks">
+  <div class="task">
+    <div class="task-bar" style="background:var(--orange)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#FFF3EC;color:#C9520A">Vinoth + Max</span>
+        <span class="task-title">Brief all active mining accounts on 3X repair capability alongside inspection programs</span>
+      </div>
+      <div class="task-body">Week of May 12–26: When contacting active accounts for inspection scheduling, add one sentence to every conversation: <em>"We now offer composite repair services — if we find any corrosion or wall loss findings in this inspection, we can provide a same-mobilisation repair quote under the same contract."</em> This is not a hard sell — it is information that every reliability engineer will want to know. <strong>Accounts to brief first:</strong> Barrick Gold, Agnico Eagle (all sites), ArcelorMittal Mining Canada, Suncor Base Plant, Cenovus. These are highest inspection frequency accounts = highest probability of findings = highest probability of repair conversion.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Deliverable: 5 active accounts briefed by May 26</span>
+        <span class="meta-chip revenue">Target: 15% conversion rate on AMBER/RED findings = $50K+ in 2026</span>
+      </div>
+    </div>
+  </div>
+  <div class="task">
+    <div class="task-bar" style="background:var(--orange)"></div>
+    <div class="task-inner">
+      <div class="task-hdr">
+        <span class="task-owner" style="background:#FFF3EC;color:#C9520A">Vinoth + Max</span>
+        <span class="task-title">Know the product line well enough to quote it in conversation</span>
+      </div>
+      <div class="task-body">You do not need to be a 3X technical expert — Keith Reichenbach handles all technical questions. But you need to know four things for every client conversation: <strong>(1) TANKiT®</strong> — for leach tanks and vessels showing wall loss from PAUT corrosion mapping. Applied magnetically from outside, no vessel entry. Quote $1,400–$2,500 per repair depending on defect size. <strong>(2) REINFORCEKiT® 4D</strong> — for pipeline anomalies found during PAUT/DA. Full pressure restoration, no hot work, no excavation beyond what is already open. <strong>(3) STOPKiT®</strong> — for active leaks under pressure. Available in pipeline and vessel versions. Stocked in Fort St. John for Petronas and regional clients. <strong>(4) Technician certification required</strong> — not all techs are certified yet. Confirm with Keith Reichenbach before committing to a repair date.</div>
+      <div class="task-meta">
+        <span class="meta-chip deliverable">Know these 4 products by May 12 — read the 3X plan Section 4</span>
+        <span class="meta-chip blocker">Always confirm tech certification with Keith before quoting a repair date</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 7 — TARGET ACCOUNT MAP
+═══════════════════════════════════════════════════════════════════ -->
+<div id="accounts" class="sec-hdr"><h2>Your Target Account Map</h2><span class="sec-sub">all active and target accounts — who owns what, current status, priority</span></div>
+
+<h3 style="font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:0.5rem">Vinoth — Eastern Canada Portfolio</h3>
+<div class="tbl-wrap">
+  <table class="acct-table">
+    <thead><tr><th>Account</th><th>Sector</th><th>Location</th><th>Status</th><th>2025 Revenue</th><th>2026 Target</th><th>Priority action</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Agnico Eagle (all sites)</strong></td><td>Gold mining</td><td>ON / QC / NU</td><td><span class="status-dot" style="background:var(--green)"></span>Active</td><td>$230K (combined)</td><td>Upsell to semi-annual + Côté Gold add</td><td>Confirm Côté Gold first inspection date by May 9</td></tr>
+      <tr><td><strong>Wesdome Gold Mines</strong></td><td>Gold mining</td><td>ON</td><td><span class="status-dot" style="background:var(--green)"></span>Active</td><td>$85K</td><td>Semi-annual upsell + Robotic UT add</td><td>Upsell pitch call — $42K incremental on frequency alone</td></tr>
+      <tr><td><strong>Barrick Gold</strong></td><td>Gold mining</td><td>ON / QC</td><td><span class="status-dot" style="background:var(--green)"></span>Active</td><td>$110K</td><td>Maintain + 3X embed</td><td>Use as reference in all ON/QC new account proposals</td></tr>
+      <tr><td><strong>ArcelorMittal Mining Canada</strong></td><td>Iron ore</td><td>QC</td><td><span class="status-dot" style="background:var(--green)"></span>Active</td><td>$113K</td><td>Maintain + Robotic UT add</td><td>Robotic UT upsell — same mobilisation as ECA</td></tr>
+      <tr><td><strong>MFQ (Minerai de Fer du Québec)</strong></td><td>Iron ore</td><td>QC</td><td><span class="status-dot" style="background:var(--green)"></span>Active</td><td>$89K</td><td>Semi-annual upsell</td><td>Frequency upsell conversation</td></tr>
+      <tr><td><strong>IAMGOLD Côté Gold</strong></td><td>Gold mining</td><td>ON (Northern)</td><td><span class="status-dot" style="background:var(--amber)"></span>Prospect — first contact done</td><td>—</td><td>$45K–$65K first contract</td><td>Issue proposal by May 9 — new operation, first mover window open now</td></tr>
+      <tr><td><strong>HudBay (Copper Mountain)</strong></td><td>Copper mining</td><td>BC (Princeton)</td><td><span class="status-dot" style="background:var(--amber)"></span>Prospect — first contact</td><td>—</td><td>$70K–$110K annual</td><td>Proposal by May 23 — downtime sensitivity after acquisition</td></tr>
+      <tr><td><strong>Hydro One Transmission</strong></td><td>Utility (Powerline)</td><td>ON</td><td><span class="status-dot" style="background:var(--amber)"></span>Proposal issued</td><td>—</td><td>$80K–$120K pilot</td><td>Follow up within 10 business days of proposal — confirm decision timeline</td></tr>
+      <tr><td><strong>Essroc Canada (Heidelberg)</strong></td><td>Cement</td><td>ON (Picton)</td><td><span class="status-dot" style="background:var(--red)"></span>Target — Q3 outreach</td><td>—</td><td>$45K–$75K introductory</td><td>Initiate contact Q3 2026 — coordinate with Mathieu</td></tr>
+      <tr><td><strong>Vale (Sudbury basin)</strong></td><td>Nickel mining</td><td>ON (Oakville access)</td><td><span class="status-dot" style="background:var(--red)"></span>Target — year 1</td><td>—</td><td>$120K–$200K annual</td><td>CIM 2026 — seek Vale reliability engineering contact</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 style="font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--navy);margin:1.25rem 0 0.5rem">Max — Western Canada Portfolio</h3>
+<div class="tbl-wrap">
+  <table class="acct-table">
+    <thead><tr><th>Account</th><th>Sector</th><th>Location</th><th>Status</th><th>2025 Revenue</th><th>2026 Target</th><th>Priority action</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Suncor Base Plant</strong></td><td>Oil sands</td><td>AB (Fort McMurray)</td><td><span class="status-dot" style="background:var(--green)"></span>Active — highest value</td><td>$609K</td><td>Maintain + Robotic UT + 3X embed</td><td>Schedule robotic UT demo alongside next ECA visit — issue integrated proposal</td></tr>
+      <tr><td><strong>Cenovus Energy</strong></td><td>Oil sands</td><td>AB</td><td><span class="status-dot" style="background:var(--green)"></span>Active</td><td>$170K</td><td>Maintain + scope expansion</td><td>Integrated Mill Health Program proposal — bundle ECA + Robotic UT + 3X</td></tr>
+      <tr><td><strong>Magris Talc</strong></td><td>Industrial minerals</td><td>Canada</td><td><span class="status-dot" style="background:var(--green)"></span>Active — small</td><td>$21K</td><td>Maintain + grow</td><td>Confirm 2026 inspection dates</td></tr>
+      <tr><td><strong>Teck Highland Valley Copper</strong></td><td>Copper/Molybdenum</td><td>BC (Princeton)</td><td><span class="status-dot" style="background:var(--amber)"></span>Proposal stage</td><td>—</td><td>$120K–$175K annual program</td><td>Proposal by May 23 — 8 mills, high-value program</td></tr>
+      <tr><td><strong>Nutrien Vanscoy Potash</strong></td><td>Potash</td><td>SK</td><td><span class="status-dot" style="background:var(--amber)"></span>First contact made</td><td>—</td><td>$55K–$90K first contract</td><td>Follow up with proposal by May 26</td></tr>
+      <tr><td><strong>Coeur Silvertip</strong></td><td>Silver mining</td><td>BC (remote)</td><td><span class="status-dot" style="background:var(--amber)"></span>First contact made</td><td>—</td><td>$35K–$55K</td><td>Remote site — emergency mobilisation premium applies. Price accordingly.</td></tr>
+      <tr><td><strong>Barrick Hemlo</strong></td><td>Gold mining</td><td>ON (Thunder Bay access)</td><td><span class="status-dot" style="background:var(--amber)"></span>Expansion — coordinate with Vinoth</td><td>See Barrick above</td><td>$35K–$55K incremental</td><td>Brooke Althouse leads Thunder Bay ops — coordinate any Hemlo site visit with her</td></tr>
+      <tr><td><strong>Newmont Coffee</strong></td><td>Gold mining</td><td>YT</td><td><span class="status-dot" style="background:var(--amber)"></span>First contact made</td><td>—</td><td>$40K–$65K first contract</td><td>Remote Yukon — high mobilisation cost, price accordingly</td></tr>
+      <tr><td><strong>AltaLink</strong></td><td>Utility (Powerline)</td><td>AB (Calgary)</td><td><span class="status-dot" style="background:var(--red)"></span>Target 2026 — 2027 delivery</td><td>—</td><td>2027 program $300K–$600K</td><td>Open discussions this month. 2027 delivery date. Do not over-commit 2026.</td></tr>
+      <tr><td><strong>BC Hydro Transmission</strong></td><td>Utility (Powerline)</td><td>BC</td><td><span class="status-dot" style="background:var(--red)"></span>Target 2026 — 2027 delivery</td><td>—</td><td>2027 program $400K–$700K</td><td>First contact via Nortech Western relationships by June 6</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SECTION 8 — RULES OF ENGAGEMENT
+═══════════════════════════════════════════════════════════════════ -->
+<div id="rules" class="sec-hdr"><h2>Rules of Engagement</h2><span class="sec-sub">how we operate commercially — non-negotiable standards</span></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:1rem">
+  <div class="callout callout-green">
+    <div class="callout-title" style="color:var(--green)">Always do</div>
+    <div class="callout-body">
+      <strong>Lead with results, not technology.</strong> Open every new account conversation with a customer outcome — "Barrick has been running this for two years and found three high-severity gear defects before they became failures." Not: "We have an ECA instrument."<br><br>
+      <strong>Quote the integrated program.</strong> Every mining proposal includes both ECA gear inspection and robotic UT shell survey. Every proposal with AMBER/RED findings includes a 3X composite repair option. One invoice, one mobilisation, maximum revenue per visit.<br><br>
+      <strong>Confirm ops capacity before quoting a field date.</strong> Call Eric Rodrigue (East) or Jason Borza (West) before putting a mobilisation date in a proposal. A date we cannot staff is worse than no date.<br><br>
+      <strong>Log everything in Salesforce the same day.</strong> Call with a prospect: log it. Proposal issued: log it as an opportunity. Deal closed: update to Closed Won immediately.
+    </div>
+  </div>
+  <div class="callout callout-red">
+    <div class="callout-title" style="color:var(--red)">Never do</div>
+    <div class="callout-body">
+      <strong>Do not promise powerline delivery dates before EIG instrument model is confirmed.</strong> If a utility asks when you can start, say "Q3 2026 is our target window — we are confirming instrument availability now." Never commit a date that depends on a decision that has not been made.<br><br>
+      <strong>Do not discount below the rate card without Olivier Marcotte's approval.</strong> Mining inspection is a specialist service with pricing power. Discount only on program volume (3+ mills) and only at rates explicitly in the rate card. Unilateral discounting trains clients to push back every time.<br><br>
+      <strong>Do not skip the vendor qualification step.</strong> Utility clients (Hydro One, BC Hydro) require formal vendor registration before they can issue a purchase order. Submit documents the day the pilot proposal is issued — never wait for a "yes" first.<br><br>
+      <strong>Do not let a deal stall silently.</strong> If a proposal has been out for more than 14 days without a response, call the contact directly. A deal sitting in "Proposal Issued" in Salesforce with no activity is a deal you are losing.
+    </div>
+  </div>
+</div>
+
+<div class="callout callout-blue">
+  <div class="callout-title" style="color:var(--blue)">Escalation: when to bring in Jon or Olivier</div>
+  <div class="callout-body">
+    <strong>Bring in Olivier Marcotte</strong> when: a deal exceeds $500K; a client raises a competitive threat from Applus RTD, Eddyfi/Baker Hughes, or Olympus IMS; a proposal has been rejected and you cannot determine why; OPG sends any signal about the MSA process outside of a scheduled meeting.<br><br>
+    <strong>Bring in Jon Eustace</strong> when: a deal exceeds $2M; a client requests an executive-level meeting; a contract term requires approval above your authority level; you are considering a strategic partnership or subcontracting arrangement not already in the plan.
+  </div>
+</div>
+
+<div style="margin-top:1.25rem" class="callout callout-amber">
+  <div class="callout-title" style="color:var(--amber)">Early warning signals — flag these at Monday's meeting immediately</div>
+  <div class="callout-body">
+    Mining R-05: Fewer than 3 new accounts signed by end of Q2. Vinoth/Max pipeline generating fewer than 10 proposals combined. Gold price correction below US$3,000/oz.<br><br>
+    Powerline R-06: EIG has not confirmed instrument terms by May 15. HQ 2026 scope not confirmed. Hydro One pilot rejected with no alternative secured.<br><br>
+    Pipeline R-02: Pembina vendor approval stalled past May 23 (Rick Carlton's deal — but Max needs to be ready to activate Alberta independent operators as backup).<br><br>
+    Nuclear R-01: OPG signals anything unusual about the MSA process. Applus RTD news (acquisition, recapitalisation, new hire in nuclear division).
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<div class="doc-footer">
+  <p>BU Services Commercial Playbook — Vinoth Tharma &amp; Max Aggrey &nbsp;·&nbsp; Version 1.0 &nbsp;·&nbsp; Effective May 1, 2026</p>
+  <p style="margin-top:4px">Ekoscan Integrity Group &nbsp;·&nbsp; Jon Eustace, CEO North America &nbsp;·&nbsp; Confidential — not for external distribution</p>
+</div>
+
+<script>
+var sections=['overview','rhythm','mining','powerline','nuclear','x3','accounts','rules'];
+var links=document.querySelectorAll('.topbar-nav a');
+window.addEventListener('scroll',function(){
+  var cur='';
+  sections.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el&&el.getBoundingClientRect().top<=70) cur=id;
+  });
+  links.forEach(function(a){
+    a.classList.toggle('act',a.getAttribute('href')==='#'+cur);
+  });
+});
+</script>
+</body>
+</html>

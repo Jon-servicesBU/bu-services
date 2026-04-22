@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — Meeting Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600;700;900&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A1F5C;--blue:#1A5CA8;--sky:#00AEEF;--teal:#0D5050;--green:#16A34A;--amber:#C9860A;--red:#B91C1C;--purp:#6D28D9;--white:#FFFFFF;--dgrey:#6678A0;--dark:#1C2B4A;--mid:#2D4A7A;--bg:#0A1425;--mono:'Courier New',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:#E8EDF5;min-height:100vh}
+/* NAV */
+
+
+
+.nav-links::-webkit-scrollbar{display:none}
+
+
+
+.nav-btn{color:var(--sky);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;text-decoration:none;flex-shrink:0;margin-left:auto}
+/* PAGE HDR */
+.page-hdr{background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 100%);padding:2.5rem 2.5rem 2rem;border-bottom:3px solid var(--sky)}
+.page-hdr .eh{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sky);margin-bottom:.5rem}
+.page-hdr h1{font-size:2.4rem;font-weight:900;color:#fff;margin-bottom:.3rem;line-height:1.1;font-family:'Barlow Condensed',sans-serif}
+.page-hdr p{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.6;max-width:680px}
+.page-hdr-meta{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.85rem}
+.ph-badge{font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;background:rgba(0,174,239,.15);border:1px solid rgba(0,174,239,.3);color:var(--sky);text-transform:uppercase;letter-spacing:.06em}
+/* SECTION */
+.section{padding:2rem 2.5rem;max-width:1440px;margin:0 auto}
+.section-hdr{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.5rem;padding-bottom:.6rem;border-bottom:2px solid var(--sky)}
+.section-hdr h2{font-size:1.5rem;font-weight:800;color:#fff;font-family:'Barlow Condensed',sans-serif}
+.section-hdr .sh-sub{font-size:.78rem;color:var(--dgrey)}
+hr.divider{border:none;border-top:1px solid var(--mid);margin:1.5rem 0}
+/* VIEWS */
+.view{display:none}.view.active{display:block}
+/* SCHEDULE TABLE */
+.sched-wrap{overflow-x:auto;margin-bottom:1.5rem}
+.sched-table{width:100%;border-collapse:collapse;font-size:.72rem;min-width:700px}
+.sched-table th{background:var(--dark);padding:.5rem .6rem;text-align:center;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:.62rem;color:var(--dgrey);border:1px solid var(--mid)}
+.sched-table td{padding:.4rem .6rem;border:1px solid var(--mid);vertical-align:top}
+.sched-cell{background:var(--dark);border-radius:4px;padding:.35rem .6rem;cursor:pointer;transition:background .15s;margin-bottom:.3rem}
+.sched-cell:hover{background:rgba(0,174,239,.12)}
+.sc-title{font-weight:600;font-size:.72rem;color:#E8EDF5}
+.sc-sub{font-size:.6rem;color:var(--dgrey);margin-top:.1rem}
+.sc-dur{font-size:.58rem;color:var(--sky);margin-top:.1rem}
+td.empty{background:rgba(255,255,255,.02);color:var(--mid);text-align:center;font-size:.65rem;font-style:italic;vertical-align:middle}
+.day-col{background:rgba(0,174,239,.05);font-weight:700;color:var(--sky);font-size:.7rem;text-align:center;white-space:nowrap;padding:.4rem .5rem;border:1px solid var(--mid);vertical-align:middle}
+.t-comm{border-left:3px solid #16A34A}.t-ops{border-left:3px solid #1A5CA8}
+.t-nuc{border-left:3px solid #6D28D9}.t-gate{border-left:3px solid #C9860A}
+.t-fin{border-left:3px solid #0D5050}.t-hr{border-left:3px solid #B91C1C}
+.t-eur{border-left:3px solid #6678A0}.t-conf{border-left:3px solid #368CD9}
+.legend{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.leg-item{display:flex;align-items:center;gap:.35rem;font-size:.65rem;color:var(--dgrey)}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+/* AGENDA */
+.ag-wrap{background:var(--dark);border:1px solid var(--mid);border-radius:8px;overflow:hidden}
+.ag-hdr{padding:1.5rem 1.75rem 1.25rem;border-bottom:2px solid var(--sky)}
+.ag-hdr-commercial{background:linear-gradient(135deg,#0A3A1F 0%,#16A34A 50%,#0A1F5C 100%)}
+.ag-hdr-ops{background:linear-gradient(135deg,#0A1F5C 0%,#1A5CA8 100%)}
+.ag-hdr-nuclear{background:linear-gradient(135deg,#1A0A5C 0%,#6D28D9 100%)}
+.ag-hdr-nuclear-track{background:linear-gradient(135deg,#0D3A2F 0%,#0D5050 100%)}
+.ag-hdr-gate{background:linear-gradient(135deg,#3A1F0A 0%,#C9860A 100%)}
+.ag-hdr-finance{background:linear-gradient(135deg,#0A1F5C 0%,#0D5050 100%)}
+.ag-hdr-hr{background:linear-gradient(135deg,#3A0A0A 0%,#B91C1C 100%)}
+.ag-hdr-eurazeo{background:linear-gradient(135deg,#1A1A2A 0%,#6678A0 100%)}
+.ag-hdr-conference{background:linear-gradient(135deg,#0A1F3A 0%,#368CD9 100%)}
+.ag-eyebrow{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sky);margin-bottom:.35rem}
+.ag-title{font-family:'Barlow Condensed',sans-serif;font-size:1.8rem;font-weight:900;color:#fff;line-height:1.1;margin-bottom:.65rem}
+.ag-badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem}
+.ag-badge{font-size:.62rem;font-weight:700;padding:.18rem .55rem;border-radius:4px;background:rgba(0,174,239,.15);border:1px solid rgba(0,174,239,.3);color:var(--sky);text-transform:uppercase;letter-spacing:.04em}
+.ag-badge.ch{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.3);color:#6EE7B7}
+.ag-attendees{display:flex;flex-wrap:wrap;gap:.4rem}
+.ag-att{font-size:.68rem;padding:.18rem .55rem;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#E8EDF5}
+.ag-att.chair{background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.25);color:#6EE7B7;font-weight:700}
+.ag-att.chair::before{content:"\2726 ";font-size:.55rem}
+.ag-body{padding:1.25rem 1.75rem}
+.ag-prep{background:rgba(0,174,239,.07);border:1px solid rgba(0,174,239,.2);border-radius:6px;padding:.7rem 1rem;font-size:.73rem;color:#A8B8D0;line-height:1.6;margin-bottom:1.25rem}
+.ag-prep-lbl{font-weight:700;color:var(--sky);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem}
+.ag-sec{margin-bottom:1.1rem}
+.ag-sec-hdr{display:flex;align-items:center;gap:.6rem;padding:.45rem 0;border-bottom:1px solid var(--mid);margin-bottom:.65rem}
+.ag-sec-num{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:900;color:var(--sky);min-width:1.5rem}
+.ag-sec-title{font-weight:700;font-size:.82rem;color:#E8EDF5;flex:1}
+.ag-sec-owner{font-size:.65rem;color:var(--dgrey);white-space:nowrap}
+.ag-sec-time{font-size:.62rem;color:var(--sky);font-family:var(--mono);white-space:nowrap;margin-left:auto}
+.ag-item{display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.5rem;font-size:.74rem;color:#D0D8E8;line-height:1.55}
+.pip{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:.45rem}
+.pd{background:#C9860A}.pa{background:#1A5CA8}.pi{background:#16A34A}.pr{background:#B91C1C}
+.ag-item strong{color:#E8EDF5}
+.ag-auth{background:rgba(255,255,255,.04);border-radius:6px;padding:.65rem .85rem;margin-top:.75rem;font-size:.7rem}
+.ag-auth-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--dgrey);font-weight:700;margin-bottom:.35rem}
+.auth-row{display:flex;gap:.5rem;align-items:baseline;margin:.2rem 0;font-size:.72rem}
+.auth-name{font-weight:700;color:var(--sky);min-width:140px;flex-shrink:0}
+.auth-scope{color:#A8B8D0}
+.ag-note{font-size:.67rem;color:var(--dgrey);font-style:italic;margin-top:.75rem;padding-top:.6rem;border-top:1px solid var(--mid)}
+/* SF */
+.sf-box{background:var(--dark);border:1px solid var(--mid);border-radius:8px;overflow:hidden}
+.sf-hdr{background:linear-gradient(135deg,#0D4A1F 0%,#16A34A 100%);padding:1.25rem 1.5rem;border-bottom:2px solid var(--sky)}
+.sf-hdr h3{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:#fff}
+.sf-hdr p{font-size:.75rem;color:rgba(255,255,255,.7);margin-top:.25rem}
+.sf-body{padding:1.25rem 1.5rem}
+.sf-why{background:rgba(22,163,74,.07);border:1px solid rgba(22,163,74,.2);border-radius:6px;padding:.75rem 1rem;margin-bottom:1.25rem;font-size:.74rem;color:#A8B8D0;line-height:1.6}
+.sf-why strong{color:#6EE7B7}
+.sf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.25rem}
+.sf-owner{background:rgba(255,255,255,.04);border:1px solid var(--mid);border-radius:6px;padding:.6rem .75rem;font-size:.7rem}
+.sf-owner .own-name{font-weight:700;color:var(--sky);margin-bottom:.2rem}
+.sf-owner .own-scope{color:#A8B8D0;line-height:1.5}
+.sf-list{list-style:none;padding:0}
+.sf-list li{display:flex;gap:.5rem;align-items:flex-start;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.73rem;color:#D0D8E8;line-height:1.5}
+.sf-list li:last-child{border-bottom:none}
+.sf-list li::before{content:"\2610";color:var(--sky);flex-shrink:0}
+.sf-esc{background:rgba(185,28,28,.08);border:1px solid rgba(185,28,28,.25);border-radius:6px;padding:.65rem .85rem;margin-top:.85rem;font-size:.72rem;color:#FCA5A5;line-height:1.6}
+/* QR */
+.qr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.qr-card{background:var(--dark);border:1px solid var(--mid);border-radius:8px;overflow:hidden}
+.qr-top{height:4px}
+.qr-body{padding:.85rem 1rem}
+.qr-title{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;color:#E8EDF5;margin-bottom:.2rem}
+.qr-cadence{font-size:.65rem;color:var(--dgrey);margin-bottom:.5rem;font-family:var(--mono)}
+.qr-row{display:flex;justify-content:space-between;align-items:baseline;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.68rem}
+.qr-row:last-child{border-bottom:none}
+.qr-lbl{color:var(--dgrey)}.qr-val{color:#E8EDF5;font-weight:600;text-align:right;max-width:65%}
+@media(max-width:900px){.sf-grid,.qr-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.page-hdr{padding:1.5rem 1.25rem 1.25rem}.section{padding:1.25rem 1rem}.sf-grid,.qr-grid{grid-template-columns:1fr}}
+
+/* ── MEETING CHECKLIST ─────────────────────────────────────────── */
+.ag-sec-hdr{cursor:pointer;user-select:none;transition:background .12s;
+  border-radius:5px;padding:.45rem .5rem;margin:0 -.5rem .65rem}
+.ag-sec-hdr:hover{background:rgba(255,255,255,.05)}
+
+.ag-check{appearance:none;-webkit-appearance:none;
+  width:16px;height:16px;flex-shrink:0;margin-left:auto;
+  border:1.5px solid rgba(255,255,255,.2);border-radius:4px;
+  cursor:pointer;transition:all .15s;position:relative;
+  background:transparent;vertical-align:middle}
+.ag-check:hover{border-color:rgba(255,255,255,.45)}
+.ag-check:checked{border-color:transparent}
+.ag-check:checked::after{content:'✓';position:absolute;
+  top:-2px;left:1px;font-size:.6rem;color:#0D1B2E;font-weight:900;line-height:1}
+.ag-sec.sec-done .ag-sec-title{opacity:.35;text-decoration:line-through;
+  text-decoration-color:rgba(255,255,255,.25)}
+.ag-sec.sec-done .ag-sec-owner,
+.ag-sec.sec-done .ag-sec-time{opacity:.25}
+.ag-sec.sec-done .ag-sec-num{opacity:.3}
+.ag-sec.sec-done .ag-item{opacity:.25}
+.ag-sec.sec-done .ag-item *{pointer-events:none}
+
+/* Progress bar in ag-hdr */
+.ag-progress-row{display:flex;align-items:center;gap:.75rem;
+  margin-top:.75rem;padding-top:.75rem;
+  border-top:1px solid rgba(255,255,255,.08)}
+.ag-progress-label{font-family:'Barlow Condensed',sans-serif;
+  font-size:.68rem;letter-spacing:1px;text-transform:uppercase;
+  color:rgba(255,255,255,.35);white-space:nowrap}
+.ag-progress-count{font-family:'Barlow Condensed',sans-serif;
+  font-size:.75rem;font-weight:700;color:var(--sky);
+  white-space:nowrap;min-width:3rem}
+.ag-progress-track{flex:1;height:5px;background:rgba(255,255,255,.1);
+  border-radius:3px;overflow:hidden}
+.ag-progress-fill{height:100%;border-radius:3px;
+  background:var(--sky);transition:width .3s ease;width:0%}
+.ag-clear-btn{background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);border-radius:5px;
+  padding:.28rem .7rem;font-size:.68rem;font-weight:700;
+  color:rgba(255,255,255,.35);cursor:pointer;font-family:'Barlow',sans-serif;
+  transition:all .15s;white-space:nowrap}
+.ag-clear-btn:hover{background:rgba(239,68,68,.1);
+  border-color:rgba(239,68,68,.3);color:#FCA5A5}
+
+/* ── MEETING LIFECYCLE ───────────────────────────────────────────────── */
+
+/* Start button */
+.mtg-start-btn{
+  display:inline-flex;align-items:center;gap:.45rem;margin-left:auto;
+  background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.4);
+  border-radius:6px;padding:.32rem .85rem;
+  font-size:.72rem;font-weight:700;letter-spacing:.3px;
+  color:#6EE7B7;cursor:pointer;font-family:'Barlow',sans-serif;
+  transition:all .18s;white-space:nowrap}
+.mtg-start-btn:hover{background:rgba(22,163,74,.3);border-color:rgba(22,163,74,.7);
+  box-shadow:0 0 10px rgba(22,163,74,.2)}
+
+/* Live badge */
+.mtg-live-badge{
+  display:none;align-items:center;gap:.5rem;margin-left:auto;
+  font-family:'Barlow Condensed',sans-serif;font-size:.72rem;
+  font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#6EE7B7}
+.mtg-live-dot{width:7px;height:7px;border-radius:50%;background:#6EE7B7;
+  flex-shrink:0;animation:livepulse 1.4s ease-in-out infinite}
+@keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
+.mtg-live-timer{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;
+  color:rgba(110,231,183,.55);margin-left:.25rem;letter-spacing:1px}
+
+/* Notes area (shown when active) */
+.mtg-notes-wrap{
+  display:none;padding:.9rem 1.25rem 0;
+  border-top:1px solid rgba(255,255,255,.06)}
+.mtg-notes-lbl{
+  font-family:'Barlow Condensed',sans-serif;font-size:.62rem;
+  letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.28);margin-bottom:.45rem}
+.mtg-notes-ta{
+  width:100%;min-height:80px;resize:vertical;
+  background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;padding:.65rem .85rem;
+  font-size:.82rem;line-height:1.6;color:#D0D8E8;
+  font-family:'Barlow',sans-serif;
+  transition:border-color .15s;outline:none}
+.mtg-notes-ta::placeholder{color:rgba(255,255,255,.2);font-style:italic}
+.mtg-notes-ta:focus{border-color:rgba(0,174,239,.4)}
+
+/* Active footer */
+.mtg-footer{
+  display:none;padding:.7rem 1.25rem;
+  border-top:1px solid rgba(255,255,255,.07);
+  background:rgba(0,0,0,.2);
+  gap:.5rem;align-items:center}
+.mtg-end-btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(0,174,239,.15);border:1px solid rgba(0,174,239,.4);
+  border-radius:6px;padding:.32rem .85rem;
+  font-size:.72rem;font-weight:700;color:var(--sky);
+  cursor:pointer;font-family:'Barlow',sans-serif;transition:all .18s}
+.mtg-end-btn:hover{background:rgba(0,174,239,.3);border-color:rgba(0,174,239,.7)}
+.mtg-reset-btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+  border-radius:6px;padding:.32rem .8rem;
+  font-size:.72rem;font-weight:700;color:rgba(255,255,255,.45);
+  cursor:pointer;font-family:'Barlow',sans-serif;transition:all .18s}
+.mtg-reset-btn:hover{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4);color:#FCD34D}
+.mtg-cancel-btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;padding:.32rem .8rem;
+  font-size:.72rem;font-weight:700;color:rgba(255,255,255,.3);
+  cursor:pointer;font-family:'Barlow',sans-serif;transition:all .18s}
+.mtg-cancel-btn:hover{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35);color:#FCA5A5}
+.mtg-demo-wrap{margin-left:auto;display:flex;align-items:center;gap:.5rem}
+.mtg-demo-inline{display:flex;align-items:center;gap:.4rem;
+  padding:.2rem .6rem;border-radius:4px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.03);transition:border-color .15s}
+.mtg-demo-inline:has(input:checked){
+  border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.07)}
+.mtg-demo-lbl{font-size:.62rem;color:rgba(255,255,255,.3);
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;
+  white-space:nowrap}
+.mtg-demo-toggle{
+  position:relative;width:32px;height:17px;cursor:pointer}
+.mtg-demo-toggle input{opacity:0;width:0;height:0;position:absolute}
+.mtg-demo-slider{
+  position:absolute;inset:0;border-radius:17px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  transition:all .2s}
+.mtg-demo-slider::before{
+  content:'';position:absolute;width:11px;height:11px;
+  left:2px;top:2px;border-radius:50%;
+  background:rgba(255,255,255,.35);transition:all .2s}
+.mtg-demo-toggle input:checked + .mtg-demo-slider{
+  background:rgba(245,158,11,.3);border-color:rgba(245,158,11,.6)}
+.mtg-demo-toggle input:checked + .mtg-demo-slider::before{
+  transform:translateX(15px);background:#FCD34D}
+
+/* Confirm overlay */
+.mtg-confirm{
+  display:none;position:absolute;z-index:20;
+  background:#0D1B2E;border:1px solid rgba(255,255,255,.15);
+  border-radius:8px;padding:.75rem 1rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  font-size:.78rem;color:#E8EDF5;min-width:200px}
+.mtg-confirm p{margin-bottom:.6rem;line-height:1.5}
+.mtg-confirm-btns{display:flex;gap:.4rem}
+.confirm-yes{
+  flex:1;padding:.28rem 0;border-radius:4px;border:none;
+  background:rgba(239,68,68,.2);color:#FCA5A5;
+  font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Barlow',sans-serif;
+  transition:background .15s}
+.confirm-yes:hover{background:rgba(239,68,68,.4)}
+.confirm-no{
+  flex:1;padding:.28rem 0;border-radius:4px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.5);font-size:.7rem;font-weight:700;
+  cursor:pointer;font-family:'Barlow',sans-serif;transition:background .15s}
+.confirm-no:hover{background:rgba(255,255,255,.12)}
+
+/* Past sessions drawer */
+.mtg-sessions-wrap{
+  border-top:1px solid rgba(255,255,255,.06)}
+.mtg-sessions-hdr{
+  display:flex;align-items:center;gap:.65rem;
+  padding:.65rem 1.25rem;cursor:pointer;
+  transition:background .12s;user-select:none}
+.mtg-sessions-hdr:hover{background:rgba(255,255,255,.03)}
+.mtg-sessions-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:.72rem;
+  font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(255,255,255,.35)}
+.mtg-sessions-count{
+  font-family:'Barlow Condensed',sans-serif;font-size:.68rem;
+  color:var(--sky);opacity:.7}
+.mtg-sessions-chevron{
+  margin-left:auto;font-size:.65rem;color:rgba(255,255,255,.25);
+  transition:transform .2s}
+.mtg-sessions-body{display:none;padding:0 1.25rem .9rem}
+.mtg-sessions-body.open{display:block}
+.mtg-sessions-chevron.open{transform:rotate(180deg)}
+
+.session-entry{
+  border:1px solid rgba(255,255,255,.07);border-radius:7px;
+  margin-bottom:.5rem;overflow:hidden;cursor:pointer;
+  transition:border-color .15s}
+.session-entry:hover{border-color:rgba(255,255,255,.15)}
+.session-entry-hdr{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.5rem .75rem;background:rgba(255,255,255,.03)}
+.session-date{
+  font-family:'Barlow Condensed',sans-serif;font-size:.75rem;
+  font-weight:700;color:#E8EDF5}
+.session-score{
+  font-family:'Barlow Condensed',sans-serif;font-size:.68rem;
+  color:var(--sky)}
+.session-dur{
+  font-family:'Barlow Condensed',sans-serif;font-size:.65rem;
+  color:rgba(255,255,255,.3)}
+.session-demo-tag{
+  font-size:.6rem;font-weight:700;padding:.1rem .35rem;border-radius:3px;
+  background:rgba(245,158,11,.2);color:#FCD34D;letter-spacing:.5px}
+.session-preview{
+  font-size:.73rem;color:rgba(255,255,255,.35);
+  padding:.35rem .75rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  border-top:1px solid rgba(255,255,255,.05)}
+.session-detail{display:none;padding:.6rem .75rem;
+  border-top:1px solid rgba(255,255,255,.06)}
+.session-detail.open{display:block}
+.session-sec-row{display:flex;align-items:center;gap:.5rem;
+  padding:.2rem 0;font-size:.75rem;color:rgba(255,255,255,.5)}
+.session-sec-row.done{color:#6EE7B7}
+.session-sec-row.done .sec-tick{color:#6EE7B7}
+.session-sec-row .sec-tick{width:14px;flex-shrink:0;font-size:.7rem}
+.session-sec-row .sec-time-stamp{
+  margin-left:auto;font-family:'Barlow Condensed',sans-serif;
+  font-size:.62rem;color:rgba(255,255,255,.25)}
+.session-notes-block{
+  margin-top:.6rem;padding:.5rem .65rem;
+  background:rgba(0,0,0,.2);border-radius:5px;
+  font-size:.75rem;color:rgba(255,255,255,.5);
+  line-height:1.55;white-space:pre-wrap}
+.session-notes-lbl{
+  font-family:'Barlow Condensed',sans-serif;font-size:.6rem;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:rgba(255,255,255,.2);margin-bottom:.3rem}
+.session-del-btn{
+  margin-top:.5rem;background:none;border:none;
+  font-size:.65rem;color:rgba(255,255,255,.2);cursor:pointer;
+  font-family:'Barlow',sans-serif;padding:0;transition:color .15s}
+.session-del-btn:hover{color:#FCA5A5}
+.sessions-empty{
+  font-size:.75rem;color:rgba(255,255,255,.2);
+  padding:.5rem 0;font-style:italic}
+
+/* Active state overrides */
+.view-active .mtg-start-btn{display:none!important}
+.view-active .mtg-demo-inline{display:none!important}
+.view-active .mtg-live-badge{display:flex!important}
+.view-active .mtg-notes-wrap{display:block!important}
+.view-active .mtg-footer{display:flex!important}
+.view-active .ag-clear-btn{display:none!important}
+
+
+/* ── SYSTEM BAR (fixed, below topnav) ──────────────────────────── */
+.sysbar{
+  position:sticky;
+  z-index:99;
+  background:rgba(5,12,25,.98);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;
+  padding:0 1.25rem;
+  gap:.5rem;
+  height:36px;
+  backdrop-filter:blur(8px);
+}
+.sysbar-label{
+  font-size:.6rem;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:rgba(255,255,255,.2);
+  margin-right:.35rem;white-space:nowrap;
+  font-family:'Courier New',monospace}
+.sysbtn{
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.22rem .7rem;border-radius:20px;
+  font-size:.7rem;font-weight:700;
+  text-decoration:none;cursor:pointer;
+  border:1.5px solid;transition:all .18s;
+  white-space:nowrap;font-family:inherit;
+  background:none}
+.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7)}
+.sysbtn-hub:hover,.sysbtn-hub.active{
+  background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);
+  color:#00AEEF;box-shadow:0 0 8px rgba(0,174,239,.2)}
+.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7)}
+.sysbtn-people:hover,.sysbtn-people.active{
+  background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);
+  color:#FCD34D;box-shadow:0 0 8px rgba(201,134,10,.2)}
+.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7)}
+.sysbtn-meetings:hover,.sysbtn-meetings.active{
+  background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);
+  color:#6EE7B7;box-shadow:0 0 8px rgba(22,163,74,.2)}
+.sysbtn-cc{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.4)}
+.sysbtn-cc:hover,.sysbtn-cc.active{
+  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);
+  color:rgba(255,255,255,.85)}
+.sysbtn.current{
+  cursor:default;pointer-events:none}
+.sysbtn-hub.current{
+  background:rgba(0,174,239,.12);border-color:rgba(0,174,239,.5);
+  color:#00AEEF;opacity:1}
+.sysbtn-people.current{
+  background:rgba(201,134,10,.12);border-color:rgba(201,134,10,.5);
+  color:#FCD34D;opacity:1}
+.sysbtn-meetings.current{
+  background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.5);
+  color:#6EE7B7;opacity:1}
+.sysbtn-cc.current{
+  background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);
+  color:rgba(255,255,255,.7);opacity:1}
+
+/* ── UNIFIED TOPNAV ─────────────────────────────────────────────────── */
+.unav{
+  position:sticky;top:0;z-index:100;
+  height:48px;
+  background:rgba(8,16,32,.98);
+  border-bottom:1px solid rgba(0,174,239,.3);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;
+  padding:0 1.5rem;
+  gap:0;
+}
+.unav-brand{
+  display:flex;align-items:baseline;gap:.5rem;
+  flex-shrink:0;margin-right:1.25rem}
+.unav-brand-name{
+  font-size:.82rem;font-weight:800;
+  color:#fff;letter-spacing:-.01em;
+  white-space:nowrap}
+.unav-brand-sep{
+  color:rgba(255,255,255,.18);font-size:.75rem;margin:0 .1rem}
+.unav-brand-page{
+  font-size:.72rem;font-weight:600;
+  color:var(--sky,#00AEEF);
+  white-space:nowrap}
+.unav-links{
+  display:flex;align-items:center;gap:0;
+  flex:1;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none}
+.unav-links::-webkit-scrollbar{display:none}
+.unav-links a{
+  padding:.25rem .7rem;
+  font-size:.72rem;font-weight:600;
+  color:rgba(255,255,255,.45);
+  text-decoration:none;white-space:nowrap;
+  border-radius:4px;transition:all .15s;
+  cursor:pointer;border:none;background:none;
+  font-family:inherit}
+.unav-links a:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.06)}
+.unav-links a.active{color:#fff;background:rgba(0,174,239,.15)}
+.unav-date{
+  font-size:.65rem;color:rgba(255,255,255,.25);
+  font-family:'Courier New',monospace;
+  white-space:nowrap;margin-left:.75rem;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<nav class="unav"><div class="unav-brand"><span class="unav-brand-name">BU Services</span><span class="unav-brand-sep">·</span><span class="unav-brand-page">Meeting Hub</span></div><div class="unav-links"><a class="active" onclick="setMode('schedule',this)">&#128197; Schedule</a><a onclick="setMode('sf-reminder',this)">SF Reminder</a><a onclick="setMode('commercial',this)">Commercial</a><a onclick="setMode('ops',this)">Ops</a><a onclick="setMode('nuclear',this)">Nuclear Steering</a><a onclick="setMode('nuclear-track',this)">Nuclear Track</a><a onclick="setMode('gate',this)">Gates</a><a onclick="setMode('finance',this)">Finance</a><a onclick="setMode('hr',this)">HR</a><a onclick="setMode('eurazeo',this)">Eurazeo</a><a onclick="setMode('conference',this)">Post-Conf</a><a onclick="setMode('quick-ref',this)">Quick Ref</a></div></nav>
+<div class="sysbar"><span class="sysbar-label">BU Services</span><a class="sysbtn sysbtn-hub" href="BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a><a class="sysbtn sysbtn-people" href="BU_Services_People_Dashboard.html" target="buservices">👥 People</a><span class="sysbtn sysbtn-meetings current">📅 Meetings</span><a class="sysbtn sysbtn-cc" href="BU_Services_Command_Centre.html" target="buservices">📊 Command Centre</a></div>
+
+<div class="page-hdr">
+  <div class="eh">Ekoscan Integrity Group &nbsp;&middot;&nbsp; BU Services</div>
+  <h1>Meeting Hub</h1>
+  <p>Full schedule &nbsp;&middot;&nbsp; Standing agendas &nbsp;&middot;&nbsp; Salesforce cadence &nbsp;&middot;&nbsp; Decision authority &nbsp;&middot;&nbsp; All recurring meetings across BU Services</p>
+  <div class="page-hdr-meta">
+    <span class="ph-badge">Effective May 2026</span>
+    <span class="ph-badge">Microsoft Teams</span>
+    <span class="ph-badge">Jon Eustace CEO NA</span>
+    <span class="ph-badge">Version 2.0</span>
+  </div>
+</div>
+
+<div class="section">
+
+<div id="view-schedule" class="view active">
+  <div class="section-hdr">
+    <h2>Meeting Schedule</h2>
+    <span class="sh-sub">All recurring BU Services meetings &nbsp;&middot;&nbsp; All times ET &nbsp;&middot;&nbsp; Microsoft Teams</span>
+  </div>
+  <div class="legend">
+    <span class="leg-item"><span class="leg-dot" style="background:#16A34A"></span>Commercial</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#1A5CA8"></span>Ops</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#6D28D9"></span>Nuclear Steering</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#0D5050"></span>Nuclear Track</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#C9860A"></span>Gate</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#0D5050"></span>Finance</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#B91C1C"></span>HR</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#6678A0"></span>Eurazeo</span>
+    <span class="leg-item"><span class="leg-dot" style="background:#368CD9"></span>Post-Conf</span>
+  </div>
+  <div class="sched-wrap">
+    <table class="sched-table">
+      <thead><tr>
+        <th style="width:80px">Freq.</th>
+        <th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="day-col">Every<br>week</td>
+          <td>
+            <div class="sched-cell t-comm" onclick="setMode('commercial')">
+              <div class="sc-title">Commercial Meeting</div>
+              <div class="sc-sub">Chair: Jon Eustace</div>
+              <div class="sc-dur">9:00 AM &middot; 60 min</div>
+            </div>
+            <div class="sched-cell t-ops" onclick="setMode('ops')" style="margin-top:.35rem">
+              <div class="sc-title">Ops &amp; Delivery</div>
+              <div class="sc-sub">Chair: Alex Cyr</div>
+              <div class="sc-dur">After Commercial &middot; 60 min</div>
+            </div>
+          </td>
+          <td class="empty">&mdash;</td>
+          <td class="empty">&mdash;</td>
+          <td class="empty">&mdash;</td>
+          <td>
+            <div class="sched-cell t-comm" onclick="setMode('sf-reminder')">
+              <div class="sc-title">Salesforce Update</div>
+              <div class="sc-sub">All commercial owners</div>
+              <div class="sc-dur">By 4:00 PM &middot; Standing</div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="day-col">Bi-<br>weekly</td>
+          <td class="empty">&mdash;</td>
+          <td>
+            <div class="sched-cell t-nuc" onclick="setMode('nuclear')">
+              <div class="sc-title">Nuclear Steering</div>
+              <div class="sc-sub">Chair: Olivier Marcotte</div>
+              <div class="sc-dur">10:00 AM &middot; 60 min</div>
+            </div>
+          </td>
+          <td class="empty">&mdash;</td>
+          <td class="empty">&mdash;</td>
+          <td class="empty">&mdash;</td>
+        </tr>
+        <tr>
+          <td class="day-col">Monthly</td>
+          <td class="empty">&mdash;</td>
+          <td class="empty">&mdash;</td>
+          <td>
+            <div class="sched-cell t-hr" onclick="setMode('hr')">
+              <div class="sc-title">HR &amp; Retention</div>
+              <div class="sc-sub">Chair: Maud Leivin Capuano</div>
+              <div class="sc-dur">2nd Wed &middot; 11:00 AM &middot; 45 min</div>
+            </div>
+          </td>
+          <td>
+            <div class="sched-cell t-fin" onclick="setMode('finance')">
+              <div class="sc-title">Financial Review</div>
+              <div class="sc-sub">Chair: Jon Eustace</div>
+              <div class="sc-dur">1st Thu &middot; 2:00 PM &middot; 60 min</div>
+            </div>
+          </td>
+          <td>
+            <div class="sched-cell t-gate" onclick="setMode('gate')">
+              <div class="sc-title">Gate Reviews</div>
+              <div class="sc-sub">Chair: Jon Eustace</div>
+              <div class="sc-dur">Last Fri &middot; 10:00 AM &middot; 90 min</div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="day-col">As<br>needed<br><small>(min. monthly)</small></td>
+          <td colspan="5" style="padding:.5rem .75rem">
+            <div class="sched-cell t-nuc" onclick="setMode('nuclear-track')" style="display:inline-flex;align-items:center;gap:.75rem;margin-bottom:.35rem">
+              <div>
+                <div class="sc-title">Nuclear Track Sync</div>
+                <div class="sc-sub">Chair: Jon Eustace &middot; Minimum monthly &middot; 60 min</div>
+              </div>
+            </div>
+            <div class="sched-cell t-conf" onclick="setMode('conference')" style="display:inline-flex;align-items:center;gap:.75rem;margin-left:.5rem">
+              <div>
+                <div class="sc-title">Post-Conference Debrief</div>
+                <div class="sc-sub">After each BU Services conference &middot; Chair: Jon or commercial lead</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="day-col">Quarterly</td>
+          <td colspan="5" style="padding:.5rem .75rem">
+            <div class="sched-cell t-eur" onclick="setMode('eurazeo')" style="display:inline-flex;align-items:center;gap:.75rem">
+              <div>
+                <div class="sc-title">Eurazeo / EIG Executive Update</div>
+                <div class="sc-sub">Presenter: Jon Eustace &middot; First week Q1/Q2/Q3/Q4 &middot; 120 min</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="background:rgba(0,174,239,.06);border:1px solid rgba(0,174,239,.2);border-radius:6px;padding:.65rem 1rem;font-size:.72rem;color:#A8B8D0;line-height:1.6;margin-bottom:1.5rem">
+    Click any cell to jump to its full agenda &nbsp;&middot;&nbsp;
+    Live action counts per series &rarr;
+    <a href="BU_Services_Command_Centre.html#meetings" target="buservices" style="color:var(--sky);text-decoration:none;font-weight:700">Command Centre &mdash; Meeting Health &#8594;</a>
+  </div>
+</div>
+
+<div id="view-sf-reminder" class="view">
+  <div class="sf-box">
+    <div class="sf-hdr">
+      <h3>Friday Salesforce Update &mdash; Standing Requirement</h3>
+      <p>Every Friday by 4:00 PM ET &nbsp;&middot;&nbsp; All commercial owners &nbsp;&middot;&nbsp; Power Automate runs Sunday 7:00 PM ET</p>
+    </div>
+    <div class="sf-body">
+      <div class="sf-why">
+        <strong>Why this matters:</strong> Power Automate runs every Sunday at 7:00 PM ET &mdash; it reads Salesforce and pushes data into the Command Centre and Monday email digest.
+        The Friday 4:00 PM deadline provides a 27-hour buffer. <strong>Stale Salesforce = stale Command Centre = stale Monday meeting = stale Eurazeo reporting.</strong>
+      </div>
+      <div class="section-hdr" style="margin-top:.5rem"><h2>Owner Responsibilities</h2><span class="sh-sub">Every Friday by 4:00 PM</span></div>
+      <div class="sf-grid">
+        <div class="sf-owner"><div class="own-name">Vinoth Tharma</div><div class="own-scope">Mining NDT (East) + Nuclear/OPG + 3X Composite. All site visit quotes, new account proposals, signed inspection agreements.</div></div>
+        <div class="sf-owner"><div class="own-name">Max Aggrey</div><div class="own-scope">Mining NDT (West) + 3X. All Alberta and BC opportunities. Any new utility conversations opened this week.</div></div>
+        <div class="sf-owner"><div class="own-name">Rick Carlton</div><div class="own-scope">Pipeline DA. All Pembina and Tidewater opportunities. Signed dig programs marked Closed Won. Joel Carlton flags field work by Thursday.</div></div>
+        <div class="sf-owner"><div class="own-name">Mathieu Beauchesne</div><div class="own-scope">Powerline. Hydro-Qu&eacute;bec and utility pipeline opportunities. Any new utility conversations.</div></div>
+        <div class="sf-owner"><div class="own-name">Olivier Marcotte</div><div class="own-scope">Nuclear/OPG executive-level deals. Confirm all initiative opportunities have correct BU Initiative picklist values.</div></div>
+      </div>
+      <div class="section-hdr" style="margin-top:1rem"><h2>Checklist</h2><span class="sh-sub">Every Friday</span></div>
+      <ul class="sf-list">
+        <li>All deals closed this week &rarr; Stage = <strong>Closed Won</strong>. Amount in CAD. Close Date = invoice date.</li>
+        <li>All new prospects &rarr; New Opportunity with <strong>BU_Initiative__c</strong> picklist value set.</li>
+        <li>All active opportunities &rarr; Stage and Amount updated to reflect current status.</li>
+        <li>New account relationships &rarr; Create Account first, then the Opportunity.</li>
+        <li>Ops-to-commercial handoff &rarr; If ops started a new engagement, commercial owner has a Salesforce opportunity open by Friday.</li>
+      </ul>
+      <div class="sf-esc"><strong>Escalation:</strong> If a commercial owner has not updated Salesforce by Friday 4:00 PM, Jon Eustace contacts them directly before end of day. This is not discretionary &mdash; the accuracy of the Command Centre, Monday digest, and Eurazeo quarterly reporting depends on it.</div>
+    </div>
+  </div>
+</div>
+
+<div id="view-commercial" class="view">
+  <div class="ag-wrap">
+    <div class="ag-hdr ag-hdr-commercial">
+      <div class="ag-eyebrow">Weekly &nbsp;&middot;&nbsp; Every Monday &nbsp;&middot;&nbsp; 9:00 AM ET &nbsp;&middot;&nbsp; 60 minutes</div>
+      <div class="ag-title">Commercial Leadership Weekly</div>
+      <div class="ag-badges"><span class="ag-badge">60 min</span><span class="ag-badge">Mon 9:00 AM ET</span><span class="ag-badge ch">&#10022; Chair: Jon Eustace</span><span class="ag-badge">Microsoft Teams</span></div>
+      <div class="ag-attendees"><span class="ag-att chair">Jon Eustace</span><span class="ag-att">Max Aggrey</span><span class="ag-att">Vinoth Tharma</span><span class="ag-att">Olivier Marcotte</span><span class="ag-att">Rick Carlton</span><span class="ag-att">Mathieu Beauchesne</span></div>
+    
+    <div class="ag-progress-row"><span class="ag-progress-label">Progress</span><span class="ag-progress-count" id="view-commercial-count">0 / 0</span><span class="ag-progress-track"><span class="ag-progress-fill" id="view-commercial-fill"></span></span><button class="ag-clear-btn" onclick="clearMeeting('view-commercial')">↺ Clear All</button><button class="mtg-start-btn" id="view-commercial-start-btn" onclick="startMeeting('view-commercial')">▶ Start Meeting</button><span class="mtg-demo-inline" id="view-commercial-demo-wrap"><span class="mtg-demo-lbl">Demo</span><label class="mtg-demo-toggle"><input type="checkbox" id="view-commercial-demo"><span class="mtg-demo-slider"></span></label></span><span class="mtg-live-badge" id="view-commercial-live-badge"><span class="mtg-live-dot"></span>Live<span class="mtg-live-timer" id="view-commercial-timer">0:00</span></span></div></div>
+    <div class="ag-body"><div class="ag-prep"><div class="ag-prep-lbl">Pre-meeting prep &mdash; all owners (10 min before)</div>Update your initiative pipeline: deals, proposals issued, client responses received. Note any gate milestones hit or missed. Flag any early warning signals. No slides &mdash; verbal updates only.</div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">01</span>
+        <span class="ag-sec-title">Initiative Pipeline Round-Robin</span>
+        <span class="ag-sec-owner">All owners &middot; 5&ndash;7 min each</span>
+        <span class="ag-sec-time">0:00&ndash;0:35</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div><strong>Mining NDT &mdash; Vinoth / Max:</strong> Account updates, new site visits, proposals out, signed MSAs or POs. Western Canada update from Max. Quote conversion rate. ECA instrument utilisation.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>Pipeline DA &mdash; Rick Carlton:</strong> Pembina and Tidewater status. Rigs operational and deployed. Digs completed and invoiced. New operator conversations. Joel Carlton field execution summary.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>Powerline &mdash; Mathieu Beauchesne:</strong> Hydro-Qu&eacute;bec program status. Hydro One / AltaLink pilot progress. EIG instrument model confirmation. Any utility conversations opened.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>Nuclear / OPG &mdash; Vinoth Tharma:</strong> OPG procurement relationship update. MSA tender preparation milestone. CGSB qualification progress from Louis-Pier Th&eacute;berge.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>3X Composite &mdash; Vinoth / Max:</strong> ABSA re-submission status from Keith Reichenbach. Non-pressure repair revenue. Repair quotes embedded in inspection reports.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">02</span>
+        <span class="ag-sec-title">Gate Decisions &amp; Sprint Milestones</span>
+        <span class="ag-sec-owner">Jon Eustace / Olivier Marcotte</span>
+        <span class="ag-sec-time">0:35&ndash;0:48</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pd"></div><div>Review any gate milestone due this week. Status: hit, missed, or at risk? Owner states position &mdash; Jon Eustace makes the call.</div></div><div class="ag-item"><div class="pip pa"></div><div>Any CAPEX release required this week &mdash; confirm Jeremy Irwin has been briefed. Amounts above $200K require Jon Eustace confirmation.</div></div><div class="ag-item"><div class="pip pd"></div><div>Any new proposals requiring pricing or scope sign-off &mdash; Olivier approves up to $2M, Jon above that.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">03</span>
+        <span class="ag-sec-title">Early Warning Signals &amp; Risk Flags</span>
+        <span class="ag-sec-owner">All owners</span>
+        <span class="ag-sec-time">0:48&ndash;0:55</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pr"></div><div>Any risk register trigger conditions approaching threshold? R-01 Nuclear MSA &middot; R-02 Pipeline MSA miss &middot; R-03 Personnel &middot; R-04 ABSA &middot; R-05 Mining stalls &middot; R-06 Powerline instrument.</div></div><div class="ag-item"><div class="pip pi"></div><div>Competitor activity &mdash; Evident Industrial, new ECA entrants in mining, pipeline DA movements.</div></div><div class="ag-item"><div class="pip pr"></div><div>Team or resource concerns &mdash; utilisation dropping, instrument gaps, client relationship stress, retention signals.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">04</span>
+        <span class="ag-sec-title">Wins &amp; Next Week Actions</span>
+        <span class="ag-sec-owner">Jon Eustace</span>
+        <span class="ag-sec-time">0:55&ndash;1:00</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Name every win from the past week &mdash; signed contract, confirmed PO, new site visit booked, first invoice issued. Celebrate before moving on.</div></div><div class="ag-item"><div class="pip pa"></div><div>Confirm one clear next action per person due by next Monday. Jon notes for tracking and sends a brief summary within 2 hours of the meeting.</div></div>
+    </div><div class="ag-auth"><div class="ag-auth-lbl">Decision Authority at this Meeting</div><div class="auth-row"><span class="auth-name">Jon Eustace</span><span class="auth-scope">Strategic pivots &middot; Contracts above $2M &middot; Contingency activation &middot; Gate milestone calls</span></div><div class="auth-row"><span class="auth-name">Olivier Marcotte</span><span class="auth-scope">Proposals and contracts to $2M &middot; CAPEX to $200K</span></div></div><div class="ag-note">Standing agenda. No preparation required beyond pipeline updates. Any owner can add to agenda 24 hrs prior via Teams message to Jon Eustace.</div></div>
+<div class="mtg-notes-wrap" id="view-commercial-notes-wrap"><div class="mtg-notes-lbl">Meeting Notes</div><textarea class="mtg-notes-ta" id="view-commercial-notes-ta" placeholder="Free notes — autosaved every 10 seconds…" oninput="autosaveNotes('view-commercial')"></textarea></div>
+<div class="mtg-footer" id="view-commercial-footer" style="position:relative"><button class="mtg-reset-btn" onclick="confirmAction('view-commercial','reset')">↺ Reset</button><button class="mtg-cancel-btn" onclick="confirmAction('view-commercial','cancel')">✕ Cancel</button><button class="mtg-end-btn" onclick="endMeeting('view-commercial')">■ End &amp; Save</button><div class="mtg-confirm" id="view-commercial-confirm"><p id="view-commercial-confirm-msg"></p><div class="mtg-confirm-btns"><button class="confirm-yes" id="view-commercial-confirm-yes">Yes, do it</button><button class="confirm-no" onclick="closeConfirm('view-commercial')">Cancel</button></div></div></div>
+<div class="mtg-sessions-wrap" id="view-commercial-sessions-wrap"><div class="mtg-sessions-hdr" onclick="toggleSessions('view-commercial')"><span class="mtg-sessions-title">Past Sessions</span><span class="mtg-sessions-count" id="view-commercial-sessions-count"></span><span class="mtg-sessions-chevron" id="view-commercial-sessions-chevron">▼</span></div><div class="mtg-sessions-body" id="view-commercial-sessions-body"></div></div></div></div>
+<div id="view-ops" class="view">
+  <div class="ag-wrap">
+    <div class="ag-hdr ag-hdr-ops">
+      <div class="ag-eyebrow">Weekly &nbsp;&middot;&nbsp; Every Monday (after Commercial) &nbsp;&middot;&nbsp; 60 minutes</div>
+      <div class="ag-title">Ops &amp; Delivery Weekly</div>
+      <div class="ag-badges"><span class="ag-badge">60 min</span><span class="ag-badge">Monday after Commercial</span><span class="ag-badge ch">&#10022; Chair: Alex Cyr</span><span class="ag-badge">Microsoft Teams</span></div>
+      <div class="ag-attendees"><span class="ag-att chair">Alex Cyr</span><span class="ag-att">Eric Rodrigue</span><span class="ag-att">Joel Djordjevic</span><span class="ag-att">Keith Reichenbach</span><span class="ag-att">Brook Althouse</span><span class="ag-att">Jason Borza</span></div>
+    
+    <div class="ag-progress-row"><span class="ag-progress-label">Progress</span><span class="ag-progress-count" id="view-ops-count">0 / 0</span><span class="ag-progress-track"><span class="ag-progress-fill" id="view-ops-fill"></span></span><button class="ag-clear-btn" onclick="clearMeeting('view-ops')">↺ Clear All</button><button class="mtg-start-btn" id="view-ops-start-btn" onclick="startMeeting('view-ops')">▶ Start Meeting</button><span class="mtg-demo-inline" id="view-ops-demo-wrap"><span class="mtg-demo-lbl">Demo</span><label class="mtg-demo-toggle"><input type="checkbox" id="view-ops-demo"><span class="mtg-demo-slider"></span></label></span><span class="mtg-live-badge" id="view-ops-live-badge"><span class="mtg-live-dot"></span>Live<span class="mtg-live-timer" id="view-ops-timer">0:00</span></span></div></div>
+    <div class="ag-body"><div class="ag-prep"><div class="ag-prep-lbl">Pre-meeting prep &mdash; all ops leads (15 min before)</div>Update crew utilisation for your region: billable hours this week vs. available hours. Note any instrument or equipment availability issues. Flag any cross-region resource conflicts.</div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">01</span>
+        <span class="ag-sec-title">Crew Utilisation &mdash; Region by Region</span>
+        <span class="ag-sec-owner">All ops leads &middot; 4&ndash;5 min each</span>
+        <span class="ag-sec-time">0:00&ndash;0:25</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Format: billable % this week &rarr; scheduled deployments next week &rarr; any idle capacity &rarr; flag if below 75%.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>QC / Eastern &mdash; Eric Rodrigue:</strong> Mining QC accounts, Hydro-Qu&eacute;bec powerline crew, remote analysis hours at QC City. Utilisation vs. 85% target.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>ON / Central &mdash; Joel Djordjevic:</strong> Nucleom ON crew (Oakville, Thunder Bay). Mining ON accounts. Nuclear remote analysis capacity. Utilisation vs. 85% target.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>Western Canada &mdash; Keith Reichenbach:</strong> Edmonton and Vancouver crew. Oil sands deployments. Powerline AB crew if applicable. Utilisation vs. 85% target.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>Northern &mdash; Brook Althouse:</strong> Northern region crews, remote logistics, any capacity or access constraints.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>Nortech / PI &mdash; Jason Borza:</strong> Nortech Edmonton and Fort St. John crew. Pipeline DA rig utilisation (coordinate with Rick Carlton). Utilisation vs. 85% target.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">02</span>
+        <span class="ag-sec-title">Instrument &amp; Equipment Availability</span>
+        <span class="ag-sec-owner">Alex Cyr</span>
+        <span class="ag-sec-time">0:25&ndash;0:35</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>SG NDT ECA instrument fleet &mdash; units deployed, units available, any maintenance outstanding.</div></div><div class="ag-item"><div class="pip pr"></div><div>Flag any instrument gap that could prevent a scheduled deployment &mdash; escalate to Mathieu Beauchesne or Olivier Marcotte if it affects a committed proposal.</div></div><div class="ag-item"><div class="pip pi"></div><div>Powerline instruments (LineCore / LineOhm / LineRay) &mdash; availability for HQ or utility deployments.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">03</span>
+        <span class="ag-sec-title">CAPEX &amp; Procurement Status</span>
+        <span class="ag-sec-owner">Jeremy Irwin update (via Alex Cyr)</span>
+        <span class="ag-sec-time">0:35&ndash;0:45</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Pipeline rig procurement &mdash; delivery status for any rigs on order.</div></div><div class="ag-item"><div class="pip pi"></div><div>3X Composite tooling &mdash; MONTIPOWER tool and tooling kit delivery status. Technician certification CAPEX release status.</div></div><div class="ag-item"><div class="pip pd"></div><div>Any CAPEX release required by ops lead this week &mdash; Alex Cyr approves under $25K, brings above that to Mathieu Beauchesne.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">04</span>
+        <span class="ag-sec-title">Field Quality &amp; Resource Conflicts</span>
+        <span class="ag-sec-owner">Alex Cyr (decision)</span>
+        <span class="ag-sec-time">0:45&ndash;0:55</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pr"></div><div>Any non-conformances, client complaints, or technical quality issues from field this week &mdash; all issues tabled regardless of initiative.</div></div><div class="ag-item"><div class="pip pd"></div><div>Cross-initiative resource conflicts resolved at this meeting. Alex Cyr makes the call on prioritisation &mdash; no initiative takes precedence without Alex's explicit decision.</div></div><div class="ag-item"><div class="pip pi"></div><div>Headcount vs. plan &mdash; any new hire approvals needed, any backfill situations flagged. Alex brings net-new FTE requests to Jon Eustace.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">05</span>
+        <span class="ag-sec-title">Commercial Update &amp; Salesforce Close</span>
+        <span class="ag-sec-owner">Alex Cyr</span>
+        <span class="ag-sec-time">0:55&ndash;1:00</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Brief summary from Commercial Meeting &mdash; what gates were discussed, any actions that affect ops execution this week.</div></div><div class="ag-item"><div class="pip pa"></div><div>One clear ops action per lead due by next Monday. Alex notes for follow-up.</div></div><div class="ag-item"><div class="pip pa"></div><div><strong>Salesforce reminder:</strong> If ops started a new engagement or issued a field quote this week, flag it to the commercial owner today &mdash; they must have a Salesforce opportunity open by Friday.</div></div>
+    </div><div class="ag-auth"><div class="ag-auth-lbl">Decision Authority at this Meeting</div><div class="auth-row"><span class="auth-name">Alex Cyr</span><span class="auth-scope">Resource prioritisation &middot; Instrument allocation &middot; Cross-initiative deployment &middot; CAPEX under $25K</span></div><div class="auth-row"><span class="auth-name">Jon Eustace</span><span class="auth-scope">Net-new FTE approvals &middot; CAPEX above $25K</span></div></div></div>
+<div class="mtg-notes-wrap" id="view-ops-notes-wrap"><div class="mtg-notes-lbl">Meeting Notes</div><textarea class="mtg-notes-ta" id="view-ops-notes-ta" placeholder="Free notes — autosaved every 10 seconds…" oninput="autosaveNotes('view-ops')"></textarea></div>
+<div class="mtg-footer" id="view-ops-footer" style="position:relative"><button class="mtg-reset-btn" onclick="confirmAction('view-ops','reset')">↺ Reset</button><button class="mtg-cancel-btn" onclick="confirmAction('view-ops','cancel')">✕ Cancel</button><button class="mtg-end-btn" onclick="endMeeting('view-ops')">■ End &amp; Save</button><div class="mtg-confirm" id="view-ops-confirm"><p id="view-ops-confirm-msg"></p><div class="mtg-confirm-btns"><button class="confirm-yes" id="view-ops-confirm-yes">Yes, do it</button><button class="confirm-no" onclick="closeConfirm('view-ops')">Cancel</button></div></div></div>
+<div class="mtg-sessions-wrap" id="view-ops-sessions-wrap"><div class="mtg-sessions-hdr" onclick="toggleSessions('view-ops')"><span class="mtg-sessions-title">Past Sessions</span><span class="mtg-sessions-count" id="view-ops-sessions-count"></span><span class="mtg-sessions-chevron" id="view-ops-sessions-chevron">▼</span></div><div class="mtg-sessions-body" id="view-ops-sessions-body"></div></div></div></div>
+<div id="view-nuclear" class="view">
+  <div class="ag-wrap">
+    <div class="ag-hdr ag-hdr-nuclear">
+      <div class="ag-eyebrow">Bi-weekly &nbsp;&middot;&nbsp; Every other Tuesday &nbsp;&middot;&nbsp; 10:00 AM ET &nbsp;&middot;&nbsp; 60 minutes</div>
+      <div class="ag-title">Nuclear Steering Committee</div>
+      <div class="ag-badges"><span class="ag-badge">60 min</span><span class="ag-badge">Bi-weekly Tue 10:00 AM ET</span><span class="ag-badge ch">&#10022; Chair: Olivier Marcotte</span><span class="ag-badge">Microsoft Teams</span></div>
+      <div class="ag-attendees"><span class="ag-att chair">Olivier Marcotte</span><span class="ag-att">Louis-Pier Théberge</span><span class="ag-att">Jean-François Martel</span><span class="ag-att">Vinoth Tharma</span><span class="ag-att">Francis Boudreault-Leclerc</span></div>
+    
+    <div class="ag-progress-row"><span class="ag-progress-label">Progress</span><span class="ag-progress-count" id="view-nuclear-count">0 / 0</span><span class="ag-progress-track"><span class="ag-progress-fill" id="view-nuclear-fill"></span></span><button class="ag-clear-btn" onclick="clearMeeting('view-nuclear')">↺ Clear All</button><button class="mtg-start-btn" id="view-nuclear-start-btn" onclick="startMeeting('view-nuclear')">▶ Start Meeting</button><span class="mtg-demo-inline" id="view-nuclear-demo-wrap"><span class="mtg-demo-lbl">Demo</span><label class="mtg-demo-toggle"><input type="checkbox" id="view-nuclear-demo"><span class="mtg-demo-slider"></span></label></span><span class="mtg-live-badge" id="view-nuclear-live-badge"><span class="mtg-live-dot"></span>Live<span class="mtg-live-timer" id="view-nuclear-timer">0:00</span></span></div></div>
+    <div class="ag-body"><div class="ag-prep"><div class="ag-prep-lbl">Pre-meeting prep</div>Louis-Pier Th&eacute;berge: updated CGSB qualification tracker. Jean-Fran&ccedil;ois Martel: tender document completion status. Vinoth Tharma: latest OPG procurement signals.</div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">01</span>
+        <span class="ag-sec-title">MSA Tender Preparation Status</span>
+        <span class="ag-sec-owner">Jean-Fran&ccedil;ois Martel</span>
+        <span class="ag-sec-time">0:00&ndash;0:20</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Document completion status per work package &mdash; which WP sections are draft, under review, or final.</div></div><div class="ag-item"><div class="pip pi"></div><div>Rate card status &mdash; proposed 2027 rates reviewed against 2020 MSA baseline and market benchmarks. Jeremy Irwin financial review required before submission.</div></div><div class="ag-item"><div class="pip pr"></div><div>Any documentation gaps &mdash; who owns the gap and what is the completion date. No gaps should carry forward more than one steering cycle.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">02</span>
+        <span class="ag-sec-title">CGSB Qualification Progress</span>
+        <span class="ag-sec-owner">Louis-Pier / Francis B-L</span>
+        <span class="ag-sec-time">0:20&ndash;0:40</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Qualification tracker update &mdash; current certifications vs. required certifications for all 10 work packages.</div></div><div class="ag-item"><div class="pip pi"></div><div>New qualifications in progress &mdash; technicians in training, expected completion dates, examiner availability.</div></div><div class="ag-item"><div class="pip pr"></div><div>Any qualification at risk of not being achieved before Q3 bid submission &mdash; flag immediately. This is the most likely blocker to a full-scope submission.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">03</span>
+        <span class="ag-sec-title">OPG Relationship Signals &amp; Close</span>
+        <span class="ag-sec-owner">Vinoth Tharma / Olivier Marcotte</span>
+        <span class="ag-sec-time">0:40&ndash;1:00</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Any direct or indirect signals from OPG procurement &mdash; RFP timeline updates, competitor activity.</div></div><div class="ag-item"><div class="pip pi"></div><div>Aecon relationship status &mdash; LOI / reference letter progress. Subcontract scope documentation for Olivier Marcotte.</div></div><div class="ag-item"><div class="pip pd"></div><div>Any executive engagement decision &mdash; does Jon Eustace need to make contact at OPG leadership level this cycle?</div></div><div class="ag-item"><div class="pip pa"></div><div>Olivier Marcotte sends a one-paragraph status note to Jon Eustace within 24 hours of each steering meeting.</div></div>
+    </div><div class="ag-auth"><div class="ag-auth-lbl">Decision Authority at this Meeting</div><div class="auth-row"><span class="auth-name">Olivier Marcotte</span><span class="auth-scope">OPG commercial decisions &middot; MSA scope and pricing &middot; Aecon relationship</span></div><div class="auth-row"><span class="auth-name">Jon Eustace</span><span class="auth-scope">Executive OPG engagement &middot; Major scope changes &middot; Contingency activation</span></div></div><div class="ag-note">MSA bid submitted to OPG by end of Q3 2026. This meeting drives that deliverable.</div></div>
+<div class="mtg-notes-wrap" id="view-nuclear-notes-wrap"><div class="mtg-notes-lbl">Meeting Notes</div><textarea class="mtg-notes-ta" id="view-nuclear-notes-ta" placeholder="Free notes — autosaved every 10 seconds…" oninput="autosaveNotes('view-nuclear')"></textarea></div>
+<div class="mtg-footer" id="view-nuclear-footer" style="position:relative"><button class="mtg-reset-btn" onclick="confirmAction('view-nuclear','reset')">↺ Reset</button><button class="mtg-cancel-btn" onclick="confirmAction('view-nuclear','cancel')">✕ Cancel</button><button class="mtg-end-btn" onclick="endMeeting('view-nuclear')">■ End &amp; Save</button><div class="mtg-confirm" id="view-nuclear-confirm"><p id="view-nuclear-confirm-msg"></p><div class="mtg-confirm-btns"><button class="confirm-yes" id="view-nuclear-confirm-yes">Yes, do it</button><button class="confirm-no" onclick="closeConfirm('view-nuclear')">Cancel</button></div></div></div>
+<div class="mtg-sessions-wrap" id="view-nuclear-sessions-wrap"><div class="mtg-sessions-hdr" onclick="toggleSessions('view-nuclear')"><span class="mtg-sessions-title">Past Sessions</span><span class="mtg-sessions-count" id="view-nuclear-sessions-count"></span><span class="mtg-sessions-chevron" id="view-nuclear-sessions-chevron">▼</span></div><div class="mtg-sessions-body" id="view-nuclear-sessions-body"></div></div></div></div>
+<div id="view-nuclear-track" class="view">
+  <div class="ag-wrap">
+    <div class="ag-hdr ag-hdr-nuclear-track">
+      <div class="ag-eyebrow">As needed &nbsp;&middot;&nbsp; Minimum monthly &nbsp;&middot;&nbsp; 60 minutes</div>
+      <div class="ag-title">Nuclear Track Sync</div>
+      <div class="ag-badges"><span class="ag-badge">Min. monthly</span><span class="ag-badge">60 min</span><span class="ag-badge ch">&#10022; Chair: Jon Eustace</span><span class="ag-badge">Microsoft Teams</span></div>
+      <div class="ag-attendees"><span class="ag-att chair">Jon Eustace</span><span class="ag-att">Vinoth Tharma</span><span class="ag-att">Louis-Pier Théberge</span><span class="ag-att">Francis Boudreault-Leclerc (technical qualification items)</span><span class="ag-att">Olivier Marcotte (Aecon items only)</span></div>
+    
+    <div class="ag-progress-row"><span class="ag-progress-label">Progress</span><span class="ag-progress-count" id="view-nuclear-track-count">0 / 0</span><span class="ag-progress-track"><span class="ag-progress-fill" id="view-nuclear-track-fill"></span></span><button class="ag-clear-btn" onclick="clearMeeting('view-nuclear-track')">↺ Clear All</button><button class="mtg-start-btn" id="view-nuclear-track-start-btn" onclick="startMeeting('view-nuclear-track')">▶ Start Meeting</button><span class="mtg-demo-inline" id="view-nuclear-track-demo-wrap"><span class="mtg-demo-lbl">Demo</span><label class="mtg-demo-toggle"><input type="checkbox" id="view-nuclear-track-demo"><span class="mtg-demo-slider"></span></label></span><span class="mtg-live-badge" id="view-nuclear-track-live-badge"><span class="mtg-live-dot"></span>Live<span class="mtg-live-timer" id="view-nuclear-track-timer">0:00</span></span></div></div>
+    <div class="ag-body"><div class="ag-prep"><div class="ag-prep-lbl">Purpose</div>Separate from the Nuclear Steering Committee (which Olivier chairs). This is Jon's direct check-in on the Nuclear Track commercial pipeline &mdash; MSA/maintenance with Vinoth, outage calendar with Louis-Pier, and Aecon/new build items with Olivier where relevant.</div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">01</span>
+        <span class="ag-sec-title">MSA / Maintenance Pipeline Update</span>
+        <span class="ag-sec-owner">Vinoth Tharma</span>
+        <span class="ag-sec-time">0:00&ndash;0:15</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>OPG conversation status &mdash; outstanding proposals, MSA progress, any procurement signals from Vinoth.</div></div><div class="ag-item"><div class="pip pi"></div><div>Rate card review &mdash; is pricing aligned ahead of tender submission?</div></div><div class="ag-item"><div class="pip pd"></div><div>Any Jon-level relationship call with OPG required this cycle?</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">02</span>
+        <span class="ag-sec-title">Outage Window Readiness</span>
+        <span class="ag-sec-owner">Louis-Pier Th&eacute;berge</span>
+        <span class="ag-sec-time">0:15&ndash;0:30</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Outage calendar review &mdash; any windows less than 90 days away? Crew confirmed for those windows?</div></div><div class="ag-item"><div class="pip pi"></div><div>OPG vendor-approved technician list &mdash; current? Any expiries approaching in next 90 days?</div></div><div class="ag-item"><div class="pip pr"></div><div>Any readiness gaps that could affect an upcoming outage window &mdash; flag immediately.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">03</span>
+        <span class="ag-sec-title">Aecon / New Build Update</span>
+        <span class="ag-sec-owner">Olivier Marcotte (when relevant)</span>
+        <span class="ag-sec-time">0:30&ndash;0:45</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>SMR programme timeline &mdash; any change to schedule or scope that affects Nucleom's position.</div></div><div class="ag-item"><div class="pip pi"></div><div>Aecon relationship status &mdash; any executive conversations needed?</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">04</span>
+        <span class="ag-sec-title">actuals.json &amp; System Check</span>
+        <span class="ag-sec-owner">Jon Eustace</span>
+        <span class="ag-sec-time">0:45&ndash;1:00</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Nuclear Outage Calendar section in Command Centre &mdash; are the 3 pre-loaded outage records current?</div></div><div class="ag-item"><div class="pip pa"></div><div>Jon or Olivier: update actuals.json outage records if any window dates or contract status has changed.</div></div>
+    </div><div class="ag-auth"><div class="ag-auth-lbl">Decision Authority at this Meeting</div><div class="auth-row"><span class="auth-name">Jon Eustace</span><span class="auth-scope">All Nuclear track commercial decisions &middot; Outage readiness calls</span></div><div class="auth-row"><span class="auth-name">Vinoth Tharma</span><span class="auth-scope">OPG day-to-day relationship &middot; MSA pipeline management</span></div></div></div>
+<div class="mtg-notes-wrap" id="view-nuclear-track-notes-wrap"><div class="mtg-notes-lbl">Meeting Notes</div><textarea class="mtg-notes-ta" id="view-nuclear-track-notes-ta" placeholder="Free notes — autosaved every 10 seconds…" oninput="autosaveNotes('view-nuclear-track')"></textarea></div>
+<div class="mtg-footer" id="view-nuclear-track-footer" style="position:relative"><button class="mtg-reset-btn" onclick="confirmAction('view-nuclear-track','reset')">↺ Reset</button><button class="mtg-cancel-btn" onclick="confirmAction('view-nuclear-track','cancel')">✕ Cancel</button><button class="mtg-end-btn" onclick="endMeeting('view-nuclear-track')">■ End &amp; Save</button><div class="mtg-confirm" id="view-nuclear-track-confirm"><p id="view-nuclear-track-confirm-msg"></p><div class="mtg-confirm-btns"><button class="confirm-yes" id="view-nuclear-track-confirm-yes">Yes, do it</button><button class="confirm-no" onclick="closeConfirm('view-nuclear-track')">Cancel</button></div></div></div>
+<div class="mtg-sessions-wrap" id="view-nuclear-track-sessions-wrap"><div class="mtg-sessions-hdr" onclick="toggleSessions('view-nuclear-track')"><span class="mtg-sessions-title">Past Sessions</span><span class="mtg-sessions-count" id="view-nuclear-track-sessions-count"></span><span class="mtg-sessions-chevron" id="view-nuclear-track-sessions-chevron">▼</span></div><div class="mtg-sessions-body" id="view-nuclear-track-sessions-body"></div></div></div></div>
+<div id="view-gate" class="view">
+  <div class="ag-wrap">
+    <div class="ag-hdr ag-hdr-gate">
+      <div class="ag-eyebrow">Monthly &nbsp;&middot;&nbsp; Last Friday of each month &nbsp;&middot;&nbsp; 10:00 AM ET &nbsp;&middot;&nbsp; 90 minutes</div>
+      <div class="ag-title">Initiative Gate Reviews</div>
+      <div class="ag-badges"><span class="ag-badge">90 min</span><span class="ag-badge">Last Fri 10:00 AM ET</span><span class="ag-badge ch">&#10022; Chair: Jon Eustace</span><span class="ag-badge">Microsoft Teams</span></div>
+      <div class="ag-attendees"><span class="ag-att chair">Jon Eustace</span><span class="ag-att">Olivier Marcotte</span><span class="ag-att">Mathieu Beauchesne</span><span class="ag-att">Alex Cyr</span><span class="ag-att">Max Aggrey</span><span class="ag-att">Vinoth Tharma</span><span class="ag-att">Rick Carlton</span><span class="ag-att">Francis Boudreault-Leclerc</span><span class="ag-att">+ relevant owners per initiative</span></div>
+    
+    <div class="ag-progress-row"><span class="ag-progress-label">Progress</span><span class="ag-progress-count" id="view-gate-count">0 / 0</span><span class="ag-progress-track"><span class="ag-progress-fill" id="view-gate-fill"></span></span><button class="ag-clear-btn" onclick="clearMeeting('view-gate')">↺ Clear All</button><button class="mtg-start-btn" id="view-gate-start-btn" onclick="startMeeting('view-gate')">▶ Start Meeting</button><span class="mtg-demo-inline" id="view-gate-demo-wrap"><span class="mtg-demo-lbl">Demo</span><label class="mtg-demo-toggle"><input type="checkbox" id="view-gate-demo"><span class="mtg-demo-slider"></span></label></span><span class="mtg-live-badge" id="view-gate-live-badge"><span class="mtg-live-dot"></span>Live<span class="mtg-live-timer" id="view-gate-timer">0:00</span></span></div></div>
+    <div class="ag-body"><div class="ag-prep"><div class="ag-prep-lbl">Pre-meeting prep &mdash; all initiative commercial owners</div>Prepare a one-page status: gate milestone hit/missed/at-risk, revenue actuals vs. plan month-to-date, next sprint milestone and owner, any asks from Jon or Mathieu.</div><div style="background:rgba(201,134,10,.07);border:1px solid rgba(201,134,10,.2);border-radius:6px;padding:.75rem 1rem;margin-bottom:1rem"><div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#FCD34D;margin-bottom:.6rem;font-family:'Courier New',monospace">2026 Gate Review Schedule &nbsp;&middot;&nbsp; Last Friday of each month &nbsp;&middot;&nbsp; 10:00 AM ET</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem .75rem"><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Jan 30</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Feb 27</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Mar 27</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Apr 24</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">May 29</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Jun 26</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Jul 31</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Aug 28</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Sep 25</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Oct 30</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#E8EDF5">Nov 27</span></div><div style="font-size:.68rem;color:#A8B8D0"><span style="font-weight:700;color:#6678A0;font-style:italic">Dec 25 &#42;</span></div></div><div style="font-size:.6rem;color:#6678A0;margin-top:.5rem;font-style:italic">&#42; December 25 falls on a Friday &mdash; reschedule to Dec 18 or confirm with Jon Eustace.</div></div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">01</span>
+        <span class="ag-sec-title">Gate Check &mdash; All 5 Initiatives</span>
+        <span class="ag-sec-owner">Commercial owners &middot; 10 min each</span>
+        <span class="ag-sec-time">0:00&ndash;0:50</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Structure: gate status &rarr; revenue actuals vs. plan &rarr; next milestone &rarr; any ask from Jon or Mathieu.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>01 Mining NDT:</strong> Vinoth / Max &mdash; gate status, new account count vs. target, ECA utilisation, H2 inspection pipeline.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>02 Pipeline DA:</strong> Rick Carlton &mdash; rig deployment status, Pembina/Tidewater progress, digs invoiced, 2027 renewal pipeline.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>03 Powerline:</strong> Mathieu &mdash; HQ program progress, second utility pilot status, EIG instrument model resolution.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>04 Nuclear / OPG:</strong> Olivier &mdash; MSA tender milestone, CGSB qualification gap count, OPG relationship status.</div></div><div class="ag-item"><div class="pip pi"></div><div><strong>05 3X Composite:</strong> Vinoth &mdash; ABSA re-submission status, non-pressure revenue, repair quote embedding rate.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">02</span>
+        <span class="ag-sec-title">Trigger Condition Review &amp; Contingency</span>
+        <span class="ag-sec-owner">Jon Eustace / Mathieu Beauchesne</span>
+        <span class="ag-sec-time">0:50&ndash;1:10</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pr"></div><div>Review all 6 risk trigger conditions. Any trigger condition observed in the past month &mdash; Jon calls the contingency activation decision.</div></div><div class="ag-item"><div class="pip pd"></div><div>Formal contingency activation decision if any trigger is confirmed. Jon + Mathieu sign-off required. Eurazeo notified within 48 hours.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">03</span>
+        <span class="ag-sec-title">Budget vs. Actuals &amp; Headcount</span>
+        <span class="ag-sec-owner">Mathieu / Jeremy Irwin</span>
+        <span class="ag-sec-time">1:10&ndash;1:25</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Revenue actuals vs. initiative targets &mdash; consolidated view across all 5 initiatives. YTD vs. plan. Mathieu presents; Jeremy Irwin provides numbers.</div></div><div class="ag-item"><div class="pip pi"></div><div>CAPEX actual vs. approved &mdash; any overspend or underspend requiring re-authorisation.</div></div><div class="ag-item"><div class="pip pi"></div><div>Incremental headcount vs. plan &mdash; FTE additions this month, open positions, any hiring decisions required.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">04</span>
+        <span class="ag-sec-title">Decisions &amp; Actions</span>
+        <span class="ag-sec-owner">Jon Eustace</span>
+        <span class="ag-sec-time">1:25&ndash;1:30</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pa"></div><div>All gate go/no-go decisions confirmed. Any pivot decisions assigned to a named owner with a deadline.</div></div><div class="ag-item"><div class="pip pa"></div><div>Jon sends a gate review summary to Eurazeo within 48 hours if any contingency was activated or any gate was missed.</div></div>
+    </div><div class="ag-auth"><div class="ag-auth-lbl">Decision Authority at this Meeting</div><div class="auth-row"><span class="auth-name">Jon Eustace</span><span class="auth-scope">All gate go/no-go decisions &middot; Contingency activation &middot; Pivot decisions</span></div><div class="auth-row"><span class="auth-name">Mathieu Beauchesne</span><span class="auth-scope">Margin and CAPEX decisions &middot; Eurazeo forecast revision</span></div></div></div>
+<div class="mtg-notes-wrap" id="view-gate-notes-wrap"><div class="mtg-notes-lbl">Meeting Notes</div><textarea class="mtg-notes-ta" id="view-gate-notes-ta" placeholder="Free notes — autosaved every 10 seconds…" oninput="autosaveNotes('view-gate')"></textarea></div>
+<div class="mtg-footer" id="view-gate-footer" style="position:relative"><button class="mtg-reset-btn" onclick="confirmAction('view-gate','reset')">↺ Reset</button><button class="mtg-cancel-btn" onclick="confirmAction('view-gate','cancel')">✕ Cancel</button><button class="mtg-end-btn" onclick="endMeeting('view-gate')">■ End &amp; Save</button><div class="mtg-confirm" id="view-gate-confirm"><p id="view-gate-confirm-msg"></p><div class="mtg-confirm-btns"><button class="confirm-yes" id="view-gate-confirm-yes">Yes, do it</button><button class="confirm-no" onclick="closeConfirm('view-gate')">Cancel</button></div></div></div>
+<div class="mtg-sessions-wrap" id="view-gate-sessions-wrap"><div class="mtg-sessions-hdr" onclick="toggleSessions('view-gate')"><span class="mtg-sessions-title">Past Sessions</span><span class="mtg-sessions-count" id="view-gate-sessions-count"></span><span class="mtg-sessions-chevron" id="view-gate-sessions-chevron">▼</span></div><div class="mtg-sessions-body" id="view-gate-sessions-body"></div></div></div></div>
+<div id="view-finance" class="view">
+  <div class="ag-wrap">
+    <div class="ag-hdr ag-hdr-finance">
+      <div class="ag-eyebrow">Monthly &nbsp;&middot;&nbsp; First Thursday of each month &nbsp;&middot;&nbsp; 2:00 PM ET &nbsp;&middot;&nbsp; 60 minutes</div>
+      <div class="ag-title">Financial Review</div>
+      <div class="ag-badges"><span class="ag-badge">60 min</span><span class="ag-badge">1st Thu 2:00 PM ET</span><span class="ag-badge ch">&#10022; Chair: Jon Eustace</span><span class="ag-badge">Microsoft Teams</span></div>
+      <div class="ag-attendees"><span class="ag-att chair">Jon Eustace</span><span class="ag-att">Jeremy Irwin</span><span class="ag-att">Mathieu Beauchesne</span><span class="ag-att">Renée Lachance</span><span class="ag-att">Charles Recape</span></div>
+    
+    <div class="ag-progress-row"><span class="ag-progress-label">Progress</span><span class="ag-progress-count" id="view-finance-count">0 / 0</span><span class="ag-progress-track"><span class="ag-progress-fill" id="view-finance-fill"></span></span><button class="ag-clear-btn" onclick="clearMeeting('view-finance')">↺ Clear All</button><button class="mtg-start-btn" id="view-finance-start-btn" onclick="startMeeting('view-finance')">▶ Start Meeting</button><span class="mtg-demo-inline" id="view-finance-demo-wrap"><span class="mtg-demo-lbl">Demo</span><label class="mtg-demo-toggle"><input type="checkbox" id="view-finance-demo"><span class="mtg-demo-slider"></span></label></span><span class="mtg-live-badge" id="view-finance-live-badge"><span class="mtg-live-dot"></span>Live<span class="mtg-live-timer" id="view-finance-timer">0:00</span></span></div></div>
+    <div class="ag-body"><div class="ag-prep"><div class="ag-prep-lbl">Pre-meeting prep</div>Jeremy Irwin: monthly actuals by initiative from invoicing system. Ren&eacute;e Lachance: Nucleom financials and any inter-entity adjustments. Charles Recape: Eurazeo pack draft if quarter-end month.</div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">01</span>
+        <span class="ag-sec-title">Revenue vs. Forecast</span>
+        <span class="ag-sec-owner">Jeremy Irwin / Mathieu</span>
+        <span class="ag-sec-time">0:00&ndash;0:20</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Monthly actuals by initiative: Mining, Pipeline, Powerline, Nuclear, 3X. Actual vs. monthly target. YTD actual vs. YTD plan.</div></div><div class="ag-item"><div class="pip pi"></div><div>Base business actuals &mdash; Nucleom (incl. Aecon) and Nortech vs. Sure Forecast. Any account losses or new wins not in the original forecast.</div></div><div class="ag-item"><div class="pip pd"></div><div>If YTD variance vs. plan exceeds $1M, Jon determines whether Eurazeo forecast revision is required and flags to Charles Recape.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">02</span>
+        <span class="ag-sec-title">CAPEX Tracking &amp; Releases</span>
+        <span class="ag-sec-owner">Jeremy Irwin</span>
+        <span class="ag-sec-time">0:20&ndash;0:35</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>CAPEX actual vs. approved plan by initiative. Pipeline rig procurement status. 3X tooling and certification spend. Nuclear instrument upgrades.</div></div><div class="ag-item"><div class="pip pd"></div><div>Any CAPEX release above $200K pending approval &mdash; Jon approves up to $500K. Above that requires EIG/Eurazeo approval.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">03</span>
+        <span class="ag-sec-title">FCF Position &amp; Eurazeo Pack</span>
+        <span class="ag-sec-owner">Mathieu / Charles Recape</span>
+        <span class="ag-sec-time">0:35&ndash;0:55</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Free cash flow position vs. financial model &mdash; cash generation from initiatives net of CAPEX.</div></div><div class="ag-item"><div class="pip pi"></div><div>Eurazeo quarterly reporting pack &mdash; if this is the first Thursday of a quarter-end month, Charles Recape presents draft pack for Jon review.</div></div><div class="ag-item"><div class="pip pi"></div><div>Contingency scenario financial modelling if any risk has been triggered &mdash; revised revenue and FCF under the relevant contingency plan.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">04</span>
+        <span class="ag-sec-title">Actions &amp; Eurazeo Escalation</span>
+        <span class="ag-sec-owner">Jon Eustace</span>
+        <span class="ag-sec-time">0:55&ndash;1:00</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pa"></div><div>All financial actions confirmed with owner and due date. Any forecast revision flagged to Charles Recape for Eurazeo communication.</div></div>
+    </div><div class="ag-auth"><div class="ag-auth-lbl">Decision Authority at this Meeting</div><div class="auth-row"><span class="auth-name">Jon Eustace</span><span class="auth-scope">Forecast revision decisions &middot; CAPEX to $500K &middot; Eurazeo escalation call</span></div><div class="auth-row"><span class="auth-name">Mathieu Beauchesne</span><span class="auth-scope">CAPEX to $500K (shared) &middot; Margin decisions</span></div></div></div>
+<div class="mtg-notes-wrap" id="view-finance-notes-wrap"><div class="mtg-notes-lbl">Meeting Notes</div><textarea class="mtg-notes-ta" id="view-finance-notes-ta" placeholder="Free notes — autosaved every 10 seconds…" oninput="autosaveNotes('view-finance')"></textarea></div>
+<div class="mtg-footer" id="view-finance-footer" style="position:relative"><button class="mtg-reset-btn" onclick="confirmAction('view-finance','reset')">↺ Reset</button><button class="mtg-cancel-btn" onclick="confirmAction('view-finance','cancel')">✕ Cancel</button><button class="mtg-end-btn" onclick="endMeeting('view-finance')">■ End &amp; Save</button><div class="mtg-confirm" id="view-finance-confirm"><p id="view-finance-confirm-msg"></p><div class="mtg-confirm-btns"><button class="confirm-yes" id="view-finance-confirm-yes">Yes, do it</button><button class="confirm-no" onclick="closeConfirm('view-finance')">Cancel</button></div></div></div>
+<div class="mtg-sessions-wrap" id="view-finance-sessions-wrap"><div class="mtg-sessions-hdr" onclick="toggleSessions('view-finance')"><span class="mtg-sessions-title">Past Sessions</span><span class="mtg-sessions-count" id="view-finance-sessions-count"></span><span class="mtg-sessions-chevron" id="view-finance-sessions-chevron">▼</span></div><div class="mtg-sessions-body" id="view-finance-sessions-body"></div></div></div></div>
+<div id="view-hr" class="view">
+  <div class="ag-wrap">
+    <div class="ag-hdr ag-hdr-hr">
+      <div class="ag-eyebrow">Monthly &nbsp;&middot;&nbsp; Second Wednesday of each month &nbsp;&middot;&nbsp; 11:00 AM ET &nbsp;&middot;&nbsp; 45 minutes</div>
+      <div class="ag-title">HR &amp; Retention Review</div>
+      <div class="ag-badges"><span class="ag-badge">45 min</span><span class="ag-badge">2nd Wed 11:00 AM ET</span><span class="ag-badge ch">&#10022; Chair: Maud Leivin Capuano</span><span class="ag-badge">Microsoft Teams</span></div>
+      <div class="ag-attendees"><span class="ag-att chair">Maud Leivin Capuano</span><span class="ag-att">Olivier Marcotte</span><span class="ag-att">Jon Eustace</span><span class="ag-att">Mathieu Beauchesne</span></div>
+    
+    <div class="ag-progress-row"><span class="ag-progress-label">Progress</span><span class="ag-progress-count" id="view-hr-count">0 / 0</span><span class="ag-progress-track"><span class="ag-progress-fill" id="view-hr-fill"></span></span><button class="ag-clear-btn" onclick="clearMeeting('view-hr')">↺ Clear All</button><button class="mtg-start-btn" id="view-hr-start-btn" onclick="startMeeting('view-hr')">▶ Start Meeting</button><span class="mtg-demo-inline" id="view-hr-demo-wrap"><span class="mtg-demo-lbl">Demo</span><label class="mtg-demo-toggle"><input type="checkbox" id="view-hr-demo"><span class="mtg-demo-slider"></span></label></span><span class="mtg-live-badge" id="view-hr-live-badge"><span class="mtg-live-dot"></span>Live<span class="mtg-live-timer" id="view-hr-timer">0:00</span></span></div></div>
+    <div class="ag-body"><div class="ag-prep"><div class="ag-prep-lbl">Pre-meeting prep &mdash; Maud Leivin Capuano</div>1:1 feedback summary from commercial owners this month (Vinoth, Max, Rick Carlton). Any compensation or role concerns raised. CGSB qualification technician pipeline update.</div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">01</span>
+        <span class="ag-sec-title">Commercial Team Retention Indicators</span>
+        <span class="ag-sec-owner">Maud / Olivier Marcotte</span>
+        <span class="ag-sec-time">0:00&ndash;0:20</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>1:1 summary for each key commercial owner &mdash; Vinoth Tharma, Max Aggrey, Rick Carlton. Engagement level, any concerns raised.</div></div><div class="ag-item"><div class="pip pr"></div><div>R-03 monitoring &mdash; any early warning signals: reduced activity, compensation concerns, LinkedIn activity, role scope discussions.</div></div><div class="ag-item"><div class="pip pd"></div><div>If any retention risk identified: Jon Eustace makes the retention decision &mdash; compensation adjustment, role expansion, recognition. Actioned immediately.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">02</span>
+        <span class="ag-sec-title">Incremental FTE Pipeline</span>
+        <span class="ag-sec-owner">Maud Leivin Capuano</span>
+        <span class="ag-sec-time">0:20&ndash;0:35</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Positions open vs. plan &mdash; which initiative FTE additions are in progress, interview stage, or pending approval.</div></div><div class="ag-item"><div class="pip pi"></div><div>CGSB qualification technician pipeline for Nuclear &mdash; 8 new qualifications needed in 2026. Training enrolment and examiner availability.</div></div><div class="ag-item"><div class="pip pd"></div><div>Any senior hire (Director level or above) requiring Jon Eustace approval &mdash; presented here before any offer is made.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">03</span>
+        <span class="ag-sec-title">Compensation vs. Market &amp; Close</span>
+        <span class="ag-sec-owner">Maud Leivin Capuano</span>
+        <span class="ag-sec-time">0:35&ndash;0:45</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Any roles where compensation has fallen behind market &mdash; particularly for field PAUT technicians given pipeline industry demand.</div></div><div class="ag-item"><div class="pip pa"></div><div>Actions confirmed. Maud sends monthly retention summary to Jon Eustace and Mathieu Beauchesne within 24 hours.</div></div>
+    </div></div>
+<div class="mtg-notes-wrap" id="view-hr-notes-wrap"><div class="mtg-notes-lbl">Meeting Notes</div><textarea class="mtg-notes-ta" id="view-hr-notes-ta" placeholder="Free notes — autosaved every 10 seconds…" oninput="autosaveNotes('view-hr')"></textarea></div>
+<div class="mtg-footer" id="view-hr-footer" style="position:relative"><button class="mtg-reset-btn" onclick="confirmAction('view-hr','reset')">↺ Reset</button><button class="mtg-cancel-btn" onclick="confirmAction('view-hr','cancel')">✕ Cancel</button><button class="mtg-end-btn" onclick="endMeeting('view-hr')">■ End &amp; Save</button><div class="mtg-confirm" id="view-hr-confirm"><p id="view-hr-confirm-msg"></p><div class="mtg-confirm-btns"><button class="confirm-yes" id="view-hr-confirm-yes">Yes, do it</button><button class="confirm-no" onclick="closeConfirm('view-hr')">Cancel</button></div></div></div>
+<div class="mtg-sessions-wrap" id="view-hr-sessions-wrap"><div class="mtg-sessions-hdr" onclick="toggleSessions('view-hr')"><span class="mtg-sessions-title">Past Sessions</span><span class="mtg-sessions-count" id="view-hr-sessions-count"></span><span class="mtg-sessions-chevron" id="view-hr-sessions-chevron">▼</span></div><div class="mtg-sessions-body" id="view-hr-sessions-body"></div></div></div></div>
+<div id="view-eurazeo" class="view">
+  <div class="ag-wrap">
+    <div class="ag-hdr ag-hdr-eurazeo">
+      <div class="ag-eyebrow">Quarterly &nbsp;&middot;&nbsp; First week of Q1 / Q2 / Q3 / Q4 &nbsp;&middot;&nbsp; To be scheduled &nbsp;&middot;&nbsp; 120 minutes</div>
+      <div class="ag-title">Eurazeo / EIG Executive Update</div>
+      <div class="ag-badges"><span class="ag-badge">120 min</span><span class="ag-badge">Quarterly &mdash; first week</span><span class="ag-badge ch">&#10022; Presenter: Jon Eustace</span><span class="ag-badge">Microsoft Teams or in-person</span></div>
+      <div class="ag-attendees"><span class="ag-att chair">Jon Eustace</span><span class="ag-att">Mathieu Beauchesne</span><span class="ag-att">Charles Recape</span><span class="ag-att">Olivier Marcotte</span><span class="ag-att">+ EIG / Eurazeo representatives</span></div>
+    
+    <div class="ag-progress-row"><span class="ag-progress-label">Progress</span><span class="ag-progress-count" id="view-eurazeo-count">0 / 0</span><span class="ag-progress-track"><span class="ag-progress-fill" id="view-eurazeo-fill"></span></span><button class="ag-clear-btn" onclick="clearMeeting('view-eurazeo')">↺ Clear All</button><button class="mtg-start-btn" id="view-eurazeo-start-btn" onclick="startMeeting('view-eurazeo')">▶ Start Meeting</button><span class="mtg-demo-inline" id="view-eurazeo-demo-wrap"><span class="mtg-demo-lbl">Demo</span><label class="mtg-demo-toggle"><input type="checkbox" id="view-eurazeo-demo"><span class="mtg-demo-slider"></span></label></span><span class="mtg-live-badge" id="view-eurazeo-live-badge"><span class="mtg-live-dot"></span>Live<span class="mtg-live-timer" id="view-eurazeo-timer">0:00</span></span></div></div>
+    <div class="ag-body"><div class="ag-prep"><div class="ag-prep-lbl">Pre-meeting prep &mdash; one week before</div>Charles Recape: Eurazeo financial reporting pack (revenue, EBITDA, FCF vs. plan). Olivier Marcotte: initiative progress summary. Jon Eustace: strategic narrative and any EIG approval items.</div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">01</span>
+        <span class="ag-sec-title">Financial Performance vs. 5-Year Plan</span>
+        <span class="ag-sec-owner">Jon Eustace / Charles Recape</span>
+        <span class="ag-sec-time">0:00&ndash;0:30</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Revenue actuals vs. Eurazeo forecast &mdash; quarter and YTD. By entity (Nucleom, Nortech) and by initiative layer.</div></div><div class="ag-item"><div class="pip pi"></div><div>EBITDA actuals and margin performance. FCF position vs. model. CAPEX actual vs. approved plan.</div></div><div class="ag-item"><div class="pip pd"></div><div>Any forecast revision &mdash; if BU Services revenue is tracking more than 10% below or above the Eurazeo plan, revised guidance presented by Jon.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">02</span>
+        <span class="ag-sec-title">Initiative Progress vs. 5-Year Plan</span>
+        <span class="ag-sec-owner">Olivier Marcotte / Jon Eustace</span>
+        <span class="ag-sec-time">0:30&ndash;1:00</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Each initiative: gate milestones hit vs. plan, current status, 2026 actuals vs. target. Nuclear MSA update presented separately and in detail.</div></div><div class="ag-item"><div class="pip pi"></div><div>Any active contingency plans &mdash; full narrative on what triggered it, what pivot has been activated, and revised revenue forecast.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">03</span>
+        <span class="ag-sec-title">Strategic Pivots &amp; EIG Approvals</span>
+        <span class="ag-sec-owner">Jon Eustace</span>
+        <span class="ag-sec-time">1:00&ndash;1:40</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pd"></div><div>Any strategic pivot requiring EIG formal approval &mdash; new market entry, material change in initiative scope, acquisition or partnership.</div></div><div class="ag-item"><div class="pip pd"></div><div>Any CAPEX request above $500K threshold &mdash; full business case presented. EIG approval required before commitment.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">04</span>
+        <span class="ag-sec-title">Q&amp;A &amp; Next Quarter Focus</span>
+        <span class="ag-sec-owner">Jon Eustace leads</span>
+        <span class="ag-sec-time">1:40&ndash;2:00</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Open Q&amp;A with Eurazeo / EIG representatives. Charles Recape handles financial clarifications.</div></div><div class="ag-item"><div class="pip pa"></div><div>Next quarter's three priority deliverables confirmed &mdash; specific, named, dated.</div></div><div class="ag-item"><div class="pip pa"></div><div>Charles Recape distributes approved minutes and action log within 48 hours. Jon communicates any EIG decisions to the BU Services commercial team.</div></div>
+    </div></div>
+<div class="mtg-notes-wrap" id="view-eurazeo-notes-wrap"><div class="mtg-notes-lbl">Meeting Notes</div><textarea class="mtg-notes-ta" id="view-eurazeo-notes-ta" placeholder="Free notes — autosaved every 10 seconds…" oninput="autosaveNotes('view-eurazeo')"></textarea></div>
+<div class="mtg-footer" id="view-eurazeo-footer" style="position:relative"><button class="mtg-reset-btn" onclick="confirmAction('view-eurazeo','reset')">↺ Reset</button><button class="mtg-cancel-btn" onclick="confirmAction('view-eurazeo','cancel')">✕ Cancel</button><button class="mtg-end-btn" onclick="endMeeting('view-eurazeo')">■ End &amp; Save</button><div class="mtg-confirm" id="view-eurazeo-confirm"><p id="view-eurazeo-confirm-msg"></p><div class="mtg-confirm-btns"><button class="confirm-yes" id="view-eurazeo-confirm-yes">Yes, do it</button><button class="confirm-no" onclick="closeConfirm('view-eurazeo')">Cancel</button></div></div></div>
+<div class="mtg-sessions-wrap" id="view-eurazeo-sessions-wrap"><div class="mtg-sessions-hdr" onclick="toggleSessions('view-eurazeo')"><span class="mtg-sessions-title">Past Sessions</span><span class="mtg-sessions-count" id="view-eurazeo-sessions-count"></span><span class="mtg-sessions-chevron" id="view-eurazeo-sessions-chevron">▼</span></div><div class="mtg-sessions-body" id="view-eurazeo-sessions-body"></div></div></div></div>
+<div id="view-conference" class="view">
+  <div class="ag-wrap">
+    <div class="ag-hdr ag-hdr-conference">
+      <div class="ag-eyebrow">After each BU Services conference &nbsp;&middot;&nbsp; Within 48 hours of returning</div>
+      <div class="ag-title">Post-Conference Debrief</div>
+      <div class="ag-badges"><span class="ag-badge">Trigger-based</span><span class="ag-badge">Within 48 hrs post-show</span><span class="ag-badge ch">&#10022; Chair: Jon or commercial lead</span><span class="ag-badge">Microsoft Teams</span></div>
+      <div class="ag-attendees"><span class="ag-att chair">Attending commercial lead</span><span class="ag-att">Shanny Trembley</span></div>
+    
+    <div class="ag-progress-row"><span class="ag-progress-label">Progress</span><span class="ag-progress-count" id="view-conference-count">0 / 0</span><span class="ag-progress-track"><span class="ag-progress-fill" id="view-conference-fill"></span></span><button class="ag-clear-btn" onclick="clearMeeting('view-conference')">↺ Clear All</button><button class="mtg-start-btn" id="view-conference-start-btn" onclick="startMeeting('view-conference')">▶ Start Meeting</button><span class="mtg-demo-inline" id="view-conference-demo-wrap"><span class="mtg-demo-lbl">Demo</span><label class="mtg-demo-toggle"><input type="checkbox" id="view-conference-demo"><span class="mtg-demo-slider"></span></label></span><span class="mtg-live-badge" id="view-conference-live-badge"><span class="mtg-live-dot"></span>Live<span class="mtg-live-timer" id="view-conference-timer">0:00</span></span></div></div>
+    <div class="ag-body"><div class="ag-prep"><div class="ag-prep-lbl">Purpose</div>Quick debrief immediately after each BU Services conference to close the loop: leads in Salesforce, actuals in the tracker, outcomes logged, follow-ups assigned. Maximum 30 minutes.</div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">01</span>
+        <span class="ag-sec-title">Salesforce &amp; Data Capture</span>
+        <span class="ag-sec-owner">Attending commercial lead</span>
+        <span class="ag-sec-time">0:00&ndash;0:10</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pd"></div><div>Leads entered in Salesforce? 48-hour rule: every conversation = a Lead with BU_Initiative__c tagged.</div></div><div class="ag-item"><div class="pip pa"></div><div>Shanny: enter total actual spend in Conference Action Tracker &mdash; Year Calendar Col S.</div></div><div class="ag-item"><div class="pip pa"></div><div>Log outcomes via Teams Adaptive Card &mdash; leads and opportunities created.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">02</span>
+        <span class="ag-sec-title">Hot Leads &amp; Follow-Up Assignment</span>
+        <span class="ag-sec-owner">Attending commercial lead</span>
+        <span class="ag-sec-time">0:10&ndash;0:20</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pa"></div><div>Any HOT-rated leads: follow-up committed within 5 business days. Owner assigned now, not later.</div></div><div class="ag-item"><div class="pip pd"></div><div>Any leads that require Jon Eustace involvement &mdash; flag and assign.</div></div>
+    </div><div class="ag-sec">
+      <div class="ag-sec-hdr">
+        <span class="ag-sec-num">03</span>
+        <span class="ag-sec-title">Conference ROI Preview</span>
+        <span class="ag-sec-owner">Attending commercial lead</span>
+        <span class="ag-sec-time">0:20&ndash;0:30</span><input type="checkbox" class="ag-check" onchange="secToggle(this)">
+      </div>
+      <div class="ag-item"><div class="pip pi"></div><div>Conference section in Command Centre &mdash; ROI once actuals flow in from Shanny's tracker entry.</div></div><div class="ag-item"><div class="pip pi"></div><div>Lessons learned for next year &mdash; booth size, location, attendee mix. One or two observations max.</div></div>
+    </div></div>
+<div class="mtg-notes-wrap" id="view-conference-notes-wrap"><div class="mtg-notes-lbl">Meeting Notes</div><textarea class="mtg-notes-ta" id="view-conference-notes-ta" placeholder="Free notes — autosaved every 10 seconds…" oninput="autosaveNotes('view-conference')"></textarea></div>
+<div class="mtg-footer" id="view-conference-footer" style="position:relative"><button class="mtg-reset-btn" onclick="confirmAction('view-conference','reset')">↺ Reset</button><button class="mtg-cancel-btn" onclick="confirmAction('view-conference','cancel')">✕ Cancel</button><button class="mtg-end-btn" onclick="endMeeting('view-conference')">■ End &amp; Save</button><div class="mtg-confirm" id="view-conference-confirm"><p id="view-conference-confirm-msg"></p><div class="mtg-confirm-btns"><button class="confirm-yes" id="view-conference-confirm-yes">Yes, do it</button><button class="confirm-no" onclick="closeConfirm('view-conference')">Cancel</button></div></div></div>
+<div class="mtg-sessions-wrap" id="view-conference-sessions-wrap"><div class="mtg-sessions-hdr" onclick="toggleSessions('view-conference')"><span class="mtg-sessions-title">Past Sessions</span><span class="mtg-sessions-count" id="view-conference-sessions-count"></span><span class="mtg-sessions-chevron" id="view-conference-sessions-chevron">▼</span></div><div class="mtg-sessions-body" id="view-conference-sessions-body"></div></div></div></div>
+<div id="view-quick-ref" class="view">
+  <div class="section-hdr">
+    <h2>All Meetings &mdash; Quick Reference</h2>
+    <span class="sh-sub">Chair &middot; attendees &middot; cadence at a glance</span>
+  </div>
+  <div class="qr-grid">
+    <div class="qr-card"><div class="qr-top" style="background:#16A34A"></div><div class="qr-body">
+      <div class="qr-title">Commercial Meeting</div><div class="qr-cadence">Weekly &middot; Mon 9:00 AM ET &middot; 60 min</div>
+      <div class="qr-row"><span class="qr-lbl">Chair</span><span class="qr-val">Jon Eustace</span></div>
+      <div class="qr-row"><span class="qr-lbl">Attendees</span><span class="qr-val">Jon, Max, Vinoth, Olivier, Rick, Mathieu</span></div>
+    </div></div>
+    <div class="qr-card"><div class="qr-top" style="background:#1A5CA8"></div><div class="qr-body">
+      <div class="qr-title">Ops Meeting</div><div class="qr-cadence">Weekly &middot; Mon after Commercial &middot; 60 min</div>
+      <div class="qr-row"><span class="qr-lbl">Chair</span><span class="qr-val">Alex Cyr</span></div>
+      <div class="qr-row"><span class="qr-lbl">Attendees</span><span class="qr-val">Alex, Eric, Joel Dj, Keith, Brook, Jason</span></div>
+    </div></div>
+    <div class="qr-card"><div class="qr-top" style="background:#6D28D9"></div><div class="qr-body">
+      <div class="qr-title">Nuclear Steering</div><div class="qr-cadence">Bi-weekly &middot; Tue 10:00 AM ET &middot; 60 min</div>
+      <div class="qr-row"><span class="qr-lbl">Chair</span><span class="qr-val">Olivier Marcotte</span></div>
+      <div class="qr-row"><span class="qr-lbl">Attendees</span><span class="qr-val">Olivier, Louis-Pier, Jean-Fran&ccedil;ois, Vinoth, Francis B-L</span></div>
+    </div></div>
+    <div class="qr-card"><div class="qr-top" style="background:#0D5050"></div><div class="qr-body">
+      <div class="qr-title">Nuclear Track Sync</div><div class="qr-cadence">Min. monthly &middot; 60 min</div>
+      <div class="qr-row"><span class="qr-lbl">Chair</span><span class="qr-val">Jon Eustace</span></div>
+      <div class="qr-row"><span class="qr-lbl">Attendees</span><span class="qr-val">Jon, Vinoth, Louis-Pier, Olivier (Aecon items)</span></div>
+    </div></div>
+    <div class="qr-card"><div class="qr-top" style="background:#C9860A"></div><div class="qr-body">
+      <div class="qr-title">Gate Reviews</div><div class="qr-cadence">Monthly &middot; Last Fri 10:00 AM ET &middot; 90 min</div>
+      <div class="qr-row"><span class="qr-lbl">Chair</span><span class="qr-val">Jon Eustace</span></div>
+      <div class="qr-row"><span class="qr-lbl">Attendees</span><span class="qr-val">Jon, Olivier, Mathieu, Alex, Max, Vinoth, Rick + relevant owners</span></div>
+    </div></div>
+    <div class="qr-card"><div class="qr-top" style="background:#0D5050"></div><div class="qr-body">
+      <div class="qr-title">Financial Review</div><div class="qr-cadence">Monthly &middot; 1st Thu 2:00 PM ET &middot; 60 min</div>
+      <div class="qr-row"><span class="qr-lbl">Chair</span><span class="qr-val">Jon Eustace</span></div>
+      <div class="qr-row"><span class="qr-lbl">Attendees</span><span class="qr-val">Jon, Jeremy Irwin, Mathieu, Ren&eacute;e Lachance, Charles Recape</span></div>
+    </div></div>
+    <div class="qr-card"><div class="qr-top" style="background:#B91C1C"></div><div class="qr-body">
+      <div class="qr-title">HR &amp; Retention</div><div class="qr-cadence">Monthly &middot; 2nd Wed 11:00 AM ET &middot; 45 min</div>
+      <div class="qr-row"><span class="qr-lbl">Chair</span><span class="qr-val">Maud Leivin Capuano</span></div>
+      <div class="qr-row"><span class="qr-lbl">Attendees</span><span class="qr-val">Maud, Olivier, Jon, Mathieu</span></div>
+    </div></div>
+    <div class="qr-card"><div class="qr-top" style="background:#6678A0"></div><div class="qr-body">
+      <div class="qr-title">Eurazeo / EIG Update</div><div class="qr-cadence">Quarterly &middot; First week Q1/Q2/Q3/Q4 &middot; 120 min</div>
+      <div class="qr-row"><span class="qr-lbl">Presenter</span><span class="qr-val">Jon Eustace</span></div>
+      <div class="qr-row"><span class="qr-lbl">Attendees</span><span class="qr-val">Jon, Mathieu, Charles R, Olivier + EIG/Eurazeo</span></div>
+    </div></div>
+    <div class="qr-card"><div class="qr-top" style="background:#368CD9"></div><div class="qr-body">
+      <div class="qr-title">Post-Conference Debrief</div><div class="qr-cadence">After each BU Services conference &middot; 30 min</div>
+      <div class="qr-row"><span class="qr-lbl">Chair</span><span class="qr-val">Jon or attending commercial lead</span></div>
+      <div class="qr-row"><span class="qr-lbl">Attendees</span><span class="qr-val">Attending commercial lead, Shanny Trembley</span></div>
+    </div></div>
+  </div>
+</div>
+
+</div><!-- end .section -->
+
+<div style="background:rgba(10,20,37,.8);border-top:1px solid var(--mid);padding:1rem 2.5rem;text-align:center;font-size:.65rem;color:var(--dgrey);margin-top:2rem">
+  BU Services Meeting Hub &nbsp;&middot;&nbsp; Ekoscan Integrity Group &nbsp;&middot;&nbsp; Jon Eustace, CEO North America &nbsp;&middot;&nbsp; Confidential &mdash; Internal Use Only &nbsp;&middot;&nbsp; Version 2.0 &mdash; April 2026
+</div>
+
+<script>
+function setMode(mode, tabEl) {
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.unav-links a').forEach(function(a){a.classList.remove('active');});
+  if (tabEl) tabEl.classList.add('active');
+  var view = document.getElementById('view-' + mode);
+  if (view) { view.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+// ── Meeting checklist + lifecycle + notes ─────────────────────────────────────
+
+var VIEWS = ['view-commercial','view-ops','view-nuclear','view-nuclear-track',
+             'view-gate','view-finance','view-hr','view-eurazeo','view-conference'];
+
+var timers   = {};
+var sessions = {};
+
+function fmtTime(d) {
+  return d.toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function fmtElapsed(ms) {
+  var s = Math.floor(ms/1000), m = Math.floor(s/60); s = s%60;
+  return m + ':' + (s<10?'0':'') + s;
+}
+function fmtDate(d) {
+  return d.toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric',weekday:'short'});
+}
+
+function startTimer(viewId) {
+  var epoch = Date.now();
+  sessions[viewId] = sessions[viewId] || {};
+  sessions[viewId].startEpoch = epoch;
+  sessions[viewId].startTime  = fmtTime(new Date());
+  timers[viewId] = setInterval(function() {
+    var el = document.getElementById(viewId+'-timer');
+    if (el) el.textContent = fmtElapsed(Date.now() - epoch);
+  }, 1000);
+}
+function stopTimer(viewId) {
+  if (timers[viewId]) { clearInterval(timers[viewId]); delete timers[viewId]; }
+}
+
+function secToggle(cb) {
+  var sec = cb.closest('.ag-sec');
+  sec.classList.toggle('sec-done', cb.checked);
+  if (cb.checked) {
+    sec.dataset.checkedAt = fmtTime(new Date());
+  } else {
+    delete sec.dataset.checkedAt;
+  }
+  updateMeetingProgress(cb.closest('.view').id);
+}
+
+function updateMeetingProgress(viewId) {
+  var view    = document.getElementById(viewId);
+  if (!view) return;
+  var checks  = view.querySelectorAll('.ag-check');
+  var done    = view.querySelectorAll('.ag-check:checked').length;
+  var total   = checks.length;
+  var pct     = total ? Math.round(done/total*100) : 0;
+  var countEl = document.getElementById(viewId+'-count');
+  var fillEl  = document.getElementById(viewId+'-fill');
+  if (countEl) countEl.textContent = done+' / '+total;
+  if (fillEl)  fillEl.style.width  = pct+'%';
+}
+
+function clearMeeting(viewId) {
+  var view = document.getElementById(viewId);
+  if (!view) return;
+  view.querySelectorAll('.ag-check').forEach(function(cb){ cb.checked = false; });
+  view.querySelectorAll('.ag-sec').forEach(function(sec){
+    sec.classList.remove('sec-done');
+    delete sec.dataset.checkedAt;
+  });
+  updateMeetingProgress(viewId);
+}
+
+function startMeeting(viewId) {
+  var view = document.getElementById(viewId);
+  view.classList.add('view-active');
+  startTimer(viewId);
+  var saved = localStorage.getItem('draft_'+viewId);
+  var ta = document.getElementById(viewId+'-notes-ta');
+  if (ta && saved) ta.value = saved;
+}
+
+function autosaveNotes(viewId) {
+  var ta = document.getElementById(viewId+'-notes-ta');
+  if (ta) localStorage.setItem('draft_'+viewId, ta.value);
+}
+setInterval(function() {
+  VIEWS.forEach(function(vid) {
+    var view = document.getElementById(vid);
+    if (view && view.classList.contains('view-active')) autosaveNotes(vid);
+  });
+}, 10000);
+
+var pendingAction = {};
+
+function confirmAction(viewId, action) {
+  var el     = document.getElementById(viewId+'-confirm');
+  var msgEl  = document.getElementById(viewId+'-confirm-msg');
+  var yesBtn = document.getElementById(viewId+'-confirm-yes');
+  if (!el) return;
+  var msgs = {
+    reset:  'Reset all checkboxes and notes? The meeting stays active.',
+    cancel: 'Cancel this meeting? Nothing will be saved.'
+  };
+  msgEl.textContent = msgs[action] || '';
+  pendingAction[viewId] = action;
+  yesBtn.onclick = function() { doConfirmed(viewId); };
+  el.style.display = 'block';
+}
+function closeConfirm(viewId) {
+  var el = document.getElementById(viewId+'-confirm');
+  if (el) el.style.display = 'none';
+  delete pendingAction[viewId];
+}
+function doConfirmed(viewId) {
+  var action = pendingAction[viewId];
+  closeConfirm(viewId);
+  if (action === 'reset')  resetMeeting(viewId);
+  if (action === 'cancel') cancelMeeting(viewId);
+}
+
+function resetMeeting(viewId) {
+  clearMeeting(viewId);
+  var ta = document.getElementById(viewId+'-notes-ta');
+  if (ta) ta.value = '';
+  localStorage.removeItem('draft_'+viewId);
+  stopTimer(viewId);
+  var timerEl = document.getElementById(viewId+'-timer');
+  if (timerEl) timerEl.textContent = '0:00';
+  startTimer(viewId);
+}
+
+function cancelMeeting(viewId) {
+  stopTimer(viewId);
+  document.getElementById(viewId).classList.remove('view-active');
+  clearMeeting(viewId);
+  var ta = document.getElementById(viewId+'-notes-ta');
+  if (ta) ta.value = '';
+  localStorage.removeItem('draft_'+viewId);
+  var timerEl = document.getElementById(viewId+'-timer');
+  if (timerEl) timerEl.textContent = '0:00';
+  delete sessions[viewId];
+}
+
+function endMeeting(viewId) {
+  var view     = document.getElementById(viewId);
+  var demoChk  = document.getElementById(viewId+'-demo');
+  var demoMode = demoChk && demoChk.checked;
+  var now      = new Date();
+  var sess     = sessions[viewId] || {};
+  var ta       = document.getElementById(viewId+'-notes-ta');
+  var notes    = ta ? ta.value.trim() : '';
+
+  var secs = [];
+  view.querySelectorAll('.ag-sec').forEach(function(sec) {
+    var num   = sec.querySelector('.ag-sec-num');
+    var title = sec.querySelector('.ag-sec-title');
+    var done  = sec.classList.contains('sec-done');
+    secs.push({
+      n: num   ? num.textContent.trim()   : '?',
+      t: title ? title.textContent.trim() : '',
+      done: done,
+      at: done ? (sec.dataset.checkedAt || '') : ''
+    });
+  });
+
+  var done  = secs.filter(function(s){ return s.done; }).length;
+  var total = secs.length;
+  var dur   = sess.startEpoch ? fmtElapsed(Date.now() - sess.startEpoch) : '—';
+
+  var record = {
+    date:       fmtDate(now),
+    dateKey:    now.toISOString().slice(0,10),
+    startTime:  sess.startTime || '—',
+    endTime:    fmtTime(now),
+    duration:   dur,
+    completion: done+'/'+total,
+    sections:   secs,
+    notes:      notes,
+    demo:       demoMode,
+    savedAt:    now.toISOString()
+  };
+
+  if (!demoMode) {
+    var key = 'meeting_notes:'+viewId+':'+record.dateKey;
+    var n = 0;
+    while (localStorage.getItem(key+(n?'-'+n:''))) n++;
+    localStorage.setItem(key+(n?'-'+n:''), JSON.stringify(record));
+  }
+
+  stopTimer(viewId);
+  view.classList.remove('view-active');
+  clearMeeting(viewId);
+  if (ta) ta.value = '';
+  localStorage.removeItem('draft_'+viewId);
+  var timerEl = document.getElementById(viewId+'-timer');
+  if (timerEl) timerEl.textContent = '0:00';
+  delete sessions[viewId];
+
+  renderSessions(viewId);
+  flashSaved(viewId, demoMode);
+}
+
+function flashSaved(viewId, demoMode) {
+  var wrap = document.getElementById(viewId+'-sessions-wrap');
+  if (!wrap) return;
+  var flash = document.createElement('div');
+  flash.style.cssText = 'padding:.4rem 1.25rem;font-size:.72rem;font-weight:700;transition:opacity .5s;'
+    + (demoMode
+      ? 'color:#FCD34D;background:rgba(245,158,11,.08);'
+      : 'color:#6EE7B7;background:rgba(22,163,74,.08);');
+  flash.textContent = demoMode ? '🎭 Demo session — not saved' : '✓ Session saved';
+  wrap.parentNode.insertBefore(flash, wrap);
+  setTimeout(function(){ flash.style.opacity='0'; }, 2000);
+  setTimeout(function(){ flash.remove(); }, 2600);
+}
+
+function getSessionKeys(viewId) {
+  var prefix = 'meeting_notes:'+viewId+':';
+  var keys = [];
+  for (var i=0; i<localStorage.length; i++) {
+    var k = localStorage.key(i);
+    if (k && k.indexOf(prefix) === 0) keys.push(k);
+  }
+  return keys.sort().reverse();
+}
+
+function renderSessions(viewId) {
+  var keys    = getSessionKeys(viewId);
+  var countEl = document.getElementById(viewId+'-sessions-count');
+  var body    = document.getElementById(viewId+'-sessions-body');
+  if (countEl) countEl.textContent = keys.length ? '('+keys.length+')' : '';
+  if (!body) return;
+  while (body.firstChild) body.removeChild(body.firstChild);
+  if (!keys.length) {
+    var empty = document.createElement('div');
+    empty.className = 'sessions-empty';
+    empty.textContent = 'No sessions recorded yet.';
+    body.appendChild(empty);
+    return;
+  }
+  keys.forEach(function(key, ki) {
+    var rec;
+    try { rec = JSON.parse(localStorage.getItem(key)); } catch(e){ return; }
+    if (!rec) return;
+    var entryId = viewId+'-sess-'+ki;
+    var entry   = document.createElement('div');
+    entry.className = 'session-entry';
+    var hdr = document.createElement('div');
+    hdr.className = 'session-entry-hdr';
+    var dateSpan  = document.createElement('span'); dateSpan.className = 'session-date';   dateSpan.textContent  = rec.date;
+    var scoreSpan = document.createElement('span'); scoreSpan.className = 'session-score'; scoreSpan.textContent = rec.completion+' ✓';
+    var durSpan   = document.createElement('span'); durSpan.className   = 'session-dur';   durSpan.textContent   = rec.startTime+'–'+rec.endTime+' · '+rec.duration;
+    hdr.appendChild(dateSpan); hdr.appendChild(scoreSpan); hdr.appendChild(durSpan);
+    if (rec.demo) {
+      var dt = document.createElement('span');
+      dt.className = 'session-demo-tag'; dt.textContent = 'DEMO';
+      hdr.appendChild(dt);
+    }
+    var prev = document.createElement('div');
+    prev.className = 'session-preview';
+    prev.textContent = rec.notes ? rec.notes.slice(0,80)+(rec.notes.length>80?'…':'') : '—';
+    var detail = document.createElement('div');
+    detail.className = 'session-detail'; detail.id = entryId;
+    (rec.sections||[]).forEach(function(s) {
+      var row  = document.createElement('div');
+      row.className = 'session-sec-row'+(s.done?' done':'');
+      var tick = document.createElement('span'); tick.className='sec-tick'; tick.textContent = s.done?'✓':'—';
+      var txt  = document.createElement('span'); txt.textContent = s.n+' — '+s.t;
+      row.appendChild(tick); row.appendChild(txt);
+      if (s.done && s.at) {
+        var stamp = document.createElement('span');
+        stamp.className = 'sec-time-stamp'; stamp.textContent = s.at;
+        row.appendChild(stamp);
+      }
+      detail.appendChild(row);
+    });
+    if (rec.notes) {
+      var nb = document.createElement('div'); nb.className = 'session-notes-block';
+      var nl = document.createElement('div'); nl.className = 'session-notes-lbl'; nl.textContent = 'Notes';
+      nb.appendChild(nl); nb.appendChild(document.createTextNode(rec.notes));
+      detail.appendChild(nb);
+    }
+    var delBtn = document.createElement('button');
+    delBtn.className = 'session-del-btn'; delBtn.textContent = 'Delete this record';
+    (function(k,v){ delBtn.addEventListener('click', function(e){ e.stopPropagation(); deleteSession(k,v); }); })(key, viewId);
+    detail.appendChild(delBtn);
+    (function(eid){ entry.addEventListener('click', function(){ toggleSessionDetail(eid); }); })(entryId);
+    entry.appendChild(hdr); entry.appendChild(prev); entry.appendChild(detail);
+    body.appendChild(entry);
+  });
+}
+
+function toggleSessionDetail(entryId) {
+  var el = document.getElementById(entryId);
+  if (el) el.classList.toggle('open');
+}
+function toggleSessions(viewId) {
+  var body    = document.getElementById(viewId+'-sessions-body');
+  var chevron = document.getElementById(viewId+'-sessions-chevron');
+  if (body)    body.classList.toggle('open');
+  if (chevron) chevron.classList.toggle('open');
+}
+function deleteSession(key, viewId) {
+  if (confirm('Delete this session record?')) {
+    localStorage.removeItem(key);
+    renderSessions(viewId);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.ag-sec-hdr').forEach(function(hdr) {
+    hdr.addEventListener('click', function(e) {
+      if (e.target.tagName === 'INPUT') return;
+      var cb = hdr.querySelector('.ag-check');
+      if (cb) { cb.checked = !cb.checked; secToggle(cb); }
+    });
+  });
+  VIEWS.forEach(function(id) {
+    updateMeetingProgress(id);
+    renderSessions(id);
+  });
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.mtg-footer')) {
+      VIEWS.forEach(function(vid) { closeConfirm(vid); });
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuclear / OPG — Commercial Plan 2026–2030 | Nucleom Inc. | BU Services</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+:root{
+  --navy:#161C60;--navy2:#1E2580;--blue:#368CD9;--blue2:#5AAAE8;
+  --orange:#E97132;--green:#196B24;--green2:#22882F;--green3:#3DDB50;
+  --dark:#060F0A;--mid:#F0F3FA;--light:#F7F9FD;--lgrey:#DDE3F0;
+  --body:#384660;--text:#1A2540;--white:#FFFFFF;
+  --shadow:0 4px 20px rgba(22,28,96,0.12);
+  --fd:'Barlow Condensed','Arial Narrow',sans-serif;
+  --fb:'Barlow','Segoe UI',Arial,sans-serif;
+}
+body{font-family:var(--fb);font-size:15.5px;line-height:1.7;color:var(--text);background:var(--light);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+.nav{position:sticky;top:0;z-index:200;background:var(--navy);border-bottom:3px solid var(--green2);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:52px;transition:box-shadow 0.2s;}
+.nav.scrolled{box-shadow:0 4px 20px rgba(0,0,0,0.3);}
+.nav-brand{font-family:var(--fd);font-size:0.9rem;font-weight:700;letter-spacing:1.5px;color:var(--white);text-transform:uppercase;white-space:nowrap;}
+.nav-brand em{color:var(--green3);font-style:normal;}
+.nav-links{display:flex;list-style:none;}
+.nav-links a{display:block;padding:0 0.8rem;height:52px;line-height:52px;font-size:0.72rem;font-weight:600;letter-spacing:0.5px;color:rgba(255,255,255,0.45);text-decoration:none;text-transform:uppercase;border-bottom:3px solid transparent;margin-bottom:-3px;transition:color 0.15s,border-color 0.15s;}
+.nav-links a:hover,.nav-links a.active{color:var(--white);border-bottom-color:var(--green3);}
+.hero{background:var(--dark);position:relative;overflow:hidden;padding:5rem 2.5rem 4rem;}
+.hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(4,14,6,0.99) 0%,rgba(6,22,10,0.94) 50%,rgba(22,28,96,0.65) 100%);}
+.hero::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(34,136,47,0.04) 80px,rgba(34,136,47,0.04) 81px),repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(34,136,47,0.04) 80px,rgba(34,136,47,0.04) 81px);pointer-events:none;}
+.hero-glow{position:absolute;right:-8rem;top:50%;transform:translateY(-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(34,136,47,0.07) 0%,transparent 70%);pointer-events:none;z-index:1;}
+.hero-inner{position:relative;z-index:2;max-width:1140px;margin:0 auto;}
+.hero-top{display:grid;grid-template-columns:1fr auto;gap:3rem;align-items:flex-start;margin-bottom:2.5rem;}
+.hero-label{display:inline-flex;align-items:center;gap:0.6rem;font-family:var(--fd);font-size:0.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green3);background:rgba(34,136,47,0.12);border:1px solid rgba(34,136,47,0.3);border-radius:3px;padding:0.25rem 0.75rem;margin-bottom:1.1rem;animation:fadeUp 0.6s ease both;}
+.hero-label::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green2);}
+.hero h1{font-family:var(--fd);font-weight:900;font-size:clamp(2.6rem,4.5vw,4rem);line-height:0.92;letter-spacing:-1px;color:var(--white);text-transform:uppercase;animation:fadeUp 0.6s 0.08s ease both;}
+.hero h1 span{display:block;color:var(--green3);}
+.hero h1 small{display:block;font-size:0.48em;color:rgba(255,255,255,0.3);letter-spacing:2px;margin-top:0.4rem;font-weight:600;}
+.hero-rule{width:3.5rem;height:4px;background:linear-gradient(90deg,var(--green2),transparent);border-radius:2px;margin:1.1rem 0;animation:fadeUp 0.5s 0.15s ease both;}
+.hero-sub{font-size:0.85rem;font-weight:500;color:rgba(255,255,255,0.4);letter-spacing:0.5px;margin-bottom:0.5rem;animation:fadeUp 0.5s 0.2s ease both;}
+.hero-desc{font-size:1.05rem;font-weight:400;color:rgba(180,220,190,0.88);max-width:600px;line-height:1.72;animation:fadeUp 0.5s 0.22s ease both;}
+.hero-conf{display:inline-block;margin-top:1.1rem;font-family:var(--fd);font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.1);border-radius:3px;padding:0.2rem 0.6rem;}
+.hero-meta{display:flex;flex-direction:column;gap:0.4rem;text-align:right;padding-top:0.25rem;}
+.hero-meta-item{font-size:0.78rem;color:rgba(255,255,255,0.3);}
+.hero-meta-item strong{color:rgba(255,255,255,0.6);}
+.hero-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;animation:fadeUp 0.6s 0.32s ease both;}
+.hkpi{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-top:3px solid var(--green2);border-radius:8px;padding:1rem 1.1rem;cursor:default;transition:background 0.2s,transform 0.2s;}
+.hkpi:hover{background:rgba(255,255,255,0.07);transform:translateY(-2px);}
+.hkpi.s2{border-top-color:var(--orange);}
+.hkpi.s3{border-top-color:var(--blue2);}
+.hkpi.s4{border-top-color:rgba(255,255,255,0.25);}
+.hkpi.s5{border-top-color:var(--green3);}
+.hkpi-val{font-family:var(--fd);font-size:1.9rem;font-weight:900;line-height:1;color:var(--green3);}
+.hkpi.s2 .hkpi-val{color:#F28B4E;}
+.hkpi.s3 .hkpi-val{color:var(--blue2);}
+.hkpi.s4 .hkpi-val{color:rgba(255,255,255,0.7);}
+.hkpi.s5 .hkpi-val{color:var(--green3);}
+.hkpi-lbl{font-size:0.75rem;color:rgba(255,255,255,0.4);margin-top:0.3rem;line-height:1.45;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.wrap{max-width:1140px;margin:0 auto;padding:0 2.5rem;}
+.sec-hdr{background:var(--navy);margin-top:3rem;position:relative;overflow:hidden;}
+.sec-hdr::after{content:'';position:absolute;right:0;top:0;bottom:0;width:40%;background:linear-gradient(90deg,transparent,rgba(34,136,47,0.07));}
+.sec-hdr::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green2),transparent 60%);}
+.sec-hdr-in{max-width:1140px;margin:0 auto;padding:1.2rem 2.5rem;display:flex;align-items:center;gap:1rem;position:relative;z-index:1;}
+.sec-num{flex-shrink:0;width:2.1rem;height:2.1rem;border-radius:50%;background:var(--green2);color:var(--white);font-family:var(--fd);font-size:0.85rem;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.sec-title{color:var(--white);font-family:var(--fd);font-size:1.2rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
+.sec-sub{color:rgba(255,255,255,0.38);font-size:0.8rem;margin-top:0.1rem;}
+.sec-body{background:var(--white);padding:2.5rem 0 3rem;}
+.sec-body p{font-size:0.975rem;color:var(--body);line-height:1.75;margin-bottom:0.9rem;}
+.sub-title{font-family:var(--fd);font-size:1.05rem;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--navy);margin:2.2rem 0 0.9rem;display:flex;align-items:center;gap:0.6rem;}
+.sub-title::after{content:'';flex:1;height:1px;background:var(--lgrey);}
+.crow{display:grid;gap:1.25rem;margin:1.5rem 0;}
+.c2{grid-template-columns:repeat(2,1fr);}
+.c3{grid-template-columns:repeat(3,1fr);}
+.c4{grid-template-columns:repeat(4,1fr);}
+.kcard{border-radius:8px;padding:1.4rem 1.3rem;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kcard.green{background:var(--green);color:var(--white);box-shadow:var(--shadow);}
+.kcard.green::before{background:var(--green3);}
+.kcard.green:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(22,96,34,0.22);}
+.kcard.navy{background:var(--navy);color:var(--white);box-shadow:var(--shadow);}
+.kcard.navy::before{background:var(--blue2);}
+.kcard.navy:hover{transform:translateY(-3px);}
+.kcard.blue{background:var(--blue);color:var(--white);box-shadow:var(--shadow);}
+.kcard.blue::before{background:rgba(255,255,255,0.3);}
+.kcard.orange{background:var(--orange);color:var(--white);box-shadow:var(--shadow);}
+.kcard.orange::before{background:rgba(255,255,255,0.3);}
+.kcard.lined{background:var(--white);border:1.5px solid var(--lgrey);box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.kcard.lined::before{background:var(--green2);}
+.kcard.lined:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(22,28,96,0.1);border-color:var(--green2);}
+.kcard h3{font-family:var(--fd);font-size:1.05rem;font-weight:700;letter-spacing:0.3px;margin-bottom:0.5rem;color:var(--white);}
+.kcard.lined h3{color:var(--navy);}
+.kcard p{font-size:0.9rem;line-height:1.65;color:rgba(255,255,255,0.88);margin:0;}
+.kcard.lined p{color:var(--body);}
+.kcard-rule{width:2rem;height:2px;background:rgba(255,255,255,0.3);border-radius:1px;margin:0.65rem 0;}
+.kcard.lined .kcard-rule{background:var(--lgrey);}
+/* Rate table */
+.rate-table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.875rem;border-radius:8px;overflow:hidden;box-shadow:var(--shadow);}
+.rate-table thead th{background:var(--navy);color:var(--white);padding:0.8rem 1rem;text-align:left;font-family:var(--fd);font-size:0.78rem;letter-spacing:0.8px;text-transform:uppercase;font-weight:700;}
+.rate-table thead th:not(:first-child):not(:nth-child(2)){text-align:right;}
+.rate-table tbody td{padding:0.7rem 1rem;border-bottom:1px solid var(--lgrey);vertical-align:middle;font-size:0.875rem;}
+.rate-table tbody tr{transition:background 0.12s;}
+.rate-table tbody tr:nth-child(even) td{background:var(--mid);}
+.rate-table tbody tr:hover td{background:#EEF8EF !important;}
+.rate-table tbody tr:last-child td{border-bottom:none;}
+.rate-table td.num{text-align:right;font-weight:600;}
+.rate-table td.proposed{text-align:right;font-weight:900;color:var(--green2);font-size:0.95rem;}
+.rate-table td.delta{text-align:right;color:var(--orange);font-size:0.82rem;}
+.rate-table .wp-hdr td{background:var(--navy);color:rgba(255,255,255,0.6);font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0.5rem 1rem;}
+.rate-table tfoot td{background:var(--green2);color:var(--white);font-weight:700;padding:0.85rem 1rem;}
+/* WP grid */
+.wp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0;}
+.wp-card{border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:transform 0.2s,box-shadow 0.2s;}
+.wp-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);}
+.wp-hd{padding:0.7rem 1rem;background:var(--navy);}
+.wp-hd .wp-num{font-family:var(--fd);font-size:0.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.1rem;}
+.wp-hd .wp-name{font-family:var(--fd);font-size:0.98rem;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:0.3px;}
+.wp-bd{background:var(--white);padding:0.9rem 1rem;border:1.5px solid var(--lgrey);border-top:none;border-radius:0 0 8px 8px;}
+.wp-roles{font-size:0.82rem;color:var(--body);line-height:1.65;}
+.wp-tag{display:inline-block;font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.12rem 0.5rem;border-radius:3px;margin-top:0.5rem;background:rgba(34,136,47,0.1);color:var(--green2);}
+/* Timeline */
+.timeline{position:relative;margin:1.75rem 0;padding-left:2.4rem;}
+.timeline::before{content:'';position:absolute;left:0.85rem;top:0.6rem;bottom:0.6rem;width:2px;background:linear-gradient(180deg,var(--green2),var(--navy));}
+.tl-item{position:relative;margin-bottom:1.4rem;}
+.tl-item:last-child{margin-bottom:0;}
+.tl-dot{position:absolute;left:-1.95rem;top:0.4rem;width:12px;height:12px;border-radius:50%;background:var(--green2);border:2px solid var(--white);box-shadow:0 0 0 2px var(--green2);}
+.tl-item.future .tl-dot{background:var(--navy);box-shadow:0 0 0 2px var(--lgrey);}
+.tl-item.active .tl-dot{background:var(--green2);box-shadow:0 0 0 3px rgba(34,136,47,0.25),0 0 0 5px rgba(34,136,47,0.1);}
+.tl-year{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green2);margin-bottom:0.25rem;}
+.tl-item.future .tl-year{color:var(--body);}
+.tl-title{font-family:var(--fd);font-size:0.95rem;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:0.3rem;}
+.tl-body{font-size:0.88rem;color:var(--body);line-height:1.65;}
+/* Info boxes */
+.info-box{border-radius:8px;margin:1.25rem 0;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid var(--green2);}
+.info-box.blue{border-left-color:var(--blue);}
+.info-box.orange{border-left-color:var(--orange);}
+.info-box.navy{border-left-color:var(--navy);}
+.box-hdr{font-family:var(--fd);font-size:0.78rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0.7rem 1.2rem;background:var(--green2);color:var(--white);}
+.info-box.blue .box-hdr{background:var(--blue);}
+.info-box.orange .box-hdr{background:var(--orange);}
+.info-box.navy .box-hdr{background:var(--navy);}
+.box-body{border:1.5px solid var(--lgrey);border-top:none;border-radius:0 0 8px 8px;}
+.box-item{padding:0.65rem 1.2rem 0.65rem 1.8rem;font-size:0.9rem;color:var(--text);line-height:1.65;border-bottom:1px solid rgba(22,28,96,0.06);position:relative;}
+.box-item:last-child{border-bottom:none;}
+.box-item::before{content:"›";position:absolute;left:0.75rem;color:var(--green2);font-weight:700;font-size:1rem;line-height:1.6;}
+.info-box.blue .box-item::before{color:var(--blue);}
+.info-box.orange .box-item::before{color:var(--orange);}
+.info-box.navy .box-item::before{color:var(--navy);}
+/* Callouts */
+.callout{border-radius:8px;padding:1.05rem 1.35rem;margin:1.3rem 0;font-size:0.92rem;line-height:1.65;display:flex;gap:0.85rem;align-items:flex-start;}
+.callout-icon{flex-shrink:0;width:1.5rem;height:1.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;margin-top:0.1rem;color:var(--white);}
+.callout.cgr{background:#D8F0DC;border-left:4px solid var(--green2);color:#0C3312;}
+.callout.cgr .callout-icon{background:var(--green2);}
+.callout.cbl{background:#DBEEFF;border-left:4px solid var(--blue);color:#0C2F60;}
+.callout.cbl .callout-icon{background:var(--blue);}
+.callout.cor{background:#FDE8D5;border-left:4px solid var(--orange);color:#5C2400;}
+.callout.cor .callout-icon{background:var(--orange);}
+.callout.cnv{background:#E8EEF8;border-left:4px solid var(--navy);color:var(--navy);}
+.callout.cnv .callout-icon{background:var(--navy);}
+.callout strong{display:block;font-weight:700;margin-bottom:0.2rem;}
+/* Data table */
+.data-table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.875rem;border-radius:8px;overflow:hidden;box-shadow:var(--shadow);}
+.data-table thead th{background:var(--navy);color:var(--white);padding:0.8rem 1rem;text-align:left;font-family:var(--fd);font-size:0.8rem;letter-spacing:0.8px;text-transform:uppercase;font-weight:700;}
+.data-table tbody td{padding:0.75rem 1rem;border-bottom:1px solid var(--lgrey);color:var(--text);vertical-align:top;font-size:0.9rem;line-height:1.55;}
+.data-table tbody tr{transition:background 0.12s;}
+.data-table tbody tr:nth-child(even) td{background:var(--mid);}
+.data-table tbody tr:hover td{background:#EEF8EF !important;}
+.data-table tbody tr:last-child td{border-bottom:none;}
+.data-table tfoot td{background:var(--green2);color:var(--white);font-weight:700;padding:0.85rem 1rem;}
+/* Rev grid */
+.rev-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:0;border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin:1.5rem 0;}
+.rev-yr{background:var(--navy);padding:1.1rem 0.85rem;text-align:center;border-right:1px solid rgba(255,255,255,0.08);transition:background 0.15s;}
+.rev-yr:last-child{border-right:none;background:var(--green2);}
+.rev-yr:not(:last-child):hover{background:var(--navy2);}
+.rev-yr-label{font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.35rem;}
+.rev-yr:last-child .rev-yr-label{color:rgba(255,255,255,0.7);}
+.rev-yr-val{font-family:var(--fd);font-size:1.25rem;font-weight:900;color:var(--white);line-height:1;}
+.rev-yr-breakdown{font-size:0.72rem;color:rgba(255,255,255,0.38);margin-top:0.3rem;line-height:1.5;}
+.rev-yr:last-child .rev-yr-breakdown{color:rgba(255,255,255,0.65);}
+/* Badges */
+.badge{display:inline-block;padding:0.2rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:700;color:var(--white);font-family:var(--fd);letter-spacing:0.3px;}
+.badge.live{background:var(--green2);}
+.badge.active{background:var(--blue);}
+.badge.awarded{background:var(--green);}
+.badge.ramp{background:var(--orange);}
+.badge.pending{background:#888;}
+.step-badge{display:inline-flex;align-items:center;justify-content:center;width:1.6rem;height:1.6rem;border-radius:50%;background:var(--green2);color:var(--white);font-family:var(--fd);font-size:0.8rem;font-weight:900;flex-shrink:0;}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity 0.5s ease,transform 0.5s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.footer{background:var(--dark);border-top:3px solid var(--green2);padding:2.5rem;margin-top:3.5rem;}
+.footer-in{max-width:1140px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:2rem;}
+.footer-brand{font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--white);letter-spacing:1px;text-transform:uppercase;line-height:1.4;}
+.footer-brand span{color:var(--green3);}
+.footer-meta{font-size:0.82rem;color:rgba(255,255,255,0.3);line-height:1.65;text-align:right;}
+@media(max-width:1050px){.hero-kpis{grid-template-columns:repeat(3,1fr);}.wp-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:900px){.hero-top{grid-template-columns:1fr;}.c3,.c4{grid-template-columns:repeat(2,1fr);}.nav-links{display:none;}.footer-in{flex-direction:column;}.footer-meta{text-align:left;}}
+@media(max-width:560px){.hero{padding:3rem 1.5rem 2.5rem;}.wrap,.sec-hdr-in{padding-left:1.5rem;padding-right:1.5rem;}.hero-kpis,.c2,.c3,.c4,.wp-grid,.rev-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<!-- Master plan context banner -->
+<div style="background:#0a0f1a;border-bottom:2px solid rgba(54,140,217,0.3);padding:0;">
+  <div style="max-width:1140px;margin:0 auto;">
+    <!-- Label row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="padding:0.55rem 1rem;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(54,140,217,0.7);">BU Services Full Picture</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2026</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2027</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2028</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2029</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2030</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">Full plan</div>
+    </div>
+    <!-- Base row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="padding:0.45rem 1rem;font-size:0.72rem;color:rgba(185,142,224,0.65);">Base business</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$47.2M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$53.1M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$58.0M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$59.9M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$55.4M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.2);border-left:1px solid rgba(255,255,255,0.04);">existing</div>
+    </div>
+    <!-- Initiatives row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="padding:0.45rem 1rem;font-size:0.72rem;color:rgba(61,219,80,0.65);">+ 5 growth initiatives</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$3.2M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$18.6M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$25.7M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$32.6M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$37.4M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.2);border-left:1px solid rgba(255,255,255,0.04);">this plan</div>
+    </div>
+    <!-- Total row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;background:rgba(255,255,255,0.03);">
+      <div style="padding:0.5rem 1rem;font-family:var(--fd,'Barlow',sans-serif);font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Total BU Services</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$50.4M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$71.7M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$83.7M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$92.5M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:#3DDB50;border-left:1px solid rgba(255,255,255,0.06);">$92.8M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.25);border-left:1px solid rgba(255,255,255,0.06);">combined</div>
+    </div>
+  </div>
+</div>
+
+<nav class="nav" id="top">
+  <div class="nav-brand">NUCLEOM INC. <em>|</em> NUCLEAR / OPG</div>
+  <ul class="nav-links">
+    <li><a href="#s1">Thesis</a></li>
+    <li><a href="#s2">MSA Renewal</a></li>
+    <li><a href="#s3">Work Packages</a></li>
+    <li><a href="#s4">Rates</a></li>
+    <li><a href="#s5">Programs</a></li>
+    <li><a href="#s6">Revenue</a></li>
+    <li><a href="#s7">Next Steps</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <div class="hero-top">
+      <div>
+        <div class="hero-label">Nuclear / OPG Commercial Plan — 2026–2030</div>
+        <h1>NUCLEAR NDT<span>COMMERCIAL PLAN</span><small>2026–2030 &nbsp;·&nbsp; NUCLEOM INC. &nbsp;·&nbsp; BU SERVICES</small></h1>
+        <div class="hero-rule"></div>
+        <p class="hero-sub">MSA &amp; Outage: Jon Eustace &amp; Vinoth Tharma &ensp;·&ensp; New Build &amp; Refurb: Olivier Marcotte &amp; Louis-Pier Théberge &ensp;·&ensp; Nucleom Inc. &ensp;·&ensp; Ekoscan Integrity Group</p>
+        <p class="hero-desc">Nucleom (formerly operating as Arcanite Inc., amalgamated January 1, 2026) built a trusted OPG relationship over five years and now carries that relationship forward as a single unified entity. The 2027 MSA renewal is the strategic inflection point — the moment to position Nucleom as the <strong>sole provider of all augmented NDT staff</strong> for every planned outage at Pickering and Darlington. Not a niche T.R.U.S.T.I.E. contract. All 10 work packages. Every outage. ~102 staff per outage. ~$5.5M per outage at proposed 2027 rates. New build and refurbishment credibility opens the door — full augmented staff is the prize.</p>
+        <div class="hero-conf">Confidential &mdash; Eurazeo / EIG Internal</div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-meta-item" style="font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--green3);font-weight:700;">MSA / Outage Maintenance</div>
+        <div class="hero-meta-item"><strong>Jon Eustace</strong> — CEO, North America</div>
+        <div class="hero-meta-item"><strong>Vinoth Tharma</strong> — Commercial Lead</div>
+        <div class="hero-meta-item" style="margin-top:0.75rem;font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.4);font-weight:700;">New Build / Refurbishment</div>
+        <div class="hero-meta-item"><strong>Olivier Marcotte</strong> — CRO, BU Services</div>
+        <div class="hero-meta-item"><strong>Louis-Pier Théberge</strong> — Program Lead</div>
+        <div class="hero-meta-item" style="margin-top:0.75rem;"><strong>April 2026</strong> &nbsp;·&nbsp; Version 1.0</div>
+      </div>
+    </div>
+    <div class="hero-kpis">
+      <div class="hkpi">
+        <div class="hkpi-val">2027</div>
+        <div class="hkpi-lbl">MSA renewal target — Nucleom OPG platform expansion (Arcanite legacy inherited)</div>
+      </div>
+      <div class="hkpi s2">
+        <div class="hkpi-val">10</div>
+        <div class="hkpi-lbl">Work packages available across 2 sites — Pickering + Darlington</div>
+      </div>
+      <div class="hkpi s3">
+        <div class="hkpi-val">~$5.5M</div>
+        <div class="hkpi-lbl">Revenue per outage — full augmented staff, all 10 work packages</div>
+      </div>
+      <div class="hkpi s4">
+        <div class="hkpi-val">~$33M</div>
+        <div class="hkpi-lbl">Annual revenue at base case (6 outages/yr, full scope)</div>
+      </div>
+      <div class="hkpi s5">
+        <div class="hkpi-val">Only</div>
+        <div class="hkpi-lbl">Unionized BU Services company — OPG site access prerequisite</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- S1: THE THESIS -->
+<!-- Amalgamation notice -->
+<div style="background:#0a0a1a;border-left:5px solid var(--blue2);padding:0.85rem 1.5rem;margin:0;">
+  <div style="max-width:1140px;margin:0 auto;font-size:0.85rem;color:rgba(200,210,240,0.85);line-height:1.6;">
+    <strong style="color:var(--white);">Corporate Note:</strong> Arcanite Inc. and Nucleom Inc. amalgamated effective January 1, 2026. All OPG MSA contracts, outage relationships, and performance history previously held under Arcanite are now carried by Nucleom Inc. as the single surviving entity. All references to "Arcanite" in this document are historical context only.
+  </div>
+</div>
+
+<div class="sec-hdr" id="s1">
+  <div class="sec-hdr-in">
+    <div class="sec-num">01</div>
+    <div><div class="sec-title">The Commercial Thesis</div><div class="sec-sub">Nucleom's inherited OPG relationship + new build and refurbishment credentials = 2027 MSA expansion</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>Nucleom's nuclear commercial strategy is built on a foundation that Nucleom (formerly Arcanite Inc., amalgamated January 1, 2026) spent five years constructing — a direct OPG Master Services Agreement covering ten work packages across steam generators, feeders, turbines, balance of plant, and quality control at Pickering and Darlington. That MSA ran from April 2020 to December 2024, with two optional one-year extensions taking it to end of 2026. The 2027 renewal is not a routine contract extension. It is a strategic opportunity to fundamentally expand the scope and value of Nucleom's OPG relationship.</p>
+    <p>The timing has never been better. OPG is simultaneously managing the world's largest active CANDU refurbishment program at Pickering, the construction of North America's first commercial grid-scale SMR at Darlington, and the ongoing maintenance of its active operating fleet. They need qualified, trusted augmented staff partners for every planned outage. <strong>Nucleom is already that partner.</strong> The 2027 MSA renewal is the moment to make it official at the expanded scale that OPG's program load demands.</p>
+
+    <div class="crow c3 reveal">
+      <div class="kcard green">
+        <h3>Nucleom's Inherited OPG Legacy</h3><div class="kcard-rule"></div>
+        <p>Five-year direct OPG MSA covering T.R.U.S.T.I.E. steam generator tube analysis, feeder inspection, BOP, turbines, PAUT, PIP and QC. A trusted relationship with OPG's inspection management team built through consistent outage delivery. Operated under Arcanite Inc. and inherited by Nucleom through the amalgamation effective January 1, 2026.</p>
+      </div>
+      <div class="kcard navy">
+        <h3>Nucleom's New Credentials</h3><div class="kcard-rule"></div>
+        <p>Nucleom has now been awarded NDT subcontract scope through Aecon on both the Darlington BWRX-300 SMR and the Pickering Units 5–8 Refurbishment. These two programs — the largest nuclear capital investments in Canadian history — are the strongest possible reference for augmented staff outage maintenance capability at OPG sites.</p>
+      </div>
+      <div class="kcard blue">
+        <h3>OPG's Interest</h3><div class="kcard-rule"></div>
+        <p>OPG is actively keen on expanding Nucleom's scope beyond T.R.U.S.T.I.E. to provide augmented staff support for maintenance shutdowns across both Pickering and Darlington. The 2027 MSA renewal is OPG's mechanism to formalise this expansion — they want Nucleom at the table for the full outage maintenance program, not just steam generator tube inspection.</p>
+      </div>
+    </div>
+
+    <div class="callout cgr reveal">
+      <div class="callout-icon">★</div>
+      <div><strong>OPG Has Already Signalled the Green Light</strong> — OPG has explicitly indicated they want Nucleom to expand and bid on as many work packages as they can supply personnel for. This is not a speculative commercial pitch. The client has already told Nucleom to come to the tender with ambition. Nucleom is already filling Eddy Current acquisition spots that Intech cannot supply — OPG is routing work to Nucleom today, ahead of the formal MSA tender. The 2027 competitive tender is the mechanism to formalise that relationship at full scale.</div>
+    </div>
+
+    <div class="callout cor reveal">
+      <div class="callout-icon">!</div>
+      <div><strong>The QCCC Union Dynamic — Technicians Follow the Contracts</strong> — The approximately 102 qualified technicians required for full augmented staff deployment are not a hiring challenge. They are QCCC (Construction and Skilled Trades) union members who get hired by whoever holds the MSA contracts. Win the packages, and the workforce follows — this is how the nuclear outage labour market works. Nucleom does not need 102 technicians on payroll today to bid for all 10 work packages. It needs the contracts. The technicians come with them.</div>
+    </div>
+
+    <div class="callout cbl reveal">
+      <div class="callout-icon">↓</div>
+      <div><strong>Applus RTD — Competitive Vulnerability</strong> — Applus RTD currently holds <strong>four work packages</strong> at OPG: FAC, Quality Control, Turbine Conventional, and Phased Array Turbines (PAUT). Applus attempted a sale to Acuren which fell through due to severely poor financial results. The company is understood to be in significant financial distress. OPG procurement will be highly motivated to consolidate these packages with a financially stable alternative at the 2027 tender. Nucleom's backing by Eurazeo PE and EIG Group is a direct competitive advantage — a financially stable, PE-backed provider vs. a distressed vendor struggling to survive.</div>
+    </div>
+
+    <div class="sub-title">Competitive Landscape — Who Nucleom Is Displacing</div>
+    <p>The 2027 MSA will be a competitive tender. OPG will issue an RFP and vendors will bid on individual work packages. The current incumbent map is well understood — and the competitive conditions at the time of tender are unusually favourable for Nucleom.</p>
+
+    <table class="data-table reveal">
+      <thead><tr><th>Work Package</th><th>Current Incumbent</th><th>Nucleom Position</th><th>Competitive Assessment</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>T.R.U.S.T.I.E. Resolution Analysis</strong></td>
+          <td><span style="color:var(--green2);font-weight:700;">Nucleom (incumbent)</span></td>
+          <td><span style="color:var(--green2);font-weight:700;">Direct MSA — active today</span></td>
+          <td>Strongest position. Nucleom holds the Analysis package directly under the current OPG MSA — inherited through the Arcanite amalgamation. No displacement needed — defend and expand.</td>
+        </tr>
+        <tr>
+          <td><strong>T.R.U.S.T.I.E. Acquisition</strong></td>
+          <td>Intech International / AIM (OPG internal)</td>
+          <td><span style="color:var(--orange);font-weight:700;">Strong bid — adjacent to Analysis package</span></td>
+          <td>Intech and AIM (OPG's own internal team) currently supply the acquisition operators. Nucleom already fills Intech gaps on EC acquisition. Winning the acquisition package completes full T.R.U.S.T.I.E. ownership under one provider.</td>
+        </tr>
+        <tr>
+          <td><strong>BOP HX Data Acquisition</strong></td>
+          <td>Intech International</td>
+          <td><span style="color:var(--green2);font-weight:700;">Already filling Intech gaps</span></td>
+          <td>OPG is already routing EC acquisition work to Nucleom when Intech cannot supply. Proven track record in place ahead of formal tender.</td>
+        </tr>
+        <tr>
+          <td><strong>Feeder Inspection</strong></td>
+          <td>Intech International</td>
+          <td><span style="color:var(--orange);font-weight:700;">Strong bid — OPG signalled interest</span></td>
+          <td>Nucleom has capability and OPG has explicitly signalled they want Nucleom to bid. Intech vulnerable if they cannot consistently supply this package.</td>
+        </tr>
+        <tr>
+          <td><strong>Flow Assisted Corrosion (FAC)</strong></td>
+          <td>Applus RTD</td>
+          <td><span style="color:var(--green2);font-weight:700;">High confidence — Applus distressed</span></td>
+          <td>Applus RTD attempted sale to Acuren fell through due to poor financials. Company in significant distress. OPG motivated to find stable alternative. Eurazeo/EIG backing is Nucleom's advantage.</td>
+        </tr>
+        <tr>
+          <td><strong>Quality Control</strong></td>
+          <td>Applus RTD</td>
+          <td><span style="color:var(--green2);font-weight:700;">High confidence — Applus distressed</span></td>
+          <td>Same Applus vulnerability as FAC. QC is table-stakes for any qualified nuclear NDT provider — Nucleom is fully qualified.</td>
+        </tr>
+        <tr>
+          <td><strong>Turbine Conventional</strong></td>
+          <td>Applus RTD</td>
+          <td><span style="color:var(--green2);font-weight:700;">High confidence — Applus distressed</span></td>
+          <td>Applus RTD holds both turbine packages. With Applus in severe financial distress following the failed Acuren acquisition, OPG has strong motivation to move both turbine packages to a stable provider. Conventional NDT is core Nucleom capability.</td>
+        </tr>
+        <tr>
+          <td><strong>Phased Array Turbines (PAUT)</strong></td>
+          <td>Applus RTD</td>
+          <td><span style="color:var(--green2);font-weight:700;">High confidence — Applus distressed</span></td>
+          <td>Both turbine packages sit with Applus RTD. The failed Acuren sale and Applus's financial state make these packages vulnerable at the 2027 tender. PAUT is a premium-rate package ($403K/outage). Nucleom holds CGSB-qualified PAUT technicians.</td>
+        </tr>
+        <tr>
+          <td><strong>ET Resolution Analysis (remote)</strong></td>
+          <td><span style="color:var(--orange);font-weight:700;">Moretech (closed) → Gap</span></td>
+          <td><span style="color:var(--green2);font-weight:700;">Urgent opportunity — major market gap</span></td>
+          <td>Moretech was the primary ET Resolution Analysis provider and has closed its doors — creating a significant gap in OPG's augmented staff supply chain. Currently being backfilled piecemeal by Intech, Zetec, and IMS (OPG's own internal team). No single stable provider. Nucleom's Oakville office is ideally positioned to fill this gap with a permanent, high-margin, remote analysis capability. This is one of the most strategically important packages in the 2027 tender.</td>
+        </tr>
+        <tr>
+          <td><strong>UT Analysis T.R.U.S.T.I.E. (remote)</strong></td>
+          <td><span style="color:var(--green2);font-weight:700;">Nucleom (incumbent on analysis)</span></td>
+          <td><span style="color:var(--green2);font-weight:700;">Defend and formalise in 2027 MSA</span></td>
+          <td>Nucleom holds the T.R.U.S.T.I.E. Resolution Analysis package under the current MSA — this includes UT analysis of steam generator tube data. Defend this package in the 2027 tender and formalise what Nucleom is already delivering. No displacement needed.</td>
+        </tr>
+        <tr>
+          <td><strong>Periodic Inspection (PIP)</strong></td>
+          <td>Acuren / Applus RTD</td>
+          <td><span style="color:var(--orange);font-weight:700;">Strong opportunity — dual incumbents weakened</span></td>
+          <td>PIP is currently split between Acuren and Applus RTD. With Applus in financial distress, half this package is immediately vulnerable. OPG wants Nucleom to bid. QCCC PIP technicians follow the contract award — not a hiring barrier.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="sub-title">The Outage Revenue Model — Why Maintenance Shutdowns Are the Prize</div>
+    <p>Nuclear power plants are shut down on a planned schedule for maintenance, inspection, and refuelling. These "planned outages" (POs) are intense, time-compressed programs — typically 3 to 6 weeks — during which large volumes of inspection and maintenance work are completed simultaneously under significant cost and schedule pressure. OPG relies heavily on augmented staff from qualified contractors to supplement its own workforce during outages.</p>
+
+    <div class="crow c2 reveal">
+      <div class="kcard lined">
+        <h3>Real Outage Scale — SG Analysis Program D2631</h3>
+        <div class="kcard-rule" style="background:var(--green2);"></div>
+        <p>The SG Analysis crew schedule for outage D2631 (April 2026) illustrates the true scale of a single work package deployment:<br><br>
+        <strong>Duration:</strong> 21 calendar days (3 weeks), April 1–21, 2026<br><br>
+        <strong>Crew size:</strong> 3 crews (X, Y, Z) — approximately <strong>78 staff total</strong> across ET Resolution/Primary/Secondary Analysts, T.R.U.S.T.I.E. operators, SG ET RCA, Sys Admins, FLMs, and Data Managers<br><br>
+        <strong>CGSB requirements:</strong> ET Level 2 or ASNT Level II for all analyst roles; ET2 + UT2 for T.R.U.S.T.I.E. resolution analysts<br><br>
+        <strong>Revenue — this one WP, one outage:</strong> At proposed 2027 rates, approximately <strong>$1.45M</strong> including mob/demob. At current 2024/25 rates with no mob/demob recovery: ~$1.03M. Rate reset uplift per outage: <strong>+$421K</strong><br><br>
+        <strong>Important:</strong> This is the Steam Generator Analysis program only. FAC, Feeder, PAUT, PIP, QC, and Turbine work packages run separately with their own crew schedules.</p>
+      </div>
+      <div class="kcard lined">
+        <h3>Why Nucleom Wins Outage Work</h3>
+        <div class="kcard-rule" style="background:var(--blue);"></div>
+        <p><strong>Union credentials:</strong> OPG sites require unionized workers — Nucleom is the only BU Services company that qualifies<br><br>
+        <strong>Existing MSA relationship:</strong> Nucleom (formerly Arcanite) delivered T.R.U.S.T.I.E. and SG analysis outage work for 5 years without incident — a continuous performance record now carried by Nucleom<br><br>
+        <strong>CGSB qualifications:</strong> All Nucleom technicians hold CGSB certifications required under nuclear codes (CSA N285, ASME Section XI). ET Level 2 and UT Level 2 are baseline requirements across most work packages<br><br>
+        <strong>NEAR RT system:</strong> Proprietary feeder inspection technology directly applicable to Pickering refurbishment feeder work and ongoing feeder inspection programs<br><br>
+        <strong>Aecon relationship:</strong> Active subcontract on both capital programs — OPG already sees Nucleom as a trusted nuclear NDT construction partner, not just an outage vendor<br><br>
+        <strong>Remote analysis capability:</strong> ET and UT resolution analysis can be performed from Nucleom's Oakville or Quebec City offices — high-margin work with no site LOA cost</p>
+      </div>
+    </div>
+
+    <div style="background:var(--navy);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin:1.5rem 0;" class="reveal">
+      <div style="background:var(--green2);padding:0.75rem 1.4rem;display:flex;align-items:center;gap:1rem;">
+        <span style="font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7);">Real Data — Outage D2631 SG Analysis Program</span>
+        <span style="margin-left:auto;font-family:var(--fd);font-size:0.72rem;font-weight:700;background:rgba(255,255,255,0.15);color:var(--white);padding:0.15rem 0.65rem;border-radius:3px;">April 1–21, 2026 &nbsp;·&nbsp; 3 Weeks &nbsp;·&nbsp; 1 of 10 Work Packages</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="padding:1rem;border-right:1px solid rgba(255,255,255,0.08);text-align:center;">
+          <div style="font-family:var(--fd);font-size:1.8rem;font-weight:900;color:var(--green3);line-height:1;">78</div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:0.25rem;">Staff across 3 crews<br>SG analysis only</div>
+        </div>
+        <div style="padding:1rem;border-right:1px solid rgba(255,255,255,0.08);text-align:center;">
+          <div style="font-family:var(--fd);font-size:1.8rem;font-weight:900;color:var(--white);line-height:1;">21 days</div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:0.25rem;">3-week outage window<br>2 shifts per day</div>
+        </div>
+        <div style="padding:1rem;border-right:1px solid rgba(255,255,255,0.08);text-align:center;">
+          <div style="font-family:var(--fd);font-size:1.8rem;font-weight:900;color:rgba(255,200,100,0.9);line-height:1;">$1.03M</div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:0.25rem;">Current 2024/25 rates<br>no mob/demob recovery</div>
+        </div>
+        <div style="padding:1rem;text-align:center;">
+          <div style="font-family:var(--fd);font-size:1.8rem;font-weight:900;color:var(--green3);line-height:1;">$1.45M</div>
+          <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:0.25rem;">Proposed 2027 rates<br>incl. mob/demob</div>
+        </div>
+      </div>
+      <div style="padding:0.85rem 1.4rem;font-size:0.82rem;color:rgba(255,255,255,0.55);line-height:1.6;">
+        <strong style="color:var(--green3);">+$421K per outage uplift</strong> from rate reset alone — across 5–8 outages per year at both Pickering and Darlington, this represents <strong style="color:var(--white);">$2.1M–$3.4M in additional annual revenue</strong> from the SG analysis program alone at no additional headcount cost. Other 9 work packages generate separate revenue streams on the same outages.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- S2: MSA RENEWAL STRATEGY -->
+<div class="sec-hdr" id="s2">
+  <div class="sec-hdr-in">
+    <div class="sec-num">02</div>
+    <div><div class="sec-title">2027 MSA Tender Strategy</div><div class="sec-sub">Competitive tender — bid aggressively on every package Nucleom can supply — displace Intech and Applus RTD</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>The existing Nucleom (formerly Arcanite) MSA runs to December 31, 2024 with up to two one-year extensions — placing expiry at end of 2025 or 2026. OPG will issue a competitive RFP for the 2027 MSA. Vendors bid on individual work packages. This is not a risk — it is the opportunity. Nucleom enters this tender as the <strong>incumbent on T.R.U.S.T.I.E.</strong>, the <strong>proven gap-filler OPG is already using</strong>, with <strong>OPG's explicit encouragement to bid widely</strong>, and with the two primary incumbents either vulnerable (Intech, unable to fully supply) or distressed (Applus RTD, failed acquisition). Conditions for a transformational tender outcome have never been better.</p>
+
+    <div class="sub-title">What the 2020 MSA Got Right and What Needs to Change</div>
+    <div class="crow c2 reveal">
+      <div class="info-box">
+        <div class="box-hdr">Retain from 2020 MSA</div>
+        <div class="box-body">
+          <div class="box-item"><strong>All 10 work packages</strong> — the full scope of Steam Generators, BOP, FAC, Feeder Inspection, PAUT, PIP, QC, Turbine Conventional, ET Resolution Analysis, and UT Analysis. Do not narrow scope — negotiate to maintain or expand all packages.</div>
+          <div class="box-item"><strong>Work Package Staffing Templates</strong> — OPG's technical qualification requirements (CGSB levels, experience thresholds, role definitions) are thorough and appropriate. Nucleom already meets them. Keep them.</div>
+          <div class="box-item"><strong>OPG Business Expense Schedule</strong> — The daily LOA rate structure ($120/day for Pickering and Darlington sites, $1,800/month for extended assignments) is a pass-through reimbursement mechanism that works. Retain it in the new MSA.</div>
+          <div class="box-item"><strong>Milestone / Crew Schedule framework</strong> — The demand planning and crew scheduling process is well-defined and operationally sound. Nucleom should maintain the same timeline structure for outage readiness notifications.</div>
+        </div>
+      </div>
+      <div class="info-box orange">
+        <div class="box-hdr">Change in 2027 MSA</div>
+        <div class="box-body">
+          <div class="box-item"><strong>All hourly rates</strong> — The 2020 rates were low at inception and have been partially escalated at 3.6–5.1%/yr. For 2027, rates need a full reset that properly covers technician LOA costs, mob/demob, and reflects nuclear labour market conditions. See Section 04 for proposed rates.</div>
+          <div class="box-item"><strong>Mob/demob as explicit line items</strong> — The 2020 MSA contains zero mob/demob provisions. Every technician deployment costs Nucleom $1,000–$1,500 in travel expenses (flights, ground transport, first-night accommodation) that is not currently recovered. The 2027 MSA must explicitly price this.</div>
+          <div class="box-item"><strong>Escalation mechanism</strong> — The 2020 escalation rates (3.6–5.1%/yr) were below CPI inflation through the 2022–2024 period. The 2027 MSA should use CPI + 1.5% or a minimum floor of 5% per year escalation to ensure rates keep pace with actual labour cost increases.</div>
+          <div class="box-item"><strong>Scope expansion to augmented staff model</strong> — Explicitly position the 2027 MSA as a full augmented staff support agreement, not just a T.R.U.S.T.I.E. contract with additional work packages. This signals Nucleom's intent to become OPG's primary outage NDT staff partner.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-title">Negotiation Timeline</div>
+    <div class="timeline reveal">
+      <div class="tl-item active">
+        <div class="tl-dot"></div>
+        <div class="tl-year">Q2 2026 — NOW</div>
+        <div class="tl-title">Initiate MSA Renewal Discussions with OPG</div>
+        <div class="tl-body">Vinoth Tharma and Olivier Marcotte initiate formal renewal dialogue with OPG's contract management team. Frame as expansion conversation, not just renewal. Present Nucleom's expanded capability profile (Aecon programs, NEAR RT, full NDT suite) as the basis for broader scope. Confirm OPG's interest in expanded augmented staff support — which has already been signalled.</div>
+      </div>
+      <div class="tl-item future">
+        <div class="tl-dot"></div>
+        <div class="tl-year">Q3 2026</div>
+        <div class="tl-title">Submit Nucleom Proposed Rate Sheet and Scope Expansion</div>
+        <div class="tl-body">Formally submit Nucleom's 2027 proposed rates across all 10 work packages (see Section 04). Include mob/demob line items and escalation mechanism. Simultaneously present the augmented staff outage maintenance value proposition — framing the 2027 MSA as a staff augmentation platform for all OPG planned outages at Pickering and Darlington.</div>
+      </div>
+      <div class="tl-item future">
+        <div class="tl-dot"></div>
+        <div class="tl-year">Q4 2026</div>
+        <div class="tl-title">Negotiate and Finalise 2027 MSA Terms</div>
+        <div class="tl-body">Rate and scope negotiation with OPG procurement. Retain all 10 work packages. Secure mob/demob line items. Agree escalation mechanism. Target signing by December 2026 to ensure no coverage gap between expiry of current MSA and commencement of 2027 program year. Jon Eustace to engage at EIG executive level if needed to accelerate OPG sign-off.</div>
+      </div>
+      <div class="tl-item future">
+        <div class="tl-dot"></div>
+        <div class="tl-year">Q1 2027</div>
+        <div class="tl-title">2027 MSA Signed — Outage Season Readiness</div>
+        <div class="tl-body">New MSA in place before first 2027 outage. Crew demand planning and staffing templates confirmed. Technician assignments confirmed for Pickering and Darlington 2027 outage schedule. Revenue begins flowing under the expanded rate structure from the first outage mobilisation.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- S3: WORK PACKAGES -->
+<div class="sec-hdr" id="s3">
+  <div class="sec-hdr-in">
+    <div class="sec-num">03</div>
+    <div><div class="sec-title">MSA Work Packages</div><div class="sec-sub">10 work packages across Pickering and Darlington — the full outage maintenance NDT platform</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>The Nucleom MSA (formerly held under Arcanite) covers ten distinct work packages, each with defined technical specifications, role qualifications (CGSB levels, experience requirements), and staffing templates. Together they represent the complete scope of outage NDT and inspection services at OPG's Pickering and Darlington stations. The 2027 MSA renewal target is to maintain all ten packages and expand the staffing volumes under each.</p>
+
+    <div class="wp-grid reveal">
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--green2);">
+          <div class="wp-num">Work Package 01</div>
+          <div class="wp-name">BOP HX Data Acquisition</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">Heat exchanger eddy current data acquisition. HX ET Acquisition Operators (Level I &amp; II) and Platform Trainees. WPST I-SPEC-04165-0001. Covers general HX and BOP heat exchangers across both sites.</div>
+          <div class="wp-tag">Steam Generators Bundle</div>
+        </div>
+      </div>
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--green2);">
+          <div class="wp-num">Work Package 02</div>
+          <div class="wp-name">T.R.U.S.T.I.E. Data Acquisition &amp; Resolution Analysis</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">Internal UT inspection of steam generator tubes. Servo-fibre acquisition operators, platform operators, and resolution analysts. WPST I-SPEC-04161-50000. OPG / Kinetrics IP. Core of the existing direct OPG MSA.</div>
+          <div class="wp-tag">Steam Generators Bundle — Core Program</div>
+        </div>
+      </div>
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--blue);">
+          <div class="wp-num">Work Package 03</div>
+          <div class="wp-name">Flow Assisted Corrosion (FAC)</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">FAC inspection of carbon steel piping systems. FAC Technicians 1 &amp; 2 and Trainees. WPST I-LIST-04160-50003. Critical safety inspection — FAC wall thinning is a primary degradation mechanism in CANDU balance-of-plant piping.</div>
+          <div class="wp-tag">Balance of Plant Bundle</div>
+        </div>
+      </div>
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--orange);">
+          <div class="wp-num">Work Package 04</div>
+          <div class="wp-name">Feeder Inspection</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">MIT and UT inspection of CANDU feeder pipes. Equipment technicians, MIT/UT acquisition operators, analysts, platform operators, and visual inspection. WPST I-LIST-04160-50001. MIT and UT inspection of CANDU feeder pipes during planned outages. Directly adjacent to Nucleom's refurbishment feeder capability but uses conventional MIT/UT methods on the MSA — not the NEAR RT system, which is specific to refurbishment/new build.</div>
+          <div class="wp-tag">Balance of Plant — NEAR RT Synergy</div>
+        </div>
+      </div>
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--green2);">
+          <div class="wp-num">Work Package 05</div>
+          <div class="wp-name">Phased Array Turbines (PAUT)</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">PAUT inspection of turbine components. Acquisition technicians, analysts, and trainees. WPST I-LIST-04160-50002. High-value work package — PAUT technicians command premium rates and are in demand across both Pickering and Darlington outages simultaneously.</div>
+          <div class="wp-tag">Balance of Plant Bundle</div>
+        </div>
+      </div>
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--blue);">
+          <div class="wp-num">Work Package 06</div>
+          <div class="wp-name">Periodic Inspection Program (PIP)</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">In-service inspection of pressure retaining components per ASME Section XI and CSA N285. PIP Technicians and Trainees. WPST I-LIST-04160-50002. Recurring regulatory requirement — every CANDU unit requires PIP on each outage cycle.</div>
+          <div class="wp-tag">Balance of Plant — Regulatory Requirement</div>
+        </div>
+      </div>
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--orange);">
+          <div class="wp-num">Work Package 07</div>
+          <div class="wp-name">Quality Control (QC)</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">QC and support technicians for inspection program oversight and documentation. WPST I-LIST-04160-50003. QC presence is mandatory on all nuclear inspection programs — every outage requires dedicated QC staff regardless of scope.</div>
+          <div class="wp-tag">Balance of Plant — Every Outage</div>
+        </div>
+      </div>
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--green2);">
+          <div class="wp-num">Work Package 08</div>
+          <div class="wp-name">Turbine Conventional (TC)</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">Conventional NDT (UT, MT, PT, VT) on turbine systems. Turbine Technicians 1 &amp; 2 and Trainees. WPST I-LIST-04160-50003. Complements the PAUT turbine program — conventional methods for areas where PAUT is not required or not applicable.</div>
+          <div class="wp-tag">Balance of Plant Bundle</div>
+        </div>
+      </div>
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--blue);">
+          <div class="wp-num">Work Package 09</div>
+          <div class="wp-name">ET Resolution Analysis</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">Off-site / remote eddy current resolution analysis for steam generator and heat exchanger data. ET Resolution Analysts. WPST I-SPEC-04165-50000. Can be performed from Nucleom's Quebec City or Oakville office — not site-dependent. Strong margin profile.</div>
+          <div class="wp-tag">Remote Analysis — High Margin</div>
+        </div>
+      </div>
+      <div class="wp-card">
+        <div class="wp-hd" style="border-top:3px solid var(--orange);">
+          <div class="wp-num">Work Package 10</div>
+          <div class="wp-name">UT Analysis (T.R.U.S.T.I.E.)</div>
+        </div>
+        <div class="wp-bd">
+          <div class="wp-roles">Off-site / remote UT resolution analysis for steam generator tube data. UT Analysts (Primary and Secondary) and T.R.U.S.T.I.E. Servo-Fibre Resolution Analysts. WPST I-SPEC-04161-50000. Remote capability — analysis can be performed from Nucleom offices. Leverages existing T.R.U.S.T.I.E. program IP relationship with Kinetrics.</div>
+          <div class="wp-tag">Remote Analysis — T.R.U.S.T.I.E. Core</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout cnv reveal">
+      <div class="callout-icon">i</div>
+      <div><strong>Strategic Note on Remote Analysis Work Packages (09 &amp; 10)</strong> — ET Resolution Analysis and UT Analysis can be performed from Nucleom's own facilities (Quebec City, Oakville) without requiring technicians on-site at Pickering or Darlington. These work packages have a strong margin profile — no LOA or site mob/demob costs — and provide revenue even between outage windows. The 2027 MSA negotiation should ensure these packages are priced at full market rates reflecting their off-site analytical value, not discounted as if they were on-site augmented staff roles.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- S4: PROPOSED RATES -->
+<div class="sec-hdr" id="s4">
+  <div class="sec-hdr-in">
+    <div class="sec-num">04</div>
+    <div><div class="sec-title">Proposed 2027 Rates</div><div class="sec-sub">Updated from 2020 baseline — includes LOA supplement and new mob/demob structure</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>The 2020 Arcanite MSA rates were set at a level that did not adequately cover all-in technician deployment costs. Five years of partial escalation (3.6–5.1%/yr) has compounded the problem — 2024/2025 rates remain below the level required to cover LOA costs, mobilisation and demobilisation expenses, and provide Nucleom with a sustainable margin on outage work. The 2027 MSA renewal is the opportunity to reset rates to a defensible, commercially viable level.</p>
+
+    <div class="crow c3 reveal">
+      <div class="kcard lined">
+        <h3>Escalation Basis</h3>
+        <div class="kcard-rule" style="background:var(--green2);"></div>
+        <p><strong>2 years at 6.5%/yr</strong> from 2024/2025 rates. Nuclear NDT labour is in high demand with both the Darlington SMR and Pickering Refurbishment running simultaneously — standard CPI escalation understates true market movement. 6.5% is defensible and reflects actual market conditions in the Ontario nuclear supply chain.</p>
+      </div>
+      <div class="kcard lined">
+        <h3>LOA Supplement</h3>
+        <div class="kcard-rule" style="background:var(--orange);"></div>
+        <p><strong>+$10/hr embedded in Mon-Fri day shift rate.</strong> OPG's existing daily rate ($120/day for Pickering and Darlington) covers accommodation but leaves a gap. Actual technician LOA all-in cost is approximately $180–200/day. The $60–80/day shortfall (~$7.50–10/hr) must be embedded in the hourly rate. This is a pass-through cost recovery, not additional margin.</p>
+      </div>
+      <div class="kcard lined">
+        <h3>Mob/Demob — New Line Item</h3>
+        <div class="kcard-rule" style="background:var(--blue);"></div>
+        <p><strong>$1,200 per technician per mobilisation, $1,200 per demobilisation.</strong> The 2020 MSA had zero mob/demob recovery. Economy airfare + ground transport to Pickering or Darlington typically costs $800–1,400 per round trip from Quebec City or elsewhere in Canada. $1,200 each way is a fair, defensible rate that OPG can accept as genuine cost recovery.</p>
+      </div>
+    </div>
+
+    <div class="sub-title">Proposed 2027 Mon–Fri Day Shift Rates (CAD/hr)</div>
+    <table class="rate-table reveal">
+      <thead>
+        <tr>
+          <th style="width:32%;">Role</th>
+          <th style="width:22%;">Work Package</th>
+          <th style="width:12%;text-align:right;">2024/25 Rate</th>
+          <th style="width:12%;text-align:right;">2027 Base (×1.065²)</th>
+          <th style="width:12%;text-align:right;">+ LOA $10</th>
+          <th style="width:10%;text-align:right;">Proposed 2027</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="wp-hdr"><td colspan="6">Steam Generators — BOP HX Data Acquisition</td></tr>
+        <tr><td>HX ET Acquisition Operator I</td><td>BOP HX</td><td class="num">$117.77</td><td class="num">$133.58</td><td class="num">$143.58</td><td class="proposed">$145</td></tr>
+        <tr><td>HX ET Acquisition Operator II</td><td>BOP HX</td><td class="num">$129.54</td><td class="num">$146.93</td><td class="num">$156.93</td><td class="proposed">$160</td></tr>
+        <tr><td>HX ET Platform Trainee</td><td>BOP HX</td><td class="num">$94.21</td><td class="num">$106.86</td><td class="num">$116.86</td><td class="proposed">$120</td></tr>
+        <tr class="wp-hdr"><td colspan="6">Steam Generators — T.R.U.S.T.I.E. Data Acquisition &amp; Resolution Analysis</td></tr>
+        <tr><td>TRUSTIE Servo-Fibre Acq. Op. DQV</td><td>T.R.U.S.T.I.E.</td><td class="num">$147.21</td><td class="num">$166.97</td><td class="num">$176.97</td><td class="proposed">$180</td></tr>
+        <tr><td>TRUSTIE Servo-Fibre Acq. Operator</td><td>T.R.U.S.T.I.E.</td><td class="num">$129.54</td><td class="num">$146.93</td><td class="num">$156.93</td><td class="proposed">$160</td></tr>
+        <tr><td>TRUSTIE Servo-Fibre Platform Acq. Tech.</td><td>T.R.U.S.T.I.E.</td><td class="num">$117.77</td><td class="num">$133.58</td><td class="num">$143.58</td><td class="proposed">$145</td></tr>
+        <tr><td>TRUSTIE Servo-Fibre Platform Trainee</td><td>T.R.U.S.T.I.E.</td><td class="num">$105.99</td><td class="num">$120.21</td><td class="num">$130.21</td><td class="proposed">$135</td></tr>
+        <tr><td>TRUSTIE Servo-Fibre Reso Analyst</td><td>T.R.U.S.T.I.E.</td><td class="num">$147.21</td><td class="num">$166.97</td><td class="num">$176.97</td><td class="proposed">$180</td></tr>
+        <tr class="wp-hdr"><td colspan="6">Balance of Plant — Flow Assisted Corrosion</td></tr>
+        <tr><td>FAC Technician 1</td><td>FAC</td><td class="num">$126.60</td><td class="num">$143.59</td><td class="num">$153.59</td><td class="proposed">$155</td></tr>
+        <tr><td>FAC Technician 2</td><td>FAC</td><td class="num">$143.98</td><td class="num">$163.31</td><td class="num">$173.31</td><td class="proposed">$175</td></tr>
+        <tr><td>FAC Trainee</td><td>FAC</td><td class="num">$124.86</td><td class="num">$141.61</td><td class="num">$151.61</td><td class="proposed">$155</td></tr>
+        <tr class="wp-hdr"><td colspan="6">Feeder Inspection</td></tr>
+        <tr><td>Equipment Technician</td><td>Feeder Inspection</td><td class="num">$130.45</td><td class="num">$147.96</td><td class="num">$157.96</td><td class="proposed">$160</td></tr>
+        <tr><td>MIT/UT Feeder Thinning Acq. Operator</td><td>Feeder Inspection</td><td class="num">$149.35</td><td class="num">$169.40</td><td class="num">$179.40</td><td class="proposed">$180</td></tr>
+        <tr><td>MIT/UT Feeder Thinning Analyst</td><td>Feeder Inspection</td><td class="num">$149.35</td><td class="num">$169.40</td><td class="num">$179.40</td><td class="proposed">$180</td></tr>
+        <tr><td>UT Feeder Cracking Technician</td><td>Feeder Inspection</td><td class="num">$149.35</td><td class="num">$169.40</td><td class="num">$179.40</td><td class="proposed">$180</td></tr>
+        <tr><td>Visual Inspection Operator</td><td>Feeder Inspection</td><td class="num">$126.60</td><td class="num">$143.59</td><td class="num">$153.59</td><td class="proposed">$155</td></tr>
+        <tr><td>UT/MIT Platform Operator</td><td>Feeder Inspection</td><td class="num">$94.26</td><td class="num">$106.91</td><td class="num">$116.91</td><td class="proposed">$120</td></tr>
+        <tr class="wp-hdr"><td colspan="6">Phased Array Turbines</td></tr>
+        <tr><td>PAUT Acquisition Technician</td><td>PAUT Turbines</td><td class="num">$149.35</td><td class="num">$169.40</td><td class="num">$179.40</td><td class="proposed">$180</td></tr>
+        <tr><td>PAUT Analyst</td><td>PAUT Turbines</td><td class="num">$149.35</td><td class="num">$169.40</td><td class="num">$179.40</td><td class="proposed">$180</td></tr>
+        <tr><td>PAUT Analyst Trainee</td><td>PAUT Turbines</td><td class="num">$147.14</td><td class="num">$166.89</td><td class="num">$176.89</td><td class="proposed">$180</td></tr>
+        <tr class="wp-hdr"><td colspan="6">Periodic Inspection Program / Quality Control / Turbine Conventional</td></tr>
+        <tr><td>PIP Technician</td><td>PIP</td><td class="num">$143.98</td><td class="num">$163.31</td><td class="num">$173.31</td><td class="proposed">$175</td></tr>
+        <tr><td>QC / Support Technician</td><td>Quality Control</td><td class="num">$149.35</td><td class="num">$169.40</td><td class="num">$179.40</td><td class="proposed">$180</td></tr>
+        <tr><td>Turbine Technician 1</td><td>Turbine Conventional</td><td class="num">$126.60</td><td class="num">$143.59</td><td class="num">$153.59</td><td class="proposed">$155</td></tr>
+        <tr><td>Turbine Technician 2</td><td>Turbine Conventional</td><td class="num">$143.98</td><td class="num">$163.31</td><td class="num">$173.31</td><td class="proposed">$175</td></tr>
+        <tr class="wp-hdr"><td colspan="6">Remote Analysis Work Packages (no site LOA cost)</td></tr>
+        <tr><td>ET Resolution Analyst</td><td>ET Reso Analysis</td><td class="num">$147.21</td><td class="num">$166.97</td><td class="num">$176.97</td><td class="proposed">$180</td></tr>
+        <tr><td>UT Analyst (Primary or Secondary)</td><td>UT Analysis</td><td class="num">$147.21</td><td class="num">$166.97</td><td class="num">$176.97</td><td class="proposed">$180</td></tr>
+        <tr><td>TRUSTIE Servo-Fibre Reso Analyst (remote)</td><td>UT Analysis</td><td class="num">$147.21</td><td class="num">$166.97</td><td class="num">$176.97</td><td class="proposed">$180</td></tr>
+      </tbody>
+    </table>
+
+    <div class="sub-title">Shift Premium Structure (Proposed — Consistent with 2020 MSA)</div>
+    <div class="crow c3 reveal">
+      <div class="kcard lined"><h3>Mon–Fri Day Shift</h3><div class="kcard-rule" style="background:var(--green2);"></div><p>Base rate as per table above. Standard working shift during planned outages.</p></div>
+      <div class="kcard lined"><h3>Mon–Fri Non-Day Shift</h3><div class="kcard-rule" style="background:var(--orange);"></div><p>Base rate × 1.15 (+15% shift premium). Evening and night shifts during intensive outage windows.</p></div>
+      <div class="kcard lined"><h3>Sat–Sun Day Shift</h3><div class="kcard-rule" style="background:var(--blue);"></div><p>Base rate × 1.50 (+50% weekend premium). Weekend shifts during critical outage path work.</p></div>
+    </div>
+    <div class="crow c3 reveal">
+      <div class="kcard lined"><h3>Sat–Sun Non-Day Shift</h3><div class="kcard-rule" style="background:var(--navy);"></div><p>Base rate × 1.73 (+73% premium). Weekend nights during peak outage scheduling pressure.</p></div>
+      <div class="kcard lined"><h3>Training Rate</h3><div class="kcard-rule" style="background:var(--lgrey);"></div><p>Base rate × 0.70 (70% of day shift rate). For documented training periods under the talent development provisions of the MSA.</p></div>
+      <div class="kcard lined"><h3>Standby Rate</h3><div class="kcard-rule" style="background:var(--lgrey);"></div><p>80% of Mon-Fri Day Shift rate — per the original MSA terms. Technicians on standby but not actively working.</p></div>
+    </div>
+
+    <div class="sub-title">Mob/Demob — Proposed New Schedule</div>
+    <div class="callout cor reveal">
+      <div class="callout-icon">!</div>
+      <div><strong>This is a Material Negotiation Point</strong> — The 2020 MSA contained no mob/demob provisions. Every technician deployment to Pickering or Darlington from Quebec City costs Nucleom approximately $800–1,400 in airfare alone, plus ground transport. On a 12-person outage crew, Nucleom absorbs $10,000–$17,000 in unrecovered mob costs per outage — and again on demob. Across 5–8 outages per year, this is a six-figure annual cost that the business currently cannot recover. The 2027 MSA must explicitly address this.</div>
+    </div>
+    <div class="crow c2 reveal">
+      <div class="kcard lined">
+        <h3>Proposed Mob Fee</h3>
+        <div class="kcard-rule" style="background:var(--green2);"></div>
+        <p><strong>$1,200 per technician per mobilisation.</strong><br><br>
+        Covers: economy class airfare from home base to site (or equivalent ground transport), ground transportation to Pickering / Darlington from nearest airport, and first-night accommodation if arrival day precedes first shift.<br><br>
+        Invoiced per technician named on each Contract Order / Crew Schedule at time of outage commencement.</p>
+      </div>
+      <div class="kcard lined">
+        <h3>Proposed Demob Fee</h3>
+        <div class="kcard-rule" style="background:var(--orange);"></div>
+        <p><strong>$1,200 per technician per demobilisation.</strong><br><br>
+        Covers: ground transport from site to airport, economy class return airfare to home base, and any incidentals associated with end-of-assignment departure.<br><br>
+        Invoiced per technician named on each Contract Order at time of outage completion or technician release, consistent with the Crew Schedule demobilisation date.</p>
+      </div>
+    </div>
+    <div class="callout cgr reveal">
+      <div class="callout-icon">i</div>
+      <div><strong>LOA Context</strong> — OPG's existing Business Expense Schedule provides $120/day at Pickering and Darlington (all-inclusive) or $1,800/month for assignments over one month. These OPG pass-through rates remain in the 2027 MSA and are reimbursed on top of the hourly rates. The $10/hr LOA supplement embedded in the proposed hourly rates covers the gap between OPG's $120/day and actual technician all-in daily cost (~$180–200/day). The mob/demob fees are separate from and in addition to the daily LOA pass-through.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- S5: CAPITAL PROGRAMS -->
+<div class="sec-hdr" id="s5">
+  <div class="sec-hdr-in">
+    <div class="sec-num">05</div>
+    <div><div class="sec-title">Capital Program Synergy</div><div class="sec-sub">Darlington SMR + Pickering Refurbishment — Aecon subcontracts that reinforce the MSA renewal case</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>The MSA renewal narrative is significantly strengthened by Nucleom's concurrent position on both of OPG's major capital programs. These Aecon subcontracts are not just revenue — they are the most powerful possible demonstration of Nucleom's nuclear NDT capability to OPG procurement. No competing outage maintenance NDT contractor can point to active construction and refurbishment NDT work on both programs simultaneously.</p>
+
+    <div class="crow c2 reveal">
+      <div class="kcard navy" style="padding:0;overflow:hidden;">
+        <div style="background:var(--green);padding:1.1rem 1.3rem;">
+          <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:0.2rem;">Darlington BWRX-300 — Aecon Subcontract</div>
+          <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">SMR Construction NDT</div>
+        </div>
+        <div style="padding:1.2rem 1.3rem;">
+          <p style="color:rgba(255,255,255,0.82);">Full NDT scope subcontract through Aecon-Kiewit Nuclear Partners. First commercial grid-scale SMR in North America — first of four planned BWRX-300 units. Construction underway, first unit in service by end of 2030. ~$100M Nucleom NDT share over the ~5-year construction window. All methods deployed: PAUT/UT weld inspection, ECT, VT, RT, MT/PT.</p>
+          <p style="color:rgba(255,255,255,0.82);">Construction NDT credibility on the Darlington SMR is a direct reinforcement of Nucleom's case for expanded outage maintenance MSA scope at the same Darlington site — OPG already knows Nucleom is on the new-build program.</p>
+        </div>
+      </div>
+      <div class="kcard navy" style="padding:0;overflow:hidden;">
+        <div style="background:var(--blue);padding:1.1rem 1.3rem;">
+          <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:0.2rem;">Pickering Units 5–8 — Aecon Subcontract</div>
+          <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">Refurbishment NDT</div>
+        </div>
+        <div style="padding:1.2rem 1.3rem;">
+          <p style="color:rgba(255,255,255,0.82);">NDT subcontract through Aecon / AtkinsRéalis (CanAtom JV). Project Execution Phase begins early 2027. Completion mid-2030s. ~$100M Nucleom NDT share over ~8 years. Key scope: feeder replacement (NEAR RT system), 48 steam generator replacements (PAUT/UT), reactor building work, conventional NDT throughout.</p>
+          <p style="color:rgba(255,255,255,0.82);">Nucleom's feeder inspection capability developed through the Pickering Refurbishment program strengthens Nucleom's technical credibility for the MSA feeder inspection work package at regular outages. Note: the NEAR RT system itself is specific to refurbishment and new build programs — the outage MSA feeder work uses conventional MIT/UT methods. The refurbishment credential and the outage maintenance MSA are mutually reinforcing.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-title">Ownership by Track</div>
+    <div class="crow c2 reveal">
+      <div class="kcard lined" style="border-top:3px solid var(--green2);">
+        <h3 style="color:var(--green2);">MSA &amp; Outage Maintenance</h3>
+        <div class="kcard-rule" style="background:var(--green2);"></div>
+        <p><strong style="color:var(--navy);">Jon Eustace — CEO, North America</strong><br>
+        Executive ownership of the 2027 MSA tender. OPG relationship at the executive level. Accountable for rate negotiations, work package scope decisions, and MSA signing. Engages EIG / Eurazeo where needed to reinforce Nucleom's financial stability positioning vs. Applus RTD.<br><br>
+        <strong style="color:var(--navy);">Vinoth Tharma — Commercial Lead, Eastern Canada</strong><br>
+        Day-to-day ownership of OPG outage maintenance relationship. Leads tender preparation — package selection, rate submission, QCCC technician pipeline. Primary commercial interface with OPG procurement and outage planning teams. Also accountable for T.R.U.S.T.I.E. current MSA billings in 2026.</p>
+      </div>
+      <div class="kcard lined" style="border-top:3px solid var(--blue);">
+        <h3 style="color:var(--blue);">New Build &amp; Refurbishment (Aecon)</h3>
+        <div class="kcard-rule" style="background:var(--blue);"></div>
+        <p><strong style="color:var(--navy);">Olivier Marcotte — CRO, BU Services</strong><br>
+        Executive ownership of both Aecon subcontract relationships — Darlington SMR and Pickering Refurbishment. Primary Aecon interface at the leadership level. Accountable for mobilisation planning, NDT procedure qualification, and delivery on both capital programs. Also owns Bruce Power direct contract pursuit.<br><br>
+        <strong style="color:var(--navy);">Louis-Pier Théberge — Program Lead, New Build &amp; Refurbishment</strong><br>
+        Operational lead for SMR and Pickering construction NDT programs. Day-to-day Aecon project team interface. Responsible for technician deployment plans, NDT qualification submissions, and the Bruce Power direct pursuit via the Aecon MCR program relationship.</p>
+      </div>
+    </div>
+
+    <div class="callout cgr reveal">
+      <div class="callout-icon">★</div>
+      <div><strong>The Unified Pitch to OPG</strong> — When Jon Eustace and Vinoth Tharma sit across the table from OPG procurement to negotiate the 2027 MSA, the conversation starts here: "We are your NDT partner on the Darlington SMR. We are your NDT partner on the Pickering Refurbishment. We delivered T.R.U.S.T.I.E. reliably for five years under the Arcanite/Nucleom entity. Now we want to expand our outage maintenance partnership to cover all ten work packages at full augmented staffing levels — because we are already the most qualified nuclear NDT provider you work with." That is not a vendor pitch. That is a partner conversation.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- S6: REVENUE FORECAST -->
+<div class="sec-hdr" id="s6">
+  <div class="sec-hdr-in">
+    <div class="sec-num">06</div>
+    <div><div class="sec-title">Revenue Forecast — Four MSA Scenarios</div><div class="sec-sub">25% · 50% · 75% · TAM — work package win rate drives the commercial outcome</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>Revenue is modelled across four scenarios based on the proportion of the 10 MSA work packages Nucleom wins in the 2027 renewal. The anchor data point is outage D2631 (SG Analysis, April 2026) — confirmed 78 staff, 21 calendar days, across 3 crews. Scaled to all 10 work packages, a fully staffed outage generates approximately <strong>$5.5M at proposed 2027 rates</strong> with 102 staff and mob/demob included. Each scenario reflects a different level of commercial ambition and the staffing capacity required to deliver it.</p>
+
+    <div class="callout cnv reveal">
+      <div class="callout-icon">i</div>
+      <div><strong>Scenario Basis</strong> — All MSA scenarios use 6 outages per year (base case). The per-outage revenue scales with work packages won. Year-by-year figures reflect a ramp to full deployment as Nucleom builds the technician capacity required for each case. <strong>Plan revenue is OPG MSA outage maintenance only.</strong> Aecon capital program revenues (Darlington SMR + Pickering Refurbishment) are described in Section 5 as strategic context and are accounted for separately — not included in initiative plan totals. All figures CAD.</div>
+    </div>
+
+    <div class="sub-title">Per-Outage Revenue — What Each Scenario Is Worth</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--lgrey);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);margin:1rem 0 2rem;" class="reveal">
+      <div style="background:#1A2560;padding:1.2rem 1rem;">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:0.4rem;">Case 1 — 25% WP Scope</div>
+        <div style="font-family:var(--fd);font-size:1.6rem;font-weight:900;color:rgba(255,200,100,0.9);line-height:1;">$2.0M</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.45);margin-top:0.3rem;line-height:1.5;">per outage<br>2 of 10 work packages</div>
+        <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.1);font-size:0.78rem;color:rgba(255,255,255,0.55);">T.R.U.S.T.I.E. (incumbent) + ET remote analysis. Retains existing MSA relationship only. Minimum viable outcome — does not reflect OPG's stated desire for Nucleom to expand.</div>
+        <div style="margin-top:0.6rem;font-family:var(--fd);font-size:0.82rem;font-weight:700;color:rgba(255,200,100,0.9);">$12.2M/yr at run rate</div>
+      </div>
+      <div style="background:#196B24;padding:1.2rem 1rem;">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:0.4rem;">Case 2 — 50% WP Scope</div>
+        <div style="font-family:var(--fd);font-size:1.6rem;font-weight:900;color:var(--white);line-height:1;">$3.4M</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.55);margin-top:0.3rem;line-height:1.5;">per outage<br>5 of 10 work packages</div>
+        <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.15);font-size:0.78rem;color:rgba(255,255,255,0.75);">Add UT Analysis (remote) + Feeder Inspection + Quality Control. Requires ~20–30 additional qualified site technicians.</div>
+        <div style="margin-top:0.6rem;font-family:var(--fd);font-size:0.82rem;font-weight:700;color:var(--white);">$20.4M/yr at run rate</div>
+      </div>
+      <div style="background:#C45A1A;padding:1.2rem 1rem;">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:0.4rem;">Case 3 — 75% WP Scope</div>
+        <div style="font-family:var(--fd);font-size:1.6rem;font-weight:900;color:var(--white);line-height:1;">$4.8M</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.55);margin-top:0.3rem;line-height:1.5;">per outage<br>8 of 10 work packages</div>
+        <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.15);font-size:0.78rem;color:rgba(255,255,255,0.75);">Add BOP HX Data Acquisition + FAC + Periodic Inspection. Requires ~50–60 additional qualified technicians. Dominant position at every outage.</div>
+        <div style="margin-top:0.6rem;font-family:var(--fd);font-size:0.82rem;font-weight:700;color:var(--white);">$28.8M/yr at run rate</div>
+      </div>
+      <div style="background:var(--green2);padding:1.2rem 1rem;">
+        <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:0.4rem;">Case 4 — TAM (Full Scope)</div>
+        <div style="font-family:var(--fd);font-size:1.6rem;font-weight:900;color:var(--white);line-height:1;">$5.5M</div>
+        <div style="font-size:0.72rem;color:rgba(255,255,255,0.65);margin-top:0.3rem;line-height:1.5;">per outage<br>10 of 10 work packages</div>
+        <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.2);font-size:0.78rem;color:rgba(255,255,255,0.85);">All 10 work packages. Adds PAUT Turbines + Periodic Inspection (PIP). Sole augmented staff provider. ~102 QCCC technicians — they come with the contracts. OPG has explicitly invited Nucleom to bid at this level.</div>
+        <div style="margin-top:0.6rem;font-family:var(--fd);font-size:0.82rem;font-weight:700;color:var(--white);">$33.1M/yr at run rate</div>
+      </div>
+    </div>
+
+    <div class="sub-title">5-Year Revenue by Scenario — MSA Outage Maintenance Only</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin:1rem 0 1.5rem;" class="reveal">
+
+      <!-- Case 1 — 25% -->
+      <div style="border-radius:8px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:#1A2560;padding:0.8rem 1rem;">
+          <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);">Case 1 — 25% WP Scope</div>
+          <div style="font-family:var(--fd);font-size:1.05rem;font-weight:900;color:rgba(255,200,100,0.9);margin-top:0.2rem;">T.R.U.S.T.I.E. + ET Remote</div>
+        </div>
+        <div style="background:var(--white);border:1.5px solid var(--lgrey);border-top:none;border-radius:0 0 8px 8px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2026</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$0.3M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2027</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$11.0M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2028</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$12.2M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2029</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$12.2M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2030</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$12.2M</div>
+          </div>
+          <div style="background:var(--mid);padding:0.6rem 0.75rem;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--navy);">MSA 5-Year Total</span>
+            <span style="font-family:var(--fd);font-size:1.1rem;font-weight:900;color:#1A2560;">$47.9M</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Case 2 — 50% -->
+      <div style="border-radius:8px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--green);padding:0.8rem 1rem;">
+          <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);">Case 2 — 50% WP Scope</div>
+          <div style="font-family:var(--fd);font-size:1.05rem;font-weight:900;color:var(--white);margin-top:0.2rem;">+ BOP HX, Feeder, UT Remote</div>
+        </div>
+        <div style="background:var(--white);border:1.5px solid var(--lgrey);border-top:none;border-radius:0 0 8px 8px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2026</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$0.2M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2027</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$11.2M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2028</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$18.3M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2029</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$20.4M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2030</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$20.4M</div>
+          </div>
+          <div style="background:#D4F5DA;padding:0.6rem 0.75rem;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--green);">MSA 5-Year Total</span>
+            <span style="font-family:var(--fd);font-size:1.1rem;font-weight:900;color:var(--green);">$70.5M</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Case 3 — 75% -->
+      <div style="border-radius:8px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--orange);padding:0.8rem 1rem;">
+          <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);">Case 3 — 75% WP Scope</div>
+          <div style="font-family:var(--fd);font-size:1.05rem;font-weight:900;color:var(--orange);margin-top:0.2rem;">TARGET — + FAC, QC, Turbine Conv.</div>
+        </div>
+        <div style="background:var(--white);border:1.5px solid var(--lgrey);border-top:none;border-radius:0 0 8px 8px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2026</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$0.1M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2027</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$8.6M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2028</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$18.7M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2029</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$27.4M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2030</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$28.8M</div>
+          </div>
+          <div style="background:#FDE8D5;padding:0.6rem 0.75rem;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--orange);">MSA 5-Year Total</span>
+            <span style="font-family:var(--fd);font-size:1.1rem;font-weight:900;color:var(--orange);">$83.6M</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Case 4 — TAM -->
+      <div style="border-radius:8px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--green2);padding:0.8rem 1rem;">
+          <div style="font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.65);">Case 4 — TAM (Full Scope)</div>
+          <div style="font-family:var(--fd);font-size:1.05rem;font-weight:900;color:var(--white);margin-top:0.2rem;">+ PAUT + Turbine Conventional</div>
+        </div>
+        <div style="background:var(--white);border:1.5px solid var(--lgrey);border-top:none;border-radius:0 0 8px 8px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2026</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$0.1M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2027</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$6.0M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2028</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$14.9M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2029</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$24.9M</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--lgrey);">
+            <div style="padding:0.5rem 0.75rem;border-right:1px solid var(--lgrey);font-size:0.78rem;color:var(--body);">2030</div><div style="padding:0.5rem 0.75rem;text-align:right;font-weight:700;font-size:0.82rem;">$33.1M</div>
+          </div>
+          <div style="background:#D4F5DA;padding:0.6rem 0.75rem;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.78rem;font-weight:700;color:var(--green2);">MSA 5-Year Total</span>
+            <span style="font-family:var(--fd);font-size:1.1rem;font-weight:900;color:var(--green2);">$79.0M</span>
+          </div>
+        </div>
+      </div>
+    </div><!-- end 4-case grid -->
+
+    <div class="sub-title">Plan Revenue Basis — OPG MSA Outage Maintenance</div>
+    <p style="font-size:0.9rem;color:var(--body);">The BU Services plan revenue for this initiative is based solely on OPG MSA augmented staff outage maintenance work. <strong>Case 1 (25% WP scope) is the adopted plan basis</strong> — a conservative and defensible entry point anchored to Nucleom's current T.R.U.S.T.I.E. incumbent position plus ET remote analysis. The table below shows MSA revenue across all four scenarios for reference; only Case 1 feeds the BU Services consolidated plan.</p>
+    <table class="data-table reveal">
+      <thead>
+        <tr>
+          <th>MSA Scenario</th>
+          <th style="text-align:right;">2026</th>
+          <th style="text-align:right;">2027</th>
+          <th style="text-align:right;">2028</th>
+          <th style="text-align:right;">2029</th>
+          <th style="text-align:right;">2030</th>
+          <th style="text-align:right;">5-Year MSA Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:#D4F5DA;">
+          <td><strong>Case 1 — 25% WP scope ★ Plan Basis</strong><br><small style="font-weight:400;color:#0C3312;">T.R.U.S.T.I.E. + ET remote analysis — incumbent packages</small></td>
+          <td style="text-align:right;font-weight:700;color:var(--green);">$0.3M</td><td style="text-align:right;font-weight:700;color:var(--green);">$11.0M</td><td style="text-align:right;font-weight:700;color:var(--green);">$12.2M</td><td style="text-align:right;font-weight:700;color:var(--green);">$12.2M</td><td style="text-align:right;font-weight:700;color:var(--green);">$12.2M</td><td style="text-align:right;font-weight:900;color:var(--green);font-size:0.95rem;">$47.9M</td>
+        </tr>
+        <tr>
+          <td>Case 2 — 50% WP scope<br><small style="font-weight:400;color:var(--body);">+ BOP HX, Feeder Inspection, UT remote</small></td>
+          <td style="text-align:right;font-weight:600;">$0.2M</td><td style="text-align:right;font-weight:600;">$11.2M</td><td style="text-align:right;font-weight:600;">$18.3M</td><td style="text-align:right;font-weight:600;">$20.4M</td><td style="text-align:right;font-weight:600;">$20.4M</td><td style="text-align:right;font-weight:700;color:var(--green);">$70.5M</td>
+        </tr>
+        <tr>
+          <td>Case 3 — 75% WP scope<br><small style="font-weight:400;color:var(--body);">+ FAC, QC, Turbine Conventional — displacing Applus RTD</small></td>
+          <td style="text-align:right;font-weight:600;">$0.1M</td><td style="text-align:right;font-weight:600;">$8.6M</td><td style="text-align:right;font-weight:600;">$18.7M</td><td style="text-align:right;font-weight:600;">$27.4M</td><td style="text-align:right;font-weight:600;">$28.8M</td><td style="text-align:right;font-weight:700;color:var(--orange);">$83.6M</td>
+        </tr>
+        <tr>
+          <td>Case 4 — TAM / Full scope<br><small style="font-weight:400;color:var(--body);">+ PAUT Turbines, PIP — all 10 work packages</small></td>
+          <td style="text-align:right;font-weight:600;">$0.1M</td><td style="text-align:right;font-weight:600;">$6.0M</td><td style="text-align:right;font-weight:600;">$14.9M</td><td style="text-align:right;font-weight:600;">$24.9M</td><td style="text-align:right;font-weight:600;">$33.1M</td><td style="text-align:right;font-weight:700;color:var(--green2);">$79.0M</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="sub-title">Aecon Capital Programs — Strategic Context</div>
+    <p style="font-size:0.9rem;color:var(--body);">Nucleom holds active NDT subcontracts through Aecon on both the Darlington BWRX-300 SMR and the Pickering Units 5–8 Refurbishment. These programs are described in detail in Section 5. Their revenues are significant — estimated at $11.3M and $18.7M respectively over the plan period — but are <strong>accounted for separately and are not included in BU Services Nuclear initiative plan totals.</strong> They are presented here as strategic context because they are the single most powerful credential Nucleom can bring to the 2027 MSA tender negotiation.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0;" class="reveal">
+      <div style="border-radius:8px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--navy);padding:0.75rem 1rem;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:var(--fd);font-size:0.85rem;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:0.5px;">Darlington SMR — Aecon Subcontract</span>
+          <span style="font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);padding:0.18rem 0.6rem;border-radius:3px;">Not in plan totals</span>
+        </div>
+        <div style="background:var(--mid);padding:0.85rem 1rem;font-size:0.85rem;color:var(--body);line-height:1.65;">Full NDT scope via Aecon-Kiewit Nuclear Partners. North America's first commercial grid-scale SMR. ~$11.3M Nucleom NDT revenue 2026–2030. Strongest possible construction NDT credential for the MSA renewal conversation at the same Darlington site.</div>
+      </div>
+      <div style="border-radius:8px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--navy);padding:0.75rem 1rem;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-family:var(--fd);font-size:0.85rem;font-weight:700;color:var(--white);text-transform:uppercase;letter-spacing:0.5px;">Pickering Refurb — Aecon Subcontract</span>
+          <span style="font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);padding:0.18rem 0.6rem;border-radius:3px;">Not in plan totals</span>
+        </div>
+        <div style="background:var(--mid);padding:0.85rem 1rem;font-size:0.85rem;color:var(--body);line-height:1.65;">NDT subcontract via Aecon / AtkinsRéalis (CanAtom JV). ~$18.7M Nucleom NDT revenue over the program. NEAR RT feeder system, PAUT/UT, 48 steam generator replacements. Directly reinforces Nucleom's MSA feeder inspection and SG analysis credentials.</div>
+      </div>
+    </div>
+
+    <div class="callout cgr reveal" style="margin-top:1.5rem;">
+      <div class="callout-icon">▲</div>
+      <div><strong>Reading the Scenarios</strong> — <strong>Case 1 (25%) is the plan basis</strong>: T.R.U.S.T.I.E. + ET remote analysis — the packages Nucleom already holds as incumbent. This is the conservative, bankable foundation. Cases 2–4 represent the commercial upside as Nucleom displaces Intech (unable to fully supply) and Applus RTD (financially distressed). The QCCC union dynamic means the technicians required for expanded scope come with the contracts — not a hiring constraint. OPG has explicitly invited Nucleom to bid at full scope, making Cases 2–4 realistic targets in the 2028–2030 period. All case totals above are MSA outage maintenance revenue only; Aecon capital program revenues are accounted for separately.</div>
+    </div>
+  </div>
+</div>
+
+<!-- S7: NEXT STEPS -->
+<div class="sec-hdr" id="s7">
+  <div class="sec-hdr-in">
+    <div class="sec-num">07</div>
+    <div><div class="sec-title">Next Steps &amp; Accountabilities</div><div class="sec-sub">MSA renewal — rate submission — OPG engagement — capacity build</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <table class="data-table reveal">
+      <thead><tr><th style="width:3%;">#</th><th style="width:50%;">Action</th><th style="width:22%;">Owner</th><th style="width:13%;">Initiative</th><th style="width:12%;">Target</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="step-badge">1</span></td>
+          <td><strong>Initiate 2027 MSA tender preparation with OPG procurement</strong> — Frame as scope expansion. Present Nucleom as OPG's preferred full-service augmented staff NDT partner. Lead with Nucleom's five-year OPG track record (delivered under the former Arcanite entity), current gap-filling performance, and OPG's own stated desire for Nucleom to bid widely.</td>
+          <td>Jon Eustace / Vinoth Tharma</td>
+          <td><span class="badge live">MSA</span></td>
+          <td>Q2 2026</td>
+        </tr>
+        <tr>
+          <td><span class="step-badge">2</span></td>
+          <td><strong>Submit proposed 2027 rate sheet to OPG</strong> — Present proposed rates from Section 04 of this plan. Include mob/demob line items as new schedule items. Include proposed escalation mechanism (CPI + 1.5% minimum, floor 5%/yr). Prepare written justification for rate increases referencing nuclear labour market conditions and LOA cost structure.</td>
+          <td>Jon Eustace / Vinoth Tharma</td>
+          <td><span class="badge live">MSA Rates</span></td>
+          <td>Q3 2026</td>
+        </tr>
+        <tr>
+          <td><span class="step-badge">3</span></td>
+          <td><strong>Negotiate and finalise 2027 MSA — retain all 10 work packages</strong> — Do not accept scope reduction. Negotiate mob/demob as explicit pass-through line items. Secure minimum 5%/yr escalation. Target signing by December 2026 for continuity of coverage.</td>
+          <td>Jon Eustace / Vinoth Tharma</td>
+          <td><span class="badge live">MSA</span></td>
+          <td>Q4 2026</td>
+        </tr>
+        <tr>
+          <td><span class="step-badge">4</span></td>
+          <td><strong>Confirm 2026 T.R.U.S.T.I.E. outage schedule with OPG</strong> — Identify which OPG units are going into planned outage in 2026, confirm inspection scope, and bill against the current MSA. Ensure no coverage gap through the transition period.</td>
+          <td>Jon Eustace / Vinoth Tharma</td>
+          <td><span class="badge active">Current MSA</span></td>
+          <td>Q2 2026</td>
+        </tr>
+        <tr>
+          <td><span class="step-badge">5</span></td>
+          <td><strong>Confirm Darlington SMR mobilisation plan with Aecon</strong> — Finalise work order release schedule, technician deployment plan, and NDT procedure qualification requirements for the BWRX-300 construction program under the Aecon subcontract.</td>
+          <td>Olivier Marcotte / Louis-Pier Théberge</td>
+          <td><span class="badge awarded">SMR</span></td>
+          <td>Q2 2026</td>
+        </tr>
+        <tr>
+          <td><span class="step-badge">6</span></td>
+          <td><strong>Engage Aecon / CanAtom on Pickering definition phase NDT planning</strong> — Confirm Nucleom's role in the 2026 definition phase. Establish the contractual framework for the 2027 execution phase. Identify NEAR RT feeder scope, PAUT, and boiler NDT deployment timeline.</td>
+          <td>Olivier Marcotte / Louis-Pier Théberge</td>
+          <td><span class="badge ramp">Pickering</span></td>
+          <td>Q2–Q3 2026</td>
+        </tr>
+        <tr>
+          <td><span class="step-badge">7</span></td>
+          <td><strong>Build QCCC technician capacity plan for 2027 MSA tender</strong> — Confirm which work packages Nucleom will bid on. Map current QCCC-qualified technician availability. Engage QCCC union to confirm technician pipeline — qualified techs follow the contract awards. Ensure coverage for all bid packages from first 2027 outage.</td>
+          <td>Jon Eustace / Vinoth Tharma</td>
+          <td><span class="badge active">Capacity</span></td>
+          <td>Q3–Q4 2026</td>
+        </tr>
+        <tr>
+          <td><span class="step-badge">8</span></td>
+          <td><strong>Initiate Bruce Power direct pursuit via Aecon MCR relationship</strong> — Leverage Nucleom's Aecon subcontract relationships on SMR and Pickering to explore direct Bruce Power NDT scope through Aecon's Bruce MCR program. Target: exit the current Intech subcontract dependency and establish a direct Bruce Power presence.</td>
+          <td>Olivier Marcotte / Louis-Pier Théberge</td>
+          <td><span class="badge pending">Bruce</span></td>
+          <td>Q3 2026</td>
+        </tr>
+        <tr>
+          <td><span class="step-badge">9</span></td>
+          <td><strong>Incorporate Nuclear revenue into Master Plan consolidated forecast</strong> — BU Services Master Commercial Plan updated with Nuclear/OPG MSA-only revenue (Case 1: $47.9M cumulative 2026–2030). Total BU Services 5-year confirmed revenue with nuclear MSA = $117.3M. Aecon capital program revenues accounted for separately.</td>
+          <td>Jon Eustace</td>
+          <td><span class="badge live">Master Plan</span></td>
+          <td>May 2026</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-in">
+    <div class="footer-brand">NUCLEOM INC. &nbsp;|&nbsp; <span>Nuclear / OPG Commercial Plan</span></div>
+    <div class="footer-meta">MSA: Jon Eustace / Vinoth Tharma &nbsp;|&nbsp; New Build / Refurb: Olivier Marcotte / Louis-Pier Théberge<br>BU Services &nbsp;|&nbsp; Ekoscan Integrity Group &nbsp;|&nbsp; Jon Eustace, CEO — North America &nbsp;|&nbsp; April 2026 &nbsp;|&nbsp; CONFIDENTIAL<br><a href="Master_Commercial_Plan_v4.html" style="color:var(--green3);">← BU Services Master Commercial Plan</a></div>
+  </div>
+</footer>
+
+<script>
+const revEls=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.07,rootMargin:'0px 0px -40px 0px'});
+revEls.forEach(el=>obs.observe(el));
+const nav=document.querySelector('.nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>20),{passive:true});
+const secs=document.querySelectorAll('[id^="s"]');
+const links=document.querySelectorAll('.nav-links a');
+const sObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.remove('active'));const a=document.querySelector('.nav-links a[href="#'+e.target.id+'"]');if(a)a.classList.add('active');}});},{threshold:0.3});
+secs.forEach(s=>sObs.observe(s));
+</script>
+
+<!-- FINANCIAL SUMMARY — NUCLEAR / OPG MSA -->
+<div id="fin-nuclear" style="background:var(--mid);border-top:3px solid var(--green2);margin:2.5rem 0 0;padding:0;">
+  <div style="background:#0a1a0a;padding:0.7rem 2.5rem;">
+    <div style="max-width:1140px;margin:0 auto;display:flex;align-items:center;gap:1rem;">
+      <div style="font-family:var(--fd);font-size:0.62rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--green2);white-space:nowrap;">Financial Model</div>
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.45);">Nuclear / OPG MSA — gross margin, EBITDA, CAPEX &amp; staffing. Part of the BU Services Master Commercial Plan financial model. All figures $000 CAD.</div>
+    </div>
+  </div>
+  <div style="max-width:1140px;margin:0 auto;padding:1.5rem 2.5rem 2rem;">
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1.5rem;">
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid var(--green2);">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">5-Yr Revenue</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">$47,900K</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #3DDB5080;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">Gross Margin</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">42%</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #3DDB5080;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">5-Yr EBITDA</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">$17,038K</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid var(--orange);">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">Total CAPEX</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">$490K</div>
+      </div>
+      <div style="background:var(--dark);border-radius:6px;padding:0.85rem 1rem;border-top:3px solid #F0C040;">
+        <div style="font-family:var(--fd);font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:0.25rem;">Peak Headcount</div>
+        <div style="font-family:var(--fd);font-size:1.2rem;font-weight:900;color:var(--white);">14 FTE</div>
+      </div>
+    </div>
+
+    <!-- P&L table -->
+    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:1.25rem;">
+      <thead>
+        <tr style="background:var(--navy);">
+          <th style="text-align:left;padding:0.55rem 0.9rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">($000 CAD)</th>
+          <th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2026</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2027</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2028</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2029</th><th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">2030</th>
+          <th style="text-align:right;padding:0.55rem 0.6rem;color:rgba(255,255,255,0.45);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">5-Year</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;font-weight:700;color:var(--navy);">Revenue</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$300</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$11,000</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$12,200</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$12,200</td><td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;">$12,200</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;font-weight:700;color:var(--navy);">$47,900</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;color:var(--body);">Gross Profit <span style="color:rgba(0,0,0,0.4);font-size:0.78rem;">(42%)</span></td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;">$126</td><td style="padding:0.5rem 0.6rem;text-align:right;">$4,620</td><td style="padding:0.5rem 0.6rem;text-align:right;">$5,124</td><td style="padding:0.5rem 0.6rem;text-align:right;">$5,124</td><td style="padding:0.5rem 0.6rem;text-align:right;">$5,124</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;">$20,118</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;color:var(--body);">SG&amp;A / Overhead</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(90)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(650)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(780)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(780)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(780)</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--body);">(3,080)</td>
+        </tr>
+        <tr style="background:#0a1a0a;border-top:2px solid var(--green2);">
+          <td style="padding:0.6rem 0.9rem;font-weight:900;color:var(--white);">EBITDA</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#3DDB50;">$36</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#3DDB50;">$3,970</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#3DDB50;">$4,344</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#3DDB50;">$4,344</td><td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#3DDB50;">$4,344</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;font-weight:900;color:#3DDB50;">$17,038</td>
+        </tr>
+        <tr style="background:#0a1a0a;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <td style="padding:0.35rem 0.9rem 0.35rem 1.3rem;font-size:0.78rem;color:rgba(255,255,255,0.4);">EBITDA %</td>
+          <td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">12.0%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">36.1%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">35.6%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">35.6%</td><td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">35.6%</td>
+          <td style="padding:0.35rem 0.6rem;text-align:right;font-size:0.78rem;color:rgba(255,255,255,0.4);">35.6%</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.5rem 0.9rem;color:var(--body);">CAPEX</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(230)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(120)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(60)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(40)</td><td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(40)</td>
+          <td style="padding:0.5rem 0.6rem;text-align:right;color:var(--orange);">(490)</td>
+        </tr>
+        <tr style="background:var(--navy);border-top:2px solid var(--blue2);">
+          <td style="padding:0.6rem 0.9rem;font-weight:900;color:var(--white);">Free Cash Flow</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;color:#FF6B6B;font-weight:900;">(194)</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#3DDB50;font-weight:900;">3,850</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#3DDB50;font-weight:900;">4,284</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#3DDB50;font-weight:900;">4,304</td><td style="padding:0.6rem 0.6rem;text-align:right;color:#3DDB50;font-weight:900;">4,304</td>
+          <td style="padding:0.6rem 0.6rem;text-align:right;color:#3DDB50;font-weight:900;">16,548</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Margin note -->
+    <div style="background:#0a1a0a;border-left:4px solid var(--green2);border-radius:0 5px 5px 0;padding:0.75rem 1rem;font-size:0.8rem;color:rgba(255,255,255,0.6);line-height:1.65;margin-bottom:1.25rem;">
+      <strong style="color:var(--white);">Margin basis:</strong> Nuclear commands premium billing rates. LOA ($120/day) is an OPG pass-through — net neutral on margin. Mob/demob ($1,000–$1,500/tech) recovered in the 2027 MSA reset. Remote analysis from Oakville/QC City is the highest-margin work package — no site cost.
+    </div>
+
+    <!-- CAPEX and Staffing side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+
+      <!-- CAPEX detail -->
+      <div style="border-radius:6px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--navy);padding:0.55rem 0.9rem;font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.6);">CAPEX Detail</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+          
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2026 — $230K</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">MSA tender preparation — legal counsel, bid strategy, OPG procurement engagement (~$150K). ET instrument upgrades for expanded work package scope (~$80K).</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2027 — $120K</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">CGSB qualification costs for 8 new nuclear techs (~$8K each). Remote analysis IT infrastructure at Oakville office.</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.55rem 0.9rem;font-weight:700;color:var(--navy);font-size:0.82rem;">2028–2030 — $40–60K/yr</td>
+          <td style="padding:0.55rem 0.9rem;font-size:0.82rem;color:var(--body);">CGSB re-qualification cycles (3-year recertification) + ET/UT instrument maintenance.</td>
+        </tr>
+        </table>
+      </div>
+
+      <!-- Staffing -->
+      <div style="border-radius:6px;overflow:hidden;box-shadow:var(--shadow);">
+        <div style="background:var(--navy);padding:0.55rem 0.9rem;font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.6);">Incremental Staffing</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+          <thead>
+            <tr style="background:#1a2040;">
+              <th style="text-align:left;padding:0.45rem 0.7rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">Year</th>
+              <th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2026</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2027</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2028</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2029</th><th style="text-align:center;padding:0.45rem 0.4rem;color:rgba(255,255,255,0.4);font-size:0.65rem;letter-spacing:1px;text-transform:uppercase;">2030</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+              <td style="padding:0.45rem 0.7rem;color:var(--body);font-size:0.78rem;">FTE added</td>
+              
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">—</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+8</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+4</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">+2</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;font-weight:700;">—</td>
+            </tr>
+            <tr style="background:var(--navy);">
+              <td style="padding:0.45rem 0.7rem;font-weight:700;color:var(--white);font-size:0.78rem;">Cumul.</td>
+              
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">0</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">8</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">12</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">14</td>
+          <td style="padding:0.55rem 0.6rem;text-align:center;color:rgba(255,255,255,0.7);">14</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="background:var(--mid);padding:0.65rem 0.9rem;font-size:0.78rem;color:var(--body);line-height:1.6;">
+          <strong>FTE (Full-Time Equivalent):</strong> One FTE = one person at full-time hours. A 0.5 FTE is a part-time or shared-role allocation. <strong>Utilisation target: 85%</strong> for all field and technical staff (billable hours as a percentage of available hours). Management and administrative roles are excluded from the utilisation target. Loaded cost includes salary, benefits (30–32% load), certifications, and vehicle allowances where applicable.<br><br><strong>Loaded cost: $105K/yr avg.</strong> CGSB ET/UT Level 2 nuclear analysts and outage leads. QCCC union — outage technicians follow contracts, not on payroll. Permanent additions are analyst leads and programme management only.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

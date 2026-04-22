@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — Meeting Schedule 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#161C60; --navy2:#0D1040; --white:#FFFFFF; --mid:#F0F3FA;
+  --lgrey:#DDE3F0; --body:#384660;
+  --green2:#3DDB50; --orange:#E97132; --blue2:#368CD9;
+  --amber:#D97706; --purple:#7C3AED;
+  --fd:'Barlow Condensed',sans-serif;
+  --fb:'Barlow',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--fb);background:var(--mid);color:var(--body);line-height:1.5;font-size:14px;}
+
+/* HEADER */
+.page-hdr{background:var(--navy);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+.page-hdr-left h1{font-family:var(--fd);font-size:1.6rem;font-weight:900;color:var(--white);letter-spacing:0.5px;}
+.page-hdr-left p{font-size:0.78rem;color:rgba(255,255,255,0.4);margin-top:0.2rem;}
+.page-hdr-right{text-align:right;font-size:0.72rem;color:rgba(255,255,255,0.3);line-height:1.6;}
+
+/* LEGEND */
+.legend{background:var(--white);border-bottom:1px solid var(--lgrey);padding:0.65rem 2rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.legend-label{font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(0,0,0,0.35);margin-right:0.5rem;}
+.leg-item{display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--body);}
+.leg-dot{width:10px;height:10px;border-radius:50%;}
+
+/* MAIN GRID */
+.container{max-width:1200px;margin:0 auto;padding:1.5rem 2rem 3rem;}
+
+/* WEEK CALENDAR STRIP */
+.week-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:var(--white);border-radius:10px;overflow:hidden;box-shadow:0 2px 16px rgba(22,28,96,0.08);margin-bottom:1.5rem;}
+.day-col{border-right:1px solid var(--lgrey);}
+.day-col:last-child{border-right:none;}
+.day-hdr{background:var(--navy);padding:0.6rem 0.8rem;text-align:center;}
+.day-hdr .day-name{font-family:var(--fd);font-size:0.85rem;font-weight:800;color:var(--white);text-transform:uppercase;letter-spacing:1px;}
+.day-hdr .day-sub{font-size:0.65rem;color:rgba(255,255,255,0.4);margin-top:0.1rem;}
+.day-body{padding:0.5rem;min-height:160px;}
+.meeting-block{border-radius:6px;padding:0.55rem 0.65rem;margin-bottom:0.4rem;cursor:default;}
+.meeting-block .mb-time{font-family:var(--mono);font-size:0.65rem;font-weight:600;margin-bottom:0.2rem;opacity:0.75;}
+.meeting-block .mb-title{font-size:0.75rem;font-weight:700;line-height:1.3;}
+.meeting-block .mb-dur{font-size:0.65rem;opacity:0.65;margin-top:0.15rem;}
+
+/* MEETING CARDS */
+.meetings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem;}
+@media(max-width:800px){.meetings-grid{grid-template-columns:1fr;}}
+.meeting-card{background:var(--white);border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(22,28,96,0.08);}
+.mc-hdr{padding:0.75rem 1rem;display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;}
+.mc-hdr-left .mc-title{font-family:var(--fd);font-size:1rem;font-weight:800;color:var(--white);line-height:1.2;}
+.mc-hdr-left .mc-cadence{font-size:0.7rem;color:rgba(255,255,255,0.55);margin-top:0.2rem;}
+.mc-badges{display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.3rem;}
+.mc-badge{font-family:var(--mono);font-size:0.62rem;font-weight:600;padding:0.15rem 0.45rem;border-radius:3px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);white-space:nowrap;}
+.mc-copy-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:var(--white);font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.3rem 0.65rem;border-radius:4px;cursor:pointer;white-space:nowrap;transition:background .15s;}
+.mc-copy-btn:hover{background:rgba(255,255,255,0.25);}
+.mc-copy-btn.copied{background:rgba(61,219,80,0.3);border-color:rgba(61,219,80,0.5);}
+.mc-body{padding:0.85rem 1rem;}
+.mc-row{display:flex;gap:0.5rem;margin-bottom:0.5rem;align-items:flex-start;}
+.mc-row:last-child{margin-bottom:0;}
+.mc-lbl{font-family:var(--fd);font-size:0.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(0,0,0,0.3);min-width:70px;padding-top:0.1rem;}
+.mc-val{font-size:0.8rem;color:var(--body);line-height:1.5;flex:1;}
+.mc-val strong{color:var(--navy);}
+.mc-attendees{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.2rem;}
+.attendee-tag{display:inline-flex;align-items:center;gap:0.3rem;background:var(--mid);border:1px solid var(--lgrey);border-radius:20px;padding:0.2rem 0.6rem;font-size:0.72rem;color:var(--body);}
+.attendee-tag .chair-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0;}
+.mc-agenda{list-style:none;margin-top:0.3rem;}
+.mc-agenda li{padding:0.18rem 0;padding-left:1rem;position:relative;font-size:0.78rem;color:var(--body);}
+.mc-agenda li::before{content:'→';position:absolute;left:0;color:var(--lgrey);}
+.mc-footer{background:var(--mid);padding:0.5rem 1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--lgrey);}
+.mc-footer-chair{font-size:0.72rem;color:var(--body);}
+.mc-footer-chair strong{color:var(--navy);}
+.mc-teams-link{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue2);text-decoration:none;padding:0.25rem 0.6rem;border:1px solid var(--blue2);border-radius:4px;transition:background .15s;}
+.mc-teams-link:hover{background:rgba(54,140,217,0.08);}
+
+/* SECTION HEADERS */
+.section-hdr{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(0,0,0,0.3);margin:1.5rem 0 0.75rem;display:flex;align-items:center;gap:0.75rem;}
+.section-hdr::after{content:'';flex:1;height:1px;background:var(--lgrey);}
+
+/* COLOUR VARIANTS */
+.c-green  .mc-hdr{background:linear-gradient(135deg,#0D3D1A,#1A6B2A);}
+.c-blue   .mc-hdr{background:linear-gradient(135deg,#0A1830,#1A3A6B);}
+.c-orange .mc-hdr{background:linear-gradient(135deg,#2A1400,#7A3800);}
+.c-purple .mc-hdr{background:linear-gradient(135deg,#150828,#3D1A60);}
+.c-navy   .mc-hdr{background:linear-gradient(135deg,#0A0C30,#161C60);}
+.c-teal   .mc-hdr{background:linear-gradient(135deg,#062020,#0D5050);}
+
+.day-empty{color:rgba(0,0,0,0.18);font-size:0.72rem;padding:0.5rem;text-align:center;padding-top:1.5rem;}
+
+/* PRINT */
+@media print{
+  body{background:white;}
+  .mc-copy-btn,.mc-teams-link{display:none;}
+  .meeting-card{break-inside:avoid;box-shadow:none;border:1px solid var(--lgrey);}
+}
+</style>
+</head>
+<body>
+
+<div class="page-hdr">
+  <div class="page-hdr-left">
+    <h1>BU Services — Meeting Schedule</h1>
+    <p>Effective May 1, 2026 &nbsp;·&nbsp; All recurring meetings &nbsp;·&nbsp; Microsoft Teams</p>
+  </div>
+  <div class="page-hdr-right">
+    Ekoscan Integrity Group &nbsp;|&nbsp; Jon Eustace, CEO NA<br>
+    Confidential — Internal Use Only<br>
+    Version 1.0 — April 2026
+  </div>
+</div>
+
+<div class="legend">
+  <span class="legend-label">Meeting type</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#1A6B2A"></span>Commercial</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#1A3A6B"></span>Operations</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#7A3800"></span>Nuclear Steering</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#3D1A60"></span>Financial</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#161C60"></span>Executive / EIG</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#0D5050"></span>HR / Retention</span>
+  <span class="leg-item" style="margin-left:auto;"><span style="width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block;margin-right:0.3rem;"></span>Chair indicated by orange dot</span>
+</div>
+
+<div class="container">
+
+  <!-- WEEKLY VIEW -->
+  <div class="section-hdr">Weekly recurring meetings</div>
+  <div class="week-strip">
+
+    <!-- MONDAY -->
+    <div class="day-col">
+      <div class="day-hdr"><div class="day-name">Monday</div><div class="day-sub">Weekly</div></div>
+      <div class="day-body">
+        <div class="meeting-block" style="background:#0D3D1A1A;border-left:3px solid #1A6B2A;">
+          <div class="mb-time">9:00 AM ET</div>
+          <div class="mb-title">Commercial Leadership</div>
+          <div class="mb-dur">60 min &nbsp;·&nbsp; Olivier Marcotte chairs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TUESDAY -->
+    <div class="day-col">
+      <div class="day-hdr"><div class="day-name">Tuesday</div><div class="day-sub">Bi-weekly</div></div>
+      <div class="day-body">
+        <div class="meeting-block" style="background:#2A14001A;border-left:3px solid #7A3800;">
+          <div class="mb-time">10:00 AM ET</div>
+          <div class="mb-title">Nuclear Steering</div>
+          <div class="mb-dur">60 min &nbsp;·&nbsp; Bi-weekly &nbsp;·&nbsp; Olivier chairs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEDNESDAY -->
+    <div class="day-col">
+      <div class="day-hdr"><div class="day-name">Wednesday</div><div class="day-sub">Weekly</div></div>
+      <div class="day-body">
+        <div class="meeting-block" style="background:#0A18301A;border-left:3px solid #1A3A6B;">
+          <div class="mb-time">9:00 AM ET</div>
+          <div class="mb-title">Ops &amp; Delivery</div>
+          <div class="mb-dur">60 min &nbsp;·&nbsp; Alex Cyr chairs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THURSDAY -->
+    <div class="day-col">
+      <div class="day-hdr"><div class="day-name">Thursday</div><div class="day-sub">&nbsp;</div></div>
+      <div class="day-body">
+        <div class="day-empty">No recurring meetings</div>
+      </div>
+    </div>
+
+    <!-- FRIDAY -->
+    <div class="day-col">
+      <div class="day-hdr"><div class="day-name">Friday</div><div class="day-sub">&nbsp;</div></div>
+      <div class="day-body">
+        <div class="day-empty">No recurring meetings</div>
+      </div>
+    </div>
+
+  </div><!-- end week-strip -->
+
+  <!-- WEEKLY MEETINGS -->
+  <div class="section-hdr">Weekly meetings — full detail</div>
+  <div class="meetings-grid">
+
+    <!-- COMMERCIAL LEADERSHIP WEEKLY -->
+    <div class="meeting-card c-green">
+      <div class="mc-hdr">
+        <div class="mc-hdr-left">
+          <div class="mc-title">Commercial Leadership Weekly</div>
+          <div class="mc-cadence">Every Monday &nbsp;·&nbsp; 9:00 AM ET &nbsp;·&nbsp; 60 minutes</div>
+          <div class="mc-badges">
+            <span class="mc-badge">📅 Weekly</span>
+            <span class="mc-badge">Mon 9:00 AM ET</span>
+            <span class="mc-badge">60 min</span>
+          </div>
+        </div>
+        <button class="mc-copy-btn" onclick="copyMeeting('commercial-weekly')">Copy invite</button>
+      </div>
+      <div class="mc-body">
+        <div class="mc-row">
+          <div class="mc-lbl">Attendees</div>
+          <div class="mc-val">
+            <div class="mc-attendees">
+              <span class="attendee-tag"><span class="chair-dot"></span>Olivier Marcotte</span>
+              <span class="attendee-tag">Jon Eustace</span>
+              <span class="attendee-tag">Vinoth Tharma</span>
+              <span class="attendee-tag">Max Aggrey</span>
+              <span class="attendee-tag">Rick Carlton</span>
+            </div>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Agenda</div>
+          <div class="mc-val">
+            <ul class="mc-agenda">
+              <li>Pipeline updates — active proposals and deals per initiative</li>
+              <li>Gate decisions — any sprint milestone requiring sign-off</li>
+              <li>Early warning signals — risk triggers flagged by any owner</li>
+              <li>Wins — close and celebrate every confirmed revenue event</li>
+              <li>Strategic pivots — Jon Eustace final call on any re-direction</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Chair</div>
+          <div class="mc-val"><strong>Olivier Marcotte</strong> — Jon Eustace for strategic pivots</div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Notes</div>
+          <div class="mc-val">Standing agenda. No preparation required beyond pipeline updates. Any owner can add to agenda 24 hrs prior.</div>
+        </div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-footer-chair">Chair: <strong>Olivier Marcotte</strong></span>
+        <a href="https://teams.microsoft.com/l/meeting/new" target="_blank" class="mc-teams-link">Create in Teams →</a>
+      </div>
+    </div>
+
+    <!-- OPS DELIVERY WEEKLY -->
+    <div class="meeting-card c-blue">
+      <div class="mc-hdr">
+        <div class="mc-hdr-left">
+          <div class="mc-title">Ops &amp; Delivery Weekly</div>
+          <div class="mc-cadence">Every Wednesday &nbsp;·&nbsp; 9:00 AM ET &nbsp;·&nbsp; 60 minutes</div>
+          <div class="mc-badges">
+            <span class="mc-badge">📅 Weekly</span>
+            <span class="mc-badge">Wed 9:00 AM ET</span>
+            <span class="mc-badge">60 min</span>
+          </div>
+        </div>
+        <button class="mc-copy-btn" onclick="copyMeeting('ops-weekly')">Copy invite</button>
+      </div>
+      <div class="mc-body">
+        <div class="mc-row">
+          <div class="mc-lbl">Attendees</div>
+          <div class="mc-val">
+            <div class="mc-attendees">
+              <span class="attendee-tag"><span class="chair-dot"></span>Alex Cyr</span>
+              <span class="attendee-tag">Joel Carlton</span>
+              <span class="attendee-tag">Louis-Pier Théberge</span>
+              <span class="attendee-tag">Eric Rodrigue</span>
+              <span class="attendee-tag">Joel Djordjevic</span>
+              <span class="attendee-tag">Jason Borza</span>
+            </div>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Agenda</div>
+          <div class="mc-val">
+            <ul class="mc-agenda">
+              <li>Crew utilisation by initiative — actuals vs. plan</li>
+              <li>Instrument and equipment availability — any gaps flagged</li>
+              <li>CAPEX procurement status — Jeremy Irwin update</li>
+              <li>Field quality issues — any non-conformances or client feedback</li>
+              <li>Cross-initiative resource conflicts — resolved at this meeting</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Chair</div>
+          <div class="mc-val"><strong>Alex Cyr</strong> — Jeremy Irwin for CAPEX releases</div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Reporting</div>
+          <div class="mc-val">All ops leads report directly to Alex Cyr. Joel Carlton reports to Rick Carlton, who reports to Alex Cyr.</div>
+        </div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-footer-chair">Chair: <strong>Alex Cyr</strong></span>
+        <a href="https://teams.microsoft.com/l/meeting/new" target="_blank" class="mc-teams-link">Create in Teams →</a>
+      </div>
+    </div>
+
+  </div><!-- end weekly grid -->
+
+  <!-- BI-WEEKLY -->
+  <div class="section-hdr">Bi-weekly meetings</div>
+  <div class="meetings-grid">
+
+    <div class="meeting-card c-orange">
+      <div class="mc-hdr">
+        <div class="mc-hdr-left">
+          <div class="mc-title">Nuclear Steering</div>
+          <div class="mc-cadence">Every other Tuesday &nbsp;·&nbsp; 10:00 AM ET &nbsp;·&nbsp; 60 minutes</div>
+          <div class="mc-badges">
+            <span class="mc-badge">📅 Bi-weekly</span>
+            <span class="mc-badge">Tue 10:00 AM ET</span>
+            <span class="mc-badge">60 min</span>
+          </div>
+        </div>
+        <button class="mc-copy-btn" onclick="copyMeeting('nuclear-biweekly')">Copy invite</button>
+      </div>
+      <div class="mc-body">
+        <div class="mc-row">
+          <div class="mc-lbl">Attendees</div>
+          <div class="mc-val">
+            <div class="mc-attendees">
+              <span class="attendee-tag"><span class="chair-dot"></span>Olivier Marcotte</span>
+              <span class="attendee-tag">Louis-Pier Théberge</span>
+              <span class="attendee-tag">Jean-François Martel</span>
+              <span class="attendee-tag">Vinoth Tharma</span>
+              <span class="attendee-tag">Francis Boudreault-Leclerc</span>
+            </div>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Agenda</div>
+          <div class="mc-val">
+            <ul class="mc-agenda">
+              <li>MSA tender preparation — document completion status</li>
+              <li>CGSB qualification progress — gaps vs. required certifications</li>
+              <li>OPG relationship signals — any procurement or debrief updates</li>
+              <li>Rate card review — pricing and scope alignment</li>
+              <li>Aecon credential formalisation — LOI / reference letter status</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Chair</div>
+          <div class="mc-val"><strong>Olivier Marcotte</strong></div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Critical gate</div>
+          <div class="mc-val">MSA bid submitted to OPG by end of Q3 2026. This meeting drives that deliverable.</div>
+        </div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-footer-chair">Chair: <strong>Olivier Marcotte</strong></span>
+        <a href="https://teams.microsoft.com/l/meeting/new" target="_blank" class="mc-teams-link">Create in Teams →</a>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDER for bi-weekly balance -->
+    <div style="background:transparent;"></div>
+
+  </div>
+
+  <!-- MONTHLY -->
+  <div class="section-hdr">Monthly meetings</div>
+  <div class="meetings-grid">
+
+    <!-- INITIATIVE GATE REVIEWS -->
+    <div class="meeting-card c-navy">
+      <div class="mc-hdr">
+        <div class="mc-hdr-left">
+          <div class="mc-title">Initiative Gate Reviews</div>
+          <div class="mc-cadence">Last Friday of each month &nbsp;·&nbsp; 10:00 AM ET &nbsp;·&nbsp; 90 minutes</div>
+          <div class="mc-badges">
+            <span class="mc-badge">📅 Monthly</span>
+            <span class="mc-badge">Last Fri 10:00 AM ET</span>
+            <span class="mc-badge">90 min</span>
+          </div>
+        </div>
+        <button class="mc-copy-btn" onclick="copyMeeting('gate-monthly')">Copy invite</button>
+      </div>
+      <div class="mc-body">
+        <div class="mc-row">
+          <div class="mc-lbl">Attendees</div>
+          <div class="mc-val">
+            <div class="mc-attendees">
+              <span class="attendee-tag"><span class="chair-dot"></span>Jon Eustace</span>
+              <span class="attendee-tag">Olivier Marcotte</span>
+              <span class="attendee-tag">Mathieu Beauchesne</span>
+              <span class="attendee-tag" style="font-style:italic;color:#888;">+ relevant commercial &amp; ops owners per initiative</span>
+            </div>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Agenda</div>
+          <div class="mc-val">
+            <ul class="mc-agenda">
+              <li>Sprint plan — gate check across all 5 initiatives</li>
+              <li>Trigger condition review — any risk signals approaching threshold</li>
+              <li>Contingency activation — formal decision if trigger met</li>
+              <li>Budget vs. actuals — revenue and CAPEX</li>
+              <li>Headcount vs. plan — FTE additions on track</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Chair</div>
+          <div class="mc-val"><strong>Jon Eustace</strong> — Mathieu Beauchesne for margin decisions</div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Decisions</div>
+          <div class="mc-val">All gate decisions and contingency activations require Jon Eustace + Mathieu Beauchesne sign-off. Eurazeo notified within 48 hrs of any contingency activation.</div>
+        </div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-footer-chair">Chair: <strong>Jon Eustace</strong></span>
+        <a href="https://teams.microsoft.com/l/meeting/new" target="_blank" class="mc-teams-link">Create in Teams →</a>
+      </div>
+    </div>
+
+    <!-- FINANCIAL REVIEW -->
+    <div class="meeting-card c-purple">
+      <div class="mc-hdr">
+        <div class="mc-hdr-left">
+          <div class="mc-title">Financial Review</div>
+          <div class="mc-cadence">First Thursday of each month &nbsp;·&nbsp; 2:00 PM ET &nbsp;·&nbsp; 60 minutes</div>
+          <div class="mc-badges">
+            <span class="mc-badge">📅 Monthly</span>
+            <span class="mc-badge">1st Thu 2:00 PM ET</span>
+            <span class="mc-badge">60 min</span>
+          </div>
+        </div>
+        <button class="mc-copy-btn" onclick="copyMeeting('finance-monthly')">Copy invite</button>
+      </div>
+      <div class="mc-body">
+        <div class="mc-row">
+          <div class="mc-lbl">Attendees</div>
+          <div class="mc-val">
+            <div class="mc-attendees">
+              <span class="attendee-tag"><span class="chair-dot"></span>Mathieu Beauchesne</span>
+              <span class="attendee-tag">Renée Lachance</span>
+              <span class="attendee-tag">Jeremy Irwin</span>
+              <span class="attendee-tag">Jon Eustace</span>
+              <span class="attendee-tag">Charles Recape</span>
+            </div>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Agenda</div>
+          <div class="mc-val">
+            <ul class="mc-agenda">
+              <li>Revenue vs. forecast — actuals by initiative</li>
+              <li>CAPEX releases and tracking vs. approved plan</li>
+              <li>FCF position — cash generation vs. model</li>
+              <li>Eurazeo reporting pack preparation</li>
+              <li>Contingency scenario financial modelling if triggered</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Chair</div>
+          <div class="mc-val"><strong>Mathieu Beauchesne</strong> — Charles Recape for Eurazeo escalation</div>
+        </div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-footer-chair">Chair: <strong>Mathieu Beauchesne</strong></span>
+        <a href="https://teams.microsoft.com/l/meeting/new" target="_blank" class="mc-teams-link">Create in Teams →</a>
+      </div>
+    </div>
+
+    <!-- HR RETENTION -->
+    <div class="meeting-card c-teal">
+      <div class="mc-hdr">
+        <div class="mc-hdr-left">
+          <div class="mc-title">HR &amp; Retention Review</div>
+          <div class="mc-cadence">Second Wednesday of each month &nbsp;·&nbsp; 11:00 AM ET &nbsp;·&nbsp; 45 minutes</div>
+          <div class="mc-badges">
+            <span class="mc-badge">📅 Monthly</span>
+            <span class="mc-badge">2nd Wed 11:00 AM ET</span>
+            <span class="mc-badge">45 min</span>
+          </div>
+        </div>
+        <button class="mc-copy-btn" onclick="copyMeeting('hr-monthly')">Copy invite</button>
+      </div>
+      <div class="mc-body">
+        <div class="mc-row">
+          <div class="mc-lbl">Attendees</div>
+          <div class="mc-val">
+            <div class="mc-attendees">
+              <span class="attendee-tag"><span class="chair-dot"></span>Maud Leivin Capuano</span>
+              <span class="attendee-tag">Olivier Marcotte</span>
+              <span class="attendee-tag">Jon Eustace</span>
+              <span class="attendee-tag">Mathieu Beauchesne</span>
+            </div>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Agenda</div>
+          <div class="mc-val">
+            <ul class="mc-agenda">
+              <li>Commercial team retention indicators — 1:1 feedback summary</li>
+              <li>Compensation vs. market — any adjustments required</li>
+              <li>Incremental FTE hiring pipeline — positions open vs. plan</li>
+              <li>Risk R-03 monitoring — Vinoth, Max, Rick Carlton signals</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Chair</div>
+          <div class="mc-val"><strong>Maud Leivin Capuano</strong> — Jon Eustace for retention decisions</div>
+        </div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-footer-chair">Chair: <strong>Maud Leivin Capuano</strong></span>
+        <a href="https://teams.microsoft.com/l/meeting/new" target="_blank" class="mc-teams-link">Create in Teams →</a>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDER -->
+    <div style="background:transparent;"></div>
+
+  </div>
+
+  <!-- QUARTERLY -->
+  <div class="section-hdr">Quarterly meetings</div>
+  <div class="meetings-grid">
+
+    <div class="meeting-card c-navy">
+      <div class="mc-hdr">
+        <div class="mc-hdr-left">
+          <div class="mc-title">Eurazeo / EIG Executive Update</div>
+          <div class="mc-cadence">First week of each quarter &nbsp;·&nbsp; To be scheduled &nbsp;·&nbsp; 120 minutes</div>
+          <div class="mc-badges">
+            <span class="mc-badge">📅 Quarterly</span>
+            <span class="mc-badge">Q1 / Q2 / Q3 / Q4</span>
+            <span class="mc-badge">120 min</span>
+          </div>
+        </div>
+        <button class="mc-copy-btn" onclick="copyMeeting('eurazeo-quarterly')">Copy invite</button>
+      </div>
+      <div class="mc-body">
+        <div class="mc-row">
+          <div class="mc-lbl">Attendees</div>
+          <div class="mc-val">
+            <div class="mc-attendees">
+              <span class="attendee-tag"><span class="chair-dot"></span>Jon Eustace</span>
+              <span class="attendee-tag">Mathieu Beauchesne</span>
+              <span class="attendee-tag">Charles Recape</span>
+              <span class="attendee-tag">Olivier Marcotte</span>
+              <span class="attendee-tag" style="font-style:italic;color:#888;">+ EIG / Eurazeo representatives</span>
+            </div>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Agenda</div>
+          <div class="mc-val">
+            <ul class="mc-agenda">
+              <li>Initiative progress vs. 5-year plan — all 5 initiatives</li>
+              <li>Revenue and EBITDA actuals vs. Eurazeo forecast</li>
+              <li>Contingency status — any active scenarios</li>
+              <li>Strategic pivots requiring EIG approval</li>
+              <li>CAPEX requests above $500K threshold</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Chair</div>
+          <div class="mc-val"><strong>Jon Eustace</strong> presents — Charles Recape financial narrative</div>
+        </div>
+        <div class="mc-row">
+          <div class="mc-lbl">Prep</div>
+          <div class="mc-val">Financial Review (monthly) feeds this pack. Charles Recape prepares Eurazeo reporting pack one week prior.</div>
+        </div>
+      </div>
+      <div class="mc-footer">
+        <span class="mc-footer-chair">Chair: <strong>Jon Eustace</strong></span>
+        <a href="https://teams.microsoft.com/l/meeting/new" target="_blank" class="mc-teams-link">Create in Teams →</a>
+      </div>
+    </div>
+
+    <div style="background:transparent;"></div>
+
+  </div>
+
+  <!-- SUMMARY TABLE -->
+  <div class="section-hdr">Quick reference — all meetings at a glance</div>
+  <div style="background:var(--white);border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(22,28,96,0.08);">
+    <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+      <thead>
+        <tr style="background:var(--navy);">
+          <th style="text-align:left;padding:0.65rem 1rem;color:rgba(255,255,255,0.5);font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Meeting</th>
+          <th style="text-align:left;padding:0.65rem 0.75rem;color:rgba(255,255,255,0.5);font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Cadence</th>
+          <th style="text-align:left;padding:0.65rem 0.75rem;color:rgba(255,255,255,0.5);font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Day / Time</th>
+          <th style="text-align:left;padding:0.65rem 0.75rem;color:rgba(255,255,255,0.5);font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Duration</th>
+          <th style="text-align:left;padding:0.65rem 0.75rem;color:rgba(255,255,255,0.5);font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Chair</th>
+          <th style="text-align:left;padding:0.65rem 0.75rem;color:rgba(255,255,255,0.5);font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Core Attendees</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.6rem 1rem;"><strong style="color:#1A6B2A;">Commercial Leadership</strong></td>
+          <td style="padding:0.6rem 0.75rem;">Weekly</td>
+          <td style="padding:0.6rem 0.75rem;font-family:var(--mono);font-size:0.75rem;">Mon 9:00 AM ET</td>
+          <td style="padding:0.6rem 0.75rem;">60 min</td>
+          <td style="padding:0.6rem 0.75rem;"><strong>Olivier Marcotte</strong></td>
+          <td style="padding:0.6rem 0.75rem;color:var(--body);">Olivier, Jon, Vinoth, Max, Rick Carlton</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.6rem 1rem;"><strong style="color:#1A3A6B;">Ops &amp; Delivery</strong></td>
+          <td style="padding:0.6rem 0.75rem;">Weekly</td>
+          <td style="padding:0.6rem 0.75rem;font-family:var(--mono);font-size:0.75rem;">Wed 9:00 AM ET</td>
+          <td style="padding:0.6rem 0.75rem;">60 min</td>
+          <td style="padding:0.6rem 0.75rem;"><strong>Alex Cyr</strong></td>
+          <td style="padding:0.6rem 0.75rem;color:var(--body);">Alex, Joel Carlton, Louis-Pier, Eric R, Joel D, Jason B</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.6rem 1rem;"><strong style="color:#7A3800;">Nuclear Steering</strong></td>
+          <td style="padding:0.6rem 0.75rem;">Bi-weekly</td>
+          <td style="padding:0.6rem 0.75rem;font-family:var(--mono);font-size:0.75rem;">Tue 10:00 AM ET</td>
+          <td style="padding:0.6rem 0.75rem;">60 min</td>
+          <td style="padding:0.6rem 0.75rem;"><strong>Olivier Marcotte</strong></td>
+          <td style="padding:0.6rem 0.75rem;color:var(--body);">Olivier, Louis-Pier, Jean-François, Vinoth, Francis B-L</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.6rem 1rem;"><strong style="color:#161C60;">Initiative Gate Reviews</strong></td>
+          <td style="padding:0.6rem 0.75rem;">Monthly</td>
+          <td style="padding:0.6rem 0.75rem;font-family:var(--mono);font-size:0.75rem;">Last Fri 10:00 AM ET</td>
+          <td style="padding:0.6rem 0.75rem;">90 min</td>
+          <td style="padding:0.6rem 0.75rem;"><strong>Jon Eustace</strong></td>
+          <td style="padding:0.6rem 0.75rem;color:var(--body);">Jon, Olivier, Mathieu + relevant owners</td>
+        </tr>
+        <tr style="background:var(--white);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.6rem 1rem;"><strong style="color:#3D1A60;">Financial Review</strong></td>
+          <td style="padding:0.6rem 0.75rem;">Monthly</td>
+          <td style="padding:0.6rem 0.75rem;font-family:var(--mono);font-size:0.75rem;">1st Thu 2:00 PM ET</td>
+          <td style="padding:0.6rem 0.75rem;">60 min</td>
+          <td style="padding:0.6rem 0.75rem;"><strong>Mathieu Beauchesne</strong></td>
+          <td style="padding:0.6rem 0.75rem;color:var(--body);">Mathieu, Renée L, Jeremy I, Jon, Charles R</td>
+        </tr>
+        <tr style="background:var(--mid);border-bottom:1px solid var(--lgrey);">
+          <td style="padding:0.6rem 1rem;"><strong style="color:#0D5050;">HR &amp; Retention</strong></td>
+          <td style="padding:0.6rem 0.75rem;">Monthly</td>
+          <td style="padding:0.6rem 0.75rem;font-family:var(--mono);font-size:0.75rem;">2nd Wed 11:00 AM ET</td>
+          <td style="padding:0.6rem 0.75rem;">45 min</td>
+          <td style="padding:0.6rem 0.75rem;"><strong>Maud Leivin Capuano</strong></td>
+          <td style="padding:0.6rem 0.75rem;color:var(--body);">Maud, Olivier, Jon, Mathieu</td>
+        </tr>
+        <tr style="background:var(--white);">
+          <td style="padding:0.6rem 1rem;"><strong style="color:#161C60;">Eurazeo / EIG Update</strong></td>
+          <td style="padding:0.6rem 0.75rem;">Quarterly</td>
+          <td style="padding:0.6rem 0.75rem;font-family:var(--mono);font-size:0.75rem;">Q1/Q2/Q3/Q4 — TBD</td>
+          <td style="padding:0.6rem 0.75rem;">120 min</td>
+          <td style="padding:0.6rem 0.75rem;"><strong>Jon Eustace</strong></td>
+          <td style="padding:0.6rem 0.75rem;color:var(--body);">Jon, Mathieu, Charles R, Olivier + EIG</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- end container -->
+
+<script>
+const meetingData = {
+  'commercial-weekly': {
+    title: 'BU Services — Commercial Leadership Weekly',
+    body: `MEETING: BU Services Commercial Leadership Weekly
+CADENCE: Every Monday
+TIME: 9:00 AM Eastern Time
+DURATION: 60 minutes
+PLATFORM: Microsoft Teams
+
+CHAIR: Olivier Marcotte (Jon Eustace for strategic pivots)
+
+ATTENDEES:
+• Olivier Marcotte (CRO, BU Services) — CHAIR
+• Jon Eustace (CEO, North America)
+• Vinoth Tharma (Commercial Director, Eastern Canada)
+• Max Aggrey (Commercial Director, Western Canada)
+• Rick Carlton (Pipeline Integrity Manager)
+
+STANDING AGENDA:
+1. Pipeline updates — active proposals and deals per initiative
+2. Gate decisions — any sprint milestone requiring sign-off
+3. Early warning signals — risk triggers flagged by any owner
+4. Wins — close and celebrate every confirmed revenue event
+5. Strategic pivots — Jon Eustace final call on any re-direction
+
+NOTE: No preparation required beyond pipeline updates. Any owner may add to agenda 24 hrs prior.`
+  },
+  'ops-weekly': {
+    title: 'BU Services — Ops & Delivery Weekly',
+    body: `MEETING: BU Services Ops & Delivery Weekly
+CADENCE: Every Wednesday
+TIME: 9:00 AM Eastern Time
+DURATION: 60 minutes
+PLATFORM: Microsoft Teams
+
+CHAIR: Alex Cyr (Jeremy Irwin for CAPEX releases)
+
+ATTENDEES:
+• Alex Cyr (Sr. Operations Director) — CHAIR
+• Joel Carlton (PI Operations Manager — reports to Rick Carlton)
+• Louis-Pier Théberge (Nuclear Operations Lead)
+• Eric Rodrigue (Operations Director, QC)
+• Joel Djordjevic (Operations Director, ON)
+• Jason Borza (Operations Director, Western Canada)
+
+STANDING AGENDA:
+1. Crew utilisation by initiative — actuals vs. plan
+2. Instrument and equipment availability — gaps flagged
+3. CAPEX procurement status — Jeremy Irwin update
+4. Field quality issues — non-conformances or client feedback
+5. Cross-initiative resource conflicts — resolved at this meeting
+
+REPORTING: All ops leads report directly to Alex Cyr. Joel Carlton reports to Rick Carlton → Alex Cyr.`
+  },
+  'nuclear-biweekly': {
+    title: 'BU Services — Nuclear Steering',
+    body: `MEETING: BU Services Nuclear Steering
+CADENCE: Every other Tuesday (bi-weekly)
+TIME: 10:00 AM Eastern Time
+DURATION: 60 minutes
+PLATFORM: Microsoft Teams
+
+CHAIR: Olivier Marcotte
+
+ATTENDEES:
+• Olivier Marcotte (CRO, BU Services) — CHAIR
+• Louis-Pier Théberge (Nuclear Operations Lead)
+• Jean-François Martel (Qual & Tech Doc Manager)
+• Vinoth Tharma (Commercial Director, Eastern Canada)
+• Francis Boudreault-Leclerc (Engineering Director)
+
+STANDING AGENDA:
+1. MSA tender preparation — document completion status
+2. CGSB qualification progress — gaps vs. required certifications
+3. OPG relationship signals — procurement or debrief updates
+4. Rate card review — pricing and scope alignment
+5. Aecon credential formalisation — LOI / reference letter status
+
+CRITICAL GATE: MSA bid submitted to OPG by end of Q3 2026.`
+  },
+  'gate-monthly': {
+    title: 'BU Services — Initiative Gate Reviews',
+    body: `MEETING: BU Services Initiative Gate Reviews
+CADENCE: Monthly — last Friday of each month
+TIME: 10:00 AM Eastern Time
+DURATION: 90 minutes
+PLATFORM: Microsoft Teams
+
+CHAIR: Jon Eustace (Mathieu Beauchesne for margin decisions)
+
+CORE ATTENDEES:
+• Jon Eustace (CEO, North America) — CHAIR
+• Olivier Marcotte (CRO, BU Services)
+• Mathieu Beauchesne (EVP)
+• + Relevant commercial and ops owners per initiative reviewed
+
+STANDING AGENDA:
+1. Sprint plan — gate check across all 5 initiatives
+2. Trigger condition review — risk signals approaching threshold
+3. Contingency activation — formal decision if trigger met
+4. Budget vs. actuals — revenue and CAPEX
+5. Headcount vs. plan — FTE additions on track
+
+DECISIONS: All gate and contingency decisions require Jon Eustace + Mathieu Beauchesne sign-off. Eurazeo notified within 48 hrs of any contingency activation.`
+  },
+  'finance-monthly': {
+    title: 'BU Services — Financial Review',
+    body: `MEETING: BU Services Financial Review
+CADENCE: Monthly — first Thursday of each month
+TIME: 2:00 PM Eastern Time
+DURATION: 60 minutes
+PLATFORM: Microsoft Teams
+
+CHAIR: Mathieu Beauchesne (Charles Recape for Eurazeo escalation)
+
+ATTENDEES:
+• Mathieu Beauchesne (EVP) — CHAIR
+• Renée Lachance (Finance)
+• Jeremy Irwin (Finance Director, Nortech)
+• Jon Eustace (CEO, North America)
+• Charles Recape (CFO, Ekoscan)
+
+STANDING AGENDA:
+1. Revenue vs. forecast — actuals by initiative
+2. CAPEX releases and tracking vs. approved plan
+3. FCF position — cash generation vs. model
+4. Eurazeo reporting pack preparation
+5. Contingency scenario financial modelling if triggered`
+  },
+  'hr-monthly': {
+    title: 'BU Services — HR & Retention Review',
+    body: `MEETING: BU Services HR & Retention Review
+CADENCE: Monthly — second Wednesday of each month
+TIME: 11:00 AM Eastern Time
+DURATION: 45 minutes
+PLATFORM: Microsoft Teams
+
+CHAIR: Maud Leivin Capuano (Jon Eustace for retention decisions)
+
+ATTENDEES:
+• Maud Leivin Capuano (HR) — CHAIR
+• Olivier Marcotte (CRO, BU Services)
+• Jon Eustace (CEO, North America)
+• Mathieu Beauchesne (EVP)
+
+STANDING AGENDA:
+1. Commercial team retention indicators — 1:1 feedback summary
+2. Compensation vs. market — adjustments required
+3. Incremental FTE hiring pipeline — positions open vs. plan
+4. Risk R-03 monitoring — retention signals for key commercial owners`
+  },
+  'eurazeo-quarterly': {
+    title: 'BU Services — Eurazeo / EIG Executive Update',
+    body: `MEETING: BU Services Eurazeo / EIG Executive Update
+CADENCE: Quarterly — first week of each quarter
+TIME: To be scheduled with EIG / Eurazeo
+DURATION: 120 minutes
+PLATFORM: Microsoft Teams
+
+CHAIR: Jon Eustace (Charles Recape financial narrative)
+
+ATTENDEES:
+• Jon Eustace (CEO, North America) — CHAIR
+• Mathieu Beauchesne (EVP)
+• Charles Recape (CFO, Ekoscan)
+• Olivier Marcotte (CRO, BU Services)
+• + EIG / Eurazeo representatives
+
+STANDING AGENDA:
+1. Initiative progress vs. 5-year plan — all 5 initiatives
+2. Revenue and EBITDA actuals vs. Eurazeo forecast
+3. Contingency status — any active scenarios
+4. Strategic pivots requiring EIG approval
+5. CAPEX requests above $500K threshold
+
+PREP: Financial Review (monthly) feeds this pack. Charles Recape prepares Eurazeo reporting pack one week prior.`
+  }
+};
+
+function copyMeeting(id) {
+  const data = meetingData[id];
+  if (!data) return;
+  const text = `${data.title}\n${'='.repeat(data.title.length)}\n\n${data.body}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(`[onclick="copyMeeting('${id}')"]`);
+    if (btn) {
+      btn.textContent = '✓ Copied';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy invite'; btn.classList.remove('copied'); }, 2000);
+    }
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.querySelector(`[onclick="copyMeeting('${id}')"]`);
+    if (btn) { btn.textContent = '✓ Copied'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'Copy invite'; btn.classList.remove('copied'); }, 2000); }
+  });
+}
+</script>
+</body>
+</html>

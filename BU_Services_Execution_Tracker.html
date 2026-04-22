@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BU Services — Execution Tracker 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#161C60;--navy2:#0D1040;--navy3:#1E2878;
+  --white:#fff;--body:#384660;--lgrey:#F0F3FA;--mgrey:#DDE3F0;--dgrey:#8896B0;
+  --green:#196B24;--green2:#22882F;--greenl:#E8F5E9;
+  --amber:#C9860A;--amberl:#FFF8E1;--red:#CC2222;--redl:#FFEBEE;
+  --blue:#0A3A6B;--bluel:#E8F4FD;--teal:#0D5050;--teal2:#E1F5EE;
+  --purple:#533FA7;--purplel:#EEEDFE;--orange:#C9520A;--orangel:#FFF3EC;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Barlow',sans-serif;font-size:.9rem;color:var(--body);background:#EEF1F9;min-height:100vh}
+
+/* NAV */
+.nav{background:var(--navy2);height:52px;display:flex;align-items:center;padding:0 1.25rem;gap:.75rem;position:sticky;top:0;z-index:200;border-bottom:3px solid var(--green2)}
+.nav-brand{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:900;color:#fff;letter-spacing:.5px;white-space:nowrap}
+.nav-sep{width:1px;height:18px;background:rgba(255,255,255,.12);flex-shrink:0}
+.nav-tabs{display:flex;gap:2px;overflow-x:auto;flex:1;scrollbar-width:none;-ms-overflow-style:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tabs button{background:none;border:none;font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.4);padding:0 .65rem;height:52px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-3px;white-space:nowrap;transition:color .15s,border-color .15s}
+.nav-tabs button:hover{color:rgba(255,255,255,.75)}
+.nav-tabs button.on{color:#fff;border-bottom-color:var(--green2)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:.6rem;flex-shrink:0}
+.sprint-badge{font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;background:var(--amber);color:#fff;padding:.2rem .55rem;border-radius:3px}
+.date-lbl{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:rgba(255,255,255,.2)}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--navy2),var(--navy3));padding:1.25rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.hero-row{display:flex;align-items:flex-end;gap:1.5rem;flex-wrap:wrap}
+.hero-eye{font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-bottom:.25rem}
+.hero-h1{font-family:'Barlow Condensed',sans-serif;font-size:1.9rem;font-weight:900;color:#fff;line-height:1}
+.hero-h1 span{color:var(--green2)}
+.kpi-row{display:flex;gap:.45rem;flex-wrap:wrap}
+.kpi{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:.45rem .8rem;min-width:90px}
+.kpi-v{font-family:'Barlow Condensed',sans-serif;font-size:1.3rem;font-weight:900;color:#fff;line-height:1}
+.kpi-l{font-size:.6rem;color:rgba(255,255,255,.3);margin-top:.15rem}
+
+/* MAIN */
+.main{max-width:1260px;margin:0 auto;padding:1.25rem 1.5rem 5rem}
+.view{display:none}.view.on{display:block}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem}
+.sh h2{font-family:'Barlow Condensed',sans-serif;font-size:1.25rem;font-weight:900;color:var(--navy)}
+.sh-ct{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--dgrey);background:var(--mgrey);padding:.1rem .35rem;border-radius:3px}
+
+/* CARDS / PANELS */
+.panel{background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:1rem 1.1rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1rem}
+
+/* FILTER BAR */
+.fbar{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.fb{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:.28rem .65rem;border-radius:3px;border:1px solid var(--mgrey);background:#fff;color:var(--dgrey);cursor:pointer;transition:all .12s}
+.fb:hover{border-color:var(--navy);color:var(--navy)}
+.fb.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.fsep{width:1px;height:18px;background:var(--mgrey)}
+.fsearch{border:1px solid var(--mgrey);border-radius:6px;padding:.28rem .65rem;font-family:'Barlow',sans-serif;font-size:.82rem;color:var(--body);background:#fff;outline:none;min-width:160px}
+.fsearch:focus{border-color:var(--navy)}
+
+/* TABLE */
+.tbl-wrap{border:1px solid var(--mgrey);border-radius:8px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:var(--navy2);color:rgba(255,255,255,.6);font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:.45rem .7rem;text-align:left;white-space:nowrap}
+td{padding:.55rem .7rem;border-bottom:1px solid var(--lgrey);background:#fff;vertical-align:top}
+tr:nth-child(even) td{background:#FAFBFE}
+tr:hover td{background:var(--lgrey)}
+tr:last-child td{border-bottom:none}
+
+/* BADGES */
+.badge{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:.12rem .45rem;border-radius:3px;white-space:nowrap;display:inline-block}
+.b-mining{background:#E8F4FD;color:#0A3A6B}
+.b-pipeline{background:#E8F5E9;color:#196B24}
+.b-powerline{background:var(--purplel);color:var(--purple)}
+.b-nuclear{background:var(--teal2);color:var(--teal)}
+.b-x3{background:var(--orangel);color:var(--orange)}
+.b-hot{background:var(--amberl);color:var(--amber);font-size:.58rem}
+.b-gate{background:var(--purplel);color:var(--purple);font-size:.58rem}
+
+/* STATUS SELECT */
+.ssel{appearance:none;-webkit-appearance:none;border:none;border-radius:4px;padding:.2rem 1.6rem .2rem .5rem;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;min-width:110px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23666'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .4rem center}
+.s0{background:#F0F3FA;color:#8896B0}
+.s1{background:var(--amberl);color:var(--amber)}
+.s2{background:var(--greenl);color:var(--green)}
+.s3{background:var(--redl);color:var(--red)}
+.s4{background:var(--purplel);color:var(--purple)}
+
+/* NOTES */
+.ntxt{border:1px solid var(--mgrey);border-radius:4px;padding:.2rem .4rem;font-family:'Barlow',sans-serif;font-size:.75rem;color:var(--body);background:#fff;width:100%;min-width:100px;resize:none;height:32px;outline:none;display:block}
+.ntxt:focus{border-color:var(--navy)}
+
+/* ACTION TITLE */
+.atitle{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:700;color:var(--navy);line-height:1.3;cursor:pointer}
+.atitle:hover{color:var(--blue)}
+.adeliverable{font-size:.72rem;color:var(--dgrey);margin-top:.2rem;line-height:1.4}
+.owners{font-size:.72rem;color:var(--navy)}
+
+/* SPRINT BOARD */
+.sboard{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-bottom:1.25rem}
+.scol{background:#fff;border:1px solid var(--mgrey);border-radius:8px;overflow:hidden;min-height:160px}
+.scol-hdr{padding:.55rem .8rem;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;display:flex;align-items:center;justify-content:space-between;color:#fff}
+.scol-body{padding:.45rem .5rem;display:flex;flex-direction:column;gap:.35rem}
+.scard{border-radius:5px;padding:.5rem .65rem;cursor:pointer;border:1px solid rgba(0,0,0,.06);transition:opacity .12s}
+.scard:hover{opacity:.82}
+.scard-title{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;color:var(--navy);line-height:1.3;margin-bottom:.2rem}
+.scard-meta{display:flex;gap:.3rem;flex-wrap:wrap;align-items:center}
+
+/* PROGRESS */
+.prog-item{background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:.85rem 1.1rem;margin-bottom:.5rem;display:grid;grid-template-columns:150px 1fr 70px 90px;gap:.85rem;align-items:center}
+.prog-label{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:800;color:var(--navy)}
+.pbar{background:var(--lgrey);border-radius:100px;height:10px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:100px;transition:width .4s}
+.pval{font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;text-align:right}
+.ptgt{font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--dgrey);text-align:right}
+
+/* GATE CARDS */
+.gcard{background:#fff;border:1px solid var(--mgrey);border-radius:8px;overflow:hidden}
+.gcard-hdr{padding:.6rem .85rem;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:800;display:flex;align-items:center;gap:.5rem;color:#fff}
+.gcard-body{padding:.6rem .85rem;font-size:.8rem;color:var(--body);line-height:1.6}
+.gsel{appearance:none;-webkit-appearance:none;border:none;padding:.18rem 1.4rem .18rem .45rem;font-family:'Barlow Condensed',sans-serif;font-size:.7rem;font-weight:700;cursor:pointer;border-radius:3px;background:rgba(255,255,255,.25);color:#fff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='white'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .35rem center}
+
+/* RISK CARDS */
+.rcard{background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:.85rem 1rem}
+.rcard.triggered{border-color:var(--red);border-width:2px}
+.rcard-hdr{display:flex;align-items:flex-start;gap:.55rem;margin-bottom:.45rem}
+.rid{font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:600;background:var(--mgrey);color:var(--navy);padding:.12rem .35rem;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.rtitle{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:800;color:var(--navy);flex:1;line-height:1.3}
+.rlevel{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;font-weight:800;padding:.1rem .4rem;border-radius:3px;text-transform:uppercase;flex-shrink:0}
+.rl-CRITICAL{background:var(--redl);color:var(--red)}
+.rl-HIGH{background:var(--amberl);color:var(--amber)}
+.rl-MEDIUM{background:var(--bluel);color:var(--blue)}
+.rimpact{font-size:.78rem;color:var(--body);line-height:1.6;margin-bottom:.5rem}
+.rsignal{display:flex;align-items:flex-start;gap:.4rem;margin-bottom:.2rem;font-size:.75rem;color:var(--body)}
+.rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:3px;background:var(--mgrey)}
+.rdot.hot{background:var(--red)}
+.rtrig-btn{border:1px solid var(--mgrey);background:var(--lgrey);color:var(--dgrey);font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;padding:.18rem .55rem;border-radius:3px;cursor:pointer;margin-top:.45rem;letter-spacing:.5px;text-transform:uppercase}
+.rtrig-btn.on{background:var(--redl);border-color:var(--red);color:var(--red)}
+
+/* MINI CARD (dashboard) */
+.mcard{display:flex;align-items:flex-start;gap:.4rem;padding:.3rem 0;border-bottom:1px solid var(--lgrey)}
+.mcard:last-child{border-bottom:none}
+.mdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.mtext{font-size:.75rem;color:var(--body);line-height:1.4}
+.minitl{font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--dgrey)}
+
+/* MODAL */
+.mbackdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;display:none;align-items:center;justify-content:center}
+.mbackdrop.on{display:flex}
+.modal{background:#fff;border-radius:10px;width:min(660px,94vw);max-height:86vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-hdr{background:var(--navy2);padding:1.1rem 1.3rem;display:flex;align-items:flex-start;gap:.75rem;border-radius:10px 10px 0 0;position:sticky;top:0}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:900;color:#fff;flex:1;line-height:1.3}
+.modal-x{background:none;border:none;color:rgba(255,255,255,.45);font-size:1.1rem;cursor:pointer;padding:0;flex-shrink:0;line-height:1}
+.modal-x:hover{color:#fff}
+.modal-body{padding:1.1rem 1.3rem}
+.mfield{margin-bottom:.9rem}
+.mlabel{font-family:'Barlow Condensed',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--dgrey);margin-bottom:.25rem}
+.mval{font-size:.84rem;color:var(--body);line-height:1.65}
+.mta{width:100%;border:1px solid var(--mgrey);border-radius:6px;padding:.55rem .7rem;font-family:'Barlow',sans-serif;font-size:.84rem;color:var(--body);resize:vertical;min-height:75px;outline:none}
+.mta:focus{border-color:var(--navy)}
+.msave{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:.45rem 1rem;font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;margin-top:.4rem}
+.msave:hover{background:var(--navy3)}
+
+/* SAVE BANNER */
+.sbanner{position:fixed;bottom:1rem;right:1rem;background:var(--green2);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.75rem;font-weight:700;padding:.45rem 1rem;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.2);opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none;z-index:500}
+.sbanner.on{opacity:1;transform:translateY(0)}
+
+/* HOWTO */
+.howto-section{margin-bottom:1.5rem}
+.howto-section h3{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:.5rem;padding-bottom:.35rem;border-bottom:2px solid var(--mgrey)}
+.step{display:flex;gap:.75rem;margin-bottom:.65rem;background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:.7rem .9rem}
+.step-num{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:900;color:var(--navy2);line-height:1;flex-shrink:0;width:24px;text-align:center}
+.step-body{flex:1}
+.step-title{font-family:'Barlow Condensed',sans-serif;font-size:.9rem;font-weight:800;color:var(--navy);margin-bottom:.2rem}
+.step-desc{font-size:.81rem;color:var(--body);line-height:1.65}
+.callout-box{border-radius:8px;padding:.8rem 1rem;margin-bottom:.75rem}
+.cb-green{background:var(--greenl);border-left:4px solid var(--green2)}
+.cb-amber{background:var(--amberl);border-left:4px solid var(--amber)}
+.cb-blue{background:var(--bluel);border-left:4px solid var(--blue)}
+.cb-title{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;font-weight:800;margin-bottom:.2rem}
+.cb-body{font-size:.81rem;line-height:1.65}
+.kbd{display:inline-block;background:var(--navy2);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:.65rem;padding:.1rem .35rem;border-radius:3px;margin:0 2px}
+</style>
+</head>
+<body>
+
+<!-- DATA — embedded as JSON, parsed by JS below. No string escaping issues. -->
+<script id="appdata" type="application/json">{"initiatives": {"mining": {"label": "Mining NDT", "color": "#0A3A6B", "light": "#E8F4FD", "target": 0.41}, "pipeline": {"label": "Pipeline DA", "color": "#196B24", "light": "#E8F5E9", "target": 2.0}, "powerline": {"label": "Powerline", "color": "#533FA7", "light": "#EEEDFE", "target": 0.365}, "nuclear": {"label": "Nuclear / OPG", "color": "#0D5050", "light": "#E1F5EE", "target": 0.3}, "x3": {"label": "3X Composite", "color": "#C9520A", "light": "#FFF3EC", "target": 0.05}}, "actions": [{"id": "m01", "init": "mining", "period": "Pre-Launch", "hot": true, "title": "Audit all 12 active accounts — confirm H1 inspection schedule, identify upsell opportunities", "owners": ["Vinoth", "Sevan Bouchy"], "deliverable": "12-account audit in Salesforce by May 1. Top 5 upsell targets identified."}, {"id": "m02", "init": "mining", "period": "Pre-Launch", "hot": true, "title": "Western Canada outreach — first contact with 5 new targets (Barrick Hemlo, Newmont Coffee, Teck HV, Nutrien Vanscoy, Coeur Silvertip)", "owners": ["Max", "Jason Borza"], "deliverable": "5 first-contact calls logged in Salesforce. Jason Borza briefed on field capacity."}, {"id": "m03", "init": "mining", "period": "Wk 1 — May 1-12", "title": "Northern Ontario activation — site visits at Agnico Macassa, Wesdome Eagle River, IAMGOLD Cote Gold", "owners": ["Brooke Althouse", "Joel Djordjevic"], "deliverable": "3 scheduled calls and proposals issued by May 9"}, {"id": "m04", "init": "mining", "period": "Wk 1 — May 1-12", "title": "Oil sands expansion — brief Shan Switzer (Crane Manager), identify 3 warm referral targets from Nortech crane clients", "owners": ["Max", "Shan Switzer"], "deliverable": "Shan briefed. 3 warm referral targets in Salesforce by May 9."}, {"id": "m05", "init": "mining", "period": "Wk 2 — May 12-26", "title": "Robotic UT pilot — schedule live demo at Suncor Base Plant (or Cenovus). Issue integrated ECA + Robotic UT proposal within 2 weeks of demo.", "owners": ["Vinoth", "Francis B-L", "Sevan Bouchy"], "deliverable": "Demo scheduled. Proposal template ready by May 23."}, {"id": "m06", "init": "mining", "period": "Wk 2 — May 12-26", "title": "HudBay Copper Mountain and Teck Highland Valley — formal program proposals issued", "owners": ["Max", "Eric Rodrigue"], "deliverable": "2 formal proposals issued by May 23. Revenue TAM: $225K-$350K/year."}, {"id": "m07", "init": "mining", "period": "Wk 3 — May 26-Jun 9", "title": "3 new MSAs signed — instrument order ($130K) gated on this milestone", "owners": ["Vinoth"], "deliverable": "3 signed agreements in Salesforce by June 9. Then release $130K ECA instrument order via Jeremy Irwin."}, {"id": "m08", "init": "mining", "period": "Wk 4 — Jun 9-23", "title": "Integrated Mill Health Program proposals — Suncor Base Plant and Cenovus (ECA + Robotic UT + 3X bundled)", "owners": ["Max"], "deliverable": "Proposals issued by June 20. Suncor value: $85K-$140K per year."}, {"id": "m09", "init": "mining", "period": "Wk 4 — Jun 9-23", "title": "CIM Annual Conference — register, pre-book 5 client meetings, prepare leave-behind one-pager", "owners": ["Vinoth", "Max"], "deliverable": "Registered and 5 meetings pre-booked by June 20"}, {"id": "m10", "init": "mining", "period": "Q3 — Jul-Sep", "gate": true, "title": "Q3 gate: 5+ new accounts signed. H2 inspection schedule confirmed. Robotic UT revenue at 2+ accounts. Cement sector outreach initiated.", "owners": ["Vinoth", "Max"], "deliverable": "5 new accounts as Closed Won in Salesforce. Cement contact: Essroc Canada and St. Marys Cement."}, {"id": "p01", "init": "pipeline", "period": "Pre-Launch", "hot": true, "title": "Rig 1 and 2 commissioning — confirm spec, procurement, PAUT instrument set. Target: operational May 16.", "owners": ["Joel Carlton", "Jeremy Irwin"], "deliverable": "Rig 1 and Rig 2 confirmed operational by May 16"}, {"id": "p02", "init": "pipeline", "period": "Pre-Launch", "hot": true, "title": "Pembina vendor qualification — submit all required documents (insurance, WCB, PAUT procedure, personnel certs)", "owners": ["Rick Carlton", "Timothee Falardeau"], "deliverable": "All Pembina vendor docs submitted. Target approval by May 23."}, {"id": "p03", "init": "pipeline", "period": "Wk 1 — May 1-12", "title": "Tidewater summer dig program — confirm scope and mobilisation date. Rigs 3 and 4 ready (second CAPEX tranche $360K)", "owners": ["Rick Carlton", "Joel Carlton", "Jeremy Irwin"], "deliverable": "Tidewater scope and dates confirmed. Second CAPEX tranche released."}, {"id": "p04", "init": "pipeline", "period": "Wk 2 — May 12-26", "title": "Tidewater dig execution — 40-80 digs at $15K-$25K average. Milestone reports at dig 25 and dig 50.", "owners": ["Joel Carlton", "Timothee Falardeau"], "deliverable": "On-site PAUT QA week 1. First 10 FFS assessments reviewed by Timothee."}, {"id": "p05", "init": "pipeline", "period": "Wk 3 — May 26-Jun 9", "title": "Pembina MSA close — executed 2-year agreement, minimum 200 digs per year", "owners": ["Rick Carlton", "Jon"], "deliverable": "Executed Pembina MSA by June 9. Jon briefed for exec sign-off if required."}, {"id": "p06", "init": "pipeline", "period": "Wk 4 — Jun 9-23", "title": "National expansion outreach — TC Energy, Enbridge Asset Management, Keyera, Cenovus pipeline assets", "owners": ["Rick Carlton", "Max"], "deliverable": "2 additional MSA term sheets by June 30. Rigs 5-6 procurement initiated."}, {"id": "p07", "init": "pipeline", "period": "Q3 — Jul-Sep", "gate": true, "title": "Q3 gate: 6-rig fleet operational. Tidewater complete. Pembina underway. 3+ MSAs signed or in final negotiation.", "owners": ["Rick Carlton", "Joel Carlton"], "deliverable": "$2M 2026 target on track. PAUT technician roster confirmed for Q4."}, {"id": "p08", "init": "pipeline", "period": "Q4 — Oct-Dec", "gate": true, "title": "Q4 gate: 2027 program volumes confirmed with Pembina, Tidewater, and new MSA clients", "owners": ["Rick Carlton", "Joel Carlton"], "deliverable": "Crew roster confirmed for $4M 2027 year. PAUT/FFS SOPs complete."}, {"id": "pw01", "init": "powerline", "period": "Pre-Launch", "hot": true, "title": "EIG instrument model confirmed — Mathieu confirms purchase/lease/group-asset model with EIG France. CRITICAL — blocks all utility delivery dates.", "owners": ["Jon", "Mathieu Beauchesne", "Francis B-L"], "deliverable": "Decision confirmed by May 1. Without this no delivery dates can be committed."}, {"id": "pw02", "init": "powerline", "period": "Pre-Launch", "hot": true, "title": "Hydro-Quebec 2026 program scope confirmed — lines, dates, crew size. Francis confirms instrument readiness.", "owners": ["Eric Rodrigue", "Sevan Bouchy", "Francis B-L"], "deliverable": "HQ scope confirmed. Instrument operational status confirmed."}, {"id": "pw03", "init": "powerline", "period": "Wk 1 — May 1-12", "title": "Hydro One Transmission — issue formal pilot proposal (LineOhm splice assessment, 3-5 splice locations, $80K-$120K)", "owners": ["Vinoth", "Joel Djordjevic"], "deliverable": "Proposal issued by May 12. Vendor portal submission initiated same day."}, {"id": "pw04", "init": "powerline", "period": "Wk 1 — May 1-12", "title": "Hydro One vendor qualification — submit to ISNetworld and Hydro One vendor portal", "owners": ["Vinoth"], "deliverable": "Portal submission by May 16. 6-8 week lead time — do not wait for pilot approval."}, {"id": "pw05", "init": "powerline", "period": "Wk 3 — May 26-Jun 9", "title": "AltaLink and ATCO Electric — open formal discussions (2027 delivery target). Jason Borza confirms AB crew capacity.", "owners": ["Max", "Jason Borza"], "deliverable": "2 introductory calls logged by June 6. No delivery date commitment until instrument model confirmed."}, {"id": "pw06", "init": "powerline", "period": "Wk 3 — May 26-Jun 9", "title": "BC Hydro Transmission — first contact via Nortech Western team relationships", "owners": ["Max", "Jason Borza"], "deliverable": "First contact initiated by June 6. Target: Asset Management or Engineering Services division."}, {"id": "pw07", "init": "powerline", "period": "Wk 4 — Jun 9-23", "gate": true, "title": "Hydro One pilot decision gate — accepted / deferred / declined. If declined: activate AltaLink pilot immediately.", "owners": ["Vinoth", "Jon", "Mathieu Beauchesne"], "deliverable": "Decision communicated to Jon and Mathieu by June 23."}, {"id": "n01", "init": "nuclear", "period": "Pre-Launch", "hot": true, "title": "OPG renewal dialogue initiated — intent letter and relationship meeting. Secure pre-bid briefing date.", "owners": ["Olivier", "Vinoth"], "deliverable": "OPG contacted by May 1. Pre-bid briefing date confirmed."}, {"id": "n02", "init": "nuclear", "period": "Pre-Launch", "hot": true, "title": "Rate card development — full draft across all 10 WPs including mob/demob line items", "owners": ["Jean-Francois M", "Louis-Pier T", "Renee Lachance"], "deliverable": "Full rate card draft ready by May 1. Renee reviews financial impact."}, {"id": "n03", "init": "nuclear", "period": "Wk 1 — May 1-12", "title": "CGSB qualification audit — audit all current certs against 10 WP requirements. Gap analysis to Olivier by May 16.", "owners": ["Louis-Pier T", "Francis B-L", "Jean-Francois M"], "deliverable": "Gap analysis delivered to Olivier Marcotte by May 16"}, {"id": "n04", "init": "nuclear", "period": "Wk 2 — May 12-26", "title": "Tender preparation begins — legal counsel engaged ($150K CAPEX). Bid structure reviewed by Mathieu and Renee.", "owners": ["Olivier", "Mathieu Beauchesne", "Louis-Pier T"], "deliverable": "Legal counsel engaged. Bid structure reviewed."}, {"id": "n05", "init": "nuclear", "period": "Wk 3 — May 26-Jun 9", "title": "ET instrument upgrade order — $80K CAPEX, Jeremy Irwin releases funds. Joel Djordjevic configures Oakville as nuclear remote analysis hub.", "owners": ["Francis B-L", "Joel Djordjevic", "Jeremy Irwin"], "deliverable": "ET instrument order placed. Oakville configured."}, {"id": "n06", "init": "nuclear", "period": "Wk 4 — Jun 9-23", "title": "Aecon relationship formalised — Louis-Pier meets Aecon Nuclear procurement. Secure LOI or reference letter for bid package.", "owners": ["Louis-Pier T", "Olivier"], "deliverable": "Aecon reference letter or LOI secured. Tender strategy document signed off."}, {"id": "n07", "init": "nuclear", "period": "Q3 — Jul-Sep", "gate": true, "title": "Q3 gate: Full MSA bid submitted to OPG for all 10 WPs by September 30.", "owners": ["Olivier", "Jean-Francois M", "Louis-Pier T"], "deliverable": "Complete bid package submitted. 8 new nuclear tech CGSB qualifications in progress."}, {"id": "x01", "init": "x3", "period": "Pre-Launch", "hot": true, "title": "ABSA re-submission (Form AB-29 and ECS Manual) — Francis B-L leads. CRITICAL for Alberta pressure vessel work.", "owners": ["Francis B-L", "Jean-Francois M", "Keith Reichenbach"], "deliverable": "ABSA re-submission filed by May 1. Non-pressure revenue activates regardless."}, {"id": "x02", "init": "x3", "period": "Pre-Launch", "hot": true, "title": "Non-pressure revenue activation — identify active accounts with corrosion findings. Issue 3 repair proposals.", "owners": ["Keith Reichenbach", "Rick Carlton"], "deliverable": "3 non-pressure repair proposals issued by May 1"}, {"id": "x03", "init": "x3", "period": "Wk 1 — May 1-12", "title": "Technician certification — 4 techs enrolled (2 Nortech via Joel Carlton, 2 Nucleom via Eric Rodrigue). MONTIPOWER tool and tooling kits ordered. $85K CAPEX released.", "owners": ["Francis B-L", "Eric Rodrigue", "Jeremy Irwin"], "deliverable": "4 tech enrolments confirmed. $85K CAPEX released by Jeremy Irwin."}, {"id": "x04", "init": "x3", "period": "Wk 2 — May 12-26", "title": "Mining account embedding — add 3X repair quotation to 5 active mining inspection reports with AMBER or RED findings", "owners": ["Vinoth", "Max"], "deliverable": "5 reports with embedded 3X repair quotes. Each logged as separate 3X opportunity in Salesforce."}, {"id": "x05", "init": "x3", "period": "Wk 3 — May 26-Jun 9", "title": "Pipeline repair embedding — 3X composite wrap as standard remediation option in Pembina and Tidewater dig programs", "owners": ["Rick Carlton", "Joel Carlton"], "deliverable": "3X included in all dig program MSA rates. First combined inspect+repair invoice target: June 30."}, {"id": "x06", "init": "x3", "period": "Wk 4 — Jun 9-23", "gate": true, "title": "ABSA approval status gate — if approved: activate pressure vessel program. If still pending: non-pressure continues and escalate formally to ABSA.", "owners": ["Francis B-L", "Keith Reichenbach"], "deliverable": "Status confirmed. Decision communicated to Vinoth and Max."}], "gates": [{"id": "g01", "period": "May 1", "init": "All", "title": "Pre-Launch completion", "desc": "All pre-launch actions completed. EIG instrument model confirmed. Rigs 1-2 commissioned. ABSA submitted. OPG dialogue opened. Rate card complete."}, {"id": "g02", "period": "Jun 9", "init": "Pipeline", "title": "Pembina MSA closed", "desc": "Executed Pembina 2-year agreement (200+ digs/year minimum). Critical for Q3 cash flow and 6-rig fleet justification."}, {"id": "g03", "period": "Jun 23", "init": "Powerline", "title": "Hydro One pilot decision", "desc": "Pilot accepted, deferred, or declined. If declined, AltaLink activated immediately as Q3 alternative. EIG instrument model final."}, {"id": "g04", "period": "Jun 23", "init": "3X Composite", "title": "3X ABSA approval status", "desc": "Alberta pressure vessel program activated or non-pressure only. $50K 2026 target achievable either way. Escalation filed if still pending."}, {"id": "g05", "period": "Sep 30", "init": "Nuclear", "title": "OPG MSA tender submitted", "desc": "Full bid for all 10 WPs submitted. CGSB qualification gaps filled. 8 new nuclear tech qualifications in progress."}, {"id": "g06", "period": "Sep 30", "init": "Mining", "title": "Mining Q3: 5+ new accounts", "desc": "5+ new mining accounts signed as Closed Won. H2 schedule confirmed. Robotic UT revenue generating. Cement outreach started."}], "risks": [{"id": "R-01", "level": "CRITICAL", "title": "Nuclear MSA — OPG partial award or delay to 2028", "impact": "-$47.6M 5-year if zero award. Single largest risk in the plan.", "signals": ["OPG delays RFP release beyond Sep 2026", "Applus RTD stabilises financially", "OPG signals preference for incumbent-only renewal", "Bid scope reduced from 10 to fewer WPs in RFP", "No BAFO request within 90 days of bid submission"]}, {"id": "R-02", "level": "CRITICAL", "title": "Pipeline — Pembina and Tidewater both miss in 2026", "impact": "-$1.5M 2026. 6 rigs underutilised. $1.44M CAPEX sunk. Critical for Q3 cash flow.", "signals": ["Vendor qualification stalls past May 15", "Tidewater delays summer dig past Jul 1", "Pembina procurement freeze announced", "Rick Carlton reports fewer than 3 active program discussions"]}, {"id": "R-03", "level": "HIGH", "title": "Key personnel departure — Vinoth, Max, or Rick Carlton", "impact": "Vinoth departure: -$4M+ 2027 at risk. Rick Carlton: Pipeline initiative collapses. Max: Western Canada commercial void.", "signals": ["Compensation concerns raised in 1:1 reviews", "Reduced Salesforce activity or pipeline not moving", "Competitor outreach visible on LinkedIn", "Dissatisfaction with operational support expressed"]}, {"id": "R-04", "level": "HIGH", "title": "ABSA clearance for 3X composite repair delayed beyond Q3", "impact": "2026 limited to ~$25K non-pressure. 2027 ramp reduced from $600K to $250K. Manageable.", "signals": ["ABSA requests additional documentation", "Review timeline exceeds 90 days from submission", "ABSA identifies procedure gaps in ECS Manual"]}, {"id": "R-05", "level": "HIGH", "title": "Mining national expansion stalls at current 12 accounts", "impact": "2027 target reduced from $1.9M to $800K. ECA instrument investment at risk. -$12M 5-year.", "signals": ["Fewer than 3 new accounts signed by end of Q2 2026", "Vinoth and Max pipeline generates fewer than 10 proposals combined", "Gold price correction below US$3000/oz sustained", "Competitor enters market with comparable ECA offering"]}, {"id": "R-06", "level": "MEDIUM", "title": "Powerline — EIG instrument model unresolved", "impact": "2026 $365K at risk. Does not affect other 4 initiatives.", "signals": ["EIG France has not confirmed instrument terms by May 15", "LineCore/LineOhm maintenance outstanding", "HQ 2026 program scope not confirmed by May 1"]}]}</script>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">BU Services</div>
+  <div class="nav-sep"></div>
+  <div class="nav-tabs" id="navTabs">
+    <button class="on" onclick="show('dashboard')">Dashboard</button>
+    <button onclick="show('howto')">How to Use</button>
+    <button onclick="show('sprint')">Sprint Board</button>
+    <button onclick="show('actions')">All Actions</button>
+    <button onclick="show('pipeline')">Pipeline</button>
+    <button onclick="show('gates')">Gates</button>
+    <button onclick="show('risks')">Risks</button>
+  </div>
+  <div class="nav-right">
+    <span class="date-lbl" id="dateLbl"></span>
+    <span class="sprint-badge" id="sprintBadge"></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-row">
+    <div>
+      <div class="hero-eye">Execution Tracker · 2026 Plan · Confidential</div>
+      <div class="hero-h1">BU Services <span>Execution Tracker</span></div>
+    </div>
+    <div class="kpi-row" id="heroKpis"></div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div class="view on" id="view-dashboard">
+  <div class="grid2">
+    <div class="panel">
+      <div class="sh"><h2>Current Sprint</h2><span class="sh-ct" id="dashSprintLbl"></span></div>
+      <div id="dashSprint"></div>
+    </div>
+    <div class="panel">
+      <div class="sh"><h2>Initiative Progress</h2></div>
+      <div id="dashInit"></div>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="panel">
+      <div class="sh"><h2 style="color:var(--red)">Blocked</h2><span class="sh-ct" style="background:var(--redl);color:var(--red)" id="cBlocked">0</span></div>
+      <div id="dashBlocked"></div>
+    </div>
+    <div class="panel">
+      <div class="sh"><h2 style="color:var(--amber)">In Progress</h2><span class="sh-ct" style="background:var(--amberl);color:var(--amber)" id="cInprog">0</span></div>
+      <div id="dashInprog"></div>
+    </div>
+    <div class="panel">
+      <div class="sh"><h2 style="color:var(--green)">Complete</h2><span class="sh-ct" style="background:var(--greenl);color:var(--green)" id="cDone">0</span></div>
+      <div id="dashDone"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW TO USE -->
+<div class="view" id="view-howto">
+  <div class="sh"><h2>How to Use This Tracker</h2></div>
+
+  <div class="callout-box cb-amber">
+    <div class="cb-title" style="color:var(--amber)">This tracker lives in your browser — all changes save automatically</div>
+    <div class="cb-body">Status updates, notes, gate decisions, risk signals, and pipeline values are all saved to your browser storage the moment you change them. You will see a green "Saved" banner in the bottom-right corner confirming each save. No server, no login, no button to click. To share state with your team, email or print the page — full SharePoint List integration is part of the pending P5 task for Eric.</div>
+  </div>
+
+  <div class="howto-section" style="margin-top:1.25rem">
+    <h3>The 6 tabs — what each one is for</h3>
+    <div class="step"><div class="step-num">1</div><div class="step-body">
+      <div class="step-title">Dashboard — your home screen</div>
+      <div class="step-desc">Opens by default. Shows the current sprint actions in the top-left, initiative completion bars top-right, and three columns at the bottom: Blocked (red), In Progress (amber), and Complete (green). Numbers in the column headers update automatically as you change statuses. Use this to start every Commercial Leadership meeting — it answers "what is the team working on right now and what is stuck?"</div>
+    </div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body">
+      <div class="step-title">Sprint Board — kanban view of current sprint actions only</div>
+      <div class="step-desc">Shows the 4 status columns side by side: Not Started, In Progress, Blocked, Complete. Only the actions due in the current sprint period appear here. Click any card to open the detail panel where you can update status and add notes. Use this during weekly check-ins with Vinoth, Max, and Rick Carlton.</div>
+    </div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body">
+      <div class="step-title">All Actions — full register of all 38 plan actions</div>
+      <div class="step-desc">Every action across all 5 initiatives and all sprint periods. Filter by initiative (Mining, Pipeline, Powerline, Nuclear, 3X), by status, or by owner. Use the search box to find a specific account or topic. Change status directly in the dropdown on each row. Add notes in the text field on the right — useful for recording what happened on a call, why something is blocked, or when a follow-up is due.</div>
+    </div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body">
+      <div class="step-title">Pipeline — revenue progress against 2026 targets</div>
+      <div class="step-desc">Top section: drag the slider for each initiative to reflect current pipeline confidence (in $M CAD). The bar turns from grey toward the initiative colour as it fills. Update this weekly before the Commercial Leadership meeting. Bottom section: stacked completion bars showing how many actions per initiative are Not Started / In Progress / Blocked / Complete.</div>
+    </div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-body">
+      <div class="step-title">Gates — 6 go/no-go decision points</div>
+      <div class="step-desc">Each gate is a critical decision point from the Execution Attack Plan. Update the status (Pending / Passed / Failed / Partial) when you reach each gate. The card header colour changes with the status — green for Passed, red for Failed, amber for Partial. A Failed gate triggers a contingency plan review at the next Ion/Olivier meeting.</div>
+    </div></div>
+    <div class="step"><div class="step-num">6</div><div class="step-body">
+      <div class="step-title">Risks — early warning signal monitor</div>
+      <div class="step-desc">6 risks from the plan (R-01 to R-06) with their early warning signals listed. Click "Mark signal" on any risk to open a checklist and tick which specific signals you are observing. Any triggered signal turns the card border red. Flag every triggered signal at the next Monday Commercial Leadership meeting — do not wait for the next gate.</div>
+    </div></div>
+  </div>
+
+  <div class="howto-section">
+    <h3>Updating a status — three ways</h3>
+    <div class="step"><div class="step-num">A</div><div class="step-body">
+      <div class="step-title">Dropdown in the All Actions table</div>
+      <div class="step-desc">Go to <span class="kbd">All Actions</span> tab. Find the action row. Click the coloured status dropdown and select the new status. It saves instantly. The colour of the dropdown changes to match the status.</div>
+    </div></div>
+    <div class="step"><div class="step-num">B</div><div class="step-body">
+      <div class="step-title">Click the action title to open the detail panel</div>
+      <div class="step-desc">In Any Actions or Sprint Board, click the action title text. A modal panel opens showing the full deliverable text, all owners, a status dropdown, and a notes field. Update both status and notes here, then click Save Notes. The modal closes and the table updates immediately.</div>
+    </div></div>
+    <div class="step"><div class="step-num">C</div><div class="step-body">
+      <div class="step-title">Click a Sprint Board card</div>
+      <div class="step-desc">In the <span class="kbd">Sprint Board</span> tab, click any card. The same detail panel opens. This is the fastest route during a meeting — you can update the whole sprint in 2-3 minutes by clicking cards one by one.</div>
+    </div></div>
+  </div>
+
+  <div class="howto-section">
+    <h3>What the status colours mean</h3>
+    <div class="step"><div class="step-num" style="background:var(--lgrey);color:var(--dgrey);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.7rem">—</div><div class="step-body">
+      <div class="step-title">Not Started (grey)</div>
+      <div class="step-desc">The action has not been picked up yet. Default state for all actions when the tracker is first opened.</div>
+    </div></div>
+    <div class="step"><div class="step-num" style="background:var(--amberl);color:var(--amber);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.7rem">▶</div><div class="step-body">
+      <div class="step-title">In Progress (amber)</div>
+      <div class="step-desc">Work has started — a call has been made, a proposal is being drafted, a vendor qualification is in flight. Use notes to record where things stand.</div>
+    </div></div>
+    <div class="step"><div class="step-num" style="background:var(--greenl);color:var(--green);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.7rem">✓</div><div class="step-body">
+      <div class="step-title">Complete (green)</div>
+      <div class="step-desc">The deliverable has been achieved. For actions with a Salesforce deliverable, mark Complete only after the record is logged in Salesforce — not when the call happens.</div>
+    </div></div>
+    <div class="step"><div class="step-num" style="background:var(--redl);color:var(--red);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.7rem">✗</div><div class="step-body">
+      <div class="step-title">Blocked (red)</div>
+      <div class="step-desc">The action cannot proceed — waiting for a decision, a dependency, an external response, or a resource. Use notes to record exactly what the blocker is. Blocked actions appear in the red column on the Dashboard and must be discussed at Monday's Commercial Leadership meeting.</div>
+    </div></div>
+    <div class="step"><div class="step-num" style="background:var(--purplel);color:var(--purple);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:.7rem">G</div><div class="step-body">
+      <div class="step-title">Gate Review (purple)</div>
+      <div class="step-desc">Used for gate decision actions — the gate is actively under review. Transition to Complete (gate passed) or Blocked (gate failed, contingency activated).</div>
+    </div></div>
+  </div>
+
+  <div class="howto-section">
+    <h3>Recommended weekly routine</h3>
+    <div class="callout-box cb-green">
+      <div class="cb-title" style="color:var(--green)">Monday before the Commercial Leadership meeting (5 minutes)</div>
+      <div class="cb-body">Open the tracker. Go to <span class="kbd">Dashboard</span>. Review the Blocked column — anything new since last week? Open <span class="kbd">All Actions</span>, filter by owner "Vinoth" then "Max" then "Rick" to spot any actions that should have moved but have not. Note any for discussion. Check <span class="kbd">Risks</span> — any new signals to flag?</div>
+    </div>
+    <div class="callout-box cb-blue">
+      <div class="cb-title" style="color:var(--blue)">Friday afternoon (10 minutes — after Salesforce is updated)</div>
+      <div class="cb-body">Open <span class="kbd">All Actions</span>. Filter to "In Progress". For each In Progress action: is it still in progress or is it done? Update accordingly. Add notes on any calls made or proposals issued this week. Update the <span class="kbd">Pipeline</span> sliders to reflect this week's pipeline movement. The tracker and Salesforce should tell the same story.</div>
+    </div>
+    <div class="callout-box cb-amber">
+      <div class="cb-title" style="color:var(--amber)">At each gate date (before the monthly Gate Review meeting)</div>
+      <div class="cb-body">Open <span class="kbd">Gates</span>. For each gate whose date has passed, update the status to Passed, Failed, or Partial. A Failed gate means a contingency plan must be activated — see Section 5 of the Execution Attack Plan document for the relevant pivot plan.</div>
+    </div>
+  </div>
+
+  <div class="howto-section">
+    <h3>No JSON file needed — data is embedded</h3>
+    <div class="callout-box cb-green">
+      <div class="cb-title" style="color:var(--green)">This is a single, standalone HTML file</div>
+      <div class="cb-body">All 38 actions, 6 gates, and 6 risks are embedded directly in this file as JSON data. No separate JSON file, no server, no database. Save this file to SharePoint and open it in any browser — everything works immediately. Your status updates, notes, and pipeline values are stored in the browser on the computer where you make changes. To transfer your progress to another computer, use the Export button (coming in next version) or simply note the key updates.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SPRINT BOARD -->
+<div class="view" id="view-sprint">
+  <div class="sh"><h2>Sprint Board</h2><span class="sh-ct" id="sprintCtLbl"></span></div>
+  <div class="sboard" id="sprintBoard"></div>
+</div>
+
+<!-- ALL ACTIONS -->
+<div class="view" id="view-actions">
+  <div class="sh"><h2>All Actions</h2><span class="sh-ct" id="actCt">0</span></div>
+  <div class="fbar" id="filterBar"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th style="width:88px">Initiative</th>
+        <th style="width:100px">Period</th>
+        <th>Action</th>
+        <th style="width:130px">Owners</th>
+        <th style="width:115px">Status</th>
+        <th style="width:130px">Notes</th>
+      </tr></thead>
+      <tbody id="actBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PIPELINE -->
+<div class="view" id="view-pipeline">
+  <div class="sh"><h2>Pipeline Progress vs 2026 Targets</h2></div>
+  <p style="font-size:.82rem;color:var(--dgrey);margin-bottom:1rem">Drag the slider for each initiative to reflect current pipeline confidence. Values in $M CAD.</p>
+  <div id="pipeProg"></div>
+  <div class="sh" style="margin-top:1.75rem"><h2>Action Completion by Initiative</h2></div>
+  <div id="pipeComp"></div>
+</div>
+
+<!-- GATES -->
+<div class="view" id="view-gates">
+  <div class="sh"><h2>Gate Decision Register</h2></div>
+  <p style="font-size:.82rem;color:var(--dgrey);margin-bottom:1rem">A Failed gate triggers the contingency plan in the Execution Attack Plan document. Update status as each gate date passes.</p>
+  <div class="grid3" id="gateGrid" style="grid-template-columns:1fr 1fr 1fr"></div>
+</div>
+
+<!-- RISKS -->
+<div class="view" id="view-risks">
+  <div class="sh"><h2>Risk Monitor</h2></div>
+  <p style="font-size:.82rem;color:var(--dgrey);margin-bottom:1rem">Click "Mark signal" to flag which warning signals are active. Any red card = discuss immediately at Monday Commercial Leadership meeting.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem" id="riskGrid"></div>
+</div>
+
+</div><!-- /main -->
+
+<!-- MODAL -->
+<div class="mbackdrop" id="mbackdrop" onclick="if(event.target===this)closeMod()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="mTitle"></div>
+      <button class="modal-x" onclick="closeMod()">&#10005;</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<div class="sbanner" id="sbanner">Saved &#10003;</div>
+
+<script>
+// ── Load data ──────────────────────────────────────────────────────────────
+var APP = JSON.parse(document.getElementById('appdata').textContent);
+var INITS = APP.initiatives;
+var ACTIONS = APP.actions;
+var GATES = APP.gates;
+var RISKS = APP.risks;
+
+// ── Persist state in localStorage ─────────────────────────────────────────
+var ST = (function(){
+  try{ return JSON.parse(localStorage.getItem('buse_tracker_v3')||'{}'); }
+  catch(e){ return {}; }
+})();
+function save(){ try{localStorage.setItem('buse_tracker_v3',JSON.stringify(ST));}catch(e){} flashSave(); }
+function flashSave(){ var b=document.getElementById('sbanner'); b.classList.add('on'); clearTimeout(b._t); b._t=setTimeout(function(){b.classList.remove('on');},1400); }
+
+// ── State accessors ────────────────────────────────────────────────────────
+function getAS(id){ return (ST.a&&ST.a[id]&&ST.a[id].s)||'s0'; }
+function getAN(id){ return (ST.a&&ST.a[id]&&ST.a[id].n)||''; }
+function setAS(id,v){ if(!ST.a)ST.a={}; if(!ST.a[id])ST.a[id]={}; ST.a[id].s=v; save(); refreshAll(); }
+function setAN(id,v){ if(!ST.a)ST.a={}; if(!ST.a[id])ST.a[id]={}; ST.a[id].n=v; save(); }
+function getGS(id){ return (ST.g&&ST.g[id])||'pending'; }
+function setGS(id,v){ if(!ST.g)ST.g={}; ST.g[id]=v; save(); renderGates(); }
+function getPV(id){ return (ST.p&&ST.p[id]!==undefined)?ST.p[id]:0; }
+function setPV(id,v){ if(!ST.p)ST.p={}; ST.p[id]=parseFloat(v)||0; save(); renderPipeline(); }
+function getRSig(rid,i){ return !!(ST.r&&ST.r[rid]&&ST.r[rid][i]); }
+function toggleRSig(rid,i){ if(!ST.r)ST.r={}; if(!ST.r[rid])ST.r[rid]={}; ST.r[rid][i]=!ST.r[rid][i]; save(); renderRisks(); }
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+var STATUS_LABELS = {s0:'Not Started',s1:'In Progress',s2:'Complete',s3:'Blocked',s4:'Gate Review'};
+var STATUS_COLORS = {s0:'#DDE3F0',s1:'#FAC775',s2:'#22882F',s3:'#CC2222',s4:'#533FA7'};
+var GATE_COLORS   = {pending:'#8896B0',passed:'#22882F',failed:'#CC2222',partial:'#C9860A'};
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function initCls(k){ return 'b-'+k; }
+function initColor(k){ return (INITS[k]&&INITS[k].color)||'#384660'; }
+function initLight(k){ return (INITS[k]&&INITS[k].light)||'#F5F7FC'; }
+function initLabel(k){ return (INITS[k]&&INITS[k].label)||k; }
+
+function getCurrentSprint(){
+  var d = new Date().toISOString().slice(0,10);
+  if(d>='2026-07-01'&&d<='2026-09-30') return 'Q3';
+  if(d>='2026-10-01') return 'Q4';
+  if(d>='2026-06-09'&&d<'2026-06-24') return 'Wk 4';
+  if(d>='2026-05-26'&&d<'2026-06-09') return 'Wk 3';
+  if(d>='2026-05-12'&&d<'2026-05-26') return 'Wk 2';
+  if(d>='2026-05-01'&&d<'2026-05-12') return 'Wk 1';
+  return 'Pre-Launch';
+}
+function isCurrentSprint(a){
+  var sp = getCurrentSprint();
+  if(sp==='Pre-Launch') return !!a.hot;
+  if(sp==='Q3') return a.period.indexOf('Q3')>-1;
+  if(sp==='Q4') return a.period.indexOf('Q4')>-1;
+  return a.period.indexOf(sp)>-1;
+}
+
+function miniCard(a){
+  var sc = STATUS_COLORS[getAS(a.id)]||'#DDE3F0';
+  return '<div class="mcard"><div class="mdot" style="background:'+sc+'"></div><div class="mtext">'+esc(a.title.substring(0,60))+(a.title.length>60?'…':'')+'<div class="minitl">'+initLabel(a.init)+'</div></div></div>';
+}
+
+// ── View switching ─────────────────────────────────────────────────────────
+function show(name){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+  document.getElementById('view-'+name).classList.add('on');
+  document.querySelectorAll('.nav-tabs button').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('onclick').indexOf("'"+name+"'")>-1);
+  });
+  if(name==='actions')  renderActions();
+  if(name==='sprint')   renderSprint();
+  if(name==='pipeline') renderPipeline();
+  if(name==='gates')    renderGates();
+  if(name==='risks')    renderRisks();
+}
+
+// ── Dashboard ──────────────────────────────────────────────────────────────
+function refreshAll(){
+  var sp = getCurrentSprint();
+  document.getElementById('dashSprintLbl').textContent = sp;
+  document.getElementById('sprintBadge').textContent = sp;
+
+  var spActs = ACTIONS.filter(isCurrentSprint);
+  document.getElementById('dashSprint').innerHTML = spActs.map(miniCard).join('')||'<div style="font-size:.75rem;color:var(--dgrey);padding:.5rem 0">No actions in current sprint</div>';
+
+  // Initiative progress bars
+  var iHtml='';
+  Object.keys(INITS).forEach(function(k){
+    var acts=ACTIONS.filter(function(a){return a.init===k;});
+    var done=acts.filter(function(a){return getAS(a.id)==='s2';}).length;
+    var pct=acts.length?Math.round(done/acts.length*100):0;
+    iHtml+='<div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.4rem">'
+      +'<div style="width:95px;font-family:Barlow Condensed,sans-serif;font-size:.75rem;font-weight:700;color:var(--navy)">'+initLabel(k)+'</div>'
+      +'<div style="flex:1"><div class="pbar"><div class="pbar-fill" style="width:'+pct+'%;background:'+initColor(k)+'"></div></div></div>'
+      +'<div style="font-family:IBM Plex Mono,monospace;font-size:.62rem;color:var(--dgrey);width:40px;text-align:right">'+done+'/'+acts.length+'</div>'
+      +'</div>';
+  });
+  document.getElementById('dashInit').innerHTML = iHtml;
+
+  var blocked=ACTIONS.filter(function(a){return getAS(a.id)==='s3';});
+  var inprog =ACTIONS.filter(function(a){return getAS(a.id)==='s1';});
+  var done   =ACTIONS.filter(function(a){return getAS(a.id)==='s2';});
+  document.getElementById('cBlocked').textContent=blocked.length;
+  document.getElementById('cInprog').textContent=inprog.length;
+  document.getElementById('cDone').textContent=done.length;
+  document.getElementById('dashBlocked').innerHTML=blocked.map(miniCard).join('')||'<div style="font-size:.75rem;color:var(--dgrey);padding:.4rem 0">None — good!</div>';
+  document.getElementById('dashInprog').innerHTML=inprog.map(miniCard).join('')||'<div style="font-size:.75rem;color:var(--dgrey);padding:.4rem 0">None in progress</div>';
+  document.getElementById('dashDone').innerHTML=done.map(miniCard).join('')||'<div style="font-size:.75rem;color:var(--dgrey);padding:.4rem 0">Nothing completed yet</div>';
+
+  // Hero KPIs
+  var gateDone=GATES.filter(function(g){return getGS(g.id)==='passed';}).length;
+  document.getElementById('heroKpis').innerHTML=
+    kpi(ACTIONS.length,'Total actions')+
+    kpi(done.length,'Complete','var(--green2)')+
+    kpi(blocked.length,'Blocked','var(--red)')+
+    kpi(GATES.length-gateDone,'Gates pending','');
+}
+function kpi(v,l,c){
+  return '<div class="kpi"><div class="kpi-v"'+(c?' style="color:'+c+'"':'')+'>'+(v)+'</div><div class="kpi-l">'+l+'</div></div>';
+}
+
+// ── Sprint Board ───────────────────────────────────────────────────────────
+function renderSprint(){
+  var sp = getCurrentSprint();
+  var spActs = ACTIONS.filter(isCurrentSprint);
+  document.getElementById('sprintCtLbl').textContent = sp + ' — ' + spActs.length + ' actions';
+  var cols=[{k:'s0',label:'Not Started',color:'var(--navy2)'},{k:'s1',label:'In Progress',color:'var(--amber)'},{k:'s3',label:'Blocked',color:'var(--red)'},{k:'s2',label:'Complete',color:'var(--green)'}];
+  var html='';
+  cols.forEach(function(col){
+    var items=spActs.filter(function(a){return getAS(a.id)===col.k;});
+    html+='<div class="scol"><div class="scol-hdr" style="background:'+col.color+'">'+col.label+'<span style="opacity:.7;font-size:.65rem">'+items.length+'</span></div><div class="scol-body">';
+    items.forEach(function(a){
+      html+='<div class="scard" style="background:'+initLight(a.init)+'" data-aid="'+a.id+'" onclick="openMod(this.dataset.aid)">'
+        +'<div class="scard-title">'+esc(a.title.substring(0,65))+(a.title.length>65?'…':'')+'</div>'
+        +'<div class="scard-meta"><span class="badge '+initCls(a.init)+'">'+initLabel(a.init)+'</span>'
+        +a.owners.slice(0,2).map(function(o){return '<span style="font-size:.62rem;background:rgba(0,0,0,.07);padding:.08rem .3rem;border-radius:2px;color:var(--navy)">'+esc(o)+'</span>';}).join('')
+        +'</div></div>';
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('sprintBoard').innerHTML=html;
+}
+
+// ── Filters ────────────────────────────────────────────────────────────────
+var FI={init:'all',status:'all',owner:'all'};
+function buildFilters(){
+  var inits=[['all','All']].concat(Object.keys(INITS).map(function(k){return [k,initLabel(k)];}));
+  var statuses=[['all','All Status'],['s0','Not Started'],['s1','In Progress'],['s2','Complete'],['s3','Blocked']];
+  var owners=[['all','All Owners'],['Vinoth','Vinoth'],['Max','Max'],['Rick Carlton','Rick'],['Olivier','Olivier'],['Jon','Jon']];
+    function row(arr,type){
+    return arr.map(function(x){
+      var onCls = FI[type]===x[0]?' on':'';
+      return '<button class="fb'+onCls+'" data-type="'+type+'" data-val="'+x[0]+'" onclick="setFI(this.dataset.type,this.dataset.val,this)">'+x[1]+'</button>';
+    }).join('');
+  }
+  document.getElementById('filterBar').innerHTML=
+    row(inits,'init')+'<div class="fsep"></div>'+row(statuses,'status')+'<div class="fsep"></div>'+row(owners,'owner')
+    +'<div class="fsep"></div><input class="fsearch" id="fsearch" type="text" placeholder="Search..." oninput="renderActions()">';
+}
+function setFI(type,val,btn){
+  FI[type]=val;
+  document.querySelectorAll('.fb').forEach(function(b){
+    var oc=b.getAttribute('onclick')||'';
+    if(oc.indexOf("'"+type+"'")<0) return;
+    var m=oc.match(/setFI\('[^']+','([^']+)'/);
+    if(m) b.classList.toggle('on',m[1]===val);
+  });
+  renderActions();
+}
+
+// ── Actions Table ──────────────────────────────────────────────────────────
+function renderActions(){
+  var q=((document.getElementById('fsearch')||{}).value||'').toLowerCase();
+  var filtered=ACTIONS.filter(function(a){
+    if(FI.init!=='all'&&a.init!==FI.init) return false;
+    if(FI.status!=='all'&&getAS(a.id)!==FI.status) return false;
+    if(FI.owner!=='all'&&!a.owners.some(function(o){return o.toLowerCase().indexOf(FI.owner.toLowerCase())>-1;})) return false;
+    if(q&&a.title.toLowerCase().indexOf(q)<0&&a.owners.join(' ').toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+  document.getElementById('actCt').textContent=filtered.length+' of '+ACTIONS.length;
+  var html='';
+  filtered.forEach(function(a){
+    var s=getAS(a.id);
+    html+='<tr>'
+      +'<td><span class="badge '+initCls(a.init)+'">'+initLabel(a.init)+'</span></td>'
+      +'<td><span style="font-family:IBM Plex Mono,monospace;font-size:.6rem;color:'+(a.gate?'var(--purple)':a.hot?'var(--amber)':'var(--dgrey)')+'">'+esc(a.period)+'</span>'
+      +(a.gate?'<br><span class="badge b-gate" style="margin-top:2px">GATE</span>':'')
+      +(a.hot&&!a.gate?'<br><span class="badge b-hot" style="margin-top:2px">SPRINT</span>':'')
+      +'</td>'
+      +'<td>'
+      +'<div class="atitle" data-aid="'+a.id+'" onclick="openMod(this.dataset.aid)">'+esc(a.title)+'</div>'
+      +(a.deliverable?'<div class="adeliverable">&#8594; '+esc(a.deliverable)+'</div>':'')
+      +'</td>'
+      +'<td><div class="owners">'+a.owners.map(function(o){return esc(o);}).join('<br>')+'</div></td>'
+      +'<td><select class="ssel '+s+'" data-aid="'+a.id+'" onchange="setAS(this.dataset.aid,this.value);this.className=\'ssel \'+this.value">'
+      +Object.keys(STATUS_LABELS).map(function(sv){return '<option value="'+sv+'"'+(s===sv?' selected':'')+'>'+STATUS_LABELS[sv]+'</option>';}).join('')
+      +'</select></td>'
+      +'<td><textarea class="ntxt" data-aid="'+a.id+'" onchange="setAN(this.dataset.aid,this.value)" placeholder="Notes...">'+esc(getAN(a.id))+'</textarea></td>'
+      +'</tr>';
+  });
+  document.getElementById('actBody').innerHTML=html||'<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--dgrey)">No matching actions</td></tr>';
+}
+
+// ── Pipeline ──────────────────────────────────────────────────────────────────
+function renderPipeline(){
+  var ph = document.getElementById('pipeProg');
+  ph.innerHTML = '';
+  Object.keys(INITS).forEach(function(k){
+    var init = INITS[k];
+    var val = getPV(k);
+    var pct = Math.min(100, Math.round(val / init.target * 100));
+    var row = document.createElement('div');
+    row.className = 'prog-item';
+    row.innerHTML =
+      '<div class="prog-label">' + initLabel(k) + '</div>'
+      + '<div><div class="pbar"><div class="pbar-fill" id="pf-' + k + '" style="width:' + pct + '%;background:' + init.color + '"></div></div>'
+      + '<input type="range" min="0" max="' + (init.target * 1.5).toFixed(2) + '" step="0.01" value="' + val.toFixed(2) + '" style="width:100%;margin-top:4px" id="pr-' + k + '">'
+      + '</div>'
+      + '<div class="pval" id="pv-' + k + '">$' + val.toFixed(2) + 'M</div>'
+      + '<div class="ptgt">Target: $' + init.target.toFixed(2) + 'M</div>';
+    var slider = row.querySelector('input[type="range"]');
+    var key = k;
+    slider.addEventListener('input', function(){ onPipe(key); });
+    ph.appendChild(row);
+  });
+  var ch = '';
+  Object.keys(INITS).forEach(function(k){
+    var init = INITS[k];
+    var acts = ACTIONS.filter(function(a){ return a.init === k; });
+    var byS = {s0:0, s1:0, s2:0, s3:0, s4:0};
+    acts.forEach(function(a){ byS[getAS(a.id)]++; });
+    var total = acts.length;
+    ch += '<div style="background:#fff;border:1px solid var(--mgrey);border-radius:8px;padding:.8rem 1.1rem;margin-bottom:.45rem;display:flex;align-items:center;gap:.85rem">'
+      + '<div style="width:120px;font-family:Barlow Condensed,sans-serif;font-size:.82rem;font-weight:800;color:' + init.color + '">' + initLabel(k) + '</div>'
+      + '<div style="flex:1;display:flex;height:12px;border-radius:100px;overflow:hidden;gap:1px">';
+    var colors2 = {s2:'var(--green2)', s1:'var(--amber)', s3:'var(--red)', s0:'var(--mgrey)', s4:'var(--purple)'};
+    Object.keys(byS).forEach(function(st){
+      if(byS[st] > 0) ch += '<div style="flex:' + byS[st] + ';background:' + colors2[st] + '" title="' + STATUS_LABELS[st] + ': ' + byS[st] + '"></div>';
+    });
+    ch += '</div><div style="font-family:IBM Plex Mono,monospace;font-size:.65rem;color:var(--dgrey);width:70px;text-align:right">' + byS.s2 + ' of ' + total + ' done</div></div>';
+  });
+  document.getElementById('pipeComp').innerHTML = ch;
+}
+function onPipe(k){
+  var r = document.getElementById('pr-' + k);
+  var v = parseFloat(r.value) || 0;
+  document.getElementById('pv-' + k).textContent = '$' + v.toFixed(2) + 'M';
+  var fill = document.getElementById('pf-' + k);
+  if(fill) fill.style.width = Math.min(100, Math.round(v / INITS[k].target * 100)) + '%';
+  setPV(k, v);
+}
+
+// ── Gates ──────────────────────────────────────────────────────────────────
+function renderGates(){
+  var grid = document.getElementById('gateGrid');
+  grid.innerHTML = '';
+  GATES.forEach(function(g){
+    var s = getGS(g.id);
+    var c = GATE_COLORS[s] || '#8896B0';
+    var card = document.createElement('div');
+    card.className = 'gcard';
+    card.innerHTML =
+      '<div class="gcard-hdr" style="background:' + c + '" id="ghdr-' + g.id + '">'
+      + '<div style="flex:1"><div style="font-size:.62rem;font-weight:700;opacity:.7;margin-bottom:2px">' + esc(g.period) + ' &middot; ' + esc(g.init) + '</div>' + esc(g.title) + '</div>'
+      + '<select class="gsel" id="gsel-' + g.id + '">'
+      + '<option value="pending"' + (s==='pending'?' selected':'') + '>Pending</option>'
+      + '<option value="passed"'  + (s==='passed' ?' selected':'') + '>Passed &#10003;</option>'
+      + '<option value="failed"'  + (s==='failed' ?' selected':'') + '>Failed &#10007;</option>'
+      + '<option value="partial"' + (s==='partial'?' selected':'') + '>Partial</option>'
+      + '</select></div>'
+      + '<div class="gcard-body">' + esc(g.desc) + '</div>';
+    var gid = g.id;
+    card.querySelector('select').addEventListener('change', function(){
+      setGS(gid, this.value);
+    });
+    grid.appendChild(card);
+  });
+}
+
+// ── Risks ──────────────────────────────────────────────────────────────────
+function renderRisks(){
+  var html='';
+  RISKS.forEach(function(r){
+    var any=r.signals.some(function(s,i){return getRSig(r.id,i);});
+    html+='<div class="rcard'+(any?' triggered':'')+'">'
+      +'<div class="rcard-hdr"><span class="rid">'+esc(r.id)+'</span><div class="rtitle">'+esc(r.title)+'</div><span class="rlevel rl-'+r.level+'">'+r.level+'</span></div>'
+      +'<div class="rimpact">'+esc(r.impact)+'</div>';
+    r.signals.forEach(function(sig,i){
+      var on=getRSig(r.id,i);
+      html+='<div class="rsignal"><div class="rdot'+(on?' hot':'')+'"></div><div style="'+(on?'color:var(--red);font-weight:500':'')+'">'+esc(sig)+'</div></div>';
+    });
+    html+='<button class="rtrig-btn'+(any?' on':'')+'" data-rid="'+r.id+'" onclick="openRiskMod(this.dataset.rid)">'+(any?'SIGNALS ACTIVE — Update':'Mark signal triggered')+'</button>';
+    html+='</div>';
+  });
+  document.getElementById('riskGrid').innerHTML=html;
+}
+function openRiskMod(rid){
+  var r = RISKS.find(function(x){ return x.id === rid; });
+  if(!r) return;
+  var html2 = '<div style="margin-bottom:.75rem;font-size:.82rem;color:var(--body)">Check any warning signals currently observed:</div>';
+  r.signals.forEach(function(sig, i){
+    var checked = getRSig(rid, i);
+    html2 += '<label style="display:flex;align-items:flex-start;gap:.55rem;margin-bottom:.5rem;cursor:pointer;font-size:.82rem;color:var(--body)">'
+      + '<input type="checkbox" class="rsig-cb" data-rid="' + rid + '" data-idx="' + i + '" style="margin-top:3px;flex-shrink:0"' + (checked?' checked':'') + '>'
+      + esc(sig) + '</label>';
+  });
+  html2 += '<div style="margin-top:.75rem;padding:.55rem .7rem;background:var(--redl);border-radius:5px;font-size:.78rem;color:var(--red);font-weight:600">Any triggered signal = flag immediately at Monday Commercial Leadership meeting</div>';
+  openModRaw('Risk Signals — ' + r.title, html2);
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+function openMod(aid){
+  var a = ACTIONS.find(function(x){ return x.id === aid; });
+  if(!a) return;
+  var s = getAS(a.id);
+  var html2 = '<div style="display:flex;gap:.4rem;margin-bottom:.9rem;flex-wrap:wrap">'
+    + '<span class="badge ' + initCls(a.init) + '">' + initLabel(a.init) + '</span>'
+    + '<span style="font-family:IBM Plex Mono,monospace;font-size:.65rem;color:' + (a.gate?'var(--purple)':a.hot?'var(--amber)':'var(--dgrey)') + '">' + esc(a.period) + '</span>'
+    + (a.gate ? '<span class="badge b-gate">Gate Decision</span>' : '')
+    + (a.hot && !a.gate ? '<span class="badge b-hot">Current Sprint</span>' : '')
+    + '</div>';
+  if(a.deliverable) html2 += '<div class="mfield"><div class="mlabel">Deliverable</div><div class="mval">' + esc(a.deliverable) + '</div></div>';
+  html2 += '<div class="mfield"><div class="mlabel">Owners</div><div class="mval">' + a.owners.map(esc).join(' &middot; ') + '</div></div>';
+  html2 += '<div class="mfield"><div class="mlabel">Status</div>'
+    + '<select class="ssel ' + s + '" id="mSel">'
+    + Object.keys(STATUS_LABELS).map(function(sv){ return '<option value="' + sv + '"' + (s===sv?' selected':'') + '>' + STATUS_LABELS[sv] + '</option>'; }).join('')
+    + '</select></div>';
+  html2 += '<div class="mfield"><div class="mlabel">Notes</div>'
+    + '<textarea class="mta" id="mNotes" placeholder="Record call outcomes, blockers, next steps...">' + esc(getAN(aid)) + '</textarea>'
+    + '<button class="msave" id="mSaveBtn">Save &amp; Close</button>'
+    + '</div>';
+  openModRaw(a.title, html2);
+  document.getElementById('mSel').addEventListener('change', function(){ setAS(aid, this.value); this.className = 'ssel ' + this.value; });
+  document.getElementById('mSaveBtn').addEventListener('click', function(){ setAN(aid, document.getElementById('mNotes').value); closeMod(); });
+}
+function openModRaw(title, body){
+  document.getElementById('mTitle').textContent=title;
+  document.getElementById('mBody').innerHTML=body;
+  document.getElementById('mbackdrop').classList.add('on');
+}
+function closeMod(){ document.getElementById('mbackdrop').classList.remove('on'); refreshAll(); if(document.getElementById('view-actions').classList.contains('on')) renderActions(); if(document.getElementById('view-sprint').classList.contains('on')) renderSprint(); }
+
+// ── Init ───────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('dateLbl').textContent=new Date().toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+  buildFilters();
+  refreshAll();
+  renderActions();
+  renderSprint();
+  renderGates();
+  renderRisks();
+  renderPipeline();
+});
+</script>
+</body>
+</html>

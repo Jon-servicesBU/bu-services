@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BU Services CRM · Capabilities Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sky:#00AEEF;--navy:#0A1F5C;--blue:#1A5CA8;
+  --green:#16A34A;--amber:#D97706;--red:#DC2626;
+  --orange:#E97132;--purp:#7C3AED;
+  --bg:#060E1C;--surface:#0D1B2E;--mid:#132236;
+  --border:#1A2D45;--muted:#4A6080;
+  --white:#F0F6FF;--mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--white);min-height:100vh}
+
+/* NAV */
+.sticky-nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(6,14,28,.97);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(10px);
+  display:flex;align-items:center;gap:0;
+  padding:0 2rem;height:52px;
+}
+.nav-brand{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.85rem;font-weight:800;
+  color:#fff;letter-spacing:-.01em;
+  margin-right:2rem;white-space:nowrap;
+  flex-shrink:0;
+}
+.nav-brand span{color:var(--sky)}
+.nav-links{display:flex;gap:0;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{
+  padding:.25rem .75rem;font-size:.72rem;font-weight:600;
+  color:rgba(255,255,255,.4);text-decoration:none;
+  border-radius:4px;white-space:nowrap;transition:all .15s;cursor:pointer;
+}
+.nav-links a:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.05)}
+.nav-links a.active{color:#fff;background:rgba(0,174,239,.15)}
+.nav-cta{
+  flex-shrink:0;margin-left:.75rem;
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.28rem .75rem;border-radius:4px;
+  font-size:.7rem;font-weight:700;color:var(--sky);
+  border:1px solid rgba(0,174,239,.3);
+  text-decoration:none;transition:all .15s;white-space:nowrap;
+}
+.nav-cta:hover{background:rgba(0,174,239,.1);border-color:rgba(0,174,239,.6)}
+
+/* HERO */
+.hero{
+  padding:4rem 2rem 3rem;
+  border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+  background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(0,174,239,.07) 0%,transparent 70%);
+}
+.hero-tag{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.65rem;font-weight:700;letter-spacing:4px;
+  text-transform:uppercase;color:var(--sky);opacity:.8;
+  margin-bottom:.75rem;
+}
+.hero-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:3.2rem;font-weight:900;
+  letter-spacing:-.02em;line-height:.9;
+  color:#fff;margin-bottom:1rem;
+  max-width:700px;
+}
+.hero-title em{color:var(--sky);font-style:normal}
+.hero-lead{
+  font-size:1rem;color:rgba(255,255,255,.5);
+  max-width:600px;line-height:1.65;margin-bottom:2rem;
+}
+.hero-chips{display:flex;gap:.5rem;flex-wrap:wrap}
+.chip{
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.3rem .75rem;border-radius:20px;
+  font-size:.7rem;font-weight:700;
+  border:1px solid;transition:all .15s;
+}
+.chip-sky{border-color:rgba(0,174,239,.3);color:var(--sky);background:rgba(0,174,239,.08)}
+.chip-green{border-color:rgba(22,163,74,.3);color:#6EE7B7;background:rgba(22,163,74,.08)}
+.chip-amber{border-color:rgba(217,119,6,.3);color:#FCD34D;background:rgba(217,119,6,.08)}
+
+/* LAYOUT */
+.page{max-width:1100px;margin:0 auto;padding:0 2rem 4rem}
+
+/* SECTIONS */
+.cap-section{
+  padding:3rem 0 1.5rem;
+  border-bottom:1px solid var(--border);
+}
+.cap-section:last-child{border-bottom:none}
+.section-eyebrow{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.62rem;font-weight:700;letter-spacing:3px;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:.4rem;
+}
+.section-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.9rem;font-weight:900;
+  color:#fff;letter-spacing:-.01em;
+  margin-bottom:.5rem;line-height:1;
+}
+.section-title span{color:var(--sky)}
+.section-lead{
+  font-size:.88rem;color:rgba(255,255,255,.45);
+  max-width:600px;line-height:1.6;margin-bottom:2rem;
+}
+
+/* CAPABILITY CARDS */
+.cap-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:.75rem;margin-bottom:1.5rem;
+}
+.cap-card{
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  border-radius:10px;padding:1.1rem;
+  transition:border-color .15s,box-shadow .15s;
+}
+.cap-card:hover{
+  border-color:rgba(255,255,255,.12);
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+.cap-card.accent-sky{border-top:2px solid var(--sky)}
+.cap-card.accent-green{border-top:2px solid #22C55E}
+.cap-card.accent-amber{border-top:2px solid #F59E0B}
+.cap-card.accent-red{border-top:2px solid #EF4444}
+.cap-card.accent-purp{border-top:2px solid #A78BFA}
+.cap-card.accent-orange{border-top:2px solid var(--orange)}
+.cc-icon{font-size:1.3rem;margin-bottom:.5rem;display:block}
+.cc-title{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:.3rem}
+.cc-body{font-size:.76rem;color:rgba(255,255,255,.5);line-height:1.6}
+.cc-features{margin-top:.65rem;display:flex;flex-direction:column;gap:.2rem}
+.cc-feat{
+  display:flex;align-items:flex-start;gap:.4rem;
+  font-size:.73rem;color:rgba(255,255,255,.5);
+}
+.cc-feat::before{content:'→';color:var(--sky);flex-shrink:0;margin-top:.02rem;font-size:.65rem}
+
+/* FIELDS TABLE */
+.fields-table{
+  width:100%;border-collapse:collapse;
+  margin-bottom:1.5rem;
+}
+.fields-table th{
+  padding:.4rem .85rem;text-align:left;
+  font-family:var(--mono);font-size:.58rem;
+  font-weight:500;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--border);
+}
+.fields-table td{
+  padding:.5rem .85rem;
+  font-size:.78rem;color:rgba(255,255,255,.7);
+  border-bottom:1px solid rgba(255,255,255,.04);
+  vertical-align:top;
+}
+.fields-table tr:hover td{background:rgba(255,255,255,.02)}
+.field-name{
+  font-family:var(--mono);font-size:.7rem;
+  color:var(--sky);font-weight:500;
+}
+.req{color:var(--sky);font-weight:800}
+.field-opt{color:var(--muted);font-size:.65rem}
+
+/* STAGE FLOW */
+.stage-flow{
+  display:flex;align-items:center;gap:0;
+  margin:1rem 0 1.5rem;flex-wrap:wrap;
+}
+.stage-pill{
+  padding:.4rem 1rem;font-size:.72rem;font-weight:700;
+  border-radius:4px;white-space:nowrap;
+  text-transform:uppercase;letter-spacing:.4px;
+}
+.stage-arrow{
+  padding:0 .35rem;color:rgba(255,255,255,.2);
+  font-size:.7rem;
+}
+.s-qualify{background:rgba(100,116,139,.2);color:#94A3B8}
+.s-propose{background:rgba(14,165,233,.15);color:#38BDF8}
+.s-negotiate{background:rgba(245,158,11,.15);color:#FCD34D}
+.s-won{background:rgba(22,163,74,.15);color:#6EE7B7}
+.s-lost{background:rgba(239,68,68,.12);color:#FCA5A5}
+
+/* RULE CARDS */
+.rules-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:.75rem;margin-bottom:1.5rem;
+}
+.rule-card{
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  border-radius:8px;padding:1rem;
+}
+.rule-hdr{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.72rem;font-weight:700;letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:.6rem;
+}
+.rule-hdr.sky{color:var(--sky)}
+.rule-hdr.amber{color:#F59E0B}
+.rule-hdr.red{color:#EF4444}
+.rule-hdr.green{color:#6EE7B7}
+.rule-item{
+  font-size:.75rem;color:rgba(255,255,255,.55);
+  padding:.25rem 0;line-height:1.55;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.rule-item:last-child{border-bottom:none}
+.rule-item strong{color:rgba(255,255,255,.8)}
+
+/* CALLOUT */
+.callout{
+  display:flex;gap:.75rem;
+  background:rgba(0,174,239,.06);
+  border:1px solid rgba(0,174,239,.2);
+  border-radius:8px;padding:.9rem 1.1rem;
+  margin-bottom:1.25rem;
+  font-size:.8rem;color:rgba(255,255,255,.65);
+  line-height:1.6;
+}
+.callout-icon{font-size:1rem;flex-shrink:0;margin-top:.05rem}
+.callout.warn{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.2)}
+.callout.danger{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.2)}
+
+/* INITIATIVE TAGS */
+.init-tag{
+  display:inline-flex;align-items:center;
+  font-size:.62rem;font-weight:700;padding:.12rem .45rem;
+  border-radius:3px;text-transform:uppercase;letter-spacing:.4px;
+  white-space:nowrap;
+}
+.it-mining  {background:rgba(14,165,233,.15);color:#38BDF8}
+.it-pipeline{background:rgba(139,92,246,.15);color:#A78BFA}
+.it-nuclear {background:rgba(16,185,129,.15);color:#34D399}
+.it-power   {background:rgba(245,158,11,.15);color:#FCD34D}
+.it-3x      {background:rgba(239,68,68,.15);color:#FCA5A5}
+.it-base    {background:rgba(100,116,139,.15);color:#94A3B8}
+
+/* SYNC DIAGRAM */
+.sync-diagram{
+  background:rgba(255,255,255,.02);
+  border:1px solid var(--border);border-radius:10px;
+  padding:1.25rem;margin-bottom:1.5rem;
+  font-family:var(--mono);font-size:.75rem;
+  color:rgba(255,255,255,.5);line-height:2;
+}
+.sync-diagram .step{display:flex;align-items:center;gap:.75rem}
+.sync-diagram .step-num{
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(0,174,239,.15);border:1px solid rgba(0,174,239,.4);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.6rem;font-weight:800;color:var(--sky);flex-shrink:0;
+}
+.sync-diagram .step-text{flex:1}
+.sync-diagram .step-time{
+  font-size:.62rem;color:var(--sky);
+  background:rgba(0,174,239,.1);padding:.1rem .4rem;border-radius:3px;
+  white-space:nowrap;
+}
+.sync-arrow{padding:.1rem 0 .1rem 2.5rem;color:var(--muted);font-size:.65rem}
+
+/* FOOTER */
+.page-footer{
+  margin-top:3rem;padding:1.25rem 0;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:.65rem;color:var(--muted);font-family:var(--mono);
+}
+
+/* ANIM */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.animate{animation:fadeUp .4s ease both}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.3}}
+.pulse{animation:livepulse 2s ease-in-out infinite;display:inline-block}
+
+@media(max-width:700px){
+  .cap-grid{grid-template-columns:1fr}
+  .rules-grid{grid-template-columns:1fr}
+  .hero-title{font-size:2.2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <div class="nav-brand">BU Services <span>CRM</span></div>
+  <div class="nav-links">
+    <a href="#pipeline" onclick="setActive(this)">Pipeline</a>
+    <a href="#leads" onclick="setActive(this)">Leads</a>
+    <a href="#accounts" onclick="setActive(this)">Accounts</a>
+    <a href="#activities" onclick="setActive(this)">Activities</a>
+    <a href="#conferences" onclick="setActive(this)">Conferences</a>
+    <a href="#sync" onclick="setActive(this)">Sync</a>
+    <a href="#rules" onclick="setActive(this)">Rules</a>
+    <a href="#data" onclick="setActive(this)">Data &amp; Export</a>
+  </div>
+  <a class="nav-cta" href="BU_Services_CRM.html" target="buservices">Open CRM →</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">BU Services · Ekoscan Integrity Group</div>
+  <h1 class="hero-title">CRM<br><em>Capabilities Guide</em></h1>
+  <p class="hero-lead">A purpose-built commercial pipeline tool for BU Services' five growth initiatives. Replaces Salesforce for pipeline management — designed around your exact commercial structure, not a generic template.</p>
+  <div class="hero-chips">
+    <span class="chip chip-sky">🗂 6 Views</span>
+    <span class="chip chip-sky">📊 5 Record Types</span>
+    <span class="chip chip-green"><span class="pulse">●</span> Real-time Supabase sync</span>
+    <span class="chip chip-amber">⚠ 30-day stale alerts</span>
+    <span class="chip chip-amber">⏰ 48-hour conference rule</span>
+    <span class="chip chip-sky">↓ JSON export</span>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ══════════════════════════════ PIPELINE ══════════════════════════════ -->
+  <div class="cap-section" id="pipeline">
+    <div class="section-eyebrow">Record Type 01</div>
+    <div class="section-title">Pipeline <span>&amp; Opportunities</span></div>
+    <p class="section-lead">The core of the CRM. Every active commercial deal lives here — from first qualifying conversation through to Closed Won.</p>
+
+    <!-- Stage flow -->
+    <div class="stage-flow">
+      <span class="stage-pill s-qualify">Qualifying</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-pill s-propose">Proposing</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-pill s-negotiate">Negotiating</span>
+      <span class="stage-arrow">→</span>
+      <span class="stage-pill s-won">Closed Won</span>
+      <span class="stage-arrow">·</span>
+      <span class="stage-pill s-lost">Closed Lost</span>
+    </div>
+
+    <div class="cap-grid">
+      <div class="cap-card accent-sky">
+        <span class="cc-icon">🗂</span>
+        <div class="cc-title">Kanban Board</div>
+        <div class="cc-body">Five-column board showing every opportunity by stage. Click any card to open the detail panel with full history.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Total pipeline value shown per column</div>
+          <div class="cc-feat">Stale flag (⚠) on cards with no activity in 30+ days</div>
+          <div class="cc-feat">Overdue close date flag (📅) on past-due open deals</div>
+          <div class="cc-feat">Initiative colour tags on every card</div>
+        </div>
+      </div>
+      <div class="cap-card accent-sky">
+        <span class="cc-icon">📋</span>
+        <div class="cc-title">List View</div>
+        <div class="cc-body">Sortable table of all opportunities. Click any column header to sort. Every column is sortable.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Sort by name, initiative, owner, stage, amount, close date, last activity</div>
+          <div class="cc-feat">Filter by owner (Emmanuel / Vinoth / Rick / Mathieu / Olivier)</div>
+          <div class="cc-feat">Filter by status: All / Open / Stale</div>
+          <div class="cc-feat">Search by name, company, or owner</div>
+        </div>
+      </div>
+      <div class="cap-card accent-amber">
+        <span class="cc-icon">⚠</span>
+        <div class="cc-title">Stale Deal Alert</div>
+        <div class="cc-body">Any open opportunity with no activity logged in 30+ days triggers a red banner at the top of the pipeline view.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Banner counts total stale deals across all owners</div>
+          <div class="cc-feat">Stale filter isolates them for bulk review</div>
+          <div class="cc-feat">Syncs stale count to Command Centre proposals section</div>
+          <div class="cc-feat">Resets automatically when an activity is logged</div>
+        </div>
+      </div>
+      <div class="cap-card accent-green">
+        <span class="cc-icon">🔍</span>
+        <div class="cc-title">Detail Panel</div>
+        <div class="cc-body">Click any opportunity to open a side panel with the full record — no navigation required.</div>
+        <div class="cc-features">
+          <div class="cc-feat">All fields: stage, amount, close date, owner, region, technicians</div>
+          <div class="cc-feat">Next action field highlighted in amber</div>
+          <div class="cc-feat">Full activity history listed in reverse chronological order</div>
+          <div class="cc-feat">Edit and Log Activity buttons inside the panel</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fields table -->
+    <table class="fields-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Type</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="field-name">Opportunity Name <span class="req">*</span></td><td>Text</td><td>Convention: [Company] — [Service] — [Year]</td></tr>
+        <tr><td class="field-name">Account / Company <span class="req">*</span></td><td>Text + autocomplete</td><td>Auto-creates an Account record on save if new company</td></tr>
+        <tr><td class="field-name">BU Initiative <span class="req">*</span></td><td>Select</td><td>Mining NDT · Pipeline DA · Nuclear/OPG · Powerline · 3X Composite · Base Business</td></tr>
+        <tr><td class="field-name">Stage <span class="req">*</span></td><td>Select</td><td>Qualifying → Proposing → Negotiating → Closed Won / Closed Lost</td></tr>
+        <tr><td class="field-name">Amount (CAD $) <span class="req">*</span></td><td>Number</td><td>Used for pipeline totals synced to Command Centre</td></tr>
+        <tr><td class="field-name">Close Date <span class="req">*</span></td><td>Date</td><td>Triggers overdue flag if past date and still open</td></tr>
+        <tr><td class="field-name">Commercial Owner <span class="req">*</span></td><td>Select</td><td>6 owners — drives owner pipeline breakdown in CC</td></tr>
+        <tr><td class="field-name">Region <span class="field-opt">(optional)</span></td><td>Select</td><td>Quebec/Eastern · Central · Western · Northern · National</td></tr>
+        <tr><td class="field-name">Assigned Technicians <span class="field-opt">(optional)</span></td><td>Text</td><td>Enter on Closed Won — for reconciliation with BC</td></tr>
+        <tr><td class="field-name">Next Action <span class="field-opt">(optional)</span></td><td>Text</td><td>Shown highlighted in detail panel and Commercial Meeting agenda</td></tr>
+        <tr><td class="field-name">Notes <span class="field-opt">(optional)</span></td><td>Textarea</td><td>Free text — client background, key contacts, flags</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <span class="callout-icon">🗑️</span>
+      <div><strong>Deleting opportunities:</strong> Each row in list view has a red ✕ button. A confirmation prompt appears before deletion. Deleted opportunities are immediately removed from Supabase on the next sync. Cannot be undone — export JSON first if you need a backup.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ LEADS ══════════════════════════════ -->
+  <div class="cap-section" id="leads">
+    <div class="section-eyebrow">Record Type 02</div>
+    <div class="section-title">Leads</div>
+    <p class="section-lead">New contacts who haven't yet become opportunities. Every conference contact, cold outreach, and referral starts here.</p>
+
+    <div class="cap-grid">
+      <div class="cap-card accent-sky">
+        <span class="cc-icon">⚡</span>
+        <div class="cc-title">Lead Capture</div>
+        <div class="cc-body">Full contact record — name, company, title, email, phone, initiative, source, rating, notes.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Rating: Hot (asked for quote) / Warm (interested) / Cold (early)</div>
+          <div class="cc-feat">Conference field links lead to the conference record</div>
+          <div class="cc-feat">48-hour deadline badge appears on conference leads within the window</div>
+          <div class="cc-feat">Auto-creates Account record on save if new company</div>
+        </div>
+      </div>
+      <div class="cap-card accent-green">
+        <span class="cc-icon">→</span>
+        <div class="cc-title">Lead Conversion</div>
+        <div class="cc-body">One-click conversion from Lead to Opportunity. Pre-fills company, initiative, and owner into the opportunity form.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Convert button on each lead row in the table</div>
+          <div class="cc-feat">"Save + Convert" button in the lead creation modal</div>
+          <div class="cc-feat">Lead is marked as Converted — stays in leads table with green ✓ Converted badge</div>
+          <div class="cc-feat">Lead data is not deleted on conversion</div>
+        </div>
+      </div>
+      <div class="cap-card accent-amber">
+        <span class="cc-icon">⏰</span>
+        <div class="cc-title">48-Hour Conference Rule</div>
+        <div class="cc-body">All conference leads must be entered within 48 hours of returning from the show. The CRM enforces this visually.</div>
+        <div class="cc-features">
+          <div class="cc-feat">"Needs Entry" filter shows only leads due within 48h window</div>
+          <div class="cc-feat">Conference lead count syncs to CC conference section</div>
+          <div class="cc-feat">Conference record tracks leads entered vs target</div>
+          <div class="cc-feat">Progress bar on conference card turns red if below target</div>
+        </div>
+      </div>
+      <div class="cap-card accent-purp">
+        <span class="cc-icon">🔍</span>
+        <div class="cc-title">Lead Filters</div>
+        <div class="cc-body">Filter the leads table by rating, source, or conference deadline status.</div>
+        <div class="cc-features">
+          <div class="cc-feat">All / Hot / Warm / Cold / Needs Entry</div>
+          <div class="cc-feat">Search by name or company</div>
+          <div class="cc-feat">Days since created shown on each row</div>
+          <div class="cc-feat">Delete: red ✕ on each row with confirm prompt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ ACCOUNTS ══════════════════════════════ -->
+  <div class="cap-section" id="accounts">
+    <div class="section-eyebrow">Record Type 03</div>
+    <div class="section-title">Accounts</div>
+    <p class="section-lead">Companies and operators. Created automatically when you add an opportunity or lead with a new company name — or manually for key target accounts.</p>
+
+    <div class="cap-grid">
+      <div class="cap-card accent-sky">
+        <span class="cc-icon">🏢</span>
+        <div class="cc-title">Account Cards</div>
+        <div class="cc-body">Grid of company cards showing open opportunity count, Closed Won revenue, primary contact, and initiative tag.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Click any card to open detail panel with full opportunity list</div>
+          <div class="cc-feat">Search by company name</div>
+          <div class="cc-feat">Industry + region shown on each card</div>
+          <div class="cc-feat">Won revenue shown in green if any Closed Won deals exist</div>
+        </div>
+      </div>
+      <div class="cap-card accent-green">
+        <span class="cc-icon">⚙️</span>
+        <div class="cc-title">Auto-Creation</div>
+        <div class="cc-body">When you save an opportunity or lead with a company name that doesn't exist in Accounts, a new Account is created automatically using the company name and initiative.</div>
+        <div class="cc-features">
+          <div class="cc-feat">No duplicate check — add details manually after auto-creation</div>
+          <div class="cc-feat">Edit any account to add industry, region, primary contact, notes</div>
+          <div class="cc-feat">Delete: red ✕ on each card with confirm prompt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ ACTIVITIES ══════════════════════════════ -->
+  <div class="cap-section" id="activities">
+    <div class="section-eyebrow">Record Type 04</div>
+    <div class="section-title">Activity Log</div>
+    <p class="section-lead">Every client touchpoint — calls, meetings, site visits, emails, proposals sent. The activity log is the evidence that deals are being worked and updates the "last activity" clock on linked opportunities.</p>
+
+    <div class="cap-grid">
+      <div class="cap-card accent-sky">
+        <span class="cc-icon">📝</span>
+        <div class="cc-title">Activity Types</div>
+        <div class="cc-body">Meeting · Call · Site Visit · Email · Conference · Proposal Sent</div>
+        <div class="cc-features">
+          <div class="cc-feat">Each type shown with icon in the feed</div>
+          <div class="cc-feat">Date, contact name, linked opportunity, owner on every record</div>
+          <div class="cc-feat">Notes field — what was discussed, what was agreed</div>
+          <div class="cc-feat">Next Action field — shown in amber, links to what happens next</div>
+        </div>
+      </div>
+      <div class="cap-card accent-red">
+        <span class="cc-icon">🔴</span>
+        <div class="cc-title">AMBER / RED Finding Flag</div>
+        <div class="cc-body">When logging an activity, a field allows flagging an AMBER or RED field inspection finding — a signal that a 3X Composite repair opportunity may exist.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Flagged activities show a coloured ⚠ badge in the feed</div>
+          <div class="cc-feat">Toast notification: "AMBER finding logged — 3X Composite opportunity flagged!"</div>
+          <div class="cc-feat">Prompts the commercial owner to create a 3X Composite opportunity</div>
+        </div>
+      </div>
+      <div class="cap-card accent-green">
+        <span class="cc-icon">🔗</span>
+        <div class="cc-title">Linked to Opportunities</div>
+        <div class="cc-body">Activities can be linked to any open opportunity. Saving an activity automatically updates the opportunity's "last activity" date, resetting the 30-day stale clock.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Dropdown of all open opportunities in the activity modal</div>
+          <div class="cc-feat">Activity history appears in the opportunity detail panel</div>
+          <div class="cc-feat">Linked opportunity name shown in the activity feed</div>
+          <div class="cc-feat">Delete: red ✕ Remove on each activity card</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ CONFERENCES ══════════════════════════════ -->
+  <div class="cap-section" id="conferences">
+    <div class="section-eyebrow">Record Type 05</div>
+    <div class="section-title">Conference Tracker</div>
+    <p class="section-lead">Tracks every BU Services conference attendance — leads entered vs target, the 48-hour deadline, and the downstream opportunity pipeline from each show.</p>
+
+    <div class="cap-grid">
+      <div class="cap-card accent-amber">
+        <span class="cc-icon">🎪</span>
+        <div class="cc-title">Conference Records</div>
+        <div class="cc-body">One record per conference attendance. Name, return date, attending owner, leads entered, leads target, notes.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Progress bar: leads entered vs target (green at 100%, amber at 60%, red below)</div>
+          <div class="cc-feat">48-hour deadline badge appears if return date was ≤ 2 days ago and target not met</div>
+          <div class="cc-feat">Edit at any time to update leads entered as you log them</div>
+          <div class="cc-feat">Delete: red ✕ with confirm prompt</div>
+        </div>
+      </div>
+      <div class="cap-card accent-sky">
+        <span class="cc-icon">📊</span>
+        <div class="cc-title">Syncs to Command Centre</div>
+        <div class="cc-body">Conference lead counts feed directly into the Command Centre's Conference section via Supabase sync.</div>
+        <div class="cc-features">
+          <div class="cc-feat">leads_ytd — total conference leads entered year to date</div>
+          <div class="cc-feat">opps_ytd — opportunities created from converted leads</div>
+          <div class="cc-feat">opp_value_ytd — total pipeline value from conference-sourced opps</div>
+          <div class="cc-feat">Updates within 1.5 seconds of any change</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conference list -->
+    <div style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem">2026 Conference Calendar (pre-loaded)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.4rem;font-size:.72rem;color:rgba(255,255,255,.5)">
+        <span>CIM Vancouver — May 4–6</span>
+        <span>IPEIA 2026 — Mar 10–12</span>
+        <span>IPC Pipeline — Sep 21–25</span>
+        <span>IPCE Pipeline — Sep 22–24</span>
+        <span>CNA 2026 — Apr 28–30</span>
+        <span>T&amp;D Conference — May 4–7</span>
+        <span>CEN CAN Expo — Sep 9–10</span>
+        <span>Canadian Mining Expo — Jun 9–11</span>
+        <span>ASNT 2026 — Oct 12–15</span>
+        <span>ECNDT Verona — Jun 15–19</span>
+        <span>API Inspection Summit — Jul 20–23</span>
+        <span>Direct Outreach / Referral</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ SYNC ══════════════════════════════ -->
+  <div class="cap-section" id="sync">
+    <div class="section-eyebrow">Integration</div>
+    <div class="section-title">Sync <span>&amp; Integration</span></div>
+    <p class="section-lead">How the CRM connects to the Command Centre and Management Hub in real time — across all team members' devices.</p>
+
+    <div class="sync-diagram">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Team member saves an opportunity, lead, or activity in the CRM</div>
+        <div class="step-time">T+0s</div>
+      </div>
+      <div class="sync-arrow">↓ debounce 1.5s (groups rapid changes)</div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Sync engine computes aggregates: pipeline by initiative, proposal counts, conversion rates, owner breakdowns, conference stats</div>
+        <div class="step-time">T+1.5s</div>
+      </div>
+      <div class="sync-arrow">↓ HTTP POST to Supabase REST API</div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Supabase writes to crm_sync table — row "pipeline_sync" updated, row "hub_summary" updated</div>
+        <div class="step-time">T+1.6s</div>
+      </div>
+      <div class="sync-arrow">↓ Postgres change event → WebSocket push</div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">Command Centre receives realtime push · applyCRMOverlay() runs · Pipeline, Proposals, Reconciliation, Meeting Health sections re-render</div>
+        <div class="step-time">T+2s</div>
+      </div>
+      <div class="sync-arrow">↓ parallel</div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-text">Management Hub reads hub_summary on next load — pipeline strip updates</div>
+        <div class="step-time">Next load</div>
+      </div>
+    </div>
+
+    <div class="cap-grid">
+      <div class="cap-card accent-sky">
+        <span class="cc-icon">📡</span>
+        <div class="cc-title">Sync Status Indicator</div>
+        <div class="cc-body">The sync dot in the CRM topnav shows the current sync state at all times.</div>
+        <div class="cc-features">
+          <div class="cc-feat">🟡 Pulsing = syncing to Supabase now</div>
+          <div class="cc-feat">🟢 "Synced HH:MM" = confirmed written to shared database</div>
+          <div class="cc-feat">🔴 "Offline — local only" = Supabase unreachable, saved locally</div>
+          <div class="cc-feat">Click the indicator to force a manual sync at any time</div>
+        </div>
+      </div>
+      <div class="cap-card accent-green">
+        <span class="cc-icon">🛡️</span>
+        <div class="cc-title">Offline Fallback</div>
+        <div class="cc-body">If Supabase is unreachable, every save still writes to localStorage. No data is lost. On reconnection, the next save syncs everything.</div>
+        <div class="cc-features">
+          <div class="cc-feat">localStorage is the primary data store for each user's CRM records</div>
+          <div class="cc-feat">Supabase holds only aggregated pipeline data (no individual deal records)</div>
+          <div class="cc-feat">CC falls back to localStorage copy if Supabase unavailable</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">ℹ️</span>
+      <div><strong>What Supabase stores vs what stays local:</strong> Individual deal names, company names, contact details, and notes stay in each user's browser localStorage only. Supabase receives only aggregated values — total pipeline in $M per initiative, counts of open/stalled deals, won MTD. No PII or deal-level detail is in the cloud database.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ RULES ══════════════════════════════ -->
+  <div class="cap-section" id="rules">
+    <div class="section-eyebrow">Operating Rules</div>
+    <div class="section-title">Built-in <span>Commercial Rules</span></div>
+    <p class="section-lead">Rules from the BU Services Commercial Operating Model are enforced directly in the CRM UI — not documented separately, built in.</p>
+
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="rule-hdr sky">Pipeline Management</div>
+        <div class="rule-item"><strong>30-day stale rule</strong> — any open opportunity with no logged activity in 30+ days shows ⚠ Stale flag. Banner count shown at top of pipeline.</div>
+        <div class="rule-item"><strong>Friday Salesforce update</strong> — the CRM auto-syncs to Supabase on every save. The equivalent of the mandatory Friday SF update is implicit: when you save, you sync.</div>
+        <div class="rule-item"><strong>Stage discipline</strong> — five stages map directly to BU Services' commercial process. Closed Lost is not deleted — it stays for conversion rate calculation.</div>
+        <div class="rule-item"><strong>Close date tracking</strong> — past close dates on open deals highlight in red. Deals with close dates within 14 days highlight in amber.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-hdr amber">Conference Rules</div>
+        <div class="rule-item"><strong>48-hour lead entry</strong> — all conference leads must be entered within 48 hours of returning. The CRM shows a ⏰ deadline badge and a "Needs Entry" filter.</div>
+        <div class="rule-item"><strong>Lead target</strong> — each conference record has a target leads count. Progress bar goes red if entered leads fall below target.</div>
+        <div class="rule-item"><strong>Lead source tracking</strong> — every lead has a source field with all 2026 BU Services conferences pre-loaded as options.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-hdr red">3X Composite Rule</div>
+        <div class="rule-item"><strong>AMBER/RED finding flag</strong> — when logging an activity, any field inspection finding can be flagged as AMBER or RED. This triggers a toast alert to create a 3X Composite opportunity.</div>
+        <div class="rule-item"><strong>Visual flag</strong> — flagged activities show a coloured badge in the activity feed so nothing is missed in review.</div>
+        <div class="rule-item"><strong>Syncs to CC</strong> — 3X pipeline total flows to the Command Centre initiative tracker.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-hdr green">Data Integrity</div>
+        <div class="rule-item"><strong>Required fields</strong> — opportunity name, company, initiative, stage, amount, close date, and owner are required. The form blocks save if any are missing.</div>
+        <div class="rule-item"><strong>Deletion confirmation</strong> — all five record types (opportunities, leads, accounts, activities, conferences) require a confirmation prompt before deletion. Cannot be undone.</div>
+        <div class="rule-item"><strong>Auto-account creation</strong> — saving a new company name automatically creates an Account record. Prevents orphaned opportunities.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ DATA & EXPORT ══════════════════════════════ -->
+  <div class="cap-section" id="data">
+    <div class="section-eyebrow">Data &amp; Storage</div>
+    <div class="section-title">Data Storage <span>&amp; Export</span></div>
+    <p class="section-lead">Where your data lives, how to back it up, and what to do if you need to move devices.</p>
+
+    <div class="cap-grid">
+      <div class="cap-card accent-sky">
+        <span class="cc-icon">💾</span>
+        <div class="cc-title">localStorage — Individual Records</div>
+        <div class="cc-body">Every deal, lead, account, activity, and conference you enter is stored in your browser's localStorage under five keys.</div>
+        <div class="cc-features">
+          <div class="cc-feat">bucrm_opps — all opportunity records</div>
+          <div class="cc-feat">bucrm_leads — all lead records</div>
+          <div class="cc-feat">bucrm_accounts — all account records</div>
+          <div class="cc-feat">bucrm_activities — all activity records</div>
+          <div class="cc-feat">bucrm_conferences — all conference records</div>
+        </div>
+      </div>
+      <div class="cap-card accent-green">
+        <span class="cc-icon">🗄️</span>
+        <div class="cc-title">Supabase — Aggregates Only</div>
+        <div class="cc-body">Supabase stores only two rows of computed aggregate data — no individual deal details. Safe to leave the anon key in the HTML files.</div>
+        <div class="cc-features">
+          <div class="cc-feat">pipeline_sync — full aggregate payload ($M totals, counts, owner breakdown)</div>
+          <div class="cc-feat">hub_summary — lightweight summary for Management Hub strip</div>
+          <div class="cc-feat">No PII, no deal names, no company names in Supabase</div>
+        </div>
+      </div>
+      <div class="cap-card accent-amber">
+        <span class="cc-icon">↓</span>
+        <div class="cc-title">JSON Export</div>
+        <div class="cc-body">Export all CRM data to a structured JSON file at any time. Dashboard view → Export JSON button (top right).</div>
+        <div class="cc-features">
+          <div class="cc-feat">Filename: BU_Services_CRM_YYYY-MM-DD.json</div>
+          <div class="cc-feat">Contains all five record types in full</div>
+          <div class="cc-feat">Use for backup before clearing browser data</div>
+          <div class="cc-feat">Use for migration to new device (import not yet built — copy-paste seedDemoData pattern)</div>
+        </div>
+      </div>
+      <div class="cap-card accent-purp">
+        <span class="cc-icon">🔄</span>
+        <div class="cc-title">Multi-Device / Multi-User</div>
+        <div class="cc-body">Individual deal records are per-browser. Aggregated pipeline data is shared via Supabase. Each commercial team member runs their own CRM locally.</div>
+        <div class="cc-features">
+          <div class="cc-feat">Emmanuel's deals → his localStorage → Supabase → Jon's CC</div>
+          <div class="cc-feat">Rick's deals → his localStorage → Supabase → Jon's CC</div>
+          <div class="cc-feat">All team members' pipeline aggregates converge in CC in real time</div>
+          <div class="cc-feat">Full team deal list requires Phase 2 (Graph API + SharePoint backend)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout danger">
+      <span class="callout-icon">⚠️</span>
+      <div><strong>Important:</strong> Clearing your browser data (cookies &amp; site data) will delete all CRM records from localStorage. Export JSON regularly as your backup. The Supabase aggregates will survive a browser clear but your individual deal records will not.</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ INITIATIVES ══════════════════════════════ -->
+  <div class="cap-section">
+    <div class="section-eyebrow">Reference</div>
+    <div class="section-title">BU_Initiative__c <span>Field Values</span></div>
+    <p class="section-lead">The BU Initiative field maps directly to BU Services' five growth initiatives plus base business. Every opportunity, lead, and account is tagged to one initiative.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem;margin-bottom:1rem">
+      <div class="cap-card accent-sky">
+        <span class="init-tag it-mining" style="margin-bottom:.5rem;font-size:.7rem">Mining NDT</span>
+        <div class="cc-title">01 — Canadian Mining NDT</div>
+        <div class="cc-body">ECA gear inspection, robotic UT mill shell surveys. 12 active accounts. Owners: Emmanuel Aggrey (West) · Vinoth Tharma (East).</div>
+      </div>
+      <div class="cap-card accent-purp">
+        <span class="init-tag it-pipeline" style="margin-bottom:.5rem;font-size:.7rem">Pipeline DA</span>
+        <div class="cc-title">02 — Pipeline Integrity DA</div>
+        <div class="cc-body">Direct assessment digs. 6-rig fleet build. Pembina + TC Energy + Tidewater. Owner: Rick Carlton · Joel Carlton.</div>
+      </div>
+      <div class="cap-card accent-green">
+        <span class="init-tag it-nuclear" style="margin-bottom:.5rem;font-size:.7rem">Nuclear/OPG</span>
+        <div class="cc-title">03 — Nuclear &amp; Utility (OPG)</div>
+        <div class="cc-body">OPG Darlington outage inspection. Vendor approval in progress. Owner: Vinoth Tharma · Jon Eustace (executive).</div>
+      </div>
+      <div class="cap-card accent-orange">
+        <span class="init-tag it-power" style="margin-bottom:.5rem;font-size:.7rem">Powerline</span>
+        <div class="cc-title">04 — Powerline Inspection</div>
+        <div class="cc-body">EIG instrument partnership. Hydro One, Emera, NS Power. Owner: Mathieu Beauchesne · Vinoth Tharma · Emmanuel Aggrey.</div>
+      </div>
+      <div class="cap-card accent-red">
+        <span class="init-tag it-3x" style="margin-bottom:.5rem;font-size:.7rem">3X Composite</span>
+        <div class="cc-title">05 — 3X Composite Repair</div>
+        <div class="cc-body">AMBER/RED field finding → composite repair opportunity. Triggered from activity log. ABSA Step 1 + Step 2 scope.</div>
+      </div>
+      <div class="cap-card">
+        <span class="init-tag it-base" style="margin-bottom:.5rem;font-size:.7rem">Base Business</span>
+        <div class="cc-title">Base Business</div>
+        <div class="cc-body">Nucleom recurring PAUT/UT accounts, Nortech RockX NDT services. Used for renewal and expansion of existing client base.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="page-footer" style="padding-left:2rem;padding-right:2rem">
+  <span>BU Services CRM · Ekoscan Integrity Group · Jon Eustace, CEO North America · Confidential</span>
+  <span>Capabilities Guide v2.0 · April 2026</span>
+</div>
+
+<script>
+function setActive(el) {
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  el.classList.add('active');
+}
+// Scroll spy
+window.addEventListener('scroll', function() {
+  const sections = ['pipeline','leads','accounts','activities','conferences','sync','rules','data'];
+  const y = window.scrollY + 80;
+  let active = null;
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= y) active = id;
+  });
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + active);
+  });
+});
+</script>
+</body></html>

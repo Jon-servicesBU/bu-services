@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — New Team Member Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0A1F5C;--blue:#1A5CA8;--sky:#00AEEF;--teal:#0D5050;
+  --green:#16A34A;--amber:#C9860A;--red:#B91C1C;--purp:#6D28D9;
+  --white:#FFFFFF;--dgrey:#6678A0;--dark:#1C2B4A;--mid:#2D4A7A;--bg:#0A1425;
+  --mono:'IBM Plex Mono',monospace;--fd:'Barlow Condensed',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:#E8EDF5;min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:var(--sky);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,var(--navy) 0%,#0D2D6E 50%,var(--blue) 100%);
+  padding:3rem 3rem 2.5rem;border-bottom:4px solid var(--sky);position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;right:-5%;top:-30%;width:40%;height:150%;
+  background:radial-gradient(ellipse,rgba(0,174,239,.1) 0%,transparent 65%);pointer-events:none}
+.hdr-badge{display:inline-block;font-family:var(--mono);font-size:.62rem;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--sky);
+  background:rgba(0,174,239,.1);border:1px solid rgba(0,174,239,.2);
+  border-radius:3px;padding:.2rem .6rem;margin-bottom:1rem}
+.hdr h1{font-family:var(--fd);font-size:3rem;font-weight:900;color:#fff;line-height:1;margin-bottom:.4rem}
+.hdr h1 em{color:var(--sky);font-style:normal}
+.hdr .subtitle{font-size:.9rem;color:rgba(255,255,255,.65);line-height:1.6;max-width:620px;margin-bottom:1.5rem}
+.hdr-pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.hdr-pill{font-size:.62rem;font-weight:700;padding:.18rem .55rem;border-radius:3px;
+  text-transform:uppercase;letter-spacing:.05em;font-family:var(--mono)}
+
+/* MAIN GRID */
+.main{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto;
+  gap:1.25rem;padding:2rem 2.5rem;max-width:1440px;margin:0 auto}
+.main > *{min-width:0}
+
+/* CARDS */
+.card{background:var(--dark);border:1px solid var(--mid);border-radius:10px;overflow:hidden}
+.card-top{height:4px}
+.card-hdr{padding:.9rem 1.25rem .7rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.card-hdr .ch-eyebrow{font-family:var(--mono);font-size:.58rem;font-weight:500;
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.2rem}
+.card-hdr h2{font-family:var(--fd);font-size:1.25rem;font-weight:900;color:#fff}
+.card-body{padding:.85rem 1.25rem}
+.card-body p{font-size:.75rem;color:#A8B8D0;line-height:1.65;margin-bottom:.75rem}
+.card-body p:last-child{margin-bottom:0}
+
+/* INITIATIVES CARD spans 2 cols */
+.span2{grid-column:span 2}
+
+/* INITIATIVE ROWS */
+.init-row{display:grid;grid-template-columns:3px 1fr 80px;gap:.7rem;align-items:start;
+  padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.init-row:last-child{border-bottom:none}
+.init-bar{width:3px;border-radius:2px;height:100%;min-height:40px;flex-shrink:0;align-self:stretch}
+.init-name{font-weight:700;font-size:.78rem;color:#E8EDF5;margin-bottom:.15rem}
+.init-desc{font-size:.68rem;color:#A8B8D0;line-height:1.5}
+.init-owner{font-size:.62rem;color:var(--dgrey);text-align:right;white-space:nowrap;font-family:var(--mono);padding-top:.1rem}
+.init-value{font-size:.65rem;color:var(--sky);font-family:var(--mono);text-align:right;margin-top:.1rem}
+
+/* PEOPLE GRID */
+.people-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.person-chip{background:rgba(255,255,255,.04);border:1px solid var(--mid);border-radius:6px;
+  padding:.5rem .7rem;display:flex;align-items:flex-start;gap:.5rem}
+.person-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:.3rem}
+.person-name{font-weight:700;font-size:.72rem;color:#E8EDF5}
+.person-role{font-size:.6rem;color:var(--dgrey);margin-top:.08rem;line-height:1.35}
+
+/* SYSTEM CARDS */
+.portal-row{display:flex;align-items:center;gap:.75rem;padding:.55rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .15s;
+  border-radius:4px;margin:0 -.25rem;padding-left:.25rem;padding-right:.25rem}
+.portal-row:last-child{border-bottom:none}
+.portal-row:hover{background:rgba(255,255,255,.03)}
+.portal-icon{font-size:1rem;flex-shrink:0}
+.portal-name{font-weight:700;font-size:.75rem;color:#E8EDF5}
+.portal-desc{font-size:.63rem;color:var(--dgrey);margin-top:.05rem}
+.portal-arrow{margin-left:auto;color:var(--dgrey);font-size:.75rem}
+
+/* MEETINGS LIST */
+.meeting-row{display:flex;justify-content:space-between;align-items:baseline;
+  padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.72rem}
+.meeting-row:last-child{border-bottom:none}
+.meeting-name{color:#E8EDF5;font-weight:600}
+.meeting-meta{font-size:.62rem;color:var(--dgrey);font-family:var(--mono);text-align:right}
+
+/* WEEK RHYTHM */
+.day-row{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05)}
+.day-row:last-child{border-bottom:none}
+.day-label{font-family:var(--fd);font-size:.75rem;font-weight:800;color:var(--sky);
+  min-width:70px;flex-shrink:0;margin-top:.05rem}
+.day-items{font-size:.7rem;color:#A8B8D0;line-height:1.6}
+.day-items strong{color:#E8EDF5}
+
+/* SF REMINDER */
+.sf-box{background:rgba(22,163,74,.06);border:1px solid rgba(22,163,74,.2);border-radius:6px;padding:.7rem .9rem;margin-bottom:.75rem}
+.sf-box .sf-title{font-weight:700;font-size:.75rem;color:#6EE7B7;margin-bottom:.3rem}
+.sf-box p{font-size:.7rem;color:#A8B8D0;line-height:1.55;margin:0}
+
+/* RULE ROWS */
+.rule-row{display:flex;align-items:flex-start;gap:.5rem;padding:.35rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05);font-size:.72rem;color:#A8B8D0;line-height:1.5}
+.rule-row:last-child{border-bottom:none}
+.rule-num{font-family:var(--fd);font-size:.9rem;font-weight:900;color:var(--sky);
+  flex-shrink:0;min-width:1.2rem}
+
+/* LINKS SECTION */
+.link-row{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;
+  border-bottom:1px solid rgba(255,255,255,.05);text-decoration:none}
+.link-row:last-child{border-bottom:none}
+.link-row:hover .link-name{color:var(--sky)}
+.link-icon{font-size:.85rem;flex-shrink:0}
+.link-name{font-weight:700;font-size:.72rem;color:#E8EDF5;transition:color .15s}
+.link-desc{font-size:.62rem;color:var(--dgrey);margin-left:auto;text-align:right;max-width:160px}
+
+/* FOOTER */
+footer{background:rgba(10,20,37,.8);border-top:1px solid var(--mid);
+  padding:.85rem 2.5rem;text-align:center;font-size:.62rem;color:var(--dgrey)}
+
+@media(max-width:1000px){.main{grid-template-columns:1fr 1fr}.span2{grid-column:span 2}}
+@media(max-width:680px){.main{grid-template-columns:1fr;padding:1rem}.span2{grid-column:span 1}
+  .people-grid{grid-template-columns:1fr}.hdr{padding:2rem 1.5rem 1.5rem}.hdr h1{font-size:2.2rem}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-badge">Ekoscan Integrity Group &nbsp;&middot;&nbsp; BU Services &nbsp;&middot;&nbsp; Internal</div>
+  <h1>Welcome to<br><em>BU Services</em></h1>
+  <p class="subtitle">Everything you need to understand the team, the business, and how the commercial system works — in five minutes.</p>
+  <div class="hdr-pills">
+    <span class="hdr-pill" style="background:rgba(0,174,239,.12);color:var(--sky);border:1px solid rgba(0,174,239,.25)">Jon Eustace · CEO NA · EIG</span>
+    <span class="hdr-pill" style="background:rgba(255,255,255,.06);color:#A8B8D0;border:1px solid var(--mid)">Nucleom + Nortech</span>
+    <span class="hdr-pill" style="background:rgba(255,255,255,.06);color:#A8B8D0;border:1px solid var(--mid)">5 Growth Initiatives</span>
+    <span class="hdr-pill" style="background:rgba(255,255,255,.06);color:#A8B8D0;border:1px solid var(--mid)">$92.8M target by 2030</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- WHAT IS BU SERVICES -->
+  <div class="card">
+    <div class="card-top" style="background:var(--sky)"></div>
+    <div class="card-hdr">
+      <div class="ch-eyebrow" style="color:var(--sky)">The business</div>
+      <h2>What is BU Services?</h2>
+    </div>
+    <div class="card-body">
+      <p><strong style="color:#E8EDF5">BU Services</strong> is the commercial and operational platform that sits above two NDT companies: <strong style="color:#E8EDF5">Nucleom Inc.</strong> (employed by, largest entity) and <strong style="color:#E8EDF5">Nortech Advanced NDT</strong>. Together they deliver industrial inspection, data analytics, and composite repair services across Canada.</p>
+      <p>Jon Eustace is CEO North America at Ekoscan Integrity Group (EIG) — the parent company. His mandate is to hit a <strong style="color:#E8EDF5">$92.8M revenue target by 2030</strong> across five growth initiatives, while running the base business of both companies.</p>
+      <p>Eurazeo is EIG's investor. Jon reports quarterly to Eurazeo on revenue, EBITDA, CAPEX, and initiative progress. This shapes how the whole commercial system is built — everything feeds into the Eurazeo reporting pack.</p>
+    </div>
+  </div>
+
+  <!-- THE FIVE INITIATIVES -->
+  <div class="card span2">
+    <div class="card-top" style="background:var(--blue)"></div>
+    <div class="card-hdr">
+      <div class="ch-eyebrow" style="color:#7DD3FC">5-year growth plan</div>
+      <h2>The Five Initiatives</h2>
+    </div>
+    <div class="card-body">
+      <div class="init-row">
+        <div class="init-bar" style="background:var(--green)"></div>
+        <div><div class="init-name">01 &nbsp;Mining NDT</div><div class="init-desc">Expand SG NDT ECA instrument inspections across Canadian mining operations. CIM and Mining Expo are the primary conference plays. Crew-intensive across all regions.</div></div>
+        <div><div class="init-owner">Vinoth / Max</div><div class="init-value">$17.9M / 5yr</div></div>
+      </div>
+      <div class="init-row">
+        <div class="init-bar" style="background:var(--amber)"></div>
+        <div><div class="init-name">02 &nbsp;Pipeline DA</div><div class="init-desc">Nortech pipeline integrity and data analytics in Western Canada, then coast-to-coast. Rick Carlton leads the programme; Jason Borza delivers via Nortech.</div></div>
+        <div><div class="init-owner">Rick Carlton</div><div class="init-value">$30.0M / 5yr</div></div>
+      </div>
+      <div class="init-row">
+        <div class="init-bar" style="background:var(--sky)"></div>
+        <div><div class="init-name">03 &nbsp;Powerline</div><div class="init-desc">LineCore, LineOhm, LineRay inspection services for Canadian utilities. Hydro-Québec is the anchor target. Mathieu owns EVP-level utility relationships.</div></div>
+        <div><div class="init-owner">Mathieu B</div><div class="init-value">$10.2M / 5yr</div></div>
+      </div>
+      <div class="init-row">
+        <div class="init-bar" style="background:var(--purp)"></div>
+        <div><div class="init-name">04 &nbsp;Nuclear / OPG</div><div class="init-desc"><strong style="color:#E8EDF5">The defining initiative.</strong> Two tracks: MSA/maintenance with OPG (Vinoth owns) and Aecon/new build/refurb (Olivier owns). OPG MSA tender submission due Q3 2026 — this is the most critical gate in the plan.</div></div>
+        <div><div class="init-owner">Olivier / Vinoth</div><div class="init-value">$47.9M / 5yr</div></div>
+      </div>
+      <div class="init-row">
+        <div class="init-bar" style="background:var(--red)"></div>
+        <div><div class="init-name">05 &nbsp;3X Composite Repair</div><div class="init-desc">Non-intrusive composite repair on pressure and non-pressure assets. Triggered by AMBER/RED findings in the field. ABSA re-submission required to unlock pressure repair revenue.</div></div>
+        <div><div class="init-owner">Vinoth / Max</div><div class="init-value">$11.4M / 5yr</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE TEAM -->
+  <div class="card span2">
+    <div class="card-top" style="background:var(--teal)"></div>
+    <div class="card-hdr">
+      <div class="ch-eyebrow" style="color:#5EEAD4">The team</div>
+      <h2>Who Does What</h2>
+    </div>
+    <div class="card-body">
+      <div class="people-grid">
+        <div class="person-chip">
+          <div class="person-dot" style="background:var(--sky)"></div>
+          <div><div class="person-name">Jon Eustace</div><div class="person-role">CEO North America, EIG. Strategy, Eurazeo reporting, gate decisions, OPG executive relationship.</div></div>
+        </div>
+        <div class="person-chip">
+          <div class="person-dot" style="background:var(--blue)"></div>
+          <div><div class="person-name">Olivier Marcotte</div><div class="person-role">BU Services CRO. Nuclear Aecon/SMR/refurb track. Commercial oversight. Chairs Nuclear Steering. Max and Vinoth report to him.</div></div>
+        </div>
+        <div class="person-chip">
+          <div class="person-dot" style="background:var(--blue)"></div>
+          <div><div class="person-name">Mathieu Beauchesne</div><div class="person-role">EVP. Powerline initiative. Dynamics BC. Alex and Louis-Pier report to him. Reports to Jon.</div></div>
+        </div>
+        <div class="person-chip">
+          <div class="person-dot" style="background:var(--sky)"></div>
+          <div><div class="person-name">Jeremy Irwin</div><div class="person-role">Director of Finance, EIG NA. Nortech actuals in actuals.json, annual budgets, Eurazeo pack. Works alongside Jon at EIG level.</div></div>
+        </div>
+        <div class="person-chip">
+          <div class="person-dot" style="background:var(--teal)"></div>
+          <div><div class="person-name">Max Aggrey</div><div class="person-role">Commercial Director West. Mining NDT west, Pipeline DA, 3X. Reports to Olivier.</div></div>
+        </div>
+        <div class="person-chip">
+          <div class="person-dot" style="background:var(--teal)"></div>
+          <div><div class="person-name">Vinoth Tharma</div><div class="person-role">Commercial Director East. Mining NDT east, Nuclear MSA track, Powerline, 3X. Reports to Olivier.</div></div>
+        </div>
+        <div class="person-chip">
+          <div class="person-dot" style="background:var(--blue)"></div>
+          <div><div class="person-name">Alex Cyr</div><div class="person-role">Sr. Operations Director. Chairs Ops Meeting. All ops directors, Rick, and the full ops structure report to him.</div></div>
+        </div>
+        <div class="person-chip">
+          <div class="person-dot" style="background:var(--green)"></div>
+          <div><div class="person-name">Rick Carlton</div><div class="person-role">Pipeline Integrity Lead. Pipeline DA programme. Reports to Alex. Joel Carlton (PI Ops) reports to Rick.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THE SYSTEM -->
+  <div class="card">
+    <div class="card-top" style="background:var(--amber)"></div>
+    <div class="card-hdr">
+      <div class="ch-eyebrow" style="color:#FCD34D">Commercial system</div>
+      <h2>Three Portals</h2>
+    </div>
+    <div class="card-body">
+      <p style="margin-bottom:.75rem">All three files live in the BU Services SharePoint folder. Open in any browser — no login required.</p>
+      <a class="portal-row" href="BU_Services_Command_Centre.html" target="buservices">
+        <span class="portal-icon">📊</span>
+        <div><div class="portal-name">Command Centre</div><div class="portal-desc">Live KPIs — revenue, gates, risks, meeting health. Auto-updated every Sunday 7PM ET via Power Automate.</div></div>
+        <span class="portal-arrow">→</span>
+      </a>
+      <a class="portal-row" href="BU_Services_Management_Hub.html" target="buservices">
+        <span class="portal-icon">⚙️</span>
+        <div><div class="portal-name">Management Hub</div><div class="portal-desc">Org chart, weekly rhythm, meeting links, all documents. Start here if you need to find anything.</div></div>
+        <span class="portal-arrow">→</span>
+      </a>
+      <a class="portal-row" href="BU_Services_Meeting_Hub.html" target="buservices">
+        <span class="portal-icon">📅</span>
+        <div><div class="portal-name">Meeting Hub</div><div class="portal-desc">Full standing agendas for all 9 recurring meetings. Includes SF Friday reminder.</div></div>
+        <span class="portal-arrow">→</span>
+      </a>
+      <a class="portal-row" href="BU_Services_Systems_Map.html" target="buservices">
+        <span class="portal-icon">🗺️</span>
+        <div><div class="portal-name">Systems Map</div><div class="portal-desc">How all three portals connect, how data flows, and where every document lives.</div></div>
+        <span class="portal-arrow">→</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- WEEKLY RHYTHM -->
+  <div class="card">
+    <div class="card-top" style="background:var(--green)"></div>
+    <div class="card-hdr">
+      <div class="ch-eyebrow" style="color:#6EE7B7">Weekly cadence</div>
+      <h2>Weekly Rhythm</h2>
+    </div>
+    <div class="card-body">
+      <div class="day-row"><div class="day-label">Monday</div><div class="day-items"><strong>9AM ET:</strong> Commercial Meeting (Jon chairs). <strong>After:</strong> Ops Meeting (Alex chairs). Read KPI email before arriving.</div></div>
+      <div class="day-row"><div class="day-label">Tuesday</div><div class="day-items">Bi-weekly: <strong>Nuclear Steering</strong> (Olivier chairs, 10AM ET). Between meetings: advance your pipeline.</div></div>
+      <div class="day-row"><div class="day-label">Wed</div><div class="day-items">Ops leads: <strong>update utilisation tracker</strong> on SharePoint by EOD. Monthly (2nd Wed): HR &amp; Retention.</div></div>
+      <div class="day-row"><div class="day-label">Thursday</div><div class="day-items">Monthly (1st Thu): <strong>Financial Review</strong> (Jon chairs, 2PM ET). Jeremy Irwin leads the numbers.</div></div>
+      <div class="day-row"><div class="day-label">Friday</div><div class="day-items"><strong style="color:#6EE7B7">4PM deadline:</strong> All commercial owners update Salesforce. Power Automate reads SF on Sunday — stale SF = stale Command Centre.</div></div>
+      <div class="day-row"><div class="day-label">Sunday</div><div class="day-items"><strong>7PM ET:</strong> Power Automate runs. actuals.json updated. Monday KPI email generated.</div></div>
+    </div>
+  </div>
+
+  <!-- THE CRITICAL RULE -->
+  <div class="card">
+    <div class="card-top" style="background:var(--red)"></div>
+    <div class="card-hdr">
+      <div class="ch-eyebrow" style="color:#FCA5A5">Non-negotiable rules</div>
+      <h2>5 Things to Know</h2>
+    </div>
+    <div class="card-body">
+      <div class="rule-row"><div class="rule-num">1</div><div><strong style="color:#E8EDF5">Commercial and ops are separate.</strong> Ops directors do not prospect, attend conferences for BD, or manage new business pipelines. New opportunities go to the commercial owner the same day they arise.</div></div>
+      <div class="rule-row"><div class="rule-num">2</div><div><strong style="color:#E8EDF5">Salesforce by Friday 4PM, every week.</strong> Every deal, every new prospect, every update. If it's not in Salesforce, it doesn't exist in the Command Centre or Eurazeo reporting.</div></div>
+      <div class="rule-row"><div class="rule-num">3</div><div><strong style="color:#E8EDF5">BU_Initiative__c must be set</strong> on every Salesforce opportunity. Without it, the revenue is invisible to the Command Centre. Use: Mining NDT / Pipeline DA / Powerline / Nuclear/OPG / 3X Composite / Base Business.</div></div>
+      <div class="rule-row"><div class="rule-num">4</div><div><strong style="color:#E8EDF5">Nuclear has two separate tracks.</strong> Vinoth owns OPG MSA/maintenance. Olivier owns Aecon/new build/refurb. Never represent Nucleom in Aecon or SMR conversations without Olivier.</div></div>
+      <div class="rule-row"><div class="rule-num">5</div><div><strong style="color:#E8EDF5">AMBER/RED findings = immediate flag.</strong> If you or your crew identify an AMBER or RED corrosion finding in the field, flag it to the commercial owner the same day. This is how 3X Composite repair revenue is generated.</div></div>
+    </div>
+  </div>
+
+  <!-- KEY DOCUMENTS -->
+  <div class="card">
+    <div class="card-top" style="background:var(--purp)"></div>
+    <div class="card-hdr">
+      <div class="ch-eyebrow" style="color:#C4B5FD">Read these first</div>
+      <h2>Key Documents</h2>
+    </div>
+    <div class="card-body">
+      <a class="link-row" href="BU_Services_Systems_Map.html" target="buservices">
+        <span class="link-icon">🗺️</span><span class="link-name">Systems Map</span>
+        <span class="link-desc">How the whole system fits together</span>
+      </a>
+      <a class="link-row" href="BU_Services_Max_Aggrey_Role_Brief.docx" target="_blank">
+        <span class="link-icon">📄</span><span class="link-name">Your Role Brief</span>
+        <span class="link-desc">Your specific mandate, initiatives, and rhythm</span>
+      </a>
+      <a class="link-row" href="Master_Commercial_Plan_v8_NoStage2.html" target="_blank">
+        <span class="link-icon">📋</span><span class="link-name">Master Commercial Plan</span>
+        <span class="link-desc">Full 5-year plan — all 5 initiatives</span>
+      </a>
+      <a class="link-row" href="BU_Services_Salesforce_Integration_Guide.docx" target="_blank">
+        <span class="link-icon">☁️</span><span class="link-name">Salesforce Guide</span>
+        <span class="link-desc">Field-level entry guide — what goes where</span>
+      </a>
+      <a class="link-row" href="Execution_Attack_Plan_v1.html" target="buservices">
+        <span class="link-icon">⚔️</span><span class="link-name">Execution Attack Plan</span>
+        <span class="link-desc">Sprint milestones — all initiative owners</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- CONTACTS -->
+  <div class="card">
+    <div class="card-top" style="background:var(--dgrey)"></div>
+    <div class="card-hdr">
+      <div class="ch-eyebrow" style="color:#A8B8D0">Who to call</div>
+      <h2>Contacts &amp; Escalation</h2>
+    </div>
+    <div class="card-body">
+      <div class="meeting-row"><span class="meeting-name">Strategy / gate decisions</span><span class="meeting-meta">Jon Eustace</span></div>
+      <div class="meeting-row"><span class="meeting-name">Commercial questions (West)</span><span class="meeting-meta">Max Aggrey</span></div>
+      <div class="meeting-row"><span class="meeting-name">Commercial questions (East)</span><span class="meeting-meta">Vinoth Tharma</span></div>
+      <div class="meeting-row"><span class="meeting-name">Nuclear Aecon / SMR track</span><span class="meeting-meta">Olivier Marcotte</span></div>
+      <div class="meeting-row"><span class="meeting-name">Ops / crew / utilisation</span><span class="meeting-meta">Alex Cyr</span></div>
+      <div class="meeting-row"><span class="meeting-name">Pipeline DA programme</span><span class="meeting-meta">Rick Carlton</span></div>
+      <div class="meeting-row"><span class="meeting-name">Powerline</span><span class="meeting-meta">Mathieu Beauchesne</span></div>
+      <div class="meeting-row"><span class="meeting-name">Financial data / actuals.json</span><span class="meeting-meta">Jeremy Irwin</span></div>
+      <div class="meeting-row"><span class="meeting-name">Salesforce / system access</span><span class="meeting-meta">Éric Carmichael</span></div>
+      <div class="meeting-row"><span class="meeting-name">HR / retention</span><span class="meeting-meta">Maud Leivin Capuano</span></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  BU Services &nbsp;&middot;&nbsp; Ekoscan Integrity Group &nbsp;&middot;&nbsp; Jon Eustace, CEO North America &nbsp;&middot;&nbsp; Confidential &mdash; Internal Use Only &nbsp;&middot;&nbsp; April 2026
+</footer>
+
+</body>
+</html>

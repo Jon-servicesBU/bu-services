@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — Commercial Management System Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0A1F5C;--blue:#1A5CA8;--sky:#00AEEF;--teal:#0D5050;
+  --green:#16A34A;--amber:#C9860A;--red:#B91C1C;--purp:#6D28D9;
+  --white:#FFFFFF;--dgrey:#6678A0;--dark:#1C2B4A;--mid:#2D4A7A;
+  --bg:#0A1425;--mono:'IBM Plex Mono',monospace;
+  --fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+  --cc:#00AEEF;--mh:#1A5CA8;--meethub:#16A34A;--data:#C9860A;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:#E8EDF5;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── TOP NAV ── */
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(10,20,37,.97);
+  backdrop-filter:blur(8px);border-bottom:2px solid var(--sky);
+  display:flex;align-items:center;padding:0 1.5rem;height:52px;gap:1.5rem}
+.brand{font-family:var(--fd);font-size:.78rem;font-weight:800;color:var(--sky);
+  letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.nav-links{display:flex;gap:0;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{display:flex;align-items:center;height:52px;padding:0 .75rem;
+  font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  color:rgba(255,255,255,.55);text-decoration:none;border-bottom:2px solid transparent;
+  margin-bottom:-2px;transition:color .15s,border-color .15s;white-space:nowrap}
+.nav-links a:hover{color:#fff}
+.nav-links a.active{color:#fff;border-bottom-color:var(--sky)}
+.nav-btn{color:var(--sky);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);
+  border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;
+  white-space:nowrap;text-decoration:none;flex-shrink:0}
+
+/* ── PAGE HEADER ── */
+.page-hdr{background:linear-gradient(135deg,var(--navy) 0%,#0D2D6E 45%,var(--blue) 100%);
+  padding:3rem 2.5rem 2.5rem;border-bottom:3px solid var(--sky);position:relative;overflow:hidden}
+.page-hdr::before{content:'';position:absolute;right:-5%;top:-20%;width:45%;height:140%;
+  background:radial-gradient(ellipse,rgba(0,174,239,.08) 0%,transparent 70%);pointer-events:none}
+.page-hdr .eh{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--sky);margin-bottom:.5rem;font-family:var(--mono)}
+.page-hdr h1{font-family:var(--fd);font-size:2.8rem;font-weight:900;color:#fff;
+  margin-bottom:.4rem;line-height:1.05}
+.page-hdr h1 em{color:var(--sky);font-style:normal}
+.page-hdr p{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.65;max-width:660px;margin-bottom:1.25rem}
+.hdr-pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.hdr-pill{font-size:.62rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;
+  background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);
+  color:var(--sky);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono)}
+
+/* ── SECTION ── */
+.section{padding:2rem 2.5rem;max-width:1440px;margin:0 auto}
+.section-hdr{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.5rem;
+  padding-bottom:.6rem;border-bottom:2px solid var(--sky)}
+.section-hdr h2{font-family:var(--fd);font-size:1.5rem;font-weight:800;color:#fff}
+.section-hdr .sh-sub{font-size:.75rem;color:var(--dgrey)}
+hr.divider{border:none;border-top:1px solid var(--mid);margin:2rem 0}
+
+/* ── DATA FLOW DIAGRAM ── */
+.flow-wrap{background:rgba(255,255,255,.025);border:1px solid var(--mid);border-radius:10px;
+  padding:1.75rem 2rem;margin-bottom:1.5rem;overflow-x:auto}
+.flow-diagram{display:grid;grid-template-columns:1fr 80px 1fr 80px 1fr;
+  align-items:center;gap:0;min-width:700px}
+.flow-node{background:var(--dark);border:1px solid var(--mid);border-radius:8px;
+  padding:.85rem 1rem;text-align:center;position:relative}
+.flow-node .fn-label{font-family:var(--fd);font-size:.7rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.25rem}
+.flow-node .fn-name{font-family:var(--fd);font-size:1.1rem;font-weight:900;color:#fff;
+  margin-bottom:.2rem}
+.flow-node .fn-sub{font-size:.62rem;color:var(--dgrey);line-height:1.4;font-family:var(--mono)}
+.flow-node.highlight{border-width:2px}
+.flow-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem}
+.flow-arrow .fa-line{width:100%;height:2px;background:var(--mid);position:relative}
+.flow-arrow .fa-line::after{content:'▶';position:absolute;right:-6px;top:-8px;
+  color:var(--dgrey);font-size:.65rem}
+.flow-arrow .fa-label{font-size:.58rem;color:var(--dgrey);text-align:center;
+  font-family:var(--mono);white-space:nowrap}
+
+/* ── PORTAL CARDS ── */
+.portals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:1.5rem}
+.portal-card{background:var(--dark);border:1px solid var(--mid);border-radius:10px;overflow:hidden;
+  display:flex;flex-direction:column;transition:box-shadow .2s}
+.portal-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.pc-top{height:4px}
+.pc-hdr{padding:1rem 1.25rem .75rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.pc-eyebrow{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:.3rem;font-family:var(--mono)}
+.pc-title{font-family:var(--fd);font-size:1.4rem;font-weight:900;color:#fff;margin-bottom:.2rem}
+.pc-file{font-size:.6rem;color:var(--dgrey);font-family:var(--mono)}
+.pc-purpose{padding:.75rem 1.25rem;font-size:.75rem;color:#A8B8D0;line-height:1.6;
+  border-bottom:1px solid rgba(255,255,255,.06)}
+.pc-meta{padding:.6rem 1.25rem;display:flex;gap:.4rem;flex-wrap:wrap;
+  border-bottom:1px solid rgba(255,255,255,.06)}
+.pc-pill{font-size:.58rem;font-weight:700;padding:.15rem .45rem;border-radius:3px;
+  background:rgba(255,255,255,.06);color:#A8B8D0;font-family:var(--mono)}
+.pc-sections{padding:.75rem 1.25rem;flex:1}
+.pc-sections-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--dgrey);margin-bottom:.5rem;font-family:var(--mono)}
+.pc-section-item{display:flex;align-items:flex-start;gap:.4rem;padding:.2rem 0;
+  font-size:.68rem;color:#D0D8E8;line-height:1.4;border-bottom:1px solid rgba(255,255,255,.04)}
+.pc-section-item:last-child{border-bottom:none}
+.pc-section-item .si-num{font-family:var(--mono);font-size:.6rem;color:var(--dgrey);
+  flex-shrink:0;min-width:1.2rem;margin-top:.05rem}
+.pc-links{padding:.65rem 1.25rem;border-top:1px solid rgba(255,255,255,.06);
+  display:flex;gap:.5rem;flex-wrap:wrap}
+.pc-link{font-size:.62rem;font-weight:700;padding:.2rem .55rem;border-radius:4px;
+  text-decoration:none;transition:opacity .15s;cursor:pointer}
+.pc-link:hover{opacity:.8}
+
+/* ── DATA BRIDGE CARD ── */
+.data-bridge{background:var(--dark);border:2px solid rgba(201,134,10,.35);border-radius:10px;
+  overflow:hidden;margin-bottom:1.5rem}
+.db-hdr{background:linear-gradient(90deg,rgba(201,134,10,.15) 0%,rgba(201,134,10,.05) 100%);
+  padding:.85rem 1.25rem;border-bottom:1px solid rgba(201,134,10,.2);
+  display:flex;align-items:center;gap:.75rem}
+.db-icon{font-size:1.2rem}
+.db-title{font-family:var(--fd);font-size:1.1rem;font-weight:900;color:#FCD34D}
+.db-sub{font-size:.68rem;color:rgba(252,211,77,.6);font-family:var(--mono)}
+.db-body{padding:1rem 1.25rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.db-col-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--dgrey);margin-bottom:.5rem;font-family:var(--mono)}
+.db-item{display:flex;align-items:flex-start;gap:.4rem;padding:.25rem 0;
+  font-size:.7rem;color:#D0D8E8;line-height:1.4;border-bottom:1px solid rgba(255,255,255,.04)}
+.db-item:last-child{border-bottom:none}
+.db-item::before{content:'→';color:var(--dgrey);flex-shrink:0;font-family:var(--mono);font-size:.65rem;margin-top:.05rem}
+.db-fields{background:rgba(201,134,10,.06);border-radius:6px;padding:.6rem .85rem;
+  font-size:.65rem;color:rgba(252,211,77,.7);font-family:var(--mono);line-height:1.6;
+  border:1px solid rgba(201,134,10,.15)}
+
+/* ── DOCUMENT INDEX ── */
+.doc-index-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.di-group{background:var(--dark);border:1px solid var(--mid);border-radius:8px;overflow:hidden}
+.di-hdr{padding:.6rem .85rem;font-size:.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;border-bottom:2px solid}
+.di-body{padding:.5rem .85rem}
+.di-item{display:flex;align-items:flex-start;gap:.4rem;padding:.28rem 0;
+  border-bottom:1px solid rgba(255,255,255,.04);font-size:.68rem;color:#D0D8E8;line-height:1.4;
+  text-decoration:none;cursor:pointer;transition:color .15s}
+.di-item:last-child{border-bottom:none}
+.di-item:hover{color:var(--sky)}
+.di-item .di-icon{flex-shrink:0;font-size:.75rem;margin-top:.05rem}
+.di-item .di-name{font-weight:600;color:#E8EDF5}
+.di-item .di-desc{font-size:.62rem;color:var(--dgrey);display:block;margin-top:.1rem}
+
+/* ── HOW TO UPDATE ── */
+.update-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.update-card{background:var(--dark);border:1px solid var(--mid);border-radius:8px;padding:.85rem 1rem}
+.uc-title{font-family:var(--fd);font-size:.95rem;font-weight:800;color:#E8EDF5;margin-bottom:.15rem}
+.uc-cadence{font-size:.62rem;color:var(--sky);font-family:var(--mono);margin-bottom:.6rem}
+.uc-step{display:flex;gap:.5rem;align-items:flex-start;margin:.3rem 0;font-size:.7rem;color:#A8B8D0;line-height:1.5}
+.uc-step-num{font-family:var(--fd);font-size:.85rem;font-weight:900;color:var(--sky);
+  flex-shrink:0;min-width:1.1rem;margin-top:-.05rem}
+
+/* ── CONNECTIONS LEGEND ── */
+.connections-wrap{background:rgba(255,255,255,.02);border:1px solid var(--mid);border-radius:8px;
+  padding:1rem 1.25rem;margin-bottom:1.5rem}
+.conn-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:.75rem}
+.conn-item{display:flex;align-items:flex-start;gap:.5rem;font-size:.7rem;color:#A8B8D0;line-height:1.5}
+.conn-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:.2rem}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.portals-grid{grid-template-columns:1fr 1fr}.doc-index-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.portals-grid,.doc-index-grid,.update-grid,.db-body,.conn-grid{grid-template-columns:1fr}
+  .flow-diagram{grid-template-columns:1fr}.flow-arrow{display:none}
+  .page-hdr{padding:1.75rem 1.25rem 1.25rem}.section{padding:1.25rem 1rem}}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="brand">BU Services</div>
+  <div class="nav-links">
+    <a href="#portals" class="active">Portals</a>
+    <a href="#data-flow">Data Flow</a>
+    <a href="#docs">Document Index</a>
+    <a href="#updates">How to Update</a>
+  </div>
+  <a class="nav-btn" href="BU_Services_Management_Hub.html" target="buservices">&#8592; Management Hub</a>
+</nav>
+
+<div class="page-hdr">
+  <div class="eh">Ekoscan Integrity Group &nbsp;&middot;&nbsp; BU Services &nbsp;&middot;&nbsp; Internal Reference</div>
+  <h1>Commercial Management<br><em>Systems Map</em></h1>
+  <p>The complete BU Services commercial operating system &mdash; three interconnected portals, one data bridge, and the full document library. Everything Jon Eustace and the team need to run the commercial plan.</p>
+  <div class="hdr-pills">
+    <span class="hdr-pill">3 Portals</span>
+    <span class="hdr-pill">1 Data Bridge</span>
+    <span class="hdr-pill">9 Meeting Agendas</span>
+    <span class="hdr-pill">12 Role Briefs</span>
+    <span class="hdr-pill">6 Rhythm Cards</span>
+    <span class="hdr-pill">8 Integration Guides</span>
+    <span class="hdr-pill">7 Commercial Plans</span>
+    <span class="hdr-pill">Power Automate Sunday 7PM ET</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 1 — THE THREE PORTALS                                      -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="portals">
+  <div class="section-hdr">
+    <h2>The Three Portals</h2>
+    <span class="sh-sub">Open in any browser from SharePoint &nbsp;&middot;&nbsp; No login required &nbsp;&middot;&nbsp; Microsoft Teams-friendly</span>
+  </div>
+
+  <div class="portals-grid">
+
+    <!-- COMMAND CENTRE -->
+    <div class="portal-card">
+      <div class="pc-top" style="background:var(--sky)"></div>
+      <div class="pc-hdr">
+        <div class="pc-eyebrow" style="color:var(--sky)">&#128202; Live Data Portal</div>
+        <div class="pc-title">Command Centre</div>
+        <div class="pc-file">BU_Services_Command_Centre.html</div>
+      </div>
+      <div class="pc-purpose">
+        The live KPI dashboard for BU Services. Reads from actuals.json every page load &mdash; auto-updated by Power Automate every Sunday at 7&nbsp;PM ET. 15 sections covering the full commercial picture. Jon&rsquo;s primary operating view.
+      </div>
+      <div class="pc-meta">
+        <span class="pc-pill">&#128100; Jon Eustace + leadership</span>
+        <span class="pc-pill">&#128337; Auto Sunday 7PM ET</span>
+        <span class="pc-pill">110-field actuals.json</span>
+      </div>
+      <div class="pc-sections">
+        <div class="pc-sections-lbl">15 Sections</div>
+        <div class="pc-section-item"><span class="si-num">01</span>Revenue Foundation &mdash; Nucleom + Nortech actuals vs. 2026 forecast</div>
+        <div class="pc-section-item"><span class="si-num">02</span>Nucleom Revenue by Region &mdash; 5 regions, live from Salesforce</div>
+        <div class="pc-section-item"><span class="si-num">03</span>Initiative Progress &mdash; 5 initiatives, actuals vs. 2026 targets</div>
+        <div class="pc-section-item"><span class="si-num">04</span>Deck Report &mdash; INT BU bi-weekly performance data (k&euro;)</div>
+        <div class="pc-section-item"><span class="si-num">05</span>Meeting Health &mdash; open action counts per meeting series</div>
+        <div class="pc-section-item"><span class="si-num">06</span>Monthly Revenue &mdash; chart + table by entity (Jan&ndash;Dec)</div>
+        <div class="pc-section-item"><span class="si-num">07</span>Gate Reviews &mdash; 12 milestones, RAG status</div>
+        <div class="pc-section-item"><span class="si-num">08</span>Risk Register &mdash; 6 risks, trigger condition monitoring</div>
+        <div class="pc-section-item"><span class="si-num">09</span>Document Library &mdash; all BU Services files in one place</div>
+        <div class="pc-section-item"><span class="si-num">10</span>System Status &mdash; go-live critical path (7 steps)</div>
+        <div class="pc-section-item"><span class="si-num">11</span>Conference ROI &mdash; budget, leads, pipeline value by show</div>
+        <div class="pc-section-item"><span class="si-num">12</span>Proposal Health &mdash; open/stalled proposals per initiative</div>
+        <div class="pc-section-item"><span class="si-num">13</span>Revenue Reconciliation &mdash; Salesforce vs. BC invoiced</div>
+        <div class="pc-section-item"><span class="si-num">14</span>Nuclear Outage Calendar &mdash; OPG outage windows with RAG</div>
+        <div class="pc-section-item"><span class="si-num">15</span>Weekly Email Digest &mdash; auto-generated Monday morning email</div>
+      </div>
+      <div class="pc-links">
+        <a class="pc-link" href="BU_Services_Command_Centre.html" target="buservices"
+           style="background:rgba(0,174,239,.15);color:var(--sky);border:1px solid rgba(0,174,239,.3)">
+          Open Command Centre &#8594;
+        </a>
+        <a class="pc-link" href="BU_Services_Management_Hub.html" target="buservices"
+           style="background:rgba(26,92,168,.15);color:#7DD3FC;border:1px solid rgba(26,92,168,.3)">
+          &#8594; Management Hub
+        </a>
+      </div>
+    </div>
+
+    <!-- MANAGEMENT HUB -->
+    <div class="portal-card">
+      <div class="pc-top" style="background:var(--blue)"></div>
+      <div class="pc-hdr">
+        <div class="pc-eyebrow" style="color:#7DD3FC">&#9881;&#65039; People &amp; Process Portal</div>
+        <div class="pc-title">Management Hub</div>
+        <div class="pc-file">BU_Services_Management_Hub.html</div>
+      </div>
+      <div class="pc-purpose">
+        The people and process portal. Static HTML &mdash; manually maintained. Starting point for anyone joining the team or needing to understand the org, the weekly rhythm, or where to find anything in the system.
+      </div>
+      <div class="pc-meta">
+        <span class="pc-pill">&#128100; All BU Services staff</span>
+        <span class="pc-pill">&#9999;&#65039; Manual updates only</span>
+        <span class="pc-pill">Links to all docs</span>
+      </div>
+      <div class="pc-sections">
+        <div class="pc-sections-lbl">4 Sections</div>
+        <div class="pc-section-item"><span class="si-num">01</span><strong>Org &amp; Roles</strong> &mdash; Full org chart (5 levels). Click any name to expand mandate, initiatives, rhythm, and documents.</div>
+        <div class="pc-section-item"><span class="si-num">02</span><strong>Weekly Flow</strong> &mdash; Sunday&ndash;Sunday rhythm for the whole team. When to update Salesforce, when meetings run, what gets published Sunday night.</div>
+        <div class="pc-section-item"><span class="si-num">03</span><strong>Meeting Hub</strong> &mdash; Condensed cards for all 9 meetings with quick-access link to full Meeting Hub agendas.</div>
+        <div class="pc-section-item"><span class="si-num">04</span><strong>Document Library</strong> &mdash; All BU Services files in 6 groups: Commercial System, Role Briefs, Rhythm Cards, Integration Guides, Conference System, Commercial Plans.</div>
+      </div>
+      <div class="pc-links">
+        <a class="pc-link" href="BU_Services_Management_Hub.html" target="buservices"
+           style="background:rgba(26,92,168,.2);color:#7DD3FC;border:1px solid rgba(26,92,168,.35)">
+          Open Management Hub &#8594;
+        </a>
+        <a class="pc-link" href="BU_Services_Meeting_Hub.html" target="buservices"
+           style="background:rgba(22,163,74,.12);color:#6EE7B7;border:1px solid rgba(22,163,74,.25)">
+          &#8594; Meeting Hub
+        </a>
+      </div>
+    </div>
+
+    <!-- MEETING HUB -->
+    <div class="portal-card">
+      <div class="pc-top" style="background:var(--green)"></div>
+      <div class="pc-hdr">
+        <div class="pc-eyebrow" style="color:#6EE7B7">&#128197; Meeting Agenda Library</div>
+        <div class="pc-title">Meeting Hub</div>
+        <div class="pc-file">BU_Services_Meeting_Hub.html</div>
+      </div>
+      <div class="pc-purpose">
+        Full standing agendas for all 9 recurring BU Services meetings. Includes chair, attendees, pre-meeting prep, agenda items by type (decision/action/info/risk), decision authority, and timing. Also contains the Friday Salesforce reminder.
+      </div>
+      <div class="pc-meta">
+        <span class="pc-pill">&#128100; All meeting participants</span>
+        <span class="pc-pill">9 meeting agendas</span>
+        <span class="pc-pill">&#9999;&#65039; Manual updates only</span>
+      </div>
+      <div class="pc-sections">
+        <div class="pc-sections-lbl">12 Views</div>
+        <div class="pc-section-item"><span class="si-num">&#128197;</span>Schedule Overview &mdash; weekly/monthly/quarterly calendar</div>
+        <div class="pc-section-item"><span class="si-num">SF</span>Salesforce Friday Reminder &mdash; owner checklist, escalation</div>
+        <div class="pc-section-item"><span class="si-num">&#9733;</span>Commercial Meeting &mdash; Jon chairs &middot; Weekly Monday 9AM</div>
+        <div class="pc-section-item"><span class="si-num">&#9733;</span>Ops Meeting &mdash; Alex chairs &middot; Weekly Monday after Commercial</div>
+        <div class="pc-section-item"><span class="si-num">&#9733;</span>Nuclear Steering &mdash; Olivier chairs &middot; Bi-weekly Tuesday</div>
+        <div class="pc-section-item"><span class="si-num">&#9733;</span>Nuclear Track Sync &mdash; Jon chairs &middot; Minimum monthly</div>
+        <div class="pc-section-item"><span class="si-num">&#9733;</span>Gate Reviews &mdash; Jon chairs &middot; Monthly last Friday</div>
+        <div class="pc-section-item"><span class="si-num">&#9733;</span>Financial Review &mdash; Jon chairs &middot; Monthly 1st Thursday</div>
+        <div class="pc-section-item"><span class="si-num">&#9733;</span>HR &amp; Retention &mdash; Maud chairs &middot; Monthly 2nd Wednesday</div>
+        <div class="pc-section-item"><span class="si-num">&#9733;</span>Eurazeo / EIG Update &mdash; Jon presents &middot; Quarterly</div>
+        <div class="pc-section-item"><span class="si-num">&#9733;</span>Post-Conference Debrief &mdash; trigger-based after each show</div>
+        <div class="pc-section-item"><span class="si-num">QR</span>Quick Reference &mdash; all 9 meetings at a glance</div>
+      </div>
+      <div class="pc-links">
+        <a class="pc-link" href="BU_Services_Meeting_Hub.html" target="buservices"
+           style="background:rgba(22,163,74,.15);color:#6EE7B7;border:1px solid rgba(22,163,74,.3)">
+          Open Meeting Hub &#8594;
+        </a>
+        <a class="pc-link" href="BU_Services_Management_Hub.html" target="buservices"
+           style="background:rgba(26,92,168,.12);color:#7DD3FC;border:1px solid rgba(26,92,168,.25)">
+          &#8592; Management Hub
+        </a>
+      </div>
+    </div>
+
+  </div><!-- end portals-grid -->
+
+  <!-- CONNECTIONS LEGEND -->
+  <div class="connections-wrap">
+    <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--dgrey);font-family:var(--mono)">Portal Connections &amp; Navigation</div>
+    <div class="conn-grid">
+      <div class="conn-item"><div class="conn-dot" style="background:var(--sky)"></div><div>Command Centre nav bar has <strong>&ldquo;&#9881; Management Hub &rarr;&rdquo;</strong> button. All portals open in same named tab (<code>target=&ldquo;buservices&rdquo;</code>) to avoid tab proliferation.</div></div>
+      <div class="conn-item"><div class="conn-dot" style="background:var(--blue)"></div><div>Management Hub nav has <strong>&ldquo;&#128202; Command Centre &rarr;&rdquo;</strong> and a <strong>&ldquo;Meeting Hub&rdquo;</strong> section that links to the full Meeting Hub file.</div></div>
+      <div class="conn-item"><div class="conn-dot" style="background:var(--green)"></div><div>Meeting Hub has <strong>&ldquo;&#8592; Management Hub&rdquo;</strong> button. Meeting Health section in Command Centre links to <code>#meetings</code> anchor. All three portals are cross-linked.</div></div>
+      <div class="conn-item"><div class="conn-dot" style="background:var(--amber)"></div><div><strong>actuals.json</strong> is read by the Command Centre on every page load. Written by Power Automate (Sunday) and manually by Jeremy Irwin (monthly Nortech actuals, annual budgets).</div></div>
+    </div>
+  </div>
+
+</div><!-- end portals section -->
+
+<hr class="divider" style="max-width:1440px;margin:0 auto">
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2 — DATA FLOW                                              -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="data-flow">
+  <div class="section-hdr">
+    <h2>Data Flow</h2>
+    <span class="sh-sub">How data moves from Salesforce and manual entry into the Command Centre</span>
+  </div>
+
+  <!-- Flow diagram -->
+  <div class="flow-wrap">
+    <div class="flow-diagram">
+      <!-- Sources -->
+      <div>
+        <div class="flow-node" style="border-color:rgba(22,163,74,.4);margin-bottom:.6rem">
+          <div class="fn-label" style="color:#6EE7B7">Source</div>
+          <div class="fn-name">Salesforce</div>
+          <div class="fn-sub">Nucleom CRM<br>Closed Won by initiative,<br>region, entity</div>
+        </div>
+        <div class="flow-node" style="border-color:rgba(201,134,10,.4);margin-bottom:.6rem">
+          <div class="fn-label" style="color:#FCD34D">Manual</div>
+          <div class="fn-name">Jeremy Irwin</div>
+          <div class="fn-sub">Nortech actuals<br>Annual budgets<br>EUR/CAD rate</div>
+        </div>
+        <div class="flow-node" style="border-color:rgba(0,174,239,.35)">
+          <div class="fn-label" style="color:var(--sky)">Manual</div>
+          <div class="fn-name">Jon Eustace</div>
+          <div class="fn-sub">Gate &amp; risk status<br>Nuclear outage calendar<br>Version + date</div>
+        </div>
+      </div>
+      <!-- Arrow 1 -->
+      <div class="flow-arrow">
+        <div class="fa-line"></div>
+        <div class="fa-label">Power Automate<br>Sunday 7PM ET</div>
+        <div class="fa-line" style="margin-top:.3rem"></div>
+        <div class="fa-label">Direct edit<br>SharePoint</div>
+      </div>
+      <!-- actuals.json centre -->
+      <div class="flow-node highlight" style="border-color:var(--amber);border-width:2px;text-align:center;padding:1.25rem">
+        <div class="fn-label" style="color:#FCD34D">&#128225; Data Bridge</div>
+        <div class="fn-name" style="font-size:1.3rem">actuals.json</div>
+        <div class="fn-sub" style="margin-top:.4rem">110 fields<br>SharePoint &mdash; BU Services folder<br>Single source of truth</div>
+        <div class="db-fields" style="margin-top:.75rem;text-align:left;font-size:.58rem">
+          nucleom, nortech, region_*, util_*<br>
+          mining, pipeline, powerline,<br>
+          nuclear, x3, nuclear_outages[]<br>
+          budget_*, bookings_*, commit_*<br>
+          gates[], risks[], meetings[]<br>
+          monthly{}, conf_*, proposals_*<br>
+          recon_nuc, recon_nor, cash{}
+        </div>
+      </div>
+      <!-- Arrow 2 -->
+      <div class="flow-arrow">
+        <div class="fa-line"></div>
+        <div class="fa-label">Page load<br>fetch()</div>
+      </div>
+      <!-- Command Centre -->
+      <div class="flow-node highlight" style="border-color:var(--sky)">
+        <div class="fn-label" style="color:var(--sky)">&#128202; Live Portal</div>
+        <div class="fn-name">Command<br>Centre</div>
+        <div class="fn-sub" style="margin-top:.3rem">Reads actuals.json<br>on every page load<br>&mdash;<br>Falls back to CONFIG<br>defaults if offline</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- actuals.json detail card -->
+  <div class="data-bridge">
+    <div class="db-hdr">
+      <span class="db-icon">&#128225;</span>
+      <div>
+        <div class="db-title">actuals.json &mdash; The Data Bridge</div>
+        <div class="db-sub">SharePoint &mdash; BU Services folder &middot; 110 fields &middot; Written Sunday 7PM ET by Power Automate &middot; Read by Command Centre on every load</div>
+      </div>
+    </div>
+    <div class="db-body">
+      <div>
+        <div class="db-col-lbl">Written automatically (Power Automate)</div>
+        <div class="db-item">Salesforce Closed Won by entity (nucleom, nortech)</div>
+        <div class="db-item">Salesforce Closed Won by region (5 Nucleom regions)</div>
+        <div class="db-item">Salesforce Closed Won by initiative (5 initiatives)</div>
+        <div class="db-item">Crew utilisation by region (from SharePoint tracker)</div>
+        <div class="db-item">Meeting action counts per series</div>
+        <div class="db-item">Conference ROI data (from Conference Action Tracker)</div>
+        <div class="db-item">Proposal pipeline health (from Salesforce)</div>
+        <div class="db-item">Revenue reconciliation (SF vs. BC invoiced)</div>
+        <div class="db-item">Previous review snapshot (auto-written each Sunday)</div>
+      </div>
+      <div>
+        <div class="db-col-lbl">Written manually by Jeremy Irwin</div>
+        <div class="db-item">nortech.actual &mdash; Nortech + RockX invoiced (monthly, by 5th)</div>
+        <div class="db-item">monthly.{year_month}.nortech &mdash; Nortech monthly breakdown</div>
+        <div class="db-item">budget_nuc, budget_nor, budget_int, budget_arcndt (annually)</div>
+        <div class="db-item">eur_rate &mdash; EUR/CAD exchange rate (annually)</div>
+        <div class="db-item">bookings_*, commit_*, upside_* (confirm vs. financial model monthly)</div>
+        <div class="db-item">ebitda_initiatives[] &mdash; EBITDA optimisation items</div>
+        <div class="db-item">cash{} &mdash; Cash position by entity monthly</div>
+      </div>
+      <div>
+        <div class="db-col-lbl">Written manually by Jon Eustace</div>
+        <div class="db-item">gates[].status &mdash; green / amber / grey / red for each of 12 milestones</div>
+        <div class="db-item">risks[].status &mdash; monitoring / triggered / resolved</div>
+        <div class="db-item">nuclear_outages[] &mdash; OPG outage windows, contract status, value</div>
+        <div class="db-item">lastUpdated, updatedBy, version &mdash; header metadata</div>
+        <div class="db-item">conference.* &mdash; new conference records when needed</div>
+        <div class="db-item">CONFIG defaults &mdash; baseline data in the HTML CONFIG block</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider" style="max-width:1440px;margin:0 auto">
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3 — DOCUMENT INDEX                                         -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="docs">
+  <div class="section-hdr">
+    <h2>Document Index</h2>
+    <span class="sh-sub">Every file in the BU Services system &nbsp;&middot;&nbsp; Click any row to open</span>
+  </div>
+
+  <div class="doc-index-grid">
+
+    <!-- CORE PORTALS -->
+    <div class="di-group">
+      <div class="di-hdr" style="color:var(--sky);border-color:var(--sky);background:rgba(0,174,239,.08)">
+        &#128202; Core Portals
+      </div>
+      <div class="di-body">
+        <a class="di-item" href="BU_Services_Command_Centre.html" target="buservices">
+          <span class="di-icon">&#128202;</span>
+          <div><span class="di-name">Command Centre</span><span class="di-desc">Live KPI portal &middot; 15 sections &middot; Auto Sunday 7PM ET</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Management_Hub.html" target="buservices">
+          <span class="di-icon">&#9881;&#65039;</span>
+          <div><span class="di-name">Management Hub</span><span class="di-desc">Org, weekly rhythm, meeting links, document library</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Meeting_Hub.html" target="buservices">
+          <span class="di-icon">&#128197;</span>
+          <div><span class="di-name">Meeting Hub</span><span class="di-desc">Full agendas for all 9 meetings &middot; SF reminder</span></div>
+        </a>
+        <a class="di-item" href="actuals.json" target="_blank">
+          <span class="di-icon">&#128225;</span>
+          <div><span class="di-name">actuals.json</span><span class="di-desc">110-field data bridge &middot; SharePoint &middot; Power Automate</span></div>
+        </a>
+        <a class="di-item" href="Execution_Attack_Plan_v1.html" target="buservices">
+          <span class="di-icon">&#9876;&#65039;</span>
+          <div><span class="di-name">Execution Attack Plan</span><span class="di-desc">Sprint milestones &middot; All initiative owners &middot; v1.0</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_GoLive_Roadmap.html" target="buservices">
+          <span class="di-icon">&#128640;</span>
+          <div><span class="di-name">Go-Live Roadmap</span><span class="di-desc">7-step build guide &middot; &Eacute;ric Carmichael</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Salesforce_Backfill_Tracker.html" target="buservices">
+          <span class="di-icon">&#9989;</span>
+          <div><span class="di-name">SF Backfill Tracker</span><span class="di-desc">Audit BU_Initiative__c on all 2026 opps before go-live</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_actuals_json_Reference.html" target="buservices">
+          <span class="di-icon">&#128225;</span>
+          <div><span class="di-name">actuals.json Reference</span><span class="di-desc">Annotated field reference &middot; who writes what &middot; starter template</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Eurazeo_Quarterly_Pack_Template.docx" target="_blank">
+          <span class="di-icon">&#127968;</span>
+          <div><span class="di-name">Eurazeo Pack Template</span><span class="di-desc">Quarterly reporting template &middot; 6 sections pre-structured</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Onboarding_One_Pager.html" target="buservices">
+          <span class="di-icon">&#128075;</span>
+          <div><span class="di-name">Onboarding One-Pager</span><span class="di-desc">New team member overview &middot; 5 min read</span></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- COMMERCIAL PLANS -->
+    <div class="di-group">
+      <div class="di-hdr" style="color:#6D28D9;border-color:#6D28D9;background:rgba(109,40,217,.08)">
+        &#128203; Commercial Plans
+      </div>
+      <div class="di-body">
+        <a class="di-item" href="Master_Commercial_Plan_v8_NoStage2.html" target="_blank">
+          <span class="di-icon">&#128203;</span>
+          <div><span class="di-name">Master Commercial Plan v8</span><span class="di-desc">Leadership / Eurazeo &middot; Full 5-year plan</span></div>
+        </a>
+        <a class="di-item" href="NDT_Mining_Commercial_Plan_v4.html" target="_blank">
+          <span class="di-icon">&#129683;</span>
+          <div><span class="di-name">Mining NDT Commercial Plan v4</span><span class="di-desc">Vinoth + Max &middot; $17.9M 5-year</span></div>
+        </a>
+        <a class="di-item" href="PI_Commercial_Plan_v2.html" target="_blank">
+          <span class="di-icon">&#128681;</span>
+          <div><span class="di-name">Pipeline DA Commercial Plan v2</span><span class="di-desc">Rick Carlton &middot; $30M 5-year</span></div>
+        </a>
+        <a class="di-item" href="Powerline_Commercial_Plan.html" target="_blank">
+          <span class="di-icon">&#9889;</span>
+          <div><span class="di-name">Powerline Commercial Plan</span><span class="di-desc">Mathieu Beauchesne &middot; $10.2M 5-year</span></div>
+        </a>
+        <a class="di-item" href="Nuclear_OPG_Commercial_Plan.html" target="_blank">
+          <span class="di-icon">&#9762;&#65039;</span>
+          <div><span class="di-name">Nuclear / OPG Commercial Plan</span><span class="di-desc">Olivier + Vinoth &middot; $47.9M 5-year</span></div>
+        </a>
+        <a class="di-item" href="3X_Composite_Repair_Commercial_Plan.html" target="_blank">
+          <span class="di-icon">&#128295;</span>
+          <div><span class="di-name">3X Composite Repair Plan</span><span class="di-desc">Vinoth + Max &middot; $11.4M 5-year</span></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ROLE BRIEFS -->
+    <div class="di-group">
+      <div class="di-hdr" style="color:#7DD3FC;border-color:#1A5CA8;background:rgba(26,92,168,.08)">
+        &#128100; Role Briefs (12)
+      </div>
+      <div class="di-body">
+        <a class="di-item" href="BU_Services_Max_Aggrey_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Max Aggrey</span><span class="di-desc">Commercial Director West &middot; Reports to Olivier</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Vinoth_Tharma_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Vinoth Tharma</span><span class="di-desc">Commercial Director East &middot; Reports to Olivier</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Alex_Cyr_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Alex Cyr</span><span class="di-desc">Sr. Operations Director &middot; Reports to Mathieu</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Eric_Rodrigue_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Eric Rodrigue</span><span class="di-desc">Ops Director &mdash; Quebec &middot; Reports to Alex</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Joel_Djordjevic_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Joel Djordjevic</span><span class="di-desc">Ops Director &mdash; Central &middot; Reports to Alex</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Keith_Reichenbach_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Keith Reichenbach</span><span class="di-desc">Ops Director &mdash; Western &middot; Reports to Alex</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Brook_Althouse_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Brook Althouse</span><span class="di-desc">Northern Ops Manager &middot; Reports to Alex</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Louis_Pier_Theberge_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Louis-Pier Th&eacute;berge</span><span class="di-desc">Nuclear Sector Ops Director &middot; Reports to Mathieu</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Jason_Borza_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Jason Borza</span><span class="di-desc">Ops Director &mdash; Nortech &middot; Reports to Alex</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Rick_Carlton_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Rick Carlton</span><span class="di-desc">Pipeline Integrity Lead &middot; Reports to Alex</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Joel_Carlton_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Joel Carlton</span><span class="di-desc">PI Operations Manager &middot; Reports to Rick</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Jeremy_Irwin_Role_Brief.docx" target="_blank">
+          <span class="di-icon">&#128100;</span>
+          <div><span class="di-name">Jeremy Irwin</span><span class="di-desc">Director of Finance, EIG NA &middot; Peer alongside Jon</span></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- RHYTHM CARDS -->
+    <div class="di-group">
+      <div class="di-hdr" style="color:#6EE7B7;border-color:var(--green);background:rgba(22,163,74,.08)">
+        &#128197; Weekly Rhythm Cards
+      </div>
+      <div class="di-body">
+        <a class="di-item" href="BU_Services_Commercial_Team_Rhythm.html" target="buservices">
+          <span class="di-icon">&#127760;</span>
+          <div><span class="di-name">Commercial Team Rhythm (HTML)</span><span class="di-desc">Max + Vinoth &middot; Interactive</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Commercial_Team_Rhythm.docx" target="_blank">
+          <span class="di-icon">&#128196;</span>
+          <div><span class="di-name">Commercial Team Rhythm (Word)</span><span class="di-desc">Max + Vinoth &middot; Printable</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Ops_Team_Rhythm.html" target="buservices">
+          <span class="di-icon">&#127760;</span>
+          <div><span class="di-name">Ops Team Rhythm (HTML)</span><span class="di-desc">All 7 ops directors &middot; Interactive</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Ops_Team_Rhythm.docx" target="_blank">
+          <span class="di-icon">&#128196;</span>
+          <div><span class="di-name">Ops Team Rhythm (Word)</span><span class="di-desc">All 7 ops directors &middot; Printable</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_PI_Team_Rhythm.html" target="buservices">
+          <span class="di-icon">&#127760;</span>
+          <div><span class="di-name">PI Team Rhythm (HTML)</span><span class="di-desc">Rick + Joel Carlton &middot; Interactive</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_PI_Team_Rhythm.docx" target="_blank">
+          <span class="di-icon">&#128196;</span>
+          <div><span class="di-name">PI Team Rhythm (Word)</span><span class="di-desc">Rick + Joel Carlton &middot; Printable</span></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- INTEGRATION GUIDES -->
+    <div class="di-group">
+      <div class="di-hdr" style="color:#FCD34D;border-color:var(--amber);background:rgba(201,134,10,.08)">
+        &#128279; Integration Guides
+      </div>
+      <div class="di-body">
+        <a class="di-item" href="BU_Services_Salesforce_Integration_Guide.docx" target="_blank">
+          <span class="di-icon">&#128279;</span>
+          <div><span class="di-name">Salesforce Integration Guide</span><span class="di-desc">Field-level Salesforce setup &middot; PA connector</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_SF_Conference_Entry_Guide.docx" target="_blank">
+          <span class="di-icon">&#128279;</span>
+          <div><span class="di-name">SF Conference Entry Guide</span><span class="di-desc">Conference leads &rarr; Salesforce workflow</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Conference_Cost_Integration_Guide.docx" target="_blank">
+          <span class="di-icon">&#128279;</span>
+          <div><span class="di-name">Conference Cost Integration Guide</span><span class="di-desc">Cost tracker &rarr; actuals.json workflow</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Dynamics_Integration_Guide.docx" target="_blank">
+          <span class="di-icon">&#128279;</span>
+          <div><span class="di-name">Dynamics BC Integration Guide</span><span class="di-desc">BC connector &middot; Invoice reconciliation</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Proposal_Tracker_Guide.docx" target="_blank">
+          <span class="di-icon">&#128279;</span>
+          <div><span class="di-name">Proposal Tracker Guide</span><span class="di-desc">Proposal health module &middot; actuals.json fields</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Quote_Cash_Recon_Guide.docx" target="_blank">
+          <span class="di-icon">&#128279;</span>
+          <div><span class="di-name">Quote / Cash Reconciliation Guide</span><span class="di-desc">SF vs. BC invoiced variance module</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Nuclear_Outage_Calendar_Guide.docx" target="_blank">
+          <span class="di-icon">&#128279;</span>
+          <div><span class="di-name">Nuclear Outage Calendar Guide</span><span class="di-desc">OPG outage records in actuals.json</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Power_Automate_Build_Guide.docx" target="_blank">
+          <span class="di-icon">&#9889;</span>
+          <div><span class="di-name">Power Automate Build Guide</span><span class="di-desc">Sunday 7PM flow &nbsp;&middot;&nbsp; SOQL queries, PA build steps, field mapping</span></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- CONFERENCE SYSTEM -->
+    <div class="di-group">
+      <div class="di-hdr" style="color:#A78BFA;border-color:var(--purp);background:rgba(109,40,217,.08)">
+        &#127968; Conference System
+      </div>
+      <div class="di-body">
+        <a class="di-item" href="BU_Services_Conference_Action_Plan.html" target="buservices">
+          <span class="di-icon">&#127968;</span>
+          <div><span class="di-name">Conference Action Plan</span><span class="di-desc">Full 2026 conference strategy &middot; Shanny Trembley</span></div>
+        </a>
+        <div class="di-item">
+          <span class="di-icon">&#128202;</span>
+          <div><span class="di-name">Conference Action Tracker (XLSX)</span><span class="di-desc">Budget vs. actuals by show &middot; SharePoint</span></div>
+        </div>
+        <div class="di-item">
+          <span class="di-icon">&#128202;</span>
+          <div><span class="di-name">Conference Budget 2026 (XLSX)</span><span class="di-desc">Annual conference spend plan</span></div>
+        </div>
+        <a class="di-item" href="BU_Services_SF_Conference_Entry_Guide.docx" target="_blank">
+          <span class="di-icon">&#128279;</span>
+          <div><span class="di-name">SF Conference Entry Guide</span><span class="di-desc">Post-show lead entry workflow</span></div>
+        </a>
+        <a class="di-item" href="BU_Services_Conference_Cost_Integration_Guide.docx" target="_blank">
+          <span class="di-icon">&#128279;</span>
+          <div><span class="di-name">Conference Cost Integration Guide</span><span class="di-desc">Cost tracker &rarr; Command Centre ROI section</span></div>
+        </a>
+      </div>
+    </div>
+
+  </div><!-- end doc-index-grid -->
+</div>
+
+<hr class="divider" style="max-width:1440px;margin:0 auto">
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 4 — HOW TO UPDATE                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="updates">
+  <div class="section-hdr">
+    <h2>How to Update the System</h2>
+    <span class="sh-sub">Who does what, and when</span>
+  </div>
+
+  <div class="update-grid">
+
+    <div class="update-card">
+      <div class="uc-title">Jeremy Irwin &mdash; Monthly</div>
+      <div class="uc-cadence">By 5th of each month &middot; actuals.json on SharePoint</div>
+      <div class="uc-step"><span class="uc-step-num">1</span>Open actuals.json on SharePoint (BU Services folder)</div>
+      <div class="uc-step"><span class="uc-step-num">2</span>Update <code>nortech.actual</code> with Nortech + RockX invoiced revenue for the month</div>
+      <div class="uc-step"><span class="uc-step-num">3</span>Update <code>monthly.{year_month}.nortech</code> for the monthly breakdown chart</div>
+      <div class="uc-step"><span class="uc-step-num">4</span>Save file. Command Centre reads it on next page load.</div>
+      <div class="uc-step"><span class="uc-step-num">&#9733;</span><em>Annual: </em>Update budget_* fields and eur_rate before January 31.</div>
+    </div>
+
+    <div class="update-card">
+      <div class="uc-title">Jon Eustace &mdash; After Each Gate Review</div>
+      <div class="uc-cadence">Monthly &middot; actuals.json on SharePoint</div>
+      <div class="uc-step"><span class="uc-step-num">1</span>Open actuals.json. Update <code>gates[].status</code> for any milestone that moved (green/amber/grey/red)</div>
+      <div class="uc-step"><span class="uc-step-num">2</span>Update <code>risks[].status</code> if any trigger was observed (monitoring &rarr; triggered)</div>
+      <div class="uc-step"><span class="uc-step-num">3</span>Update <code>nuclear_outages[]</code> if any OPG window date or contract status changed</div>
+      <div class="uc-step"><span class="uc-step-num">4</span>Update <code>lastUpdated</code>, <code>updatedBy</code>, <code>version</code> fields. Save.</div>
+    </div>
+
+    <div class="update-card">
+      <div class="uc-title">Commercial Owners &mdash; Every Friday by 4PM</div>
+      <div class="uc-cadence">Weekly &middot; Salesforce &middot; Power Automate reads Sunday 7PM ET</div>
+      <div class="uc-step"><span class="uc-step-num">1</span>All deals closed this week &rarr; Stage = Closed Won, Amount in CAD, Close Date = invoice date</div>
+      <div class="uc-step"><span class="uc-step-num">2</span>All new prospects &rarr; New Opportunity with BU_Initiative__c picklist value</div>
+      <div class="uc-step"><span class="uc-step-num">3</span>All active opportunities &rarr; Stage and Amount updated</div>
+      <div class="uc-step"><span class="uc-step-num">4</span>Power Automate runs Sunday 7PM &rarr; actuals.json updated &rarr; Command Centre refreshed</div>
+    </div>
+
+    <div class="update-card">
+      <div class="uc-title">Management Hub &mdash; When org or process changes</div>
+      <div class="uc-cadence">Manual &middot; Edit HTML file &middot; Upload to SharePoint</div>
+      <div class="uc-step"><span class="uc-step-num">1</span>Open BU_Services_Management_Hub.html in any text editor</div>
+      <div class="uc-step"><span class="uc-step-num">2</span>Org changes: find the org section HTML and update card names/titles/connections</div>
+      <div class="uc-step"><span class="uc-step-num">3</span>PEOPLE object in JS: update mandate, initiatives, rhythm, docs for the changed person</div>
+      <div class="uc-step"><span class="uc-step-num">4</span>MEETINGS JS var: update chair or attendees if a meeting changes</div>
+      <div class="uc-step"><span class="uc-step-num">5</span>DOC_GROUPS: add new files to the library. Save and re-upload to SharePoint.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="background:rgba(10,20,37,.8);border-top:1px solid var(--mid);padding:1rem 2.5rem;
+  text-align:center;font-size:.65rem;color:var(--dgrey);margin-top:2rem">
+  BU Services Commercial Management Systems Map &nbsp;&middot;&nbsp;
+  Ekoscan Integrity Group &nbsp;&middot;&nbsp;
+  Jon Eustace, CEO North America &nbsp;&middot;&nbsp;
+  Confidential &mdash; Internal Use Only &nbsp;&middot;&nbsp;
+  April 2026
+</div>
+
+<script>
+// Active nav on scroll
+const sections = ['portals','data-flow','docs','updates'].map(id=>document.getElementById(id));
+const links = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',function(){
+  const y = window.scrollY + 80;
+  let active = 0;
+  sections.forEach(function(s,i){ if(s && s.offsetTop <= y) active=i; });
+  links.forEach(function(l,i){ l.classList.toggle('active',i===active); });
+},{passive:true});
+</script>
+</body>
+</html>

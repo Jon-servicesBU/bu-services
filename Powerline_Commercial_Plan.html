@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Powerline Inspection — Commercial Plan 2026–2030</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --navy:   #161C60;
+  --navy2:  #1E2580;
+  --blue:   #368CD9;
+  --blue2:  #5AAAE8;
+  --orange: #E97132;
+  --green:  #196B24;
+  --green2: #22882F;
+  --dark:   #0B1035;
+  --mid:    #F0F3FA;
+  --light:  #F7F9FD;
+  --lgrey:  #DDE3F0;
+  --body:   #384660;
+  --text:   #1A2540;
+  --white:  #FFFFFF;
+  --shadow: 0 4px 20px rgba(22,28,96,0.12);
+  --fd: 'Barlow Condensed','Arial Narrow',sans-serif;
+  --fb: 'Barlow','Segoe UI',Arial,sans-serif;
+}
+
+body { font-family: var(--fb); font-size: 15.5px; line-height: 1.7; color: var(--text); background: var(--light); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 200; background: var(--navy); border-bottom: 3px solid var(--orange); display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; height: 52px; }
+.nav-brand { font-family: var(--fd); font-size: 0.95rem; font-weight: 700; letter-spacing: 1.5px; color: var(--white); text-transform: uppercase; white-space: nowrap; }
+.nav-brand em { color: var(--blue); font-style: normal; }
+.nav-links { display: flex; list-style: none; }
+.nav-links a { display: block; padding: 0 1rem; height: 52px; line-height: 52px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; color: rgba(255,255,255,0.5); text-decoration: none; text-transform: uppercase; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: color 0.15s, border-color 0.15s; }
+.nav-links a:hover { color: var(--white); border-bottom-color: var(--blue2); }
+
+/* HERO */
+.hero { background: var(--dark); position: relative; overflow: hidden; padding: 5rem 2.5rem 4rem; }
+.hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(22,28,96,0.98) 0%, rgba(11,16,53,0.90) 60%, rgba(18,42,110,0.75) 100%); }
+.hero::after { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(54,140,217,0.04) 60px,rgba(54,140,217,0.04) 61px), repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(54,140,217,0.04) 60px,rgba(54,140,217,0.04) 61px); pointer-events: none; }
+.hero-bg { position: absolute; right: -2rem; top: 50%; transform: translateY(-50%); font-family: var(--fd); font-weight: 900; font-size: min(22vw,300px); line-height: 1; color: rgba(54,140,217,0.05); letter-spacing: -8px; pointer-events: none; user-select: none; white-space: nowrap; z-index: 1; }
+.hero-inner { position: relative; z-index: 2; max-width: 1140px; margin: 0 auto; display: grid; grid-template-columns: 1fr 260px; gap: 3rem; align-items: center; }
+.hero-label { display: inline-block; font-family: var(--fd); font-size: 0.72rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); background: rgba(233,113,50,0.12); border: 1px solid rgba(233,113,50,0.3); border-radius: 3px; padding: 0.25rem 0.65rem; margin-bottom: 1.1rem; }
+.hero h1 { font-family: var(--fd); font-weight: 900; font-size: clamp(2.8rem,5vw,4.2rem); line-height: 0.95; letter-spacing: -1px; color: var(--white); text-transform: uppercase; }
+.hero h1 span { display: block; color: var(--blue); }
+.hero-rule { width: 3.5rem; height: 4px; background: linear-gradient(90deg,var(--orange),transparent); border-radius: 2px; margin: 1.1rem 0; }
+.hero-sub { font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.4); letter-spacing: 0.5px; margin-bottom: 0.85rem; }
+.hero-desc { font-size: 1rem; font-weight: 300; color: rgba(170,190,220,0.9); max-width: 520px; line-height: 1.65; }
+.hero-stats { display: flex; flex-direction: column; gap: 0.75rem; }
+.hstat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-left: 3px solid var(--blue); border-radius: 6px; padding: 0.9rem 1.1rem; }
+.hstat.s2 { border-left-color: var(--orange); }
+.hstat.s3 { border-left-color: var(--green2); }
+.hstat-val { font-family: var(--fd); font-size: 1.9rem; font-weight: 900; line-height: 1; color: var(--white); }
+.hstat.s2 .hstat-val { color: #F28B4E; }
+.hstat.s3 .hstat-val { color: #3DDB50; }
+.hstat-lbl { font-size: 0.72rem; color: rgba(255,255,255,0.38); margin-top: 0.2rem; line-height: 1.4; }
+
+/* LAYOUT */
+.wrap { max-width: 1140px; margin: 0 auto; padding: 0 2.5rem; }
+
+/* SECTION HEADERS */
+.sec-hdr { background: var(--navy); margin-top: 3rem; position: relative; overflow: hidden; }
+.sec-hdr::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 40%; background: linear-gradient(90deg,transparent,rgba(54,140,217,0.06)); pointer-events: none; }
+.sec-hdr-in { max-width: 1140px; margin: 0 auto; padding: 1.2rem 2.5rem; display: flex; align-items: center; gap: 1rem; position: relative; z-index: 1; }
+.sec-num { flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 50%; background: var(--orange); color: var(--white); font-family: var(--fd); font-size: 0.95rem; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.sec-title { color: var(--white); font-family: var(--fd); font-size: 1.2rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+.sec-sub { color: rgba(255,255,255,0.38); font-size: 0.8rem; margin-top: 0.1rem; }
+.sec-body { background: var(--white); padding: 2.5rem 0 3rem; }
+.sec-body p { font-size: 0.975rem; color: var(--body); line-height: 1.75; margin-bottom: 0.9rem; font-weight: 400; }
+
+/* SUBSECTION TITLE */
+.sub-title { font-family: var(--fd); font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--navy); margin: 2rem 0 0.75rem; display: flex; align-items: center; gap: 0.6rem; }
+.sub-title::after { content: ''; flex: 1; height: 1px; background: var(--lgrey); }
+
+/* CARDS */
+.crow { display: grid; gap: 1.25rem; margin: 1.5rem 0; }
+.c3 { grid-template-columns: repeat(3,1fr); }
+.c2 { grid-template-columns: repeat(2,1fr); }
+.c4 { grid-template-columns: repeat(4,1fr); }
+
+.kcard { border-radius: 8px; padding: 1.5rem 1.4rem; position: relative; overflow: hidden; }
+.kcard::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kcard.navy { background: var(--navy); color: var(--white); box-shadow: var(--shadow); }
+.kcard.navy::before { background: var(--blue2); }
+.kcard.blue { background: var(--blue); color: var(--white); box-shadow: var(--shadow); }
+.kcard.blue::before { background: rgba(255,255,255,0.3); }
+.kcard.orange { background: var(--orange); color: var(--white); box-shadow: var(--shadow); }
+.kcard.orange::before { background: rgba(255,255,255,0.3); }
+.kcard.lined { background: var(--white); border: 1.5px solid var(--lgrey); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.kcard.lined::before { background: var(--orange); }
+.kcard h3 { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.3px; margin-bottom: 0.5rem; color: var(--white); }
+.kcard.lined h3 { color: var(--navy); }
+.kcard p { font-size: 0.9rem; line-height: 1.65; color: rgba(255,255,255,0.88); margin: 0; }
+.kcard.lined p { color: var(--body); }
+.kcard-rule { width: 2rem; height: 2px; background: rgba(255,255,255,0.3); border-radius: 1px; margin: 0.65rem 0; }
+
+/* TOOL PANELS */
+.tool-block { margin: 2.25rem 0; }
+.tool-hdg { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 0.65rem; border-bottom: 2px solid var(--lgrey); }
+.tool-accent { width: 4px; height: 1.8rem; border-radius: 2px; flex-shrink: 0; }
+.tool-hdg h3 { font-family: var(--fd); font-size: 1.2rem; font-weight: 700; letter-spacing: 0.3px; color: var(--navy); text-transform: uppercase; }
+.tool-panel { display: grid; grid-template-columns: 1fr 1fr; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 24px rgba(22,28,96,0.1); }
+.tp-l { background: var(--mid); padding: 1.6rem 1.8rem; }
+.tp-r { background: var(--navy); padding: 1.6rem 1.8rem; }
+.tp-lbl { font-family: var(--fd); font-size: 0.7rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.6rem; color: var(--blue); }
+.tp-r .tp-lbl { color: var(--orange); }
+.tp-desc { font-size: 0.875rem; color: var(--body); line-height: 1.65; margin-bottom: 1.1rem; }
+
+/* Spec table */
+.stbl { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.stbl tr { border-bottom: 1px solid var(--lgrey); }
+.stbl tr:last-child { border-bottom: none; }
+.stbl td { padding: 0.45rem 0.7rem; vertical-align: middle; }
+.stbl td:first-child { font-weight: 600; color: var(--white); background: var(--navy); width: 45%; font-size: 0.8rem; }
+.stbl tr:nth-child(even) td:first-child { background: #1E2580; }
+.stbl td:last-child { color: var(--text); background: var(--white); }
+.stbl tr:nth-child(even) td:last-child { background: #EEF3FA; }
+
+/* Advantage list */
+.adv-list { list-style: none; }
+.adv-item { display: flex; gap: 0.8rem; margin-bottom: 1rem; }
+.adv-item:last-child { margin-bottom: 0; }
+.adv-bar { flex-shrink: 0; width: 3px; border-radius: 2px; margin-top: 3px; min-height: 2.5rem; background: var(--blue2); }
+.adv-item.ora .adv-bar { background: var(--orange); }
+.adv-title { font-size: 0.875rem; font-weight: 700; color: var(--blue2); margin-bottom: 0.15rem; display: block; }
+.adv-item.ora .adv-title { color: #F28B4E; }
+.adv-body { font-size: 0.83rem; color: rgba(170,190,220,0.85); line-height: 1.55; }
+
+/* CALLOUTS */
+.callout { border-radius: 8px; padding: 1.05rem 1.35rem; margin: 1.3rem 0; font-size: 0.92rem; line-height: 1.65; display: flex; gap: 0.85rem; align-items: flex-start; }
+.callout-icon { flex-shrink: 0; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 900; margin-top: 0.1rem; color: var(--white); }
+.callout.cgr  { background: #D8F0DC; border-left: 4px solid var(--green2); color: #0C3312; }
+.callout.cgr  .callout-icon { background: var(--green2); }
+.callout.cor  { background: #FDE8D5; border-left: 4px solid var(--orange); color: #5C2400; }
+.callout.cor  .callout-icon { background: var(--orange); }
+.callout.cbl  { background: #DBEEFF; border-left: 4px solid var(--blue); color: #0C2F60; }
+.callout.cbl  .callout-icon { background: var(--blue); }
+.callout.cnv  { background: #E8EEF8; border-left: 4px solid var(--navy); color: var(--navy); }
+.callout.cnv  .callout-icon { background: var(--navy); }
+.callout strong { display: block; font-weight: 700; margin-bottom: 0.2rem; font-size: 0.92rem; }
+
+/* DEPLOY */
+.deploy-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; margin: 1.5rem 0; }
+.dcard { border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+.dcard-hd { padding: 1.1rem 1.3rem; }
+.dcard-hd.navy   { background: var(--navy); }
+.dcard-hd.blue   { background: var(--blue); }
+.dcard-hd.orange { background: var(--orange); }
+.dcard-hd h3 { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; color: var(--white); text-transform: uppercase; }
+.dcard-hd p { color: rgba(255,255,255,0.6); font-size: 0.78rem; font-style: italic; margin-top: 0.2rem; }
+.dcard-bd { background: var(--mid); padding: 1.1rem 1.3rem; font-size: 0.87rem; color: var(--body); line-height: 1.6; }
+.dtags { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
+.dtag { font-size: 0.7rem; font-weight: 700; padding: 0.22rem 0.7rem; border-radius: 20px; border: 1.5px solid; text-transform: uppercase; letter-spacing: 0.5px; }
+.dtag.navy   { color: var(--navy);   border-color: var(--navy); }
+.dtag.blue   { color: var(--blue);   border-color: var(--blue); }
+.dtag.orange { color: var(--orange); border-color: var(--orange); }
+
+/* MARKET */
+.mstats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin: 1.75rem 0; }
+.mstat { background: var(--navy); border-radius: 10px; padding: 1.2rem 1.1rem; position: relative; overflow: hidden; box-shadow: var(--shadow); }
+.mstat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; }
+.mstat:nth-child(1)::after { background: var(--blue); }
+.mstat:nth-child(2)::after { background: var(--orange); }
+.mstat:nth-child(3)::after { background: var(--green2); }
+.mstat:nth-child(4)::after { background: #9B59B6; }
+.mstat-val { font-family: var(--fd); font-size: 1.65rem; font-weight: 900; color: var(--white); line-height: 1.1; }
+.mstat-lbl { font-size: 0.75rem; color: rgba(255,255,255,0.42); margin-top: 0.3rem; line-height: 1.4; }
+
+.driver-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; margin: 1rem 0; }
+.driver { background: var(--white); border-radius: 8px; padding: 1rem 1.1rem 1rem 1.3rem; border-left: 4px solid var(--blue); box-shadow: 0 2px 8px rgba(0,0,0,0.05); font-size: 0.875rem; }
+.driver:nth-child(2) { border-left-color: var(--orange); }
+.driver:nth-child(3) { border-left-color: var(--green2); }
+.driver:nth-child(4) { border-left-color: #9B59B6; }
+.driver strong { display: block; color: var(--navy); font-size: 0.9rem; font-weight: 700; margin-bottom: 0.35rem; }
+.driver span { color: var(--body); line-height: 1.55; }
+
+/* TABLES */
+.ctbl, .rtbl, .ntbl { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.875rem; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 12px rgba(22,28,96,0.08); }
+.ctbl thead th, .rtbl thead th, .ntbl thead th { background: var(--navy); color: var(--white); padding: 0.75rem 1rem; text-align: left; font-family: var(--fd); font-size: 0.78rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; }
+.ctbl tbody td, .ntbl tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--lgrey); color: var(--text); vertical-align: middle; }
+.ctbl tbody tr:nth-child(even) td, .ntbl tbody tr:nth-child(even) td { background: var(--mid); }
+.ctbl tbody tr:last-child td, .ntbl tbody tr:last-child td { border-bottom: none; }
+
+.rtbl thead th:not(:first-child) { text-align: right; }
+.rtbl tbody td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--lgrey); color: var(--text); }
+.rtbl tbody td:not(:first-child) { text-align: right; font-weight: 600; color: var(--navy); }
+.rtbl tbody tr:nth-child(even) td { background: var(--mid); }
+.rtbl tbody tr:last-child td { border-bottom: none; }
+.rtbl tfoot td { background: var(--orange); color: var(--white); font-weight: 700; padding: 0.85rem 1rem; font-size: 0.95rem; }
+.rtbl tfoot td:not(:first-child) { text-align: right; font-size: 1rem; }
+
+.badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: var(--white); font-family: var(--fd); letter-spacing: 0.5px; }
+.badge.p1 { background: var(--green); }
+.badge.p2 { background: var(--blue); }
+.badge.p3 { background: var(--orange); }
+
+/* PHASES */
+.phases { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.25rem; margin: 1.5rem 0; }
+.phase { border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+.phase-hd { padding: 1.1rem 1.3rem; }
+.phase-hd.navy   { background: var(--navy); }
+.phase-hd.blue   { background: var(--blue); }
+.phase-hd.green  { background: var(--green); }
+.phase-hd h3 { font-family: var(--fd); font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; color: var(--white); text-transform: uppercase; }
+.phase-hd p { color: rgba(255,255,255,0.6); font-size: 0.8rem; font-style: italic; margin-top: 0.2rem; }
+.phase-bd { background: var(--mid); padding: 1.2rem 1.3rem; }
+.phase-bd ol { padding-left: 1.2rem; font-size: 0.87rem; color: var(--body); line-height: 1.65; }
+.phase-bd ol li { margin-bottom: 0.55rem; }
+.phase-bd ol li:last-child { margin-bottom: 0; }
+
+.step-badge { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--orange); color: var(--white); font-size: 0.78rem; font-weight: 700; font-family: var(--fd); flex-shrink: 0; }
+
+/* FOOTER */
+.footer { background: var(--dark); border-top: 3px solid var(--orange); padding: 2.5rem; margin-top: 3.5rem; }
+.footer-in { max-width: 1140px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; }
+.footer-brand { font-family: var(--fd); font-size: 1rem; font-weight: 700; color: var(--white); letter-spacing: 1px; text-transform: uppercase; line-height: 1.4; }
+.footer-brand span { color: var(--blue); }
+.footer-meta { font-size: 0.8rem; color: rgba(255,255,255,0.3); line-height: 1.6; text-align: right; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .hero-inner, .footer-in { grid-template-columns: 1fr; }
+  .hero-stats { flex-direction: row; flex-wrap: wrap; }
+  .hstat { flex: 1; min-width: 140px; }
+  .c3,.c4,.deploy-grid,.phases,.mstats { grid-template-columns: repeat(2,1fr); }
+  .tool-panel { grid-template-columns: 1fr; }
+  .driver-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .footer-meta { text-align: left; }
+}
+@media (max-width: 560px) {
+  .c3,.c4,.deploy-grid,.phases,.mstats,.c2 { grid-template-columns: 1fr; }
+  .hero { padding: 3rem 1.5rem 2.5rem; }
+  .wrap, .sec-hdr-in { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<!-- Master plan context banner -->
+<div style="background:#0a0f1a;border-bottom:2px solid rgba(54,140,217,0.3);padding:0;">
+  <div style="max-width:1140px;margin:0 auto;">
+    <!-- Label row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="padding:0.55rem 1rem;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(54,140,217,0.7);">BU Services Full Picture</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2026</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2027</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2028</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2029</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">2030</div>
+      <div style="padding:0.55rem 0.4rem;text-align:center;font-family:var(--fd,'Barlow',sans-serif);font-size:0.6rem;font-weight:700;color:rgba(255,255,255,0.3);border-left:1px solid rgba(255,255,255,0.06);">Full plan</div>
+    </div>
+    <!-- Base row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="padding:0.45rem 1rem;font-size:0.72rem;color:rgba(185,142,224,0.65);">Base business</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$47.2M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$53.1M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$58.0M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$59.9M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(185,142,224,0.8);border-left:1px solid rgba(255,255,255,0.04);">$55.4M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.2);border-left:1px solid rgba(255,255,255,0.04);">existing</div>
+    </div>
+    <!-- Initiatives row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;border-bottom:1px solid rgba(255,255,255,0.04);">
+      <div style="padding:0.45rem 1rem;font-size:0.72rem;color:rgba(61,219,80,0.65);">+ 5 growth initiatives</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$3.2M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$18.6M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$25.7M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$32.6M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.78rem;font-weight:700;color:rgba(61,219,80,0.8);border-left:1px solid rgba(255,255,255,0.04);">$37.4M</div>
+      <div style="padding:0.45rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.2);border-left:1px solid rgba(255,255,255,0.04);">this plan</div>
+    </div>
+    <!-- Total row -->
+    <div style="display:grid;grid-template-columns:220px repeat(5,1fr) 100px;background:rgba(255,255,255,0.03);">
+      <div style="padding:0.5rem 1rem;font-family:var(--fd,'Barlow',sans-serif);font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Total BU Services</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$50.4M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$71.7M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$83.7M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:rgba(255,255,255,0.85);border-left:1px solid rgba(255,255,255,0.06);">$92.5M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.85rem;font-weight:900;color:#3DDB50;border-left:1px solid rgba(255,255,255,0.06);">$92.8M</div>
+      <div style="padding:0.5rem 0.4rem;text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.25);border-left:1px solid rgba(255,255,255,0.06);">combined</div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-brand">NUCLEOM <em>|</em> EKOSCAN INTEGRITY GROUP</div>
+  <ul class="nav-links">
+    <li><a href="#tech">Technology</a></li>
+    <li><a href="#deployment">Deployment</a></li>
+    <li><a href="#market">Market</a></li>
+    <li><a href="#gtm">Go-to-Market</a></li>
+    <li><a href="#forecast">Revenue</a></li>
+    <li><a href="#nextsteps">Next Steps</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true">735kV</div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-label">Commercial Plan &mdash; 2026 to 2030</div>
+      <h1>POWERLINE<span>INSPECTION</span></h1>
+      <div class="hero-rule"></div>
+      <p class="hero-sub">Nucleom Inc. (Lead)&ensp;&middot;&ensp;Nortech Advanced NDT (AB Support)&ensp;&middot;&ensp;Ekoscan Integrity Group&ensp;&middot;&ensp;BU Services</p>
+      <p class="hero-desc">Three proprietary tools. Live lines to 735kV. The only complete Canadian transmission line inspection solution &mdash; developed in partnership with Hydro-Qu&eacute;bec.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat">
+        <div class="hstat-val">3</div>
+        <div class="hstat-lbl">Proprietary Inspection Tools<br>LineCore &middot; LineOhm &middot; LineRay</div>
+      </div>
+      <div class="hstat s2">
+        <div class="hstat-val">735kV</div>
+        <div class="hstat-lbl">Live Line Capability<br>All three tools, energized lines</div>
+      </div>
+      <div class="hstat s3">
+        <div class="hstat-val">HQ IP</div>
+        <div class="hstat-lbl">Hydro-Qu&eacute;bec Patent Partnership<br>Exclusive Canadian licensing</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXECUTIVE SUMMARY -->
+<div class="sec-hdr" id="exec">
+  <div class="sec-hdr-in">
+    <div class="sec-num">&bull;</div>
+    <div><div class="sec-title">Executive Summary</div><div class="sec-sub">Why Nucleom wins in powerline inspection</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>Canada operates one of the world&rsquo;s most extensive high-voltage transmission networks. Aging infrastructure, growing renewable energy connections, and grid uprating programs are creating unprecedented demand for advanced conductor and splice inspection &mdash; work that cannot be deferred and cannot be done visually. Nucleom holds the only Canadian-owned suite of three proprietary tools for this market, leading the Powerline Inspection initiative across the BU Services platform with Nortech providing Western Canada (Alberta) commercial support.</p>
+    <div class="crow c3">
+      <div class="kcard navy"><h3>Unique IP</h3><div class="kcard-rule"></div><p>LineCore (ECA), LineOhm (resistance), LineRay (X-ray). Three tools &mdash; no competitor offers this complete suite on live lines to 735kV.</p></div>
+      <div class="kcard blue"><h3>Proven Platform</h3><div class="kcard-rule"></div><p>Nucleom already holds OPG contracts and multi-sector NDT credibility. Powerline extends the same trusted brand into a safety-critical vertical.</p></div>
+      <div class="kcard orange"><h3>Market Timing</h3><div class="kcard-rule"></div><p>Canadian utilities face multi-decade re-investment cycles. Hydro-Qu&eacute;bec, BC Hydro, AltaLink, and Hydro One are actively procuring condition-based inspection services.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- TECHNOLOGY -->
+<div class="sec-hdr" id="tech">
+  <div class="sec-hdr-in">
+    <div class="sec-num">1</div>
+    <div><div class="sec-title">Technology Portfolio</div><div class="sec-sub">Three tools. One complete transmission line inspection solution.</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>Nucleom&rsquo;s powerline inspection capability rests on three purpose-built instruments, each addressing a distinct failure mode and complementary to the others.</p>
+
+    <div class="tool-block">
+      <div class="tool-hdg"><div class="tool-accent" style="background:var(--blue);"></div><h3>LineCore &mdash; Conductor Zinc Layer Assessment (ECA)</h3></div>
+      <div class="tool-panel">
+        <div class="tp-l">
+          <div class="tp-lbl">What It Does</div>
+          <p class="tp-desc">An Eddy Current Array probe that detects progressive degradation of the protective zinc layer on ACSR conductors &mdash; the key early-warning indicator of corrosion-driven conductor failure. Operates on energized lines and moves autonomously.</p>
+          <table class="stbl">
+            <tr><td>Conductor type</td><td>ACSR</td></tr>
+            <tr><td>Conductor diameter</td><td>15 mm to 43.18 mm</td></tr>
+            <tr><td>Inspection speed</td><td>Up to 1.0 m/s</td></tr>
+            <tr><td>Line voltage</td><td>Energized to 735 kV</td></tr>
+            <tr><td>Conductor temperature</td><td>Tested to 100&deg;C</td></tr>
+            <tr><td>Ambient temperature</td><td>5&deg;C to 30&deg;C</td></tr>
+            <tr><td>Deployment</td><td>LineDrone, pole-mounted robot, carrier</td></tr>
+          </table>
+        </div>
+        <div class="tp-r">
+          <div class="tp-lbl">Why Clients Choose LineCore</div>
+          <ul class="adv-list">
+            <li class="adv-item"><div class="adv-bar"></div><div><span class="adv-title">Early Detection</span><span class="adv-body">Identifies zinc degradation before corrosion reaches the steel core &mdash; planned maintenance vs. emergency replacement.</span></div></li>
+            <li class="adv-item"><div class="adv-bar"></div><div><span class="adv-title">No Line Shutdown</span><span class="adv-body">Inspects at up to 735 kV while energized. Zero production loss for the utility.</span></div></li>
+            <li class="adv-item"><div class="adv-bar"></div><div><span class="adv-title">Motorized Autonomous</span><span class="adv-body">Double-wheel drive enables continuous travel; covers long spans without lineman involvement.</span></div></li>
+            <li class="adv-item"><div class="adv-bar"></div><div><span class="adv-title">Uprating Validation</span><span class="adv-body">Confirms conductor condition for Dynamic Line Rating (DLR) feasibility &mdash; a growing utility requirement.</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-block">
+      <div class="tool-hdg"><div class="tool-accent" style="background:var(--orange);"></div><h3>LineOhm &mdash; Splice Sleeve Electrical Resistance Assessment</h3></div>
+      <div class="tool-panel">
+        <div class="tp-l">
+          <div class="tp-lbl">What It Does</div>
+          <p class="tp-desc">Measures the micro-ohm electrical resistance of compression splice sleeves on energized lines. Elevated resistance is the leading indicator of overheating and splice failure &mdash; invisible to visual or thermal inspection. Based on a Hydro-Qu&eacute;bec patent.</p>
+          <table class="stbl">
+            <tr><td>Splice diameter</td><td>15 mm to 70 mm</td></tr>
+            <tr><td>Conductor diameter</td><td>15 mm to 45 mm</td></tr>
+            <tr><td>Operating current</td><td>2.5 A to 3,000 A</td></tr>
+            <tr><td>Adjustable length</td><td>19 cm to 33 cm</td></tr>
+            <tr><td>Line voltage</td><td>Energized to 735 kV</td></tr>
+            <tr><td>Weight</td><td>&lt;500 g (aluminum housing)</td></tr>
+            <tr><td>Range of motion</td><td>~360&deg; (ball-and-socket joint)</td></tr>
+          </table>
+        </div>
+        <div class="tp-r">
+          <div class="tp-lbl">Hydro-Qu&eacute;bec Patented Technology</div>
+          <ul class="adv-list">
+            <li class="adv-item ora"><div class="adv-bar"></div><div><span class="adv-title">No Surface Prep</span><span class="adv-body">Patented contact plate system eliminates conductor cleaning, cutting field time significantly.</span></div></li>
+            <li class="adv-item ora"><div class="adv-bar"></div><div><span class="adv-title">Low-Current Use</span><span class="adv-body">Operates at minimum 2.5 A &mdash; usable on adjacent de-energized circuits without an external source.</span></div></li>
+            <li class="adv-item ora"><div class="adv-bar"></div><div><span class="adv-title">Full 360&deg; Freedom</span><span class="adv-body">Ball-and-socket joint allows use in constrained tower geometry from a pole or platform.</span></div></li>
+            <li class="adv-item ora"><div class="adv-bar"></div><div><span class="adv-title">Paired with LineRay</span><span class="adv-body">Complete mechanical + electrical splice assessment in one mobilization.</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-block">
+      <div class="tool-hdg"><div class="tool-accent" style="background:var(--green2);"></div><h3>LineRay &mdash; Internal X-Ray Inspection of Powerline Components</h3></div>
+      <div class="callout cbl" style="margin-bottom:1.25rem;"><div class="callout-icon">&#10003;</div><div><strong>The Invisible Made Visible</strong>Visual and thermal inspections cannot see inside metal. LineRay uses X-ray imaging to detect hidden defects inside critical overhead powerline components &mdash; without dismantling, without outages.</div></div>
+      <div class="crow c2">
+        <div class="kcard lined"><h3>Components Inspected</h3><ul style="padding-left:1.2rem;font-size:0.875rem;color:var(--body);line-height:1.9;margin-top:0.5rem;"><li>Compression sleeves (splices)</li><li>Connectors and terminals</li><li>Bolted joints</li><li>Dead ends and dampers</li><li>Ground wire connections</li></ul></div>
+        <div class="kcard lined"><h3>Hidden Defects Detected by X-Ray</h3><ul style="padding-left:1.2rem;font-size:0.875rem;color:var(--body);line-height:1.9;margin-top:0.5rem;"><li>Broken conductor strands under compression sleeves</li><li>Voids, cracks, or poor crimps inside joints</li><li>Water or contamination causing internal corrosion</li></ul></div>
+      </div>
+      <div class="callout cgr"><div class="callout-icon">&#10024;</div><div><strong>LineRay + LineOhm = Complete Splice Assessment</strong>Mechanical integrity (X-ray) + Electrical resistance (micro-ohm) delivered in a single mobilization. No other Canadian provider offers this combined assessment.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DEPLOYMENT -->
+<div class="sec-hdr" id="deployment">
+  <div class="sec-hdr-in">
+    <div class="sec-num">2</div>
+    <div><div class="sec-title">Deployment Methods</div><div class="sec-sub">Three modes &mdash; all conditions, all site configurations.</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>Nucleom&rsquo;s powerline tools are designed for three deployment modes. They are not mutually exclusive &mdash; a single campaign may combine all three for maximum data coverage per mobilization.</p>
+    <div class="deploy-grid">
+      <div class="dcard"><div class="dcard-hd navy"><h3>LineDrone</h3><p>Autonomous aerial deployment</p></div><div class="dcard-bd">Minimizes human intervention on live HV lines. Reaches spans and tower geometries inaccessible to line workers. Deploys LineOhm and LineCore in a single flight.<div class="dtags"><span class="dtag navy">LineOhm</span><span class="dtag navy">LineCore</span></div></div></div>
+      <div class="dcard"><div class="dcard-hd blue"><h3>Pole-Mounted Robot</h3><p>Autonomous on-wire crawler</p></div><div class="dcard-bd">Clamps onto conductor and travels autonomously. Ideal for close-phase configurations where drone EM interference is a concern. Inspects bundled conductors section by section.<div class="dtags"><span class="dtag blue">LineCore</span><span class="dtag blue">LineRay</span></div></div></div>
+      <div class="dcard"><div class="dcard-hd orange"><h3>Carrier / Manual</h3><p>Lineman-assisted deployment</p></div><div class="dcard-bd">Pairs with line work already underway &mdash; adds NDT data at minimal incremental cost. Best for LineOhm splice checks when linemen are already at height.<div class="dtags"><span class="dtag orange">LineOhm</span><span class="dtag orange">LineRay</span></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MARKET -->
+<div class="sec-hdr" id="market">
+  <div class="sec-hdr-in">
+    <div class="sec-num">3</div>
+    <div><div class="sec-title">Market Opportunity</div><div class="sec-sub">Canadian utilities face a multi-decade re-investment cycle. The window is now.</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>Canada operates over 160,000 km of high-voltage transmission lines, much of it built in the 1960s&ndash;1980s and now approaching or exceeding design service life. Utilities face mounting pressure from regulators, insurers, and reliability standards bodies to document conductor condition systematically.</p>
+    <div class="mstats">
+      <div class="mstat"><div class="mstat-val">160,000+<span style="font-size:0.9rem;font-weight:400"> km</span></div><div class="mstat-lbl">HV transmission lines in Canada</div></div>
+      <div class="mstat"><div class="mstat-val">40&ndash;60yr</div><div class="mstat-lbl">Average age of infrastructure</div></div>
+      <div class="mstat"><div class="mstat-val">$50B+</div><div class="mstat-lbl">Utility capex projected 2025&ndash;2035</div></div>
+      <div class="mstat"><div class="mstat-val">$2B+/yr</div><div class="mstat-lbl">Estimated addressable NDT spend</div></div>
+    </div>
+    <div class="sub-title">Key Market Drivers</div>
+    <div class="driver-grid">
+      <div class="driver"><strong>Grid Decarbonization</strong><span>Renewable integration requires expanded transmission and systematic conductor condition monitoring to ensure existing lines can handle increased loads safely.</span></div>
+      <div class="driver"><strong>Aging Infrastructure</strong><span>Utilities face NERC/FERC reliability mandates with conductor fleets well beyond design life. Reactive maintenance is no longer acceptable to regulators.</span></div>
+      <div class="driver"><strong>Uprating Demand</strong><span>DLR uprating programs require a conductor condition baseline. LineCore is the only live-line ECA tool for this assessment in Canada.</span></div>
+      <div class="driver"><strong>Insurance &amp; Risk Management</strong><span>Insurers and regulators require documented condition assessments before lines are operated above nameplate capacity or approved for life extension.</span></div>
+    </div>
+    <div class="sub-title">Target Clients &mdash; Priority Accounts</div>
+    <table class="ctbl">
+      <thead><tr><th>Priority</th><th>Region</th><th>Utility / Client</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge p1">P1</span></td><td><strong>France</strong></td><td>RTE &mdash; R&eacute;seau de Transport d&rsquo;&Eacute;lectricit&eacute;</td><td>Active interest in powerline inspection services &mdash; EIG France base and EDF/Eurazeo network provide direct access to Europe&rsquo;s largest HV grid (100,000+ km, up to 400 kV)</td></tr>
+        <tr><td><span class="badge p1">P1</span></td><td><strong>Qu&eacute;bec</strong></td><td>Hydro-Qu&eacute;bec (TransÉnergie)</td><td>Founding IP partner &mdash; expand from R&amp;D collaboration to full service contract</td></tr>
+        <tr><td><span class="badge p1">P1</span></td><td><strong>Ontario</strong></td><td>Hydro One Networks</td><td>Largest IOu in Canada; active conductor assessment program; Nucleom has OPG presence</td></tr>
+        <tr><td><span class="badge p1">P1</span></td><td><strong>British Columbia</strong></td><td>BC Hydro Transmission</td><td>Active DLR and uprating programs &mdash; strong LineCore and LineOhm fit</td></tr>
+        <tr><td><span class="badge p2">P2</span></td><td><strong>Alberta</strong></td><td>AltaLink, ATCO Electric</td><td>Nortech AB relationships provide natural commercial entry (Max Aggrey &mdash; 2027)</td></tr>
+        <tr><td><span class="badge p2">P2</span></td><td><strong>SK / MB</strong></td><td>SaskPower, Manitoba Hydro</td><td>Older 230kV networks; strong LineOhm splice audit candidate from 2027</td></tr>
+        <tr><td><span class="badge p3">P3</span></td><td><strong>Atlantic / US (2028+)</strong></td><td>NB Power, NS Power + NERC IOUs</td><td>Marine corrosion = urgent LineCore need; US via EIG/Eurazeo network 2029&ndash;2030</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- GO-TO-MARKET -->
+<div class="sec-hdr" id="gtm">
+  <div class="sec-hdr-in">
+    <div class="sec-num">4</div>
+    <div><div class="sec-title">Go-To-Market Strategy</div><div class="sec-sub">From Hydro-Qu&eacute;bec reference to national utility presence &mdash; 2026 to 2030.</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <p>Nucleom&rsquo;s powerline commercial strategy follows a three-phase build &mdash; each phase funded by revenue generated in the prior phase, with no requirement for speculative investment.</p>
+    <div class="phases">
+      <div class="phase"><div class="phase-hd navy"><h3>Phase 1 &mdash; 2026</h3><p>Anchor &amp; Validate</p></div><div class="phase-bd"><ol><li>Execute Hydro-Qu&eacute;bec reference campaign with LineCore + LineOhm on TransÉnergie lines</li><li>Publish case study: zinc degradation + splice resistance results</li><li>Initiate Hydro One and BC Hydro vendor qualification (Vinoth Tharma &mdash; East)</li><li>Develop LineRay service offering: safety protocols, radiation licensing, SOP</li></ol></div></div>
+      <div class="phase"><div class="phase-hd blue"><h3>Phase 2 &mdash; 2027</h3><p>Scale Nationally</p></div><div class="phase-bd"><ol><li>Convert Hydro One and BC Hydro to multi-year service agreements</li><li>Launch bundled 3-tool inspection programs in a single mobilization</li><li>Enter Alberta via AltaLink / ATCO through Nortech AB relationships (Max Aggrey)</li><li>Submit to utility vendor prequalification portals (MERX, Hydro One, BC Hydro)</li></ol></div></div>
+      <div class="phase"><div class="phase-hd green"><h3>Phase 3 &mdash; 2028&ndash;2030</h3><p>Recurring Platform</p></div><div class="phase-bd"><ol><li>Annual conductor audit contracts with 5+ utilities across Canada</li><li>US expansion via EIG France / Eurazeo network &mdash; NERC-regulated IOUs (2029)</li><li>IP licensing and instrument rental as secondary revenue streams</li><li>Integrate with EIG SG NDT EMMA software for unified data reporting</li></ol></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- REVENUE -->
+<div class="sec-hdr" id="forecast">
+  <div class="sec-hdr-in">
+    <div class="sec-num">5</div>
+    <div><div class="sec-title">Revenue Forecast 2026&ndash;2030</div><div class="sec-sub">Conservative build from reference to recurring &mdash; showing the EIG upside.</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <div class="callout cnv"><div class="callout-icon">&#9650;</div><div><strong>5-Year Summary: Cumulative Revenue $10.18M &nbsp;|&nbsp; CAGR 2026&ndash;2030: ~79%</strong>LineCore reaches $1.75M/yr by 2030. Combined powerline service line delivers $3.80M/year on a recurring utility audit platform.</div></div>
+    <table class="rtbl">
+      <thead><tr><th>Revenue Stream</th><th>2026 &mdash; Base</th><th>2027</th><th>2028</th><th>2029</th><th>2030 &mdash; Scale</th></tr></thead>
+      <tbody>
+        <tr><td>LineCore &mdash; Conductor ECA Inspection</td><td>$180K</td><td>$520K</td><td>$950K</td><td>$1.35M</td><td>$1.75M</td></tr>
+        <tr><td>LineOhm &mdash; Splice Resistance Assessment</td><td>$90K</td><td>$280K</td><td>$480K</td><td>$680K</td><td>$880K</td></tr>
+        <tr><td>LineRay &mdash; X-Ray Internal Inspection</td><td>$60K</td><td>$200K</td><td>$420K</td><td>$620K</td><td>$850K</td></tr>
+        <tr><td>Additional Services (pylon / soil / reporting)</td><td>$35K</td><td>$90K</td><td>$180K</td><td>$250K</td><td>$320K</td></tr>
+      </tbody>
+      <tfoot><tr><td>TOTAL &mdash; Powerline Service Line</td><td>$365K</td><td>$1.09M</td><td>$2.03M</td><td>$2.90M</td><td>$3.80M</td></tr></tfoot>
+    </table>
+    <div class="callout cor"><div class="callout-icon">i</div><div><strong>Key Assumptions</strong>2026: Hydro-Qu&eacute;bec reference + 1 Hydro One pilot. 2027: 3 active utility clients; bundled programs. 2028: 5+ clients; annual recurring audit contracts. 2029: US market entry via EIG/Eurazeo network. 2030: National platform; $3.80M/yr run rate. Instrument rental and IP licensing excluded. Nortech Alberta entry represents additional upside.</div></div>
+  </div>
+</div>
+
+<!-- NEXT STEPS -->
+<div class="sec-hdr" id="nextsteps">
+  <div class="sec-hdr-in">
+    <div class="sec-num">6</div>
+    <div><div class="sec-title">Next Steps &amp; Accountabilities</div><div class="sec-sub">Six actions to activate the powerline commercial plan.</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <table class="ntbl">
+      <thead><tr><th style="width:3.5rem;">#</th><th>Action</th><th>Owner</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td><span class="step-badge">1</span></td><td>Confirm Hydro-Qu&eacute;bec 2026 program scope and commercial terms</td><td>Vinoth Tharma / Mathieu Beauchesne</td><td>Q2 2026</td></tr>
+        <tr><td><span class="step-badge">2</span></td><td>Initiate Hydro One vendor qualification process</td><td>Vinoth Tharma</td><td>Q2 2026</td></tr>
+        <tr><td><span class="step-badge">3</span></td><td>Develop LineRay service SOP, safety protocol, radiation licensing plan</td><td>Nucleom Technical Lead</td><td>Q3 2026</td></tr>
+        <tr><td><span class="step-badge">4</span></td><td>Package bundled 3-tool inspection offering with pricing schedule</td><td>Commercial Team</td><td>Q2 2026</td></tr>
+        <tr><td><span class="step-badge">5</span></td><td>Confirm Max Aggrey (Nortech) as Alberta powerline commercial support lead — AltaLink and ATCO Electric entry via Nortech AB relationships targeting 2027</td><td>Mathieu Beauchesne</td><td>Q2 2026</td></tr>
+        <tr><td><span class="step-badge">6</span></td><td>Incorporate revenue forecast into EIG 2026&ndash;2030 five-year plan</td><td>Mathieu Beauchesne</td><td>April 2026</td></tr>
+      </tbody>
+    </table>
+    <div class="callout cgr"><div class="callout-icon">&#9733;</div><div><strong>Why This Wins</strong>Three proprietary tools no competitor offers on live lines to 735kV. An existing Hydro-Qu&eacute;bec partnership that gives instant national credibility. A utility re-investment cycle that is underway and cannot be deferred. The EIG ecosystem &mdash; SG NDT instruments, EMMA software, and 50-country global reach &mdash; behind every proposal. $10.18M cumulative over five years from a standing start.</div></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-in">
+    <div class="footer-brand">POWERLINE INSPECTION<br><span>COMMERCIAL PLAN 2026&ndash;2030</span></div>
+    <div class="footer-meta">Nucleom Inc. &nbsp;|&nbsp; Ekoscan Integrity Group &nbsp;|&nbsp; BU Services<br>Prepared by Jon Eustace, CEO &mdash; North America &nbsp;|&nbsp; April 2026 &nbsp;|&nbsp; CONFIDENTIAL</div>
+  </div>
+</footer>
+
+</body>
+</html>

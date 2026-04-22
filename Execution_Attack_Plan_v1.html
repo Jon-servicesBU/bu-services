@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — Execution Attack Plan 2026–2030</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400&family=Barlow+Condensed:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#161C60;--navy2:#0D1040;--navy3:#0A0C30;
+  --white:#FFFFFF;--mid:#F0F3FA;--lgrey:#DDE3F0;--body:#384660;
+  --blue:#1A4A8C;--blue2:#368CD9;--blue3:#1E6BB5;
+  --green:#1A6B2A;--green2:#3DDB50;--green3:#22882F;
+  --orange:#E97132;--orange2:#C9590A;
+  --red:#CC2222;--red2:#FF4444;
+  --amber:#D97706;--amber2:#F59E0B;
+  --purple:#7C3AED;--teal:#0D9488;
+  --mining:#C9860A;--pipeline:#368CD9;--powerline:#E97132;
+  --nuclear:#3DDB50;--x3:#8B5CF6;
+  --fd:'Barlow Condensed',sans-serif;
+  --fb:'Barlow',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --shadow:0 2px 16px rgba(22,28,96,0.10);
+  --shadow-lg:0 4px 32px rgba(22,28,96,0.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fb);background:var(--white);color:var(--body);line-height:1.65;font-size:15px;}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:200;background:var(--navy2);border-bottom:2px solid rgba(255,255,255,0.07);}
+.nav-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;padding:0 2rem;gap:0;}
+.nav-brand{font-family:var(--fd);font-size:0.72rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--white);padding:0 1.2rem 0 0;margin-right:1rem;border-right:1px solid rgba(255,255,255,0.1);white-space:nowrap;height:52px;display:flex;align-items:center;}
+.nav-links{display:flex;flex-wrap:wrap;}
+.nav-links a{display:block;padding:0 0.8rem;height:52px;line-height:52px;font-size:0.67rem;font-weight:600;letter-spacing:0.5px;color:rgba(255,255,255,0.38);text-decoration:none;text-transform:uppercase;border-bottom:3px solid transparent;margin-bottom:-3px;transition:color .15s,border-color .15s;white-space:nowrap;}
+.nav-links a:hover{color:var(--white);border-bottom-color:rgba(255,255,255,0.3);}
+
+/* HERO */
+.hero{background:var(--navy);padding:4rem 2rem 3.5rem;position:relative;overflow:hidden;}
+.hero::after{content:'';position:absolute;right:0;top:0;width:40%;height:100%;background:linear-gradient(135deg,transparent 40%,rgba(61,219,80,0.04) 100%);pointer-events:none;}
+.hero-in{max-width:1200px;margin:0 auto;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;font-family:var(--fd);font-size:0.7rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green2);background:rgba(61,219,80,0.1);border:1px solid rgba(61,219,80,0.3);border-radius:3px;padding:0.25rem 0.75rem;margin-bottom:1.2rem;}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green2);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.hero h1{font-family:var(--fd);font-size:3.2rem;font-weight:900;color:var(--white);line-height:1.05;letter-spacing:-0.5px;margin-bottom:0.5rem;}
+.hero h1 span{color:var(--green2);}
+.hero-rule{width:3.5rem;height:4px;background:linear-gradient(90deg,var(--green2),transparent);border-radius:2px;margin:1.2rem 0;}
+.hero-sub{font-size:1rem;color:rgba(255,255,255,0.5);max-width:640px;line-height:1.6;margin-bottom:2rem;}
+.hero-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;}
+.hkpi{background:rgba(255,255,255,0.04);padding:1rem 1.1rem;}
+.hkpi-val{font-family:var(--fd);font-size:1.6rem;font-weight:900;color:var(--white);line-height:1;}
+.hkpi-lbl{font-size:0.72rem;color:rgba(255,255,255,0.38);margin-top:0.2rem;line-height:1.4;}
+.hero-conf{display:inline-block;margin-top:1.5rem;font-family:var(--fd);font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.1);border-radius:3px;padding:0.2rem 0.6rem;}
+
+/* SECTION */
+.sec-hdr{background:var(--navy);margin-top:3rem;position:relative;overflow:hidden;}
+.sec-hdr::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,var(--green2));}
+.sec-hdr-in{max-width:1200px;margin:0 auto;padding:1.4rem 2.5rem;display:flex;align-items:center;gap:1.2rem;}
+.sec-num{font-family:var(--fd);font-size:2.2rem;font-weight:900;color:rgba(255,255,255,0.12);line-height:1;min-width:3rem;}
+.sec-title{font-family:var(--fd);font-size:1.5rem;font-weight:800;color:var(--white);letter-spacing:0.5px;}
+.sec-sub{font-size:0.82rem;color:rgba(255,255,255,0.38);margin-top:0.2rem;}
+.sec-body{padding:2.5rem 0 3rem;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 2.5rem;}
+.sub-title{font-family:var(--fd);font-size:1.15rem;font-weight:700;color:var(--navy);letter-spacing:0.5px;text-transform:uppercase;border-bottom:2px solid var(--lgrey);padding-bottom:0.5rem;margin:2rem 0 1rem;}
+
+/* CALLOUT */
+.callout{border-radius:6px;padding:1rem 1.3rem;margin:1.2rem 0;display:flex;gap:0.75rem;align-items:flex-start;}
+.callout.warn{background:#1a1000;border-left:4px solid var(--amber);}
+.callout.danger{background:#1a0505;border-left:4px solid var(--red);}
+.callout.info{background:#050a1a;border-left:4px solid var(--blue2);}
+.callout.success{background:#051a09;border-left:4px solid var(--green2);}
+.callout p{font-size:0.875rem;line-height:1.7;margin:0;}
+.callout-hdr{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.3rem;}
+.callout.warn .callout-hdr{color:var(--amber2);}
+.callout.danger .callout-hdr{color:var(--red2);}
+.callout.info .callout-hdr{color:var(--blue2);}
+.callout.success .callout-hdr{color:var(--green2);}
+.callout.warn p,.callout.warn li{color:rgba(255,220,120,0.85);}
+.callout.danger p,.callout.danger li{color:rgba(255,180,180,0.85);}
+.callout.info p,.callout.info li{color:rgba(180,210,255,0.85);}
+.callout.success p,.callout.success li{color:rgba(160,240,170,0.85);}
+
+/* INITIATIVE BAND */
+.init-band{border-radius:8px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:1.5rem;}
+.init-band-hdr{padding:0.8rem 1.2rem;display:flex;align-items:center;gap:1rem;}
+.init-band-hdr .num{font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:0.7;}
+.init-band-hdr .title{font-family:var(--fd);font-size:1.1rem;font-weight:800;color:var(--white);}
+.init-band-hdr .owners{margin-left:auto;font-size:0.75rem;color:rgba(255,255,255,0.6);text-align:right;line-height:1.4;}
+.init-band-body{background:var(--white);padding:1rem 1.2rem;}
+
+/* SPRINT TABLE */
+.sprint-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:0.5rem;}
+.sprint-table th{background:var(--navy);color:rgba(255,255,255,0.5);font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0.55rem 0.75rem;text-align:left;}
+.sprint-table th.center{text-align:center;}
+.sprint-table td{padding:0.55rem 0.75rem;border-bottom:1px solid var(--lgrey);vertical-align:top;}
+.sprint-table tr:last-child td{border-bottom:none;}
+.sprint-table tr:nth-child(even) td{background:var(--mid);}
+.sprint-table .week-lbl{font-family:var(--mono);font-size:0.72rem;font-weight:600;color:var(--navy);white-space:nowrap;}
+.sprint-table .action{color:var(--body);line-height:1.5;}
+.sprint-table .owner-cell{font-size:0.75rem;color:var(--blue2);white-space:nowrap;}
+.sprint-table .status{display:inline-block;font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.15rem 0.5rem;border-radius:3px;}
+.s-live{background:rgba(61,219,80,0.15);color:#22882F;}
+.s-q1{background:rgba(54,140,217,0.15);color:#1A5A9A;}
+.s-q2{background:rgba(233,113,50,0.15);color:#A04010;}
+.s-gate{background:rgba(124,58,237,0.15);color:#5B21B6;}
+.s-risk{background:rgba(204,34,34,0.15);color:#881111;}
+
+/* RISK REGISTER */
+.risk-card{border-radius:8px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:1rem;}
+.risk-hdr{padding:0.7rem 1rem;display:flex;align-items:center;justify-content:space-between;}
+.risk-hdr .risk-id{font-family:var(--mono);font-size:0.7rem;font-weight:600;color:rgba(255,255,255,0.6);}
+.risk-hdr .risk-title{font-family:var(--fd);font-size:1rem;font-weight:700;color:var(--white);}
+.risk-hdr .risk-badge{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:3px;}
+.risk-body{background:var(--white);padding:1rem;}
+.risk-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:0.75rem;}
+.risk-section{font-size:0.82rem;line-height:1.6;}
+.risk-section-hdr{font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--navy);border-bottom:1px solid var(--lgrey);padding-bottom:0.3rem;margin-bottom:0.4rem;}
+.risk-section li{margin-left:1rem;color:var(--body);}
+.r-critical .risk-hdr{background:linear-gradient(135deg,#3D0808,#6B1111);}
+.r-high .risk-hdr{background:linear-gradient(135deg,#3D2000,#7A4200);}
+.r-medium .risk-hdr{background:linear-gradient(135deg,#1a1000,#3D2E00);}
+.r-critical .risk-badge{background:var(--red);color:var(--white);}
+.r-high .risk-badge{background:var(--orange);color:var(--white);}
+.r-medium .risk-badge{background:var(--amber);color:#1A0A00;}
+
+/* CONTINGENCY SCENARIO */
+.scenario{border-radius:10px;overflow:hidden;box-shadow:var(--shadow-lg);margin-bottom:2rem;}
+.scenario-hdr{padding:1.2rem 1.5rem;position:relative;}
+.scenario-hdr h3{font-family:var(--fd);font-size:1.4rem;font-weight:900;color:var(--white);margin-bottom:0.2rem;}
+.scenario-hdr .scenario-sub{font-size:0.82rem;color:rgba(255,255,255,0.5);}
+.scenario-hdr .scenario-impact{position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);text-align:right;}
+.scenario-hdr .impact-val{font-family:var(--fd);font-size:1.6rem;font-weight:900;color:var(--white);}
+.scenario-hdr .impact-lbl{font-size:0.7rem;color:rgba(255,255,255,0.45);}
+.scenario-body{background:var(--white);}
+.scenario-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;}
+.scenario-col{padding:1.2rem 1.3rem;border-right:1px solid var(--lgrey);}
+.scenario-col:last-child{border-right:none;}
+.scenario-col-hdr{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.6rem;}
+.scenario-col ul{list-style:none;font-size:0.83rem;line-height:1.65;}
+.scenario-col li{padding:0.2rem 0;padding-left:1rem;position:relative;}
+.scenario-col li::before{content:'→';position:absolute;left:0;color:var(--lgrey);}
+.scenario-pivot{background:var(--navy);padding:1.1rem 1.3rem;}
+.scenario-pivot-hdr{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green2);margin-bottom:0.5rem;}
+.scenario-pivot p{font-size:0.85rem;color:rgba(255,255,255,0.65);line-height:1.65;}
+.s-nuclear .scenario-hdr{background:linear-gradient(135deg,#0A2010,#1A5030);}
+.s-pipeline .scenario-hdr{background:linear-gradient(135deg,#0A1830,#1A3A6B);}
+.s-mining .scenario-hdr{background:linear-gradient(135deg,#2A1800,#6B4000);}
+
+/* GOVERNANCE */
+.gov-table{width:100%;border-collapse:collapse;font-size:0.84rem;}
+.gov-table th{background:var(--navy);color:rgba(255,255,255,0.5);font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0.6rem 0.9rem;text-align:left;}
+.gov-table td{padding:0.6rem 0.9rem;border-bottom:1px solid var(--lgrey);vertical-align:top;}
+.gov-table tr:nth-child(even) td{background:var(--mid);}
+.cadence-badge{display:inline-block;font-family:var(--mono);font-size:0.68rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:3px;background:rgba(22,28,96,0.08);color:var(--navy);}
+
+/* FOOTER */
+.doc-footer{background:var(--navy);padding:2rem;text-align:center;margin-top:4rem;}
+.doc-footer p{font-size:0.78rem;color:rgba(255,255,255,0.25);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-in">
+    <div class="nav-brand">BU Services · Execution Plan</div>
+    <div class="nav-links">
+      <a href="BU_Services_Meeting_Hub.html" target="_blank" style="color:#3DDB50;font-weight:700;">Meeting Hub ↗</a>
+      <a href="BU_Services_Command_Centre.html" target="_blank">Command Centre ↗</a>
+      <a href="#s1">Overview</a>
+      <a href="#s2">2026 Attack Plan</a>
+      <a href="#s3">2027–2030 Roadmap</a>
+      <a href="#s4">Risk Register</a>
+      <a href="#s5">Contingencies</a>
+      <a href="#s6">Governance</a>
+    </div>
+  </div>
+</nav>
+<div style="background:#7A3800;border-bottom:3px solid #E97132;padding:0.65rem 2rem;display:flex;align-items:center;gap:0.75rem;">
+  <div style="width:8px;height:8px;border-radius:50%;background:#F59E0B;flex-shrink:0;"></div>
+  <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#FDE68A;">
+    STANDING WEEKLY ACTION &mdash; Every Friday 4 PM ET: All commercial owners update Salesforce (Closed Won, stages, amounts). Power Automate runs Sunday 7 PM. Stale Salesforce = stale Command Centre all week.
+  </span>
+  <a href="BU_Services_Meeting_Hub.html" target="_blank" style="margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:1px;color:#FDE68A;text-decoration:none;border:1px solid rgba(253,230,138,0.4);border-radius:4px;padding:0.2rem 0.55rem;white-space:nowrap;">
+    Meeting Hub &rarr;
+  </a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-in">
+    <div class="hero-eyebrow">Execution Attack Plan — Effective May 1, 2026</div>
+    <h1>BU Services<br><span>How We Win</span></h1>
+    <div class="hero-rule"></div>
+    <p class="hero-sub">Q1 2026 is complete. This plan launches May 1, 2026. Sprint plan covers May through end of Q2 (June). Quarterly milestones for Q3–Q4 and 2027–2030. Named owners from the Nucleom and Nortech org. Contingency plans for the three scenarios that could change the trajectory of this plan.</p>
+    <div class="hero-kpis">
+      <div class="hkpi"><div class="hkpi-val">5</div><div class="hkpi-lbl">Initiatives running in parallel</div></div>
+      <div class="hkpi"><div class="hkpi-val">22</div><div class="hkpi-lbl">Named owners across Nucleom + Nortech</div></div>
+      <div class="hkpi"><div class="hkpi-val">3</div><div class="hkpi-lbl">Contingency pivot plans</div></div>
+      <div class="hkpi"><div class="hkpi-val">Q3 2026</div><div class="hkpi-lbl">First major revenue inflection</div></div>
+      <div class="hkpi"><div class="hkpi-val">$92.8M</div><div class="hkpi-lbl">2030 BU Services total target</div></div>
+    </div>
+    <div class="hero-conf">Confidential — Eurazeo / EIG Internal — Jon Eustace, CEO North America — May 1, 2026</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 1 — OVERVIEW -->
+<div class="sec-hdr" id="s1" style="--accent:var(--blue2);">
+  <div class="sec-hdr-in">
+    <div class="sec-num">01</div>
+    <div><div class="sec-title">Strategic Overview — The Execution Framework</div>
+    <div class="sec-sub">How the five initiatives are sequenced, who owns each, and what the critical path looks like</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+    <div class="callout info">
+      <div><div class="callout-hdr">How to read this document</div>
+      <p>This execution plan sits on top of the BU Services Master Commercial Plan. The commercial plan defines <em>what</em> we are going after. This document defines <em>how</em> — weekly action items, named owners drawn from the Nucleom and Nortech org charts, gate decisions, risk triggers, and pivot plans. Every action below has a commercial owner (the person accountable for the revenue outcome) and an ops owner (the person responsible for delivering the work). Where a single person holds both, that is noted.</p></div>
+    </div>
+
+    <div class="sub-title">Initiative Ownership Matrix</div>
+    <table class="sprint-table" style="margin-bottom:2rem;">
+      <thead>
+        <tr>
+          <th>Initiative</th>
+          <th>Commercial Owner</th>
+          <th>Ops Lead</th>
+          <th>Technical Lead</th>
+          <th>Finance / CAPEX</th>
+          <th>2026 Revenue Target</th>
+          <th>Critical Gate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--mining);">01 Mining NDT</strong></td>
+          <td class="owner-cell">Vinoth Tharma (East)<br>Max Aggrey (West)</td>
+          <td class="owner-cell">Eric Rodrigue (QC)<br>Joel Djordjevic (ON)<br>Brooke Althouse (N.ON)<br>Jason Borza (West)</td>
+          <td class="owner-cell">Francis Boudreault-Leclerc<br><em style="font-size:0.72rem;color:rgba(201,134,10,0.7);">Engineering &amp; Technical Team</em></td>
+          <td class="owner-cell">Jeremy Irwin</td>
+          <td><strong>$410K</strong></td>
+          <td><span class="status s-q2">5 new sites by Q2</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--pipeline);">02 Pipeline DA</strong></td>
+          <td class="owner-cell">Rick Carlton</td>
+          <td class="owner-cell">Joel Carlton<br><em style="font-size:0.72rem;color:rgba(54,140,217,0.7);">reports to Rick Carlton → Alex Cyr</em></td>
+          <td class="owner-cell">Francis Boudreault-Leclerc<br><em style="font-size:0.72rem;color:rgba(54,140,217,0.7);">Engineering &amp; Technical Team</em></td>
+          <td class="owner-cell">Jeremy Irwin (rigs)</td>
+          <td><strong>$2,000K</strong></td>
+          <td><span class="status s-q1">4 rigs operational May</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--powerline);">03 Powerline</strong></td>
+          <td class="owner-cell">Mathieu Beauchesne (Overall)<br>Vinoth Tharma (East)<br>Max Aggrey (West)</td>
+          <td class="owner-cell">Eric Rodrigue (QC/HQ)<br>Jason Borza (AB)</td>
+          <td class="owner-cell">Francis Boudreault-Leclerc<br><em style="font-size:0.72rem;color:rgba(231,113,50,0.7);">Engineering &amp; Technical Team</em></td>
+          <td class="owner-cell">Mathieu Beauchesne</td>
+          <td><strong>$365K</strong></td>
+          <td><span class="status s-q2">HQ pilot delivered</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--nuclear);">04 Nuclear / OPG</strong></td>
+          <td class="owner-cell">Olivier Marcotte (CRO)<br>Vinoth Tharma (outage)</td>
+          <td class="owner-cell">Louis-Pier Théberge<br>Joel Djordjevic (ON ops)<br>Eric Rodrigue (remote analysis)</td>
+          <td class="owner-cell">Jean-François Martel (tender)<br>Francis Boudreault-Leclerc</td>
+          <td class="owner-cell">Renée Lachance<br>Jeremy Irwin</td>
+          <td><strong>$300K</strong></td>
+          <td><span class="status s-gate">MSA bid submitted Q3</span></td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--x3);">05 3X Composite</strong></td>
+          <td class="owner-cell">Vinoth Tharma (East)<br>Max Aggrey (West)</td>
+          <td class="owner-cell">Keith Reichenbach (tanks)<br>Joel Carlton (pipeline)<br>All field managers</td>
+          <td class="owner-cell">Keith Reichenbach (ABSA lead)<br>Francis Boudreault-Leclerc (technical support)<br>Jean-François Martel (procedures)</td>
+          <td class="owner-cell">Jeremy Irwin</td>
+          <td><strong>$50K</strong></td>
+          <td><span class="status s-q2">ABSA re-submission Q2</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <div><div class="callout-hdr">Sequencing Logic — Why Everything Runs in Parallel</div>
+      <p>All five initiatives launch simultaneously. Mining and Pipeline generate 2026 cash flow that funds Nuclear MSA tender costs. The Pipeline rig buildout (Q2) is the largest single CAPEX event and the most time-critical — Tidewater summer dig program is a hard window. Nuclear MSA preparation runs through all of 2026 as a Q3 2026 submission target. 3X Composite is deliberately low-investment in 2026 — ABSA re-submission is the only blocker, and non-pressure revenue (tanks, mining) is available now without it.</p></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 2 — 2026 ATTACK PLAN -->
+<div class="sec-hdr" id="s2" style="--accent:var(--orange);">
+  <div class="sec-hdr-in">
+    <div class="sec-num">02</div>
+    <div><div class="sec-title">2026 Attack Plan — Pre-Launch Completion + May/June Sprint, Quarterly Q3/Q4</div>
+    <div class="sec-sub">Q1 actions listed as pre-launch completion targets (by May 1). Active sprint begins May 1. Quarterly milestones Q3–Q4.</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+    <!-- MINING -->
+    <div class="init-band">
+      <div class="init-band-hdr" style="background:linear-gradient(135deg,#2A1800,#7A4200);">
+        <div><div class="num">Initiative 01</div><div class="title">Canadian Mining NDT</div></div>
+        <div class="owners"><strong>Commercial:</strong> Vinoth Tharma / Max Aggrey<br><strong>Ops:</strong> Eric Rodrigue / Joel Djordjevic / Brooke Althouse / Jason Borza</div>
+      </div>
+      <div class="init-band-body">
+        <table class="sprint-table">
+          <thead><tr><th style="width:12%">Period</th><th>Action</th><th style="width:18%">Owner</th><th style="width:10%" class="center">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>Audit active 12 accounts</strong> — confirm H1 inspection schedule across all sites. Identify top 5 accounts ready for frequency upsell (from annual to semi-annual). Sevan Bouchy confirms instrument availability and probe condition for Q2 season.</td><td class="owner-cell">Vinoth Tharma<br>Sevan Bouchy</td><td class="center"><span class="status s-live">By May 1</span></td></tr>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>Western Canada outreach</strong> — Max Aggrey contacts 5 new Alberta/BC mining targets: Barrick Hemlo expansion, Newmont Coffee, Teck Highland Valley, Nutrien Vanscoy, Coeur Silvertip. Joel Carlton briefed to cross-pitch pipeline accounts simultaneously. Jason Borza confirms Western field capacity for May deployments.</td><td class="owner-cell">Max Aggrey<br>Jason Borza</td><td class="center"><span class="status" style="background:rgba(100,100,180,0.15);color:#443388;">Pre-Launch</span></td></tr>
+            <tr><td class="week-lbl">Wk 1<br>May 1–12</td><td class="action"><strong>Northern ON activation</strong> — Brooke Althouse schedules site visits: Agnico Macassa, Wesdome Eagle River, IAMGOLD Côté Gold (new site). Joel Djordjevic confirms Oakville-based crew availability for ON deployments. First new-site proposals issued.</td><td class="owner-cell">Brooke Althouse<br>Joel Djordjevic</td><td class="center"><span class="status" style="background:rgba(100,100,180,0.15);color:#443388;">Pre-Launch</span></td></tr>
+            <tr><td class="week-lbl">Wk 2<br>May 12–26</td><td class="action"><strong>Robotic UT pilot</strong> — Francis Boudreault-Leclerc finalises robotic UT system commissioning. Schedule first live mill shell survey demo at an existing account (Suncor Base Plant or Cenovus preferred — high visibility, strong relationship). Proposal issued within 2 weeks of demo.</td><td class="owner-cell">Francis B-L<br>Sevan Bouchy</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 3<br>May 26–Jun 9</td><td class="action"><strong>New site onboarding</strong> — target 3 new signed MSAs from Q1–Q2 outreach. Eric Rodrigue confirms QC capacity for any new QC-region sites. Vinoth Tharma closes Eastern targets. $130K ECA instrument order placed with SG NDT (EIG internal) to expand fleet for H2 volume.</td><td class="owner-cell">Vinoth Tharma<br>Eric Rodrigue</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 4<br>Jun 9–23</td><td class="action"><strong>Oil sands expansion</strong> — Suncor and Cenovus accounts are live; pitch scope expansion to include mill shell robotic UT alongside existing ECA program. Shan Switzer (Crane Manager, Nortech) briefed to identify crane clients with adjacent grinding mill assets — cross-sell opportunity. First joint crane+NDT proposals issued.</td><td class="owner-cell">Max Aggrey<br>Shan Switzer</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Q3 2026<br>Jul–Sep</td><td class="action"><strong>National program embedded</strong> — at least 5 new accounts signed. H2 inspection schedule confirmed across all 17+ sites. Robotic UT generating standalone revenue. Cement sector outreach initiated (Heidelberg, Votorantim, St. Marys). Jean-François Martel confirms instrument qualification records current for all deployed equipment.</td><td class="owner-cell">Vinoth Tharma<br>Max Aggrey<br>Jean-François M</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+            <tr><td class="week-lbl">Q4 2026<br>Oct–Dec</td><td class="action"><strong>2026 close and 2027 plan</strong> — $410K target confirmed or exceeded. 2027 forecast locked with Brooke Althouse, Eric Rodrigue, Joel Djordjevic, Jason Borza confirming capacity for $1.91M revenue year. Second ECA instrument order ($90K) placed if Q3 utilisation exceeded 80%.</td><td class="owner-cell">Vinoth Tharma<br>Max Aggrey</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="init-band">
+      <div class="init-band-hdr" style="background:linear-gradient(135deg,#0A1830,#1A3A6B);">
+        <div><div class="num">Initiative 02</div><div class="title">Pipeline Integrity DA</div></div>
+        <div class="owners"><strong>Commercial:</strong> Rick Carlton<br><strong>Ops:</strong> Joel Carlton (reports to Rick Carlton) — Rick Carlton reports to Alex Cyr</div>
+      </div>
+      <div class="init-band-body">
+        <table class="sprint-table">
+          <thead><tr><th style="width:12%">Period</th><th>Action</th><th style="width:18%">Owner</th><th style="width:10%" class="center">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>Rig 1 &amp; 2 commissioning</strong> — Joel Carlton confirms equipment spec and procurement status. Jeremy Irwin releases CAPEX ($360K for first 2 rigs). Joel Carlton confirms PAUT instrument set (OmniScan/Focus PX) for each rig. Target: Rig 1 operational by May 16. Rig 2 by May 16.</td><td class="owner-cell">Joel Carlton<br>Jeremy Irwin</td><td class="center"><span class="status s-live">By May 1</span></td></tr>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>Pembina vendor qualification</strong> — Rick Carlton advances Pembina vendor qualification process. Submit all required documentation: insurance, WCB, PAUT procedure, personnel certs. Timothé Falardeau provides any FFS methodology documentation required. Target: vendor approval by May 23.</td><td class="owner-cell">Rick Carlton<br>Timothé Falardeau</td><td class="center"><span class="status" style="background:rgba(100,100,180,0.15);color:#443388;">Pre-Launch</span></td></tr>
+            <tr><td class="week-lbl">Wk 1<br>May 1–12</td><td class="action"><strong>Tidewater summer dig program</strong> — Rick Carlton confirms scope and mobilisation date for Tidewater summer program. Joel Carlton has Rigs 3 &amp; 4 ready (Jeremy Irwin releases second tranche CAPEX $360K). Joel Carlton leads field crew briefing — safety plan, dig protocols, PAUT scanning procedures confirmed with Joel Carlton.</td><td class="owner-cell">Rick Carlton<br>Joel Carlton</td><td class="center"><span class="status" style="background:rgba(100,100,180,0.15);color:#443388;">Pre-Launch</span></td></tr>
+            <tr><td class="week-lbl">Wk 2<br>May 12–26</td><td class="action"><strong>Tidewater summer dig execution</strong> — target 40–80 digs at $15K–$25K average. Joel Carlton conducts on-site PAUT QA for first week. Timothé Falardeau reviews first 10 FFS assessments for technical quality. Client milestone report issued at dig 25 and dig 50. Rick Carlton progresses Pembina MSA terms in parallel.</td><td class="owner-cell">Joel Carlton</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 3<br>May 26–Jun 9</td><td class="action"><strong>Pembina MSA close</strong> — Rick Carlton targets executed Pembina MSA by June 9. Two-year agreement, minimum 200 digs/year, $15K–$30K per dig. Jeremy Irwin confirms rig financing structure. Jon Eustace briefed for executive sign-off if required by Pembina.</td><td class="owner-cell">Rick Carlton<br>Jon Eustace</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 4<br>Jun 9–23</td><td class="action"><strong>National expansion outreach</strong> — Max Aggrey (Western Canada commercial lead) briefed to identify additional pipeline operators: TC Energy, Enbridge Asset Management, Keyera, Cenovus pipeline assets. Rick Carlton targets 2 additional MSA term sheets by end of Q2. Rigs 5–6 procurement initiated (Jeremy Irwin) for Q3 delivery.</td><td class="owner-cell">Rick Carlton<br>Max Aggrey<br>Jeremy Irwin</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Q3 2026<br>Jul–Sep</td><td class="action"><strong>6-rig fleet operational</strong> — Rigs 5–6 operational. Tidewater summer program complete and invoiced. Pembina program underway. At least 3 MSAs signed or in final negotiation. Joel Carlton confirms PAUT technician roster for Q4 volume. $2M 2026 target on track.olivette conducts H1 technical quality review.</td><td class="owner-cell">Rick Carlton<br>Joel Carlton</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+            <tr><td class="week-lbl">Q4 2026<br>Oct–Dec</td><td class="action"><strong>2027 ramp locked</strong> — 2027 program volumes confirmed with Pembina, Tidewater, and any new MSA clients. Joel Carlton confirms crew roster for $4M 2027 year. Technical: Timothé Falardeau establishes PAUT/FFS standard operating procedures document for use across all crews.</td><td class="owner-cell">Rick Carlton<br>Joel Carlton</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- POWERLINE -->
+    <div class="init-band">
+      <div class="init-band-hdr" style="background:linear-gradient(135deg,#2A1400,#7A3800);">
+        <div><div class="num">Initiative 03</div><div class="title">Powerline Inspection</div></div>
+        <div class="owners"><strong>Commercial:</strong> Mathieu Beauchesne (Overall) · Vinoth Tharma (East) · Max Aggrey (West)<br><strong>Ops:</strong> Eric Rodrigue (QC) / Jason Borza (AB) — reporting to Alex Cyr</div>
+      </div>
+      <div class="init-band-body">
+        <table class="sprint-table">
+          <thead><tr><th style="width:12%">Period</th><th>Action</th><th style="width:18%">Owner</th><th style="width:10%" class="center">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>EIG instrument CAPEX confirmation</strong> — Mathieu Beauchesne confirms LineCore/LineOhm/LineRay instrument ownership model with EIG France. Is BU Services purchasing, leasing, or accessing instruments as EIG group assets? This single decision unlocks the financial model for the initiative and must be resolved by May 1. Francis Boudreault-Leclerc confirms current instrument operational status.</td><td class="owner-cell">Jon Eustace<br>Francis B-L</td><td class="center"><span class="status s-live">By May 1</span></td></tr>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>Hydro-Québec 2026 program scope</strong> — Eric Rodrigue confirms with HQ procurement the 2026 inspection scope under the existing IP partnership. What lines, what dates, what crew size? Francis Boudreault-Leclerc ensures instrument readiness. Sevan Bouchy confirms EMMA software version compatibility with HQ data delivery requirements.</td><td class="owner-cell">Eric Rodrigue<br>Sevan Bouchy</td><td class="center"><span class="status" style="background:rgba(100,100,180,0.15);color:#443388;">Pre-Launch</span></td></tr>
+            <tr><td class="week-lbl">Wk 1<br>May 1–12</td><td class="action"><strong>Hydro One pilot proposal</strong> — Mathieu Beauchesne issues formal pilot proposal to Hydro One Transmission (Ontario). Target: LineOhm splice assessment on 3–5 identified splice locations. Joel Djordjevic identifies ON-based field crew available for deployment. Proposal value: $80K–$120K pilot program.</td><td class="owner-cell">Jon Eustace<br>Joel Djordjevic</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 2<br>May 12–26</td><td class="action"><strong>HQ field delivery (Phase 1)</strong> — Eric Rodrigue leads first Hydro-Québec 2026 inspection deployment. Crew mobilisation, safety briefing, data acquisition. Sevan Bouchy on-call for instrument support. Target: 2–3 line segments inspected, data delivered within 5 business days of field work. Invoice issued immediately on data acceptance.</td><td class="owner-cell">Eric Rodrigue<br>Sevan Bouchy</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 3<br>May 26–Jun 9</td><td class="action"><strong>AltaLink / ATCO outreach</strong> — Max Aggrey opens formal discussions with AltaLink and ATCO Electric (Alberta) — the two largest AB transmission operators. Jason Borza confirms AB crew availability for H2 deployments. Jason Borza advances BC Hydro engagement through the Nortech Western team.</td><td class="owner-cell">Mathieu Beauchesne<br>Jason Borza</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 4<br>Jun 9–23</td><td class="action"><strong>Hydro One pilot decision</strong> — Mathieu Beauchesne confirms Hydro One pilot outcome. If approved: Joel Djordjevic mobilises ON crew for summer window. If deferred: Jason Borza advances AltaLink pilot as Q3 alternative. EIG instrument CAPEX model now finalised and incorporated into financial model.</td><td class="owner-cell">Jon Eustace<br>Joel Djordjevic</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+            <tr><td class="week-lbl">Q3 2026<br>Jul–Sep</td><td class="action"><strong>HQ Phase 1 complete + second client active</strong> — Hydro-Québec 2026 program delivered and invoiced (~$200K). One additional utility client (Hydro One or AltaLink) pilot underway. Mathieu Beauchesne reviews 2027 programme proposal with HQ — target 3× scope expansion for 2027. EIG instrument model confirmed in financial plan.</td><td class="owner-cell">Jon Eustace<br>Eric Rodrigue</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+            <tr><td class="week-lbl">Q4 2026<br>Oct–Dec</td><td class="action"><strong>2027 scope locked</strong> — HQ 2027 MSA / SOW executed. Second utility pilot converted to program agreement. $365K 2026 target on track. Jason Borza confirms BC Hydro engagement status for 2027 entry.</td><td class="owner-cell">Jon Eustace<br>Max Aggrey</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NUCLEAR -->
+    <div class="init-band">
+      <div class="init-band-hdr" style="background:linear-gradient(135deg,#0A2010,#1A5030);">
+        <div><div class="num">Initiative 04</div><div class="title">Nuclear / OPG MSA</div></div>
+        <div class="owners"><strong>Commercial:</strong> Olivier Marcotte (CRO) / Vinoth Tharma<br><strong>Ops:</strong> Louis-Pier Théberge / Joel Djordjevic / Eric Rodrigue</div>
+      </div>
+      <div class="init-band-body">
+        <table class="sprint-table">
+          <thead><tr><th style="width:12%">Period</th><th>Action</th><th style="width:18%">Owner</th><th style="width:10%" class="center">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>OPG renewal dialogue initiated</strong> — Olivier Marcotte and Vinoth Tharma initiate formal contact with OPG's Contract Manager (Supply Chain). Purpose: signal intent to bid for all 10 work packages in 2027 MSA. Not a bid — an intent letter and relationship meeting. Secure a pre-bid briefing date.</td><td class="owner-cell">Olivier Marcotte<br>Vinoth Tharma</td><td class="center"><span class="status s-live">By May 1</span></td></tr>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>Rate card development</strong> — Jean-François Martel leads development of proposed 2027 rate card across all 10 WPs. Louis-Pier Théberge provides outage data from 2020–2026 MSA for benchmarking. Target: full rate card draft including mob/demob line items ready by May 1. Renée Lachance reviews financial impact of proposed rates.</td><td class="owner-cell">Jean-François M<br>Louis-Pier T<br>Renée Lachance</td><td class="center"><span class="status" style="background:rgba(100,100,180,0.15);color:#443388;">Pre-Launch</span></td></tr>
+            <tr><td class="week-lbl">Wk 1<br>May 1–12</td><td class="action"><strong>CGSB qualification audit</strong> — Louis-Pier Théberge audits all current Nucleom CGSB certifications against the 10 WP requirements. Francis Boudreault-Leclerc identifies gaps. Jean-François Martel confirms certification records are current and in correct format for OPG submission. Gap analysis delivered to Olivier Marcotte by May 16.</td><td class="owner-cell">Louis-Pier T<br>Francis B-L<br>Jean-François M</td><td class="center"><span class="status" style="background:rgba(100,100,180,0.15);color:#443388;">Pre-Launch</span></td></tr>
+            <tr><td class="week-lbl">Wk 2<br>May 12–26</td><td class="action"><strong>Tender preparation begins</strong> — legal counsel engaged for MSA tender strategy ($150K CAPEX). Mathieu Beauchesne reviews bid structure and risk allocation with Renée Lachance. Louis-Pier Théberge confirms outage delivery model for all 10 WPs. Aecon references (Darlington SMR + Pickering Refurb) formalised as credentials in bid package.</td><td class="owner-cell">Olivier Marcotte<br>Mathieu B<br>Louis-Pier T</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 3<br>May 26–Jun 9</td><td class="action"><strong>ET instrument upgrade</strong> — Francis Boudreault-Leclerc orders ET instrument upgrades for expanded WP scope ($80K CAPEX, Jeremy Irwin releases funds). Sevan Bouchy confirms SG NDT instrument compatibility with OPG's data delivery specifications. Joel Djordjevic confirms Oakville office is configured as nuclear remote analysis hub.</td><td class="owner-cell">Francis B-L<br>Joel Djordjevic<br>Jeremy Irwin</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 4<br>Jun 9–23</td><td class="action"><strong>Aecon relationship formalised</strong> — Louis-Pier Théberge meets with Aecon Nuclear procurement to formalise NDT subcontract scope documentation for both Darlington SMR and Pickering Refurb as part of OPG bid credentials. Letter of reference or LOI from Aecon would materially strengthen the 2027 MSA bid. Olivier Marcotte signs off on completed tender strategy document.</td><td class="owner-cell">Louis-Pier T<br>Olivier Marcotte</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Q3 2026<br>Jul–Sep</td><td class="action"><strong>MSA tender submitted</strong> — Full bid for all 10 WPs submitted to OPG by September 30. Jean-François Martel confirms all documentation package complete. CGSB qualification gaps filled — 8 new nuclear tech qualifications in progress. Louis-Pier Théberge leads Q&A process with OPG procurement. Jon Eustace available for any executive-level OPG engagement required.</td><td class="owner-cell">Olivier Marcotte<br>Jean-François M<br>Louis-Pier T</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+            <tr><td class="week-lbl">Q4 2026<br>Oct–Dec</td><td class="action"><strong>Award / BAFO process</strong> — OPG evaluation period. Olivier Marcotte and Vinoth Tharma manage any Best and Final Offer (BAFO) requests. Louis-Pier Théberge coordinates technical clarifications. Jon Eustace executive-level engagement with OPG leadership if required. Contingency plan activated if early signals of partial award (see Section 5).</td><td class="owner-cell">Olivier Marcotte<br>Jon Eustace<br>Louis-Pier T</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3X -->
+    <div class="init-band">
+      <div class="init-band-hdr" style="background:linear-gradient(135deg,#150820,#3D1A60);">
+        <div><div class="num">Initiative 05</div><div class="title">3X Composite Repair</div></div>
+        <div class="owners"><strong>Commercial:</strong> Vinoth Tharma (East) &middot; Max Aggrey (West)<br><strong>Ops:</strong> Keith Reichenbach (ABSA &amp; delivery lead) / Joel Carlton (pipeline, via Rick Carlton) — all via Alex Cyr</div>
+      </div>
+      <div class="init-band-body">
+        <table class="sprint-table">
+          <thead><tr><th style="width:12%">Period</th><th>Action</th><th style="width:18%">Owner</th><th style="width:10%" class="center">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>ABSA re-submission (Form AB-29 + ECS Manual)</strong> — Keith Reichenbach leads the ABSA re-submission process. Francis Boudreault-Leclerc provides technical support on the ECS Manual under Nortech QMS. Jean-François Martel confirms all procedure documents are in correct format. This is the critical regulatory step — without ABSA clearance, pressure vessel repair work in Alberta is blocked. Non-pressure revenue (tanks, mining equipment) proceeds regardless.</td><td class="owner-cell">Francis B-L<br>Jean-François M</td><td class="center"><span class="status s-live">By May 1</span></td></tr>
+            <tr><td class="week-lbl">Pre-Launch<br>By May 1</td><td class="action"><strong>Non-pressure revenue activation</strong> — Keith Reichenbach (Tanks Manager, Nortech) identifies all active tank inspection clients with corrosion findings that qualify for immediate composite repair — no ABSA required for non-pressure service. Rick Carlton identifies pipeline clients with non-pressure coating repair needs. Target: 3 repair proposals issued by May 1.</td><td class="owner-cell">Keith Reichenbach<br>Rick Carlton</td><td class="center"><span class="status" style="background:rgba(100,100,180,0.15);color:#443388;">Pre-Launch</span></td></tr>
+            <tr><td class="week-lbl">Wk 1<br>May 1–12</td><td class="action"><strong>Technician certification</strong> — Keith Reichenbach coordinates first 4 technician enrolments in 3X installation training. Prioritise: 2 Nortech field techs (pipeline/tanks — Joel Carlton nominates), 2 Nucleom techs (mining/oil sands — Eric Rodrigue nominates). Francis Boudreault-Leclerc provides technical oversight of certification process. MONTIPOWER tool ($18K) and tooling kits ($22K) ordered. Jeremy Irwin releases $85K total 3X CAPEX.</td><td class="owner-cell">Francis B-L<br>Eric Rodrigue</td><td class="center"><span class="status" style="background:rgba(100,100,180,0.15);color:#443388;">Pre-Launch</span></td></tr>
+            <tr><td class="week-lbl">Wk 2<br>May 12–26</td><td class="action"><strong>Mining account embedding</strong> — Vinoth Tharma and Max Aggrey brief all mining commercial contacts that BU Services now offers composite repair alongside inspection. Any corrosion finding from ECA/robotic UT program automatically triggers a 3X quote. Target: quotes embedded into 5 active mining inspection reports by end of May.</td><td class="owner-cell">Vinoth Tharma<br>Max Aggrey</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 3<br>May 26–Jun 9</td><td class="action"><strong>Pipeline repair embedding</strong> — Rick Carlton embeds 3X composite repair into all Pembina and Tidewater dig programs. Any dig finding with a composite repair option automatically triggers a quote. Joel Carlton ensures field crews carry 3X product literature. First combined inspect+repair invoice target: June 30.</td><td class="owner-cell">Rick Carlton<br>Joel Carlton</td><td class="center"><span class="status s-q2">Q2</span></td></tr>
+            <tr><td class="week-lbl">Wk 4<br>Jun 9–23</td><td class="action"><strong>ABSA approval status</strong> — Francis Boudreault-Leclerc confirms ABSA response timeline. If approved: Keith Reichenbach and Joel Carlton activates pressure vessel repair program immediately. If under review: non-pressure program continues with formal escalation to ABSA for timeline confirmation. No change to 2026 revenue target regardless — $50K is achievable without pressure work.</td><td class="owner-cell">Francis B-L<br>Keith Reichenbach</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+            <tr><td class="week-lbl">Q3 2026<br>Jul–Sep</td><td class="action"><strong>Revenue generating</strong> — $50K target on track via non-pressure work. ABSA approval received and pressure vessel repair program activated. All commercial managers embedding repair quotes into inspection programs. Jean-François Martel confirms procedure library complete for all product lines.</td><td class="owner-cell">Vinoth Tharma<br>Francis B-L</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+            <tr><td class="week-lbl">Q4 2026<br>Oct–Dec</td><td class="action"><strong>2027 ramp positioned</strong> — 2027 $600K target requires 3X quotes embedded in all active programs. All 4 initiative commercial teams briefed to include 3X in every client conversation. 8+ certified technicians. Keith Reichenbach reports on tanks sector pipeline. Max Aggrey reports on oil sands pipeline.</td><td class="owner-cell">Vinoth Tharma<br>Max Aggrey<br>Rick Carlton</td><td class="center"><span class="status s-gate">Gate</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 3 — 2027–2030 ROADMAP -->
+<div class="sec-hdr" id="s3" style="--accent:var(--blue2);">
+  <div class="sec-hdr-in">
+    <div class="sec-num">03</div>
+    <div><div class="sec-title">2027–2030 Quarterly Roadmap</div>
+    <div class="sec-sub">Major milestones, owner transitions, and scale targets by year</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <table class="sprint-table">
+      <thead>
+        <tr>
+          <th style="width:8%">Year</th>
+          <th style="width:16%">Initiative</th>
+          <th>Key Milestone</th>
+          <th style="width:18%">Owner(s)</th>
+          <th style="width:10%">Revenue Target</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="week-lbl" rowspan="5" style="vertical-align:middle;font-size:1rem;color:var(--navy);font-weight:700;">2027</td><td style="color:var(--nuclear)"><strong>Nuclear</strong></td><td class="action"><strong>MSA award received + ramp to full augmented staff program.</strong> Louis-Pier Théberge mobilises 8 new CGSB-qualified technicians. Joel Djordjevic leads ON outage execution. Eric Rodrigue activates Oakville/QC City remote analysis hub. Rate reset generates +$421K per outage on SG analysis WP alone. All 10 WPs staffed and delivering by end of Q2.</td><td class="owner-cell">Olivier Marcotte<br>Louis-Pier T<br>Joel Djordjevic</td><td><strong style="color:var(--nuclear)">$11.0M</strong></td></tr>
+        <tr><td style="color:var(--pipeline)"><strong>Pipeline</strong></td><td class="action"><strong>6-rig fleet at full utilisation + Pembina MSA year 1 execution.</strong> Rick Carlton closes 2 additional MSAs (TC Energy or Enbridge target). Joel Carlton manages 15-tech field roster. Joel Carlton leads field quality programme.</td><td class="owner-cell">Rick Carlton<br>Joel Carlton</td><td><strong style="color:var(--pipeline)">$4.0M</strong></td></tr>
+        <tr><td style="color:var(--mining)"><strong>Mining</strong></td><td class="action"><strong>National program — 20+ accounts, 3.5 FTE incremental.</strong> Vinoth Tharma (East) and Max Aggrey (West) each manage 10+ active accounts. Brooke Althouse Northern ON program generating $400K+. Jason Borza Western program delivering oil sands and BC mining accounts. SG NDT instrument fleet expanded to 4 ECA + 2 robotic UT.</td><td class="owner-cell">Vinoth Tharma<br>Max Aggrey<br>Brooke Althouse</td><td><strong style="color:var(--mining)">$1.9M</strong></td></tr>
+        <tr><td style="color:var(--powerline)"><strong>Powerline</strong></td><td class="action"><strong>3 active utility clients + HQ scope expansion.</strong> Mathieu Beauchesne closes AltaLink or Hydro One as second utility. Vinoth Tharma owns Eastern utility relationships (Hydro One, OPG network). Max Aggrey owns Western (AltaLink, ATCO, BC Hydro). Eric Rodrigue leads HQ 2027 expanded program. Jason Borza manages AB/BC utility delivery — reporting to Alex Cyr. RTE France reference available via EIG network for North American credibility.</td><td class="owner-cell">Mathieu Beauchesne<br>Vinoth Tharma (East)<br>Max Aggrey (West)</td><td><strong style="color:var(--powerline)">$1.1M</strong></td></tr>
+        <tr><td style="color:var(--x3)"><strong>3X</strong></td><td class="action"><strong>Pressure vessel repair active + 10+ certified technicians.</strong> ABSA fully operational. Keith Reichenbach manages tanks sector program. All pipeline dig programs embedding 3X quotes. Vinoth Tharma tracks repair conversion rate from all inspection programs — target 15% conversion.</td><td class="owner-cell">Vinoth Tharma<br>Keith Reichenbach<br>Rick Carlton</td><td><strong style="color:var(--x3)">$600K</strong></td></tr>
+
+        <tr style="background:#F8F9FF"><td class="week-lbl" rowspan="5" style="vertical-align:middle;font-size:1rem;color:var(--navy);font-weight:700;">2028</td><td style="color:var(--nuclear)"><strong>Nuclear</strong></td><td class="action"><strong>Full MSA programme steady state + 4 more CGSB technicians.</strong> Joel Djordjevic and Louis-Pier Théberge manage peak outage staffing (all active PO windows at Pickering + Darlington). Remote analysis expanding — Eric Rodrigue's QC team handling ET/UT resolution analysis remotely as preferred model. Aecon capital programmes (SMR + Refurb) generating incremental revenue.</td><td class="owner-cell">Louis-Pier T<br>Joel Djordjevic<br>Eric Rodrigue</td><td><strong style="color:var(--nuclear)">$12.2M</strong></td></tr>
+        <tr style="background:#F8F9FF"><td style="color:var(--pipeline)"><strong>Pipeline</strong></td><td class="action"><strong>National coverage — 4+ MSA operators, 11 FTE incremental.</strong> Rick Carlton manages national pipeline client portfolio. Joel Carlton scales crew roster. Joel Carlton leads technical quality across all crews.nalytics tool for predictive integrity reporting — differentiation from competitors.</td><td class="owner-cell">Rick Carlton<br>Joel Carlton</td><td><strong style="color:var(--pipeline)">$6.0M</strong></td></tr>
+        <tr style="background:#F8F9FF"><td style="color:var(--mining)"><strong>Mining</strong></td><td class="action"><strong>Condition monitoring programs — annual recurring contracts.</strong> Vinoth Tharma and Max Aggrey convert transactional inspections to annual condition monitoring programs. Each program: 2–4 inspections/year at fixed rate. Brooke Althouse manages Northern ON programme independently. Jason Borza anchors Western Canada.</td><td class="owner-cell">Vinoth Tharma<br>Max Aggrey</td><td><strong style="color:var(--mining)">$3.6M</strong></td></tr>
+        <tr style="background:#F8F9FF"><td style="color:var(--powerline)"><strong>Powerline</strong></td><td class="action"><strong>5+ clients, recurring annual audit model established.</strong> Mathieu Beauchesne owns the Powerline programme. Vinoth Tharma drives Eastern utility client acquisition. Max Aggrey drives Western Canada. US market entry begins via EIG/Eurazeo network (NERC-regulated IOUs 2028–2029). Jason Borza leads BC/AB expansion. Mathieu Beauchesne closes AltaLink multi-year agreement.</td><td class="owner-cell">Mathieu Beauchesne<br>Vinoth Tharma (East)<br>Max Aggrey (West)</td><td><strong style="color:var(--powerline)">$2.0M</strong></td></tr>
+        <tr style="background:#F8F9FF"><td style="color:var(--x3)"><strong>3X</strong></td><td class="action"><strong>Full multi-sector delivery — pipeline + tanks + mining.</strong> 3X embedded in all inspection programs across all sectors. Keith Reichenbach manages tanks programme. Joel Carlton manages pipeline repair. Vinoth Tharma tracks quarterly repair revenue per initiative and reports to Olivier Marcotte.</td><td class="owner-cell">Vinoth Tharma<br>Keith Reichenbach</td><td><strong style="color:var(--x3)">$1.85M</strong></td></tr>
+
+        <tr><td class="week-lbl" rowspan="2" style="vertical-align:middle;font-size:1rem;color:var(--navy);font-weight:700;">2029–30</td><td style="color:var(--nuclear)"><strong>Nuclear</strong></td><td class="action"><strong>Steady state — $12.2M/yr recurring.</strong> Louis-Pier Théberge manages a mature, recurring nuclear programme. All outages staffed. Remote analysis generating high-margin revenue without mobilisation cost. MSA renewal preparation begins 2029 for 2032 cycle.</td><td class="owner-cell">Louis-Pier T<br>Joel Djordjevic</td><td><strong style="color:var(--nuclear)">$12.2M/yr</strong></td></tr>
+        <tr><td colspan="3" class="action"><strong>All other initiatives:</strong> Mining $5.2M→$6.7M (condition monitoring platform, 25+ accounts), Pipeline $8M→$10M (dominant national DA provider, 15 FTE), Powerline $2.9M→$3.8M (national platform, US entry), 3X $4.25M→$4.65M (inspect-fix closed loop across all sectors). Mathieu Beauchesne's margin programme delivering target EBITDA margins by 2028. Alex Cyr leads integration of Nucleom/Nortech shared services.</td><td class="owner-cell">All commercial<br>+ Mathieu B<br>+ Alex Cyr</td><td><strong>$92.5M→<br>$92.8M</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 4 — RISK REGISTER -->
+<div class="sec-hdr" id="s4" style="--accent:var(--red2);">
+  <div class="sec-hdr-in">
+    <div class="sec-num">04</div>
+    <div><div class="sec-title">Risk Register</div>
+    <div class="sec-sub">Identified risks, probability, impact, early warning signals, and mitigation owners</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+    <!-- R1 -->
+    <div class="risk-card r-critical">
+      <div class="risk-hdr">
+        <div><div class="risk-id">R-01</div><div class="risk-title">Nuclear MSA — OPG Awards Partial Scope or Delays to 2028</div></div>
+        <div><span class="risk-badge">CRITICAL</span></div>
+      </div>
+      <div class="risk-body">
+        <div class="risk-grid">
+          <div class="risk-section">
+            <div class="risk-section-hdr">Probability / Impact</div>
+            <ul>
+              <li>Probability: Medium (30–40%)</li>
+              <li>Revenue impact: −$10.7M in 2027 alone</li>
+              <li>5-year impact: −$47.6M if zero award</li>
+              <li>This single risk changes the BU Services thesis</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Early Warning Signals</div>
+            <ul>
+              <li>OPG delays RFP release beyond Sep 2026</li>
+              <li>Applus RTD stabilises financially (key competitor)</li>
+              <li>OPG signals preference for incumbent-only renewal</li>
+              <li>Bid scope reduced from 10 to fewer WPs in RFP</li>
+              <li>No BAFO request within 90 days of bid submission</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Mitigation (Owners)</div>
+            <ul>
+              <li>Executive engagement — Olivier Marcotte / Jon Eustace</li>
+              <li>Aecon LOI as bid differentiator — Louis-Pier Théberge</li>
+              <li>CGSB quals complete — Francis B-L / Jean-François M</li>
+              <li>Competitive rate card — Renée Lachance</li>
+              <li>Monitor Applus RTD — Olivier Marcotte ongoing</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- R2 -->
+    <div class="risk-card r-critical">
+      <div class="risk-hdr">
+        <div><div class="risk-id">R-02</div><div class="risk-title">Pipeline — Pembina or Tidewater MSA Does Not Execute in 2026</div></div>
+        <div><span class="risk-badge">CRITICAL</span></div>
+      </div>
+      <div class="risk-body">
+        <div class="risk-grid">
+          <div class="risk-section">
+            <div class="risk-section-hdr">Probability / Impact</div>
+            <ul>
+              <li>Probability: Medium (25–35%)</li>
+              <li>Revenue impact: −$1.5M in 2026</li>
+              <li>6 rigs sitting underutilised — $1.44M CAPEX sunk</li>
+              <li>Critical for Q3 2026 cash flow credibility</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Early Warning Signals</div>
+            <ul>
+              <li>Vendor qualification process stalls past May 15</li>
+              <li>Tidewater delays summer dig program past Jul 1</li>
+              <li>Pembina procurement freeze or budget cut</li>
+              <li>Competing vendor already has incumbent MSA</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Mitigation (Owners)</div>
+            <ul>
+              <li>Pursue TC Energy and Keyera in parallel — Rick Carlton</li>
+              <li>Delay Rigs 5–6 CAPEX until Pembina confirmed — Jeremy I</li>
+              <li>Max Aggrey opens AB operator conversations immediately</li>
+              <li>Joel Carlton manages rig deployment flexibility</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- R3 -->
+    <div class="risk-card r-high">
+      <div class="risk-hdr">
+        <div><div class="risk-id">R-03</div><div class="risk-title">Key Personnel Departure — Commercial Team (Vinoth, Max, Rick Carlton)</div></div>
+        <div><span class="risk-badge">HIGH</span></div>
+      </div>
+      <div class="risk-body">
+        <div class="risk-grid">
+          <div class="risk-section">
+            <div class="risk-section-hdr">Probability / Impact</div>
+            <ul>
+              <li>Probability: Low–Medium (15–25%)</li>
+              <li>Vinoth departure: −$4M+ 2027 at risk</li>
+              <li>Rick Carlton departure: Pipeline initiative collapses</li>
+              <li>Max departure: Western Canada commercial void</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Early Warning Signals</div>
+            <ul>
+              <li>Compensation concerns raised in 1:1 reviews</li>
+              <li>Reduced activity / pipeline engagement</li>
+              <li>Competitor outreach (LinkedIn activity)</li>
+              <li>Dissatisfaction with operational support</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Mitigation (Owners)</div>
+            <ul>
+              <li>Retention packages — Jon Eustace / Olivier Marcotte</li>
+              <li>Monthly 1:1 cadence — Olivier Marcotte with each</li>
+              <li>CRM hygiene — all client relationships logged in system</li>
+              <li>Deputy identified for each commercial role</li>
+              <li>Alex Cyr backstop for ops continuity</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- R4 -->
+    <div class="risk-card r-high">
+      <div class="risk-hdr">
+        <div><div class="risk-id">R-04</div><div class="risk-title">ABSA Clearance for 3X Composite Repair Delayed Beyond Q3 2026</div></div>
+        <div><span class="risk-badge">HIGH</span></div>
+      </div>
+      <div class="risk-body">
+        <div class="risk-grid">
+          <div class="risk-section">
+            <div class="risk-section-hdr">Probability / Impact</div>
+            <ul>
+              <li>Probability: Medium (35–45%)</li>
+              <li>Revenue impact: 2026 limited to ~$25K (non-pressure only)</li>
+              <li>2027 ramp reduced from $600K to $250K</li>
+              <li>Limited financial impact — manageable</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Early Warning Signals</div>
+            <ul>
+              <li>ABSA requests additional documentation</li>
+              <li>Review timeline exceeds 90 days from submission</li>
+              <li>ABSA identifies procedure gaps in ECS Manual</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Mitigation (Owners)</div>
+            <ul>
+              <li>Keith Reichenbach leads ABSA process and activates non-pressure revenue immediately</li>
+              <li>Keith Reichenbach manages ABSA relationship directly with Francis B-L as technical support</li>
+              <li>Jean-François Martel ensures procedure completeness</li>
+              <li>Ontario/QC Pressure Equipment Directive as alternative</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- R5 -->
+    <div class="risk-card r-high">
+      <div class="risk-hdr">
+        <div><div class="risk-id">R-05</div><div class="risk-title">Mining — National Expansion Stalls at Current 12 Accounts</div></div>
+        <div><span class="risk-badge">HIGH</span></div>
+      </div>
+      <div class="risk-body">
+        <div class="risk-grid">
+          <div class="risk-section">
+            <div class="risk-section-hdr">Probability / Impact</div>
+            <ul>
+              <li>Probability: Low–Medium (20–30%)</li>
+              <li>Revenue impact: $1.9M 2027 target reduced to $800K</li>
+              <li>ECA instrument investment stranded</li>
+              <li>5-year impact: −$12M cumulative</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Early Warning Signals</div>
+            <ul>
+              <li>Less than 3 new accounts signed by Q2 2026</li>
+              <li>Vinoth / Max pipeline generates fewer than 10 proposals</li>
+              <li>Gold price correction reducing mine capex budgets</li>
+              <li>Competitor enters market with similar ECA offering</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Mitigation (Owners)</div>
+            <ul>
+              <li>Shan Switzer (Crane Mgr) cross-sell at Nortech mining sites</li>
+              <li>Cement sector as additional addressable market</li>
+              <li>Oil sands expansion — Jason Borza / Max Aggrey</li>
+              <li>EIG France mining references for credential leverage</li>
+              <li>Sevan Bouchy develops new ECA probe for mill type gaps</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- R6 -->
+    <div class="risk-card r-medium">
+      <div class="risk-hdr">
+        <div><div class="risk-id">R-06</div><div class="risk-title">Powerline — EIG Instrument Model Unresolved / Instrument Unavailability</div></div>
+        <div><span class="risk-badge">MEDIUM</span></div>
+      </div>
+      <div class="risk-body">
+        <div class="risk-grid">
+          <div class="risk-section">
+            <div class="risk-section-hdr">Probability / Impact</div>
+            <ul>
+              <li>Probability: Medium (30–40%)</li>
+              <li>Revenue impact: 2026 $365K at risk</li>
+              <li>Does not affect other 4 initiatives</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Early Warning Signals</div>
+            <ul>
+              <li>EIG France has not confirmed instrument terms by May 1</li>
+              <li>LineCore/LineOhm instrument maintenance outstanding</li>
+              <li>HQ 2026 program scope not confirmed by May 1</li>
+            </ul>
+          </div>
+          <div class="risk-section">
+            <div class="risk-section-hdr">Mitigation (Owners)</div>
+            <ul>
+              <li>Mathieu Beauchesne escalates to EIG CEO if no response by Apr 14</li>
+              <li>Francis B-L confirms instrument readiness independently</li>
+              <li>Powerline excluded from consolidated model already</li>
+              <li>Upside-only contribution to plan — no downside if zero</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 5 — CONTINGENCIES -->
+<div class="sec-hdr" id="s5" style="--accent:var(--amber2);">
+  <div class="sec-hdr-in">
+    <div class="sec-num">05</div>
+    <div><div class="sec-title">Contingency &amp; Pivot Plans</div>
+    <div class="sec-sub">Three scenarios that materially change the plan — trigger conditions, pivot decisions, and revised forecasts</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+
+    <div class="callout warn">
+      <div><div class="callout-hdr">How Contingencies Are Structured</div>
+      <p>Each scenario defines: (1) the trigger condition — the specific event or signal that activates the contingency, (2) immediate actions within 30 days of trigger, (3) the revised revenue forecast if the contingency plays out fully, and (4) the pivot — how BU Services redeploys the resources and energy that were allocated to the lost initiative into alternative growth vectors. No scenario puts BU Services in existential risk — the base business generates $47.2M regardless.</p></div>
+    </div>
+
+    <!-- SCENARIO A — NUCLEAR -->
+    <div class="scenario s-nuclear">
+      <div class="scenario-hdr">
+        <h3>Scenario A — Nuclear MSA Not Won (Partial or Full Loss)</h3>
+        <div class="scenario-sub">OPG awards fewer WPs than bid, delays award to 2028, or selects incumbent-heavy approach</div>
+        <div class="scenario-impact"><div class="impact-val">−$47.6M</div><div class="impact-lbl">5-year revenue impact if zero award</div></div>
+      </div>
+      <div class="scenario-body">
+        <div class="scenario-cols">
+          <div class="scenario-col">
+            <div class="scenario-col-hdr" style="color:var(--red2);">Trigger Conditions</div>
+            <ul>
+              <li>OPG awards fewer than 4 of 10 WPs</li>
+              <li>Award delayed past January 2027</li>
+              <li>BAFO process not initiated within 90 days of bid</li>
+              <li>OPG signals incumbent preference in debrief</li>
+              <li>Applus RTD stabilises under new ownership</li>
+            </ul>
+          </div>
+          <div class="scenario-col">
+            <div class="scenario-col-hdr" style="color:var(--amber2);">Immediate Actions (30 days)</div>
+            <ul>
+              <li>Olivier Marcotte requests full debrief with OPG</li>
+              <li>Louis-Pier Théberge redirects CGSB-qualified techs to Aecon Darlington/Pickering subcontract work (this revenue exists regardless)</li>
+              <li>Renée Lachance revises 2027 financial forecast for Eurazeo</li>
+              <li>Jon Eustace / Mathieu Beauchesne assess whether Aecon subcontract alone justifies nuclear headcount</li>
+              <li>Eric Rodrigue pivots remote analysis capacity to pipeline FFS and mining interpretation work</li>
+            </ul>
+          </div>
+          <div class="scenario-col">
+            <div class="scenario-col-hdr" style="color:var(--green2);">Revised 2027–2030 Forecast</div>
+            <ul>
+              <li>Zero MSA: 2027 total = $60.7M (vs $71.7M)</li>
+              <li>Aecon subcontract (~$5M/yr) partially preserved</li>
+              <li>Other 4 initiatives unchanged — $24.9M by 2027</li>
+              <li>Base business organic growth continues unchanged</li>
+              <li>Eurazeo plan revised down — managed transparently</li>
+            </ul>
+          </div>
+        </div>
+        <div class="scenario-pivot">
+          <div class="scenario-pivot-hdr">The Pivot — Where Does Nuclear Energy Go?</div>
+          <p>If the OPG MSA is lost, Nucleom retains the Aecon NDT subcontract on Darlington SMR and Pickering Refurb — estimated $5M/yr through programme life. Louis-Pier Théberge and the nuclear team pivot fully to maximising Aecon subcontract scope. Joel Djordjevic redirects ON operational capacity to Pipeline DA support (Joel Carlton's crew load increases). The CGSB-qualified technicians Nucleom has built are a rare, hard-to-replicate asset — they are immediately deployable to both Aecon programmes and to New Brunswick Power (Point Lepreau) and Bruce Power outage opportunities. Olivier Marcotte pivots commercial energy to Bruce Power and NB Power outage MSA opportunities as the 2029 cycle approaches. The nuclear technical platform is not abandoned — it is redirected.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO B — PIPELINE -->
+    <div class="scenario s-pipeline">
+      <div class="scenario-hdr">
+        <h3>Scenario B — Pipeline MSA Awards Miss in 2026 (Pembina + Tidewater Both Delayed)</h3>
+        <div class="scenario-sub">No major operator MSA executed in 2026 — 6-rig fleet underutilised through year-end</div>
+        <div class="scenario-impact"><div class="impact-val">−$1.5M</div><div class="impact-lbl">2026 revenue impact</div></div>
+      </div>
+      <div class="scenario-body">
+        <div class="scenario-cols">
+          <div class="scenario-col">
+            <div class="scenario-col-hdr" style="color:var(--red2);">Trigger Conditions</div>
+            <ul>
+              <li>Pembina vendor qualification not approved by Jun 1</li>
+              <li>Tidewater summer dig delayed past Aug 1</li>
+              <li>No MSA term sheet signed by Jul 1</li>
+              <li>Commodity price correction freezes operator CAPEX</li>
+              <li>Rick Carlton reports fewer than 3 active program discussions</li>
+            </ul>
+          </div>
+          <div class="scenario-col">
+            <div class="scenario-col-hdr" style="color:var(--amber2);">Immediate Actions (30 days)</div>
+            <ul>
+              <li>Jeremy Irwin halts Rigs 5–6 procurement immediately (saves $360K)</li>
+              <li>Rick Carlton pivots to TC Energy, Keyera, and Cenovus pipeline assets in parallel</li>
+              <li>Joel Carlton repositions Rigs 1–4 for smaller, faster-paying operators (distribution companies, municipals)</li>
+              <li>Joel Carlton deploys PAUT capacity to Nucleom's existing oil sands pipeline clients (Suncor, Cenovus)</li>
+              <li>Max Aggrey activates AB independent operators — faster procurement cycles than majors</li>
+            </ul>
+          </div>
+          <div class="scenario-col">
+            <div class="scenario-col-hdr" style="color:var(--green2);">Revised 2026 Forecast</div>
+            <ul>
+              <li>No Pembina/Tidewater: 2026 Pipeline = $500K–$800K</li>
+              <li>Total BU Services 2026: ~$49M (vs $50.4M)</li>
+              <li>CAPEX reduced by $360K (Rigs 5–6 deferred)</li>
+              <li>FCF impact minimal — CAPEX savings offset revenue loss</li>
+              <li>2027 ramp preserved if alternative MSAs close Q4</li>
+            </ul>
+          </div>
+        </div>
+        <div class="scenario-pivot">
+          <div class="scenario-pivot-hdr">The Pivot — Rigs Are Flexible Assets</div>
+          <p>PI service rigs configured for direct assessment are highly flexible. If transmission operator MSAs don't materialise in 2026, Joel Carlton immediately repositions Rigs 1–4 as: (1) distribution integrity DA for smaller municipal operators and LDCs — faster procurement, lower volume but available now; (2) cathodic protection survey support work — adjacent to DA, uses same field crew; (3) short-duration PAUT inspection programs for Nucleom's existing oil sands pipeline clients (Suncor, Cenovus), leveraging Joel Carlton's PAUT expertise. Rick Carlton redirects commercial focus to TC Energy and Enbridge Asset Management — larger clients with longer procurement cycles but higher long-term value. The 2027 ramp is delayed by one quarter but not structurally impaired. Jeremy Irwin's decision to halt Rigs 5–6 procurement preserves $360K of cash that can be redeployed or returned to base business investment.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENARIO C — MINING -->
+    <div class="scenario s-mining">
+      <div class="scenario-hdr">
+        <h3>Scenario C — Mining National Expansion Stalls (Fewer Than 5 New Accounts by Q3 2026)</h3>
+        <div class="scenario-sub">New account acquisition slower than forecast — existing 12 accounts hold but national ramp does not materialise</div>
+        <div class="scenario-impact"><div class="impact-val">−$11.4M</div><div class="impact-lbl">5-year revenue impact at base case miss</div></div>
+      </div>
+      <div class="scenario-body">
+        <div class="scenario-cols">
+          <div class="scenario-col">
+            <div class="scenario-col-hdr" style="color:var(--red2);">Trigger Conditions</div>
+            <ul>
+              <li>Fewer than 3 new accounts signed by end of Q2</li>
+              <li>Vinoth / Max pipeline generates fewer than 8 proposals in Q1–Q2</li>
+              <li>Gold price correction below US$3,000/oz sustained</li>
+              <li>Competitor with comparable ECA capability emerges</li>
+              <li>Western Canada outreach generates no site visits by Jun 1</li>
+            </ul>
+          </div>
+          <div class="scenario-col">
+            <div class="scenario-col-hdr" style="color:var(--amber2);">Immediate Actions (30 days)</div>
+            <ul>
+              <li>Vinoth Tharma and Max Aggrey review proposal conversion rate — identify objection patterns</li>
+              <li>Jon Eustace / Sevan Bouchy develop new mine-type-specific ECA demo package for harder-to-sell sites</li>
+              <li>Shan Switzer (Crane Manager) activated as internal referral source for Nortech crane clients with mill assets</li>
+              <li>Cement sector accelerated — Heidelberg, Votorantim as immediate targets (no new instrument needed)</li>
+              <li>International accounts (Suriname, other EIG connections) expanded as alternative volume</li>
+            </ul>
+          </div>
+          <div class="scenario-col">
+            <div class="scenario-col-hdr" style="color:var(--green2);">Revised 2026–2027 Forecast</div>
+            <ul>
+              <li>Stall scenario: 2026 Mining = $250K (vs $410K)</li>
+              <li>2027: $800K–$1.0M (vs $1.9M)</li>
+              <li>Total BU Services 2027: ~$70M (vs $71.7M) — minor</li>
+              <li>ECA instrument order deferred — $90K saved in 2027</li>
+              <li>Vinoth capacity partially redirected to 3X and Nuclear</li>
+            </ul>
+          </div>
+        </div>
+        <div class="scenario-pivot">
+          <div class="scenario-pivot-hdr">The Pivot — Adjacent Markets Within the Same Commercial Team</div>
+          <p>The Mining commercial team (Vinoth Tharma, Max Aggrey) is not exclusively a mining team — they are the BU Services commercial capacity for all Heavy Industries initiatives. If mining new account acquisition is slower than planned, Vinoth and Max do not sit idle. Vinoth pivots commercial energy toward 3X Composite Repair embedding across the existing 12 accounts (converting inspection revenue to inspection + repair revenue on the same site visit — no new relationship required). Max Aggrey redirects Western Canada outreach toward Powerline (AltaLink, ATCO) and oil sands pipeline operators. Sevan Bouchy and Francis Boudreault-Leclerc review whether a modified ECA instrument configuration could open new mill types (vertical mills, AG mills) that the current probe set cannot address — expanding the addressable market technically. The mining opportunity is not lost — it is slower than planned, and the commercial team is redirected to adjacent revenue that can be captured now.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 6 — GOVERNANCE -->
+<div class="sec-hdr" id="s6" style="--accent:var(--blue2);">
+  <div class="sec-hdr-in">
+    <div class="sec-num">06</div>
+    <div><div class="sec-title">Governance &amp; Cadence</div>
+    <div class="sec-sub">Who reviews what, how often, and what decisions get escalated where</div></div>
+  </div>
+</div>
+<div class="sec-body">
+  <div class="wrap">
+    <table class="gov-table">
+      <thead>
+        <tr><th>Forum</th><th>Participants</th><th>Cadence</th><th>Agenda</th><th>Decision Authority</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Commercial Leadership Weekly</strong></td>
+          <td>Olivier Marcotte, Vinoth Tharma, Max Aggrey, Rick Carlton, Jon Eustace</td>
+          <td><span class="cadence-badge">Weekly — Monday</span></td>
+          <td>Pipeline updates per initiative. Proposal status. Gate decisions. Any early warning signals flagged. Wins celebrated.</td>
+          <td>Olivier Marcotte chairs. Jon Eustace for strategic pivots.</td>
+        </tr>
+        <tr>
+          <td><strong>Ops &amp; Delivery Weekly</strong></td>
+          <td>Alex Cyr, Joel Carlton, Louis-Pier Théberge, Eric Rodrigue, Joel Djordjevic, Jason Borza</td>
+          <td><span class="cadence-badge">Weekly — Wednesday</span></td>
+          <td>Crew utilisation. Instrument availability. CAPEX procurement status. Field quality issues. Cross-initiative resource conflicts resolved.</td>
+          <td>Alex Cyr chairs. All ops leads report directly to Alex Cyr except Joel Carlton who reports to Rick Carlton, who reports to Alex Cyr. Jeremy Irwin for CAPEX releases.</td>
+        </tr>
+        <tr>
+          <td><strong>Initiative Gate Reviews</strong></td>
+          <td>Jon Eustace, Olivier Marcotte, Mathieu Beauchesne, relevant commercial + ops owners</td>
+          <td><span class="cadence-badge">Monthly — end of month</span></td>
+          <td>Gate check against sprint plan. Trigger condition review. Contingency activation decisions. Budget vs. actuals. Headcount vs. plan.</td>
+          <td>Jon Eustace chairs. Mathieu Beauchesne for margin decisions.</td>
+        </tr>
+        <tr>
+          <td><strong>Nuclear Steering</strong></td>
+          <td>Olivier Marcotte, Louis-Pier Théberge, Jean-François Martel, Vinoth Tharma, Francis Boudreault-Leclerc</td>
+          <td><span class="cadence-badge">Bi-weekly</span></td>
+          <td>MSA tender progress. CGSB qualification status. OPG relationship signals. Rate card and bid document reviews.</td>
+          <td>Olivier Marcotte chairs.</td>
+        </tr>
+        <tr>
+          <td><strong>Financial Review</strong></td>
+          <td>Mathieu Beauchesne, Renée Lachance, Jeremy Irwin, Jon Eustace, Charles Recape (CFO)</td>
+          <td><span class="cadence-badge">Monthly</span></td>
+          <td>Revenue vs. forecast. CAPEX releases. FCF tracking. Eurazeo reporting preparation. Contingency scenario modelling.</td>
+          <td>Mathieu Beauchesne chairs. Charles Recape for Eurazeo escalation.</td>
+        </tr>
+        <tr>
+          <td><strong>Eurazeo / EIG Executive Update</strong></td>
+          <td>Jon Eustace, Mathieu Beauchesne, Charles Recape (CFO), Olivier Marcotte</td>
+          <td><span class="cadence-badge">Quarterly</span></td>
+          <td>Initiative progress vs. plan. Revenue and EBITDA vs. forecast. Contingency status. Strategic pivots requiring EIG approval. CAPEX requests above threshold.</td>
+          <td>Jon Eustace presents. Charles Recape financial narrative.</td>
+        </tr>
+        <tr>
+          <td><strong>HR &amp; Retention Review</strong></td>
+          <td>Maud Leivin Capuano, Olivier Marcotte, Jon Eustace, Mathieu Beauchesne</td>
+          <td><span class="cadence-badge">Monthly</span></td>
+          <td>Commercial team retention indicators. Compensation vs. market. Incremental FTE hiring pipeline. Risk R-03 monitoring.</td>
+          <td>Maud Leivin Capuano runs. Jon Eustace for retention decisions.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="sub-title" style="margin-top:2rem;">Decision Escalation Matrix</div>
+    <table class="gov-table">
+      <thead>
+        <tr><th>Decision Type</th><th>Level 1 — Self-Authorised</th><th>Level 2 — Commercial/Ops Leadership</th><th>Level 3 — CEO / EVP</th><th>Level 4 — EIG / Eurazeo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>CAPEX spend</strong></td><td>Under $25K — Jeremy Irwin</td><td>$25K–$200K — Mathieu Beauchesne + Jeremy Irwin</td><td>$200K–$500K — Jon Eustace</td><td>Over $500K — EIG approval</td></tr>
+        <tr><td><strong>New hire</strong></td><td>Backfill within approved FTE plan — Alex Cyr</td><td>Net new FTE — Mathieu Beauchesne</td><td>Senior hire (Director+) — Jon Eustace</td><td>C-suite — EIG</td></tr>
+        <tr><td><strong>Contingency activation</strong></td><td>—</td><td>Early warning flagged — Olivier Marcotte</td><td>Contingency confirmed — Jon Eustace</td><td>Major pivot (>$5M impact) — EIG</td></tr>
+        <tr><td><strong>MSA / contract terms</strong></td><td>Under $500K — commercial owner</td><td>$500K–$2M — Olivier Marcotte</td><td>Over $2M — Jon Eustace</td><td>Multi-year strategic contracts — EIG</td></tr>
+        <tr><td><strong>Eurazeo forecast revision</strong></td><td>—</td><td>—</td><td>Jon Eustace initiates</td><td>Charles Recape / EIG Finance</td></tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<div class="doc-footer">
+  <p>BU Services Execution Attack Plan · Version 1.0 · Effective May 1, 2026 · Prepared by Jon Eustace, CEO North America · Ekoscan Integrity Group</p>
+  <p style="margin-top:0.3rem;">Confidential — Eurazeo / EIG Internal — Not for external distribution</p>
+</div>
+
+</body>
+</html>

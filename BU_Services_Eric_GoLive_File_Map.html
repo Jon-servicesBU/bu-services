@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — Go-Live File Map · Éric Carmichael</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0A1F5C;--blue:#1A5CA8;--sky:#00AEEF;
+  --green:#16A34A;--amber:#C9860A;--red:#B91C1C;--purp:#6D28D9;--teal:#0D5050;
+  --body:#2D3748;--light:#F7F9FC;--border:#DDE3EF;--mid:#8896B0;
+  --sf:#00547A;--pa:#4B2067;--bc:#196B24;--sp:#004578;--mn:#374151;
+  --mono:'IBM Plex Mono',monospace;--fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:#F2F5FB;color:var(--body);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── TOP STRIP ── */
+.top-strip{background:var(--navy);padding:.45rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.ts-brand{font-family:var(--fd);font-size:.72rem;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.08em;text-transform:uppercase}
+.ts-badge{font-family:var(--mono);font-size:.6rem;color:var(--sky);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.2);border-radius:3px;padding:.15rem .5rem}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,var(--navy) 0%,#0D2D6E 55%,var(--blue) 100%);padding:2.5rem 2.5rem 2rem;border-bottom:4px solid var(--sky)}
+.hdr-eye{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.4);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem}
+.hdr h1{font-family:var(--fd);font-size:2.6rem;font-weight:900;color:#fff;line-height:1.05;margin-bottom:.3rem}
+.hdr h1 em{color:var(--sky);font-style:normal}
+.hdr-sub{font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.65;max-width:640px;margin-bottom:1.25rem}
+.hdr-meta{display:flex;flex-wrap:wrap;gap:.5rem}
+.hdr-pill{font-family:var(--mono);font-size:.6rem;font-weight:600;padding:.2rem .6rem;border-radius:3px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)}
+
+/* ── LEGEND ── */
+.legend{background:#fff;border-bottom:1px solid var(--border);padding:.75rem 2.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.legend-title{font-family:var(--mono);font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--mid)}
+.leg-item{display:flex;align-items:center;gap:.35rem;font-size:.68rem;color:var(--body)}
+.leg-chip{font-family:var(--mono);font-size:.6rem;font-weight:700;padding:.1rem .4rem;border-radius:3px;white-space:nowrap}
+
+/* ── PAGE ── */
+.page{max-width:1160px;margin:0 auto;padding:2rem 2.5rem 4rem}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:flex-start;gap:.85rem;margin:2.5rem 0 1rem;padding-bottom:.6rem;
+  border-bottom:2px solid var(--border)}
+.sh-step{font-family:var(--fd);font-size:2rem;font-weight:900;color:var(--border);line-height:1;flex-shrink:0;width:2.8rem}
+.sh-right{}
+.sh h2{font-family:var(--fd);font-size:1.35rem;font-weight:900;color:var(--navy);line-height:1.1}
+.sh-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.3rem}
+.sh-time{font-family:var(--mono);font-size:.62rem;color:var(--amber);background:#FFF8E1;
+  border:1px solid #F5C84A;border-radius:3px;padding:.1rem .4rem}
+.sh-owner{font-family:var(--mono);font-size:.62rem;color:var(--sky);background:rgba(0,174,239,.08);
+  border:1px solid rgba(0,174,239,.2);border-radius:3px;padding:.1rem .4rem}
+.sh-prereq{font-family:var(--mono);font-size:.6rem;color:var(--red);background:#FFEBEE;
+  border:1px solid rgba(185,28,28,.2);border-radius:3px;padding:.1rem .4rem}
+
+/* ── FILE CARDS GRID ── */
+.files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:.75rem;margin-bottom:.5rem}
+
+/* ── FILE CARD ── */
+.file-card{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;
+  display:flex;flex-direction:column;transition:box-shadow .15s,transform .15s}
+.file-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px)}
+.fc-top{height:3px}
+.fc-body{padding:.75rem .9rem;flex:1}
+.fc-name{font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--navy);
+  word-break:break-all;line-height:1.4;margin-bottom:.3rem}
+.fc-desc{font-size:.72rem;color:var(--body);line-height:1.55;margin-bottom:.45rem}
+.fc-footer{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:.58rem;font-weight:700;padding:.1rem .38rem;border-radius:3px;white-space:nowrap}
+.chip-read{background:#E8F4FD;color:var(--blue);border:1px solid rgba(26,92,168,.2)}
+.chip-edit{background:#FFF8E1;color:var(--amber);border:1px solid rgba(201,134,10,.25)}
+.chip-build{background:#E8F5E9;color:var(--green);border:1px solid rgba(22,163,74,.25)}
+.chip-upload{background:#EDE9FE;color:var(--purp);border:1px solid rgba(109,40,217,.2)}
+.chip-sf{background:#E0F3FA;color:var(--sf);border:1px solid rgba(0,84,122,.2)}
+.chip-pa{background:#F3ECF9;color:var(--pa);border:1px solid rgba(75,32,103,.2)}
+.chip-bc{background:#E8F5E9;color:var(--bc);border:1px solid rgba(25,107,36,.2)}
+.chip-sp{background:#E6F0FB;color:var(--sp);border:1px solid rgba(0,69,120,.2)}
+.chip-type{background:#F0F3FA;color:var(--mid);border:1px solid var(--border)}
+
+/* ── SUMMARY NOTE ── */
+.note{background:#fff;border:1px solid var(--border);border-left:4px solid var(--sky);border-radius:0 8px 8px 0;
+  padding:.75rem 1rem;margin:.75rem 0;font-size:.76rem;color:var(--body);line-height:1.6}
+.note strong{color:var(--navy)}
+
+/* ── FULL FILE LIST ── */
+.all-files{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:2.5rem}
+.af-hdr{background:var(--navy);padding:.75rem 1.25rem;display:flex;align-items:baseline;gap:.75rem}
+.af-hdr h2{font-family:var(--fd);font-size:1.1rem;font-weight:900;color:#fff}
+.af-hdr span{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.4)}
+.af-table{width:100%;border-collapse:collapse;font-size:.71rem}
+.af-table th{background:var(--light);padding:.45rem .85rem;text-align:left;font-family:var(--mono);
+  font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--mid);border-bottom:1px solid var(--border)}
+.af-table td{padding:.4rem .85rem;border-bottom:1px solid #F0F3FA;vertical-align:middle}
+.af-table tr:last-child td{border-bottom:none}
+.af-table tr:hover td{background:#F7F9FC}
+.af-name{font-family:var(--mono);font-size:.68rem;font-weight:500;color:var(--navy)}
+.af-desc{color:var(--body)}
+.af-step{font-family:var(--mono);font-size:.62rem;color:var(--mid);text-align:center}
+.af-actions{display:flex;gap:.25rem;flex-wrap:wrap}
+
+/* ── RESPONSIVE ── */
+@media(max-width:800px){
+  .hdr{padding:1.75rem 1.25rem 1.5rem}
+  .page{padding:1.5rem 1rem 3rem}
+  .legend{padding:.75rem 1rem}
+  .files-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="top-strip">
+  <div class="ts-brand">Ekoscan Integrity Group &nbsp;&middot;&nbsp; BU Services &nbsp;&middot;&nbsp; Go-Live</div>
+  <div class="ts-badge">CONFIDENTIAL &nbsp;&middot;&nbsp; INTERNAL USE ONLY</div>
+  <a href="BU_Services_GoLive_Roadmap.html" target="buservices" style="font-family:'IBM Plex Mono',monospace;font-size:.6rem;font-weight:600;color:var(--sky);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.2);border-radius:3px;padding:.18rem .55rem;text-decoration:none;white-space:nowrap">&#8592; Go-Live Roadmap</a>
+</div>
+
+<div class="hdr">
+  <div class="hdr-eye">File Management Map &nbsp;&middot;&nbsp; Go-Live Reference</div>
+  <h1>&Eacute;ric Carmichael<br><em>Go-Live File Map</em></h1>
+  <p class="hdr-sub">Every file you need to complete the BU Services go-live — organised by build step, with the exact filename, what it is, and what you do with it.</p>
+  <div class="hdr-meta">
+    <span class="hdr-pill">~13 hrs total build</span>
+    <span class="hdr-pill">7 steps</span>
+    <span class="hdr-pill">17 files</span>
+    <span class="hdr-pill">Salesforce &middot; Power Automate &middot; SharePoint &middot; Business Central</span>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="legend-title">Action key:</span>
+  <span class="leg-item"><span class="leg-chip chip-read">READ</span> Reference only — no edits</span>
+  <span class="leg-item"><span class="leg-chip chip-edit">EDIT</span> Open and fill in / update</span>
+  <span class="leg-item"><span class="leg-chip chip-build">BUILD</span> Use as spec to build the integration</span>
+  <span class="leg-item"><span class="leg-chip chip-upload">UPLOAD</span> Upload to SharePoint</span>
+  <span class="leg-item"><span class="leg-chip chip-sf">SF</span> Salesforce</span>
+  <span class="leg-item"><span class="leg-chip chip-pa">PA</span> Power Automate</span>
+  <span class="leg-item"><span class="leg-chip chip-bc">BC</span> Business Central</span>
+  <span class="leg-item"><span class="leg-chip chip-sp">SP</span> SharePoint</span>
+</div>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- STEP 0 — SHAREPOINT SETUP                             -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="sh">
+    <div class="sh-step">0</div>
+    <div class="sh-right">
+      <h2>SharePoint Setup &mdash; Create Folder &amp; Upload All Files</h2>
+      <div class="sh-meta">
+        <span class="sh-time">~10 min</span>
+        <span class="sh-owner">Éric &middot; Jon (optional)</span>
+        <span class="sh-prereq">MUST complete before anything else</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Create the <strong>BU Services</strong> folder on the shared SharePoint site. Upload every HTML, DOCX, XLSX, and JSON file from this list into that folder. The Command Centre and all three portals read files by relative path — they must all be in the same folder.</div>
+  <div class="files-grid">
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--sp)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_SharePoint_Setup_Guide.docx</div>
+        <div class="fc-desc">Step-by-step instructions for creating the BU Services SharePoint folder, setting permissions, and uploading all files in the correct structure.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-sp">SP</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--sky)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Command_Centre.html</div>
+        <div class="fc-desc">The live KPI dashboard. Upload to SharePoint root BU Services folder. This is the file Jon opens every Monday.</div>
+        <div class="fc-footer">
+          <span class="chip chip-upload">UPLOAD</span>
+          <span class="chip chip-sp">SP</span>
+          <span class="chip chip-type">HTML</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--blue)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Management_Hub.html</div>
+        <div class="fc-desc">Org chart, weekly rhythm, document library. Upload alongside the Command Centre. Cross-links to all other portals.</div>
+        <div class="fc-footer">
+          <span class="chip chip-upload">UPLOAD</span>
+          <span class="chip chip-sp">SP</span>
+          <span class="chip chip-type">HTML</span>
+        </div>
+      </div>
+            <div class="fc-item">
+        <div class="fc-name">BC_People_PA_Guide_v2.docx</div>
+        <div class="fc-desc">BC People Data PA Build Guide v2. Covers P6 (Hours_Rolling_13_Weeks), P7 (Vacances — unionized + non-unionized with priority rule), P8 (Date_d'embauche). Corrected column map, overhead % formula (non/paid), 2000h/50wk capacity (520h/13wk), both vacation sheets parsed. Office Scripts v2 included. Eric Rodrigue builds P6/P7/P8 — People Dashboard must be on SharePoint first.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-build">BUILD</span>
+          <span class="chip chip-pa">PA</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+      <div class="fc-item">
+        <div class="fc-name">BU_Services_People_Dashboard.html</div>
+        <div class="fc-desc">People &amp; Capacity Dashboard — overhead %, cumulative utilization, vacation liability, 126-employee roster. Fed automatically by BC exports via PA flow P6/P7/P8. Must be in same SharePoint folder as Command Centre and actuals.json.</div>
+        <div class="fc-footer">
+          <span class="chip chip-upload">UPLOAD</span>
+          <span class="chip chip-sp">SP</span>
+          <span class="chip chip-type">HTML</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--amber)"></div>
+      <div class="fc-body">
+        <div class="fc-name">actuals.json</div>
+        <div class="fc-desc">The data bridge — 110 fields. Upload to the BU Services folder root. Power Automate writes to it every Sunday; the Command Centre reads it on every page load. This file must be in the same folder as the HTML files.</div>
+        <div class="fc-footer">
+          <span class="chip chip-upload">UPLOAD</span>
+          <span class="chip chip-edit">EDIT</span>
+          <span class="chip chip-sp">SP</span>
+          <span class="chip chip-type">JSON</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- STEP 1 — SALESFORCE                                    -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="sh">
+    <div class="sh-step">1</div>
+    <div class="sh-right">
+      <h2>Salesforce &mdash; Create Custom Fields &amp; Picklists</h2>
+      <div class="sh-meta">
+        <span class="sh-time">~35 min Éric &nbsp;+&nbsp; ~20 min commercial team</span>
+        <span class="sh-owner">Éric (fields) &middot; commercial team (backfill)</span>
+        <span class="sh-prereq">MUST complete before Step 2 — PA flow reads these fields</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Create the <strong>BU_Initiative__c</strong> custom picklist on the Opportunity object, add the 5 initiative values, and set up the Region field. Then coordinate with Max, Vinoth, and Rick to backfill the picklist on all 2026 opportunities. Without this, every initiative total in the Command Centre shows $0.</div>
+  <div class="files-grid">
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--sf)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Salesforce_Integration_Guide.docx</div>
+        <div class="fc-desc">Full field-by-field Salesforce build guide. Covers BU_Initiative__c picklist creation (5 values), Region field setup, Assigned_Technicians__c field, and the exact SOQL queries Power Automate will use. Your primary reference for Step 1.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-build">BUILD</span>
+          <span class="chip chip-sf">SF</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--sky)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Salesforce_Backfill_Tracker.html</div>
+        <div class="fc-desc">Interactive checklist for auditing and tracking which 2026 Salesforce opportunities have BU_Initiative__c set correctly. Share with Emmanuel Aggrey, Vinoth Tharma, and Rick Carlton to complete the backfill before go-live.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-sf">SF</span>
+          <span class="chip chip-type">HTML</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--sf)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_SF_Technician_Tracking.docx</div>
+        <div class="fc-desc">Setup guide for the Assigned_Technicians__c field on Opportunity — used by ops directors to flag crew assigned to closed deals. Required for the technician tracking section of the Command Centre.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-build">BUILD</span>
+          <span class="chip chip-sf">SF</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--sf)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_SF_Conference_Entry_Guide.docx</div>
+        <div class="fc-desc">How conference leads are entered into Salesforce post-show (Lead object → Opportunity with BU_Initiative__c tag). Read this before building the Step 2b conference PA flow — the SF data structure it reads depends on this guide.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-sf">SF</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- STEP 2 — POWER AUTOMATE (MAIN FLOW)                   -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="sh">
+    <div class="sh-step">2</div>
+    <div class="sh-right">
+      <h2>Power Automate &mdash; Sunday 7PM Scheduled Flow</h2>
+      <div class="sh-meta">
+        <span class="sh-time">~2 hrs</span>
+        <span class="sh-owner">Éric</span>
+        <span class="sh-prereq">Requires Step 1 complete — SOQL queries need BU_Initiative__c to exist</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Build the scheduled PA flow that runs every Sunday at 7:00 PM ET. It queries Salesforce (Closed Won by initiative, region, entity), reads the SharePoint utilisation tracker, and writes results to <strong>actuals.json</strong>. Critical: the flow must merge new data into the existing JSON — it must never overwrite Jeremy Irwin&rsquo;s manual Nortech entries or Jon&rsquo;s gate/risk status.</div>
+  <div class="files-grid">
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--pa)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Power_Automate_Build_Guide.docx</div>
+        <div class="fc-desc">Complete PA build guide. Contains: system overview, prerequisites checklist, all 5 SOQL query templates with exact syntax, step-by-step PA flow structure, actuals.json field mapping table, SharePoint file locations, testing checklist, troubleshooting table, and annual reset instructions. This is your primary build spec for Step 2.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-build">BUILD</span>
+          <span class="chip chip-pa">PA</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--amber)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_actuals_json_Reference.html</div>
+        <div class="fc-desc">Annotated reference for all 110 fields in actuals.json. Colour-coded by owner: which fields PA writes automatically, which Jeremy Irwin enters manually, which Jon Eustace updates. Essential companion when building the PA flow to know exactly which fields to write and which to preserve.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-pa">PA</span>
+          <span class="chip chip-type">HTML</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--amber)"></div>
+      <div class="fc-body">
+        <div class="fc-name">actuals.json</div>
+        <div class="fc-desc">The file your PA flow writes to. Before go-live, confirm the file is on SharePoint and the flow has write permission. After each test run, open the file and verify the nucleom, mining, pipeline, powerline, nuclear, and x3 fields are updating correctly.</div>
+        <div class="fc-footer">
+          <span class="chip chip-edit">EDIT (test)</span>
+          <span class="chip chip-pa">PA</span>
+          <span class="chip chip-sp">SP</span>
+          <span class="chip chip-type">JSON</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- STEP 2b — CONFERENCE COST FLOW                        -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="sh">
+    <div class="sh-step">2b</div>
+    <div class="sh-right">
+      <h2>Power Automate &mdash; Conference Cost &amp; Teams Adaptive Card</h2>
+      <div class="sh-meta">
+        <span class="sh-time">~2.5 hrs (runs parallel to Step 2)</span>
+        <span class="sh-owner">Éric</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Build the conference-related PA flows: (1) a flow that reads the Conference Action Tracker (Excel on SharePoint) and writes conference actuals to actuals.json, and (2) a Teams Adaptive Card that triggers after each conference end date to collect lead/opp counts from Jon, writing results directly to actuals.json.</div>
+  <div class="files-grid">
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--pa)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Conference_Cost_Integration_Guide.docx</div>
+        <div class="fc-desc">Step-by-step guide for the conference cost PA flow. Covers the Excel tracker schema (Conference Action Tracker), which columns map to which actuals.json conf_* fields, the Adaptive Card trigger logic, and the post-conference debrief automation.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-build">BUILD</span>
+          <span class="chip chip-pa">PA</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- STEP 3 — BUSINESS CENTRAL                             -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="sh">
+    <div class="sh-step">3</div>
+    <div class="sh-right">
+      <h2>Business Central &mdash; Invoice Reconciliation Connector</h2>
+      <div class="sh-meta">
+        <span class="sh-time">~90 min (Éric) &nbsp;+&nbsp; ~30 min (Mathieu — Q&A workbook first)</span>
+        <span class="sh-owner">Éric (build) &middot; Mathieu Beauchesne (Q&A workbook)</span>
+        <span class="sh-prereq">Mathieu must complete the Q&A workbook before Éric can build</span>
+      </div>
+    </div>
+  </div>
+  <div class="note"><strong>Prerequisite:</strong> Mathieu Beauchesne fills in the yellow cells of the Dynamics Q&A Workbook first (BC environment URL, legal entity codes, API version, whether invoices use project dimensions). Éric cannot build the connector without those answers.</div>
+  <div class="files-grid">
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--bc)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Dynamics_QA_Workbook.xlsx</div>
+        <div class="fc-desc">Q&A workbook that Mathieu Beauchesne fills in first. Yellow cells = Mathieu's answers (BC URL, entity codes, API version, dimension tagging). Green cells = Éric's build outputs. You read the completed version to configure the BC connector.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ (after Mathieu fills it)</span>
+          <span class="chip chip-bc">BC</span>
+          <span class="chip chip-type">Excel</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--bc)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Dynamics_Integration_Guide.docx</div>
+        <div class="fc-desc">Full build guide for the Business Central connector. Covers the BC API endpoint structure, OData query format for invoice data, entity mapping (Nucleom, Nortech), how the invoiced revenue fields write to actuals.json (int_invoiced, arcndt_invoiced), and the reconciliation section of the Command Centre.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-build">BUILD</span>
+          <span class="chip chip-bc">BC</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- STEP 4 — SHAREPOINT LISTS                             -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="sh">
+    <div class="sh-step">4</div>
+    <div class="sh-right">
+      <h2>SharePoint Lists &mdash; Meeting Actions &amp; Utilisation Tracker</h2>
+      <div class="sh-meta">
+        <span class="sh-time">~2 hrs 15 min (runs parallel to Step 3)</span>
+        <span class="sh-owner">Éric</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Create the SharePoint List for Meeting Actions (columns: MeetingId, Action, Owner, DueDate, Status) and the Utilisation Tracker Excel workbook (columns: Region, Week, BillablePct, OpLead). The PA flow reads both every Sunday to populate the Meeting Health and Utilisation sections of the Command Centre.</div>
+  <div class="files-grid">
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--sp)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Meeting_Tracking_Setup.docx</div>
+        <div class="fc-desc">Setup guide for the BU Services Meeting Actions SharePoint List. Covers column schema, MeetingId values that match the Command Centre (commercial, ops, nuclear, gate, finance, hr, eurazeo), permission levels, and the PA branch that reads open action counts and writes them to actuals.json actions_* fields.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-build">BUILD</span>
+          <span class="chip chip-sp">SP</span>
+          <span class="chip chip-pa">PA</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- STEP 5 — DECK & EMAIL                                 -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="sh">
+    <div class="sh-step">5</div>
+    <div class="sh-right">
+      <h2>Deck &amp; Email &mdash; Monday Digest &amp; Add-On Modules</h2>
+      <div class="sh-meta">
+        <span class="sh-time">~15 min scheduling &nbsp;+&nbsp; remaining add-on modules</span>
+        <span class="sh-owner">Éric</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">Schedule the Monday 7:00 AM email digest (reads actuals.json, generates HTML email to Jon). Then build the remaining add-on modules: Proposal Tracker, Quote-to-Cash Reconciliation, and Nuclear Outage Calendar — each has its own guide.</div>
+  <div class="files-grid">
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--pa)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Proposal_Tracker_Guide.docx</div>
+        <div class="fc-desc">Add-On 1. Guide for building the PA flow that reads Salesforce proposal pipeline (open, stalled, won, conversion rate) and writes to actuals.json proposals_* objects. Feeds the Proposal Health section of the Command Centre. 18 SOQL queries.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-build">BUILD</span>
+          <span class="chip chip-pa">PA</span>
+          <span class="chip chip-sf">SF</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--bc)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Quote_Cash_Recon_Guide.docx</div>
+        <div class="fc-desc">Add-On 2. Guide for the revenue reconciliation module — compares Salesforce Closed Won against Business Central invoiced amounts to surface mismatches. Writes to actuals.json recon_nuc and recon_nor objects. Requires Step 3 (BC connector) complete.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-build">BUILD</span>
+          <span class="chip chip-pa">PA</span>
+          <span class="chip chip-bc">BC</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--purp)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_Nuclear_Outage_Calendar_Guide.docx</div>
+        <div class="fc-desc">Add-On 3. Manual entry guide for OPG nuclear outage records in actuals.json (nuclear_outages[] array). This is a manual process — Jon Eustace and Olivier Marcotte update the records. Your job is to confirm the array structure is correct in actuals.json and the Command Centre Nuclear Outage Calendar section is reading it.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-sp">SP</span>
+          <span class="chip chip-type">Word</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- REFERENCE FILES                                        -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="sh">
+    <div class="sh-step">&#9432;</div>
+    <div class="sh-right">
+      <h2>Reference Files &mdash; Read-Only Context</h2>
+      <div class="sh-meta">
+        <span class="sh-owner">No build tasks — background reading</span>
+      </div>
+    </div>
+  </div>
+  <div class="note">These files are not build tasks — they give you context on how the system works and what the commercial team is doing with it. Useful if you need to understand why a field exists or what a section of the Command Centre is supposed to show.</div>
+  <div class="files-grid">
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--mid)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_GoLive_Roadmap.html</div>
+        <div class="fc-desc">The full go-live plan with all steps, owners, timings, and dependencies. Open this in a browser for the complete picture. This file management map is a companion to it.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-type">HTML</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="file-card">
+      <div class="fc-top" style="background:var(--mid)"></div>
+      <div class="fc-body">
+        <div class="fc-name">BU_Services_actuals_json_Reference.html</div>
+        <div class="fc-desc">Complete annotated field reference — every field in actuals.json with its type, who writes it, and what happens if it's wrong. Keep open in a browser tab while building the PA flow.</div>
+        <div class="fc-footer">
+          <span class="chip chip-read">READ</span>
+          <span class="chip chip-type">HTML</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- COMPLETE FILE LIST                                     -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="all-files">
+    <div class="af-hdr">
+      <h2>Complete File List</h2>
+      <span>All 17 files &nbsp;&middot;&nbsp; exact filenames for SharePoint upload</span>
+    </div>
+    <table class="af-table">
+      <thead>
+        <tr>
+          <th style="width:36px">#</th>
+          <th>Filename</th>
+          <th>Type</th>
+          <th>Step</th>
+          <th>Your action</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="af-step">1</td><td class="af-name">BU_Services_SharePoint_Setup_Guide.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">0</td><td class="af-actions"><span class="chip chip-read">READ</span></td><td class="af-desc">SharePoint folder setup instructions</td></tr>
+        <tr><td class="af-step">2</td><td class="af-name">BU_Services_Command_Centre.html</td><td><span class="chip chip-type">HTML</span></td><td class="af-step">0</td><td class="af-actions"><span class="chip chip-upload">UPLOAD</span></td><td class="af-desc">Live KPI dashboard — upload to SP root</td></tr>
+        <tr><td class="af-step">3</td><td class="af-name">BU_Services_Management_Hub.html</td><td><span class="chip chip-type">HTML</span></td><td class="af-step">0</td><td class="af-actions"><span class="chip chip-upload">UPLOAD</span></td><td class="af-desc">Org chart &amp; process portal — upload to SP root</td></tr>
+        <tr><td class="af-step">4</td><td class="af-name">actuals.json</td><td><span class="chip chip-type">JSON</span></td><td class="af-step">0</td><td class="af-actions"><span class="chip chip-upload">UPLOAD</span><span class="chip chip-edit">EDIT</span></td><td class="af-desc">135-field data bridge — upload &amp; confirm PA write access</td></tr>
+        <tr><td class="af-step">5</td><td class="af-name">BU_Services_Salesforce_Integration_Guide.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">1</td><td class="af-actions"><span class="chip chip-read">READ</span><span class="chip chip-build">BUILD</span></td><td class="af-desc">BU_Initiative__c picklist &amp; field creation spec</td></tr>
+        <tr><td class="af-step">6</td><td class="af-name">BU_Services_Salesforce_Backfill_Tracker.html</td><td><span class="chip chip-type">HTML</span></td><td class="af-step">1</td><td class="af-actions"><span class="chip chip-read">READ</span></td><td class="af-desc">Share with commercial team to audit 2026 opps</td></tr>
+        <tr><td class="af-step">7</td><td class="af-name">BU_Services_SF_Technician_Tracking.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">1</td><td class="af-actions"><span class="chip chip-read">READ</span><span class="chip chip-build">BUILD</span></td><td class="af-desc">Assigned_Technicians__c field setup</td></tr>
+        <tr><td class="af-step">8</td><td class="af-name">BU_Services_SF_Conference_Entry_Guide.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">1</td><td class="af-actions"><span class="chip chip-read">READ</span></td><td class="af-desc">Conference lead SF structure — read before Step 2b</td></tr>
+        <tr><td class="af-step">9</td><td class="af-name">BU_Services_Power_Automate_Build_Guide.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">2</td><td class="af-actions"><span class="chip chip-read">READ</span><span class="chip chip-build">BUILD</span></td><td class="af-desc">Sunday 7PM PA flow — SOQL queries, field mapping, full steps</td></tr>
+        <tr><td class="af-step">10</td><td class="af-name">BU_Services_actuals_json_Reference.html</td><td><span class="chip chip-type">HTML</span></td><td class="af-step">2</td><td class="af-actions"><span class="chip chip-read">READ</span></td><td class="af-desc">Field reference — which fields PA writes vs. manual</td></tr>
+        <tr><td class="af-step">11</td><td class="af-name">BU_Services_Conference_Cost_Integration_Guide.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">2b</td><td class="af-actions"><span class="chip chip-read">READ</span><span class="chip chip-build">BUILD</span></td><td class="af-desc">Conference cost PA flow &amp; Adaptive Card spec</td></tr>
+        <tr><td class="af-step">12</td><td class="af-name">BU_Services_Dynamics_QA_Workbook.xlsx</td><td><span class="chip chip-type">Excel</span></td><td class="af-step">3</td><td class="af-actions"><span class="chip chip-read">READ</span></td><td class="af-desc">Mathieu fills yellow cells — read after his answers</td></tr>
+        <tr><td class="af-step">13</td><td class="af-name">BU_Services_Dynamics_Integration_Guide.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">3</td><td class="af-actions"><span class="chip chip-read">READ</span><span class="chip chip-build">BUILD</span></td><td class="af-desc">Business Central connector build spec</td></tr>
+        <tr><td class="af-step">3</td><td class="af-file">BC_People_PA_Guide_v2.docx</td><td class="af-type">Word</td><td class="af-action"><span class="chip chip-read">READ</span> <span class="chip chip-build">BUILD</span></td><td class="af-desc">BC People PA flow P6/P7/P8 — People Dashboard data pipeline build spec</td></tr><tr><td class="af-step">14</td><td class="af-name">BU_Services_Meeting_Tracking_Setup.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">4</td><td class="af-actions"><span class="chip chip-read">READ</span><span class="chip chip-build">BUILD</span></td><td class="af-desc">SP Meeting Actions list schema &amp; PA branch setup</td></tr>
+        <tr><td class="af-step">15</td><td class="af-name">BU_Services_Proposal_Tracker_Guide.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">5</td><td class="af-actions"><span class="chip chip-read">READ</span><span class="chip chip-build">BUILD</span></td><td class="af-desc">Add-On 1 — proposal pipeline PA module</td></tr>
+        <tr><td class="af-step">16</td><td class="af-name">BU_Services_Quote_Cash_Recon_Guide.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">5</td><td class="af-actions"><span class="chip chip-read">READ</span><span class="chip chip-build">BUILD</span></td><td class="af-desc">Add-On 2 — SF vs. BC reconciliation module</td></tr>
+        <tr><td class="af-step">17</td><td class="af-name">BU_Services_Nuclear_Outage_Calendar_Guide.docx</td><td><span class="chip chip-type">Word</span></td><td class="af-step">5</td><td class="af-actions"><span class="chip chip-read">READ</span></td><td class="af-desc">Add-On 3 — confirm JSON structure, no PA build needed</td></tr>
+        <tr><td class="af-step">18</td><td class="af-name">BU_Services_GoLive_Roadmap.html</td><td><span class="chip chip-type">HTML</span></td><td class="af-step">REF</td><td class="af-actions"><span class="chip chip-read">READ</span></td><td class="af-desc">Full go-live plan — complete step detail &amp; timings</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div style="background:var(--navy);border-top:3px solid var(--sky);padding:1rem 2.5rem;text-align:center;font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.3)">
+  BU Services Go-Live File Map &nbsp;&middot;&nbsp; Éric Carmichael &nbsp;&middot;&nbsp; Ekoscan Integrity Group &nbsp;&middot;&nbsp; Confidential &mdash; Internal Use Only &nbsp;&middot;&nbsp; April 2026
+</div>
+
+</body>
+</html>

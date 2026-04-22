@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BU Services — Management Hub</title>
+<style>
+/* ── Reset & Base ──────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A1F5C;--blue:#1A5CA8;--sky:#00AEEF;--teal:#0D5050;
+  --green:#16A34A;--greenl:#DCFCE7;--amber:#C9860A;--amberl:#FEF3C7;
+  --red:#B91C1C;--redl:#FEE2E2;--purp:#6D28D9;--purpl:#EDE9FE;
+  --white:#FFFFFF;--lgrey:#F4F7FB;--body:#1A2A4A;--dgrey:#6678A0;
+  --dark:#1C2B4A;--mid:#2D4A7A;--mgrey:#D0DCF0;--mono:'Courier New',monospace;
+  --bg:#0A1425;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:#E8EDF5;min-height:100vh}
+
+/* ── Top Nav ───────────────────────────────────────────────────────── */
+
+
+
+.nav-links::-webkit-scrollbar{display:none}
+.nav-btn{color:var(--sky);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;text-decoration:none;flex-shrink:0;margin-left:.75rem}
+.nav-btn:hover{background:rgba(0,174,239,.22)}
+
+.nav-links a:hover,
+.nav-date{font-family:var(--mono);font-size:.65rem;color:var(--dgrey);margin-left:auto;white-space:nowrap}
+
+/* ── Page Header ───────────────────────────────────────────────────── */
+.page-hdr{background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 100%);
+  padding:2.5rem 2.5rem 2rem;border-bottom:3px solid var(--sky)}
+.page-hdr .eh{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--sky);margin-bottom:.5rem}
+.page-hdr h1{font-size:2.8rem;font-weight:900;color:#fff;margin-bottom:.3rem;line-height:1.1}
+.page-hdr .sub{font-size:1rem;color:#A8B8D0;margin-bottom:.4rem}
+.page-hdr .meta{font-size:.68rem;color:var(--dgrey)}
+
+/* ── Section wrapper ───────────────────────────────────────────────── */
+.section{padding:2rem 2.5rem;max-width:1440px;margin:0 auto}
+.section-hdr{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.25rem;
+  padding-bottom:.6rem;border-bottom:2px solid var(--sky)}
+.section-hdr h2{font-size:1.5rem;font-weight:800;color:#fff}
+.section-hdr .sh-sub{font-size:.78rem;color:var(--dgrey)}
+hr.divider{border:none;border-top:1px solid var(--mid);margin:1.5rem 0}
+
+/* ── ORG CHART ─────────────────────────────────────────────────────── */
+.org-wrap{overflow-x:auto;padding:1rem 0 1.5rem}
+.org-tree{display:flex;flex-direction:column;align-items:center;gap:0}
+
+/* EIG Level */
+.org-level{display:flex;justify-content:center;gap:1rem;position:relative;margin-bottom:0}
+.org-connector-v{width:2px;height:24px;background:var(--sky);margin:0 auto}
+.org-connector-h{height:2px;background:var(--sky);position:absolute;top:0}
+
+.org-card{background:var(--dark);border:1px solid var(--mid);border-radius:8px;
+  padding:.7rem .9rem;min-width:160px;max-width:190px;cursor:pointer;
+  transition:all .25s;position:relative;text-align:center}
+.org-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,174,239,.18)}
+.org-card.active{border-color:var(--sky);box-shadow:0 0 0 2px rgba(0,174,239,.3)}
+.org-card .oc-name{font-size:.82rem;font-weight:700;color:#fff;margin-bottom:.18rem}
+.org-card .oc-title{font-size:.65rem;color:var(--dgrey);line-height:1.4}
+.org-card .oc-emp{font-size:.58rem;color:var(--dgrey);margin-top:.3rem;font-style:italic}
+.org-card .oc-dot{width:8px;height:8px;border-radius:50%;margin:0 auto .35rem;display:block}
+
+/* Person detail panel */
+.person-panel{background:var(--dark);border:1px solid var(--mid);border-radius:10px;
+  margin:1rem 0 .5rem;padding:1.25rem 1.5rem;display:none}
+.person-panel.open{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.pp-hdr{display:flex;align-items:flex-start;gap:1.5rem;margin-bottom:1rem;
+  padding-bottom:.75rem;border-bottom:1px solid var(--mid)}
+.pp-hdr .pp-name{font-size:1.5rem;font-weight:800;color:#fff}
+.pp-hdr .pp-role{font-size:.82rem;color:var(--sky);margin-top:.15rem}
+.pp-hdr .pp-emp{font-size:.72rem;color:var(--dgrey);margin-top:.2rem;font-style:italic}
+.pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.pp-card{background:rgba(255,255,255,.03);border:1px solid var(--mid);
+  border-radius:6px;padding:.7rem .85rem}
+.pp-card .ppc-title{font-size:.63rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;margin-bottom:.5rem;padding-bottom:.3rem;
+  border-bottom:1px solid var(--mid)}
+.pp-card .ppc-item{font-size:.74rem;color:#A8B8D0;margin-bottom:.3rem;line-height:1.5}
+.pp-card .ppc-item strong{color:#fff}
+.pp-links{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
+.pp-link{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .65rem;
+  background:rgba(0,174,239,.1);border:1px solid rgba(0,174,239,.25);border-radius:4px;
+  font-size:.66rem;font-weight:600;color:var(--sky);text-decoration:none;cursor:pointer;
+  transition:all .2s}
+.pp-link:hover{background:rgba(0,174,239,.2)}
+
+/* ── WEEKLY FLOW ────────────────────────────────────────────────────── */
+.flow-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-bottom:1.5rem}
+.flow-day{background:var(--dark);border:1px solid var(--mid);border-radius:8px;overflow:hidden}
+.flow-day-hdr{padding:.4rem .5rem;font-size:.65rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;text-align:center}
+.flow-day-body{padding:.45rem .5rem}
+.flow-event{padding:.28rem .4rem;margin-bottom:.3rem;border-radius:4px;
+  font-size:.69rem;line-height:1.45;border-left:2px solid}
+.flow-event .fe-time{font-family:var(--mono);font-size:.6rem;color:var(--dgrey);display:block}
+.flow-event .fe-name{font-weight:600;color:#E8EDF5}
+.flow-event .fe-who{font-size:.62rem;color:var(--dgrey);margin-top:.1rem}
+.flow-system-note{background:rgba(0,174,239,.06);border:1px solid rgba(0,174,239,.15);
+  border-radius:6px;padding:.65rem .85rem;margin-bottom:1rem;
+  font-size:.76rem;color:#A8B8D0;line-height:1.7}
+.flow-system-note strong{color:var(--sky)}
+
+/* ── MEETINGS ────────────────────────────────────────────────────────── */
+
+
+
+
+
+.meeting-card .mc-meta-item strong{color:#A8B8D0}
+
+
+
+
+
+
+
+
+
+
+
+
+.agenda-item .ai-text strong{color:#fff}
+
+/* ── DOCUMENTS ────────────────────────────────────────────────────────── */
+.doc-groups{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}
+.doc-group{background:var(--dark);border:1px solid var(--mid);border-radius:8px;overflow:hidden}
+.doc-group .dg-hdr{padding:.55rem .8rem;font-size:.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.07em}
+.doc-group .dg-body{padding:.5rem .7rem}
+.doc-item{display:flex;align-items:flex-start;gap:.45rem;padding:.35rem .3rem;
+  border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .15s;
+  border-radius:4px}
+.doc-item:last-child{border-bottom:none}
+.doc-item:hover{background:rgba(255,255,255,.04)}
+.doc-item .di-icon{font-size:.85rem;flex-shrink:0;margin-top:.05rem}
+.doc-item .di-text{font-size:.71rem;line-height:1.4}
+.doc-item .di-name{color:#E8EDF5;font-weight:600}
+.doc-item .di-desc{color:var(--dgrey);font-size:.64rem;margin-top:.08rem}
+.status-pill{display:inline-block;font-size:.58rem;font-weight:700;padding:.08rem .35rem;
+  border-radius:3px;margin-left:.3rem;vertical-align:middle}
+
+
+/* ── RESPONSIVE ────────────────────────────────────────────────────────── */
+@media(max-width:1100px){
+  .doc-groups{grid-template-columns:repeat(2,1fr)}
+  
+  .pp-grid{grid-template-columns:repeat(2,1fr)}
+  }
+@media(max-width:700px){
+  .flow-grid{grid-template-columns:repeat(4,1fr)}
+  .doc-groups,.pp-grid{grid-template-columns:1fr}
+}
+
+.org-row-with-sides{display:flex;align-items:flex-start;justify-content:center;gap:0;margin-bottom:0}
+.org-side-spacer{display:flex;flex-direction:column;align-items:center;padding-top:0}
+.org-h-connector{width:28px;height:2px;border-top:2px dashed rgba(102,120,160,.55);margin-top:30px;flex-shrink:0}
+.org-card.side{border-color:rgba(102,120,160,.4);border-style:dashed;min-width:148px;opacity:.9}
+.org-card.side:hover{border-color:var(--sky);border-style:dashed;opacity:1}
+.side-note{font-size:.52rem;color:var(--dgrey);text-align:center;margin-top:.3rem;font-style:italic;max-width:148px;line-height:1.35;opacity:.8}
+.org-center-col{display:flex;flex-direction:column;align-items:center;gap:0}
+
+
+/* ══ PEOPLE TOOLS ══════════════════════════════════════════════════════ */
+
+/* Shared tool chrome */
+.pt-tabs{display:flex;gap:.6rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.pt-tab{
+  display:flex;flex-direction:column;align-items:flex-start;
+  padding:.65rem 1.1rem;min-width:160px;
+  background:rgba(255,255,255,.04);
+  border:1.5px solid rgba(255,255,255,.1);
+  border-radius:8px;cursor:pointer;
+  color:var(--dgrey);transition:all .18s;
+  font-family:inherit;text-align:left}
+.pt-tab:hover{
+  background:rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.22);
+  color:#E8EDF5;transform:translateY(-1px);
+  box-shadow:0 3px 12px rgba(0,0,0,.3)}
+.pt-tab.active{
+  background:rgba(0,174,239,.12);
+  border-color:rgba(0,174,239,.45);
+  color:var(--sky);
+  box-shadow:0 3px 12px rgba(0,174,239,.15)}
+.pt-tab-icon{font-size:1.1rem;margin-bottom:.2rem}
+.pt-tab-label{font-size:.82rem;font-weight:700;line-height:1.2;margin-bottom:.15rem}
+.pt-tab-sub{font-size:.65rem;font-weight:400;opacity:.6;line-height:1.3}
+.pt-panel{display:none}.pt-panel.active{display:block}
+
+/* ── SPRINT BOARD ─────────────────────────────────────────── */
+.sb-toolbar{display:flex;align-items:center;gap:.75rem;margin-bottom:1.1rem;flex-wrap:wrap}
+.sb-add-btn{display:inline-flex;align-items:center;gap:.35rem;
+  background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.3);
+  border-radius:6px;padding:.32rem .85rem;font-size:.75rem;font-weight:700;
+  color:var(--sky);cursor:pointer;font-family:inherit;transition:all .15s}
+.sb-add-btn:hover{background:rgba(0,174,239,.25)}
+.sb-filter{display:flex;gap:.35rem;flex-wrap:wrap}
+.sb-filter-btn{padding:.22rem .65rem;border-radius:4px;font-size:.68rem;font-weight:700;
+  cursor:pointer;border:1px solid transparent;font-family:inherit;transition:all .15s;
+  background:rgba(255,255,255,.05);color:var(--dgrey)}
+.sb-filter-btn.active, .sb-filter-btn:hover{border-color:var(--sky);color:var(--sky)}
+.sb-empty{color:var(--dgrey);font-size:.82rem;font-style:italic;padding:1rem 0}
+
+.sb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem}
+.sb-card{background:rgba(255,255,255,.04);border:1px solid var(--mid);border-radius:8px;
+  overflow:hidden;transition:border-color .15s}
+.sb-card:hover{border-color:rgba(255,255,255,.2)}
+.sb-card-hdr{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;
+  border-bottom:1px solid var(--mid)}
+.sb-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0;color:#fff}
+.sb-person-name{font-size:.8rem;font-weight:700;color:#E8EDF5;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-status{font-size:.6rem;font-weight:800;padding:.15rem .45rem;border-radius:3px;
+  letter-spacing:.5px;white-space:nowrap;text-transform:uppercase}
+.sb-status-on{background:rgba(22,163,74,.2);color:#6EE7B7}
+.sb-status-risk{background:rgba(201,134,10,.2);color:#FCD34D}
+.sb-status-blocked{background:rgba(185,28,28,.2);color:#FCA5A5}
+.sb-card-body{padding:.6rem .85rem}
+.sb-focus{font-size:.82rem;color:#E8EDF5;line-height:1.5;margin-bottom:.4rem}
+.sb-meta{display:flex;align-items:center;gap:.65rem;font-size:.68rem;color:var(--dgrey)}
+.sb-initiative-tag{font-size:.62rem;font-weight:700;padding:.1rem .4rem;border-radius:3px}
+.sb-due{font-size:.67rem;color:var(--dgrey)}
+.sb-due.overdue{color:#FCA5A5;font-weight:700}
+.sb-card-footer{padding:.4rem .85rem;border-top:1px solid var(--mid);
+  display:flex;gap:.4rem;background:rgba(0,0,0,.1)}
+.sb-edit-btn,.sb-del-btn{font-size:.65rem;color:var(--dgrey);background:none;
+  border:none;cursor:pointer;font-family:inherit;padding:.15rem .3rem;
+  border-radius:3px;transition:all .15s}
+.sb-edit-btn:hover{color:var(--sky);background:rgba(0,174,239,.1)}
+.sb-del-btn:hover{color:#FCA5A5;background:rgba(185,28,28,.1)}
+
+/* Sprint board modal */
+.pt-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
+  z-index:1000;align-items:center;justify-content:center}
+.pt-modal-overlay.open{display:flex}
+.pt-modal{background:#1C2B4A;border:1px solid var(--mid);border-radius:10px;
+  padding:1.5rem;width:min(480px,92vw);max-height:85vh;overflow-y:auto}
+.pt-modal h3{font-size:.95rem;font-weight:800;color:#fff;margin-bottom:1.1rem}
+.pt-field{margin-bottom:.85rem}
+.pt-field label{display:block;font-size:.68rem;font-weight:700;color:var(--dgrey);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:.3rem}
+.pt-field input,.pt-field select,.pt-field textarea{
+  width:100%;background:rgba(0,0,0,.3);border:1px solid var(--mid);
+  border-radius:5px;padding:.5rem .75rem;font-size:.83rem;color:#E8EDF5;
+  font-family:inherit;transition:border-color .15s;outline:none}
+.pt-field input:focus,.pt-field select:focus,.pt-field textarea:focus{
+  border-color:var(--sky)}
+.pt-field select option{background:#1C2B4A;color:#E8EDF5}
+.pt-field textarea{resize:vertical;min-height:70px}
+.pt-modal-btns{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1.1rem}
+.pt-save-btn{background:rgba(0,174,239,.2);border:1px solid rgba(0,174,239,.4);
+  border-radius:5px;padding:.38rem .9rem;font-size:.78rem;font-weight:700;
+  color:var(--sky);cursor:pointer;font-family:inherit;transition:all .15s}
+.pt-save-btn:hover{background:rgba(0,174,239,.35)}
+.pt-cancel-btn{background:rgba(255,255,255,.05);border:1px solid var(--mid);
+  border-radius:5px;padding:.38rem .9rem;font-size:.78rem;font-weight:700;
+  color:var(--dgrey);cursor:pointer;font-family:inherit;transition:all .15s}
+.pt-cancel-btn:hover{background:rgba(255,255,255,.1);color:#E8EDF5}
+
+/* ── 1:1 TRACKER ──────────────────────────────────────────── */
+.ot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
+.ot-card{background:rgba(255,255,255,.04);border:1px solid var(--mid);border-radius:8px;
+  overflow:hidden;cursor:pointer;transition:border-color .15s}
+.ot-card:hover{border-color:rgba(255,255,255,.2)}
+.ot-card-hdr{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;
+  border-bottom:1px solid var(--mid)}
+.ot-name{font-size:.82rem;font-weight:700;color:#E8EDF5;flex:1}
+.ot-overdue-badge{font-size:.6rem;font-weight:800;padding:.12rem .4rem;
+  border-radius:3px;background:rgba(185,28,28,.2);color:#FCA5A5;
+  text-transform:uppercase;letter-spacing:.5px}
+.ot-upcoming-badge{font-size:.6rem;font-weight:800;padding:.12rem .4rem;
+  border-radius:3px;background:rgba(201,134,10,.15);color:#FCD34D;
+  text-transform:uppercase;letter-spacing:.5px}
+.ot-ok-badge{font-size:.6rem;font-weight:800;padding:.12rem .4rem;
+  border-radius:3px;background:rgba(22,163,74,.15);color:#6EE7B7;
+  text-transform:uppercase;letter-spacing:.5px}
+.ot-card-body{padding:.6rem .85rem;font-size:.75rem;color:var(--dgrey);line-height:1.6}
+.ot-row{display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:.2rem}
+.ot-row-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;color:var(--dgrey)}
+.ot-row-val{font-size:.78rem;color:#A8B8D0;font-weight:500}
+.ot-note{font-size:.75rem;color:var(--dgrey);font-style:italic;
+  padding:.45rem .5rem;background:rgba(0,0,0,.15);border-radius:4px;
+  border-left:2px solid var(--mid);margin-top:.4rem;line-height:1.5}
+.ot-add-btn{display:inline-flex;align-items:center;gap:.35rem;
+  background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.3);
+  border-radius:6px;padding:.32rem .85rem;font-size:.75rem;font-weight:700;
+  color:var(--sky);cursor:pointer;font-family:inherit;transition:all .15s;
+  margin-bottom:1.1rem}
+.ot-add-btn:hover{background:rgba(0,174,239,.25)}
+
+/* ── ACTION ITEMS ─────────────────────────────────────────── */
+.ai-toolbar{display:flex;align-items:center;gap:.75rem;margin-bottom:1.1rem;flex-wrap:wrap}
+.ai-add-btn{display:inline-flex;align-items:center;gap:.35rem;
+  background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.3);
+  border-radius:6px;padding:.32rem .85rem;font-size:.75rem;font-weight:700;
+  color:var(--sky);cursor:pointer;font-family:inherit;transition:all .15s}
+.ai-add-btn:hover{background:rgba(0,174,239,.25)}
+.ai-filter-tabs{display:flex;gap:.35rem}
+.ai-ftab{padding:.22rem .65rem;border-radius:4px;font-size:.68rem;font-weight:700;
+  cursor:pointer;border:1px solid transparent;font-family:inherit;transition:all .15s;
+  background:rgba(255,255,255,.05);color:var(--dgrey)}
+.ai-ftab.active{border-color:var(--sky);color:var(--sky);background:rgba(0,174,239,.08)}
+.ai-table{width:100%;border-collapse:collapse}
+.ai-table th{padding:.45rem .75rem;text-align:left;font-size:.65rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.8px;color:var(--dgrey);
+  border-bottom:2px solid var(--mid)}
+.ai-table td{padding:.55rem .75rem;border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:.8rem;color:#D0D8E8;vertical-align:top}
+.ai-table tr:hover td{background:rgba(255,255,255,.02)}
+.ai-table tr.done td{opacity:.4}
+.ai-table tr.done .ai-action-text{text-decoration:line-through}
+.ai-source-tag{font-size:.62rem;font-weight:700;padding:.1rem .4rem;border-radius:3px;
+  white-space:nowrap}
+.ai-src-commercial{background:rgba(0,174,239,.15);color:var(--sky)}
+.ai-src-ops{background:rgba(109,40,217,.15);color:#C4B5FD}
+.ai-src-gate{background:rgba(201,134,10,.15);color:#FCD34D}
+.ai-src-finance{background:rgba(22,163,74,.15);color:#6EE7B7}
+.ai-src-other{background:rgba(255,255,255,.08);color:var(--dgrey)}
+.ai-due{font-size:.75rem;white-space:nowrap}
+.ai-due.overdue{color:#FCA5A5;font-weight:700}
+.ai-due.today{color:#FCD34D;font-weight:700}
+.ai-check-col{width:28px;text-align:center}
+.ai-check{appearance:none;-webkit-appearance:none;width:15px;height:15px;
+  border:1.5px solid rgba(255,255,255,.2);border-radius:3px;cursor:pointer;
+  position:relative;transition:all .15s;vertical-align:middle;background:transparent}
+.ai-check:checked{background:var(--sky);border-color:var(--sky)}
+.ai-check:checked::after{content:'✓';position:absolute;top:-2px;left:1px;
+  font-size:.6rem;color:var(--navy);font-weight:900}
+.ai-del-btn{background:none;border:none;color:var(--dgrey);cursor:pointer;
+  font-size:.72rem;padding:.1rem .3rem;border-radius:3px;transition:all .15s}
+.ai-del-btn:hover{color:#FCA5A5;background:rgba(185,28,28,.1)}
+.ai-overdue-count{font-size:.72rem;font-weight:700;color:#FCA5A5;margin-left:auto}
+.ai-empty{color:var(--dgrey);font-size:.82rem;font-style:italic;
+  padding:1rem 0;text-align:center}
+
+/* 1:1 and sprint badge in person panel */
+.pp-tool-badges{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+.pp-sprint-badge{font-size:.72rem;padding:.22rem .65rem;border-radius:4px;
+  font-weight:600;cursor:default}
+.pp-oneon-chip{font-size:.7rem;padding:.2rem .6rem;border-radius:4px;
+  background:rgba(255,255,255,.06);border:1px solid var(--mid);color:var(--dgrey)}
+
+
+.pt-howto{
+  background:rgba(0,174,239,.05);border:1px solid rgba(0,174,239,.15);
+  border-radius:7px;padding:.6rem .9rem;margin-bottom:1.1rem;
+  font-size:.8rem}
+.pt-howto summary{
+  cursor:pointer;font-weight:700;color:rgba(0,174,239,.7);
+  font-size:.75rem;user-select:none;list-style:none;
+  display:flex;align-items:center;gap:.4rem}
+.pt-howto summary::-webkit-details-marker{display:none}
+.pt-howto[open] summary{margin-bottom:.65rem;color:var(--sky)}
+.pt-howto-body p{color:#A8B8D0;font-size:.78rem;margin-bottom:.5rem;line-height:1.6}
+.pt-howto-body ul{padding-left:1.1rem;color:#A8B8D0}
+.pt-howto-body li{font-size:.76rem;margin-bottom:.3rem;line-height:1.55}
+.pt-howto-body li strong{color:#E8EDF5}
+.pt-howto-body li em{color:var(--sky);font-style:normal}
+
+/* ── SYSTEM BAR (fixed, below topnav) ──────────────────────────── */
+.sysbar{
+  position:sticky;
+  z-index:99;
+  background:rgba(5,12,25,.98);
+  border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;
+  padding:0 1.25rem;
+  gap:.5rem;
+  height:36px;
+  backdrop-filter:blur(8px);
+}
+.sysbar-label{
+  font-size:.6rem;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:rgba(255,255,255,.2);
+  margin-right:.35rem;white-space:nowrap;
+  font-family:'Courier New',monospace}
+.sysbtn{
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.22rem .7rem;border-radius:20px;
+  font-size:.7rem;font-weight:700;
+  text-decoration:none;cursor:pointer;
+  border:1.5px solid;transition:all .18s;
+  white-space:nowrap;font-family:inherit;
+  background:none}
+.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7)}
+.sysbtn-hub:hover,.sysbtn-hub.active{
+  background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);
+  color:#00AEEF;box-shadow:0 0 8px rgba(0,174,239,.2)}
+.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7)}
+.sysbtn-people:hover,.sysbtn-people.active{
+  background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);
+  color:#FCD34D;box-shadow:0 0 8px rgba(201,134,10,.2)}
+.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7)}
+.sysbtn-meetings:hover,.sysbtn-meetings.active{
+  background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);
+  color:#6EE7B7;box-shadow:0 0 8px rgba(22,163,74,.2)}
+.sysbtn-cc{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.4)}
+.sysbtn-cc:hover,.sysbtn-cc.active{
+  background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);
+  color:rgba(255,255,255,.85)}
+.sysbtn.current{
+  cursor:default;pointer-events:none}
+.sysbtn-hub.current{
+  background:rgba(0,174,239,.12);border-color:rgba(0,174,239,.5);
+  color:#00AEEF;opacity:1}
+.sysbtn-people.current{
+  background:rgba(201,134,10,.12);border-color:rgba(201,134,10,.5);
+  color:#FCD34D;opacity:1}
+.sysbtn-meetings.current{
+  background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.5);
+  color:#6EE7B7;opacity:1}
+.sysbtn-cc.current{
+  background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);
+  color:rgba(255,255,255,.7);opacity:1}
+
+/* ── UNIFIED TOPNAV ─────────────────────────────────────────────────── */
+.unav{
+  position:sticky;top:0;z-index:100;
+  height:48px;
+  background:rgba(8,16,32,.98);
+  border-bottom:1px solid rgba(0,174,239,.3);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;
+  padding:0 1.5rem;
+  gap:0;
+}
+.unav-brand{
+  display:flex;align-items:baseline;gap:.5rem;
+  flex-shrink:0;margin-right:1.25rem}
+.unav-brand-name{
+  font-size:.82rem;font-weight:800;
+  color:#fff;letter-spacing:-.01em;
+  white-space:nowrap}
+.unav-brand-sep{
+  color:rgba(255,255,255,.18);font-size:.75rem;margin:0 .1rem}
+.unav-brand-page{
+  font-size:.72rem;font-weight:600;
+  color:var(--sky,#00AEEF);
+  white-space:nowrap}
+.unav-links{
+  display:flex;align-items:center;gap:0;
+  flex:1;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none}
+.unav-links::-webkit-scrollbar{display:none}
+.unav-links a{
+  padding:.25rem .7rem;
+  font-size:.72rem;font-weight:600;
+  color:rgba(255,255,255,.45);
+  text-decoration:none;white-space:nowrap;
+  border-radius:4px;transition:all .15s;
+  cursor:pointer;border:none;background:none;
+  font-family:inherit}
+.unav-links a:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.06)}
+.unav-links a.active{color:#fff;background:rgba(0,174,239,.15)}
+.unav-date{
+  font-size:.65rem;color:rgba(255,255,255,.25);
+  font-family:'Courier New',monospace;
+  white-space:nowrap;margin-left:.75rem;flex-shrink:0}
+
+/* ── CRM PIPELINE STRIP ────────────────────────────────────────── */
+.crm-strip{
+  display:flex;align-items:center;gap:1.5rem;
+  background:rgba(0,174,239,.06);
+  border:1px solid rgba(0,174,239,.15);
+  border-radius:8px;padding:.6rem 1.1rem;
+  margin:0 2.5rem 0;
+  flex-wrap:wrap}
+.crm-strip-item{display:flex;flex-direction:column;gap:.1rem}
+.crm-strip-label{font-size:.58rem;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--dgrey);font-family:var(--mono)}
+.crm-strip-value{font-size:.9rem;font-weight:800;color:#fff;line-height:1}
+.crm-strip-sub{font-size:.65rem;color:var(--dgrey)}
+.crm-strip-divider{width:1px;height:32px;background:var(--mid);flex-shrink:0}
+.crm-strip-link{
+  margin-left:auto;display:inline-flex;align-items:center;gap:.35rem;
+  font-size:.7rem;font-weight:700;color:rgba(0,174,239,.7);
+  text-decoration:none;padding:.25rem .65rem;border-radius:4px;
+  border:1px solid rgba(0,174,239,.2);transition:all .15s;white-space:nowrap}
+.crm-strip-link:hover{background:rgba(0,174,239,.1);border-color:rgba(0,174,239,.4);color:#00AEEF}
+.sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5)}
+.sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF}
+</style>
+</head>
+<body>
+
+<!-- ── TOP NAV ──────────────────────────────────────────────────────── -->
+<nav class="unav"><div class="unav-brand"><span class="unav-brand-name">BU Services</span><span class="unav-brand-sep">·</span><span class="unav-brand-page">Management Hub</span></div><div class="unav-links"><a href="#org">Org &amp; Roles</a><a href="#flow">Weekly Flow</a><a href="#people-tools">People Tools</a><a href="#documents">Documents</a></div><div class="unav-date" id="nav-date"></div></nav>
+<div class="sysbar"><span class="sysbar-label">BU Services</span><span class="sysbtn sysbtn-hub current">🏠 Hub</span><a class="sysbtn sysbtn-people" href="BU_Services_People_Dashboard.html" target="buservices">👥 People</a><a class="sysbtn sysbtn-meetings" href="BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a><a class="sysbtn sysbtn-cc" href="BU_Services_Command_Centre.html" target="buservices">📊 Command Centre</a><a class="sysbtn sysbtn-crm" href="BU_Services_CRM.html" target="buservices">🗂 CRM</a></div>
+<div id="crm-strip-wrap" style="display:none;padding:.75rem 0 0">
+  <div class="crm-strip" id="crm-strip">
+    <div class="crm-strip-item">
+      <span class="crm-strip-label">Open Pipeline</span>
+      <span class="crm-strip-value" id="cs-pipeline">—</span>
+      <span class="crm-strip-sub" id="cs-pipeline-sub"></span>
+    </div>
+    <div class="crm-strip-divider"></div>
+    <div class="crm-strip-item">
+      <span class="crm-strip-label">Won This Month</span>
+      <span class="crm-strip-value" id="cs-won">—</span>
+      <span class="crm-strip-sub" id="cs-won-sub"></span>
+    </div>
+    <div class="crm-strip-divider"></div>
+    <div class="crm-strip-item">
+      <span class="crm-strip-label">Open Leads</span>
+      <span class="crm-strip-value" id="cs-leads">—</span>
+    </div>
+    <div class="crm-strip-divider"></div>
+    <div class="crm-strip-item">
+      <span class="crm-strip-label">Stale Deals</span>
+      <span class="crm-strip-value" id="cs-stale" style="color:#FCA5A5">—</span>
+    </div>
+    <a class="crm-strip-link" href="BU_Services_CRM.html" target="buservices">🗂 Open CRM →</a>
+  </div>
+</div>
+
+
+<!-- ── PAGE HEADER ──────────────────────────────────────────────────── -->
+<div class="page-hdr">
+  <div class="eh">Ekoscan Integrity Group — BU Services</div>
+  <h1>Management Hub</h1>
+  <div class="sub">Org structure · Weekly rhythm · Meetings · System status · Documents — one page</div>
+  <div class="meta">Jon Eustace, CEO North America · Confidential · 2026</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 1 — ORG & ROLES                                           -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="org">
+  <div class="section-hdr">
+    <h2>Org &amp; Roles</h2>
+    <span class="sh-sub">Click any name to expand mandate, initiatives, and document links</span>
+  </div>
+
+  <!-- EIG Level -->
+  <div style="text-align:center;margin-bottom:.5rem">
+    <span style="font-size:.62rem;color:var(--dgrey);font-style:italic;
+      background:rgba(0,174,239,.08);padding:.2rem .7rem;border-radius:10px">
+      Ekoscan Integrity Group Level
+    </span>
+  </div>
+  <div class="org-row-with-sides">
+    <div class="org-side-spacer">
+      <div class="org-card side" onclick="togglePerson('olivier')">
+        <span class="oc-dot" style="background:var(--blue)"></span>
+        <div class="oc-name">Olivier Marcotte</div>
+        <div class="oc-title">CRO &middot; Aecon &middot; SMR &middot; Refurb</div>
+        <div class="oc-emp">Nucleom &middot; BU Services CRO</div>
+      </div>
+      <div class="side-note">BU Services CRO<br>Peer &mdash; works with Jon</div>
+    </div>
+    <div class="org-h-connector"></div>
+    <div class="org-center-col">
+      <div class="org-card" onclick="togglePerson('jon')" style="border-color:var(--sky)">
+        <span class="oc-dot" style="background:var(--sky)"></span>
+        <div class="oc-name">Jon Eustace</div>
+        <div class="oc-title">CEO North America<br>Ekoscan Integrity Group</div>
+      </div>
+      <div class="org-connector-v"></div>
+    </div>
+    <div class="org-h-connector"></div>
+    <div class="org-side-spacer" style="display:flex;flex-direction:column;gap:.5rem">
+      <div style="display:flex;gap:.6rem;align-items:flex-start;flex-wrap:wrap">
+        <div>
+          <div class="org-card side" onclick="togglePerson('jeremy')" style="border-color:rgba(0,174,239,.35)">
+            <span class="oc-dot" style="background:var(--sky)"></span>
+            <div class="oc-name">Jeremy Irwin</div>
+            <div class="oc-title">Director of Finance, EIG NA</div>
+            <div class="oc-emp">EIG</div>
+          </div>
+        </div>
+        <div>
+          <div class="org-card side" onclick="togglePerson('renee')" style="border-color:rgba(0,174,239,.35)">
+            <span class="oc-dot" style="background:var(--sky)"></span>
+            <div class="oc-name">Ren&eacute;e Lachance</div>
+            <div class="oc-title">Sr. Director, Finance &amp; Controller</div>
+            <div class="oc-emp">Nucleom</div>
+          </div>
+        </div>
+      </div>
+      <div class="side-note">EIG NA Finance &mdash; Jeremy (EIG group) &amp; Ren&eacute;e (Nucleom BC) work as a pair alongside Jon</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:.3rem">
+    <span style="font-size:.62rem;color:var(--dgrey);font-style:italic;
+      background:rgba(26,92,168,.1);padding:.2rem .7rem;border-radius:10px">
+      Reports to Jon Eustace
+    </span>
+  </div>
+  <div class="org-level" style="justify-content:center;margin-bottom:0">
+    <div class="org-card" onclick="togglePerson('mathieu')">
+      <span class="oc-dot" style="background:var(--blue)"></span>
+      <div class="oc-name">Mathieu Beauchesne</div>
+      <div class="oc-title">EVP &middot; Powerline &middot; Cigre</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+  </div>
+  <div class="org-connector-v"></div>
+
+  <div style="text-align:center;margin-bottom:.3rem">
+    <span style="font-size:.62rem;color:var(--dgrey);font-style:italic;
+      background:rgba(26,92,168,.08);padding:.2rem .7rem;border-radius:10px">
+      Reports to Mathieu Beauchesne
+    </span>
+  </div>
+  <div class="org-level" style="gap:.6rem;justify-content:center;margin-bottom:0">
+    <div class="org-card" onclick="togglePerson('alex')">
+      <span class="oc-dot" style="background:var(--blue)"></span>
+      <div class="oc-name">Alex Cyr</div>
+      <div class="oc-title">Sr. Operations Director</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+    <div class="org-card" onclick="togglePerson('francis')">
+      <span class="oc-dot" style="background:var(--purp)"></span>
+      <div class="oc-name">Francis Boudreault-Leclerc</div>
+      <div class="oc-title">Engineering &amp; Technical Manager</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+  </div>
+  <div class="org-connector-v"></div>
+
+  <div style="text-align:center;margin-bottom:.3rem">
+    <span style="font-size:.62rem;color:var(--dgrey);font-style:italic;
+      background:rgba(10,31,92,.2);padding:.2rem .7rem;border-radius:10px">
+      Reports to Alex Cyr
+    </span>
+  </div>
+  <div class="org-level" style="gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem">
+    <div class="org-card" onclick="togglePerson('eric_r')">
+      <span class="oc-dot" style="background:var(--blue)"></span>
+      <div class="oc-name">Eric Rodrigue</div>
+      <div class="oc-title">Ops Director &mdash; Quebec</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+    <div class="org-card" onclick="togglePerson('joel_dj')">
+      <span class="oc-dot" style="background:var(--teal)"></span>
+      <div class="oc-name">Joel Djordjevic</div>
+      <div class="oc-title">Ops Director &mdash; Central</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+    <div class="org-card" onclick="togglePerson('keith')">
+      <span class="oc-dot" style="background:var(--green)"></span>
+      <div class="oc-name">Keith Reichenbach</div>
+      <div class="oc-title">Ops Director &mdash; Western</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+    <div class="org-card" onclick="togglePerson('brook')">
+      <span class="oc-dot" style="background:var(--amber)"></span>
+      <div class="oc-name">Brook Althouse</div>
+      <div class="oc-title">Northern Ops Manager</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+    <div class="org-card" onclick="togglePerson('louisp')">
+      <span class="oc-dot" style="background:var(--purp)"></span>
+      <div class="oc-name">Louis-Pier Th&#233;berge</div>
+      <div class="oc-title">Ops Director &mdash; Nuclear Sector<br>Program Lead, New Build &amp; Refurb</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+    <div class="org-card" onclick="togglePerson('jason')">
+      <span class="oc-dot" style="background:var(--teal)"></span>
+      <div class="oc-name">Jason Borza</div>
+      <div class="oc-title">Ops Director &mdash; Nortech</div>
+      <div class="oc-emp">Nortech</div>
+    </div>
+    <div class="org-card" onclick="togglePerson('rick')">
+      <span class="oc-dot" style="background:var(--green)"></span>
+      <div class="oc-name">Rick Carlton</div>
+      <div class="oc-title">Pipeline Integrity Lead &middot; Edmonton</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:.3rem">
+    <span style="font-size:.62rem;color:var(--dgrey);font-style:italic;
+      background:rgba(26,92,168,.12);border:1px dashed rgba(102,120,160,.4);
+      padding:.2rem .7rem;border-radius:10px">
+      Commercial Team &mdash; reports to Olivier Marcotte
+    </span>
+  </div>
+  <div class="org-level" style="gap:.6rem;margin-bottom:1.5rem">
+    <div class="org-card" onclick="togglePerson('max')">
+      <span class="oc-dot" style="background:var(--teal)"></span>
+      <div class="oc-name">Emmanuel Aggrey</div>
+      <div class="oc-title">Commercial Director West</div>
+      <div class="oc-emp">Nucleom &middot; Nortech West commercial</div>
+    </div>
+    <div class="org-card" onclick="togglePerson('vinoth')">
+      <span class="oc-dot" style="background:var(--teal)"></span>
+      <div class="oc-name">Vinoth Tharma</div>
+      <div class="oc-title">Commercial Director East</div>
+      <div class="oc-emp">Nucleom</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:.3rem">
+    <span style="font-size:.62rem;color:var(--dgrey);font-style:italic;
+      background:rgba(22,163,74,.1);padding:.2rem .7rem;border-radius:10px">
+      Pipeline Integrity Group &mdash; reports to Rick Carlton
+    </span>
+  </div>
+  <div class="org-level" style="gap:.6rem">
+    <div class="org-card" onclick="togglePerson('joel_c')">
+      <span class="oc-dot" style="background:var(--green)"></span>
+      <div class="oc-name">Joel Carlton</div>
+      <div class="oc-title">PI Operations Manager</div>
+      <div class="oc-emp">Nortech</div>
+    </div>
+  </div>
+
+  <!-- Éric Carmichael — Commercial Systems (side card) -->
+  <div style="text-align:center;margin-top:1.5rem;margin-bottom:.3rem">
+    <span style="font-size:.62rem;color:var(--dgrey);font-style:italic;
+      background:rgba(0,174,239,.06);border:1px dashed rgba(102,120,160,.3);
+      padding:.2rem .7rem;border-radius:10px">
+      Commercial Systems &mdash; dotted line to Jon Eustace
+    </span>
+  </div>
+  <div style="display:flex;justify-content:center">
+    <div style="display:flex;flex-direction:column;align-items:center">
+      <div class="org-card side" onclick="togglePerson('eric_c')" style="border-color:rgba(0,174,239,.35)">
+        <span class="oc-dot" style="background:var(--sky)"></span>
+        <div class="oc-name">Éric Carmichael</div>
+        <div class="oc-title">Commercial Systems Manager</div>
+        <div class="oc-emp">Nucleom</div>
+      </div>
+      <div class="side-note">Go-live build &middot; PA flows &middot; SF<br>Dotted line &mdash; reports to Jon</div>
+    </div>
+  </div>
+
+  <!-- Person detail panel — single shared panel -->
+  <div class="person-panel" id="person-panel"></div>
+</div>
+
+<hr class="divider" style="margin:0">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2 — WEEKLY FLOW                                           -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="flow">
+  <div class="section-hdr">
+    <h2>Weekly Flow</h2>
+    <span class="sh-sub">How the whole team moves together — Sunday to Sunday</span>
+  </div>
+
+  <div class="flow-system-note">
+    <strong>The automated backbone:</strong> Every Sunday at 7PM ET the Power Automate flow queries Salesforce and writes results to <strong>actuals.json</strong> on SharePoint.
+    Every Monday at 7AM ET the digest email goes to the commercial leadership group.
+    The Command Centre reads actuals.json live on every page load.
+    Everything else in this rhythm feeds or reads from that backbone.
+  </div>
+
+  <div class="flow-grid" id="flow-grid"></div>
+
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem">
+    <span style="font-size:.68rem;color:var(--dgrey)">Colour key:</span>
+    <span class="status-pill" style="background:rgba(0,174,239,.15);color:var(--sky)">System automated</span>
+    <span class="status-pill" style="background:rgba(26,92,168,.15);color:#7EB4FF">Commercial</span>
+    <span class="status-pill" style="background:rgba(10,31,92,.2);color:#99B8E0">Ops</span>
+    <span class="status-pill" style="background:rgba(22,163,74,.15);color:var(--green)">PI Team</span>
+    <span class="status-pill" style="background:rgba(109,40,217,.15);color:#C4B5FD">Nuclear</span>
+    <span class="status-pill" style="background:rgba(201,134,10,.15);color:var(--amber)">Finance</span>
+  </div>
+</div>
+
+<hr class="divider" style="margin:0">
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3 — MEETINGS                                              -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION — PEOPLE TOOLS                                            -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="people-tools">
+  <div class="section-hdr">
+    <h2>People Tools</h2>
+    <span class="sh-sub">Sprint board &nbsp;·&nbsp; 1:1 tracker &nbsp;·&nbsp; Action items</span>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="pt-tabs">
+    <button class="pt-tab active" onclick="switchPTTab('sprint',this)">
+      <span class="pt-tab-icon">🎯</span>
+      <span class="pt-tab-label">Sprint Board</span>
+      <span class="pt-tab-sub">What each person is working on</span>
+    </button>
+    <button class="pt-tab" onclick="switchPTTab('oneon',this)">
+      <span class="pt-tab-icon">💬</span>
+      <span class="pt-tab-label">1:1 Tracker</span>
+      <span class="pt-tab-sub">Last meeting · next date · notes</span>
+    </button>
+    <button class="pt-tab" onclick="switchPTTab('actions',this)">
+      <span class="pt-tab-icon">✅</span>
+      <span class="pt-tab-label">Action Items</span>
+      <span class="pt-tab-sub">Open items from all meetings</span>
+    </button>
+  </div>
+
+  <!-- ── SPRINT BOARD ───────────────────────────────────────────────── -->
+  <div class="pt-panel active" id="pt-sprint">
+
+  <details class="pt-howto">
+    <summary>ℹ How to use Sprint Board</summary>
+    <div class="pt-howto-body">
+      <p>Track what each person on the team is focused on this sprint. One item per person — adding a new item for someone replaces their previous one.</p>
+      <ul>
+        <li><strong>+ Add Sprint Item</strong> — pick the person, describe their current focus in plain language, set status and optionally an initiative tag and review date.</li>
+        <li><strong>Status</strong> — update to <em>At Risk</em> or <em>Blocked</em> the moment you learn of an issue. Use the filter buttons to quickly surface anyone not On Track.</li>
+        <li><strong>Review date</strong> — use the next Commercial or Ops meeting date. Overdue items highlight automatically.</li>
+        <li><strong>Personal use</strong> — this data lives in your browser only. Nobody else sees it.</li>
+      </ul>
+    </div>
+  </details>
+    <div class="sb-toolbar">
+      <button class="sb-add-btn" onclick="openSBModal()">+ Add Sprint Item</button>
+      <div class="sb-filter" id="sb-filter">
+        <button class="sb-filter-btn active" data-filter="all" onclick="sbFilter('all',this)">All</button>
+        <button class="sb-filter-btn" data-filter="on" onclick="sbFilter('on',this)">On Track</button>
+        <button class="sb-filter-btn" data-filter="risk" onclick="sbFilter('risk',this)">At Risk</button>
+        <button class="sb-filter-btn" data-filter="blocked" onclick="sbFilter('blocked',this)">Blocked</button>
+      </div>
+    </div>
+    <div class="sb-grid" id="sb-grid"></div>
+  </div>
+
+  <!-- ── 1:1 TRACKER ───────────────────────────────────────────────── -->
+  <div class="pt-panel" id="pt-oneon">
+
+  <details class="pt-howto">
+    <summary>ℹ How to use the 1:1 Tracker</summary>
+    <div class="pt-howto-body">
+      <p>This is <strong>Jon's personal log</strong> — not a shared team tool. It tracks Jon's own 1:1 conversations with each person on the commercial and ops team. The rest of the team does not see this.</p>
+      <ul>
+        <li><strong>Logging a 1:1</strong> — click any person's card to open the log form. Enter the date, schedule the next one, rate engagement, and add a one-line observation to carry forward.</li>
+        <li><strong>One record per person</strong> — each save replaces the previous record. The tracker shows the most recent conversation only, not a full history.</li>
+        <li><strong>Engagement level</strong> — use 🔴 Low to flag anyone showing early R-03 (retention) signals. Low-engagement cards are badged in red.</li>
+        <li><strong>Overdue</strong> — cards badge as Overdue when the next scheduled date has passed, and <em>This Week</em> when it's within 7 days.</li>
+        <li><strong>Not logged</strong> — anyone with no 1:1 record yet shows a grey "Not logged" badge — useful to spot gaps when onboarding new team members.</li>
+      </ul>
+    </div>
+  </details>
+    <button class="ot-add-btn" onclick="openOTModal()">+ Log 1:1</button>
+    <div class="ot-grid" id="ot-grid"></div>
+  </div>
+
+  <!-- ── ACTION ITEMS ──────────────────────────────────────────────── -->
+  <div class="pt-panel" id="pt-actions">
+
+  <details class="pt-howto">
+    <summary>ℹ How to use Action Items</summary>
+    <div class="pt-howto-body">
+      <p>A rolling list of actions from Commercial Meeting, Ops Meeting, Gate Reviews, and Financial Reviews — in one place, not lost in email.</p>
+      <ul>
+        <li><strong>+ Add Action</strong> — describe the action, assign an owner, tag the source meeting, and set a due date.</li>
+        <li><strong>Checking off</strong> — click the checkbox to mark an item done. It fades and strikes through. Switch to the <em>Done</em> filter to review what's been completed.</li>
+        <li><strong>Overdue count</strong> — shown in red beside the filter tabs. Anything past its due date highlights automatically.</li>
+        <li><strong>Source tags</strong> — colour-coded by meeting type so you can see at a glance which meeting generated the most open actions.</li>
+        <li><strong>Personal use</strong> — this is Jon's list only. It lives in the browser and is not shared.</li>
+      </ul>
+    </div>
+  </details>
+    <div class="ai-toolbar">
+      <button class="ai-add-btn" onclick="openAIModal()">+ Add Action</button>
+      <div class="ai-filter-tabs">
+        <button class="ai-ftab active" data-filter="open" onclick="aiFilter('open',this)">Open</button>
+        <button class="ai-ftab" data-filter="done" onclick="aiFilter('done',this)">Done</button>
+        <button class="ai-ftab" data-filter="all" onclick="aiFilter('all',this)">All</button>
+      </div>
+      <span class="ai-overdue-count" id="ai-overdue-count"></span>
+    </div>
+    <table class="ai-table">
+      <thead>
+        <tr>
+          <th class="ai-check-col"></th>
+          <th>Action</th>
+          <th>Owner</th>
+          <th>Source</th>
+          <th>Due</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="ai-tbody"></tbody>
+    </table>
+    <div class="ai-empty" id="ai-empty" style="display:none">No action items.</div>
+  </div>
+</div>
+
+<hr class="divider" style="margin:0">
+
+<!-- Sprint Board Modal -->
+<div class="pt-modal-overlay" id="sb-modal">
+  <div class="pt-modal">
+    <h3 id="sb-modal-title">Add Sprint Item</h3>
+    <div class="pt-field">
+      <label>Person</label>
+      <select id="sb-person"></select>
+    </div>
+    <div class="pt-field">
+      <label>Current Focus</label>
+      <textarea id="sb-focus" rows="2" placeholder="What are they working on this sprint?"></textarea>
+    </div>
+    <div class="pt-field">
+      <label>Status</label>
+      <select id="sb-status-sel">
+        <option value="on">✅ On Track</option>
+        <option value="risk">⚠️ At Risk</option>
+        <option value="blocked">🔴 Blocked</option>
+      </select>
+    </div>
+    <div class="pt-field">
+      <label>Initiative</label>
+      <select id="sb-initiative">
+        <option value="">— None —</option>
+        <option value="Mining NDT">Mining NDT</option>
+        <option value="Pipeline DA">Pipeline DA</option>
+        <option value="Nuclear/OPG">Nuclear/OPG</option>
+        <option value="Powerline">Powerline</option>
+        <option value="3X Composite">3X Composite</option>
+        <option value="Finance">Finance</option>
+        <option value="Operations">Operations</option>
+        <option value="People">People</option>
+      </select>
+    </div>
+    <div class="pt-field">
+      <label>Due / Review Date</label>
+      <input type="date" id="sb-due">
+    </div>
+    <div class="pt-modal-btns">
+      <button class="pt-cancel-btn" onclick="closeSBModal()">Cancel</button>
+      <button class="pt-save-btn" onclick="saveSBItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- 1:1 Modal -->
+<div class="pt-modal-overlay" id="ot-modal">
+  <div class="pt-modal">
+    <h3 id="ot-modal-title">Log 1:1</h3>
+    <div class="pt-field">
+      <label>Person</label>
+      <select id="ot-person"></select>
+    </div>
+    <div class="pt-field">
+      <label>Date of 1:1</label>
+      <input type="date" id="ot-date">
+    </div>
+    <div class="pt-field">
+      <label>Next 1:1 (scheduled)</label>
+      <input type="date" id="ot-next">
+    </div>
+    <div class="pt-field">
+      <label>Engagement</label>
+      <select id="ot-engagement">
+        <option value="high">🟢 High</option>
+        <option value="medium">🟡 Medium</option>
+        <option value="low">🔴 Low — flag</option>
+      </select>
+    </div>
+    <div class="pt-field">
+      <label>Key note from this conversation</label>
+      <textarea id="ot-note" rows="3" placeholder="One or two observations — anything to carry forward…"></textarea>
+    </div>
+    <div class="pt-modal-btns">
+      <button class="pt-cancel-btn" onclick="closeOTModal()">Cancel</button>
+      <button class="pt-save-btn" onclick="saveOTItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Action Item Modal -->
+<div class="pt-modal-overlay" id="ai-modal">
+  <div class="pt-modal">
+    <h3 id="ai-modal-title">Add Action Item</h3>
+    <div class="pt-field">
+      <label>Action</label>
+      <textarea id="ai-action" rows="2" placeholder="What needs to happen?"></textarea>
+    </div>
+    <div class="pt-field">
+      <label>Owner</label>
+      <select id="ai-owner"></select>
+    </div>
+    <div class="pt-field">
+      <label>Source Meeting</label>
+      <select id="ai-source">
+        <option value="commercial">Commercial Meeting</option>
+        <option value="ops">Ops Meeting</option>
+        <option value="gate">Gate Review</option>
+        <option value="finance">Financial Review</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="pt-field">
+      <label>Due Date</label>
+      <input type="date" id="ai-due">
+    </div>
+    <div class="pt-modal-btns">
+      <button class="pt-cancel-btn" onclick="closeAIModal()">Cancel</button>
+      <button class="pt-save-btn" onclick="saveAIItem()">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 5 — DOCUMENTS                                             -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="section" id="documents">
+  <div class="section-hdr">
+    <h2>Document Library</h2>
+    <span class="sh-sub">All BU Services management system files — upload to SharePoint BU Services folder</span>
+  </div>
+  <div class="doc-groups" id="doc-groups"></div>
+  <div style="margin-top:.75rem;font-size:.68rem;color:var(--dgrey)">
+    All files live in the same SharePoint folder. Open HTML files in any browser. Open .docx files in Word or Word Online.
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<!-- DATA & LOGIC                                                             -->
+<!-- ════════════════════════════════════════════════════════════════════════ -->
+<script>
+// ── Date ─────────────────────────────────────────────────────────────────────
+document.getElementById('nav-date').textContent =
+  new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+
+// ── Nav active state ─────────────────────────────────────────────────────────
+const navLinks = document.querySelectorAll('.unav-links a');
+const sections = ['org','flow','meetings','documents'].map(id=>document.getElementById(id));
+window.addEventListener('scroll',()=>{
+  const y = window.scrollY + 92;
+  let active = 0;
+  sections.forEach((s,i)=>{ if(s && s.offsetTop <= y) active=i; });
+  navLinks.forEach((l,i)=>l.classList.toggle('active',i===active));
+},{passive:true});
+
+// ── Person Data ───────────────────────────────────────────────────────────────
+var PEOPLE = {
+  jon: {
+    name:'Jon Eustace', color:'var(--sky)',
+    role:'CEO North America · Ekoscan Integrity Group',
+    employer:'Ekoscan Integrity Group',
+    mandate:'Responsible for BU Services commercial and operational performance. Ultimate signing authority and oversight of all NA parent company activities across Nucleom and Nortech. Eurazeo relationship owner.',
+    initiatives:['BU Services P&L — $92.8M 2030 target','Eurazeo reporting and gate decisions','Strategic partnerships and M&A oversight','OPG executive relationship (supports Vinoth on MSA track)'],
+    rhythm:['Monday: Review KPI email + Commercial Meeting','Monthly: Eurazeo board reporting','Gate reviews: pass/fail decisions for all 5 initiatives'],
+    docs:[
+      {icon:'🗺️',name:'Systems Map',file:'BU_Services_Systems_Map.html',desc:'Complete system overview — portals, data flow, document index',status:'new'},
+      {icon:'👥',name:'People & Capacity Dashboard',file:'BU_Services_People_Dashboard.html',desc:'Utilization · Tenure · Vacation liability — BC live data',status:'new'},
+      {icon:'👥',name:'People & Capacity Dashboard',file:'BU_Services_People_Dashboard.html',desc:'Overhead % · Cumulative utilization · Vacation liability · 126-employee roster — BC live data'},
+      {icon:'📊',name:'Command Centre',file:'BU_Services_Command_Centre.html'},
+      {icon:'📋',name:'Go-Live Roadmap',file:'BU_Services_GoLive_Roadmap.html'},
+      {icon:'📄',name:'System Overview',file:'BU_Services_System_Overview.html'},
+    ]
+  },
+  mathieu: {
+    name:'Mathieu Beauchesne', color:'var(--blue)',
+    role:'EVP · Powerline · Cigre',
+    employer:'Nucleom Inc.',
+    mandate:'Executive leadership of Nucleom operations. Leads the Powerline initiative commercially. Manages Dynamics BC Q&A (prerequisite for BC connector). Direct reports: Alex Cyr (Sr. Ops Director), Francis Boudreault-Leclerc (Engineering & Technical Manager), Louis-Pier Théberge (Nuclear Sector).',
+    initiatives:['Powerline — LineCore, LineOhm, LineRay ($10.2M 5yr)','Dynamics BC environment Q&A (blocks Step 3 of go-live)','Cigre Paris — international positioning'],
+    rhythm:['Weekly: Ops meeting support','Monthly: Enter BC interim data into actuals.json (until P4 live)','Quarterly: Budget figures + EUR rate into actuals.json'],
+    docs:[
+      {icon:'📊',name:'Dynamics Q&A Workbook',file:'BU_Services_Dynamics_QA_Workbook.xlsx'},
+      {icon:'📋',name:'Dynamics Integration Guide',file:'BU_Services_Dynamics_Integration_Guide.docx'},
+    ]
+  },
+  olivier: {
+    name:'Olivier Marcotte', color:'var(--blue)',
+    role:'CRO · Aecon · New Build SMR · Refurbishment',
+    employer:'Nucleom Inc.',
+    mandate:'Owns the Aecon relationship, new build SMR contracts, and all refurbishment scopes. This is entirely separate from the OPG MSA/maintenance track owned by Vinoth. Do not conflate the two nuclear tracks.',
+    initiatives:['Aecon — Darlington BWRX-300 SMR (NDT subcontract ~$100M)','Pickering Units 5–8 Refurbishment ($26.8B program, execution 2027)','New Build / Refurb track with Louis-Pier Théberge as Program Lead'],
+    rhythm:['Ongoing: Aecon relationship management','Conference: CNA Ottawa (annual) — attends for Aecon/SMR track','Update Nuclear Outage Calendar in actuals.json when outage data changes'],
+    docs:[
+      {icon:'☢️',name:'Nuclear Outage Calendar Guide',file:'BU_Services_Nuclear_Outage_Calendar_Guide.docx'},
+      {icon:'📄',name:'Nuclear/OPG Commercial Plan',file:'Nuclear_OPG_Commercial_Plan.html'},
+    ]
+  },
+  alex: {
+    name:'Alex Cyr', color:'var(--blue)',
+    role:'Sr. Operations Director — BU Services',
+    employer:'Nucleom Inc.',
+    mandate:'Above all regional ops directors. BU Services level — covers both Nucleom and Nortech. Direct reports: Eric Rodrigue, Joel Djordjevic, Keith Reichenbach, Brook Althouse, Jason Borza. Coordinates with Louis-Pier Théberge (reports to Mathieu B). Peers: Mathieu B, Olivier Marcotte, Rick Carlton.',
+    initiatives:['Oversees ops delivery across all 5 initiatives','Wednesday utilisation review — quality gate before Monday KPI email','Certification tracking — 90-day advance warning standard','3X escalation protocol — every regional director knows same-day rule'],
+    rhythm:['Monday: Chair weekly Ops meeting','Wednesday: Review all regional util entries → escalate anomalies to Jon before Thursday','Thursday: Jason Borza check-in (Nortech)','Friday: Cert status review + cross-region deployment check'],
+    docs:[
+      {icon:'👤',name:'Alex Cyr Role Brief',file:'BU_Services_Alex_Cyr_Role_Brief.html'},
+      {icon:'👥',name:'People & Capacity Dashboard',file:'BU_Services_People_Dashboard.html',desc:'Utilization · Tenure · Vacation liability — BC live data',status:'new'},
+      
+      {icon:'📊',name:'Command Centre',file:'BU_Services_Command_Centre.html'},
+    ]
+  },
+  rick: {
+    name:'Rick Carlton', color:'var(--green)',
+    role:'Pipeline Integrity Lead — BU Services · Edmonton-based',
+    employer:'Nucleom Inc.',
+    mandate:'BU Services level — covers both Nucleom and Nortech. Co-owns new Pipeline DA commercial relationships with Emmanuel Aggrey. Western Canada first, then continental. Joel Carlton (PI Ops Manager) manages the PI group day-to-day with Rick\'s technical direction.',
+    initiatives:['Pipeline DA — $30M 5-year target','Western anchor clients: Enbridge, TC Energy NGTL, Pembina, Keyera, Tidewater','IPC 2026 (Sep, Calgary) — primary annual commercial event','Co-own new Pipeline DA relationships with Emmanuel Aggrey'],
+    rhythm:['Monday: Commercial meeting — Pipeline DA update','Tuesday: Joel Carlton PI delivery check-in','Wednesday: SF update + Emmanuel Aggrey proposal coord','Friday: SF current + 3X findings flagged + new operator leads'],
+    docs:[
+      {icon:'👤',name:'Rick Carlton Role Brief',file:'BU_Services_Rick_Carlton_Role_Brief.html'},
+      {icon:'📅',name:'PI Team Weekly Rhythm',file:'BU_Services_Rick_Carlton_Role_Brief.html'},
+    ]
+  },
+  jeremy: {
+    name:'Jeremy Irwin', color:'var(--blue)',
+    role:'Director of Finance, EIG NA',
+    employer:'EIG (covers both Nucleom + Nortech)',
+    mandate:'Quarterly budget vs actual reporting. Nortech financial data entry (bookings, actuals). Monthly BC interim data into actuals.json until P4 BC connector is live. Cash positions. Annual budget figures + EUR rate into actuals.json. Works in tandem with Renée Lachance who owns the BC system and Nucleom-specific financials.',
+    initiatives:['Eurazeo financial reporting preparation','Revenue Reconciliation — SF vs BC variance (once P4 live)','Nortech monthly pipeline and actuals data'],
+    rhythm:['Monthly (first Monday): Enter BC interim data into actuals.json','Monthly: Nortech bookings and actuals input','Annually: Budget figures + EUR rate into actuals.json'],
+    docs:[
+      {icon:'📅',name:'Finance Team Rhythm',file:'BU_Services_Jeremy_Irwin_Role_Brief.html'},
+      {icon:'📊',name:'Quote-to-Cash Recon Guide',file:'BU_Services_Quote_Cash_Recon_Guide.docx'},
+      {icon:'📋',name:'Dynamics Q&A Workbook',file:'BU_Services_Dynamics_QA_Workbook.xlsx'},
+    ]
+  },
+  renee: {
+    name:'Renée Lachance', color:'var(--blue)',
+    role:'Sr. Director, Finance & Controller',
+    employer:'Nucleom Inc.',
+    mandate:'Reports to Charles (CFO, Ekoscan Group). Works alongside Jon Eustace (CEO NA) in an indirect capacity. Owns Business Central for Nucleom — the source of truth for all financial data. Responsible for BC scheduled exports (Hours, Vacances, Embauche) that feed the People & Capacity Dashboard and actuals.json via Power Automate. Manages Nucleom payroll, accounts payable/receivable, and financial controls. Works alongside Jeremy Irwin — Renée owns the Nucleom BC system, Jeremy owns the EIG-level reporting and Nortech data.',
+    initiatives:['BC scheduled exports — configure weekly Hours + Vacances + monthly Embauche exports to SharePoint (feeds PA P6/P7/P8 flow)','Vacation liability tracking — syndiqués balance sheet (CAD)','Financial controls — Nucleom AP/AR','Payroll integrity — coordinates with Cynthia Dorval (Payroll Administrator)'],
+    rhythm:['Weekly: BC Hours export lands Sunday 6PM ET before PA flow runs at 7PM','Weekly: BC Vacances export — same schedule','Monthly (first Sunday): BC Embauche export for headcount & tenure data','Monthly: Coordinate with Jeremy on actuals.json BC interim data fields until P4 connector is live'],
+    docs:[
+      {icon:'📅',name:'Finance Team Rhythm',file:'BU_Services_Renee_Lachance_Role_Brief.html'},
+      {icon:'⚡',name:'BC People Data — PA Build Guide',file:'BC_People_PA_Guide_v2.docx',desc:'Full guide for BC exports → People Dashboard via PA'},
+      {icon:'📊',name:'Quote-to-Cash Recon Guide',file:'BU_Services_Quote_Cash_Recon_Guide.docx'},
+    ]
+  },
+  max: {
+    name:'Emmanuel Aggrey', color:'var(--teal)',
+    role:'Commercial Director — West',
+    employer:'Nucleom Inc. · Commercial responsibility: Nucleom + Nortech Western Canada',
+    mandate:'Own Mining NDT West, Pipeline DA (co-own with Rick Carlton), 3X Composite West. Carries commercial responsibility for Nortech Western Canada. Weekly check-in with Jason Borza is the Nortech intelligence feed. Existing client relationships maintained by ops — Max owns new client development.',
+    initiatives:['Mining NDT West — CIM Vancouver, Canadian Mining Expo','Pipeline DA West — co-own with Rick Carlton','3X Composite West','Nortech Western Canada commercial (not in Salesforce yet)'],
+    rhythm:['Friday: Salesforce update mandatory — all open opps + new leads','Monday: Read KPI email + Commercial Meeting','Wednesday: Jason Borza Nortech check-in + conference lead entry','Sunday: PA flow updates actuals.json automatically'],
+    docs:[
+      {icon:'👤',name:'Emmanuel Aggrey Role Brief',file:'BU_Services_Max_Aggrey_Role_Brief.html'},
+      {icon:'📅',name:'Commercial Team Rhythm',file:'BU_Services_Max_Aggrey_Role_Brief.html'},
+      {icon:'📋',name:'SF Entry Guide',file:'BU_Services_SF_Conference_Entry_Guide.docx'},
+      {icon:'📊',name:'Conference Action Tracker',file:'BU_Services_Conference_Action_Tracker.xlsx'},
+    ]
+  },
+  vinoth: {
+    name:'Vinoth Tharma', color:'var(--teal)',
+    role:'Commercial Director — East',
+    employer:'Nucleom Inc.',
+    mandate:'Own Mining NDT East, Nuclear/OPG MSA and maintenance/inspection growth (supported by Jon\'s OPG relationship), Powerline with Mathieu B, 3X East. Olivier Marcotte owns Aecon/SMR/refurb — completely separate lane. CNA 2026: Jon attends. Vinoth from 2027.',
+    initiatives:['Mining NDT East — CNA Ottawa, CEN CAN Thunder Bay','Nuclear/OPG — MSA and maintenance track (NOT Aecon/SMR — that is Olivier)','Powerline East — Hydro One, Emera, NS Power','3X Composite East'],
+    rhythm:['Friday: Salesforce update mandatory — Nuclear opps need weekly activity log','Monday: Read KPI email + Commercial Meeting','Tuesday: OPG activity log — even if nothing moved','Wednesday: Nuclear SF check + Powerline coord with Mathieu B'],
+    docs:[
+      {icon:'👤',name:'Vinoth Tharma Role Brief',file:'BU_Services_Vinoth_Tharma_Role_Brief.html'},
+      {icon:'📅',name:'Commercial Team Rhythm',file:'BU_Services_Vinoth_Tharma_Role_Brief.html'},
+      {icon:'📋',name:'SF Entry Guide',file:'BU_Services_SF_Conference_Entry_Guide.docx'},
+      {icon:'☢️',name:'Nuclear Outage Calendar',file:'BU_Services_Nuclear_Outage_Calendar_Guide.docx'},
+    ]
+  },
+  eric_r: {
+    name:'Eric Rodrigue', color:'var(--blue)',
+    role:'Operations Director — Quebec',
+    employer:'Nucleom Inc.',
+    mandate:'Maintain existing Quebec client relationships. Deliver current and awarded work. Support Vinoth Tharma with crew availability on quotes. New clients belong to Vinoth — warm handoff same day if an existing client mentions new scope.',
+    initiatives:['Mining NDT Quebec — primary initiative','Nuclear/OPG — crew readiness for outage deployments','Powerline Quebec — Hydro-Québec target (Mathieu commercial lead)','3X — immediate escalation on AMBER/RED findings'],
+    rhythm:['Wednesday: Utilisation Tracker — util_hq + util_mtl','Friday: Confirm Assigned_Technicians__c on closed Quebec deals','Monday: Ops meeting report to Alex Cyr'],
+    docs:[
+      {icon:'👤',name:'Eric Rodrigue Role Brief',file:'BU_Services_Eric_Rodrigue_Role_Brief.html'},
+      {icon:'📅',name:'Ops Team Weekly Rhythm',file:'BU_Services_Eric_Rodrigue_Role_Brief.html'},
+    ]
+  },
+  joel_dj: {
+    name:'Joel Djordjevic', color:'var(--teal)',
+    role:'Operations Director — Central',
+    employer:'Nucleom Inc.',
+    mandate:'Maintain existing Central Canada client relationships (Ontario + Manitoba). Nuclear outage readiness is highest-complexity ops item — OPG Darlington and Pickering are in your region. New clients belong to Vinoth Tharma.',
+    initiatives:['Mining NDT Central — Sudbury, Thunder Bay, Timmins','Nuclear/OPG — OPG Darlington + Pickering outage deployment readiness','Powerline Central — Hydro One (Mathieu commercial lead)','3X escalation'],
+    rhythm:['Wednesday: Utilisation Tracker — util_central','Monday: Ops meeting + Nuclear outage readiness update','Ongoing: Coord with Louis-Pier Théberge on OPG vendor-approved techs'],
+    docs:[
+      {icon:'👤',name:'Joel Djordjevic Role Brief',file:'BU_Services_Joel_Djordjevic_Role_Brief.html'},
+      {icon:'📅',name:'Ops Team Weekly Rhythm',file:'BU_Services_Joel_Djordjevic_Role_Brief.html'},
+    ]
+  },
+  keith: {
+    name:'Keith Reichenbach', color:'var(--green)',
+    role:'Operations Director — Western',
+    employer:'Nucleom Inc.',
+    mandate:'Maintain existing Western Canada client relationships. Pipeline DA is flagship Western initiative — coordinate closely with Rick Carlton and Jason Borza. New Pipeline DA clients co-owned by Max and Rick. New clients belong to Max (general) or Max+Rick (Pipeline DA).',
+    initiatives:['Mining NDT Western — BC, AB, SK operators','Pipeline DA Western — Nucleom crew support for Rick and Nortech','Powerline Western — AltaLink (Mathieu commercial lead)','3X escalation'],
+    rhythm:['Wednesday: Utilisation Tracker — util_edm + util_van','Friday: Confirm Assigned_Technicians__c on Max\'s and Rick\'s Western deals','Monday: Ops meeting report to Alex Cyr'],
+    docs:[
+      {icon:'👤',name:'Keith Reichenbach Role Brief',file:'BU_Services_Keith_Reichenbach_Role_Brief.html'},
+      {icon:'📅',name:'Ops Team Weekly Rhythm',file:'BU_Services_Keith_Reichenbach_Role_Brief.html'},
+    ]
+  },
+  brook: {
+    name:'Brook Althouse', color:'var(--amber)',
+    role:'Northern Operations Manager',
+    employer:'Nucleom Inc.',
+    mandate:'Manage Northern Canada ops — remote and fly-in/fly-out sites. Mining NDT is primary initiative. Any Northern quote requires your logistics feasibility sign-off BEFORE the commercial lead submits it. New clients belong to Vinoth (East) or Max (West).',
+    initiatives:['Mining NDT Northern — Agnico Eagle, Newmont Porcupine, Vale Thompson','3X Composite — remote site findings have extra deployment lead time','Fly-in logistics — crew rotation dates are fixed, plan early'],
+    rhythm:['Wednesday: Utilisation Tracker — Northern region row','Monday: Ops meeting report to Alex Cyr','Ongoing: Logistics sign-off required on all Northern quotes before submission'],
+    docs:[
+      {icon:'👤',name:'Brook Althouse Role Brief',file:'BU_Services_Brook_Althouse_Role_Brief.html'},
+      {icon:'📅',name:'Ops Team Weekly Rhythm',file:'BU_Services_Brook_Althouse_Role_Brief.html'},
+    ]
+  },
+  louisp: {
+    name:'Louis-Pier Théberge', color:'var(--purp)',
+    role:'Ops Director — Nuclear Sector · Program Lead, New Build & Refurb',
+    employer:'Nucleom Inc. · Reports to Mathieu Beauchesne (EVP)',
+    mandate:'Two distinct tracks: MSA/maintenance ops delivery (Vinoth + Jon commercially) and Aecon/new build/refurb Programme Lead (Olivier Marcotte commercially). Coordinates with Alex Cyr on Nuclear crew deployment. OPG vendor approvals and outage readiness are primary ops responsibility.',
+    initiatives:['MSA/maintenance track — ops delivery for Vinoth\'s pipeline','New Build/Refurb track — Programme Lead with Olivier Marcotte','OPG vendor approval management — maintain live list of approved technicians','Nuclear Outage Calendar — update actuals.json when dates or status change'],
+    rhythm:['Monday: Nuclear outage readiness check','Wednesday: Utilisation Tracker — Nuclear sector + Aecon/refurb coord with Olivier','Thursday: OPG vendor approval review + Vinoth MSA pipeline input','Friday: Cert expiry check + 90-day outage horizon review'],
+    docs:[
+      {icon:'👤',name:'Louis-Pier Théberge Role Brief',file:'BU_Services_Louis_Pier_Theberge_Role_Brief.html'},
+      {icon:'☢️',name:'Nuclear Outage Calendar Guide',file:'BU_Services_Nuclear_Outage_Calendar_Guide.docx'},
+      {icon:'📅',name:'Ops Team Weekly Rhythm',file:'BU_Services_Louis_Pier_Theberge_Role_Brief.html'},
+    ]
+  },
+  jason: {
+    name:'Jason Borza', color:'var(--teal)',
+    role:'Operations Director — Nortech Advanced NDT',
+    employer:'Nortech Advanced NDT',
+    mandate:'Reports to Alex Cyr (BU Services). PI group is a bolt-on — Joel Carlton manages PI ops, PI crew are dedicated and do not cross into core Nortech business. Weekly briefing to Emmanuel Aggrey is the Nortech commercial intelligence feed until Salesforce integration.',
+    initiatives:['Nortech Pipeline DA ops — support PI group delivery (Joel Carlton)','Nortech Western Canada ops — existing client relationship maintenance','Weekly Nortech pipeline brief to Emmanuel Aggrey until SF integration'],
+    rhythm:['Monday: Ops meeting — report to Alex Cyr','Tuesday: Nortech Pipeline DA review + Joel Carlton PI check-in','Wednesday: Utilisation Tracker — Nortech row','Thursday: Rick Carlton Pipeline DA coord','Friday: Emmanuel Aggrey weekly check-in + Nortech intel brief'],
+    docs:[
+      {icon:'👤',name:'Jason Borza Role Brief',file:'BU_Services_Jason_Borza_Role_Brief.html'},
+      {icon:'📅',name:'Ops Team Weekly Rhythm',file:'BU_Services_Jason_Borza_Role_Brief.html'},
+    ]
+  },
+  joel_c: {
+    name:'Joel Carlton', color:'var(--green)',
+    role:'PI Operations Manager — Nortech Advanced NDT',
+    employer:'Nortech Advanced NDT',
+    mandate:'Manage the PI group — a dedicated bolt-on unit within Nortech. PI technicians work exclusively in pipeline integrity and do not cross into core Nortech business. Reports to Jason Borza; works directly with Rick Carlton on all DA delivery. Field quality builds the references for continental expansion.',
+    initiatives:['Pipeline DA delivery — all active Western Canada DA contracts','Field intelligence — AMBER/RED findings → Rick + Max same day','Job quality standards — every completed job builds the Western references'],
+    rhythm:['Monday: Active project review + Rick Carlton check-in','Wednesday: Utilisation Tracker — PI group row + Jason Borza ops check-in','Friday: Field findings review + completed job summaries to Rick Carlton'],
+    docs:[
+      {icon:'👤',name:'Joel Carlton Role Brief',file:'BU_Services_Joel_Carlton_Role_Brief.html'},
+      {icon:'📅',name:'PI Team Weekly Rhythm',file:'BU_Services_Joel_Carlton_Role_Brief.html'},
+    ]
+  },
+  francis: {
+    name:'Francis Boudreault-Leclerc', color:'var(--purp)',
+    role:'Engineering & Technical Manager',
+    employer:'Nucleom Inc.',
+    mandate:'Technical authority for all BU Services initiative engineering work. Technical Lead for all five initiatives — Francis\'s team provides the engineering framework, procedures, and technical oversight for both initiatives. Mining NDT technical lead (ECA, PAUT, robotic UT procedures) alongside Sevan Bouchy. Reports to Mathieu Beauchesne.',
+    initiatives:['Pipeline DA — Engineering & Technical Lead (FFS, procedures)','Powerline — Engineering & Technical Lead (LineCore/LineOhm/LineRay methods)','Mining NDT — Engineering & Technical Lead (ECA, PAUT, robotic UT)','Nuclear / OPG — Technical support (MSA tender with Jean-François Martel)','3X Composite — Technical support (ABSA procedures)'],
+    rhythm:['Weekly: Technical review with ops directors on active initiative delivery','Bi-weekly: Initiative technical milestone check with Mathieu B','Monthly: Engineering procedures update for active initiative scope'],
+    docs:[
+      {icon:'👤',name:'Francis Role Brief',file:'BU_Services_Francis_BoudreaultLeclerc_Role_Brief.html'},
+      {icon:'📄',name:'Nuclear/OPG Commercial Plan',file:'Nuclear_OPG_Commercial_Plan.html'},
+      {icon:'📋',name:'Go-Live Roadmap',file:'BU_Services_GoLive_Roadmap.html'},
+    ]
+  },
+  eric_c: {
+    name:'Éric Carmichael', color:'var(--sky)',
+    role:'Commercial Systems Manager',
+    employer:'Nucleom',
+    mandate:'Responsible for building and maintaining all commercial system integrations: Power Automate Sunday flow (Salesforce → actuals.json), Business Central connector, SharePoint Meeting Lists, conference cost flow, and deck generation script. Dotted-line to Jon Eustace. ~11.5 hrs total build time to full go-live.',
+    initiatives:['Power Automate — Sunday 7PM SF → actuals.json flow','Business Central connector — invoiced revenue','SharePoint Meeting Actions list + PA health branch','Conference cost PA flow + Teams Adaptive Card','Deck generation script scheduling (python-pptx)'],
+    rhythm:['Step 1 (this week): Salesforce BU_Initiative__c field + Region API name','Step 2 (Week 2): PA Sunday flow build','Step 3 (Week 2–3): Business Central connector','Step 4 (Week 2–3): SharePoint Lists + meeting health PA branch','Step 5 (Week 3): Schedule deck generation script'],
+    docs:[
+      {icon:'🗺️',name:'Éric Go-Live File Map',file:'BU_Services_Eric_GoLive_File_Map.html'},
+      {icon:'📋',name:'Go-Live Roadmap',file:'BU_Services_GoLive_Roadmap.html'},
+      {icon:'⚡',name:'Power Automate Build Guide',file:'BU_Services_Power_Automate_Build_Guide.docx'},
+      {icon:'☁️',name:'Salesforce Integration Guide',file:'BU_Services_Salesforce_Integration_Guide.docx'},
+      {icon:'💎',name:'Dynamics Integration Guide',file:'BU_Services_Dynamics_Integration_Guide.docx'},
+    ]
+  },
+};
+
+var openPerson = null;
+function togglePerson(id) {
+  var panel = document.getElementById('person-panel');
+  if (openPerson === id) {
+    panel.classList.remove('open');
+    openPerson = null;
+    document.querySelectorAll('.org-card').forEach(c=>c.classList.remove('active'));
+    return;
+  }
+  openPerson = id;
+  document.querySelectorAll('.org-card').forEach(c=>c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  var p = PEOPLE[id];
+  if(!p) return;
+  panel.innerHTML = `
+    <div class="pp-hdr">
+      <div>
+        <div class="pp-name">${p.name}</div>
+        <div class="pp-role" style="color:${p.color}">${p.role}</div>
+        <div class="pp-emp">${p.employer}</div>
+      </div>
+    </div>
+    <div class="pp-grid">
+      <div class="pp-card">
+        <div class="ppc-title" style="color:${p.color}">Mandate</div>
+        <div class="ppc-item">${p.mandate}</div>
+      </div>
+      <div class="pp-card">
+        <div class="ppc-title" style="color:${p.color}">Initiatives &amp; Focus</div>
+        ${p.initiatives.map(i=>`<div class="ppc-item">• ${i}</div>`).join('')}
+      </div>
+      <div class="pp-card">
+        <div class="ppc-title" style="color:${p.color}">Weekly Rhythm (key tasks)</div>
+        ${p.rhythm.map(r=>`<div class="ppc-item">• ${r}</div>`).join('')}
+      </div>
+    </div>
+    <div class="pp-links">
+      ${p.docs.map(d=>`<a class="pp-link" href="${d.file}">${d.icon} ${d.name}</a>`).join('')}
+    </div>`;
+  panel.classList.add('open');
+  setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+}
+
+// ── Weekly Flow Data ──────────────────────────────────────────────────────────
+var FLOW_DAYS = [
+  { day:'Monday', color:'var(--blue)', bg:'rgba(26,92,168,.12)',
+    events:[
+      {time:'7AM ET',name:'KPI Email Digest',who:'Jon, Max, Vinoth, Rick',color:'var(--sky)',bg:'rgba(0,174,239,.09)'},
+      {time:'Morning',name:'Commercial Meeting',who:'Jon, Max, Vinoth, Olivier, Rick',color:'#7EB4FF',bg:'rgba(26,92,168,.12)'},
+      {time:'Morning',name:'Ops Meeting',who:'Alex, Eric, Joel Dj, Keith, Brook, Jason',color:'#99B8E0',bg:'rgba(10,31,92,.15)'},
+    ]},
+  { day:'Tuesday', color:'var(--teal)', bg:'rgba(13,80,80,.12)',
+    events:[
+      {time:'Ongoing',name:'Client calls & follow-ups',who:'Max, Vinoth',color:'#7EB4FF',bg:'rgba(26,92,168,.1)'},
+      {time:'Ongoing',name:'OPG activity log',who:'Vinoth — even if nothing moved',color:'#C4B5FD',bg:'rgba(109,40,217,.1)'},
+      {time:'Ongoing',name:'PI delivery check-in',who:'Rick Carlton + Joel Carlton',color:'var(--green)',bg:'rgba(22,163,74,.1)'},
+    ]},
+  { day:'Wednesday', color:'var(--amber)', bg:'rgba(201,134,10,.12)',
+    events:[
+      {time:'Weekly',name:'Utilisation Tracker',who:'ALL ops directors by EOD',color:'var(--amber)',bg:'rgba(201,134,10,.1)'},
+      {time:'Weekly',name:'SF update — active opps',who:'Max, Vinoth, Rick',color:'#7EB4FF',bg:'rgba(26,92,168,.1)'},
+      {time:'Weekly',name:'Nortech check-in',who:'Max ↔ Jason Borza',color:'#5EEAD4',bg:'rgba(13,80,80,.1)'},
+      {time:'Weekly',name:'Nuclear coord',who:'Louis-Pier ↔ Olivier + Vinoth',color:'#C4B5FD',bg:'rgba(109,40,217,.1)'},
+    ]},
+  { day:'Thursday', color:'var(--dgrey)', bg:'rgba(102,120,160,.1)',
+    events:[
+      {time:'Weekly',name:'Util data quality review',who:'Alex Cyr — all regions',color:'var(--amber)',bg:'rgba(201,134,10,.1)'},
+      {time:'Weekly',name:'Crew availability answers',who:'Regional ops → commercial leads',color:'#99B8E0',bg:'rgba(10,31,92,.1)'},
+      {time:'Weekly',name:'Jason Borza check-in',who:'Alex Cyr ↔ Nortech ops',color:'#5EEAD4',bg:'rgba(13,80,80,.1)'},
+    ]},
+  { day:'Friday', color:'var(--sky)', bg:'rgba(0,174,239,.09)',
+    events:[
+      {time:'4PM ET HARD',name:'Salesforce update',who:'Max, Vinoth, Rick — ALL open opps',color:'var(--sky)',bg:'rgba(0,174,239,.12)'},
+      {time:'EOD',name:'3X findings review',who:'All ops — flagged to commercial?',color:'var(--red)',bg:'rgba(185,28,28,.09)'},
+      {time:'EOD',name:'Assigned_Technicians__c',who:'All ops — confirm on closed deals',color:'#7EB4FF',bg:'rgba(26,92,168,.1)'},
+      {time:'EOD',name:'PI job summaries',who:'Joel Carlton → Rick Carlton',color:'var(--green)',bg:'rgba(22,163,74,.1)'},
+    ]},
+  { day:'Saturday', color:'var(--dgrey)', bg:'rgba(102,120,160,.05)',
+    events:[{time:'',name:'—',who:'',color:'var(--dgrey)',bg:'transparent'}]},
+  { day:'Sunday', color:'var(--sky)', bg:'rgba(0,174,239,.08)',
+    events:[
+      {time:'7PM ET AUTO',name:'PA flow runs',who:'Salesforce → actuals.json',color:'var(--sky)',bg:'rgba(0,174,239,.12)'},
+    ]},
+];
+
+var fg = document.getElementById('flow-grid');
+FLOW_DAYS.forEach(function(d){
+  var evts = d.events.map(function(e){
+    if(e.name==='—') return `<div style="font-size:.65rem;color:var(--dgrey);text-align:center;padding:.5rem 0">—</div>`;
+    return `<div class="flow-event" style="background:${e.bg};border-left-color:${e.color}">
+      <span class="fe-time">${e.time}</span>
+      <span class="fe-name">${e.name}</span>
+      <div class="fe-who">${e.who}</div>
+    </div>`;
+  }).join('');
+  fg.innerHTML += `<div class="flow-day">
+    <div class="flow-day-hdr" style="background:${d.bg};color:${d.color};border-bottom:1px solid var(--mid)">${d.day}</div>
+    <div class="flow-day-body">${evts}</div>
+  </div>`;
+});
+
+// ── Meeting Cadences ────────────────────────────────────────────────────────────
+var MEETINGS = [
+  { title:'Monday Commercial Meeting', color:'var(--sky)',
+    cadence:'Weekly · Monday morning', chair:'Jon Eustace', attendees:'Jon, Max, Vinoth, Olivier, Rick Carlton',
+    agenda:[
+      {n:1,t:'KPI email review',d:'Jon walks through the automated Monday digest — pipeline, utilisation, any alerts'},
+      {n:2,t:'Commercial wins / near-wins',d:'Each commercial lead: one positive update from the prior week'},
+      {n:3,t:'Stalled deals',d:'Any deal with no SF activity >30 days — what does it need?'},
+      {n:4,t:'Pipeline DA update',d:'Rick Carlton: active projects, operator conversations, Joel Carlton field update'},
+      {n:5,t:'Nortech Western update',d:'Max: Nortech pipeline intelligence from Jason Borza check-in'},
+      {n:6,t:'Nuclear track update',d:'Vinoth: OPG MSA/maintenance pipeline status — one line minimum'},
+      {n:7,t:'Conference follow-up',d:'Post-show: leads entered in SF? SF outcomes entered via Teams card?'},
+    ]},
+  { title:'Monday Ops Meeting', color:'#99B8E0',
+    cadence:'Weekly · Monday morning (after Commercial)', chair:'Alex Cyr', attendees:'Alex, Eric, Joel Dj, Keith, Brook, Jason Borza',
+    agenda:[
+      {n:1,t:'Regional utilisation snapshot',d:'Each director: current billable % and any anomalies. Preview of Wednesday tracker entries.'},
+      {n:2,t:'Capacity constraints',d:'Any region with upcoming capacity issues affecting active or quoted projects?'},
+      {n:3,t:'3X escalations',d:'Any AMBER/RED findings from the past week? Flagged to commercial lead same day?'},
+      {n:4,t:'Certification status',d:'Any cert expiries approaching 90 days? OPG vendor approvals current?'},
+      {n:5,t:'Cross-region deployment',d:'Any crew movement between regions this week or next?'},
+      {n:6,t:'Nortech ops alignment',d:'Jason Borza: Nortech crew status and any PI group issues'},
+    ]},
+  { title:'Monthly Finance Review', color:'var(--amber)',
+    cadence:'Monthly · First week', chair:'Jon Eustace', attendees:'Jon, Jeremy Irwin',
+    agenda:[
+      {n:1,t:'Budget vs actual — Nucleom',d:'Jeremy: quarterly budget vs actual, year-to-date performance'},
+      {n:2,t:'Nortech financial data',d:'Jeremy: enter Nortech bookings and actuals into actuals.json'},
+      {n:3,t:'BC interim data',d:'Jeremy: monthly BC data entry into actuals.json until P4 connector is live'},
+      {n:4,t:'Revenue reconciliation review',d:'Once P4 live: SF Closed Won vs BC Invoiced variance — any flags?'},
+      {n:5,t:'Cash positions',d:'Jeremy: current cash position update'},
+      {n:6,t:'Eurazeo prep',d:'Quarterly: prepare board reporting package'},
+    ]},
+  { title:'Quarterly Gate Review', color:'var(--purp)',
+    cadence:'Quarterly · Jon-led', chair:'Jon Eustace', attendees:'Jon, Mathieu B, Olivier, Alex, Max, Vinoth, Rick, Francis B-L',
+    agenda:[
+      {n:1,t:'Initiative gate status',d:'Each initiative: pass/fail against gate milestones. Command Centre gates section as reference.'},
+      {n:2,t:'Revenue vs plan',d:'YTD vs 2026 sure forecast. Gap analysis. Eurazeo plan implications.'},
+      {n:3,t:'Pipeline quality review',d:'Proposal Health section — conversion rates, stalled deals, oldest open proposals'},
+      {n:4,t:'Ops capacity vs commercial pipeline',d:'Alex: can ops deliver what commercial has committed for next quarter?'},
+      {n:5,t:'Risk register review',d:'Risks section of Command Centre — any status changes, new risks to add'},
+      {n:6,t:'Eurazeo reporting preview',d:'Jon: anything that will be presented to Eurazeo — team alignment required'},
+    ]},
+  { title:'Post-Conference Debrief', color:'var(--teal)',
+    cadence:'After each BU Services conference', chair:'Jon or commercial lead', attendees:'Attending commercial lead + Shanny',
+    agenda:[
+      {n:1,t:'Leads entered in Salesforce?',d:'48-hour rule: every conversation = a Lead in SF with BU_Initiative__c tagged'},
+      {n:2,t:'Actuals entered in tracker?',d:'Shanny: enter total actual spend in Conference Action Tracker — Year Calendar Col S'},
+      {n:3,t:'SF outcomes entered?',d:'Jon/commercial lead: log outcomes via Teams Adaptive Card (leads, opps created)'},
+      {n:4,t:'Hot leads — immediate follow-up',d:'Any HOT-rated leads: follow-up committed within 5 business days'},
+      {n:5,t:'Conference ROI preview',d:'Conference Programme section in Command Centre — ROI once actuals flow in'},
+    ]},
+  { title:'Nuclear Track Sync', color:'var(--purp)',
+    cadence:'As needed · minimum monthly', chair:'Jon Eustace', attendees:'Jon, Vinoth, Louis-Pier, Francis B-L (technical items), Olivier (Aecon track items only)',
+    agenda:[
+      {n:1,t:'MSA/maintenance pipeline update',d:'Vinoth: OPG conversation status, outstanding proposals, MSA progress'},
+      {n:2,t:'Outage window readiness',d:'Louis-Pier: outage calendar review — any windows <90 days? Crew confirmed?'},
+      {n:3,t:'OPG vendor approval status',d:'Louis-Pier: approved technician list current? Any expiries approaching?'},
+      {n:4,t:'Aecon/new build update',d:'Olivier (where relevant): SMR programme timeline, Aecon relationship status'},
+      {n:5,t:'actuals.json — outage records current?',d:'Review Nuclear Outage Calendar section in Command Centre'},
+    ]},
+];
+
+
+// ── System Status ─────────────────────────────────────────────────────────────
+// ── Document Library ───────────────────────────────────────────────────────────
+var DOC_GROUPS = [
+  { title:'Commercial System', color:'var(--sky)',
+    docs:[
+      {icon:'👥',name:'People & Capacity Dashboard',file:'BU_Services_People_Dashboard.html',desc:'Overhead % · Cumulative utilization · Vacation liability · 126-employee roster — BC live data'},
+      {icon:'📊',name:'Command Centre',file:'BU_Services_Command_Centre.html',desc:'Live KPI portal — 15 sections · 135 actuals.json fields',status:'ready'},
+      {icon:'📦',name:'actuals.json',file:'actuals.json',desc:'135-field data bridge — single source of truth for all dashboards',status:'ready'},
+      {icon:'📖',name:'actuals.json Reference',file:'BU_Services_actuals_json_Reference.html',desc:'Annotated field reference — who writes what, 135 fields explained'},
+      {icon:'✅',name:'SF Backfill Tracker',file:'BU_Services_Salesforce_Backfill_Tracker.html',desc:'Audit BU_Initiative__c on all 2026 opportunities before go-live'},
+      {icon:'📋',name:'Go-Live Roadmap',file:'BU_Services_GoLive_Roadmap.html',desc:'Step-by-step build guide for Éric — all 9 steps with owners and times',status:'ready'},
+      {icon:'📄',name:'System Overview',file:'BU_Services_System_Overview.html',desc:'Master reference — all files, all data flows, all 135 fields',status:'ready'},
+      {icon:'🏦',name:'Eurazeo Quarterly Pack Template',file:'BU_Services_Eurazeo_Quarterly_Pack_Template.docx',desc:'Quarterly Eurazeo reporting template — 6 sections pre-structured'},
+    ]},
+  { title:'Role Briefs', color:'var(--blue)',
+    docs:[
+      {icon:'👤',name:'Jeremy Irwin',file:'BU_Services_Jeremy_Irwin_Role_Brief.html',desc:'Director of Finance, EIG NA · rhythm & meeting agendas included'},
+      {icon:'👤',name:'Renée Lachance',file:'BU_Services_Renee_Lachance_Role_Brief.html',desc:'Sr. Director, Finance & Controller · BC system owner · rhythm & meeting agendas included',status:'new'},
+      {icon:'👤',name:'Emmanuel Aggrey',file:'BU_Services_Max_Aggrey_Role_Brief.html',desc:'Commercial Director West · Salesforce guide & weekly checklist included'},
+      {icon:'👤',name:'Vinoth Tharma',file:'BU_Services_Vinoth_Tharma_Role_Brief.html',desc:'Commercial Director East · Nuclear track guide & weekly checklist included'},
+      {icon:'👤',name:'Alex Cyr',file:'BU_Services_Alex_Cyr_Role_Brief.html',desc:'Sr. Operations Director · weekly checklist included'},
+      {icon:'👤',name:'Eric Rodrigue',file:'BU_Services_Eric_Rodrigue_Role_Brief.html',desc:'Ops Director — Quebec · weekly checklist included'},
+      {icon:'👤',name:'Joel Djordjevic',file:'BU_Services_Joel_Djordjevic_Role_Brief.html',desc:'Ops Director — Central · weekly checklist included'},
+      {icon:'👤',name:'Keith Reichenbach',file:'BU_Services_Keith_Reichenbach_Role_Brief.html',desc:'Ops Director — Western · weekly checklist included'},
+      {icon:'👤',name:'Brook Althouse',file:'BU_Services_Brook_Althouse_Role_Brief.html',desc:'Northern Ops Manager · weekly checklist included'},
+      {icon:'👤',name:'Louis-Pier Théberge',file:'BU_Services_Louis_Pier_Theberge_Role_Brief.html',desc:'Nuclear Sector Ops Director · weekly checklist included'},
+      {icon:'👤',name:'Jason Borza',file:'BU_Services_Jason_Borza_Role_Brief.html',desc:'Ops Director — Nortech · weekly checklist included'},
+      {icon:'👤',name:'Rick Carlton',file:'BU_Services_Rick_Carlton_Role_Brief.html',desc:'Pipeline Integrity Lead · weekly checklist included'},
+      {icon:'👤',name:'Joel Carlton',file:'BU_Services_Joel_Carlton_Role_Brief.html',desc:'PI Operations Manager · weekly checklist included'},
+      {icon:'👤',name:'Francis Boudreault-Leclerc',file:'BU_Services_Francis_BoudreaultLeclerc_Role_Brief.html',desc:'Engineering & Technical Manager · weekly checklist included'},
+    ]},
+  { title:'Integration Guides', color:'var(--amber)',
+    docs:[
+      {icon:'👥',name:'BC People Data — PA Guide v2',file:'BC_People_PA_Guide_v2.docx',desc:'P6/P7/P8 — corrected column map · overhead % formula · both vac sheets · Office Scripts v2'},
+      {icon:'🔗',name:'Power Automate Build Guide',file:'BU_Services_Power_Automate_Build_Guide.docx',desc:'Sunday 7PM PA flow — Salesforce SOQL · step-by-step build · field mapping'},
+      {icon:'🔗',name:'Salesforce Integration Guide',file:'BU_Services_Salesforce_Integration_Guide.docx',desc:'Full Salesforce build guide'},
+      {icon:'🔗',name:'SF Conference Entry Guide',file:'BU_Services_SF_Conference_Entry_Guide.docx',desc:'For attendees + Éric SF config'},
+      {icon:'🔗',name:'Conference Cost Integration Guide',file:'BU_Services_Conference_Cost_Integration_Guide.docx',desc:'Step 2b PA flow build guide'},
+      {icon:'🔗',name:'Dynamics Integration Guide',file:'BU_Services_Dynamics_Integration_Guide.docx',desc:'Business Central connector guide'},
+      {icon:'🔗',name:'Proposal Tracker Guide',file:'BU_Services_Proposal_Tracker_Guide.docx',desc:'Add-On 1 — 18 SF queries'},
+      {icon:'🔗',name:'Quote-to-Cash Recon Guide',file:'BU_Services_Quote_Cash_Recon_Guide.docx',desc:'Add-On 2 — build with P4'},
+      {icon:'☢️',name:'Nuclear Outage Calendar Guide',file:'BU_Services_Nuclear_Outage_Calendar_Guide.docx',desc:'Add-On 3 — manual entry guide'},
+    ]},
+  { title:'Commercial Plans & Decks', color:'var(--teal)',
+    docs:[
+      {icon:'📄',name:'Nuclear / OPG Commercial Plan',file:'Nuclear_OPG_Commercial_Plan.html',desc:'$47.9M initiative plan',status:'ready'},
+      {icon:'📄',name:'Master Commercial Plan',file:'Master_Commercial_Plan_v8_NoStage2.html',desc:'$92.8M 5-year plan — Eurazeo · No Stage 2'},
+      {icon:'📄',name:'Pipeline DA Commercial Plan',file:'PI_Commercial_Plan_v2.html',desc:'$30M initiative plan'},
+      {icon:'📄',name:'Powerline Commercial Plan',file:'Powerline_Commercial_Plan.html',desc:'$10.2M initiative plan'},
+      {icon:'📄',name:'Mining NDT Commercial Plan',file:'NDT_Mining_Commercial_Plan_v4.html',desc:'$17.9M initiative plan'},
+      {icon:'📄',name:'3X Composite Commercial Plan',file:'3X_Composite_Repair_Commercial_Plan.html',desc:'$11.4M initiative plan'},
+    ]},
+  { title:'Conference System', color:'var(--purp)',
+    docs:[
+      {icon:'💰',name:'Conference Budget 2026',file:'2026_Conference_budget.xlsx',desc:'Assumptions · Budget Model · Strategic Summary'},
+      {icon:'📋',name:'Conference Action Plan',file:'BU_Services_Conference_Action_Plan.html',desc:'Full 2026 approval portal'},
+      {icon:'📊',name:'Conference Action Tracker',file:'BU_Services_Conference_Action_Tracker.xlsx',desc:'5-tab Excel workbook — Shanny enters actuals after each show'},
+    ]},
+]
+var dg = document.getElementById('doc-groups');
+DOC_GROUPS.forEach(function(g){
+  var items = g.docs.map(function(d){
+    var pill = d.status ? `<span class="status-pill" style="background:rgba(0,174,239,.15);color:var(--sky)">${d.status}</span>` : '';
+    var isDownload = /\.(xlsx|docx|pptx|pdf)$/i.test(d.file);
+    var clickHandler = isDownload
+      ? `onclick="var a=document.createElement('a');a.href='${d.file}';a.download='${d.file}';document.body.appendChild(a);a.click();document.body.removeChild(a);"`
+      : `onclick="window.open('${d.file}','_blank')"`;
+    return `<div class="doc-item" ${clickHandler}>
+      <div class="di-icon">${d.icon}</div>
+      <div class="di-text">
+        <div class="di-name">${d.name}${pill}</div>
+        <div class="di-desc">${d.desc}</div>
+      </div>
+    </div>`;
+  }).join('');
+  dg.innerHTML += `<div class="doc-group">
+    <div class="dg-hdr" style="background:rgba(255,255,255,.04);color:${g.color};border-bottom:2px solid ${g.color}">${g.title}</div>
+    <div class="dg-body">${items}</div>
+  </div>`;
+});
+
+
+// ══ PEOPLE TOOLS ════════════════════════════════════════════════════════════
+
+var PT_PEOPLE = [{id:"jon",name:"Jon Eustace"},{id:"mathieu",name:"Mathieu Beauchesne"},{id:"olivier",name:"Olivier Marcotte"},{id:"alex",name:"Alex Cyr"},{id:"rick",name:"Rick Carlton"},{id:"jeremy",name:"Jeremy Irwin"},{id:"renee",name:"Renée Lachance"},{id:"max",name:"Emmanuel Aggrey"},{id:"vinoth",name:"Vinoth Tharma"},{id:"eric_r",name:"Eric Rodrigue"},{id:"joel_dj",name:"Joel Djordjevic"},{id:"keith",name:"Keith Reichenbach"},{id:"brook",name:"Brook Althouse"},{id:"louisp",name:"Louis-Pier Théberge"},{id:"jason",name:"Jason Borza"},{id:"joel_c",name:"Joel Carlton"},{id:"francis",name:"Francis Boudreault-Leclerc"},{id:"eric_c",name:"Éric Carmichael"}];
+
+var PT_INIT_COLORS = {'Mining NDT':'rgba(0,174,239,.2)','Pipeline DA':'rgba(109,40,217,.2)','Nuclear/OPG':'rgba(22,163,74,.2)','Powerline':'rgba(201,134,10,.2)','3X Composite':'rgba(185,28,28,.2)','Finance':'rgba(45,74,122,.3)','Operations':'rgba(103,78,167,.2)','People':'rgba(16,185,129,.15)'};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function ptLoad(key) { try { return JSON.parse(localStorage.getItem(key)||'[]'); } catch(e){return[];} }
+function ptSave(key,val) { localStorage.setItem(key, JSON.stringify(val)); }
+function ptToday() { return new Date().toISOString().slice(0,10); }
+function ptFmtDate(s) {
+  if (!s) return '—';
+  var d = new Date(s+'T00:00:00'); 
+  return d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'});
+}
+function ptDaysUntil(s) {
+  if (!s) return null;
+  return Math.round((new Date(s+'T00:00:00') - new Date(ptToday()+'T00:00:00')) / 86400000);
+}
+function ptInitials(name) {
+  return name.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+}
+function ptPersonColor(id) {
+  var p = PEOPLE[id];
+  return p ? p.color : 'var(--sky)';
+}
+function ptPersonColorHex(id) {
+  var colors = {'var(--sky)':'#00AEEF','var(--blue)':'#1A5CA8','var(--teal)':'#0D6E4E','var(--green)':'#16A34A','var(--amber)':'#C9860A','var(--purp)':'#6D28D9'};
+  var col = ptPersonColor(id);
+  return colors[col] || '#1A5CA8';
+}
+
+function populatePersonSelect(selId) {
+  var sel = document.getElementById(selId);
+  if (!sel) return;
+  sel.innerHTML = PT_PEOPLE.map(function(p){
+    return '<option value="'+p.id+'">'+p.name+'</option>';
+  }).join('');
+}
+
+function switchPTTab(tab, el) {
+  document.querySelectorAll('.pt-tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.pt-panel').forEach(function(p){p.classList.remove('active');});
+  el.classList.add('active');
+  document.getElementById('pt-'+tab).classList.add('active');
+}
+
+// ── SPRINT BOARD ──────────────────────────────────────────────────────────────
+var sbEditId = null;
+var sbCurrentFilter = 'all';
+
+function openSBModal(editId) {
+  sbEditId = editId || null;
+  populatePersonSelect('sb-person');
+  var modal = document.getElementById('sb-modal');
+  document.getElementById('sb-modal-title').textContent = editId ? 'Edit Sprint Item' : 'Add Sprint Item';
+  if (editId) {
+    var items = ptLoad('pt_sprint');
+    var item  = items.find(function(i){return i.id===editId;});
+    if (item) {
+      document.getElementById('sb-person').value       = item.personId;
+      document.getElementById('sb-focus').value        = item.focus;
+      document.getElementById('sb-status-sel').value   = item.status;
+      document.getElementById('sb-initiative').value   = item.initiative || '';
+      document.getElementById('sb-due').value          = item.due || '';
+    }
+  } else {
+    document.getElementById('sb-focus').value       = '';
+    document.getElementById('sb-status-sel').value  = 'on';
+    document.getElementById('sb-initiative').value  = '';
+    document.getElementById('sb-due').value         = '';
+  }
+  modal.classList.add('open');
+}
+function closeSBModal() { document.getElementById('sb-modal').classList.remove('open'); }
+
+function saveSBItem() {
+  var personId   = document.getElementById('sb-person').value;
+  var focus      = document.getElementById('sb-focus').value.trim();
+  var status     = document.getElementById('sb-status-sel').value;
+  var initiative = document.getElementById('sb-initiative').value;
+  var due        = document.getElementById('sb-due').value;
+  if (!focus) { alert('Please enter a focus item.'); return; }
+  var items = ptLoad('pt_sprint');
+  if (sbEditId) {
+    items = items.map(function(i){
+      return i.id === sbEditId ? {...i, personId, focus, status, initiative, due} : i;
+    });
+  } else {
+    items.push({id: Date.now()+'', personId, focus, status, initiative, due, created: ptToday()});
+  }
+  // One item per person — replace if same person exists and not editing
+  if (!sbEditId) {
+    var existing = items.filter(function(i){return i.personId===personId;});
+    if (existing.length > 1) {
+      // Keep only the latest
+      items = items.filter(function(i){return i.personId!==personId || i.id===existing[existing.length-1].id;});
+    }
+  }
+  ptSave('pt_sprint', items);
+  closeSBModal();
+  renderSB();
+  renderPPToolBadges();
+}
+
+function deleteSBItem(id) {
+  if (!confirm('Remove this sprint item?')) return;
+  ptSave('pt_sprint', ptLoad('pt_sprint').filter(function(i){return i.id!==id;}));
+  renderSB(); renderPPToolBadges();
+}
+
+function sbFilter(filter, el) {
+  sbCurrentFilter = filter;
+  document.querySelectorAll('.sb-filter-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  renderSB();
+}
+
+function renderSB() {
+  var items = ptLoad('pt_sprint');
+  var filtered = sbCurrentFilter === 'all' ? items
+    : items.filter(function(i){return i.status===sbCurrentFilter;});
+  var grid = document.getElementById('sb-grid');
+  if (!grid) return;
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="sb-empty">No sprint items yet. Click + Add Sprint Item to track what your team is working on.</div>';
+    return;
+  }
+  var statusLabels = {on:'On Track',risk:'At Risk',blocked:'Blocked'};
+  var statusCls    = {on:'sb-status-on',risk:'sb-status-risk',blocked:'sb-status-blocked'};
+  grid.innerHTML = filtered.map(function(item) {
+    var p    = PEOPLE[item.personId];
+    var name = p ? p.name : item.personId;
+    var days = ptDaysUntil(item.due);
+    var dueHtml = '';
+    if (item.due) {
+      var cls = days !== null && days < 0 ? ' overdue' : '';
+      var label = days === 0 ? 'Due today' : days < 0 ? 'Overdue '+Math.abs(days)+'d' : 'Due '+ptFmtDate(item.due);
+      dueHtml = '<span class="sb-due'+cls+'">📅 '+label+'</span>';
+    }
+    var initHtml = item.initiative
+      ? '<span class="sb-initiative-tag" style="background:'+( PT_INIT_COLORS[item.initiative]||'rgba(255,255,255,.08)')+'">'+item.initiative+'</span>' : '';
+    var col = ptPersonColorHex(item.personId);
+    return '<div class="sb-card">'
+      +'<div class="sb-card-hdr">'
+      +'<div class="sb-avatar" style="background:'+col+'">'+ptInitials(name)+'</div>'
+      +'<span class="sb-person-name">'+name+'</span>'
+      +'<span class="sb-status '+statusCls[item.status]+'">'+statusLabels[item.status]+'</span>'
+      +'</div>'
+      +'<div class="sb-card-body">'
+      +'<div class="sb-focus">'+item.focus+'</div>'
+      +'<div class="sb-meta">'+initHtml+dueHtml+'</div>'
+      +'</div>'
+      +'<div class="sb-card-footer">'
+      +'<button class="sb-edit-btn" data-id="'+item.id+'" data-act="edit">✏ Edit</button>'
+      +'<button class="sb-del-btn" data-id="'+item.id+'" data-act="del">✕ Remove</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ── 1:1 TRACKER ───────────────────────────────────────────────────────────────
+var otEditPersonId = null;
+
+function openOTModal(personId) {
+  otEditPersonId = personId || null;
+  populatePersonSelect('ot-person');
+  var modal = document.getElementById('ot-modal');
+  document.getElementById('ot-modal-title').textContent = 'Log 1:1';
+  document.getElementById('ot-date').value        = ptToday();
+  document.getElementById('ot-next').value        = '';
+  document.getElementById('ot-engagement').value  = 'high';
+  document.getElementById('ot-note').value        = '';
+  if (personId) {
+    document.getElementById('ot-person').value = personId;
+    var existing = ptLoad('pt_oneon').find(function(i){return i.personId===personId;});
+    if (existing) {
+      document.getElementById('ot-engagement').value = existing.engagement || 'high';
+      document.getElementById('ot-next').value       = existing.next || '';
+    }
+  }
+  modal.classList.add('open');
+}
+function closeOTModal() { document.getElementById('ot-modal').classList.remove('open'); }
+
+function saveOTItem() {
+  var personId   = document.getElementById('ot-person').value;
+  var date       = document.getElementById('ot-date').value;
+  var next       = document.getElementById('ot-next').value;
+  var engagement = document.getElementById('ot-engagement').value;
+  var note       = document.getElementById('ot-note').value.trim();
+  if (!date) { alert('Please enter the date of the 1:1.'); return; }
+  var items = ptLoad('pt_oneon');
+  // One record per person — upsert
+  var idx = items.findIndex(function(i){return i.personId===personId;});
+  var record = {personId, lastDate:date, next, engagement, note, updated:ptToday()};
+  if (idx > -1) items[idx] = record;
+  else items.push(record);
+  ptSave('pt_oneon', items);
+  closeOTModal();
+  renderOT();
+  renderPPToolBadges();
+}
+
+function renderOT() {
+  var items = ptLoad('pt_oneon');
+  var grid  = document.getElementById('ot-grid');
+  if (!grid) return;
+
+  // Build a card for every person, showing blank if no record yet
+  var html = PT_PEOPLE.map(function(pp) {
+    var rec  = items.find(function(i){return i.personId===pp.id;});
+    var col  = ptPersonColorHex(pp.id);
+    var daysNext  = rec && rec.next ? ptDaysUntil(rec.next) : null;
+    var daysLast  = rec && rec.lastDate ? ptDaysUntil(rec.lastDate) : null;
+
+    var badgeHtml = '';
+    if (!rec) {
+      badgeHtml = '<span class="ot-upcoming-badge">Not logged</span>';
+    } else if (daysNext !== null && daysNext < 0) {
+      badgeHtml = '<span class="ot-overdue-badge">Overdue</span>';
+    } else if (daysNext !== null && daysNext <= 7) {
+      badgeHtml = '<span class="ot-upcoming-badge">This week</span>';
+    } else if (rec.engagement === 'low') {
+      badgeHtml = '<span class="ot-overdue-badge">Low engagement</span>';
+    } else {
+      badgeHtml = '<span class="ot-ok-badge">✓ Current</span>';
+    }
+
+    var lastHtml = rec ? '<div class="ot-row"><span class="ot-row-label">Last 1:1</span><span class="ot-row-val">'+ptFmtDate(rec.lastDate)+(daysLast!==null?' ('+Math.abs(daysLast)+'d ago)':'')+'</span></div>' : '';
+    var nextHtml = rec && rec.next ? '<div class="ot-row"><span class="ot-row-label">Next</span><span class="ot-row-val">'+ptFmtDate(rec.next)+'</span></div>' : '';
+    var engHtml  = rec ? '<div class="ot-row"><span class="ot-row-label">Engagement</span><span class="ot-row-val">'+(rec.engagement==='high'?'🟢 High':rec.engagement==='medium'?'🟡 Medium':'🔴 Low')+'</span></div>' : '';
+    var noteHtml = rec && rec.note ? '<div class="ot-note">'+rec.note+'</div>' : '';
+
+    return '<div class="ot-card" data-id="'+pp.id+'" data-act="ot-open">'
+      +'<div class="ot-card-hdr"><div class="sb-avatar" style="background:'+col+';width:26px;height:26px;font-size:.65rem">'+ptInitials(pp.name)+'</div>'
+      +'<span class="ot-name">'+pp.name+'</span>'+badgeHtml+'</div>'
+      +'<div class="ot-card-body">'+lastHtml+nextHtml+engHtml+noteHtml+'</div>'
+      +'</div>';
+  }).join('');
+  grid.innerHTML = html;
+}
+
+// ── ACTION ITEMS ──────────────────────────────────────────────────────────────
+var aiEditId      = null;
+var aiCurrentFilter = 'open';
+
+function openAIModal(editId) {
+  aiEditId = editId || null;
+  populatePersonSelect('ai-owner');
+  var modal = document.getElementById('ai-modal');
+  document.getElementById('ai-modal-title').textContent = editId ? 'Edit Action Item' : 'Add Action Item';
+  if (editId) {
+    var items = ptLoad('pt_actions');
+    var item  = items.find(function(i){return i.id===editId;});
+    if (item) {
+      document.getElementById('ai-action').value = item.action;
+      document.getElementById('ai-owner').value  = item.ownerId;
+      document.getElementById('ai-source').value = item.source;
+      document.getElementById('ai-due').value    = item.due || '';
+    }
+  } else {
+    document.getElementById('ai-action').value = '';
+    document.getElementById('ai-source').value = 'commercial';
+    document.getElementById('ai-due').value    = '';
+  }
+  modal.classList.add('open');
+}
+function closeAIModal() { document.getElementById('ai-modal').classList.remove('open'); }
+
+function saveAIItem() {
+  var action  = document.getElementById('ai-action').value.trim();
+  var ownerId = document.getElementById('ai-owner').value;
+  var source  = document.getElementById('ai-source').value;
+  var due     = document.getElementById('ai-due').value;
+  if (!action) { alert('Please describe the action.'); return; }
+  var items = ptLoad('pt_actions');
+  if (aiEditId) {
+    items = items.map(function(i){
+      return i.id===aiEditId ? {...i,action,ownerId,source,due} : i;
+    });
+  } else {
+    items.push({id:Date.now()+'',action,ownerId,source,due,done:false,created:ptToday()});
+  }
+  ptSave('pt_actions', items);
+  closeAIModal();
+  renderAI();
+}
+
+function toggleAIItem(id) {
+  var items = ptLoad('pt_actions');
+  items = items.map(function(i){return i.id===id?{...i,done:!i.done}:i;});
+  ptSave('pt_actions', items);
+  renderAI();
+}
+
+function deleteAIItem(id) {
+  if (!confirm('Delete this action item?')) return;
+  ptSave('pt_actions', ptLoad('pt_actions').filter(function(i){return i.id!==id;}));
+  renderAI();
+}
+
+function aiFilter(filter, el) {
+  aiCurrentFilter = filter;
+  document.querySelectorAll('.ai-ftab').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  renderAI();
+}
+
+function renderAI() {
+  var items = ptLoad('pt_actions');
+  var overdue = items.filter(function(i){return !i.done && i.due && ptDaysUntil(i.due)<0;}).length;
+  var overdueEl = document.getElementById('ai-overdue-count');
+  if (overdueEl) overdueEl.textContent = overdue ? overdue+' overdue' : '';
+
+  var filtered = aiCurrentFilter==='open' ? items.filter(function(i){return !i.done;})
+    : aiCurrentFilter==='done' ? items.filter(function(i){return i.done;})
+    : items;
+  // Sort: open overdue first, then by due date, then no due date
+  filtered.sort(function(a,b){
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    if (!a.due && !b.due) return 0;
+    if (!a.due) return 1;
+    if (!b.due) return -1;
+    return a.due.localeCompare(b.due);
+  });
+
+  var tbody = document.getElementById('ai-tbody');
+  var empty = document.getElementById('ai-empty');
+  if (!tbody) return;
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  var srcCls = {commercial:'ai-src-commercial',ops:'ai-src-ops',gate:'ai-src-gate',finance:'ai-src-finance',other:'ai-src-other'};
+  var srcLbl = {commercial:'Commercial',ops:'Ops',gate:'Gate Review',finance:'Finance',other:'Other'};
+
+  tbody.innerHTML = filtered.map(function(item) {
+    var p     = PEOPLE[item.ownerId];
+    var owner = p ? p.name.split(' ')[0]+' '+p.name.split(' ').slice(-1)[0] : item.ownerId;
+    var days  = item.due ? ptDaysUntil(item.due) : null;
+    var dueCls = '';
+    var dueLabel = item.due ? ptFmtDate(item.due) : '—';
+    if (!item.done && days !== null) {
+      if (days < 0)   { dueCls='overdue'; dueLabel='⚠ '+Math.abs(days)+'d overdue'; }
+      else if (days===0) { dueCls='today'; dueLabel='Today'; }
+    }
+    var doneCls = item.done ? ' done' : '';
+    return '<tr class="ai-row'+doneCls+'" id="ai-row-'+item.id+'">'
+      +'<td class="ai-check-col"><input type="checkbox" class="ai-check"'+(item.done?' checked':'')
+      +'<input type="checkbox" class="ai-check" data-id="'+item.id+'" data-act="ai-toggle"'+(item.done?' checked':'')+' onclick="event.stopPropagation()">'
+      +'<td><span class="ai-action-text">'+item.action+'</span></td>'
+      +'<td>'+owner+'</td>'
+      +'<td><span class="ai-source-tag '+(srcCls[item.source]||'ai-src-other')+'">'+( srcLbl[item.source]||item.source)+'</span></td>'
+      +'<td><span class="ai-due '+dueCls+'">'+dueLabel+'</span></td>'
+      +'<td><button class="ai-del-btn" data-id="'+item.id+'" data-act="ai-del" title="Delete">✕</button></td>'
+      +'</tr>';
+  }).join('');
+}
+
+// ── Person panel badges (sprint + 1:1 chip shown when person is opened) ───────
+function renderPPToolBadges() {
+  // Called after togglePerson renders — we re-augment the panel
+  var panel = document.getElementById('person-panel');
+  if (!panel || !panel.classList.contains('open') || !openPerson) return;
+  var pid = openPerson;
+
+  var sprint = ptLoad('pt_sprint').find(function(i){return i.personId===pid;});
+  var oneon  = ptLoad('pt_oneon').find(function(i){return i.personId===pid;});
+  if (!sprint && !oneon) return;
+
+  var wrap = document.createElement('div');
+  wrap.className = 'pp-tool-badges';
+
+  if (sprint) {
+    var statusCls = {on:'sb-status-on',risk:'sb-status-risk',blocked:'sb-status-blocked'};
+    var statusLbl = {on:'On Track',risk:'At Risk',blocked:'Blocked'};
+    var chip = document.createElement('span');
+    chip.className = 'pp-sprint-badge '+statusCls[sprint.status];
+    chip.textContent = '🎯 '+sprint.focus.slice(0,50)+(sprint.focus.length>50?'…':'');
+    chip.title = sprint.focus;
+    wrap.appendChild(chip);
+  }
+  if (oneon) {
+    var daysLast = ptDaysUntil(oneon.lastDate);
+    var chip2 = document.createElement('span');
+    chip2.className = 'pp-oneon-chip';
+    chip2.textContent = '💬 Last 1:1: '+ptFmtDate(oneon.lastDate)+(daysLast!==null?' ('+Math.abs(daysLast)+'d ago)':'');
+    wrap.appendChild(chip2);
+  }
+
+  // Insert after pp-hdr
+  var hdr = panel.querySelector('.pp-hdr');
+  if (hdr && hdr.nextSibling) panel.insertBefore(wrap, hdr.nextSibling);
+  else if (hdr) panel.appendChild(wrap);
+}
+
+// Patch togglePerson to also render tool badges
+var _origTogglePerson = togglePerson;
+togglePerson = function(id) {
+  _origTogglePerson.call(this, id);
+  setTimeout(renderPPToolBadges, 50);
+};
+
+// Close modals on overlay click
+['sb-modal','ot-modal','ai-modal'].forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) el.addEventListener('click', function(e){
+    if (e.target===el) el.classList.remove('open');
+  });
+});
+
+// ── Event delegation for dynamically rendered buttons ────────────────────────
+document.addEventListener('click', function(e) {
+  var act = e.target.dataset && e.target.dataset.act;
+  var id  = e.target.dataset && e.target.dataset.id;
+  if (!act) return;
+  if (act==='edit')     { e.stopPropagation(); openSBModal(id); }
+  if (act==='del')      { e.stopPropagation(); deleteSBItem(id); }
+  if (act==='ot-open')  { openOTModal(id); }
+  if (act==='ai-del')   { e.stopPropagation(); deleteAIItem(id); }
+  if (act==='ai-toggle'){ e.stopPropagation(); toggleAIItem(id); }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  renderSB();
+  renderOT();
+  renderAI();
+  loadCRMSummary();
+});
+
+
+
+
+var _SB_URL   = 'https://tbcoktkpjwdvnhqtuups.supabase.co';
+var _SB_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiY29rdGtwandkdm5ocXR1dXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MDM1OTIsImV4cCI6MjA5MjM3OTU5Mn0.8Zw75YQYmNPXKoLE_bK23Vs2j3ZeqCUwAYUFt5-8YWs';
+var _SB_TABLE = 'crm_sync';
+
+async function sbWrite(id, payload) {
+  const res = await fetch(_SB_URL + '/rest/v1/' + _SB_TABLE, {
+    method:  'POST',
+    headers: {
+      'apikey':        _SB_KEY,
+      'Authorization': 'Bearer ' + _SB_KEY,
+      'Content-Type':  'application/json',
+      'Prefer':        'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify({ id, data: payload, updated_at: new Date().toISOString() })
+  });
+  if (!res.ok) throw new Error('sbWrite ' + res.status + ' ' + await res.text());
+  return true;
+}
+
+async function sbRead(id) {
+  const res = await fetch(
+    _SB_URL + '/rest/v1/' + _SB_TABLE + '?id=eq.' + id + '&select=data,updated_at&limit=1',
+    { headers: { 'apikey': _SB_KEY, 'Authorization': 'Bearer ' + _SB_KEY } }
+  );
+  if (!res.ok) throw new Error('sbRead ' + res.status);
+  const rows = await res.json();
+  return rows.length ? rows[0] : null;
+}
+
+function sbSubscribe(callback) {
+  const wsUrl = _SB_URL.replace('https://','wss://') + '/realtime/v1/websocket?apikey=' + _SB_KEY + '&vsn=1.0.0';
+  let ws, hb, rt;
+  function connect() {
+    try {
+      ws = new WebSocket(wsUrl);
+      ws.onopen = function() {
+        ws.send(JSON.stringify({
+          topic: 'realtime:public:' + _SB_TABLE,
+          event: 'phx_join', ref: '1',
+          payload: { config: { broadcast: { self: false },
+            postgres_changes: [{ event: '*', schema: 'public', table: _SB_TABLE }] } }
+        }));
+        hb = setInterval(function() {
+          if (ws.readyState === 1)
+            ws.send(JSON.stringify({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: 'hb' }));
+        }, 25000);
+      };
+      ws.onmessage = function(e) {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.event === 'postgres_changes') {
+            const rec = (msg.payload && msg.payload.data && msg.payload.data.record) || (msg.payload && msg.payload.record);
+            if (rec && rec.data) callback(rec.data);
+          }
+        } catch(err) {}
+      };
+      ws.onclose = function() { clearInterval(hb); rt = setTimeout(connect, 4000); };
+      ws.onerror  = function() { ws.close(); };
+    } catch(err) { rt = setTimeout(connect, 4000); }
+  }
+  connect();
+  return function() { clearInterval(hb); clearTimeout(rt); try{ ws.close(); }catch(e){} };
+}
+
+
+// ── CRM Live Summary Strip (reads from Supabase with localStorage fallback) ──
+async function loadCRMSummary() {
+  let s = null;
+  try {
+    const row = await sbRead('hub_summary');
+    if (row && row.data) s = row.data;
+  } catch(e) {
+    const raw = localStorage.getItem('crm_hub_summary');
+    if (raw) try { s = JSON.parse(raw); } catch(e2) {}
+  }
+  if (!s) return;
+
+  function fmtM(n) {
+    if (!n && n !== 0) return '—';
+    if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+    if (n >= 1000) return '$' + Math.round(n/1000) + 'K';
+    return '$' + n;
+  }
+  var el = function(id) { return document.getElementById(id); };
+  var wrap = document.getElementById('crm-strip-wrap');
+  if (wrap) wrap.style.display = 'block';
+  if (el('cs-pipeline'))     el('cs-pipeline').textContent     = fmtM(s.pipeline_total_cad);
+  if (el('cs-pipeline-sub')) el('cs-pipeline-sub').textContent = (s.open_opps||0) + ' open opps';
+  if (el('cs-won'))          el('cs-won').textContent          = fmtM(s.won_mtd_value);
+  if (el('cs-won-sub'))      el('cs-won-sub').textContent      = (s.won_mtd||0) + ' deals closed';
+  if (el('cs-leads'))        el('cs-leads').textContent        = s.open_leads||0;
+  if (el('cs-stale')) {
+    el('cs-stale').textContent = s.stale_opps||0;
+    el('cs-stale').style.color = (s.stale_opps>0) ? '#FCA5A5' : '#6EE7B7';
+  }
+}
+
+</script>
+</body>
+</html>

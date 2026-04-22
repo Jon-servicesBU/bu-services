@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — Meeting Agendas 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#161C60;--navy2:#0D1040;--white:#FFFFFF;--mid:#F0F3FA;
+  --lgrey:#DDE3F0;--body:#384660;--dark:#0B1035;
+  --green:#196B24;--green2:#22882F;--green-l:#E8F5E9;
+  --orange:#E97132;--orange2:#7A3800;--orange-l:#FFF3EC;
+  --blue:#1A3A6B;--blue2:#368CD9;--blue-l:#E8F4FD;
+  --purple:#3D1A60;--teal:#062020;
+  --amber:#D97706;--amber-l:#FFF8E1;
+  --red:#CC2222;--red-l:#FFEBEE;
+  --fd:'Barlow Condensed',sans-serif;
+  --fb:'Barlow',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --shadow:0 2px 16px rgba(22,28,96,0.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fb);background:#EAECF5;color:var(--body);line-height:1.6;font-size:14px;}
+
+/* PAGE HEADER */
+.page-hdr{background:var(--navy2);padding:1.3rem 2rem;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--green2);}
+.page-hdr h1{font-family:var(--fd);font-size:1.6rem;font-weight:900;color:var(--white);}
+.page-hdr p{font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:0.15rem;}
+.page-hdr-right{text-align:right;font-size:0.7rem;color:rgba(255,255,255,0.25);line-height:1.65;}
+
+/* NAV TABS */
+.nav-tabs{background:var(--navy);display:flex;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,0.07);;scrollbar-width:none;-ms-overflow-style:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.38);padding:0 1.1rem;height:44px;line-height:44px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s,border-color .15s;user-select:none;flex-shrink:0;}
+.nav-tab:hover{color:rgba(255,255,255,0.7);}
+.nav-tab.active{color:var(--white);border-bottom-color:var(--green2);}
+
+/* CONTAINER */
+.container{max-width:880px;margin:0 auto;padding:1.75rem 2rem 4rem;}
+
+/* AGENDA CARD */
+.agenda-card{background:var(--white);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);display:none;}
+.agenda-card.active{display:block;}
+
+/* AGENDA HEADER */
+.ag-hdr{padding:1.3rem 1.6rem 1.1rem;}
+.ag-hdr-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:0.7rem;}
+.ag-eyebrow{font-family:var(--mono);font-size:0.62rem;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:0.2rem;letter-spacing:1px;}
+.ag-title{font-family:var(--fd);font-size:1.45rem;font-weight:900;color:var(--white);line-height:1.1;}
+.ag-meta{display:flex;gap:0.45rem;flex-wrap:wrap;margin-top:0.45rem;}
+.ag-badge{font-family:var(--mono);font-size:0.62rem;font-weight:600;padding:0.18rem 0.5rem;border-radius:3px;background:rgba(255,255,255,0.13);color:rgba(255,255,255,0.75);}
+.ag-print-btn{background:rgba(255,255,255,0.11);border:1px solid rgba(255,255,255,0.22);color:var(--white);font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.35rem 0.85rem;border-radius:5px;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0;}
+.ag-print-btn:hover{background:rgba(255,255,255,0.2);}
+.ag-attendees{display:flex;flex-wrap:wrap;gap:0.3rem;}
+.ag-att{display:inline-flex;align-items:center;gap:0.3rem;background:rgba(255,255,255,0.11);border-radius:20px;padding:0.2rem 0.65rem;font-size:0.73rem;color:rgba(255,255,255,0.85);}
+.chair-pip{width:6px;height:6px;border-radius:50%;background:var(--orange);flex-shrink:0;}
+
+/* TYPE LEGEND */
+.type-legend{background:var(--white);padding:0.55rem 1.6rem;border-bottom:1px solid var(--lgrey);display:flex;gap:1.25rem;flex-wrap:wrap;font-size:0.72rem;}
+.tl-item{display:flex;align-items:center;gap:0.35rem;color:var(--body);}
+.tl-pip{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* PREP BOX */
+.ag-prep{background:#FFFDF4;border-left:4px solid var(--amber);padding:0.75rem 1.1rem;font-size:0.8rem;color:var(--body);line-height:1.65;}
+.ag-prep-lbl{font-family:var(--fd);font-size:0.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:0.25rem;}
+
+/* SECTIONS */
+.ag-section{border-bottom:1px solid var(--lgrey);}
+.ag-section:last-child{border-bottom:none;}
+.ag-sec-hdr{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1.6rem;background:var(--mid);}
+.ag-sec-num{font-family:var(--mono);font-size:0.68rem;font-weight:600;color:rgba(0,0,0,0.25);min-width:1.8rem;}
+.ag-sec-title{font-family:var(--fd);font-size:0.95rem;font-weight:700;color:var(--navy);flex:1;}
+.ag-sec-owner{font-size:0.72rem;color:var(--blue2);padding-right:0.5rem;}
+.ag-sec-time{font-family:var(--mono);font-size:0.7rem;color:rgba(0,0,0,0.3);white-space:nowrap;}
+.ag-sec-body{padding:0.8rem 1.6rem 0.9rem 4.1rem;}
+
+/* ITEMS */
+.ag-item{display:flex;gap:0.7rem;padding:0.32rem 0;font-size:0.83rem;color:var(--body);line-height:1.55;align-items:flex-start;}
+.ag-item-bullet{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:0.42rem;}
+.item-decision .ag-item-bullet{background:var(--orange);}
+.item-action   .ag-item-bullet{background:var(--blue2);}
+.item-info     .ag-item-bullet{background:var(--green2);}
+.item-risk     .ag-item-bullet{background:var(--red);}
+
+/* DECISION BOX */
+.decision-box{background:#FFF8F4;border:1px solid #FFD5B8;border-radius:6px;padding:0.65rem 0.9rem;margin-top:0.5rem;font-size:0.8rem;line-height:1.6;}
+.decision-box-lbl{font-family:var(--fd);font-size:0.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:0.2rem;}
+
+/* TIMING BAR */
+.timing-bar{background:var(--mid);border-top:1px solid var(--lgrey);display:flex;}
+.ts{flex:1;text-align:center;padding:0.4rem 0.3rem;border-right:1px solid var(--lgrey);}
+.ts:last-child{border-right:none;}
+.ts-time{font-family:var(--mono);font-size:0.62rem;color:rgba(0,0,0,0.3);}
+.ts-label{font-weight:600;color:var(--navy);font-size:0.72rem;margin-top:0.1rem;}
+.ts-dur{font-size:0.62rem;color:rgba(0,0,0,0.3);margin-top:0.05rem;}
+
+/* COLOUR HEADERS */
+.c-green  .ag-hdr{background:linear-gradient(135deg,#0D3D1A,#196B24);}
+.c-blue   .ag-hdr{background:linear-gradient(135deg,#0A1830,#1A3A6B);}
+.c-orange .ag-hdr{background:linear-gradient(135deg,#2A1400,#7A3800);}
+.c-navy   .ag-hdr{background:linear-gradient(135deg,#0A0C30,var(--navy));}
+.c-purple .ag-hdr{background:linear-gradient(135deg,#150828,var(--purple));}
+.c-teal   .ag-hdr{background:linear-gradient(135deg,var(--teal),#0D5050);}
+
+@media print{
+  .nav-tabs,.ag-print-btn{display:none!important;}
+  .agenda-card{display:block!important;box-shadow:none;border:1px solid var(--lgrey);margin-bottom:2rem;break-inside:avoid;}
+  body{background:white;}
+}
+</style>
+</head>
+<body>
+
+<div class="page-hdr">
+  <div>
+    <h1>BU Services — Meeting Agendas</h1>
+    <p>Standing agendas for all 7 recurring meetings &nbsp;·&nbsp; Effective May 2026</p>
+  </div>
+  <div class="page-hdr-right">
+    Ekoscan Integrity Group &nbsp;|&nbsp; Jon Eustace, CEO NA<br>
+    Confidential — Internal Use Only &nbsp;|&nbsp; v1.0
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active"  onclick="show('commercial')">Commercial Weekly</div>
+  <div class="nav-tab"         onclick="show('ops')">Ops Weekly</div>
+  <div class="nav-tab"         onclick="show('nuclear')">Nuclear Steering</div>
+  <div class="nav-tab"         onclick="show('gate')">Gate Reviews</div>
+  <div class="nav-tab"         onclick="show('finance')">Financial Review</div>
+  <div class="nav-tab"         onclick="show('hr')">HR &amp; Retention</div>
+  <div class="nav-tab"         onclick="show('eurazeo')">Eurazeo / EIG</div>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════ COMMERCIAL LEADERSHIP WEEKLY ═══════════════ -->
+<div class="agenda-card c-green active" id="agenda-commercial">
+  <div class="ag-hdr">
+    <div class="ag-hdr-row">
+      <div>
+        <div class="ag-eyebrow">Weekly &nbsp;·&nbsp; Every Monday &nbsp;·&nbsp; 9:00 AM ET</div>
+        <div class="ag-title">Commercial Leadership Weekly</div>
+        <div class="ag-meta">
+          <span class="ag-badge">60 min</span>
+          <span class="ag-badge">Mon 9:00 AM ET</span>
+          <span class="ag-badge">Chair: Olivier Marcotte</span>
+          <span class="ag-badge">Microsoft Teams</span>
+        </div>
+      </div>
+      <button class="ag-print-btn" onclick="window.print()">Print agenda</button>
+    </div>
+    <div class="ag-attendees">
+      <span class="ag-att"><span class="chair-pip"></span>Olivier Marcotte</span>
+      <span class="ag-att">Jon Eustace</span>
+      <span class="ag-att">Vinoth Tharma</span>
+      <span class="ag-att">Max Aggrey</span>
+      <span class="ag-att">Rick Carlton</span>
+    </div>
+  </div>
+  <div class="type-legend">
+    <span class="tl-item"><span class="tl-pip" style="background:var(--orange)"></span>Decision required</span>
+    <span class="tl-item"><span class="tl-pip" style="background:var(--blue2)"></span>Action item</span>
+    <span class="tl-item"><span class="tl-pip" style="background:var(--green2)"></span>Information / update</span>
+    <span class="tl-item"><span class="tl-pip" style="background:var(--red)"></span>Risk / flag</span>
+  </div>
+  <div class="ag-prep">
+    <span class="ag-prep-lbl">Pre-meeting prep — all owners (10 min before)</span>
+    Update your initiative pipeline: deals active, proposals issued this week, client responses received. Note any gate milestones hit or missed. Flag any early warning signals. No slides required — verbal updates only.
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr">
+      <span class="ag-sec-num">01</span>
+      <span class="ag-sec-title">Initiative Pipeline Round-Robin</span>
+      <span class="ag-sec-owner">All owners · 5–7 min each</span>
+      <span class="ag-sec-time">0:00 – 0:35</span>
+    </div>
+    <div class="ag-sec-body">
+      <p style="font-size:0.78rem;color:rgba(0,0,0,0.38);margin-bottom:0.55rem;font-style:italic;">Format per owner: deals active → proposals issued → client responses → next action this week.</p>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Mining NDT — Vinoth Tharma / Max Aggrey:</strong> Account updates, new site visits booked, proposals out, any signed MSAs or POs. Western Canada update from Max. Quote conversion rate vs. target. ECA instrument utilisation.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Pipeline DA — Rick Carlton:</strong> Pembina and Tidewater status. Rigs operational and deployed. Digs completed and invoiced this week. New operator conversations opened. Joel Carlton field execution summary.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Powerline — Mathieu Beauchesne:</strong> Hydro-Québec program status. Hydro One / AltaLink pilot progress. EIG instrument model confirmation status. Any utility client responses received.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Nuclear / OPG — Vinoth Tharma:</strong> OPG procurement relationship update. MSA tender preparation milestone. CGSB qualification progress from Louis-Pier Théberge. Aecon reference letter status.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>3X Composite — Vinoth Tharma / Max Aggrey:</strong> ABSA re-submission status from Keith Reichenbach. Non-pressure repair revenue. Repair quotes embedded in inspection reports this week. First combined invoice status.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr">
+      <span class="ag-sec-num">02</span>
+      <span class="ag-sec-title">Gate Decisions &amp; Sprint Milestones</span>
+      <span class="ag-sec-owner">Olivier Marcotte / Jon Eustace</span>
+      <span class="ag-sec-time">0:35 – 0:48</span>
+    </div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Review any gate milestone due this week from the sprint plan. Status: hit, missed, or at risk? Owner states position — Olivier decides whether action is required or escalation to Jon Eustace is needed.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Any CAPEX release required this week — confirm Jeremy Irwin has been briefed. Amounts above $200K require Jon Eustace confirmation. Above $500K requires EIG approval.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Any new proposals requiring sign-off on pricing or scope before issue — Olivier approves up to $2M, Jon Eustace above that.</div></div>
+      <div class="decision-box">
+        <div class="decision-box-lbl">Decision authority at this meeting</div>
+        <strong>Olivier Marcotte:</strong> Proposals and contracts to $2M · Gate milestone calls · CAPEX to $200K<br>
+        <strong>Jon Eustace:</strong> Strategic pivots · Contracts above $2M · Contingency activation signals
+      </div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr">
+      <span class="ag-sec-num">03</span>
+      <span class="ag-sec-title">Early Warning Signals &amp; Risk Flags</span>
+      <span class="ag-sec-owner">All owners</span>
+      <span class="ag-sec-time">0:48 – 0:55</span>
+    </div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-risk"><div class="ag-item-bullet"></div><div>Any risk register trigger conditions approaching threshold? R-01 Nuclear MSA · R-02 Pipeline MSA miss · R-03 Personnel · R-04 ABSA · R-05 Mining stall · R-06 Powerline instrument.</div></div>
+      <div class="ag-item item-risk"><div class="ag-item-bullet"></div><div>Any competitor activity — Evident Industrial (formerly Applus RTD) stability signals, new ECA entrants in mining, pipeline DA incumbent moves at Pembina or TC Energy.</div></div>
+      <div class="ag-item item-risk"><div class="ag-item-bullet"></div><div>Any team or resource concerns — utilisation dropping, instrument availability issues, client relationship stress, retention signals from any commercial owner.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr">
+      <span class="ag-sec-num">04</span>
+      <span class="ag-sec-title">Wins &amp; Next Week Actions</span>
+      <span class="ag-sec-owner">Olivier Marcotte</span>
+      <span class="ag-sec-time">0:55 – 1:00</span>
+    </div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Name every win from the past week — signed contract, confirmed PO, new site visit booked, first invoice issued. Celebrate explicitly. Commercial momentum is built week by week.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Confirm one clear next action per person, due by next Monday. Each owner states their action aloud — Olivier notes for the following week's check-in.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Olivier sends a brief summary to Jon Eustace within 2 hours: deals closed this week, risks flagged, decisions taken, actions assigned.</div></div>
+    </div>
+  </div>
+
+  <div class="timing-bar">
+    <div class="ts"><div class="ts-time">0:00</div><div class="ts-label">Pipeline round-robin</div><div class="ts-dur">35 min</div></div>
+    <div class="ts"><div class="ts-time">0:35</div><div class="ts-label">Gates &amp; decisions</div><div class="ts-dur">13 min</div></div>
+    <div class="ts"><div class="ts-time">0:48</div><div class="ts-label">Risk flags</div><div class="ts-dur">7 min</div></div>
+    <div class="ts"><div class="ts-time">0:55</div><div class="ts-label">Wins &amp; actions</div><div class="ts-dur">5 min</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ OPS DELIVERY WEEKLY ═══════════════ -->
+<div class="agenda-card c-blue" id="agenda-ops">
+  <div class="ag-hdr">
+    <div class="ag-hdr-row">
+      <div>
+        <div class="ag-eyebrow">Weekly &nbsp;·&nbsp; Every Wednesday &nbsp;·&nbsp; 9:00 AM ET</div>
+        <div class="ag-title">Ops &amp; Delivery Weekly</div>
+        <div class="ag-meta">
+          <span class="ag-badge">60 min</span>
+          <span class="ag-badge">Wed 9:00 AM ET</span>
+          <span class="ag-badge">Chair: Alex Cyr</span>
+          <span class="ag-badge">Microsoft Teams</span>
+        </div>
+      </div>
+      <button class="ag-print-btn" onclick="window.print()">Print agenda</button>
+    </div>
+    <div class="ag-attendees">
+      <span class="ag-att"><span class="chair-pip"></span>Alex Cyr</span>
+      <span class="ag-att">Joel Carlton</span>
+      <span class="ag-att">Louis-Pier Théberge</span>
+      <span class="ag-att">Eric Rodrigue</span>
+      <span class="ag-att">Joel Djordjevic</span>
+      <span class="ag-att">Jason Borza</span>
+    </div>
+  </div>
+  <div class="type-legend">
+    <span class="tl-item"><span class="tl-pip" style="background:var(--orange)"></span>Decision required</span>
+    <span class="tl-item"><span class="tl-pip" style="background:var(--blue2)"></span>Action item</span>
+    <span class="tl-item"><span class="tl-pip" style="background:var(--green2)"></span>Information / update</span>
+    <span class="tl-item"><span class="tl-pip" style="background:var(--red)"></span>Risk / flag</span>
+  </div>
+  <div class="ag-prep">
+    <span class="ag-prep-lbl">Pre-meeting prep — all ops leads (15 min before)</span>
+    Update crew utilisation for your region: billable hours this week vs. available hours. Note any instrument or equipment issues. Flag resource conflicts with other initiatives. Have headcount vs. plan ready.
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr">
+      <span class="ag-sec-num">01</span>
+      <span class="ag-sec-title">Crew Utilisation — Region by Region</span>
+      <span class="ag-sec-owner">All ops leads · 4–5 min each</span>
+      <span class="ag-sec-time">0:00 – 0:25</span>
+    </div>
+    <div class="ag-sec-body">
+      <p style="font-size:0.78rem;color:rgba(0,0,0,0.38);margin-bottom:0.55rem;font-style:italic;">Format: billable % this week → scheduled deployments next week → any idle capacity → flag if below 75%.</p>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Pipeline — Joel Carlton</strong> (reports to Rick Carlton → Alex Cyr): Rig utilisation by rig number. Digs completed, in-progress, scheduled. Crew hours billable vs. available. Any rig downtime or maintenance.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Nuclear — Louis-Pier Théberge:</strong> Outage schedule and Nucleom staffing deployed. T.R.U.S.T.I.E. crew status. Aecon site hours. Any OPG scheduling changes affecting crew availability. CGSB qualification training hours.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>QC / Eastern — Eric Rodrigue:</strong> Mining QC accounts, Hydro-Québec powerline crew, remote analysis hours at QC City. Utilisation vs. 85% target. Any new account mobilisations this week.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>ON / Central — Joel Djordjevic:</strong> Nucleom ON crew (Oakville, Thunder Bay). Mining ON accounts. Nuclear remote analysis capacity at Oakville. Utilisation vs. 85% target.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Western Canada — Jason Borza:</strong> Nortech Edmonton and Fort St. John crew. Oil sands deployments. Powerline AB crew if active. Utilisation vs. 85% target. Brooke Althouse Northern ON update if applicable.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr">
+      <span class="ag-sec-num">02</span>
+      <span class="ag-sec-title">Instrument &amp; Equipment Availability</span>
+      <span class="ag-sec-owner">Alex Cyr / Francis Boudreault-Leclerc</span>
+      <span class="ag-sec-time">0:25 – 0:35</span>
+    </div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>SG NDT ECA instrument fleet — units deployed, units available, any maintenance outstanding. Sevan Bouchy to flag probe condition for upcoming Mining deployments.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Pipeline rigs — operational status per rig number. Any repairs, PAUT instrument issues, dig program equipment readiness for next mobilisation window.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Powerline instruments (LineCore / LineOhm / LineRay) — availability for HQ or utility deployments. EIG instrument model status if unresolved.</div></div>
+      <div class="ag-item item-risk"><div class="ag-item-bullet"></div><div>Flag any instrument gap that could prevent a scheduled deployment — escalate to Mathieu Beauchesne or Olivier Marcotte immediately if it threatens a billable commitment.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr">
+      <span class="ag-sec-num">03</span>
+      <span class="ag-sec-title">CAPEX &amp; Procurement Status</span>
+      <span class="ag-sec-owner">Jeremy Irwin update (via Alex Cyr)</span>
+      <span class="ag-sec-time">0:35 – 0:43</span>
+    </div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Pipeline rig procurement — delivery status for any rigs on order. Rigs 5–6 status (hold or proceed depending on Pembina MSA).</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>3X Composite tooling — MONTIPOWER tool and tooling kit delivery status. Technician certification CAPEX release status.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Nuclear instrument upgrades — ET instrument order status. OPG data delivery spec compliance confirmed.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Any CAPEX release required by ops lead this week — Alex Cyr approves under $25K, brings above that to Mathieu Beauchesne.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr">
+      <span class="ag-sec-num">04</span>
+      <span class="ag-sec-title">Field Quality &amp; Resource Conflicts</span>
+      <span class="ag-sec-owner">Alex Cyr</span>
+      <span class="ag-sec-time">0:43 – 0:55</span>
+    </div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-risk"><div class="ag-item-bullet"></div><div>Any non-conformances, client complaints, or technical quality issues from field this week — all issues tabled here regardless of initiative.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Cross-initiative resource conflicts resolved at this meeting. Alex Cyr makes the call on prioritisation — no initiative owner escalates above Alex without flagging at this meeting first.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Headcount vs. plan — any new hire approvals needed, any backfill situations flagged. Alex Cyr brings net-new FTE requests to Mathieu Beauchesne.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr">
+      <span class="ag-sec-num">05</span>
+      <span class="ag-sec-title">Monday Commercial Update &amp; Close</span>
+      <span class="ag-sec-owner">Alex Cyr</span>
+      <span class="ag-sec-time">0:55 – 1:00</span>
+    </div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Brief summary of Monday Commercial Leadership meeting — what gates were discussed, any actions that affect ops execution this week. Ensures ops team is aligned with commercial priorities.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>One clear ops action per lead due by next Wednesday. Alex Cyr notes for follow-up check-in.</div></div>
+    </div>
+  </div>
+
+  <div class="timing-bar">
+    <div class="ts"><div class="ts-time">0:00</div><div class="ts-label">Crew utilisation</div><div class="ts-dur">25 min</div></div>
+    <div class="ts"><div class="ts-time">0:25</div><div class="ts-label">Instruments</div><div class="ts-dur">10 min</div></div>
+    <div class="ts"><div class="ts-time">0:35</div><div class="ts-label">CAPEX status</div><div class="ts-dur">8 min</div></div>
+    <div class="ts"><div class="ts-time">0:43</div><div class="ts-label">Quality &amp; conflicts</div><div class="ts-dur">12 min</div></div>
+    <div class="ts"><div class="ts-time">0:55</div><div class="ts-label">Commercial update</div><div class="ts-dur">5 min</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ NUCLEAR STEERING ═══════════════ -->
+<div class="agenda-card c-orange" id="agenda-nuclear">
+  <div class="ag-hdr">
+    <div class="ag-hdr-row">
+      <div>
+        <div class="ag-eyebrow">Bi-weekly &nbsp;·&nbsp; Every other Tuesday &nbsp;·&nbsp; 10:00 AM ET</div>
+        <div class="ag-title">Nuclear Steering</div>
+        <div class="ag-meta">
+          <span class="ag-badge">60 min</span>
+          <span class="ag-badge">Bi-weekly Tue 10:00 AM ET</span>
+          <span class="ag-badge">Chair: Olivier Marcotte</span>
+          <span class="ag-badge">Microsoft Teams</span>
+        </div>
+      </div>
+      <button class="ag-print-btn" onclick="window.print()">Print agenda</button>
+    </div>
+    <div class="ag-attendees">
+      <span class="ag-att"><span class="chair-pip"></span>Olivier Marcotte</span>
+      <span class="ag-att">Louis-Pier Théberge</span>
+      <span class="ag-att">Jean-François Martel</span>
+      <span class="ag-att">Vinoth Tharma</span>
+      <span class="ag-att">Francis Boudreault-Leclerc</span>
+    </div>
+  </div>
+  <div class="ag-prep">
+    <span class="ag-prep-lbl">Pre-meeting prep</span>
+    Louis-Pier Théberge: updated CGSB qualification tracker. Jean-François Martel: tender document completion status. Vinoth Tharma: OPG relationship signals from any recent contact. Francis Boudreault-Leclerc: instrument readiness for any outage window.
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">01</span><span class="ag-sec-title">MSA Tender Preparation Status</span><span class="ag-sec-owner">Jean-François Martel</span><span class="ag-sec-time">0:00 – 0:20</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Document completion status per work package — which WP sections are draft, under review, or final. Jean-François Martel leads with a checklist update against the Q3 2026 submission target.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Rate card status — proposed 2027 rates reviewed against 2020 MSA baseline and market benchmarks. Jeremy Irwin financial sign-off status.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Any documentation gaps identified — who owns the gap and what is the completion date. No gaps should carry forward more than two steering meetings.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">02</span><span class="ag-sec-title">CGSB Qualification Progress</span><span class="ag-sec-owner">Louis-Pier Théberge / Francis Boudreault-Leclerc</span><span class="ag-sec-time">0:20 – 0:35</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Qualification tracker update — current certifications vs. required certifications for all 10 work packages. Gap count and trend (closing or widening).</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>New qualifications in progress — technicians currently in training, expected completion dates, examiner availability.</div></div>
+      <div class="ag-item item-risk"><div class="ag-item-bullet"></div><div>Any qualification at risk of not being achieved before the Q3 bid submission — flag immediately. This is the most likely technical blocker for the MSA bid.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">03</span><span class="ag-sec-title">OPG Relationship Signals</span><span class="ag-sec-owner">Vinoth Tharma / Olivier Marcotte</span><span class="ag-sec-time">0:35 – 0:47</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Any direct or indirect signals from OPG procurement — procurement contacts, RFP timeline updates, competitor activity on-site, changes to outage scheduling.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Aecon relationship status — LOI / reference letter progress. Aecon Capital programmes subcontract scope documentation for bid credentials.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Any executive engagement decision — does Jon Eustace need to make contact at OPG leadership level this cycle? Olivier Marcotte decides and action is assigned.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">04</span><span class="ag-sec-title">Close &amp; Actions</span><span class="ag-sec-owner">Olivier Marcotte</span><span class="ag-sec-time">0:47 – 1:00</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>All actions confirmed with owner and due date — nothing leaves this meeting unowned. The Q3 submission is the single most important deliverable of 2026.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Olivier Marcotte sends a one-paragraph status note to Jon Eustace within 24 hours of each steering meeting: progress, blockers, next milestone.</div></div>
+    </div>
+  </div>
+
+  <div class="timing-bar">
+    <div class="ts"><div class="ts-time">0:00</div><div class="ts-label">Tender status</div><div class="ts-dur">20 min</div></div>
+    <div class="ts"><div class="ts-time">0:20</div><div class="ts-label">CGSB quals</div><div class="ts-dur">15 min</div></div>
+    <div class="ts"><div class="ts-time">0:35</div><div class="ts-label">OPG signals</div><div class="ts-dur">12 min</div></div>
+    <div class="ts"><div class="ts-time">0:47</div><div class="ts-label">Actions</div><div class="ts-dur">13 min</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ INITIATIVE GATE REVIEWS ═══════════════ -->
+<div class="agenda-card c-navy" id="agenda-gate">
+  <div class="ag-hdr">
+    <div class="ag-hdr-row">
+      <div>
+        <div class="ag-eyebrow">Monthly &nbsp;·&nbsp; Last Friday of each month &nbsp;·&nbsp; 10:00 AM ET</div>
+        <div class="ag-title">Initiative Gate Reviews</div>
+        <div class="ag-meta">
+          <span class="ag-badge">90 min</span>
+          <span class="ag-badge">Last Fri 10:00 AM ET</span>
+          <span class="ag-badge">Chair: Jon Eustace</span>
+          <span class="ag-badge">Microsoft Teams</span>
+        </div>
+      </div>
+      <button class="ag-print-btn" onclick="window.print()">Print agenda</button>
+    </div>
+    <div class="ag-attendees">
+      <span class="ag-att"><span class="chair-pip"></span>Jon Eustace</span>
+      <span class="ag-att">Olivier Marcotte</span>
+      <span class="ag-att">Mathieu Beauchesne</span>
+      <span class="ag-att" style="font-style:italic;opacity:0.65;">+ relevant owners per initiative</span>
+    </div>
+  </div>
+  <div class="ag-prep">
+    <span class="ag-prep-lbl">Pre-meeting prep — all initiative commercial owners</span>
+    Prepare a one-page status for your initiative: gate milestone hit/missed/at-risk, revenue actuals vs. plan month-to-date, any risk trigger conditions observed, next milestone and owner. Send to Jon Eustace and Mathieu Beauchesne by Thursday 5PM.
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">01</span><span class="ag-sec-title">Gate Check — All 5 Initiatives</span><span class="ag-sec-owner">Commercial owners · 10 min each</span><span class="ag-sec-time">0:00 – 0:50</span></div>
+    <div class="ag-sec-body">
+      <p style="font-size:0.78rem;color:rgba(0,0,0,0.38);margin-bottom:0.55rem;font-style:italic;">Structure: gate status → revenue actuals vs. plan → next milestone → any ask from Jon Eustace or Mathieu Beauchesne.</p>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Initiative 01 — Mining NDT:</strong> Vinoth Tharma / Max Aggrey present gate status, new account count vs. target, ECA instrument utilisation, and H2 inspection schedule confirmation.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Initiative 02 — Pipeline DA:</strong> Rick Carlton presents rig deployment status, Pembina/Tidewater program progress, digs completed and invoiced, and 2027 ramp readiness.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Initiative 03 — Powerline:</strong> Mathieu Beauchesne presents HQ program progress, second utility pilot status, and EIG instrument model resolution.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Initiative 04 — Nuclear / OPG:</strong> Olivier Marcotte presents MSA tender milestone, CGSB qualification gap count, and OPG relationship status.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div><strong>Initiative 05 — 3X Composite:</strong> Vinoth Tharma presents ABSA re-submission status, non-pressure revenue, and repair quote embedding rate across inspection programs.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">02</span><span class="ag-sec-title">Trigger Condition Review &amp; Contingency</span><span class="ag-sec-owner">Jon Eustace / Mathieu Beauchesne</span><span class="ag-sec-time">0:50 – 1:10</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-risk"><div class="ag-item-bullet"></div><div>Review all 6 risk trigger conditions against current status. Any trigger condition that has been observed in the past month must be named explicitly — not generalised.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Formal contingency activation decision if any trigger is confirmed. Jon Eustace + Mathieu Beauchesne sign-off required. Eurazeo notified within 48 hours of any activation.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">03</span><span class="ag-sec-title">Budget vs. Actuals &amp; Headcount</span><span class="ag-sec-owner">Mathieu Beauchesne / Jeremy Irwin</span><span class="ag-sec-time">1:10 – 1:25</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Revenue actuals vs. initiative targets — consolidated view across all 5 initiatives. YTD vs. plan. Mathieu Beauchesne presents.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>CAPEX actual vs. approved — any overspend or underspend requiring re-authorisation. Jeremy Irwin update via Mathieu.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Incremental headcount vs. plan — FTE additions made this month, open positions, any hiring decisions required at this meeting.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">04</span><span class="ag-sec-title">Decisions &amp; Actions</span><span class="ag-sec-owner">Jon Eustace</span><span class="ag-sec-time">1:25 – 1:30</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>All gate go/no-go decisions confirmed. Any pivot decisions resulting from this meeting assigned to a named owner with a completion date.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Jon Eustace sends a gate review summary to Eurazeo within 48 hours if any contingency was activated or any gate was missed by more than 30 days.</div></div>
+    </div>
+  </div>
+
+  <div class="timing-bar">
+    <div class="ts"><div class="ts-time">0:00</div><div class="ts-label">5-initiative gate check</div><div class="ts-dur">50 min</div></div>
+    <div class="ts"><div class="ts-time">0:50</div><div class="ts-label">Risk &amp; contingency</div><div class="ts-dur">20 min</div></div>
+    <div class="ts"><div class="ts-time">1:10</div><div class="ts-label">Budget &amp; headcount</div><div class="ts-dur">15 min</div></div>
+    <div class="ts"><div class="ts-time">1:25</div><div class="ts-label">Decisions</div><div class="ts-dur">5 min</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ FINANCIAL REVIEW ═══════════════ -->
+<div class="agenda-card c-purple" id="agenda-finance">
+  <div class="ag-hdr">
+    <div class="ag-hdr-row">
+      <div>
+        <div class="ag-eyebrow">Monthly &nbsp;·&nbsp; First Thursday of each month &nbsp;·&nbsp; 2:00 PM ET</div>
+        <div class="ag-title">Financial Review</div>
+        <div class="ag-meta">
+          <span class="ag-badge">60 min</span>
+          <span class="ag-badge">1st Thu 2:00 PM ET</span>
+          <span class="ag-badge">Chair: Mathieu Beauchesne</span>
+          <span class="ag-badge">Microsoft Teams</span>
+        </div>
+      </div>
+      <button class="ag-print-btn" onclick="window.print()">Print agenda</button>
+    </div>
+    <div class="ag-attendees">
+      <span class="ag-att"><span class="chair-pip"></span>Mathieu Beauchesne</span>
+      <span class="ag-att">Renée Lachance</span>
+      <span class="ag-att">Jeremy Irwin</span>
+      <span class="ag-att">Jon Eustace</span>
+      <span class="ag-att">Charles Recape</span>
+    </div>
+  </div>
+  <div class="ag-prep">
+    <span class="ag-prep-lbl">Pre-meeting prep</span>
+    Jeremy Irwin: monthly actuals by initiative from invoicing system. Renée Lachance: Nucleom financials and any inter-entity allocations. Charles Recape: Eurazeo reporting pack draft if quarterly. All figures in CAD.
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">01</span><span class="ag-sec-title">Revenue vs. Forecast</span><span class="ag-sec-owner">Jeremy Irwin</span><span class="ag-sec-time">0:00 – 0:20</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Monthly actuals by initiative: Mining, Pipeline, Powerline, Nuclear, 3X. Actual vs. monthly target. YTD actual vs. YTD plan. Variance explanation for any initiative more than 15% off plan.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Base business actuals — Nucleom (incl. Aecon) and Nortech vs. Sure Forecast. Any account losses or new wins not in the original forecast.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>If YTD variance vs. plan exceeds $1M, Mathieu Beauchesne determines whether Eurazeo forecast revision is required and flags to Charles Recape.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">02</span><span class="ag-sec-title">CAPEX Tracking &amp; Releases</span><span class="ag-sec-owner">Jeremy Irwin</span><span class="ag-sec-time">0:20 – 0:35</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>CAPEX actual vs. approved plan by initiative. Pipeline rig procurement status. 3X tooling and certification spend. Nuclear ET instrument orders.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Any CAPEX release above $200K pending approval — Mathieu Beauchesne approves up to $500K. Jon Eustace above that. EIG above $500K.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">03</span><span class="ag-sec-title">FCF Position &amp; Eurazeo Pack</span><span class="ag-sec-owner">Mathieu Beauchesne / Charles Recape</span><span class="ag-sec-time">0:35 – 0:52</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Free cash flow position vs. financial model — cash generation from initiatives net of CAPEX. Cashflow breakeven point for Pipeline initiative tracked against rig deployment.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Eurazeo quarterly reporting pack — if this is the first Thursday of a quarter end month, Charles Recape presents draft pack for review before submission. Revenue narrative, EBITDA, FCF, gate status.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Contingency scenario financial modelling if any risk has been triggered — revised revenue and FCF under the relevant contingency.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">04</span><span class="ag-sec-title">Actions &amp; Eurazeo Escalation</span><span class="ag-sec-owner">Mathieu Beauchesne</span><span class="ag-sec-time">0:52 – 1:00</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>All financial actions confirmed with owner and due date. Any forecast revision flagged to Charles Recape for Eurazeo communication timeline.</div></div>
+    </div>
+  </div>
+
+  <div class="timing-bar">
+    <div class="ts"><div class="ts-time">0:00</div><div class="ts-label">Revenue vs. forecast</div><div class="ts-dur">20 min</div></div>
+    <div class="ts"><div class="ts-time">0:20</div><div class="ts-label">CAPEX tracking</div><div class="ts-dur">15 min</div></div>
+    <div class="ts"><div class="ts-time">0:35</div><div class="ts-label">FCF &amp; Eurazeo</div><div class="ts-dur">17 min</div></div>
+    <div class="ts"><div class="ts-time">0:52</div><div class="ts-label">Actions</div><div class="ts-dur">8 min</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ HR & RETENTION ═══════════════ -->
+<div class="agenda-card c-teal" id="agenda-hr">
+  <div class="ag-hdr">
+    <div class="ag-hdr-row">
+      <div>
+        <div class="ag-eyebrow">Monthly &nbsp;·&nbsp; Second Wednesday of each month &nbsp;·&nbsp; 11:00 AM ET</div>
+        <div class="ag-title">HR &amp; Retention Review</div>
+        <div class="ag-meta">
+          <span class="ag-badge">45 min</span>
+          <span class="ag-badge">2nd Wed 11:00 AM ET</span>
+          <span class="ag-badge">Chair: Maud Leivin Capuano</span>
+          <span class="ag-badge">Microsoft Teams</span>
+        </div>
+      </div>
+      <button class="ag-print-btn" onclick="window.print()">Print agenda</button>
+    </div>
+    <div class="ag-attendees">
+      <span class="ag-att"><span class="chair-pip"></span>Maud Leivin Capuano</span>
+      <span class="ag-att">Olivier Marcotte</span>
+      <span class="ag-att">Jon Eustace</span>
+      <span class="ag-att">Mathieu Beauchesne</span>
+    </div>
+  </div>
+  <div class="ag-prep">
+    <span class="ag-prep-lbl">Pre-meeting prep — Maud Leivin Capuano</span>
+    1:1 feedback summary from commercial owners this month (Vinoth, Max, Rick Carlton). Any compensation or role concerns raised informally. Open positions vs. FTE plan. Market rate data for key commercial roles if applicable.
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">01</span><span class="ag-sec-title">Commercial Team Retention Indicators</span><span class="ag-sec-owner">Maud Leivin Capuano / Olivier Marcotte</span><span class="ag-sec-time">0:00 – 0:20</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>1:1 summary for each key commercial owner — Vinoth Tharma, Max Aggrey, Rick Carlton. Engagement level, any concerns raised, satisfaction with support and resources.</div></div>
+      <div class="ag-item item-risk"><div class="ag-item-bullet"></div><div>R-03 monitoring — any of the early warning signals observed: reduced activity, compensation concerns raised, LinkedIn activity change, dissatisfaction with operational support. Name specifically — do not generalise.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>If any retention risk identified: Jon Eustace makes the retention decision — compensation adjustment, role expansion, recognition. Action is same-week, not deferred.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">02</span><span class="ag-sec-title">Incremental FTE Pipeline</span><span class="ag-sec-owner">Maud Leivin Capuano</span><span class="ag-sec-time">0:20 – 0:35</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Positions open vs. plan — which initiative FTE additions are in progress, interview stage, or pending approval. On-track count vs. 45 FTE incremental target by 2030.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>CGSB qualification technician pipeline for Nuclear — 8 new qualifications needed in 2026. Training enrolment and examination scheduling status.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Any senior hire (Director level or above) requiring Jon Eustace approval — presented here before any offer is made.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">03</span><span class="ag-sec-title">Compensation vs. Market &amp; Close</span><span class="ag-sec-owner">Jon Eustace</span><span class="ag-sec-time">0:35 – 0:45</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Any roles where compensation has fallen behind market — particularly for field PAUT technicians given pipeline industry demand, and for commercial directors given Nucleom's growth trajectory.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Actions confirmed. Maud Leivin Capuano sends monthly retention summary to Jon Eustace and Mathieu Beauchesne within 24 hours.</div></div>
+    </div>
+  </div>
+
+  <div class="timing-bar">
+    <div class="ts"><div class="ts-time">0:00</div><div class="ts-label">Retention indicators</div><div class="ts-dur">20 min</div></div>
+    <div class="ts"><div class="ts-time">0:20</div><div class="ts-label">FTE pipeline</div><div class="ts-dur">15 min</div></div>
+    <div class="ts"><div class="ts-time">0:35</div><div class="ts-label">Comp &amp; close</div><div class="ts-dur">10 min</div></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ EURAZEO / EIG UPDATE ═══════════════ -->
+<div class="agenda-card c-navy" id="agenda-eurazeo">
+  <div class="ag-hdr">
+    <div class="ag-hdr-row">
+      <div>
+        <div class="ag-eyebrow">Quarterly &nbsp;·&nbsp; First week of Q2 / Q3 / Q4 / Q1 &nbsp;·&nbsp; To be scheduled</div>
+        <div class="ag-title">Eurazeo / EIG Executive Update</div>
+        <div class="ag-meta">
+          <span class="ag-badge">120 min</span>
+          <span class="ag-badge">Quarterly</span>
+          <span class="ag-badge">Presenter: Jon Eustace</span>
+          <span class="ag-badge">Microsoft Teams</span>
+        </div>
+      </div>
+      <button class="ag-print-btn" onclick="window.print()">Print agenda</button>
+    </div>
+    <div class="ag-attendees">
+      <span class="ag-att"><span class="chair-pip"></span>Jon Eustace</span>
+      <span class="ag-att">Mathieu Beauchesne</span>
+      <span class="ag-att">Charles Recape</span>
+      <span class="ag-att">Olivier Marcotte</span>
+      <span class="ag-att" style="font-style:italic;opacity:0.65;">+ EIG / Eurazeo representatives</span>
+    </div>
+  </div>
+  <div class="ag-prep">
+    <span class="ag-prep-lbl">Pre-meeting prep — one week before</span>
+    Charles Recape: Eurazeo financial reporting pack (revenue, EBITDA, FCF vs. plan). Olivier Marcotte: initiative progress narrative — one paragraph per initiative, gate status, risks active. Jon Eustace: executive narrative and any strategic pivots requiring EIG approval. All materials distributed to Eurazeo 48 hours before the meeting.
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">01</span><span class="ag-sec-title">Financial Performance vs. 5-Year Plan</span><span class="ag-sec-owner">Charles Recape</span><span class="ag-sec-time">0:00 – 0:30</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Revenue actuals vs. Eurazeo forecast — quarter and YTD. Presentation by entity (Nucleom, Nortech) and by initiative layer (base business, each initiative).</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>EBITDA actuals and margin performance. FCF position vs. model. CAPEX actual vs. approved plan.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Any forecast revision — if BU Services revenue is tracking more than 10% below or above the Eurazeo plan, revised guidance is presented and rationale explained.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">02</span><span class="ag-sec-title">Initiative Progress vs. 5-Year Plan</span><span class="ag-sec-owner">Olivier Marcotte / Jon Eustace</span><span class="ag-sec-time">0:30 – 0:70</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Each initiative: gate milestones hit vs. plan, current status (on track / at risk / gate pending), 2026 actuals vs. target, and 2027 ramp confidence.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Nuclear MSA update is presented separately and in detail — this is the highest-stakes item on the 5-year plan. OPG relationship status, tender timeline, CGSB qualification count, competition assessment.</div></div>
+      <div class="ag-item item-risk"><div class="ag-item-bullet"></div><div>Any active contingency plans — full narrative on what triggered it, what pivot has been activated, and revised revenue forecast under the contingency scenario.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">03</span><span class="ag-sec-title">Strategic Pivots &amp; EIG Approvals</span><span class="ag-sec-owner">Jon Eustace</span><span class="ag-sec-time">1:10 – 1:40</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Any strategic pivot requiring EIG formal approval — new market entry, material change in initiative scope, acquisition or partnership above threshold.</div></div>
+      <div class="ag-item item-decision"><div class="ag-item-bullet"></div><div>Any CAPEX request above $500K threshold — full business case presented. EIG approval required before commitment.</div></div>
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Stage 2 margin programme progress if applicable — integration milestones, shared services status, overhead reduction achieved to date.</div></div>
+    </div>
+  </div>
+
+  <div class="ag-section">
+    <div class="ag-sec-hdr"><span class="ag-sec-num">04</span><span class="ag-sec-title">Q&amp;A &amp; Next Quarter Focus</span><span class="ag-sec-owner">All</span><span class="ag-sec-time">1:40 – 2:00</span></div>
+    <div class="ag-sec-body">
+      <div class="ag-item item-info"><div class="ag-item-bullet"></div><div>Open Q&A with Eurazeo / EIG representatives. Jon Eustace leads responses. Charles Recape handles financial clarification questions.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Next quarter's three priority deliverables confirmed — specific, named, dated. These become the opening agenda items for the following quarterly update.</div></div>
+      <div class="ag-item item-action"><div class="ag-item-bullet"></div><div>Charles Recape distributes approved minutes and action log within 48 hours. Jon Eustace communicates any EIG decisions to Olivier Marcotte and Mathieu Beauchesne same day.</div></div>
+    </div>
+  </div>
+
+  <div class="timing-bar">
+    <div class="ts"><div class="ts-time">0:00</div><div class="ts-label">Financial performance</div><div class="ts-dur">30 min</div></div>
+    <div class="ts"><div class="ts-time">0:30</div><div class="ts-label">Initiative progress</div><div class="ts-dur">40 min</div></div>
+    <div class="ts"><div class="ts-time">1:10</div><div class="ts-label">Strategic &amp; CAPEX</div><div class="ts-dur">30 min</div></div>
+    <div class="ts"><div class="ts-time">1:40</div><div class="ts-label">Q&amp;A &amp; close</div><div class="ts-dur">20 min</div></div>
+  </div>
+</div>
+
+</div><!-- end container -->
+
+<script>
+function show(id) {
+  document.querySelectorAll('.agenda-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('agenda-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BU Services — Salesforce Backfill Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;900&family=Barlow+Condensed:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0A1F5C;--blue:#1A5CA8;--sky:#00AEEF;--green:#16A34A;--amber:#C9860A;
+  --red:#B91C1C;--purp:#6D28D9;--teal:#0D5050;--dgrey:#6678A0;--dark:#1C2B4A;
+  --mid:#2D4A7A;--bg:#0A1425;--mono:'IBM Plex Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:#E8EDF5;min-height:100vh}
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(10,20,37,.97);
+  backdrop-filter:blur(8px);border-bottom:2px solid var(--sky);
+  display:flex;align-items:center;padding:0 1.5rem;height:52px;gap:1rem}
+.brand{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;
+  color:var(--sky);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.nav-right{display:flex;gap:.5rem;margin-left:auto;align-items:center}
+.progress-pill{font-family:var(--mono);font-size:.68rem;color:var(--sky);
+  background:rgba(0,174,239,.1);border:1px solid rgba(0,174,239,.2);
+  border-radius:12px;padding:.2rem .65rem;white-space:nowrap}
+.nav-btn{color:var(--sky);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);
+  border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;text-decoration:none}
+.page-hdr{background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 100%);
+  padding:2.5rem 2.5rem 2rem;border-bottom:3px solid var(--sky)}
+.page-hdr .eh{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--sky);margin-bottom:.5rem;font-family:var(--mono)}
+.page-hdr h1{font-family:'Barlow Condensed',sans-serif;font-size:2.4rem;font-weight:900;
+  color:#fff;margin-bottom:.3rem}
+.page-hdr p{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.65;max-width:700px;margin-bottom:1rem}
+.why-box{background:rgba(0,174,239,.08);border:1px solid rgba(0,174,239,.2);
+  border-radius:6px;padding:.75rem 1rem;font-size:.75rem;color:#A8B8D0;line-height:1.6;max-width:780px}
+.why-box strong{color:var(--sky)}
+.section{padding:1.5rem 2.5rem;max-width:1400px;margin:0 auto}
+.section-hdr{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.25rem;
+  padding-bottom:.5rem;border-bottom:2px solid var(--sky)}
+.section-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:1.35rem;font-weight:800;color:#fff}
+.section-hdr .sh-sub{font-size:.72rem;color:var(--dgrey)}
+/* PROGRESS BAR */
+.global-progress{background:var(--dark);border:1px solid var(--mid);border-radius:8px;
+  padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem}
+.gp-label{font-size:.72rem;color:var(--dgrey);white-space:nowrap}
+.gp-bar-wrap{flex:1;background:rgba(255,255,255,.06);border-radius:4px;height:8px;overflow:hidden}
+.gp-bar{height:100%;background:linear-gradient(90deg,var(--green),var(--sky));
+  border-radius:4px;transition:width .4s ease}
+.gp-count{font-family:var(--mono);font-size:.75rem;color:#E8EDF5;white-space:nowrap;
+  font-weight:600;min-width:60px;text-align:right}
+/* INITIATIVE TABS */
+.init-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.init-tab{padding:.3rem .85rem;border-radius:20px;font-size:.68rem;font-weight:700;
+  cursor:pointer;transition:all .15s;border:1px solid transparent;user-select:none}
+.init-tab.active{color:#fff}
+.init-tab.inactive{background:rgba(255,255,255,.04);color:var(--dgrey);border-color:var(--mid)}
+/* OPP TABLE */
+.opp-table-wrap{overflow-x:auto;margin-bottom:1.5rem}
+.opp-table{width:100%;border-collapse:collapse;min-width:800px;font-size:.72rem}
+.opp-table th{background:var(--dark);padding:.5rem .75rem;text-align:left;
+  font-weight:700;font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--dgrey);border-bottom:2px solid var(--mid);white-space:nowrap}
+.opp-table td{padding:.45rem .75rem;border-bottom:1px solid rgba(255,255,255,.04);
+  vertical-align:middle}
+.opp-table tr:hover td{background:rgba(255,255,255,.025)}
+.opp-name{font-weight:600;color:#E8EDF5}
+.opp-account{color:var(--dgrey);font-size:.65rem}
+.opp-amount{font-family:var(--mono);font-size:.7rem;color:#6EE7B7}
+.opp-stage{font-size:.62rem;padding:.18rem .5rem;border-radius:3px;font-weight:700;
+  display:inline-block;white-space:nowrap}
+.stage-closedwon{background:rgba(22,163,74,.15);color:#6EE7B7;border:1px solid rgba(22,163,74,.25)}
+.stage-negotiation{background:rgba(201,134,10,.12);color:#FCD34D;border:1px solid rgba(201,134,10,.2)}
+.stage-proposal{background:rgba(26,92,168,.15);color:#7DD3FC;border:1px solid rgba(26,92,168,.25)}
+.stage-qualifying{background:rgba(102,120,160,.12);color:var(--dgrey);border:1px solid var(--mid)}
+.stage-other{background:rgba(255,255,255,.06);color:var(--dgrey);border:1px solid var(--mid)}
+/* INITIATIVE SELECT */
+.init-select{display:flex;align-items:center;gap:.5rem}
+.init-select select{background:var(--dark);border:1px solid var(--mid);color:#E8EDF5;
+  font-family:var(--mono);font-size:.68rem;padding:.3rem .5rem;border-radius:4px;cursor:pointer;
+  outline:none;min-width:180px}
+.init-select select:focus{border-color:var(--sky)}
+.status-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.65rem;
+  font-weight:700;padding:.2rem .55rem;border-radius:3px}
+.badge-done{background:rgba(22,163,74,.15);color:#6EE7B7;border:1px solid rgba(22,163,74,.25)}
+.badge-missing{background:rgba(185,28,28,.12);color:#FCA5A5;border:1px solid rgba(185,28,28,.2)}
+.badge-na{background:rgba(255,255,255,.06);color:var(--dgrey);border:1px solid var(--mid)}
+/* INSTRUCTIONS */
+.instructions{background:var(--dark);border:1px solid var(--mid);border-radius:8px;
+  overflow:hidden;margin-bottom:1.5rem}
+.inst-hdr{padding:.75rem 1.25rem;background:rgba(0,174,239,.08);border-bottom:1px solid var(--mid);
+  font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:800;color:var(--sky)}
+.inst-body{padding:.85rem 1.25rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+.inst-step{font-size:.72rem;color:#A8B8D0;line-height:1.6}
+.inst-step-num{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:900;
+  color:var(--sky);display:block;margin-bottom:.25rem}
+/* SOQL HELPER */
+.soql-box{background:#0D1A2E;border:1px solid var(--mid);border-radius:6px;
+  padding:.85rem 1rem;margin-bottom:1.5rem;font-family:var(--mono);font-size:.65rem;
+  line-height:1.7;color:#A8B8D0;overflow-x:auto}
+.soql-box .sk{color:#7DD3FC}.soql-box .sv{color:#FCD34D}.soql-box .sc{color:var(--dgrey);font-style:italic}
+/* ADD OPP */
+.add-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:1.25rem}
+.add-field{display:flex;flex-direction:column;gap:.25rem}
+.add-label{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--dgrey);font-family:var(--mono)}
+.add-input{background:var(--dark);border:1px solid var(--mid);color:#E8EDF5;
+  font-family:'Barlow',sans-serif;font-size:.75rem;padding:.35rem .6rem;border-radius:4px;
+  outline:none;min-width:160px}
+.add-input:focus{border-color:var(--sky)}
+.add-btn{background:var(--green);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;
+  font-size:.82rem;font-weight:800;padding:.38rem 1rem;border-radius:4px;cursor:pointer;
+  letter-spacing:.04em;text-transform:uppercase;transition:opacity .15s;white-space:nowrap}
+.add-btn:hover{opacity:.85}
+/* BULK ACTIONS */
+.bulk-bar{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.bulk-label{font-size:.68rem;color:var(--dgrey);margin-right:.25rem}
+.bulk-btn{font-size:.65rem;font-weight:700;padding:.25rem .65rem;border-radius:4px;
+  cursor:pointer;border:1px solid;transition:opacity .15s}
+.bulk-btn:hover{opacity:.8}
+.btn-green{background:rgba(22,163,74,.12);color:#6EE7B7;border-color:rgba(22,163,74,.25)}
+.btn-red{background:rgba(185,28,28,.1);color:#FCA5A5;border-color:rgba(185,28,28,.2)}
+.btn-blue{background:rgba(26,92,168,.12);color:#7DD3FC;border-color:rgba(26,92,168,.25)}
+.btn-amber{background:rgba(201,134,10,.1);color:#FCD34D;border-color:rgba(201,134,10,.2)}
+/* SUMMARY CARDS */
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1.5rem}
+.sum-card{background:var(--dark);border:1px solid var(--mid);border-radius:8px;padding:.75rem 1rem;text-align:center}
+.sum-card .sc-num{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:900;margin-bottom:.2rem}
+.sum-card .sc-label{font-size:.62rem;color:var(--dgrey);text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono)}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="brand">BU Services</div>
+  <span style="font-size:.7rem;color:var(--dgrey)">Salesforce BU_Initiative__c Backfill Tracker</span>
+  <div class="nav-right">
+    <span class="progress-pill" id="nav-progress">0 / 0 tagged</span>
+    <a class="nav-btn" href="BU_Services_Management_Hub.html" target="buservices">&#8592; Hub</a>
+  </div>
+</nav>
+
+<div class="page-hdr">
+  <div class="eh">Ekoscan Integrity Group &nbsp;&middot;&nbsp; BU Services &nbsp;&middot;&nbsp; Salesforce Audit</div>
+  <h1>Salesforce Backfill Tracker</h1>
+  <p>Every 2026 Opportunity in Salesforce needs the <strong style="color:var(--sky)">BU_Initiative__c</strong> picklist set correctly before Power Automate runs. Without it, initiative revenue shows as $0 in the Command Centre — even if the deal is Closed Won.</p>
+  <div class="why-box">
+    <strong>Why this matters:</strong> Power Automate queries Salesforce using <code style="font-family:var(--mono);font-size:.75rem">BU_Initiative__c = 'Mining NDT'</code> (etc.) to populate the Command Centre KPIs. Any opportunity without this field set is <strong>invisible to the Command Centre</strong> — it will not appear in initiative totals, region totals, or the Deck Report. This tracker ensures 100% coverage before go-live.
+  </div>
+</div>
+
+<div class="section">
+
+  <!-- INSTRUCTIONS -->
+  <div class="instructions">
+    <div class="inst-hdr">How to use this tracker</div>
+    <div class="inst-body">
+      <div class="inst-step"><span class="inst-step-num">01</span>In Salesforce: run the SOQL query below to export all 2026 Opportunities. Copy the Name, Account, Amount, Stage, and current BU_Initiative__c value for each.</div>
+      <div class="inst-step"><span class="inst-step-num">02</span>Add each opportunity to this tracker using the form below. For any opp with BU_Initiative__c already set correctly, mark it Done. For any missing or wrong value, mark the correct initiative and fix it in Salesforce.</div>
+      <div class="inst-step"><span class="inst-step-num">03</span>Work through until all opps are tagged. The progress bar turns green when 100% complete. Re-run Power Automate after completing the backfill — the Command Centre will update Sunday night.</div>
+    </div>
+  </div>
+
+  <!-- SOQL QUERY -->
+  <div class="section-hdr"><h2>SOQL Query</h2><span class="sh-sub">Run in Salesforce Developer Console or Data Loader</span></div>
+  <div class="soql-box">
+    <span class="sk">SELECT</span> Id, Name, Account.Name, Amount, StageName, CloseDate, BU_Initiative__c, Owner.Name<br>
+    <span class="sk">FROM</span> Opportunity<br>
+    <span class="sk">WHERE</span> CloseDate &gt;= <span class="sv">2026-01-01</span><br>
+    &nbsp;&nbsp;<span class="sk">AND</span> CloseDate &lt;= <span class="sv">2026-12-31</span><br>
+    &nbsp;&nbsp;<span class="sk">AND</span> IsDeleted = <span class="sv">false</span><br>
+    <span class="sk">ORDER BY</span> CloseDate <span class="sk">ASC</span><br>
+    <span class="sc">-- Paste results into tracker below. Focus on rows where BU_Initiative__c is blank or wrong.</span>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="section-hdr"><h2>Progress Summary</h2><span class="sh-sub">Updates as you mark opportunities</span></div>
+  <div class="summary-grid">
+    <div class="sum-card"><div class="sc-num" id="sum-total" style="color:var(--sky)">0</div><div class="sc-label">Total Opps</div></div>
+    <div class="sum-card"><div class="sc-num" id="sum-done" style="color:var(--green)">0</div><div class="sc-label">Tagged ✓</div></div>
+    <div class="sum-card"><div class="sc-num" id="sum-missing" style="color:var(--red)">0</div><div class="sc-label">Missing Tag</div></div>
+    <div class="sum-card"><div class="sc-num" id="sum-closed" style="color:#6EE7B7">0</div><div class="sc-label">Closed Won</div></div>
+    <div class="sum-card"><div class="sc-num" id="sum-value" style="color:#FCD34D">$0</div><div class="sc-label">Won Value (CAD)</div></div>
+  </div>
+
+  <!-- GLOBAL PROGRESS -->
+  <div class="global-progress">
+    <span class="gp-label">Overall backfill progress:</span>
+    <div class="gp-bar-wrap"><div class="gp-bar" id="gp-bar" style="width:0%"></div></div>
+    <span class="gp-count" id="gp-count">0 / 0</span>
+  </div>
+
+  <!-- ADD OPP -->
+  <div class="section-hdr"><h2>Add Opportunity</h2><span class="sh-sub">Enter each Salesforce opp manually or paste from SOQL export</span></div>
+  <div class="add-row">
+    <div class="add-field">
+      <span class="add-label">Opportunity Name</span>
+      <input class="add-input" id="add-name" placeholder="e.g. Teck Resources — PAUT 2026" style="min-width:260px">
+    </div>
+    <div class="add-field">
+      <span class="add-label">Account</span>
+      <input class="add-input" id="add-account" placeholder="e.g. Teck Resources" style="min-width:180px">
+    </div>
+    <div class="add-field">
+      <span class="add-label">Amount (CAD)</span>
+      <input class="add-input" id="add-amount" placeholder="e.g. 85000" style="min-width:110px">
+    </div>
+    <div class="add-field">
+      <span class="add-label">Stage</span>
+      <select class="add-input" id="add-stage" style="min-width:150px">
+        <option value="Closed Won">Closed Won</option>
+        <option value="Negotiation">Negotiation</option>
+        <option value="Proposal Submitted">Proposal Submitted</option>
+        <option value="Qualifying" selected>Qualifying</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="add-field">
+      <span class="add-label">BU_Initiative__c (current in SF)</span>
+      <select class="add-input" id="add-current" style="min-width:180px">
+        <option value="">&mdash; blank / not set &mdash;</option>
+        <option value="Mining NDT">Mining NDT</option>
+        <option value="Pipeline DA">Pipeline DA</option>
+        <option value="Powerline">Powerline</option>
+        <option value="Nuclear/OPG">Nuclear/OPG</option>
+        <option value="3X Composite">3X Composite</option>
+        <option value="Base Business">Base Business</option>
+      </select>
+    </div>
+    <div class="add-field">
+      <span class="add-label">Owner</span>
+      <select class="add-input" id="add-owner" style="min-width:140px">
+        <option value="Max Aggrey">Max Aggrey</option>
+        <option value="Vinoth Tharma">Vinoth Tharma</option>
+        <option value="Rick Carlton">Rick Carlton</option>
+        <option value="Mathieu Beauchesne">Mathieu Beauchesne</option>
+        <option value="Olivier Marcotte">Olivier Marcotte</option>
+      </select>
+    </div>
+    <button class="add-btn" onclick="addOpp()">+ Add</button>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="section-hdr"><h2>Opportunity Checklist</h2><span class="sh-sub">Click initiative to filter &nbsp;&middot;&nbsp; Set correct tag for each row &nbsp;&middot;&nbsp; Mark done when fixed in Salesforce</span></div>
+  <div class="init-tabs" id="init-tabs">
+    <div class="init-tab active" style="background:var(--sky);border-color:var(--sky)" onclick="filterInit('all',this)">All</div>
+    <div class="init-tab inactive" onclick="filterInit('Mining NDT',this)">Mining NDT</div>
+    <div class="init-tab inactive" onclick="filterInit('Pipeline DA',this)">Pipeline DA</div>
+    <div class="init-tab inactive" onclick="filterInit('Powerline',this)">Powerline</div>
+    <div class="init-tab inactive" onclick="filterInit('Nuclear/OPG',this)">Nuclear/OPG</div>
+    <div class="init-tab inactive" onclick="filterInit('3X Composite',this)">3X Composite</div>
+    <div class="init-tab inactive" onclick="filterInit('Base Business',this)">Base Business</div>
+    <div class="init-tab inactive" onclick="filterInit('__missing__',this)" style="border-color:rgba(185,28,28,.3);color:#FCA5A5">Missing Tag</div>
+  </div>
+
+  <!-- BULK ACTIONS -->
+  <div class="bulk-bar">
+    <span class="bulk-label">Bulk:</span>
+    <button class="bulk-btn btn-green" onclick="bulkMarkDone()">&#10003; Mark filtered as Done</button>
+    <button class="bulk-btn btn-amber" onclick="bulkSetInit()">Tag filtered as:</button>
+    <select id="bulk-init" style="background:var(--dark);border:1px solid var(--mid);color:#E8EDF5;font-size:.68rem;padding:.22rem .4rem;border-radius:4px;outline:none">
+      <option>Mining NDT</option><option>Pipeline DA</option><option>Powerline</option>
+      <option>Nuclear/OPG</option><option>3X Composite</option><option>Base Business</option>
+    </select>
+    <button class="bulk-btn btn-red" onclick="bulkDelete()">&#10005; Remove filtered</button>
+    <button class="bulk-btn btn-blue" onclick="exportCSV()">&#8595; Export CSV</button>
+    <button class="bulk-btn btn-blue" onclick="clearAll()" style="margin-left:auto">Clear all data</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="opp-table-wrap">
+    <table class="opp-table" id="opp-table">
+      <thead>
+        <tr>
+          <th style="width:32px"><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"></th>
+          <th>Opportunity / Account</th>
+          <th>Amount</th>
+          <th>Stage</th>
+          <th>Owner</th>
+          <th>Current BU_Initiative__c</th>
+          <th>Correct Initiative</th>
+          <th>Status</th>
+          <th style="width:40px"></th>
+        </tr>
+      </thead>
+      <tbody id="opp-body"></tbody>
+    </table>
+  </div>
+
+  <div id="empty-state" style="text-align:center;padding:3rem;color:var(--dgrey);font-size:.8rem;display:none">
+    No opportunities yet &mdash; add them above or import from the SOQL export.
+  </div>
+
+</div>
+
+<div style="background:rgba(10,20,37,.8);border-top:1px solid var(--mid);padding:1rem 2.5rem;
+  text-align:center;font-size:.65rem;color:var(--dgrey);margin-top:2rem">
+  BU Services Salesforce Backfill Tracker &nbsp;&middot;&nbsp; Ekoscan Integrity Group &nbsp;&middot;&nbsp; Confidential &mdash; Internal Use Only
+</div>
+
+<script>
+const INIT_COLORS = {
+  'Mining NDT':    {bg:'rgba(22,163,74,.15)',  color:'#6EE7B7',  border:'rgba(22,163,74,.3)'},
+  'Pipeline DA':   {bg:'rgba(201,134,10,.12)', color:'#FCD34D',  border:'rgba(201,134,10,.25)'},
+  'Powerline':     {bg:'rgba(0,174,239,.12)',  color:'#7DD3FC',  border:'rgba(0,174,239,.25)'},
+  'Nuclear/OPG':   {bg:'rgba(109,40,217,.12)', color:'#C4B5FD', border:'rgba(109,40,217,.25)'},
+  '3X Composite':  {bg:'rgba(185,28,28,.1)',   color:'#FCA5A5',  border:'rgba(185,28,28,.2)'},
+  'Base Business': {bg:'rgba(255,255,255,.06)','color':'#A8B8D0', border:'rgba(102,120,160,.3)'},
+  '':              {bg:'rgba(185,28,28,.08)',  color:'#FCA5A5',  border:'rgba(185,28,28,.2)'},
+};
+
+const INIT_TAB_COLORS = {
+  'Mining NDT':'var(--green)','Pipeline DA':'var(--amber)','Powerline':'var(--sky)',
+  'Nuclear/OPG':'var(--purp)','3X Composite':'var(--red)','Base Business':'var(--dgrey)',
+  '__missing__':'var(--red)','all':'var(--sky)'
+};
+
+let opps = JSON.parse(localStorage.getItem('sf_backfill_opps') || '[]');
+let currentFilter = 'all';
+let nextId = parseInt(localStorage.getItem('sf_backfill_nextid') || '1');
+
+function save() {
+  localStorage.setItem('sf_backfill_opps', JSON.stringify(opps));
+  localStorage.setItem('sf_backfill_nextid', String(nextId));
+}
+
+function stageClass(stage) {
+  if(stage==='Closed Won') return 'stage-closedwon';
+  if(stage==='Negotiation') return 'stage-negotiation';
+  if(stage.includes('Proposal')) return 'stage-proposal';
+  if(stage==='Qualifying') return 'stage-qualifying';
+  return 'stage-other';
+}
+
+function formatAmount(amt) {
+  if(!amt || isNaN(amt)) return '—';
+  return '$' + Number(amt).toLocaleString('en-CA');
+}
+
+function initBadge(val) {
+  const c = INIT_COLORS[val] || INIT_COLORS[''];
+  const label = val || '⚠ NOT SET';
+  return `<span style="display:inline-block;font-size:.62rem;font-weight:700;padding:.18rem .5rem;border-radius:3px;background:${c.bg};color:${c.color};border:1px solid ${c.border}">${label}</span>`;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('opp-body');
+  const filtered = opps.filter(o => {
+    if(currentFilter === 'all') return true;
+    if(currentFilter === '__missing__') return !o.initiative || o.initiative !== o.correct;
+    return o.correct === currentFilter || o.initiative === currentFilter;
+  });
+
+  if(filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:2.5rem;color:var(--dgrey);font-size:.75rem">No opportunities match this filter.</td></tr>`;
+  } else {
+    tbody.innerHTML = filtered.map(o => {
+      const needsFix = !o.initiative || (o.correct && o.correct !== o.initiative);
+      const statusBadge = o.done
+        ? `<span class="status-badge badge-done">&#10003; Done</span>`
+        : needsFix
+          ? `<span class="status-badge badge-missing">Fix in SF</span>`
+          : `<span class="status-badge badge-na">Review</span>`;
+
+      const initOptions = ['Mining NDT','Pipeline DA','Powerline','Nuclear/OPG','3X Composite','Base Business']
+        .map(v => `<option value="${v}" ${o.correct===v?'selected':''}>${v}</option>`).join('');
+
+      return `<tr data-id="${o.id}" style="${o.done ? 'opacity:.55' : ''}">
+        <td><input type="checkbox" class="row-cb" data-id="${o.id}"></td>
+        <td>
+          <div class="opp-name">${o.name}</div>
+          <div class="opp-account">${o.account||'—'}</div>
+        </td>
+        <td><span class="opp-amount">${formatAmount(o.amount)}</span></td>
+        <td><span class="opp-stage ${stageClass(o.stage)}">${o.stage}</span></td>
+        <td style="font-size:.68rem;color:#A8B8D0">${o.owner||'—'}</td>
+        <td>${initBadge(o.initiative)}</td>
+        <td>
+          <select onchange="setCorrect(${o.id},this.value)"
+            style="background:var(--dark);border:1px solid var(--mid);color:#E8EDF5;font-size:.65rem;padding:.2rem .35rem;border-radius:3px;outline:none;max-width:160px">
+            <option value="">— select —</option>
+            ${initOptions}
+          </select>
+        </td>
+        <td>
+          <div style="display:flex;gap:.3rem;align-items:center">
+            ${statusBadge}
+            <button onclick="toggleDone(${o.id})"
+              style="font-size:.6rem;padding:.15rem .4rem;border-radius:3px;cursor:pointer;font-weight:700;
+              background:${o.done?'rgba(185,28,28,.1)':'rgba(22,163,74,.12)'};
+              color:${o.done?'#FCA5A5':'#6EE7B7'};
+              border:1px solid ${o.done?'rgba(185,28,28,.2)':'rgba(22,163,74,.25)'}">
+              ${o.done ? 'Undo' : '✓ Done'}
+            </button>
+          </div>
+        </td>
+        <td>
+          <button onclick="deleteOpp(${o.id})"
+            style="background:none;border:none;color:var(--dgrey);cursor:pointer;font-size:.8rem;padding:.1rem .3rem"
+            title="Remove">&#10005;</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+  updateSummary();
+}
+
+function updateSummary() {
+  const total = opps.length;
+  const done = opps.filter(o => o.done).length;
+  const missing = opps.filter(o => !o.initiative || (o.correct && o.correct !== o.initiative)).length;
+  const closed = opps.filter(o => o.stage === 'Closed Won').length;
+  const value = opps.filter(o => o.stage === 'Closed Won').reduce((s,o) => s + (Number(o.amount)||0), 0);
+  const pct = total > 0 ? Math.round((done/total)*100) : 0;
+
+  document.getElementById('sum-total').textContent = total;
+  document.getElementById('sum-done').textContent = done;
+  document.getElementById('sum-missing').textContent = missing;
+  document.getElementById('sum-closed').textContent = closed;
+  document.getElementById('sum-value').textContent = value >= 1000000
+    ? '$' + (value/1000000).toFixed(1) + 'M'
+    : '$' + value.toLocaleString('en-CA');
+  document.getElementById('gp-bar').style.width = pct + '%';
+  document.getElementById('gp-bar').style.background = pct === 100
+    ? 'linear-gradient(90deg,var(--green),#6EE7B7)'
+    : 'linear-gradient(90deg,var(--green),var(--sky))';
+  document.getElementById('gp-count').textContent = done + ' / ' + total + ' (' + pct + '%)';
+  document.getElementById('nav-progress').textContent = done + ' / ' + total + ' tagged';
+}
+
+function addOpp() {
+  const name = document.getElementById('add-name').value.trim();
+  if(!name) { alert('Enter an opportunity name.'); return; }
+  opps.push({
+    id: nextId++,
+    name,
+    account: document.getElementById('add-account').value.trim(),
+    amount: document.getElementById('add-amount').value.replace(/[^0-9.]/g,''),
+    stage: document.getElementById('add-stage').value,
+    initiative: document.getElementById('add-current').value,
+    correct: document.getElementById('add-current').value,
+    owner: document.getElementById('add-owner').value,
+    done: false
+  });
+  document.getElementById('add-name').value = '';
+  document.getElementById('add-account').value = '';
+  document.getElementById('add-amount').value = '';
+  document.getElementById('add-current').value = '';
+  save();
+  renderTable();
+}
+
+function setCorrect(id, val) {
+  const o = opps.find(o => o.id === id);
+  if(o) { o.correct = val; save(); renderTable(); }
+}
+
+function toggleDone(id) {
+  const o = opps.find(o => o.id === id);
+  if(o) { o.done = !o.done; save(); renderTable(); }
+}
+
+function deleteOpp(id) {
+  opps = opps.filter(o => o.id !== id);
+  save(); renderTable();
+}
+
+function filterInit(val, el) {
+  currentFilter = val;
+  document.querySelectorAll('.init-tab').forEach(t => {
+    t.classList.remove('active');
+    t.classList.add('inactive');
+    t.style.background = '';
+    t.style.borderColor = '';
+    t.style.color = '';
+  });
+  el.classList.remove('inactive');
+  el.classList.add('active');
+  const col = INIT_TAB_COLORS[val] || 'var(--sky)';
+  el.style.background = col;
+  el.style.borderColor = col;
+  el.style.color = '#fff';
+  renderTable();
+}
+
+function getSelected() {
+  return [...document.querySelectorAll('.row-cb:checked')].map(cb => parseInt(cb.dataset.id));
+}
+
+function bulkMarkDone() {
+  const ids = getSelected();
+  const filtered = opps.filter(o => {
+    if(currentFilter === 'all') return true;
+    if(currentFilter === '__missing__') return !o.initiative || o.initiative !== o.correct;
+    return o.correct === currentFilter || o.initiative === currentFilter;
+  });
+  const targets = ids.length > 0 ? opps.filter(o => ids.includes(o.id)) : filtered;
+  targets.forEach(o => o.done = true);
+  save(); renderTable();
+}
+
+function bulkSetInit() {
+  const val = document.getElementById('bulk-init').value;
+  const ids = getSelected();
+  const filtered = opps.filter(o => {
+    if(currentFilter === 'all') return true;
+    if(currentFilter === '__missing__') return !o.initiative || o.initiative !== o.correct;
+    return o.correct === currentFilter || o.initiative === currentFilter;
+  });
+  const targets = ids.length > 0 ? opps.filter(o => ids.includes(o.id)) : filtered;
+  targets.forEach(o => { o.correct = val; });
+  save(); renderTable();
+}
+
+function bulkDelete() {
+  if(!confirm('Remove selected/filtered opportunities?')) return;
+  const ids = getSelected();
+  if(ids.length > 0) {
+    opps = opps.filter(o => !ids.includes(o.id));
+  } else {
+    const filtered = opps.filter(o => {
+      if(currentFilter === 'all') return false;
+      if(currentFilter === '__missing__') return !o.initiative || o.initiative !== o.correct;
+      return o.correct === currentFilter || o.initiative === currentFilter;
+    });
+    const fids = filtered.map(o => o.id);
+    opps = opps.filter(o => !fids.includes(o.id));
+  }
+  save(); renderTable();
+}
+
+function clearAll() {
+  if(!confirm('Clear all opportunities? This cannot be undone.')) return;
+  opps = []; save(); renderTable();
+}
+
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.row-cb').forEach(c => c.checked = cb.checked);
+}
+
+function exportCSV() {
+  const rows = [['Name','Account','Amount','Stage','Owner','Current Initiative','Correct Initiative','Done']];
+  opps.forEach(o => rows.push([o.name,o.account,o.amount,o.stage,o.owner,o.initiative,o.correct,o.done?'Yes':'No']));
+  const csv = rows.map(r => r.map(c => '"'+(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'BU_Services_SF_Backfill_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// Load pre-seeded example opps to demonstrate usage
+function seedExamples() {
+  if(opps.length > 0) return;
+  const examples = [
+    {name:'Teck QB2 — Annual PAUT Inspection',account:'Teck Resources',amount:'145000',stage:'Closed Won',initiative:'Mining NDT',correct:'Mining NDT',owner:'Max Aggrey',done:false},
+    {name:'Pembina Pipeline — Vendor Qualification',account:'Pembina Pipeline',amount:'25000',stage:'Qualifying',initiative:'',correct:'',owner:'Rick Carlton',done:false},
+    {name:'OPG Darlington — MSA Qualification',account:'Ontario Power Generation',amount:'300000',stage:'Negotiation',initiative:'Nuclear/OPG',correct:'Nuclear/OPG',owner:'Vinoth Tharma',done:false},
+    {name:'Hydro-Québec LineCore Pilot',account:'Hydro-Québec',amount:'85000',stage:'Proposal Submitted',initiative:'',correct:'',owner:'Mathieu Beauchesne',done:false},
+    {name:'Barrick Lumwana — 3X Composite Repair',account:'Barrick Gold',amount:'18500',stage:'Qualifying',initiative:'',correct:'',owner:'Vinoth Tharma',done:false},
+  ];
+  examples.forEach(e => opps.push({id:nextId++, ...e}));
+  save();
+}
+
+seedExamples();
+renderTable();
+</script>
+</body>
+</html>
