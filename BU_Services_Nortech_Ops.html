@@ -1462,6 +1462,82 @@ var _csEquipmentRowCount = 0;
 var _csConsumableRowCount= 0;
 var _csFilmRowCount      = 0;
 
+
+// ── Formatting utilities ──────────────────────────────────────────────────────
+function _fmtMoneyImpl(n) {
+  if (n == null || isNaN(n)) return '$0.00';
+  return '$' + Number(n).toLocaleString('en-CA', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function _fmtMoneyShortImpl(n) {
+  if (n == null || isNaN(n)) return '$0';
+  if (Math.abs(n) >= 1e6)  return '$' + (n/1e6).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1e3)  return '$' + (n/1e3).toFixed(0) + 'K';
+  return '$' + Number(n).toFixed(0);
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  var dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('en-CA', {year:'numeric', month:'short', day:'numeric'});
+}
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+function toast(msg, type) {
+  var el = document.createElement('div');
+  var bg = type==='success' ? '#16A34A' : type==='error' ? '#DC2626' : type==='info' ? '#0891B2' : '#374151';
+  el.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;background:'+bg+';color:#fff;padding:.65rem 1.1rem;border-radius:8px;font-size:.8rem;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.4);opacity:0;transition:opacity .2s;max-width:340px;line-height:1.4';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){ el.style.opacity='1'; });
+  setTimeout(function(){ el.style.opacity='0'; setTimeout(function(){ el.remove(); }, 200); }, 3200);
+}
+function chipHtml(status) {
+  var map = {
+    draft:     {bg:'rgba(107,114,128,.15)', color:'#9CA3AF',  label:'Draft'},
+    submitted: {bg:'rgba(245,158,11,.15)',  color:'#F59E0B',  label:'Submitted'},
+    approved:  {bg:'rgba(59,130,246,.15)',  color:'#60A5FA',  label:'Approved'},
+    invoiced:  {bg:'rgba(139,92,246,.15)',  color:'#A78BFA',  label:'Invoiced'},
+    paid:      {bg:'rgba(22,163,74,.15)',   color:'#22C55E',  label:'Paid'},
+    sent:      {bg:'rgba(59,130,246,.15)',  color:'#60A5FA',  label:'Sent'},
+    void:      {bg:'rgba(239,68,68,.15)',   color:'#EF4444',  label:'Void'},
+  };
+  var s = map[status] || {bg:'rgba(156,163,175,.1)', color:'#9CA3AF', label: status||'—'};
+  return '<span style="display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .55rem;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:'+s.bg+';color:'+s.color+'"><span style="width:5px;height:5px;border-radius:50%;background:'+s.color+';display:inline-block"></span>'+s.label+'</span>';
+}
+
+// ── Additional utilities ──────────────────────────────────────────────────────
+function nextNum(prefix, arr, field) {
+  var nums = arr.map(function(x) {
+    var v = parseInt((x[field] || '').replace(/[^0-9]/g, ''));
+    return isNaN(v) ? 0 : v;
+  });
+  var max = nums.length ? Math.max.apply(null, nums) : 0;
+  return prefix + String(max + 1).padStart(5, '0');
+}
+
+function getWeekDays(startDate) {
+  var days = [];
+  var d = new Date(startDate + 'T12:00:00');
+  for (var i = 0; i < 7; i++) {
+    var dd = new Date(d);
+    dd.setDate(d.getDate() + i);
+    days.push(dd.toISOString().slice(0,10));
+  }
+  return days;
+}
+
+function getFilmTypeOptions(selected) {
+  var types = ['Single Wall Single Image','Single Wall Double Image','Double Wall Single Image',
+               'Double Wall Double Image','Panoramic','Tangential','Source Inside'];
+  return types.map(function(t) {
+    return '<option value="'+t+'"'+(t===selected?' selected':'')+'>'+t+'</option>';
+  }).join('');
+}
+
+
 // ── Push actuals to Command Centre via Supabase ───────────────────────────────
 async function pushActualsToCC(){
   try{
