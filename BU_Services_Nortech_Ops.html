@@ -460,6 +460,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     <button onclick="showView('invoices',this)" id="nav-invoices" data-admin-only>🧾 Invoices</button>
     <button onclick="showView('rate-sheets',this)" id="nav-rates" data-admin-only>💲 Rate Sheets</button>
+  <button onclick="showView('timesheets',this)" id="nav-timesheets">⏱ Timesheets</button>
+  <button onclick="showView('margin',this)" id="nav-margin" data-admin-only>📈 Margins</button>
   </div>
   <div class="unav-right">
     <span class="nav-badge" id="pending-badge" style="display:none">0 Pending</span>
@@ -792,9 +794,240 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
-</div><!-- /page -->
 
-<!-- ══ MODALS ═════════════════════════════════════════════════════════════ -->
+
+<!-- ══ TIMESHEETS VIEW ══════════════════════════════════════════════════════ -->
+  <div id="view-timesheets" class="view" style="display:none">
+    <div class="sec-hdr">
+      <div><h2>Timesheets</h2><div class="sec-sub" id="ts-view-sub">Hours per work order — submit for payroll</div></div>
+      <div class="sec-actions">
+        <select class="form-select" style="width:130px;font-size:.72rem" id="ts-filter-status" onchange="renderTimesheets()">
+          <option value="">All</option>
+          <option value="draft">Draft</option>
+          <option value="submitted">Submitted</option>
+        </select>
+        <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="renderTimesheets()">
+      </div>
+    </div>
+    <div id="ts-grid" style="display:grid;gap:.75rem"></div>
+    <div class="empty-state" id="ts-empty" style="display:none">
+      <div class="empty-state-icon">⏱</div>
+      <div class="empty-state-title">No Timesheets Yet</div>
+      <div class="empty-state-sub">Timesheets are created when a Work Order is submitted</div>
+    </div>
+  </div>
+
+  <!-- ══ MARGIN REPORT VIEW ═══════════════════════════════════════════════════ -->
+  <div id="view-margin" class="view" style="display:none">
+    <div class="sec-hdr">
+      <div><h2>Margin Report</h2><div class="sec-sub">Billed vs Cost — admin only</div></div>
+      <div class="sec-actions">
+        <select class="form-select" style="width:160px;font-size:.72rem" id="margin-filter-tech" onchange="renderMarginReport()">
+          <option value="">All Technicians</option>
+        </select>
+        <input class="form-input" style="width:130px" placeholder="Filter by WO…" id="margin-filter-wo" oninput="renderMarginReport()">
+      </div>
+    </div>
+    <div class="kpi-row" id="margin-kpis" style="margin-bottom:1.25rem"></div>
+    <div class="section" style="margin-bottom:1.25rem">
+      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Work Order</h2></div></div>
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table class="data-table" id="margin-wo-table">
+          <thead><tr>
+            <th>WO #</th><th>Client</th><th>Technician</th><th>Date</th>
+            <th style="text-align:right">Reg</th><th style="text-align:right">OT</th><th style="text-align:right">Night</th>
+            <th style="text-align:right">Billed $</th>
+            <th style="text-align:right">Cost $</th>
+            <th style="text-align:right">Margin $</th>
+            <th style="text-align:right">Margin %</th>
+          </tr></thead>
+          <tbody id="margin-wo-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Technician</h2></div></div>
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table class="data-table" id="margin-tech-table">
+          <thead><tr>
+            <th>Technician</th><th>Pay Type</th><th style="text-align:right">WOs</th>
+            <th style="text-align:right">Total Hrs</th>
+            <th style="text-align:right">Billed $</th>
+            <th style="text-align:right">Cost $</th>
+            <th style="text-align:right">Margin $</th>
+            <th style="text-align:right">Margin %</th>
+          </tr></thead>
+          <tbody id="margin-tech-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TIMESHEET MODAL ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="ts-modal">
+    <div class="modal" style="max-width:860px;width:96vw">
+      <div class="modal-hdr">
+        <span class="modal-title" id="ts-modal-title">Timesheet</span>
+        <button class="modal-close" onclick="closeModal('ts-modal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding:1rem 1.25rem">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;margin-bottom:1rem;font-size:.78rem;display:flex;gap:1.5rem;flex-wrap:wrap">
+          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Work Order</div><strong id="ts-wo-ref">—</strong></div>
+          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Client</div><span id="ts-wo-client">—</span></div>
+          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Date</div><span id="ts-wo-date">—</span></div>
+          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Site</div><span id="ts-wo-site">—</span></div>
+        </div>
+        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:.5rem">Hours — adjust as needed, add non-billable rows</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:110px">Date</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:150px">Category / Activity</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">OT Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Night</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">Start</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">End</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:72px">Billable?</th>
+              <th style="width:24px"></th>
+            </tr></thead>
+            <tbody id="ts-rows-body"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addTSRow()" style="margin-top:.5rem" id="ts-add-row-btn">+ Add Row</button>
+        <div class="form-group" style="margin-top:.9rem">
+          <label class="form-label">Notes (optional)</label>
+          <textarea class="form-textarea" id="ts-notes" placeholder="Any notes about your time on this job…" style="min-height:64px"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
+        <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
+        <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
+        <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-secondary" id="ts-draft-btn" onclick="saveTSDraft()">Save Draft</button>
+        <button class="btn btn-primary" id="ts-submit-btn" onclick="submitTS()">Submit Timesheet</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ══ TIMESHEETS VIEW ══════════════════════════════════════════════════════ -->
+  <div id="view-timesheets" class="view" style="display:none">
+    <div class="sec-hdr">
+      <div><h2>Timesheets</h2><div class="sec-sub" id="ts-view-sub">Hours per work order — submit for payroll</div></div>
+      <div class="sec-actions">
+        <select class="form-select" style="width:130px;font-size:.72rem" id="ts-filter-status" onchange="renderTimesheets()">
+          <option value="">All</option>
+          <option value="draft">Draft</option>
+          <option value="submitted">Submitted</option>
+        </select>
+        <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="renderTimesheets()">
+      </div>
+    </div>
+    <div id="ts-grid" style="display:grid;gap:.75rem"></div>
+    <div class="empty-state" id="ts-empty" style="display:none">
+      <div class="empty-state-icon">⏱</div>
+      <div class="empty-state-title">No Timesheets Yet</div>
+      <div class="empty-state-sub">Timesheets are created when a Work Order is submitted</div>
+    </div>
+  </div>
+
+  <!-- ══ MARGIN REPORT VIEW ═══════════════════════════════════════════════════ -->
+  <div id="view-margin" class="view" style="display:none">
+    <div class="sec-hdr">
+      <div><h2>Margin Report</h2><div class="sec-sub">Billed vs Cost — admin only</div></div>
+      <div class="sec-actions">
+        <select class="form-select" style="width:160px;font-size:.72rem" id="margin-filter-tech" onchange="renderMarginReport()">
+          <option value="">All Technicians</option>
+        </select>
+        <input class="form-input" style="width:130px" placeholder="Filter by WO…" id="margin-filter-wo" oninput="renderMarginReport()">
+      </div>
+    </div>
+    <div class="kpi-row" id="margin-kpis" style="margin-bottom:1.25rem"></div>
+    <div class="section" style="margin-bottom:1.25rem">
+      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Work Order</h2></div></div>
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table class="data-table" id="margin-wo-table">
+          <thead><tr>
+            <th>WO #</th><th>Client</th><th>Technician</th><th>Date</th>
+            <th style="text-align:right">Reg</th><th style="text-align:right">OT</th><th style="text-align:right">Night</th>
+            <th style="text-align:right">Billed $</th>
+            <th style="text-align:right">Cost $</th>
+            <th style="text-align:right">Margin $</th>
+            <th style="text-align:right">Margin %</th>
+          </tr></thead>
+          <tbody id="margin-wo-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Technician</h2></div></div>
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table class="data-table" id="margin-tech-table">
+          <thead><tr>
+            <th>Technician</th><th>Pay Type</th><th style="text-align:right">WOs</th>
+            <th style="text-align:right">Total Hrs</th>
+            <th style="text-align:right">Billed $</th>
+            <th style="text-align:right">Cost $</th>
+            <th style="text-align:right">Margin $</th>
+            <th style="text-align:right">Margin %</th>
+          </tr></thead>
+          <tbody id="margin-tech-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TIMESHEET MODAL ═══════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="ts-modal">
+    <div class="modal" style="max-width:860px;width:96vw">
+      <div class="modal-hdr">
+        <span class="modal-title" id="ts-modal-title">Timesheet</span>
+        <button class="modal-close" onclick="closeModal('ts-modal')">✕</button>
+      </div>
+      <div class="modal-body" style="padding:1rem 1.25rem">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;margin-bottom:1rem;font-size:.78rem;display:flex;gap:1.5rem;flex-wrap:wrap">
+          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Work Order</div><strong id="ts-wo-ref">—</strong></div>
+          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Client</div><span id="ts-wo-client">—</span></div>
+          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Date</div><span id="ts-wo-date">—</span></div>
+          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Site</div><span id="ts-wo-site">—</span></div>
+        </div>
+        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:.5rem">Hours — adjust as needed, add non-billable rows</div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:.73rem">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:110px">Date</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:150px">Category / Activity</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">OT Hrs</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Night</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">Start</th>
+              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">End</th>
+              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:72px">Billable?</th>
+              <th style="width:24px"></th>
+            </tr></thead>
+            <tbody id="ts-rows-body"></tbody>
+          </table>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addTSRow()" style="margin-top:.5rem" id="ts-add-row-btn">+ Add Row</button>
+        <div class="form-group" style="margin-top:.9rem">
+          <label class="form-label">Notes (optional)</label>
+          <textarea class="form-textarea" id="ts-notes" placeholder="Any notes about your time on this job…" style="min-height:64px"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
+        <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
+        <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
+        <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-secondary" id="ts-draft-btn" onclick="saveTSDraft()">Save Draft</button>
+        <button class="btn btn-primary" id="ts-submit-btn" onclick="submitTS()">Submit Timesheet</button>
+      </div>
+    </div>
+  </div>
+
 
 <!-- ══ WORK ORDER MODAL ══════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="job-modal">
@@ -1213,195 +1446,646 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
-<script>
-// ── NORTECH STANDARD LISTS ────────────────────────────────────────────────────
-// These are fixed company lists independent of any customer rate sheet.
-// Techs select from these when logging work orders.
-// Pricing is applied later at invoice creation by admin.
+<script>// ── Push actuals to Command Centre via Supabase ───────────────────────────────
+async function pushActualsToCC(){
+  try{
+    var now=new Date().toISOString().slice(0,7); // YYYY-MM
+    var thisYear=new Date().getFullYear().toString();
+    var paidThisYear=_invoices.filter(function(i){return i.status==='paid'&&(i.paidDate||'').startsWith(thisYear);});
+    var totalPaidYTD=paidThisYear.reduce(function(s,i){return s+(i.total||0);},0);
+    // Write to crm_sync nortech actuals
+    var res=await fetch(_SB_URL+'/rest/v1/crm_sync',{
+      method:'POST',
+      headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({id:'nortech_actuals',data:{
+        nortech_invoiced_ytd:totalPaidYTD/1e6,
+        nortech_paid_invoices:paidThisYear.length,
+        last_updated:new Date().toISOString(),
+      },updated_at:new Date().toISOString()})
+    });
+    if(res.ok) console.log('Nortech actuals pushed to CC');
+  }catch(e){ console.warn('pushActualsToCC failed:', e.message); }
+}
 
-var NORTECH_LABOUR_CATEGORIES = [
-  // NDT Disciplines
-  'Magnetic Particle Testing (MT)',
-  'Liquid Penetrant Testing (PT)',
-  'Ultrasonic Testing Level 1 (UT1)',
-  'Ultrasonic Testing Level 2 (UT2)',
-  'Phased Array UT / TOFD (PAUT)',
-  'Automated UT Corrosion (AUT)',
-  'Radiographic Testing (RT)',
-  'Eddy Current Testing (ECT)',
-  'Guided Wave Testing (GWT)',
-  'Hardness Testing',
-  'Ferrite Testing',
-  'Positive Material Identification (PMI)',
-  'Spectrographic Analysis',
-  'Visual Inspection CWB Level 2',
-  'Visual Inspection CWB Level 3',
-  'NACE Level 2 Inspection',
-  'API 510 Pressure Vessel Inspection',
-  'API 570 Piping Inspection',
-  'API 653 Tank Inspection',
-  'Rope Access Level 3',
-  'UAV / Drone Inspection',
-  'MFL Tank Floor Inspection',
-  'CGSB Level 3',
-  'Data Analysis',
-  // Roles
-  'Supervisor / Project Coordinator',
-  'HSE Supervisor',
-  'NDT Assistant / CEDO',
-  'Engineering',
-  'Inspection ISO / PID Drafter',
-  'Office Clerical',
-];
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+function closeModal(id){
+  var el=document.getElementById(id);
+  if(el) el.classList.remove('open');
+}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+});
 
-var NORTECH_EQUIPMENT_LIST = [
-  // UT / PAUT
-  'PAUT/TOFD Unit (Omniscan, Focus LT)',
-  'AUT Unit',
-  'Ultrasonic Unit (Epoch, DMS Go)',
-  'PAUT Scanners & Cables',
-  'UT Probes & Calibration Blocks',
-  // RT
-  'Radiographic Exposure Device',
-  'Dark Room / Processing Equipment',
-  'NorScan Digital Imaging Acquisition (DDA)',
-  // MT / PT
-  'Magnetic Particle Yoke',
-  'Light Meter & Power Supply',
-  'Liquid Penetrant Kit',
-  // Specialty
-  'Optical Emission Spectrometer (OES)',
-  'LIPPS Unit',
-  'XRF (PMI) Unit',
-  'Hardness Tester (UCI)',
-  'Hardness Tester (Telebrineller)',
-  'Hardness Tester (King Tester)',
-  'Ferrite Tester',
-  'Coating Thickness Tester',
-  'Airal Robot (UT Drone)',
-  // Measurement / Safety
-  'Digital Pit Gauge',
-  'Voltmeter',
-  'Gas Monitor',
-  'Safety Equipment Kit',
-  // Vehicles / Field
-  'Service Vehicle',
-  '5-Ton Flat Deck Truck',
-  'Rope Access Equipment Set',
-  'UAV / Drone Unit',
-];
-
-var NORTECH_CONSUMABLES_LIST = [
-  // UT
-  'Ultrasonic Couplant (standard)',
-  'Ultrasonic Couplant (high/low temp)',
-  'PAUT Antifreeze',
-  // MT
-  'MT Contrast Paint',
-  'Wet Magnetic Particles',
-  'Dry Magnetic Particles',
-  // PT
-  'PT Penetrant',
-  'PT Developer',
-  'PT Cleaner',
-  // RT / Film
-  'Film (per weld)',
-  'Film Sheet',
-  'Film Digitizing',
-  // Grinding / Surface
-  'Grinding Discs',
-  'Surface Preparation Supplies',
-  // Chemistry
-  'Nital Acid Etchant',
-  'Methanol Neutralizer',
-  'NDT Cleaner',
-  // Other
-  'Temp Sticks',
-  'Calibration Blocks (consumable)',
-  'PPE (project-specific)',
-];
-
-var NORTECH_FILM_TYPES = [
-  { name: 'Film Per Weld — < 2"',        pipeSizes: ['< 2"'] },
-  { name: 'Film Per Weld — 2" & 3"',     pipeSizes: ['2"-3"'] },
-  { name: 'Film Per Weld — 4" & 5"',     pipeSizes: ['4"-5"'] },
-  { name: 'Film Per Weld — 6"',          pipeSizes: ['6"'] },
-  { name: 'Film Per Weld — 8"-12"',      pipeSizes: ['8"-12"'] },
-  { name: 'Film Per Weld — 14"+ ',       pipeSizes: ['14"+'] },
-  { name: 'Film Sheet 2.75" x 8.5"',     pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 2.75" x 17"',      pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 3.5" x 17"',       pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 4.5" x 17"',       pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 7" x 17"',         pipeSizes: ['N/A'] },
-  { name: 'Film Sheet 14" x 17"',        pipeSizes: ['N/A'] },
-  { name: 'Film Digitizing per 17"',     pipeSizes: ['N/A'] },
-  { name: 'Film Digitizing per 17" Stapled', pipeSizes: ['N/A'] },
-];
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('nav-date').textContent=
+    new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+  loadAll();
+});
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// NORTECH FIELD OPERATIONS — CORE JS
-// ══════════════════════════════════════════════════════════════════════════════
 
-var _SB_URL = 'https://tbcoktkpjwdvnhqtuups.supabase.co';
-var _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiY29rdGtwandkdm5ocXR1dXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MDM1OTIsImV4cCI6MjA5MjM3OTU5Mn0.8Zw75YQYmNPXKoLE_bK23Vs2j3ZeqCUwAYUFt5-8YWs';
+// ── RATE SHEET IMPORT ────────────────────────────────────────────────────────
 
-// ── Nortech company info (fill in later) ──────────────────────────────────────
-var NORTECH = {
-  name:    'Nortech Advanced NDT',
-  address: '— Address pending —',
-  phone:   '— Phone pending —',
-  email:   '— Email pending —',
-  gst:     '— GST/HST # pending —',
-  logo:    '', // base64 or URL
+var _importedRateData = null;
+
+function openImportRateModal() {
+  var status = document.getElementById('import-status');
+  var preview = document.getElementById('import-preview');
+  var btn = document.getElementById('import-confirm-btn');
+  var fi = document.getElementById('import-file-input');
+  if (status) { status.style.display = 'none'; }
+  if (preview) { preview.style.display = 'none'; }
+  if (btn) { btn.style.display = 'none'; }
+  if (fi) { fi.value = ''; }
+  _importedRateData = null;
+  document.getElementById('import-rate-modal').classList.add('open');
+}
+
+function handleImportDrop(e) {
+  e.preventDefault();
+  document.getElementById('import-dropzone').style.borderColor = 'var(--border2)';
+  var file = e.dataTransfer.files[0];
+  if (file) handleImportFile(file);
+}
+
+async function handleImportFile(file) {
+  if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (ext !== 'docx' && ext !== 'pdf') {
+    showImportStatus('Only .docx and .pdf files are supported', 'error');
+    return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    showImportStatus('File too large (max 10MB)', 'error');
+    return;
+  }
+  showImportStatus('Reading file…', 'loading');
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('import-confirm-btn').style.display = 'none';
+  try {
+    var payload;
+    if (ext === 'docx') {
+      var text = await extractDocxText(file);
+      if (!text || text.trim().length < 20) {
+        showImportStatus('Could not extract text. Try PDF format.', 'error');
+        return;
+      }
+      showImportStatus('Analysing with AI…', 'loading');
+      payload = await parseRateSheetText(text);
+    } else {
+      showImportStatus('Analysing PDF with AI…', 'loading');
+      payload = await parseRateSheetPDF(file);
+    }
+    if (!payload) {
+      showImportStatus('Could not extract rates from document.', 'error');
+      return;
+    }
+    _importedRateData = payload;
+    showImportPreview(payload);
+    showImportStatus('✓ Rate sheet extracted — review and confirm below', 'success');
+    document.getElementById('import-confirm-btn').style.display = 'inline-flex';
+  } catch(e) {
+    showImportStatus('Error: ' + e.message, 'error');
+  }
+}
+
+async function extractDocxText(file) {
+  if (!window.mammoth) {
+    await new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+      s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = async function(e) {
+      try {
+        var result = await mammoth.extractRawText({ arrayBuffer: e.target.result });
+        resolve(result.value);
+      } catch(err) { reject(err); }
+    };
+    reader.onerror = function() { reject(new Error('File read failed')); };
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+var RATE_PROMPT = 'You are a data extraction assistant. Extract rate sheet pricing data and return ONLY a valid JSON object. No markdown, no explanation, no code blocks. Just the raw JSON. Use this exact structure: {"name":"rate sheet name","customer":"client name or empty string","effective":"YYYY-MM-DD","currency":"CAD","labour":[{"name":"category name","stRate":0,"otRate":0,"dtRate":0}],"equipment":[{"name":"item name","rate":0,"unit":"day"}]} Rules: all rate values must be numbers not strings. Extract every labour category. If only ST rate shown set OT=ST*1.5 and DT=ST*2. Return ONLY the JSON object starting with { and ending with }.';
+
+async function parseRateSheetText(text) {
+  var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: RATE_PROMPT + ' Document text: ' + text.slice(0, 8000) }]
+    })
+  });
+  if (!res.ok) throw new Error('API error ' + res.status);
+  var data = await res.json();
+  var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+  console.log('AI response:', txt.slice(0, 300));
+  var clean = txt.replace(/```json|```/g,'').trim();
+  var match = clean.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
+  var jsonStr = match[0];
+  jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+  jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ');
+  try { return JSON.parse(jsonStr); }
+  catch(e2) { throw new Error('Could not parse AI response as JSON: ' + e2.message); }
+}
+
+async function parseRateSheetPDF(file) {
+  var base64 = await new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
+    reader.onerror = function() { reject(new Error('Read failed')); };
+    reader.readAsDataURL(file);
+  });
+  var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          { type: 'text', text: RATE_PROMPT }
+        ]
+      }]
+    })
+  });
+  if (!res.ok) throw new Error('API error ' + res.status);
+  var data = await res.json();
+  var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+  var clean = txt.replace(/```json|```/g,'').trim();
+  var match = clean.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON in response');
+  return JSON.parse(match[0]);
+}
+
+function showImportPreview(data) {
+  document.getElementById('import-rs-name').value = data.name || '';
+  document.getElementById('import-rs-customer').value = data.customer || '';
+  var labourEl = document.getElementById('import-labour-preview');
+  if (labourEl) {
+    labourEl.innerHTML = (data.labour && data.labour.length
+      ? '<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Labour (' + data.labour.length + ' categories)</div>'
+        + data.labour.map(function(l) {
+          return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
+            + '<span style="font-weight:600">' + l.name + '</span>'
+            + '<span style="font-family:var(--mono);color:var(--muted)">ST:' + fmtMoney(l.stRate) + ' OT:' + fmtMoney(l.otRate) + ' DT:' + fmtMoney(l.dtRate) + '</span>'
+          + '</div>';
+        }).join('')
+      : '<div style="color:var(--muted);font-size:.75rem">No labour rates found</div>');
+  }
+  var eqEl = document.getElementById('import-equipment-preview');
+  if (eqEl && data.equipment && data.equipment.length) {
+    eqEl.innerHTML = '<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Equipment (' + data.equipment.length + ' items)</div>'
+      + data.equipment.map(function(e) {
+        return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
+          + '<span>' + e.name + '</span>'
+          + '<span style="font-family:var(--mono);color:var(--muted)">' + fmtMoney(e.rate) + '/' + e.unit + '</span>'
+        + '</div>';
+      }).join('');
+  }
+  document.getElementById('import-preview').style.display = 'block';
+}
+
+async function confirmImport() {
+  if (!_importedRateData) return;
+  var name = document.getElementById('import-rs-name').value.trim();
+  if (!name) { toast('Enter a name for this rate sheet', 'error'); return; }
+  var data = Object.assign({}, _importedRateData, {
+    id: uid(), name: name,
+    customer: document.getElementById('import-rs-customer').value.trim(),
+    created: today(), modified: today(),
+    effective: _importedRateData.effective || today(),
+    currency: _importedRateData.currency || 'CAD',
+  });
+  try {
+    await sbUpsert('rate_sheets', data.id, data);
+    _rateSheets.unshift(data);
+    closeModal('import-rate-modal');
+    renderRateSheets();
+    toast('Imported: ' + (data.labour||[]).length + ' labour categories, ' + (data.equipment||[]).length + ' equipment items', 'success');
+  } catch(e) { toast('Import failed: ' + e.message, 'error'); }
+}
+
+function showImportStatus(msg, type) {
+  var el = document.getElementById('import-status');
+  if (!el) return;
+  var styles = {
+    loading: 'background:rgba(0,174,239,.1);color:rgba(0,174,239,.8);border:1px solid rgba(0,174,239,.2)',
+    success: 'background:rgba(22,163,74,.1);color:#22C55E;border:1px solid rgba(22,163,74,.2)',
+    error:   'background:rgba(185,28,28,.1);color:#EF4444;border:1px solid rgba(185,28,28,.2)',
+  };
+  el.style.cssText = 'display:block;padding:.75rem;border-radius:6px;font-size:.78rem;margin-bottom:1rem;' + (styles[type]||styles.loading);
+  el.textContent = msg;
+}
+
+// ── Pre-built EllisDon rate sheet ─────────────────────────────────────────────
+
+
+var SEED_RATE_SHEETS = {
+  'ellisdon_march_2026': {"id": "ellisdon_march_2026", "name": "EllisDon NDT Rates \u2014 March 2026", "customer": "EllisDon", "effective": "2026-03-01", "currency": "CAD", "notes": "Quote #26-117. March 2026 \u2013 March 2027. FOB Edmonton, AB. Rates portal to portal. Regular time Mon-Fri 7:30am-4:00pm. 15% night shift differential. RT/PAUT/TOFD/AUT min 4hr callout, all others 2hr min. Remote: LOA $70/tech/day, MOB/DEMOB $1.20/km.", "labour": [{"name": "Magnetic Particle Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Liquid Penetrant Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Hardness Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Ferrite Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Manual UT Level 1", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Manual UT Level 2", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "Visual CWB Level 2", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "Visual CWB Level 3", "stRate": 135.0, "otRate": 202.5, "dtRate": 202.5}, {"name": "NACE Level 2", "stRate": 130.0, "otRate": 195.0, "dtRate": 195.0}, {"name": "Positive Material Identification", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Spectrographic Analysis", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Radiographic Testing (2 person)", "stRate": 165.0, "otRate": 247.5, "dtRate": 247.5}, {"name": "PAUT / TOFD (2 person)", "stRate": 225.0, "otRate": 337.5, "dtRate": 337.5}, {"name": "AUT Corrosion Testing (2 person)", "stRate": 215.0, "otRate": 322.5, "dtRate": 322.5}, {"name": "Data Analysis", "stRate": 135.0, "otRate": 202.5, "dtRate": 202.5}, {"name": "NDT Assistant / CEDO", "stRate": 85.0, "otRate": 127.5, "dtRate": 127.5}, {"name": "Supervisor / Project Coordinator", "stRate": 135.0, "otRate": 202.0, "dtRate": 202.0}, {"name": "HSE Supervisor", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "API 510 ISI-PVPP Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "API 653 Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "API 570 Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "Rope Access Level 3", "stRate": 145.0, "otRate": 217.5, "dtRate": 217.5}, {"name": "UAV UT/Visual Drone (2 person)", "stRate": 255.0, "otRate": 382.5, "dtRate": 382.5}, {"name": "CGSB Level 3", "stRate": 150.0, "otRate": 225.0, "dtRate": 225.0}, {"name": "Engineering", "stRate": 215.0, "otRate": 322.5, "dtRate": 322.5}, {"name": "Inspection ISO / PID Drafter", "stRate": 87.0, "otRate": 130.5, "dtRate": 130.5}, {"name": "Office Clerical", "stRate": 59.0, "otRate": 88.5, "dtRate": 88.5}, {"name": "MFL Tank Floor Inspection", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}, {"name": "Guided Wave Testing", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}, {"name": "Eddy Current Testing", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}], "equipment": [{"name": "MP Yoke, calibration block, light meter", "rate": 5.0, "unit": "hour"}, {"name": "Liquid Penetrant testing kit", "rate": 5.0, "unit": "hour"}, {"name": "Ultrasonic unit, calibration blocks, probes", "rate": 20.0, "unit": "hour"}, {"name": "Radiographic exposure device, dark room", "rate": 25.0, "unit": "hour"}, {"name": "NorScan Digital Imaging Acquisition (DDA)", "rate": 75.0, "unit": "hour"}, {"name": "Optical Emission Spectrometry unit", "rate": 99.0, "unit": "hour"}, {"name": "LIPPS unit, argon, calibration blocks", "rate": 55.0, "unit": "hour"}, {"name": "PMI (XRF) unit & calibration blocks", "rate": 35.0, "unit": "hour"}, {"name": "Hardness Tester (UCI)", "rate": 15.0, "unit": "hour"}, {"name": "Hardness Tester (Telebrineller)", "rate": 15.0, "unit": "hour"}, {"name": "Hardness Tester (King Tester)", "rate": 20.0, "unit": "hour"}, {"name": "Ferrite Tester unit", "rate": 15.0, "unit": "hour"}, {"name": "PAUT/TOFD unit, scanners, cables, probes", "rate": 1250.0, "unit": "shift"}, {"name": "AUT unit, cables, probes, calibration blocks", "rate": 1250.0, "unit": "shift"}, {"name": "Coating Tester unit", "rate": 150.0, "unit": "shift"}, {"name": "Voltmeter", "rate": 50.0, "unit": "shift"}, {"name": "Digital Pit Gauge", "rate": 85.0, "unit": "shift"}, {"name": "Airal Robot, UT Thickness unit", "rate": 2625.0, "unit": "shift"}, {"name": "Ultrasonic Couplant", "rate": 33.0, "unit": "liter"}, {"name": "Ultrasonic Couplant High/Low temp", "rate": 3.5, "unit": "oz"}, {"name": "MT Contrast Paint / Wet Particles", "rate": 32.0, "unit": "can"}, {"name": "Dry Magnetic Particle", "rate": 15.0, "unit": "can"}, {"name": "PT Penetrant, Developer, Cleaner", "rate": 35.0, "unit": "can"}, {"name": "Grinding Discs", "rate": 22.0, "unit": "disc"}, {"name": "Temp Sticks", "rate": 25.0, "unit": "stick"}, {"name": "NDT Cleaner", "rate": 15.0, "unit": "can"}, {"name": "Nital Acid Etchant", "rate": 12.5, "unit": "oz"}, {"name": "Methanol Neutralizer", "rate": 35.75, "unit": "liter"}, {"name": "PAUT Antifreeze", "rate": 20.0, "unit": "liter"}, {"name": "Film < 2\" per weld", "rate": 9.0, "unit": "weld"}, {"name": "Film 2\"-3\" per weld (4 exposures)", "rate": 12.0, "unit": "weld"}, {"name": "Film 4\"-5\" per weld", "rate": 12.0, "unit": "weld"}, {"name": "Film 6\" per weld", "rate": 15.0, "unit": "weld"}, {"name": "Film 8\"-12\" per weld", "rate": 21.0, "unit": "weld"}, {"name": "Film 14\"+ per weld", "rate": 1.75, "unit": "diameter inch"}, {"name": "Film 2.75\"x8.5\" sheet", "rate": 4.5, "unit": "sheet"}, {"name": "Film 2.75\"x17\" sheet", "rate": 8.0, "unit": "sheet"}, {"name": "Film 3.5\"x17\" sheet", "rate": 13.0, "unit": "sheet"}, {"name": "Film 4.5\"x17\" sheet", "rate": 15.0, "unit": "sheet"}, {"name": "Film 7\"x17\" sheet", "rate": 19.0, "unit": "sheet"}, {"name": "Film 14\"x17\" sheet", "rate": 24.0, "unit": "sheet"}, {"name": "Film Digitizing per 17\" length", "rate": 5.0, "unit": "length"}, {"name": "Film Digitizing per 17\" stapled", "rate": 7.5, "unit": "length"}, {"name": "Film Minimum digitizing charge", "rate": 85.0, "unit": "job"}, {"name": "Service Vehicle & Fuel", "rate": 10.0, "unit": "hour"}, {"name": "Environmental Fee (MT/PT/RT)", "rate": 10.0, "unit": "shift"}, {"name": "LOA (Remote)", "rate": 70.0, "unit": "tech/day"}, {"name": "MOB/DEMOB Kilometers (Remote)", "rate": 1.2, "unit": "km"}, {"name": "Remote Service Vehicle (onsite)", "rate": 120.0, "unit": "shift"}], "created": "2026-04-22", "modified": "2026-04-22"}
 };
 
-// ── State ──────────────────────────────────────────────────────────────────────
-var _jobs        = [];
-var _chargeSheets = [];
-var _invoices    = [];
-var _rateSheets  = [];
-var _timesheets  = [];
-var _currentView = 'dashboard';
-var _editJobId   = null;
-var _editCSId    = null;
-var _editInvId   = null;
-var _editRateId  = null;
-var _currentInvId = null;
-var _csExtraCount = 0;
-var _rateLbCount  = 0;
-var _rateEqCount  = 0;
+async function importSeedRateSheet(key) {
+  var rs = SEED_RATE_SHEETS[key];
+  if (!rs) return;
+  rs = Object.assign({}, rs, { id: uid(), created: today(), modified: today() });
+  try {
+    await sbUpsert('rate_sheets', rs.id, rs);
+    _rateSheets.unshift(rs);
+    renderRateSheets();
+    toast('Rate sheet imported: ' + rs.labour.length + ' labour + ' + rs.equipment.length + ' equipment/consumable items', 'success');
+  } catch(e) { toast('Import failed: ' + e.message, 'error'); }
+}
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
-function today(){ return new Date().toISOString().slice(0,10); }
-function fmtDate(s){ if(!s)return'—'; var d=new Date(s+'T00:00:00'); return d.toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'}); }
-function _fmtMoneyImpl(n){ return '$'+Number(n||0).toLocaleString('en-CA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function _fmtMoneyShortImpl(n){ var v=Number(n||0); if(v>=1000000)return'$'+(v/1e6).toFixed(2)+'M'; if(v>=1000)return'$'+(v/1000).toFixed(1)+'k'; return fmtMoney(v); }
-function chipHtml(status){
-  var map={draft:'chip-draft',pending:'chip-pending',approved:'chip-approved',invoiced:'chip-invoiced',paid:'chip-paid',void:'chip-void',sent:'chip-invoiced',active:'chip-active',closed:'chip-closed'};
-  var lbl={draft:'Draft',pending:'Pending',approved:'Approved',invoiced:'Invoiced',paid:'Paid',void:'Void',sent:'Sent',active:'Active',closed:'Closed'};
-  return '<span class="chip '+(map[status]||'chip-draft')+'">'+(lbl[status]||status)+'</span>';
+
+// ── Canadian provincial tax rates ─────────────────────────────────────────────
+var CANADA_TAX_RATES = {
+  'AB': { name: 'Alberta',                 gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
+  'BC': { name: 'British Columbia',        gst:5,  pst:7,      hst:0,  total:12,     label:'GST 5% + PST 7%' },
+  'SK': { name: 'Saskatchewan',            gst:5,  pst:6,      hst:0,  total:11,     label:'GST 5% + PST 6%' },
+  'MB': { name: 'Manitoba',               gst:5,  pst:7,      hst:0,  total:12,     label:'GST 5% + PST 7%' },
+  'ON': { name: 'Ontario',                 gst:0,  pst:0,      hst:13, total:13,     label:'HST 13%' },
+  'QC': { name: 'Quebec',                  gst:5,  pst:9.975,  hst:0,  total:14.975, label:'GST 5% + QST 9.975%' },
+  'NB': { name: 'New Brunswick',           gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
+  'NS': { name: 'Nova Scotia',             gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
+  'PE': { name: 'Prince Edward Island',    gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
+  'NL': { name: 'Newfoundland & Labrador', gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
+  'NT': { name: 'Northwest Territories',   gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
+  'NU': { name: 'Nunavut',                 gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
+  'YT': { name: 'Yukon',                   gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
+  'EXEMPT': { name: 'Tax Exempt',          gst:0,  pst:0,      hst:0,  total:0,      label:'Exempt (Federal/First Nations)' },
+};
+
+function getProvinceOptions(selected) {
+  return Object.entries(CANADA_TAX_RATES).map(function(kv) {
+    var code=kv[0], p=kv[1];
+    return '<option value="'+code+'" '+(code===selected?'selected':'')+'>'+p.name+' — '+p.label+'</option>';
+  }).join('');
 }
-function toast(msg, type){
-  var c=document.getElementById('toast-container');
-  var t=document.createElement('div');
-  t.className='toast toast-'+(type||'info');
-  t.textContent=msg;
-  c.appendChild(t);
-  setTimeout(function(){t.remove();},3000);
+
+function onProvinceChange() {
+  var sel = document.getElementById('inv-province');
+  if (!sel) return;
+  var province = CANADA_TAX_RATES[sel.value];
+  if (!province) return;
+  var taxInput = document.getElementById('inv-tax-rate');
+  var taxLabel = document.getElementById('inv-tax-label');
+  if (taxInput) taxInput.value = province.total;
+  if (taxLabel) taxLabel.textContent = province.label;
+  updateInvTotals();
 }
-function nextNum(prefix, items, field){
-  var nums=items.map(function(i){return parseInt((i[field]||'').replace(/\D/g,''))||0;});
-  return prefix+(nums.length?Math.max.apply(null,nums)+1:1001);
+
+
+// ── Reverse invoice/WO status ─────────────────────────────────────────────────
+async function reverseInvoicePayment(id) {
+  var inv = _invoices.find(function(i){ return i.id===id; });
+  if (!inv) return;
+  if (!confirm('Reverse payment on '+inv.invNum+'?\n\nThis will:\n  • Set invoice back to Sent\n  • Remove the paid date\n  • Reverse actuals pushed to Command Centre\n\nContinue?')) return;
+  inv.status='sent'; inv.paidDate=null; inv.reversedDate=today(); inv.modified=today();
+  try {
+    await sbUpsert('invoices',id,inv);
+    renderInvoices(); renderDashboard();
+    pushActualsToCC();
+    toast('Payment reversed — invoice back to Sent','info');
+    closeModal('inv-view-modal');
+  } catch(e){ toast('Error: '+e.message,'error'); }
 }
-function getWeekDays(weekStart){
-  var days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  var d=new Date(weekStart+'T00:00:00');
-  return days.map(function(name,i){
-    var dd=new Date(d); dd.setDate(dd.getDate()+i);
-    return {name:name, date:dd.toISOString().slice(0,10)};
+
+async function reverseInvoiceToApproved(id) {
+  var inv = _invoices.find(function(i){ return i.id===id; });
+  if (!inv) return;
+  var woCount = (inv.chargeSheetIds||[]).length;
+  if (!confirm('Reverse invoice '+inv.invNum+' back to draft?\n\nThis will:\n  • Set invoice back to Draft\n  • Return '+woCount+' work order'+(woCount!==1?'s':'')+' to Approved\n\nContinue?')) return;
+  inv.status='draft'; inv.sentDate=null; inv.modified=today();
+  try {
+    await sbUpsert('invoices',id,inv);
+    await Promise.all((inv.chargeSheetIds||[]).map(async function(woId){
+      var wo=_jobs.find(function(j){return j.id===woId;});
+      if(wo&&wo.status==='invoiced'){ wo.status='approved'; wo.invoiceId=null; wo.modified=today(); await sbUpsert('jobs',woId,wo); }
+    }));
+    renderInvoices(); renderJobs(); renderDashboard();
+    toast('Invoice reversed to Draft — work orders returned to Approved','info');
+    closeModal('inv-view-modal');
+  } catch(e){ toast('Error: '+e.message,'error'); }
+}
+
+async function markVoid(id) {
+  if (!confirm('Mark this invoice as void? This cannot be undone.')) return;
+  var inv = _invoices.find(function(i){ return i.id===id; });
+  if (!inv) return;
+  inv.status='void'; inv.voidDate=today(); inv.modified=today();
+  try {
+    await sbUpsert('invoices',id,inv);
+    await Promise.all((inv.chargeSheetIds||[]).map(async function(woId){
+      var wo=_jobs.find(function(j){return j.id===woId;});
+      if(wo&&wo.status==='invoiced'){ wo.status='approved'; wo.invoiceId=null; wo.modified=today(); await sbUpsert('jobs',woId,wo); }
+    }));
+    renderInvoices(); renderDashboard();
+    toast('Invoice voided — work orders returned to Approved','info');
+  } catch(e){ toast('Error: '+e.message,'error'); }
+}
+
+async function markInvSent(id) {
+  var inv = _invoices.find(function(i){ return i.id === id; });
+  if (!inv) return;
+  if (!confirm('Mark invoice ' + inv.invNum + ' as Sent? This means it has been delivered to the client. Continue?')) return;
+  inv.status = 'sent'; inv.sentDate = today(); inv.modified = today(); inv.sentDate=today(); inv.modified=today();
+  try { await sbUpsert('invoices',id,inv); renderInvoices(); renderDashboard(); toast('Invoice marked as sent','success'); }
+  catch(e){ toast('Error: '+e.message,'error'); }
+}
+async function markInvoiceSent(){ if(!_currentInvId)return; await markInvSent(_currentInvId); closeModal('inv-view-modal'); }
+async function markInvoiceVoid(){ if(!_currentInvId)return; await markVoid(_currentInvId); closeModal('inv-view-modal'); }
+
+
+// ── Price visibility guard ─────────────────────────────────────────────────────
+var _ADMIN_IDS = ['jon','jason','joel_c','renee','jeremy','mathieu'];
+
+function isAdmin() {
+  var viewer = (window.CURRENT_VIEWER || localStorage.getItem('hub_viewer') || 'tech');
+  return _ADMIN_IDS.indexOf(viewer) > -1;
+}
+
+function fmtMoney(n) { return isAdmin() ? _fmtMoneyImpl(n) : '—'; }
+function fmtMoneyShort(n) { return isAdmin() ? _fmtMoneyShortImpl(n) : '—'; }
+
+function applyAdminVisibility() {
+  if (!isAdmin()) {
+    document.body.classList.add('tech-view');
+    var invBtn = document.getElementById('inv-nav-btn');
+    if (invBtn) invBtn.style.display='none';
+    var rateBtn = document.getElementById('nav-rates');
+    if (rateBtn) rateBtn.style.display='none';
+  } else {
+    document.body.classList.remove('tech-view');
+  }
+}
+
+function renderTechDashboard() {
+  var kpiEl = document.getElementById('dash-kpis');
+  if (!kpiEl) return;
+  var activeJobs = _jobs.filter(function(j){ return j.status==='draft'||j.status==='submitted'; }).length;
+  var myPending  = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
+  var myApproved = _jobs.filter(function(j){ return j.status==='approved'; }).length;
+  kpiEl.innerHTML = [
+    {val:activeJobs, lbl:'Active Work Orders', sub:'Draft or submitted'},
+    {val:myPending,  lbl:'Pending Approval',   sub:'Awaiting admin review'},
+    {val:myApproved, lbl:'Approved',            sub:'Ready for invoicing'},
+  ].map(function(k){
+    return '<div class="kpi-tile"><div class="kpi-tile-val">'+k.val+'</div>'
+      +'<div class="kpi-tile-lbl">'+k.lbl+'</div>'
+      +'<div class="kpi-tile-sub">'+k.sub+'</div></div>';
+  }).join('');
+}
+
+
+// ── Job detail toggle ──────────────────────────────────────────────────────────
+function toggleJobDetail(jobId) {
+  var detail = document.getElementById('job-detail-' + jobId);
+  var icon   = document.getElementById('job-expand-icon-' + jobId);
+  if (!detail) return;
+  var open = detail.style.display === 'none' || detail.style.display === '';
+  detail.style.display = open ? 'block' : 'none';
+  if (icon) icon.textContent = open ? '▲' : '▼';
+}
+
+// ── Global click delegation ─────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('[data-toggle-job]');
+  if (el && !e.target.closest('button') && !e.target.closest('a')) { toggleJobDetail(el.getAttribute('data-toggle-job')); return; }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WORK ORDER SYSTEM — replaces Job + Work Order
+// ══════════════════════════════════════════════════════════════════════════════
+
+var _editWOId = null;
+
+// ── Open WO Modal ─────────────────────────────────────────────────────────────
+function openWOModal(editId) {
+  _editWOId = editId || null;
+  _csLabourRowCount = 0;
+  _csEquipmentRowCount = 0;
+  _csConsumableRowCount = 0;
+  _csFilmRowCount = 0;
+
+  var wo = editId ? (_jobs.find(function(j){ return j.id === editId; }) || {}) : {};
+  document.getElementById('wo-modal-title').textContent = editId ? 'Edit Work Order' : 'New Work Order';
+
+  // Populate province dropdown
+  var pSel = document.getElementById('job-province');
+  if (pSel) { pSel.innerHTML = '<option value="">— Province —</option>' + getProvinceOptions(wo.province || 'AB'); pSel.value = wo.province || 'AB'; }
+
+  // Fill header fields
+  var fields = {
+    'job-client': wo.client || '',
+    'job-number': wo.number || '',
+    'wo-date':    wo.date   || today(),
+    'job-site':   wo.site   || '',
+    'wo-equip-owner': wo.equipOwner || '',
+    'job-po':     wo.po     || '',
+    'job-client-wo': wo.jobNum || '',
+    'wo-afe':     wo.afe    || '',
+    'wo-rig':     wo.rig    || '',
+    'cs-notes':   wo.notes  || '',
+    'wo-field-reports': wo.fieldReports || '',
+    'cs-travel-km':       (wo.travel && wo.travel.km)      || '',
+    'cs-travel-km-rate':  (wo.travel && wo.travel.kmRate)  || '1.20',
+    'cs-travel-hotels':   (wo.travel && wo.travel.hotels)  || '',
+    'wo-travel-camp':     (wo.travel && wo.travel.camp)    || '',
+    'cs-travel-flights':  (wo.travel && wo.travel.flights) || '',
+    'cs-travel-loa-techs':(wo.travel && wo.travel.loaTechs)|| '',
+    'cs-travel-loa-days': (wo.travel && wo.travel.loaDays) || '',
+    'cs-travel-loa-rate': (wo.travel && wo.travel.loaRate) || '70.00',
+    'wo-travel-misc':     (wo.travel && wo.travel.misc)    || '',
+    'wo-travel-misc-desc':(wo.travel && wo.travel.miscDesc)|| '',
+    'wo-customer-contact':(wo.travel && wo.travel.customerContact) || '',
+  };
+  Object.keys(fields).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = fields[id];
   });
+
+  // Clear & rebuild tabbed sections
+  ['cs-labour-body','cs-equipment-body','cs-consumables-body','cs-film-body'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.innerHTML = '';
+  });
+
+  // Restore saved rows if editing
+  if (editId && wo.labourRows && wo.labourRows.length) {
+    wo.labourRows.forEach(function(row) { addLabourRow(null, null, row); });
+  } else {
+    addLabourRow(); // Start with one empty row
+  }
+  if (editId && wo.equipRows && wo.equipRows.length) {
+    wo.equipRows.forEach(function(row) { addEquipmentRow(row); });
+  }
+  if (editId && wo.consumables && wo.consumables.length) {
+    wo.consumables.forEach(function(row) { addConsumableRow(row); });
+  }
+  if (editId && wo.film && wo.film.length) {
+    wo.film.forEach(function(row) { addFilmRow(row); });
+  }
+
+  // Show export buttons only when editing existing WO
+  var expPdf  = document.getElementById('wo-export-pdf-btn');
+  var expWord = document.getElementById('wo-export-word-btn');
+  if (expPdf)  expPdf.style.display  = editId ? 'inline-flex' : 'none';
+  if (expWord) expWord.style.display = editId ? 'inline-flex' : 'none';
+
+  switchCSTab('labour', document.querySelector('#job-modal .cs-tab'));
+  document.getElementById('job-modal').classList.add('open');
+}
+
+// openInvoiceModal — also accepts WO id (preWOId)
+// The real openInvoiceModal is defined earlier; preWOId handled via loadApprovedCS
+
+// ── Export Work Order as PDF or Word ─────────────────────────────────────────
+function exportWO(format, woId) {
+  var id = woId || _editWOId;
+  if (!id) { toast('Save the work order first', 'error'); return; }
+  var wo = _jobs.find(function(j){ return j.id === id; });
+  if (!wo) { toast('Work order not found', 'error'); return; }
+  var woNum = wo.woNum || wo.number || 'WO';
+  var html  = buildWOPrintHTML(wo);
+  if (format === 'word') {
+    var blob = new Blob(['﻿' + html], { type: 'application/msword' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href = url; a.download = 'WorkOrder-' + woNum + '.doc';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+    toast('Word document downloaded', 'success');
+  } else {
+    var win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(function(){ win.print(); }, 600);
+    toast('Print dialog opened — choose Save as PDF', 'info');
+  }
+}
+
+
+function buildWOPrintHTML(wo) {
+  var woNum  = wo.woNum || wo.number || '—';
+  var totalReg = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
+  var totalOT  = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0);  }, 0);
+  var totalDT  = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.dtHrs||0);  }, 0);
+
+  var labourTable = (wo.labourRows||[]).map(function(r) {
+    return '<tr>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (r.technician||'—') + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">' + (r.regHrs||0) + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">' + (r.otHrs||0) + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (r.startTime||'—') + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (r.endTime||'—') + '</td>'
+    + '</tr>';
+  }).join('');
+
+  var consumableTable = (wo.consumables||[]).map(function(c) {
+    return '<tr>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (c.item||'—') + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">' + (c.qty||0) + '</td>'
+      + '<td style="padding:4px 8px;border-bottom:1px solid #eee"></td>'
+    + '</tr>';
+  }).join('');
+
+  var travel = wo.travel || {};
+
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Work Order ' + woNum + '</title>'
+    + '<style>'
+    + 'body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px;color:#111}'
+    + 'h1{font-size:22px;font-weight:900;color:#C0392B;margin:0}'
+    + 'h2{font-size:13px;font-weight:700;margin:0}'
+    + '.header{display:flex;justify-content:space-between;margin-bottom:16px}'
+    + '.company{font-size:9px;color:#666;margin-top:4px;line-height:1.4}'
+    + '.wo-num{font-size:20px;font-weight:900;text-align:center}'
+    + '.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px;border:1px solid #ddd;padding:8px;margin-bottom:12px;font-size:10px}'
+    + '.ref-lbl{color:#666;font-weight:700}'
+    + 'table{width:100%;border-collapse:collapse;margin-bottom:12px}'
+    + 'th{background:#f4f4f4;padding:4px 8px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd}'
+    + '.footer-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px;margin-top:8px}'
+    + '.footer-lbl{color:#666}'
+    + '@media print{body{padding:0}}'
+    + '</style></head><body>'
+    // Header
+    + '<div class="header">'
+      + '<div>'
+        + '<div style="font-size:22px;font-weight:900;color:#C0392B;line-height:1">N<span style="border-radius:50%;background:#C0392B;color:#fff;padding:0 3px;font-size:16px">O</span>RTECH</div>'
+        + '<div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#333">ADVANCED NDT</div>'
+        + '<div class="company">' + NORTECH.address + '<br>Ph: ' + NORTECH.phone + ' Fx: ' + NORTECH.fax + '<br>' + NORTECH.web + '</div>'
+      + '</div>'
+      + '<div style="text-align:right">'
+        + '<div style="font-size:9px;color:#999">Print Date: ' + new Date().toLocaleString() + '</div>'
+        + '<div style="margin-top:8px"><h2>Work Order</h2><div class="wo-num">' + woNum + '</div></div>'
+      + '</div>'
+    + '</div>'
+    // Client + refs
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px;font-size:10px">'
+      + '<div>'
+        + '<div><span class="ref-lbl">CLIENT: </span>' + (wo.client||'—') + '</div>'
+        + '<div><span class="ref-lbl">LOCATION: </span>' + (wo.site||'—') + '</div>'
+        + '<div><span class="ref-lbl">EQUIPMENT OWNER: </span>' + (wo.equipOwner||'—') + '</div>'
+      + '</div>'
+      + '<div>'
+        + '<div><span class="ref-lbl">P.O.#: </span>' + (wo.po||'—') + '</div>'
+        + '<div><span class="ref-lbl">JOB#: </span>' + (wo.jobNum||'—') + '</div>'
+        + '<div><span class="ref-lbl">AFE#: </span>' + (wo.afe||'—') + '</div>'
+        + '<div><span class="ref-lbl">RIG#: </span>' + (wo.rig||'—') + '</div>'
+      + '</div>'
+    + '</div>'
+    // Description of service
+    + '<div style="margin-bottom:12px">'
+      + '<div style="font-weight:700;font-size:10px;border-bottom:2px solid #111;padding-bottom:2px;margin-bottom:6px">DESCRIPTION OF SERVICE</div>'
+      + '<div style="font-size:10px"><strong>' + fmtDate(wo.date) + '</strong></div>'
+      + '<div style="font-size:10px;white-space:pre-line;margin:4px 0">' + (wo.notes||'') + '</div>'
+      + (wo.fieldReports ? '<div style="font-size:10px;margin-top:4px">Field Reports: ' + wo.fieldReports + '</div>' : '')
+    + '</div>'
+    // Consumables table
+    + ((wo.consumables||[]).length ? '<div style="display:grid;grid-template-columns:1fr auto;gap:16px;margin-bottom:12px">'
+      + '<div></div>'
+      + '<table style="width:280px">'
+        + '<thead><tr><th>Consumable Type</th><th>Qty</th><th>Amount</th></tr></thead>'
+        + '<tbody>' + consumableTable + '</tbody>'
+      + '</table></div>' : '')
+    // Labour table
+    + '<table>'
+      + '<thead><tr><th>Technician</th><th>Reg. Hrs</th><th>OT Hrs</th><th>Start date/time</th><th>End date/time</th></tr></thead>'
+      + '<tbody>' + labourTable + '</tbody>'
+      + '<tfoot><tr style="font-weight:700;background:#f9f9f9">'
+        + '<td style="padding:4px 8px">Subtotal:</td>'
+        + '<td style="padding:4px 8px;text-align:center">' + totalReg.toFixed(2) + '</td>'
+        + '<td style="padding:4px 8px;text-align:center">' + totalOT.toFixed(2) + '</td>'
+        + '<td colspan="2"></td>'
+      + '</tr></tfoot>'
+    + '</table>'
+    // Footer
+    + '<div class="footer-grid">'
+      + '<div><span class="footer-lbl">Total Kilometers:</span> ' + (travel.km||'') + '</div>'
+      + '<div style="text-align:right"><span class="footer-lbl">Total Reg. Hours:</span> <strong>' + totalReg.toFixed(2) + '</strong></div>'
+      + '<div><span class="footer-lbl">Hotel:</span> ' + (travel.hotels ? '$' + travel.hotels : '') + '</div>'
+      + '<div style="text-align:right"><span class="footer-lbl">Total OT. Hours:</span> <strong>' + totalOT.toFixed(2) + '</strong></div>'
+      + '<div><span class="footer-lbl">Camp:</span> ' + (travel.camp ? '$' + travel.camp : '') + '</div>'
+      + '<div></div>'
+      + '<div><span class="footer-lbl">Meals (LOA):</span> ' + (travel.loaTechs ? travel.loaTechs + ' tech × ' + travel.loaDays + ' days' : '') + '</div>'
+      + '<div></div>'
+      + '<div><span class="footer-lbl">Misc. Charges:</span> ' + (travel.misc ? '$' + travel.misc + (travel.miscDesc ? ' — ' + travel.miscDesc : '') : '') + '</div>'
+      + '<div></div>'
+      + '<div><span class="footer-lbl">Customer Contact:</span> ' + (travel.customerContact||'') + '</div>'
+      + '<div></div>'
+    + '</div>'
+    + '<div style="margin-top:16px;font-size:9px;color:#999;border-top:1px solid #ddd;padding-top:4px">Nortech Advanced NDT Ltd.</div>' + '</body></html>';
 }
 
 // ── Supabase CRUD ─────────────────────────────────────────────────────────────
@@ -1462,6 +2146,8 @@ function renderForView(v){
   if(v==='charge-sheets') renderCSList();
   if(v==='invoices') renderInvoices();
   if(v==='rate-sheets') renderRateSheets();
+  if(v==='timesheets')  renderTimesheets();
+  if(v==='margin')      renderMarginReport();
 }
 function renderAll(){
   renderDashboard();
@@ -4557,7 +5243,7 @@ function openTSModal(tsId) {
   document.getElementById('ts-wo-client').textContent = ts.client || wo.client || '—';
   document.getElementById('ts-wo-date').textContent   = fmtDate(ts.date || wo.date) || '—';
   document.getElementById('ts-wo-site').textContent   = (ts.site || wo.site || '').slice(0, 40) || '—';
-  document.getElementById('ts-modal-title').textContent = 'Timesheet — ' + (ts.woNum || wo.woNum || wo.number || '');
+  document.getElementById('ts-modal-title').textContent = 'Timesheet — WO ' + (ts.woNum || wo.woNum || wo.number || '—') + ' · ' + (ts.client || wo.client || '');
   document.getElementById('ts-notes').value = ts.notes || '';
 
   // Clear body
@@ -4859,7 +5545,8 @@ function renderTimesheets() {
       + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.4rem">'
         + '<div>'
           + '<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.2rem">'
-            + '<span style="font-family:var(--ffc);font-size:.9rem;font-weight:800">' + (ts.woNum||'TS') + '</span>'
+            + '<span style="font-family:var(--mono);font-size:.72rem;color:var(--nor-accent);font-weight:700">⏱ TIMESHEET</span>'
+            + '<span style="font-family:var(--ffc);font-size:.9rem;font-weight:800">' + (ts.woNum||'—') + '</span>'
             + '<span style="font-size:.75rem;color:var(--muted)">' + (ts.client||'—') + '</span>'
             + chipHtml(ts.status)
           + '</div>'
@@ -4875,6 +5562,7 @@ function renderTimesheets() {
       + '<div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">'
         + '<button class="btn btn-primary btn-sm" data-open-ts="' + ts.id + '">✏ Edit / View</button>'
         + '<button class="btn btn-secondary btn-sm" data-export-ts="' + ts.id + '">⬇ Export PDF</button>'
+        + (ts.woId ? '<button class="btn btn-ghost btn-sm" data-open-wo="' + ts.woId + '">🔧 View WO ' + (ts.woNum||'') + '</button>' : '')
         + (ts.status === 'submitted' && isAdmin() ? '<button class="btn btn-ghost btn-sm" data-revert-ts="' + ts.id + '">↩ Back to Draft</button>' : '')
       + '</div>'
     + '</div>';
@@ -5044,1001 +5732,5 @@ document.addEventListener('click', function(e) {
 });
 
 </script>
-
-  <!-- ══ TIMESHEETS VIEW ══════════════════════════════════════════════════════ -->
-  <div id="view-timesheets" class="view" style="display:none">
-    <div class="sec-hdr">
-      <div><h2>Timesheets</h2><div class="sec-sub" id="ts-view-sub">Hours per work order — submit for payroll</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:130px;font-size:.72rem" id="ts-filter-status" onchange="renderTimesheets()">
-          <option value="">All</option>
-          <option value="draft">Draft</option>
-          <option value="submitted">Submitted</option>
-        </select>
-        <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="renderTimesheets()">
-      </div>
-    </div>
-    <div id="ts-grid" style="display:grid;gap:.75rem"></div>
-    <div class="empty-state" id="ts-empty" style="display:none">
-      <div class="empty-state-icon">⏱</div>
-      <div class="empty-state-title">No Timesheets Yet</div>
-      <div class="empty-state-sub">Timesheets are created when a Work Order is submitted</div>
-    </div>
-  </div>
-
-  <!-- ══ MARGIN REPORT VIEW ═══════════════════════════════════════════════════ -->
-  <div id="view-margin" class="view" style="display:none">
-    <div class="sec-hdr">
-      <div><h2>Margin Report</h2><div class="sec-sub">Billed vs Cost — admin only</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:160px;font-size:.72rem" id="margin-filter-tech" onchange="renderMarginReport()">
-          <option value="">All Technicians</option>
-        </select>
-        <input class="form-input" style="width:130px" placeholder="Filter by WO…" id="margin-filter-wo" oninput="renderMarginReport()">
-      </div>
-    </div>
-    <div class="kpi-row" id="margin-kpis" style="margin-bottom:1.25rem"></div>
-    <div class="section" style="margin-bottom:1.25rem">
-      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Work Order</h2></div></div>
-      <div class="card" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="margin-wo-table">
-          <thead><tr>
-            <th>WO #</th><th>Client</th><th>Technician</th><th>Date</th>
-            <th style="text-align:right">Reg</th><th style="text-align:right">OT</th><th style="text-align:right">Night</th>
-            <th style="text-align:right">Billed $</th>
-            <th style="text-align:right">Cost $</th>
-            <th style="text-align:right">Margin $</th>
-            <th style="text-align:right">Margin %</th>
-          </tr></thead>
-          <tbody id="margin-wo-body"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="section">
-      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Technician</h2></div></div>
-      <div class="card" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="margin-tech-table">
-          <thead><tr>
-            <th>Technician</th><th>Pay Type</th><th style="text-align:right">WOs</th>
-            <th style="text-align:right">Total Hrs</th>
-            <th style="text-align:right">Billed $</th>
-            <th style="text-align:right">Cost $</th>
-            <th style="text-align:right">Margin $</th>
-            <th style="text-align:right">Margin %</th>
-          </tr></thead>
-          <tbody id="margin-tech-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ TIMESHEET MODAL ═══════════════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="ts-modal">
-    <div class="modal" style="max-width:860px;width:96vw">
-      <div class="modal-hdr">
-        <span class="modal-title" id="ts-modal-title">Timesheet</span>
-        <button class="modal-close" onclick="closeModal('ts-modal')">✕</button>
-      </div>
-      <div class="modal-body" style="padding:1rem 1.25rem">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;margin-bottom:1rem;font-size:.78rem;display:flex;gap:1.5rem;flex-wrap:wrap">
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Work Order</div><strong id="ts-wo-ref">—</strong></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Client</div><span id="ts-wo-client">—</span></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Date</div><span id="ts-wo-date">—</span></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Site</div><span id="ts-wo-site">—</span></div>
-        </div>
-        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:.5rem">Hours — adjust as needed, add non-billable rows</div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-            <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:110px">Date</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:150px">Category / Activity</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">OT Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Night</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">Start</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">End</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:72px">Billable?</th>
-              <th style="width:24px"></th>
-            </tr></thead>
-            <tbody id="ts-rows-body"></tbody>
-          </table>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="addTSRow()" style="margin-top:.5rem" id="ts-add-row-btn">+ Add Row</button>
-        <div class="form-group" style="margin-top:.9rem">
-          <label class="form-label">Notes (optional)</label>
-          <textarea class="form-textarea" id="ts-notes" placeholder="Any notes about your time on this job…" style="min-height:64px"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
-        <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
-        <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
-        <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
-        <div style="flex:1"></div>
-        <button class="btn btn-secondary" id="ts-draft-btn" onclick="saveTSDraft()">Save Draft</button>
-        <button class="btn btn-primary" id="ts-submit-btn" onclick="submitTS()">Submit Timesheet</button>
-      </div>
-    </div>
-  </div>
-
-
-
-  <!-- ══ TIMESHEETS VIEW ══════════════════════════════════════════════════════ -->
-  <div id="view-timesheets" class="view" style="display:none">
-    <div class="sec-hdr">
-      <div><h2>Timesheets</h2><div class="sec-sub" id="ts-view-sub">Hours per work order — submit for payroll</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:130px;font-size:.72rem" id="ts-filter-status" onchange="renderTimesheets()">
-          <option value="">All</option>
-          <option value="draft">Draft</option>
-          <option value="submitted">Submitted</option>
-        </select>
-        <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="renderTimesheets()">
-      </div>
-    </div>
-    <div id="ts-grid" style="display:grid;gap:.75rem"></div>
-    <div class="empty-state" id="ts-empty" style="display:none">
-      <div class="empty-state-icon">⏱</div>
-      <div class="empty-state-title">No Timesheets Yet</div>
-      <div class="empty-state-sub">Timesheets are created when a Work Order is submitted</div>
-    </div>
-  </div>
-
-  <!-- ══ MARGIN REPORT VIEW ═══════════════════════════════════════════════════ -->
-  <div id="view-margin" class="view" style="display:none">
-    <div class="sec-hdr">
-      <div><h2>Margin Report</h2><div class="sec-sub">Billed vs Cost — admin only</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:160px;font-size:.72rem" id="margin-filter-tech" onchange="renderMarginReport()">
-          <option value="">All Technicians</option>
-        </select>
-        <input class="form-input" style="width:130px" placeholder="Filter by WO…" id="margin-filter-wo" oninput="renderMarginReport()">
-      </div>
-    </div>
-    <div class="kpi-row" id="margin-kpis" style="margin-bottom:1.25rem"></div>
-    <div class="section" style="margin-bottom:1.25rem">
-      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Work Order</h2></div></div>
-      <div class="card" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="margin-wo-table">
-          <thead><tr>
-            <th>WO #</th><th>Client</th><th>Technician</th><th>Date</th>
-            <th style="text-align:right">Reg</th><th style="text-align:right">OT</th><th style="text-align:right">Night</th>
-            <th style="text-align:right">Billed $</th>
-            <th style="text-align:right">Cost $</th>
-            <th style="text-align:right">Margin $</th>
-            <th style="text-align:right">Margin %</th>
-          </tr></thead>
-          <tbody id="margin-wo-body"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="section">
-      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Technician</h2></div></div>
-      <div class="card" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="margin-tech-table">
-          <thead><tr>
-            <th>Technician</th><th>Pay Type</th><th style="text-align:right">WOs</th>
-            <th style="text-align:right">Total Hrs</th>
-            <th style="text-align:right">Billed $</th>
-            <th style="text-align:right">Cost $</th>
-            <th style="text-align:right">Margin $</th>
-            <th style="text-align:right">Margin %</th>
-          </tr></thead>
-          <tbody id="margin-tech-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ TIMESHEET MODAL ═══════════════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="ts-modal">
-    <div class="modal" style="max-width:860px;width:96vw">
-      <div class="modal-hdr">
-        <span class="modal-title" id="ts-modal-title">Timesheet</span>
-        <button class="modal-close" onclick="closeModal('ts-modal')">✕</button>
-      </div>
-      <div class="modal-body" style="padding:1rem 1.25rem">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;margin-bottom:1rem;font-size:.78rem;display:flex;gap:1.5rem;flex-wrap:wrap">
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Work Order</div><strong id="ts-wo-ref">—</strong></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Client</div><span id="ts-wo-client">—</span></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Date</div><span id="ts-wo-date">—</span></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Site</div><span id="ts-wo-site">—</span></div>
-        </div>
-        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:.5rem">Hours — adjust as needed, add non-billable rows</div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-            <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:110px">Date</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:150px">Category / Activity</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">OT Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Night</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">Start</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">End</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:72px">Billable?</th>
-              <th style="width:24px"></th>
-            </tr></thead>
-            <tbody id="ts-rows-body"></tbody>
-          </table>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="addTSRow()" style="margin-top:.5rem" id="ts-add-row-btn">+ Add Row</button>
-        <div class="form-group" style="margin-top:.9rem">
-          <label class="form-label">Notes (optional)</label>
-          <textarea class="form-textarea" id="ts-notes" placeholder="Any notes about your time on this job…" style="min-height:64px"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
-        <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
-        <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
-        <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
-        <div style="flex:1"></div>
-        <button class="btn btn-secondary" id="ts-draft-btn" onclick="saveTSDraft()">Save Draft</button>
-        <button class="btn btn-primary" id="ts-submit-btn" onclick="submitTS()">Submit Timesheet</button>
-      </div>
-    </div>
-  </div>
-
-</body></html>');
-  win.document.close();
-  win.focus();
-  setTimeout(function(){ win.print(); }, 500);
-}
-
-// ── Push actuals to Command Centre via Supabase ───────────────────────────────
-async function pushActualsToCC(){
-  try{
-    var now=new Date().toISOString().slice(0,7); // YYYY-MM
-    var thisYear=new Date().getFullYear().toString();
-    var paidThisYear=_invoices.filter(function(i){return i.status==='paid'&&(i.paidDate||'').startsWith(thisYear);});
-    var totalPaidYTD=paidThisYear.reduce(function(s,i){return s+(i.total||0);},0);
-    // Write to crm_sync nortech actuals
-    var res=await fetch(_SB_URL+'/rest/v1/crm_sync',{
-      method:'POST',
-      headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-      body:JSON.stringify({id:'nortech_actuals',data:{
-        nortech_invoiced_ytd:totalPaidYTD/1e6,
-        nortech_paid_invoices:paidThisYear.length,
-        last_updated:new Date().toISOString(),
-      },updated_at:new Date().toISOString()})
-    });
-    if(res.ok) console.log('Nortech actuals pushed to CC');
-  }catch(e){ console.warn('pushActualsToCC failed:', e.message); }
-}
-
-// ── Modal helpers ─────────────────────────────────────────────────────────────
-function closeModal(id){
-  var el=document.getElementById(id);
-  if(el) el.classList.remove('open');
-}
-document.addEventListener('click',function(e){
-  if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
-});
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded',function(){
-  document.getElementById('nav-date').textContent=
-    new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
-  loadAll();
-});
-
-
-
-// ── RATE SHEET IMPORT ────────────────────────────────────────────────────────
-
-var _importedRateData = null;
-
-function openImportRateModal() {
-  var status = document.getElementById('import-status');
-  var preview = document.getElementById('import-preview');
-  var btn = document.getElementById('import-confirm-btn');
-  var fi = document.getElementById('import-file-input');
-  if (status) { status.style.display = 'none'; }
-  if (preview) { preview.style.display = 'none'; }
-  if (btn) { btn.style.display = 'none'; }
-  if (fi) { fi.value = ''; }
-  _importedRateData = null;
-  document.getElementById('import-rate-modal').classList.add('open');
-}
-
-function handleImportDrop(e) {
-  e.preventDefault();
-  document.getElementById('import-dropzone').style.borderColor = 'var(--border2)';
-  var file = e.dataTransfer.files[0];
-  if (file) handleImportFile(file);
-}
-
-async function handleImportFile(file) {
-  if (!file) return;
-  var ext = file.name.split('.').pop().toLowerCase();
-  if (ext !== 'docx' && ext !== 'pdf') {
-    showImportStatus('Only .docx and .pdf files are supported', 'error');
-    return;
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    showImportStatus('File too large (max 10MB)', 'error');
-    return;
-  }
-  showImportStatus('Reading file…', 'loading');
-  document.getElementById('import-preview').style.display = 'none';
-  document.getElementById('import-confirm-btn').style.display = 'none';
-  try {
-    var payload;
-    if (ext === 'docx') {
-      var text = await extractDocxText(file);
-      if (!text || text.trim().length < 20) {
-        showImportStatus('Could not extract text. Try PDF format.', 'error');
-        return;
-      }
-      showImportStatus('Analysing with AI…', 'loading');
-      payload = await parseRateSheetText(text);
-    } else {
-      showImportStatus('Analysing PDF with AI…', 'loading');
-      payload = await parseRateSheetPDF(file);
-    }
-    if (!payload) {
-      showImportStatus('Could not extract rates from document.', 'error');
-      return;
-    }
-    _importedRateData = payload;
-    showImportPreview(payload);
-    showImportStatus('✓ Rate sheet extracted — review and confirm below', 'success');
-    document.getElementById('import-confirm-btn').style.display = 'inline-flex';
-  } catch(e) {
-    showImportStatus('Error: ' + e.message, 'error');
-  }
-}
-
-async function extractDocxText(file) {
-  if (!window.mammoth) {
-    await new Promise(function(resolve, reject) {
-      var s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
-      s.onload = resolve; s.onerror = reject;
-      document.head.appendChild(s);
-    });
-  }
-  return new Promise(function(resolve, reject) {
-    var reader = new FileReader();
-    reader.onload = async function(e) {
-      try {
-        var result = await mammoth.extractRawText({ arrayBuffer: e.target.result });
-        resolve(result.value);
-      } catch(err) { reject(err); }
-    };
-    reader.onerror = function() { reject(new Error('File read failed')); };
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-var RATE_PROMPT = 'You are a data extraction assistant. Extract rate sheet pricing data and return ONLY a valid JSON object. No markdown, no explanation, no code blocks. Just the raw JSON. Use this exact structure: {"name":"rate sheet name","customer":"client name or empty string","effective":"YYYY-MM-DD","currency":"CAD","labour":[{"name":"category name","stRate":0,"otRate":0,"dtRate":0}],"equipment":[{"name":"item name","rate":0,"unit":"day"}]} Rules: all rate values must be numbers not strings. Extract every labour category. If only ST rate shown set OT=ST*1.5 and DT=ST*2. Return ONLY the JSON object starting with { and ending with }.';
-
-async function parseRateSheetText(text) {
-  var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: RATE_PROMPT + ' Document text: ' + text.slice(0, 8000) }]
-    })
-  });
-  if (!res.ok) throw new Error('API error ' + res.status);
-  var data = await res.json();
-  var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-  console.log('AI response:', txt.slice(0, 300));
-  var clean = txt.replace(/```json|```/g,'').trim();
-  var match = clean.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
-  var jsonStr = match[0];
-  jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
-  jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ');
-  try { return JSON.parse(jsonStr); }
-  catch(e2) { throw new Error('Could not parse AI response as JSON: ' + e2.message); }
-}
-
-async function parseRateSheetPDF(file) {
-  var base64 = await new Promise(function(resolve, reject) {
-    var reader = new FileReader();
-    reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
-    reader.onerror = function() { reject(new Error('Read failed')); };
-    reader.readAsDataURL(file);
-  });
-  var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 1000,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-          { type: 'text', text: RATE_PROMPT }
-        ]
-      }]
-    })
-  });
-  if (!res.ok) throw new Error('API error ' + res.status);
-  var data = await res.json();
-  var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-  var clean = txt.replace(/```json|```/g,'').trim();
-  var match = clean.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('No JSON in response');
-  return JSON.parse(match[0]);
-}
-
-function showImportPreview(data) {
-  document.getElementById('import-rs-name').value = data.name || '';
-  document.getElementById('import-rs-customer').value = data.customer || '';
-  var labourEl = document.getElementById('import-labour-preview');
-  if (labourEl) {
-    labourEl.innerHTML = (data.labour && data.labour.length
-      ? '<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Labour (' + data.labour.length + ' categories)</div>'
-        + data.labour.map(function(l) {
-          return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
-            + '<span style="font-weight:600">' + l.name + '</span>'
-            + '<span style="font-family:var(--mono);color:var(--muted)">ST:' + fmtMoney(l.stRate) + ' OT:' + fmtMoney(l.otRate) + ' DT:' + fmtMoney(l.dtRate) + '</span>'
-          + '</div>';
-        }).join('')
-      : '<div style="color:var(--muted);font-size:.75rem">No labour rates found</div>');
-  }
-  var eqEl = document.getElementById('import-equipment-preview');
-  if (eqEl && data.equipment && data.equipment.length) {
-    eqEl.innerHTML = '<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Equipment (' + data.equipment.length + ' items)</div>'
-      + data.equipment.map(function(e) {
-        return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
-          + '<span>' + e.name + '</span>'
-          + '<span style="font-family:var(--mono);color:var(--muted)">' + fmtMoney(e.rate) + '/' + e.unit + '</span>'
-        + '</div>';
-      }).join('');
-  }
-  document.getElementById('import-preview').style.display = 'block';
-}
-
-async function confirmImport() {
-  if (!_importedRateData) return;
-  var name = document.getElementById('import-rs-name').value.trim();
-  if (!name) { toast('Enter a name for this rate sheet', 'error'); return; }
-  var data = Object.assign({}, _importedRateData, {
-    id: uid(), name: name,
-    customer: document.getElementById('import-rs-customer').value.trim(),
-    created: today(), modified: today(),
-    effective: _importedRateData.effective || today(),
-    currency: _importedRateData.currency || 'CAD',
-  });
-  try {
-    await sbUpsert('rate_sheets', data.id, data);
-    _rateSheets.unshift(data);
-    closeModal('import-rate-modal');
-    renderRateSheets();
-    toast('Imported: ' + (data.labour||[]).length + ' labour categories, ' + (data.equipment||[]).length + ' equipment items', 'success');
-  } catch(e) { toast('Import failed: ' + e.message, 'error'); }
-}
-
-function showImportStatus(msg, type) {
-  var el = document.getElementById('import-status');
-  if (!el) return;
-  var styles = {
-    loading: 'background:rgba(0,174,239,.1);color:rgba(0,174,239,.8);border:1px solid rgba(0,174,239,.2)',
-    success: 'background:rgba(22,163,74,.1);color:#22C55E;border:1px solid rgba(22,163,74,.2)',
-    error:   'background:rgba(185,28,28,.1);color:#EF4444;border:1px solid rgba(185,28,28,.2)',
-  };
-  el.style.cssText = 'display:block;padding:.75rem;border-radius:6px;font-size:.78rem;margin-bottom:1rem;' + (styles[type]||styles.loading);
-  el.textContent = msg;
-}
-
-// ── Pre-built EllisDon rate sheet ─────────────────────────────────────────────
-
-
-var SEED_RATE_SHEETS = {
-  'ellisdon_march_2026': {"id": "ellisdon_march_2026", "name": "EllisDon NDT Rates \u2014 March 2026", "customer": "EllisDon", "effective": "2026-03-01", "currency": "CAD", "notes": "Quote #26-117. March 2026 \u2013 March 2027. FOB Edmonton, AB. Rates portal to portal. Regular time Mon-Fri 7:30am-4:00pm. 15% night shift differential. RT/PAUT/TOFD/AUT min 4hr callout, all others 2hr min. Remote: LOA $70/tech/day, MOB/DEMOB $1.20/km.", "labour": [{"name": "Magnetic Particle Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Liquid Penetrant Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Hardness Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Ferrite Testing", "stRate": 105.0, "otRate": 157.5, "dtRate": 157.5}, {"name": "Manual UT Level 1", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Manual UT Level 2", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "Visual CWB Level 2", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "Visual CWB Level 3", "stRate": 135.0, "otRate": 202.5, "dtRate": 202.5}, {"name": "NACE Level 2", "stRate": 130.0, "otRate": 195.0, "dtRate": 195.0}, {"name": "Positive Material Identification", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Spectrographic Analysis", "stRate": 95.0, "otRate": 142.5, "dtRate": 142.5}, {"name": "Radiographic Testing (2 person)", "stRate": 165.0, "otRate": 247.5, "dtRate": 247.5}, {"name": "PAUT / TOFD (2 person)", "stRate": 225.0, "otRate": 337.5, "dtRate": 337.5}, {"name": "AUT Corrosion Testing (2 person)", "stRate": 215.0, "otRate": 322.5, "dtRate": 322.5}, {"name": "Data Analysis", "stRate": 135.0, "otRate": 202.5, "dtRate": 202.5}, {"name": "NDT Assistant / CEDO", "stRate": 85.0, "otRate": 127.5, "dtRate": 127.5}, {"name": "Supervisor / Project Coordinator", "stRate": 135.0, "otRate": 202.0, "dtRate": 202.0}, {"name": "HSE Supervisor", "stRate": 110.0, "otRate": 165.0, "dtRate": 165.0}, {"name": "API 510 ISI-PVPP Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "API 653 Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "API 570 Inspector", "stRate": 135.0, "otRate": 187.5, "dtRate": 187.5}, {"name": "Rope Access Level 3", "stRate": 145.0, "otRate": 217.5, "dtRate": 217.5}, {"name": "UAV UT/Visual Drone (2 person)", "stRate": 255.0, "otRate": 382.5, "dtRate": 382.5}, {"name": "CGSB Level 3", "stRate": 150.0, "otRate": 225.0, "dtRate": 225.0}, {"name": "Engineering", "stRate": 215.0, "otRate": 322.5, "dtRate": 322.5}, {"name": "Inspection ISO / PID Drafter", "stRate": 87.0, "otRate": 130.5, "dtRate": 130.5}, {"name": "Office Clerical", "stRate": 59.0, "otRate": 88.5, "dtRate": 88.5}, {"name": "MFL Tank Floor Inspection", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}, {"name": "Guided Wave Testing", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}, {"name": "Eddy Current Testing", "stRate": 0.0, "otRate": 0.0, "dtRate": 0.0}], "equipment": [{"name": "MP Yoke, calibration block, light meter", "rate": 5.0, "unit": "hour"}, {"name": "Liquid Penetrant testing kit", "rate": 5.0, "unit": "hour"}, {"name": "Ultrasonic unit, calibration blocks, probes", "rate": 20.0, "unit": "hour"}, {"name": "Radiographic exposure device, dark room", "rate": 25.0, "unit": "hour"}, {"name": "NorScan Digital Imaging Acquisition (DDA)", "rate": 75.0, "unit": "hour"}, {"name": "Optical Emission Spectrometry unit", "rate": 99.0, "unit": "hour"}, {"name": "LIPPS unit, argon, calibration blocks", "rate": 55.0, "unit": "hour"}, {"name": "PMI (XRF) unit & calibration blocks", "rate": 35.0, "unit": "hour"}, {"name": "Hardness Tester (UCI)", "rate": 15.0, "unit": "hour"}, {"name": "Hardness Tester (Telebrineller)", "rate": 15.0, "unit": "hour"}, {"name": "Hardness Tester (King Tester)", "rate": 20.0, "unit": "hour"}, {"name": "Ferrite Tester unit", "rate": 15.0, "unit": "hour"}, {"name": "PAUT/TOFD unit, scanners, cables, probes", "rate": 1250.0, "unit": "shift"}, {"name": "AUT unit, cables, probes, calibration blocks", "rate": 1250.0, "unit": "shift"}, {"name": "Coating Tester unit", "rate": 150.0, "unit": "shift"}, {"name": "Voltmeter", "rate": 50.0, "unit": "shift"}, {"name": "Digital Pit Gauge", "rate": 85.0, "unit": "shift"}, {"name": "Airal Robot, UT Thickness unit", "rate": 2625.0, "unit": "shift"}, {"name": "Ultrasonic Couplant", "rate": 33.0, "unit": "liter"}, {"name": "Ultrasonic Couplant High/Low temp", "rate": 3.5, "unit": "oz"}, {"name": "MT Contrast Paint / Wet Particles", "rate": 32.0, "unit": "can"}, {"name": "Dry Magnetic Particle", "rate": 15.0, "unit": "can"}, {"name": "PT Penetrant, Developer, Cleaner", "rate": 35.0, "unit": "can"}, {"name": "Grinding Discs", "rate": 22.0, "unit": "disc"}, {"name": "Temp Sticks", "rate": 25.0, "unit": "stick"}, {"name": "NDT Cleaner", "rate": 15.0, "unit": "can"}, {"name": "Nital Acid Etchant", "rate": 12.5, "unit": "oz"}, {"name": "Methanol Neutralizer", "rate": 35.75, "unit": "liter"}, {"name": "PAUT Antifreeze", "rate": 20.0, "unit": "liter"}, {"name": "Film < 2\" per weld", "rate": 9.0, "unit": "weld"}, {"name": "Film 2\"-3\" per weld (4 exposures)", "rate": 12.0, "unit": "weld"}, {"name": "Film 4\"-5\" per weld", "rate": 12.0, "unit": "weld"}, {"name": "Film 6\" per weld", "rate": 15.0, "unit": "weld"}, {"name": "Film 8\"-12\" per weld", "rate": 21.0, "unit": "weld"}, {"name": "Film 14\"+ per weld", "rate": 1.75, "unit": "diameter inch"}, {"name": "Film 2.75\"x8.5\" sheet", "rate": 4.5, "unit": "sheet"}, {"name": "Film 2.75\"x17\" sheet", "rate": 8.0, "unit": "sheet"}, {"name": "Film 3.5\"x17\" sheet", "rate": 13.0, "unit": "sheet"}, {"name": "Film 4.5\"x17\" sheet", "rate": 15.0, "unit": "sheet"}, {"name": "Film 7\"x17\" sheet", "rate": 19.0, "unit": "sheet"}, {"name": "Film 14\"x17\" sheet", "rate": 24.0, "unit": "sheet"}, {"name": "Film Digitizing per 17\" length", "rate": 5.0, "unit": "length"}, {"name": "Film Digitizing per 17\" stapled", "rate": 7.5, "unit": "length"}, {"name": "Film Minimum digitizing charge", "rate": 85.0, "unit": "job"}, {"name": "Service Vehicle & Fuel", "rate": 10.0, "unit": "hour"}, {"name": "Environmental Fee (MT/PT/RT)", "rate": 10.0, "unit": "shift"}, {"name": "LOA (Remote)", "rate": 70.0, "unit": "tech/day"}, {"name": "MOB/DEMOB Kilometers (Remote)", "rate": 1.2, "unit": "km"}, {"name": "Remote Service Vehicle (onsite)", "rate": 120.0, "unit": "shift"}], "created": "2026-04-22", "modified": "2026-04-22"}
-};
-
-async function importSeedRateSheet(key) {
-  var rs = SEED_RATE_SHEETS[key];
-  if (!rs) return;
-  rs = Object.assign({}, rs, { id: uid(), created: today(), modified: today() });
-  try {
-    await sbUpsert('rate_sheets', rs.id, rs);
-    _rateSheets.unshift(rs);
-    renderRateSheets();
-    toast('Rate sheet imported: ' + rs.labour.length + ' labour + ' + rs.equipment.length + ' equipment/consumable items', 'success');
-  } catch(e) { toast('Import failed: ' + e.message, 'error'); }
-}
-
-
-// ── Canadian provincial tax rates ─────────────────────────────────────────────
-var CANADA_TAX_RATES = {
-  'AB': { name: 'Alberta',                 gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
-  'BC': { name: 'British Columbia',        gst:5,  pst:7,      hst:0,  total:12,     label:'GST 5% + PST 7%' },
-  'SK': { name: 'Saskatchewan',            gst:5,  pst:6,      hst:0,  total:11,     label:'GST 5% + PST 6%' },
-  'MB': { name: 'Manitoba',               gst:5,  pst:7,      hst:0,  total:12,     label:'GST 5% + PST 7%' },
-  'ON': { name: 'Ontario',                 gst:0,  pst:0,      hst:13, total:13,     label:'HST 13%' },
-  'QC': { name: 'Quebec',                  gst:5,  pst:9.975,  hst:0,  total:14.975, label:'GST 5% + QST 9.975%' },
-  'NB': { name: 'New Brunswick',           gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
-  'NS': { name: 'Nova Scotia',             gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
-  'PE': { name: 'Prince Edward Island',    gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
-  'NL': { name: 'Newfoundland & Labrador', gst:0,  pst:0,      hst:15, total:15,     label:'HST 15%' },
-  'NT': { name: 'Northwest Territories',   gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
-  'NU': { name: 'Nunavut',                 gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
-  'YT': { name: 'Yukon',                   gst:5,  pst:0,      hst:0,  total:5,      label:'GST 5%' },
-  'EXEMPT': { name: 'Tax Exempt',          gst:0,  pst:0,      hst:0,  total:0,      label:'Exempt (Federal/First Nations)' },
-};
-
-function getProvinceOptions(selected) {
-  return Object.entries(CANADA_TAX_RATES).map(function(kv) {
-    var code=kv[0], p=kv[1];
-    return '<option value="'+code+'" '+(code===selected?'selected':'')+'>'+p.name+' — '+p.label+'</option>';
-  }).join('');
-}
-
-function onProvinceChange() {
-  var sel = document.getElementById('inv-province');
-  if (!sel) return;
-  var province = CANADA_TAX_RATES[sel.value];
-  if (!province) return;
-  var taxInput = document.getElementById('inv-tax-rate');
-  var taxLabel = document.getElementById('inv-tax-label');
-  if (taxInput) taxInput.value = province.total;
-  if (taxLabel) taxLabel.textContent = province.label;
-  updateInvTotals();
-}
-
-
-// ── Reverse invoice/WO status ─────────────────────────────────────────────────
-async function reverseInvoicePayment(id) {
-  var inv = _invoices.find(function(i){ return i.id===id; });
-  if (!inv) return;
-  if (!confirm('Reverse payment on '+inv.invNum+'?\n\nThis will:\n  • Set invoice back to Sent\n  • Remove the paid date\n  • Reverse actuals pushed to Command Centre\n\nContinue?')) return;
-  inv.status='sent'; inv.paidDate=null; inv.reversedDate=today(); inv.modified=today();
-  try {
-    await sbUpsert('invoices',id,inv);
-    renderInvoices(); renderDashboard();
-    pushActualsToCC();
-    toast('Payment reversed — invoice back to Sent','info');
-    closeModal('inv-view-modal');
-  } catch(e){ toast('Error: '+e.message,'error'); }
-}
-
-async function reverseInvoiceToApproved(id) {
-  var inv = _invoices.find(function(i){ return i.id===id; });
-  if (!inv) return;
-  var woCount = (inv.chargeSheetIds||[]).length;
-  if (!confirm('Reverse invoice '+inv.invNum+' back to draft?\n\nThis will:\n  • Set invoice back to Draft\n  • Return '+woCount+' work order'+(woCount!==1?'s':'')+' to Approved\n\nContinue?')) return;
-  inv.status='draft'; inv.sentDate=null; inv.modified=today();
-  try {
-    await sbUpsert('invoices',id,inv);
-    await Promise.all((inv.chargeSheetIds||[]).map(async function(woId){
-      var wo=_jobs.find(function(j){return j.id===woId;});
-      if(wo&&wo.status==='invoiced'){ wo.status='approved'; wo.invoiceId=null; wo.modified=today(); await sbUpsert('jobs',woId,wo); }
-    }));
-    renderInvoices(); renderJobs(); renderDashboard();
-    toast('Invoice reversed to Draft — work orders returned to Approved','info');
-    closeModal('inv-view-modal');
-  } catch(e){ toast('Error: '+e.message,'error'); }
-}
-
-async function markVoid(id) {
-  if (!confirm('Mark this invoice as void? This cannot be undone.')) return;
-  var inv = _invoices.find(function(i){ return i.id===id; });
-  if (!inv) return;
-  inv.status='void'; inv.voidDate=today(); inv.modified=today();
-  try {
-    await sbUpsert('invoices',id,inv);
-    await Promise.all((inv.chargeSheetIds||[]).map(async function(woId){
-      var wo=_jobs.find(function(j){return j.id===woId;});
-      if(wo&&wo.status==='invoiced'){ wo.status='approved'; wo.invoiceId=null; wo.modified=today(); await sbUpsert('jobs',woId,wo); }
-    }));
-    renderInvoices(); renderDashboard();
-    toast('Invoice voided — work orders returned to Approved','info');
-  } catch(e){ toast('Error: '+e.message,'error'); }
-}
-
-async function markInvSent(id) {
-  var inv = _invoices.find(function(i){ return i.id === id; });
-  if (!inv) return;
-  if (!confirm('Mark invoice ' + inv.invNum + ' as Sent? This means it has been delivered to the client. Continue?')) return;
-  inv.status = 'sent'; inv.sentDate = today(); inv.modified = today(); inv.sentDate=today(); inv.modified=today();
-  try { await sbUpsert('invoices',id,inv); renderInvoices(); renderDashboard(); toast('Invoice marked as sent','success'); }
-  catch(e){ toast('Error: '+e.message,'error'); }
-}
-async function markInvoiceSent(){ if(!_currentInvId)return; await markInvSent(_currentInvId); closeModal('inv-view-modal'); }
-async function markInvoiceVoid(){ if(!_currentInvId)return; await markVoid(_currentInvId); closeModal('inv-view-modal'); }
-
-
-// ── Price visibility guard ─────────────────────────────────────────────────────
-var _ADMIN_IDS = ['jon','jason','joel_c','renee','jeremy','mathieu'];
-
-function isAdmin() {
-  var viewer = (window.CURRENT_VIEWER || localStorage.getItem('hub_viewer') || 'tech');
-  return _ADMIN_IDS.indexOf(viewer) > -1;
-}
-
-function fmtMoney(n) { return isAdmin() ? _fmtMoneyImpl(n) : '—'; }
-function fmtMoneyShort(n) { return isAdmin() ? _fmtMoneyShortImpl(n) : '—'; }
-
-function applyAdminVisibility() {
-  if (!isAdmin()) {
-    document.body.classList.add('tech-view');
-    var invBtn = document.getElementById('inv-nav-btn');
-    if (invBtn) invBtn.style.display='none';
-    var rateBtn = document.getElementById('nav-rates');
-    if (rateBtn) rateBtn.style.display='none';
-  } else {
-    document.body.classList.remove('tech-view');
-  }
-}
-
-function renderTechDashboard() {
-  var kpiEl = document.getElementById('dash-kpis');
-  if (!kpiEl) return;
-  var activeJobs = _jobs.filter(function(j){ return j.status==='draft'||j.status==='submitted'; }).length;
-  var myPending  = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
-  var myApproved = _jobs.filter(function(j){ return j.status==='approved'; }).length;
-  kpiEl.innerHTML = [
-    {val:activeJobs, lbl:'Active Work Orders', sub:'Draft or submitted'},
-    {val:myPending,  lbl:'Pending Approval',   sub:'Awaiting admin review'},
-    {val:myApproved, lbl:'Approved',            sub:'Ready for invoicing'},
-  ].map(function(k){
-    return '<div class="kpi-tile"><div class="kpi-tile-val">'+k.val+'</div>'
-      +'<div class="kpi-tile-lbl">'+k.lbl+'</div>'
-      +'<div class="kpi-tile-sub">'+k.sub+'</div></div>';
-  }).join('');
-}
-
-
-// ── Job detail toggle ──────────────────────────────────────────────────────────
-function toggleJobDetail(jobId) {
-  var detail = document.getElementById('job-detail-' + jobId);
-  var icon   = document.getElementById('job-expand-icon-' + jobId);
-  if (!detail) return;
-  var open = detail.style.display === 'none' || detail.style.display === '';
-  detail.style.display = open ? 'block' : 'none';
-  if (icon) icon.textContent = open ? '▲' : '▼';
-}
-
-// ── Global click delegation ─────────────────────────────────────────────────────
-document.addEventListener('click', function(e) {
-  var el = e.target.closest('[data-toggle-job]');
-  if (el && !e.target.closest('button') && !e.target.closest('a')) { toggleJobDetail(el.getAttribute('data-toggle-job')); return; }
-});
-
-// ══════════════════════════════════════════════════════════════════════════════
-// WORK ORDER SYSTEM — replaces Job + Work Order
-// ══════════════════════════════════════════════════════════════════════════════
-
-var _editWOId = null;
-
-// ── Open WO Modal ─────────────────────────────────────────────────────────────
-function openWOModal(editId) {
-  _editWOId = editId || null;
-  _csLabourRowCount = 0;
-  _csEquipmentRowCount = 0;
-  _csConsumableRowCount = 0;
-  _csFilmRowCount = 0;
-
-  var wo = editId ? (_jobs.find(function(j){ return j.id === editId; }) || {}) : {};
-  document.getElementById('wo-modal-title').textContent = editId ? 'Edit Work Order' : 'New Work Order';
-
-  // Populate province dropdown
-  var pSel = document.getElementById('job-province');
-  if (pSel) { pSel.innerHTML = '<option value="">— Province —</option>' + getProvinceOptions(wo.province || 'AB'); pSel.value = wo.province || 'AB'; }
-
-  // Fill header fields
-  var fields = {
-    'job-client': wo.client || '',
-    'job-number': wo.number || '',
-    'wo-date':    wo.date   || today(),
-    'job-site':   wo.site   || '',
-    'wo-equip-owner': wo.equipOwner || '',
-    'job-po':     wo.po     || '',
-    'job-client-wo': wo.jobNum || '',
-    'wo-afe':     wo.afe    || '',
-    'wo-rig':     wo.rig    || '',
-    'cs-notes':   wo.notes  || '',
-    'wo-field-reports': wo.fieldReports || '',
-    'cs-travel-km':       (wo.travel && wo.travel.km)      || '',
-    'cs-travel-km-rate':  (wo.travel && wo.travel.kmRate)  || '1.20',
-    'cs-travel-hotels':   (wo.travel && wo.travel.hotels)  || '',
-    'wo-travel-camp':     (wo.travel && wo.travel.camp)    || '',
-    'cs-travel-flights':  (wo.travel && wo.travel.flights) || '',
-    'cs-travel-loa-techs':(wo.travel && wo.travel.loaTechs)|| '',
-    'cs-travel-loa-days': (wo.travel && wo.travel.loaDays) || '',
-    'cs-travel-loa-rate': (wo.travel && wo.travel.loaRate) || '70.00',
-    'wo-travel-misc':     (wo.travel && wo.travel.misc)    || '',
-    'wo-travel-misc-desc':(wo.travel && wo.travel.miscDesc)|| '',
-    'wo-customer-contact':(wo.travel && wo.travel.customerContact) || '',
-  };
-  Object.keys(fields).forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.value = fields[id];
-  });
-
-  // Clear & rebuild tabbed sections
-  ['cs-labour-body','cs-equipment-body','cs-consumables-body','cs-film-body'].forEach(function(id) {
-    var el = document.getElementById(id); if (el) el.innerHTML = '';
-  });
-
-  // Restore saved rows if editing
-  if (editId && wo.labourRows && wo.labourRows.length) {
-    wo.labourRows.forEach(function(row) { addLabourRow(null, null, row); });
-  } else {
-    addLabourRow(); // Start with one empty row
-  }
-  if (editId && wo.equipRows && wo.equipRows.length) {
-    wo.equipRows.forEach(function(row) { addEquipmentRow(row); });
-  }
-  if (editId && wo.consumables && wo.consumables.length) {
-    wo.consumables.forEach(function(row) { addConsumableRow(row); });
-  }
-  if (editId && wo.film && wo.film.length) {
-    wo.film.forEach(function(row) { addFilmRow(row); });
-  }
-
-  // Show export buttons only when editing existing WO
-  var expPdf  = document.getElementById('wo-export-pdf-btn');
-  var expWord = document.getElementById('wo-export-word-btn');
-  if (expPdf)  expPdf.style.display  = editId ? 'inline-flex' : 'none';
-  if (expWord) expWord.style.display = editId ? 'inline-flex' : 'none';
-
-  switchCSTab('labour', document.querySelector('#job-modal .cs-tab'));
-  document.getElementById('job-modal').classList.add('open');
-}
-
-// openInvoiceModal — also accepts WO id (preWOId)
-// The real openInvoiceModal is defined earlier; preWOId handled via loadApprovedCS
-
-// ── Export Work Order as PDF or Word ─────────────────────────────────────────
-function exportWO(format, woId) {
-  var id = woId || _editWOId;
-  if (!id) { toast('Save the work order first', 'error'); return; }
-  var wo = _jobs.find(function(j){ return j.id === id; });
-  if (!wo) { toast('Work order not found', 'error'); return; }
-  var woNum = wo.woNum || wo.number || 'WO';
-  var html  = buildWOPrintHTML(wo);
-  if (format === 'word') {
-    var blob = new Blob(['﻿' + html], { type: 'application/msword' });
-    var url  = URL.createObjectURL(blob);
-    var a    = document.createElement('a');
-    a.href = url; a.download = 'WorkOrder-' + woNum + '.doc';
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-    toast('Word document downloaded', 'success');
-  } else {
-    var win = window.open('', '_blank');
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    setTimeout(function(){ win.print(); }, 600);
-    toast('Print dialog opened — choose Save as PDF', 'info');
-  }
-}
-
-
-function buildWOPrintHTML(wo) {
-  var woNum  = wo.woNum || wo.number || '—';
-  var totalReg = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
-  var totalOT  = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0);  }, 0);
-  var totalDT  = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.dtHrs||0);  }, 0);
-
-  var labourTable = (wo.labourRows||[]).map(function(r) {
-    return '<tr>'
-      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (r.technician||'—') + '</td>'
-      + '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">' + (r.regHrs||0) + '</td>'
-      + '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">' + (r.otHrs||0) + '</td>'
-      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (r.startTime||'—') + '</td>'
-      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (r.endTime||'—') + '</td>'
-    + '</tr>';
-  }).join('');
-
-  var consumableTable = (wo.consumables||[]).map(function(c) {
-    return '<tr>'
-      + '<td style="padding:4px 8px;border-bottom:1px solid #eee">' + (c.item||'—') + '</td>'
-      + '<td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">' + (c.qty||0) + '</td>'
-      + '<td style="padding:4px 8px;border-bottom:1px solid #eee"></td>'
-    + '</tr>';
-  }).join('');
-
-  var travel = wo.travel || {};
-
-  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Work Order ' + woNum + '</title>'
-    + '<style>'
-    + 'body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px;color:#111}'
-    + 'h1{font-size:22px;font-weight:900;color:#C0392B;margin:0}'
-    + 'h2{font-size:13px;font-weight:700;margin:0}'
-    + '.header{display:flex;justify-content:space-between;margin-bottom:16px}'
-    + '.company{font-size:9px;color:#666;margin-top:4px;line-height:1.4}'
-    + '.wo-num{font-size:20px;font-weight:900;text-align:center}'
-    + '.ref-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px;border:1px solid #ddd;padding:8px;margin-bottom:12px;font-size:10px}'
-    + '.ref-lbl{color:#666;font-weight:700}'
-    + 'table{width:100%;border-collapse:collapse;margin-bottom:12px}'
-    + 'th{background:#f4f4f4;padding:4px 8px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd}'
-    + '.footer-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px;margin-top:8px}'
-    + '.footer-lbl{color:#666}'
-    + '@media print{body{padding:0}}'
-    + '</style></head><body>'
-    // Header
-    + '<div class="header">'
-      + '<div>'
-        + '<div style="font-size:22px;font-weight:900;color:#C0392B;line-height:1">N<span style="border-radius:50%;background:#C0392B;color:#fff;padding:0 3px;font-size:16px">O</span>RTECH</div>'
-        + '<div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#333">ADVANCED NDT</div>'
-        + '<div class="company">' + NORTECH.address + '<br>Ph: ' + NORTECH.phone + ' Fx: ' + NORTECH.fax + '<br>' + NORTECH.web + '</div>'
-      + '</div>'
-      + '<div style="text-align:right">'
-        + '<div style="font-size:9px;color:#999">Print Date: ' + new Date().toLocaleString() + '</div>'
-        + '<div style="margin-top:8px"><h2>Work Order</h2><div class="wo-num">' + woNum + '</div></div>'
-      + '</div>'
-    + '</div>'
-    // Client + refs
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:12px;font-size:10px">'
-      + '<div>'
-        + '<div><span class="ref-lbl">CLIENT: </span>' + (wo.client||'—') + '</div>'
-        + '<div><span class="ref-lbl">LOCATION: </span>' + (wo.site||'—') + '</div>'
-        + '<div><span class="ref-lbl">EQUIPMENT OWNER: </span>' + (wo.equipOwner||'—') + '</div>'
-      + '</div>'
-      + '<div>'
-        + '<div><span class="ref-lbl">P.O.#: </span>' + (wo.po||'—') + '</div>'
-        + '<div><span class="ref-lbl">JOB#: </span>' + (wo.jobNum||'—') + '</div>'
-        + '<div><span class="ref-lbl">AFE#: </span>' + (wo.afe||'—') + '</div>'
-        + '<div><span class="ref-lbl">RIG#: </span>' + (wo.rig||'—') + '</div>'
-      + '</div>'
-    + '</div>'
-    // Description of service
-    + '<div style="margin-bottom:12px">'
-      + '<div style="font-weight:700;font-size:10px;border-bottom:2px solid #111;padding-bottom:2px;margin-bottom:6px">DESCRIPTION OF SERVICE</div>'
-      + '<div style="font-size:10px"><strong>' + fmtDate(wo.date) + '</strong></div>'
-      + '<div style="font-size:10px;white-space:pre-line;margin:4px 0">' + (wo.notes||'') + '</div>'
-      + (wo.fieldReports ? '<div style="font-size:10px;margin-top:4px">Field Reports: ' + wo.fieldReports + '</div>' : '')
-    + '</div>'
-    // Consumables table
-    + ((wo.consumables||[]).length ? '<div style="display:grid;grid-template-columns:1fr auto;gap:16px;margin-bottom:12px">'
-      + '<div></div>'
-      + '<table style="width:280px">'
-        + '<thead><tr><th>Consumable Type</th><th>Qty</th><th>Amount</th></tr></thead>'
-        + '<tbody>' + consumableTable + '</tbody>'
-      + '</table></div>' : '')
-    // Labour table
-    + '<table>'
-      + '<thead><tr><th>Technician</th><th>Reg. Hrs</th><th>OT Hrs</th><th>Start date/time</th><th>End date/time</th></tr></thead>'
-      + '<tbody>' + labourTable + '</tbody>'
-      + '<tfoot><tr style="font-weight:700;background:#f9f9f9">'
-        + '<td style="padding:4px 8px">Subtotal:</td>'
-        + '<td style="padding:4px 8px;text-align:center">' + totalReg.toFixed(2) + '</td>'
-        + '<td style="padding:4px 8px;text-align:center">' + totalOT.toFixed(2) + '</td>'
-        + '<td colspan="2"></td>'
-      + '</tr></tfoot>'
-    + '</table>'
-    // Footer
-    + '<div class="footer-grid">'
-      + '<div><span class="footer-lbl">Total Kilometers:</span> ' + (travel.km||'') + '</div>'
-      + '<div style="text-align:right"><span class="footer-lbl">Total Reg. Hours:</span> <strong>' + totalReg.toFixed(2) + '</strong></div>'
-      + '<div><span class="footer-lbl">Hotel:</span> ' + (travel.hotels ? '$' + travel.hotels : '') + '</div>'
-      + '<div style="text-align:right"><span class="footer-lbl">Total OT. Hours:</span> <strong>' + totalOT.toFixed(2) + '</strong></div>'
-      + '<div><span class="footer-lbl">Camp:</span> ' + (travel.camp ? '$' + travel.camp : '') + '</div>'
-      + '<div></div>'
-      + '<div><span class="footer-lbl">Meals (LOA):</span> ' + (travel.loaTechs ? travel.loaTechs + ' tech × ' + travel.loaDays + ' days' : '') + '</div>'
-      + '<div></div>'
-      + '<div><span class="footer-lbl">Misc. Charges:</span> ' + (travel.misc ? '$' + travel.misc + (travel.miscDesc ? ' — ' + travel.miscDesc : '') : '') + '</div>'
-      + '<div></div>'
-      + '<div><span class="footer-lbl">Customer Contact:</span> ' + (travel.customerContact||'') + '</div>'
-      + '<div></div>'
-    + '</div>'
-    + '<div style="margin-top:16px;font-size:9px;color:#999;border-top:1px solid #ddd;padding-top:4px">Nortech Advanced NDT Ltd.</div>'
-    + '
-  <!-- ══ TIMESHEETS VIEW ══════════════════════════════════════════════════════ -->
-  <div id="view-timesheets" class="view" style="display:none">
-    <div class="sec-hdr">
-      <div><h2>Timesheets</h2><div class="sec-sub" id="ts-view-sub">Hours per work order — submit for payroll</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:130px;font-size:.72rem" id="ts-filter-status" onchange="renderTimesheets()">
-          <option value="">All</option>
-          <option value="draft">Draft</option>
-          <option value="submitted">Submitted</option>
-        </select>
-        <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="renderTimesheets()">
-      </div>
-    </div>
-    <div id="ts-grid" style="display:grid;gap:.75rem"></div>
-    <div class="empty-state" id="ts-empty" style="display:none">
-      <div class="empty-state-icon">⏱</div>
-      <div class="empty-state-title">No Timesheets Yet</div>
-      <div class="empty-state-sub">Timesheets are created when a Work Order is submitted</div>
-    </div>
-  </div>
-
-  <!-- ══ MARGIN REPORT VIEW ═══════════════════════════════════════════════════ -->
-  <div id="view-margin" class="view" style="display:none">
-    <div class="sec-hdr">
-      <div><h2>Margin Report</h2><div class="sec-sub">Billed vs Cost — admin only</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:160px;font-size:.72rem" id="margin-filter-tech" onchange="renderMarginReport()">
-          <option value="">All Technicians</option>
-        </select>
-        <input class="form-input" style="width:130px" placeholder="Filter by WO…" id="margin-filter-wo" oninput="renderMarginReport()">
-      </div>
-    </div>
-    <div class="kpi-row" id="margin-kpis" style="margin-bottom:1.25rem"></div>
-    <div class="section" style="margin-bottom:1.25rem">
-      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Work Order</h2></div></div>
-      <div class="card" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="margin-wo-table">
-          <thead><tr>
-            <th>WO #</th><th>Client</th><th>Technician</th><th>Date</th>
-            <th style="text-align:right">Reg</th><th style="text-align:right">OT</th><th style="text-align:right">Night</th>
-            <th style="text-align:right">Billed $</th>
-            <th style="text-align:right">Cost $</th>
-            <th style="text-align:right">Margin $</th>
-            <th style="text-align:right">Margin %</th>
-          </tr></thead>
-          <tbody id="margin-wo-body"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="section">
-      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Technician</h2></div></div>
-      <div class="card" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="margin-tech-table">
-          <thead><tr>
-            <th>Technician</th><th>Pay Type</th><th style="text-align:right">WOs</th>
-            <th style="text-align:right">Total Hrs</th>
-            <th style="text-align:right">Billed $</th>
-            <th style="text-align:right">Cost $</th>
-            <th style="text-align:right">Margin $</th>
-            <th style="text-align:right">Margin %</th>
-          </tr></thead>
-          <tbody id="margin-tech-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ TIMESHEET MODAL ═══════════════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="ts-modal">
-    <div class="modal" style="max-width:860px;width:96vw">
-      <div class="modal-hdr">
-        <span class="modal-title" id="ts-modal-title">Timesheet</span>
-        <button class="modal-close" onclick="closeModal('ts-modal')">✕</button>
-      </div>
-      <div class="modal-body" style="padding:1rem 1.25rem">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;margin-bottom:1rem;font-size:.78rem;display:flex;gap:1.5rem;flex-wrap:wrap">
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Work Order</div><strong id="ts-wo-ref">—</strong></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Client</div><span id="ts-wo-client">—</span></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Date</div><span id="ts-wo-date">—</span></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Site</div><span id="ts-wo-site">—</span></div>
-        </div>
-        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:.5rem">Hours — adjust as needed, add non-billable rows</div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-            <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:110px">Date</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:150px">Category / Activity</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">OT Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Night</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">Start</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">End</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:72px">Billable?</th>
-              <th style="width:24px"></th>
-            </tr></thead>
-            <tbody id="ts-rows-body"></tbody>
-          </table>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="addTSRow()" style="margin-top:.5rem" id="ts-add-row-btn">+ Add Row</button>
-        <div class="form-group" style="margin-top:.9rem">
-          <label class="form-label">Notes (optional)</label>
-          <textarea class="form-textarea" id="ts-notes" placeholder="Any notes about your time on this job…" style="min-height:64px"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
-        <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
-        <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
-        <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
-        <div style="flex:1"></div>
-        <button class="btn btn-secondary" id="ts-draft-btn" onclick="saveTSDraft()">Save Draft</button>
-        <button class="btn btn-primary" id="ts-submit-btn" onclick="submitTS()">Submit Timesheet</button>
-      </div>
-    </div>
-  </div>
-
-
 </body>
 </html>
