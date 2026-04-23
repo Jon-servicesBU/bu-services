@@ -749,7 +749,8 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="sec-hdr">
       <div><h2>Invoices</h2><div class="sec-sub">Generated from approved work orders</div></div>
       <div class="sec-actions">
-        <select class="form-select" style="width:140px;font-size:.72rem" id="inv-filter-status" onchange="renderInvoices()">
+        <input class="form-input" style="width:150px" placeholder="Search…" id="inv-search" oninput="renderInvoices()">
+        <select class="form-select" style="width:130px;font-size:.72rem" id="inv-filter-status" onchange="renderInvoices()">
           <option value="">All Status</option>
           <option value="draft">Draft</option>
           <option value="sent">Sent</option>
@@ -762,7 +763,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="card" style="padding:0">
       <table class="data-table">
         <thead><tr>
-          <th>Invoice #</th><th>Client</th><th>Period</th>
+          <th>Invoice #</th><th>Client</th><th>Date</th>
           <th>Work Orders</th><th class="hide-from-tech">Subtotal</th><th class="hide-from-tech">Tax</th><th class="hide-from-tech">Total</th>
           <th>Status</th><th></th>
         </tr></thead>
@@ -1609,6 +1610,18 @@ function chipHtml(status) {
   return '<span style="display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .55rem;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:'+s.bg+';color:'+s.color+'"><span style="width:5px;height:5px;border-radius:50%;background:'+s.color+';display:inline-block"></span>'+s.label+'</span>';
 }
 
+
+// ── Toggle collapsible detail panel ──────────────────────────────────────────
+function toggleDetail(id) {
+  var el   = document.getElementById(id);
+  var chev = document.getElementById(id.replace('ts-d-','ts-chev-').replace('inv-d-','inv-chev-'));
+  if (!el) return;
+  var open = el.style.display === 'none' || el.style.display === '';
+  el.style.display = open ? 'block' : 'none';
+  if (el.tagName === 'TR') el.style.display = open ? 'table-row' : 'none';
+  if (chev) chev.textContent = open ? '▲' : '▼';
+}
+
 // ── Additional utilities ──────────────────────────────────────────────────────
 function nextNum(prefix, arr, field) {
   var nums = arr.map(function(x) {
@@ -2192,6 +2205,122 @@ function exportWO(format, woId) {
 }
 
 
+// ── Export WO + Timesheet as a combined PDF ───────────────────────────────────
+function exportPackage(woId) {
+  var wo = _jobs.find(function(j){ return j.id === woId; });
+  if (!wo) { toast('Work order not found', 'error'); return; }
+  var ts  = _timesheets.find(function(t){ return t.woId === woId; });
+  var woNum = wo.woNum || wo.number || 'WO';
+
+  // Build WO HTML
+  var woHtml = buildWOPrintHTML(wo);
+  // Strip the outer <html> wrapper to get just the body content
+  var woBody = woHtml.replace(/^[\s\S]*?<body[^>]*>/i, '').replace(/<\/body>[\s\S]*$/i, '');
+
+  // Build TS HTML
+  var tsHtml = '';
+  if (ts) {
+    var rows = ts.rows || [];
+    var totalReg   = rows.reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
+    var totalOT    = rows.reduce(function(s,r){ return s+(r.otHrs||0); }, 0);
+    var totalNight = rows.reduce(function(s,r){ return s+(r.nightHrs||0); }, 0);
+    var tech = (function(){
+      var m = {};
+      rows.forEach(function(r){ if(r.technician) m[r.technician]=(m[r.technician]||0)+1; });
+      return Object.keys(m).sort(function(a,b){return m[b]-m[a];})[0] || '—';
+    })();
+    var rowsHTML = rows.map(function(r){
+      return '<tr style="border-bottom:1px solid #eee">'
+        +'<td style="padding:4px 8px">'+(r.date||'—')+'</td>'
+        +'<td style="padding:4px 8px">'+(r.category||'—')+'</td>'
+        +'<td style="padding:4px 8px;text-align:center">'+(r.regHrs||0)+'</td>'
+        +'<td style="padding:4px 8px;text-align:center">'+(r.otHrs||0)+'</td>'
+        +'<td style="padding:4px 8px;text-align:center">'+(r.nightHrs||0)+'</td>'
+        +'<td style="padding:4px 8px">'+(r.startTime||'—')+'</td>'
+        +'<td style="padding:4px 8px">'+(r.endTime||'—')+'</td>'
+        +'<td style="padding:4px 8px;text-align:center">'+(r.billable!==false?'✓':'—')+'</td>'
+      +'</tr>';
+    }).join('');
+
+    tsHtml = '<div style="page-break-before:always"></div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
+        +'<div>'
+          +'<div style="font-size:20px;font-weight:900;color:#C0392B;line-height:1">N<span style="border-radius:50%;background:#C0392B;color:#fff;padding:0 3px;font-size:14px">O</span>RTECH</div>'
+          +'<div style="font-size:11px;font-weight:700;letter-spacing:2px">ADVANCED NDT</div>'
+          +'<div style="font-size:9px;color:#666;margin-top:3px">'+NORTECH.address+'</div>'
+        +'</div>'
+        +'<div style="text-align:right">'
+          +'<div style="font-size:18px;font-weight:900">TIMESHEET</div>'
+          +'<div style="font-size:11px;margin-top:4px"><strong>'+woNum+'</strong></div>'
+          +'<div style="font-size:10px;color:'+(ts.status==='submitted'?'#16A34A':'#D97706')+';font-weight:700;text-transform:uppercase">'+(ts.status||'draft')+'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px 16px;font-size:10px;border:1px solid #ddd;padding:8px;margin-bottom:12px">'
+        +'<div><span style="color:#666;font-weight:700">Technician: </span>'+tech+'</div>'
+        +'<div><span style="color:#666;font-weight:700">Client: </span>'+(ts.client||wo.client||'—')+'</div>'
+        +'<div><span style="color:#666;font-weight:700">Work Order: </span>'+woNum+'</div>'
+        +'<div><span style="color:#666;font-weight:700">Date: </span>'+fmtDate(ts.date||wo.date)+'</div>'
+        +'<div><span style="color:#666;font-weight:700">P.O. #: </span>'+(wo.po||'—')+'</div>'
+        +'<div><span style="color:#666;font-weight:700">Job #: </span>'+(wo.jobNum||'—')+'</div>'
+        +'<div><span style="color:#666;font-weight:700">Site: </span>'+(wo.site||'—').slice(0,30)+'</div>'
+        +'<div><span style="color:#666;font-weight:700">Status: </span>'+(ts.status||'draft')+'</div>'
+      +'</div>'
+      +'<table style="width:100%;border-collapse:collapse;margin-bottom:10px">'
+        +'<thead><tr style="background:#f4f4f4">'
+          +'<th style="padding:4px 8px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd">Date</th>'
+          +'<th style="padding:4px 8px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd">Category</th>'
+          +'<th style="padding:4px 8px;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd">Reg Hrs</th>'
+          +'<th style="padding:4px 8px;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd">OT Hrs</th>'
+          +'<th style="padding:4px 8px;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd">Night</th>'
+          +'<th style="padding:4px 8px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd">Start</th>'
+          +'<th style="padding:4px 8px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd">End</th>'
+          +'<th style="padding:4px 8px;text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:2px solid #ddd">Billable</th>'
+        +'</tr></thead>'
+        +'<tbody>'+rowsHTML+'</tbody>'
+        +'<tfoot><tr style="font-weight:700;background:#f9f9f9">'
+          +'<td style="padding:4px 8px" colspan="2">Total:</td>'
+          +'<td style="padding:4px 8px;text-align:center">'+totalReg.toFixed(2)+'</td>'
+          +'<td style="padding:4px 8px;text-align:center">'+totalOT.toFixed(2)+'</td>'
+          +'<td style="padding:4px 8px;text-align:center">'+totalNight.toFixed(2)+'</td>'
+          +'<td colspan="3"></td>'
+        +'</tr></tfoot>'
+      +'</table>'
+      +(ts.notes?'<div style="font-size:10px;padding:6px;background:#f9f9f9;border-left:3px solid #ddd;margin-bottom:10px"><strong>Notes: </strong>'+ts.notes+'</div>':'')
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:10px;margin-top:16px">'
+        +'<div><div style="border-top:1px solid #333;padding-top:4px;margin-top:24px">Technician Signature &amp; Date</div></div>'
+        +'<div><div style="border-top:1px solid #333;padding-top:4px;margin-top:24px">Supervisor Signature &amp; Date</div></div>'
+      +'</div>'
+      +'<div style="margin-top:10px;font-size:9px;color:#999;border-top:1px solid #ddd;padding-top:4px">Nortech Advanced NDT Ltd. — Confidential</div>';
+  } else {
+    // No timesheet yet — just note it
+    tsHtml = '<div style="page-break-before:always;padding:2rem;text-align:center;color:#999;font-size:12px">'
+      +'<div style="font-size:16px;font-weight:700;margin-bottom:.5rem">TIMESHEET</div>'
+      +'<div>No timesheet created for Work Order '+woNum+' yet.</div>'
+      +'<div style="margin-top:.5rem">Create a timesheet from the Work Orders tab.</div>'
+    +'</div>';
+  }
+
+  // Combine and print
+  var combined = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<title>Package — '+woNum+'</title>'
+    +'<style>body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px;color:#111}'
+    +'table{width:100%;border-collapse:collapse}'
+    +'th{background:#f4f4f4;text-align:left}'
+    +'@media print{body{padding:0}.no-print{display:none}}'
+    +'</style></head><body>'
+    + woBody
+    + tsHtml
+    +'</body></html>';
+
+  var win = window.open('', '_blank');
+  win.document.write(combined);
+  win.document.close();
+  win.focus();
+  setTimeout(function(){ win.print(); }, 600);
+  toast('Package ready — WO + Timesheet', 'info');
+}
+
+
 function buildWOPrintHTML(wo) {
   var woNum  = wo.woNum || wo.number || '—';
   var totalReg = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
@@ -2372,67 +2501,70 @@ function renderAll(){
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function renderDashboard(){
-  // KPIs
-  var openJobs    = _jobs.filter(function(j){return j.status==='active';}).length;
-  var pendingCS   = _chargeSheets.filter(function(c){return c.status==='pending';}).length;
-  var approvedCS  = _chargeSheets.filter(function(c){return c.status==='approved';}).length;
-  var outstanding = _invoices.filter(function(i){return i.status==='sent';})
-                             .reduce(function(s,i){return s+(i.total||0);},0);
-  var paidMTD     = _invoices.filter(function(i){return i.status==='paid'&&(i.paidDate||'').startsWith(today().slice(0,7));})
-                             .reduce(function(s,i){return s+(i.total||0);},0);
+  var activeWOs   = _jobs.filter(function(j){
+    return j.status==='draft'||j.status==='submitted'||j.status==='approved';
+  }).length;
+  var pendingAppr = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
+  var outstanding = _invoices.filter(function(i){ return i.status==='sent'; })
+                             .reduce(function(s,i){ return s+(i.total||0); }, 0);
+  var paidMTD     = _invoices.filter(function(i){
+    return i.status==='paid' && (i.paidDate||'').startsWith(today().slice(0,7));
+  }).reduce(function(s,i){ return s+(i.total||0); }, 0);
 
-  var kpis=[
-    {val:openJobs,       lbl:'Active Work Orders',    sub:'Draft / submitted / approved'},
-    {val:pendingCS,      lbl:'Pending Approval',       sub:'Work orders to review', alert:pendingCS>0},
-    {val:fmtMoneyShort(outstanding), lbl:'Outstanding',sub:'Invoices sent unpaid'},
-    {val:fmtMoneyShort(paidMTD),     lbl:'Paid MTD',   sub:'Month to date'},
+  var kpis = [
+    { val: activeWOs,                   lbl: 'Active Work Orders', sub: 'Draft / submitted / approved' },
+    { val: pendingAppr,                 lbl: 'Pending Approval',   sub: 'Work orders to review', alert: pendingAppr > 0 },
+    { val: fmtMoneyShort(outstanding),  lbl: 'Outstanding',        sub: 'Invoices sent unpaid' },
+    { val: fmtMoneyShort(paidMTD),      lbl: 'Paid MTD',           sub: 'Month to date' },
   ];
-  var kpiEl=document.getElementById('dash-kpis');
-  if(kpiEl) kpiEl.innerHTML=kpis.map(function(k){
+  var kpiEl = document.getElementById('dash-kpis');
+  if (kpiEl) kpiEl.innerHTML = kpis.map(function(k){
     return '<div class="kpi-tile" style="'+(k.alert?'border-color:rgba(201,134,10,.4)':'')+'">'
-      +'<div class="kpi-tile-val" style="'+(k.alert?'color:#F59E0B':'')+'">'+k.val+'</div>'
-      +'<div class="kpi-tile-lbl">'+k.lbl+'</div>'
-      +'<div class="kpi-tile-sub">'+k.sub+'</div>'
+      +'<div class="kpi-tile-val" style="'+(k.alert?'color:#F59E0B':'')+'">' + k.val + '</div>'
+      +'<div class="kpi-tile-lbl">' + k.lbl + '</div>'
+      +'<div class="kpi-tile-sub">' + k.sub + '</div>'
     +'</div>';
   }).join('');
 
-  // Recent work orders
-  var csEl=document.getElementById('dash-cs-table');
-  if(csEl){
-    var recent=_chargeSheets.slice(0,8);
-    csEl.querySelector('tbody').innerHTML=recent.length?recent.map(function(c){
-      var job=_jobs.find(function(j){return j.id===c.jobId;})||{};
-      return '<tr onclick="viewCS(\''+c.id+'\')" style="cursor:pointer">'
-        +'<td style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">'+c.csNum+'</td>'
-        +'<td><span style="font-weight:600">'+c.technician+'</span><br><span style="font-size:.68rem;color:var(--muted)">'+c.weekStart+'</span></td>'
-        +'<td style="font-size:.72rem">'+((job.client||'—').slice(0,20))+'</td>'
-        +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(c.total)+'</td>'
-        +'<td>'+chipHtml(c.status)+'</td>'
+  var csEl = document.getElementById('dash-cs-table');
+  if (csEl) {
+    var recent = _jobs.slice(0, 8);
+    var tbody  = csEl.querySelector('tbody');
+    if (tbody) tbody.innerHTML = recent.length ? recent.map(function(j){
+      var reg   = (j.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
+      var ot    = (j.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0); }, 0);
+      var techs = Array.from(new Set((j.labourRows||[]).map(function(r){ return r.technician; }).filter(Boolean))).join(', ');
+      return '<tr onclick="openWOModal(\''+j.id+'\')" style="cursor:pointer">'
+        +'<td style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">'+(j.woNum||j.number||'—')+'</td>'
+        +'<td><span style="font-weight:600">'+(techs||'—').slice(0,20)+'</span><br><span style="font-size:.68rem;color:var(--muted)">'+(j.date||'—')+'</span></td>'
+        +'<td style="font-size:.72rem">'+((j.client||'—').slice(0,20))+'</td>'
+        +'<td style="font-family:var(--mono);font-size:.75rem">'+(reg?reg+'h reg':'—')+(ot?' +'+ot+'h OT':'')+'</td>'
+        +'<td>'+chipHtml(j.status)+'</td>'
       +'</tr>';
     }).join('')
-    :'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.75rem">No work orders yet</td></tr>';
+    : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.75rem">No work orders yet</td></tr>';
   }
 
-  // Outstanding invoices
-  var invEl=document.getElementById('dash-inv-table');
-  if(invEl){
-    var outstanding_inv=_invoices.filter(function(i){return i.status==='sent';}).slice(0,6);
-    invEl.querySelector('tbody').innerHTML=outstanding_inv.length?outstanding_inv.map(function(i){
+  var invEl = document.getElementById('dash-inv-table');
+  if (invEl) {
+    var sent   = _invoices.filter(function(i){ return i.status==='sent'; }).slice(0, 6);
+    var itbody = invEl.querySelector('tbody');
+    if (itbody) itbody.innerHTML = sent.length ? sent.map(function(i){
       return '<tr onclick="viewInvoice(\''+i.id+'\')" style="cursor:pointer">'
-        +'<td style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">'+i.invNum+'</td>'
+        +'<td style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">'+(i.invNum||'—')+'</td>'
         +'<td style="font-size:.72rem">'+((i.client||'—').slice(0,22))+'</td>'
         +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.total)+'</td>'
         +'<td>'+chipHtml(i.status)+'</td>'
       +'</tr>';
     }).join('')
-    :'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.75rem">No outstanding invoices</td></tr>';
+    : '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.75rem">No outstanding invoices</td></tr>';
   }
 }
 
 function updatePendingBadge(){
-  var pending=_chargeSheets.filter(function(c){return c.status==='pending';}).length;
-  var badge=document.getElementById('pending-badge');
-  if(badge){ badge.textContent=pending+' Pending'; badge.style.display=pending?'inline':'none'; }
+  var pending = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
+  var badge = document.getElementById('pending-badge');
+  if (badge){ badge.textContent = pending + ' Pending'; badge.style.display = pending ? 'inline' : 'none'; }
 }
 
 // ── Jobs ──────────────────────────────────────────────────────────────────────
@@ -2545,12 +2677,19 @@ function renderJobs() {
       // Action buttons
       +'<div style="padding:.55rem 1.1rem;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">'
         +'<button class="btn btn-primary btn-sm" data-open-wo="'+j.id+'">✏ Edit / Add Work</button>'
-        +'<button class="btn btn-secondary btn-sm" data-export-wo="'+j.id+'">⬇ Export PDF</button>'
+        +'<button class="btn btn-secondary btn-sm" data-export-wo="'+j.id+'">⬇ WO</button>'
+        +'<button class="btn btn-secondary btn-sm" data-export-pkg="'+j.id+'">⬇ WO + TS</button>'
         +(j.status==='submitted'&&isAdmin()?'<button class="btn btn-success btn-sm" data-approve-wo="'+j.id+'">✓ Approve</button>':'')
         +(j.status==='approved'&&isAdmin()?'<button class="btn btn-secondary btn-sm" data-invoice-wo="'+j.id+'">🧾 Invoice</button>':'')
         +(j.status==='approved'&&isAdmin()?'<button class="btn btn-ghost btn-sm" data-reverse-cs-approved="'+j.id+'">↩ Unapprove</button>':'')
         +(j.status==='submitted'?'<button class="btn btn-ghost btn-sm" data-unapprove-wo="'+j.id+'">↩ Back to Draft</button>':'')
         +(j.status==='invoiced'&&isAdmin()?'<button class="btn btn-ghost btn-sm" data-reverse-cs-invoiced="'+j.id+'">↩ Back to Approved</button>':'')
+        +(function(){
+            var ts = _timesheets.find(function(t){ return t.woId === j.id; });
+            var lbl = ts ? '⏱ Timesheet' : '⏱ Create Timesheet';
+            var col = ts ? 'color:var(--sky)' : '';
+            return '<button class="btn btn-ghost btn-sm" data-ts-for-wo="'+j.id+'" style="'+col+'">'+lbl+'</button>';
+          })()
         +(isAdmin()&&j.status!=='invoiced'&&j.status!=='paid'
           ?'<button class="btn btn-ghost btn-sm" data-delete-wo="'+j.id+'" style="color:#EF4444;border-color:rgba(185,28,28,.3);margin-left:auto">🗑 Delete</button>'
           :'')
@@ -3134,37 +3273,75 @@ async function saveInvoice(status){
 }
 
 function renderInvoices(){
-  var filter=(document.getElementById('inv-filter-status')||{}).value||'';
-  var filtered=_invoices.filter(function(i){return !filter||i.status===filter;});
-  var tbody=document.getElementById('inv-tbody');
-  var empty=document.getElementById('inv-empty');
-  if(!tbody)return;
-  if(!filtered.length){tbody.innerHTML='';if(empty)empty.style.display='block';return;}
-  if(empty)empty.style.display='none';
-  tbody.innerHTML=filtered.map(function(i){
-    var dateRange='';
-    if(i.chargeSheets&&i.chargeSheets.length){
-      var dates=i.chargeSheets.map(function(c){return c.weekStart;}).sort();
-      dateRange=fmtDate(dates[0])+(dates.length>1?' – '+fmtDate(dates[dates.length-1]):'');
-    }
-    return '<tr>'
-      +'<td style="font-family:var(--mono);font-size:.72rem;color:var(--muted)">'+i.invNum+'</td>'
-      +'<td style="font-weight:600">'+i.client+'</td>'
-      +'<td style="font-size:.72rem;color:var(--muted)">'+dateRange+'</td>'
-      +'<td style="text-align:center;font-size:.72rem">'+((i.chargeSheetIds||[]).length)+'</td>'
-      +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.subtotal)+'</td>'
-      +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.tax)+'</td>'
-      +'<td style="font-family:var(--mono);font-size:.75rem;font-weight:700">'+fmtMoney(i.total)+'</td>'
-      +'<td>'+chipHtml(i.status)+'</td>'
-      +'<td style="white-space:nowrap">'
-        +'<button class="btn btn-ghost btn-sm" onclick="viewInvoice(\''+i.id+'\')">View</button>'
-        +(i.status==='draft' ?' <button class="btn btn-sm btn-secondary" onclick="markInvSent(\''+i.id+'\')">Mark Sent</button>':'')
-        +(i.status==='sent'  ?' <button class="btn btn-sm btn-success"   onclick="markPaid(\''+i.id+'\')">✓ Paid</button>':'')
-        +(i.status==='paid'  ?' <button class="btn btn-sm btn-secondary" onclick="reverseInvoicePayment(\''+i.id+'\')">↩ Reverse</button>':'')
-        +(i.status!=='void'&&i.status!=='paid'&&isAdmin()?' <button class="btn btn-sm" style="color:#EF4444;border:1px solid rgba(185,28,28,.3);background:rgba(185,28,28,.1)" onclick="markVoid(\''+i.id+'\')">Void</button>':'')
-        +(isAdmin()?' <button class="btn btn-ghost btn-sm" style="color:#EF4444" onclick="deleteInvoice(\''+i.id+'\')">🗑</button>':'')
-      +'</td>'
-    +'</tr>';
+  var filter   = (document.getElementById('inv-filter-status')||{}).value||'';
+  var q        = (document.getElementById('inv-search')||{}).value||'';
+  var filtered = _invoices.filter(function(i){
+    if (filter && i.status !== filter) return false;
+    if (q && !((i.invNum||'')+(i.client||'')).toLowerCase().includes(q.toLowerCase())) return false;
+    return true;
+  });
+  var tbody = document.getElementById('inv-tbody');
+  var empty = document.getElementById('inv-empty');
+  if (!tbody) return;
+  if (!filtered.length){ tbody.innerHTML=''; if(empty) empty.style.display='block'; return; }
+  if (empty) empty.style.display='none';
+
+  tbody.innerHTML = filtered.map(function(i){
+    // Work orders linked to this invoice
+    var wos = (i.chargeSheetIds||[]).map(function(wid){
+      return _jobs.find(function(j){ return j.id===wid; });
+    }).filter(Boolean);
+
+    // Build linked WO detail
+    var woRows = wos.map(function(wo){
+      var techs = Array.from(new Set((wo.labourRows||[]).map(function(r){ return r.technician; }).filter(Boolean))).join(', ');
+      var reg   = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
+      var ot    = (wo.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0); }, 0);
+      return '<tr style="background:var(--surface2)">'
+        + '<td style="padding:.35rem .75rem;font-family:var(--mono);font-size:.68rem;color:var(--nor-accent)">' + (wo.woNum||wo.number||'—') + '</td>'
+        + '<td style="padding:.35rem .75rem;font-size:.7rem">' + (wo.client||'—').slice(0,22) + '</td>'
+        + '<td style="padding:.35rem .75rem;font-size:.68rem;color:var(--muted)" colspan="2">' + (techs||'—').slice(0,28) + '</td>'
+        + '<td style="padding:.35rem .75rem;font-size:.68rem;color:var(--muted)">' + fmtDate(wo.date) + '</td>'
+        + '<td style="padding:.35rem .75rem;font-size:.68rem;color:var(--muted)">' + (reg?reg+'h reg':'')+( ot?' +'+ot+'h OT':'') + '</td>'
+        + '<td style="padding:.35rem .75rem">' + chipHtml(wo.status) + '</td>'
+        + '<td style="padding:.35rem .75rem;font-size:.68rem;color:var(--muted)">'
+          + (wo.po?'PO: '+wo.po+'  ':'') + (wo.site?wo.site.slice(0,20):'')
+        + '</td>'
+        + '<td></td>'
+      + '</tr>';
+    }).join('');
+
+    // Notes row
+    var notesRow = i.notes ? '<tr style="background:var(--surface2)">'
+      + '<td colspan="9" style="padding:.35rem .75rem;font-size:.71rem;color:var(--muted)"><strong>Notes:</strong> ' + i.notes + '</td>'
+    + '</tr>' : '';
+
+    var mainRow = '<tr onclick="toggleDetail(\'inv-d-'+i.id+'\')" style="cursor:pointer">'
+      + '<td style="font-family:var(--mono);font-size:.72rem;color:var(--muted)">' + (i.invNum||'—') + '</td>'
+      + '<td style="font-weight:600">' + (i.client||'—') + '</td>'
+      + '<td style="font-size:.72rem;color:var(--muted)">' + fmtDate(i.invDate||i.created) + '</td>'
+      + '<td style="text-align:center;font-size:.72rem">' + (i.chargeSheetIds||[]).length + ' WO</td>'
+      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + fmtMoney(i.subtotal) + '</td>'
+      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + fmtMoney(i.tax) + '</td>'
+      + '<td style="font-family:var(--mono);font-size:.75rem;font-weight:700" class="hide-from-tech">' + fmtMoney(i.total) + '</td>'
+      + '<td>' + chipHtml(i.status) + '</td>'
+      + '<td style="white-space:nowrap;text-align:right">'
+        + '<span style="font-size:.8rem;color:var(--muted);margin-right:.3rem" id="inv-chev-'+i.id+'">▼</span>'
+        + '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewInvoice(\''+i.id+'\')">View</button>'
+        + (isAdmin()&&i.status==='draft'?'<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();markInvSent(\''+i.id+'\')">Mark Sent</button>':'')
+        + (isAdmin()&&i.status==='sent'?'<button class="btn btn-success btn-sm" onclick="event.stopPropagation();markInvoicePaid()">Mark Paid</button>':'')
+        + (isAdmin()?'<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();deleteInvoice(\''+i.id+'\')">🗑</button>':'')
+      + '</td>'
+    + '</tr>';
+
+    var detailRow = '<tr id="inv-d-'+i.id+'" style="display:none"><td colspan="9" style="padding:0">'
+      + '<table style="width:100%;border-collapse:collapse">'
+        + (wos.length ? woRows : '')
+        + notesRow
+      + '</table>'
+    + '</td></tr>';
+
+    return mainRow + detailRow;
   }).join('');
 }
 
@@ -3739,7 +3916,13 @@ async function saveWO(status) {
       await createTimesheetFromWO(data);
       renderTimesheets();
     }
-    toast(status === 'submitted' ? 'Work order submitted — timesheet created' : 'Draft saved', 'success');
+    if (status === 'submitted') {
+      toast('Work order submitted — timesheet created', 'success');
+      // Refresh timesheet button on WO card
+      renderJobs();
+    } else {
+      toast('Draft saved', 'success');
+    }
   } catch(e) { toast('Save failed: ' + e.message, 'error'); }
 }
 
@@ -5446,6 +5629,24 @@ async function createTimesheetFromWO(wo) {
   }
 }
 
+
+// ── Create or open timesheet for a WO ────────────────────────────────────────
+async function createOrOpenTS(woId) {
+  var wo = _jobs.find(function(j){ return j.id === woId; });
+  if (!wo) return;
+  // Check if one already exists
+  var existing = _timesheets.find(function(t){ return t.woId === woId; });
+  if (!existing) {
+    await createTimesheetFromWO(wo);
+    existing = _timesheets.find(function(t){ return t.woId === woId; });
+  }
+  if (existing) {
+    _editTSId = existing.id;
+    openTSModal(existing.id);
+    showView('timesheets', document.getElementById('nav-timesheets'));
+  }
+}
+
 // ── Open Timesheet Modal ──────────────────────────────────────────────────────
 function openTSModal(tsId) {
   _editTSId  = tsId || null;
@@ -5616,8 +5817,9 @@ async function revertTS() {
 }
 
 // ── Export Timesheet PDF ──────────────────────────────────────────────────────
-function exportTimesheet() {
-  var ts = _editTSId ? (_timesheets.find(function(t) { return t.id === _editTSId; }) || {}) : {};
+function exportTimesheet(tsId) {
+  var resolvedId = tsId || _editTSId;
+  var ts = resolvedId ? (_timesheets.find(function(t) { return t.id === resolvedId; }) || {}) : {};
   var wo = ts.woId ? (_jobs.find(function(j) { return j.id === ts.woId; }) || {}) : {};
   var rows = ts.rows || [];
   var totalReg   = rows.reduce(function(s, r) { return s + (r.regHrs   || 0); }, 0);
@@ -5777,9 +5979,53 @@ function renderTimesheets() {
       + '</div>'
       + '<div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">'
         + '<button class="btn btn-primary btn-sm" data-open-ts="' + ts.id + '">✏ Edit / View</button>'
-        + '<button class="btn btn-secondary btn-sm" data-export-ts="' + ts.id + '">⬇ Export PDF</button>'
+        + '<button class="btn btn-secondary btn-sm" data-export-ts="' + ts.id + '">⬇ TS</button>'
+        + (ts.woId ? '<button class="btn btn-secondary btn-sm" data-export-pkg="' + ts.woId + '">⬇ WO + TS</button>' : '')
         + (ts.woId ? '<button class="btn btn-ghost btn-sm" data-open-wo="' + ts.woId + '">🔧 View WO ' + (ts.woNum||'') + '</button>' : '')
         + (ts.status === 'submitted' && isAdmin() ? '<button class="btn btn-ghost btn-sm" data-revert-ts="' + ts.id + '">↩ Back to Draft</button>' : '')
+      + '</div>'
+      // ── Collapsible detail panel
+      + '<div style="border-top:1px solid var(--border);margin-top:.5rem;padding-top:.5rem">'
+        + '<button onclick="toggleDetail(\'ts-d-\'+ts.id)" '
+          + 'style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.72rem;padding:.1rem .3rem;width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center">'
+          + '<span style="font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:.62rem">Details</span>'
+          + '<span id="ts-chev-'+ts.id+'">▼</span>'
+        + '</button>'
+        + '<div id="ts-d-'+ts.id+'" style="display:none;margin-top:.5rem">'
+          // Hours table
+          + ((ts.rows&&ts.rows.length)
+            ? '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.7rem;margin-bottom:.6rem">'
+                + '<thead><tr style="border-bottom:1px solid var(--border)">'
+                  + '<th style="padding:.2rem .35rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;letter-spacing:1px;text-align:left">Date</th>'
+                  + '<th style="padding:.2rem .35rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;letter-spacing:1px;text-align:left">Category</th>'
+                  + '<th style="padding:.2rem .35rem;color:var(--muted);font-size:.58rem;text-align:center">Reg</th>'
+                  + '<th style="padding:.2rem .35rem;color:var(--muted);font-size:.58rem;text-align:center">OT</th>'
+                  + '<th style="padding:.2rem .35rem;color:var(--muted);font-size:.58rem;text-align:center">Night</th>'
+                  + '<th style="padding:.2rem .35rem;color:var(--muted);font-size:.58rem">Start</th>'
+                  + '<th style="padding:.2rem .35rem;color:var(--muted);font-size:.58rem">End</th>'
+                  + '<th style="padding:.2rem .35rem;color:var(--muted);font-size:.58rem;text-align:center">Bill</th>'
+                + '</tr></thead>'
+                + '<tbody>' + (ts.rows||[]).map(function(r){
+                    return '<tr style="border-bottom:1px solid rgba(255,255,255,.04)">'
+                      + '<td style="padding:.2rem .35rem;color:var(--muted);font-size:.66rem">' + (r.date||'—') + '</td>'
+                      + '<td style="padding:.2rem .35rem;font-size:.68rem">' + (r.category||'—') + '</td>'
+                      + '<td style="padding:.2rem .35rem;text-align:center;font-family:var(--mono)">' + (r.regHrs||0) + '</td>'
+                      + '<td style="padding:.2rem .35rem;text-align:center;font-family:var(--mono)">' + (r.otHrs||0) + '</td>'
+                      + '<td style="padding:.2rem .35rem;text-align:center;font-family:var(--mono)">' + (r.nightHrs||0) + '</td>'
+                      + '<td style="padding:.2rem .35rem;color:var(--muted);font-size:.66rem">' + (r.startTime||'—') + '</td>'
+                      + '<td style="padding:.2rem .35rem;color:var(--muted);font-size:.66rem">' + (r.endTime||'—') + '</td>'
+                      + '<td style="padding:.2rem .35rem;text-align:center">' + (r.billable!==false?'✓':'—') + '</td>'
+                    + '</tr>';
+                  }).join('') + '</tbody>'
+              + '</table></div>'
+            : '')
+          // Notes
+          + (ts.notes
+            ? '<div style="font-size:.72rem;color:var(--muted);padding:.35rem .5rem;background:var(--surface2);border-radius:4px">'
+                + '<strong>Notes:</strong> ' + ts.notes
+              + '</div>'
+            : '')
+        + '</div>'
       + '</div>'
     + '</div>';
   }).join('');
@@ -5933,12 +6179,12 @@ document.addEventListener('click', function(e) {
   var el;
   el = e.target.closest('[data-open-ts]');
   if (el) { openTSModal(el.getAttribute('data-open-ts')); return; }
+  el = e.target.closest('[data-ts-for-wo]');
+  if (el) { createOrOpenTS(el.getAttribute('data-ts-for-wo')); return; }
   el = e.target.closest('[data-export-ts]');
-  if (el) {
-    _editTSId = el.getAttribute('data-export-ts');
-    exportTimesheet();
-    return;
-  }
+  if (el) { _editTSId = el.getAttribute('data-export-ts'); exportTimesheet(); return; }
+  el = e.target.closest('[data-export-pkg]');
+  if (el) { exportPackage(el.getAttribute('data-export-pkg')); return; }
   el = e.target.closest('[data-revert-ts]');
   if (el) {
     _editTSId = el.getAttribute('data-revert-ts');
