@@ -1552,6 +1552,18 @@ var NORTECH_CONSUMABLES_LIST = [
 ];
 
 
+// ── Nortech company details ───────────────────────────────────────────────────
+var NORTECH = {
+  name:    'Nortech Advanced NDT',
+  address: '7108 8th Street, Edmonton, Alberta T6P 1V1, Canada',
+  phone:   '(780) 449-5013',
+  fax:     '(780) 449-5036',
+  email:   'info@nortechadvanced.com',
+  web:     'www.nortechadvanced.com',
+  gst:     '801560228 RT0001'
+};
+
+
 // ── Formatting utilities ──────────────────────────────────────────────────────
 function _fmtMoneyImpl(n) {
   if (n == null || isNaN(n)) return '$0.00';
@@ -1624,6 +1636,28 @@ function getFilmTypeOptions(selected) {
   return types.map(function(t) {
     return '<option value="'+t+'"'+(t===selected?' selected':'')+'>'+t+'</option>';
   }).join('');
+}
+
+
+// ── Timesheet localStorage storage ───────────────────────────────────────────
+function saveTimesheetToStorage(ts) {
+  if (!ts || !ts.id) return;
+  var all = loadTimesheetsFromStorage();
+  var idx = all.findIndex(function(t){ return t.id === ts.id; });
+  if (idx > -1) all[idx] = ts; else all.unshift(ts);
+  try { localStorage.setItem('nortech_timesheets', JSON.stringify(all)); } catch(e){}
+  _timesheets = all;
+}
+function loadTimesheetsFromStorage() {
+  try {
+    var raw = localStorage.getItem('nortech_timesheets');
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) { return []; }
+}
+function deleteTimesheetFromStorage(id) {
+  var all = loadTimesheetsFromStorage().filter(function(t){ return t.id !== id; });
+  try { localStorage.setItem('nortech_timesheets', JSON.stringify(all)); } catch(e){}
+  _timesheets = all;
 }
 
 
@@ -2296,12 +2330,13 @@ async function sbDelete(table, id){
 // ── Data load ─────────────────────────────────────────────────────────────────
 async function loadAll(){
   try{
-    var results=await Promise.allSettled([sbList('jobs'),sbList('charge_sheets'),sbList('invoices'),sbList('rate_sheets'),sbList('timesheets')]);
+    var results=await Promise.allSettled([sbList('jobs'),sbList('charge_sheets'),sbList('invoices'),sbList('rate_sheets')]);
     if(results[0].status==='fulfilled') _jobs         = results[0].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[1].status==='fulfilled') _chargeSheets = results[1].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[2].status==='fulfilled') _invoices     = results[2].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[3].status==='fulfilled') _rateSheets   = results[3].value.map(function(r){return Object.assign({id:r.id},r.data);});
-    if(results[4] && results[4].status==='fulfilled') _timesheets = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
+    // Timesheets stored in localStorage (no Supabase table needed)
+    _timesheets = loadTimesheetsFromStorage();
     renderAll();
   }catch(e){ console.warn('loadAll failed:', e.message); renderAll(); }
 }
@@ -5404,7 +5439,7 @@ async function createTimesheetFromWO(wo) {
   };
 
   try {
-    await sbUpsert('timesheets', id, ts);
+    saveTimesheetToStorage(ts);
     _timesheets.unshift(ts);
   } catch(e) {
     console.warn('Timesheet auto-create failed:', e.message);
@@ -5539,7 +5574,7 @@ async function saveTSDraft() {
   if (!_editTSId) { toast('No timesheet to save', 'error'); return; }
   var data = buildTSData('draft');
   try {
-    await sbUpsert('timesheets', _editTSId, data);
+    saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
     _timesheets = _timesheets.map(function(t) { return t.id === _editTSId ? Object.assign({id:_editTSId}, data) : t; });
     closeModal('ts-modal');
     renderTimesheets();
@@ -5556,7 +5591,7 @@ async function submitTS() {
   var data = buildTSData('submitted');
   data.submittedDate = today();
   try {
-    await sbUpsert('timesheets', _editTSId, data);
+    saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
     _timesheets = _timesheets.map(function(t) { return t.id === _editTSId ? Object.assign({id:_editTSId}, data) : t; });
     closeModal('ts-modal');
     renderTimesheets();
@@ -5572,7 +5607,7 @@ async function revertTS() {
   var data = buildTSData('draft');
   data.submittedDate = null;
   try {
-    await sbUpsert('timesheets', _editTSId, data);
+    saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
     _timesheets = _timesheets.map(function(t) { return t.id === _editTSId ? Object.assign({id:_editTSId}, data) : t; });
     closeModal('ts-modal');
     renderTimesheets();
