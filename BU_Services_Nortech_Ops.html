@@ -270,6 +270,7 @@ body.tech-view .inv-preview { display: none !important; }
 body.tech-view #inv-nav-btn          { display: none !important; }
 body.tech-view #dash-kpis            { display: none !important; }
 body.tech-view #dash-inv-table       { display: none !important; }
+body.tech-view #dash-inv-panel       { display: none !important; }
 body.tech-view .cs-totals-bar        { display: none !important; }
 body.tech-view .inv-col              { display: none !important; }
 body.tech-view [data-admin-only]     { display: none !important; }
@@ -488,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <div id="view-dashboard" class="view active">
     <div class="kpi-row" id="dash-kpis"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
-      <div class="section">
+      <div id="dash-inv-panel" class="section">
         <div class="sec-hdr">
           <div><h2>Recent Work Orders</h2><div class="sec-sub">Latest submitted &amp; approved</div></div>
           <div class="sec-actions"><button class="btn btn-sm btn-primary" onclick="showView('jobs',document.getElementById('nav-jobs'))">View All</button></div>
@@ -906,6 +907,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
         <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
         <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
+        <button class="btn btn-primary" id="ts-admin-save-btn" onclick="saveAdminTSEdits()" style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">💾 Save Admin Edits</button>
         <div style="flex:1"></div>
         <button class="btn btn-secondary" id="ts-draft-btn" onclick="saveTSDraft()">Save Draft</button>
         <button class="btn btn-primary" id="ts-submit-btn" onclick="submitTS()">Submit Timesheet</button>
@@ -2049,14 +2051,26 @@ function fmtMoney(n) { return isAdmin() ? _fmtMoneyImpl(n) : '—'; }
 function fmtMoneyShort(n) { return isAdmin() ? _fmtMoneyShortImpl(n) : '—'; }
 
 function applyAdminVisibility() {
-  if (!isAdmin()) {
+  var admin = isAdmin();
+  if (!admin) {
+    // Tech view — hide financial & admin tabs
     document.body.classList.add('tech-view');
-    var invBtn = document.getElementById('inv-nav-btn');
-    if (invBtn) invBtn.style.display='none';
-    var rateBtn = document.getElementById('nav-rates');
-    if (rateBtn) rateBtn.style.display='none';
+    ['nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    // If currently on a hidden view, redirect to dashboard
+    var hiddenViews = ['invoices','rate-sheets','margin'];
+    if (hiddenViews.indexOf(_currentView) > -1) {
+      showView('dashboard', document.getElementById('nav-dashboard'));
+    }
   } else {
+    // Admin — show all tabs
     document.body.classList.remove('tech-view');
+    ['nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = '';
+    });
   }
 }
 
@@ -2473,6 +2487,12 @@ async function loadAll(){
 
 // ── View switching ─────────────────────────────────────────────────────────────
 function showView(view, btn){
+  // Block non-admins from restricted tabs entirely
+  var adminOnly = ['invoices','rate-sheets','margin'];
+  if (!isAdmin() && adminOnly.indexOf(view) > -1) {
+    toast('This section is for admin users only', 'info');
+    return;
+  }
   document.querySelectorAll('.view').forEach(function(v){v.style.display='none';});
   var el=document.getElementById('view-'+view);
   if(el) el.style.display='block';
@@ -2520,11 +2540,14 @@ function renderDashboard(){
     return i.status==='paid' && (i.paidDate||'').startsWith(today().slice(0,7));
   }).reduce(function(s,i){ return s+(i.total||0); }, 0);
 
-  var kpis = [
+  var kpis = isAdmin() ? [
     { val: activeWOs,                   lbl: 'Active Work Orders', sub: 'Draft / submitted / approved' },
     { val: pendingAppr,                 lbl: 'Pending Approval',   sub: 'Work orders to review', alert: pendingAppr > 0 },
     { val: fmtMoneyShort(outstanding),  lbl: 'Outstanding',        sub: 'Invoices sent unpaid' },
     { val: fmtMoneyShort(paidMTD),      lbl: 'Paid MTD',           sub: 'Month to date' },
+  ] : [
+    { val: activeWOs,                   lbl: 'My Work Orders',     sub: 'Draft / submitted / approved' },
+    { val: pendingAppr,                 lbl: 'Pending Approval',   sub: 'Submitted, awaiting review', alert: pendingAppr > 0 },
   ];
   var kpiEl = document.getElementById('dash-kpis');
   if (kpiEl) kpiEl.innerHTML = kpis.map(function(k){
@@ -2555,7 +2578,10 @@ function renderDashboard(){
   }
 
   var invEl = document.getElementById('dash-inv-table');
-  if (invEl) {
+  // Hide invoice panel from non-admins
+  var invPanel = document.getElementById('dash-inv-panel');
+  if (invPanel) invPanel.style.display = isAdmin() ? '' : 'none';
+  if (invEl && isAdmin()) {
     var sent   = _invoices.filter(function(i){ return i.status==='sent'; }).slice(0, 6);
     var itbody = invEl.querySelector('tbody');
     if (itbody) itbody.innerHTML = sent.length ? sent.map(function(i){
@@ -3990,8 +4016,11 @@ async function approveWO(id) {
   wo.status = 'approved'; wo.approvedDate = today(); wo.modified = today();
   try {
     await sbUpsert('jobs', id, wo);
+    _jobs = _jobs.map(function(j){ return j.id === id ? wo : j; });
     renderJobs(); renderDashboard();
-    toast('Work order approved', 'success');
+    toast('Work order approved ✓', 'success');
+    // Show post-approval actions
+    showApprovalActions(id);
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -4006,6 +4035,74 @@ async function unapproveWO(id) {
     toast('Work order returned to ' + prev, 'info');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
+// ── Post-approval action picker ─────────────────────────────────────────────────
+function showApprovalActions(woId) {
+  var wo    = _jobs.find(function(j){ return j.id === woId; }) || {};
+  var woNum = wo.woNum || wo.number || '—';
+  var ts    = _timesheets.find(function(t){ return t.woId === woId; });
+  var tsLbl = ts ? (ts.status==='submitted' ? 'Export Timesheet' : 'Open Timesheet') : 'Create & Export Timesheet';
+  var tsSub = ts && ts.status==='submitted' ? 'Timesheet submitted — export as PDF'
+            : ts ? 'Timesheet exists — open or export'
+            : 'No timesheet yet — create from labour rows';
+  var body  = document.getElementById('approval-actions-body');
+  if (!body) return;
+
+  function mkBtn(cls, icon, lbl, sub, fn) {
+    var b = document.createElement('button');
+    b.className = cls;
+    b.style.cssText = 'width:100%;margin-bottom:.55rem;justify-content:flex-start;gap:.6rem;padding:.7rem 1rem';
+    b.innerHTML = '<span style="font-size:1.1rem">' + icon + '</span>'
+      + '<span><strong>' + lbl + '</strong>'
+      + (sub ? '<br><span style="font-size:.7rem;font-weight:400;opacity:.75">' + sub + '</span>' : '')
+      + '</span>';
+    b.onclick = fn; return b;
+  }
+
+  body.innerHTML = '<div style="font-size:.78rem;color:var(--muted);margin-bottom:1.1rem">'
+    + 'Work Order <strong style="color:var(--nor-accent)">' + woNum + '</strong> approved'
+    + ' — what would you like to do next?</div>';
+
+  body.appendChild(mkBtn('btn btn-primary',   '🧾', 'Generate Invoice',
+    'Create & price an invoice for ' + (wo.client||'this client'),
+    function(){ closeModal('approval-actions-modal'); openInvoiceModal(wo.client||''); }));
+
+  body.appendChild(mkBtn('btn btn-secondary', '⏱', tsLbl, tsSub,
+    function(){ closeModal('approval-actions-modal'); handleTSExportAfterApproval(woId); }));
+
+  body.appendChild(mkBtn('btn btn-ghost',     '📦', 'Export WO + Timesheet Package',
+    'Combined PDF — work order and timesheet together',
+    function(){ closeModal('approval-actions-modal'); exportPackage(woId); }));
+
+  var done = document.createElement('button');
+  done.className = 'btn btn-ghost';
+  done.style.cssText = 'width:100%;justify-content:center;margin-top:.25rem;color:var(--muted)';
+  done.textContent = 'Done — no action needed';
+  done.onclick = function(){ closeModal('approval-actions-modal'); };
+  body.appendChild(done);
+
+  document.getElementById('approval-actions-modal').classList.add('open');
+}
+
+// ── Handle timesheet export after approval ────────────────────────────────────
+async function handleTSExportAfterApproval(woId) {
+  var ts = _timesheets.find(function(t){ return t.woId === woId; });
+  if (!ts) {
+    // Create timesheet first
+    var wo = _jobs.find(function(j){ return j.id === woId; });
+    if (wo) await createTimesheetFromWO(wo);
+    ts = _timesheets.find(function(t){ return t.woId === woId; });
+  }
+  if (ts) {
+    // Open the timesheet modal so admin can review before exporting
+    showView('timesheets', document.getElementById('nav-timesheets'));
+    _editTSId = ts.id;
+    openTSModal(ts.id);
+  } else {
+    toast('Could not create timesheet', 'error');
+  }
+}
+
+
 
 
 // ── Tab switching (WO modal) ──────────────────────────────────────────────────
@@ -5734,15 +5831,17 @@ function openTSModal(tsId) {
   var submitted = ts.status === 'submitted';
 
   // Button visibility
-  var showExport = !!tsId;
-  var showBack   = submitted && isAdmin();
-  var showSubmit = !submitted;
-  var showDraft  = !submitted;
+  var showExport     = !!tsId;
+  var showBack       = submitted && isAdmin();
+  var showAdminSave  = submitted && isAdmin();   // admin can save edits to submitted TS
+  var showSubmit     = !submitted;
+  var showDraft      = !submitted;
 
-  document.getElementById('ts-export-btn').style.display = showExport  ? 'inline-flex' : 'none';
-  document.getElementById('ts-back-btn').style.display   = showBack    ? 'inline-flex' : 'none';
-  document.getElementById('ts-submit-btn').style.display = showSubmit  ? 'inline-flex' : 'none';
-  document.getElementById('ts-draft-btn').style.display  = showDraft   ? 'inline-flex' : 'none';
+  document.getElementById('ts-export-btn').style.display     = showExport    ? 'inline-flex' : 'none';
+  document.getElementById('ts-back-btn').style.display       = showBack      ? 'inline-flex' : 'none';
+  document.getElementById('ts-admin-save-btn').style.display = showAdminSave ? 'inline-flex' : 'none';
+  document.getElementById('ts-submit-btn').style.display     = showSubmit    ? 'inline-flex' : 'none';
+  document.getElementById('ts-draft-btn').style.display      = showDraft     ? 'inline-flex' : 'none';
 
   // Lock if submitted and not admin
   if (submitted && !isAdmin()) {
@@ -5874,6 +5973,25 @@ async function revertTS() {
 }
 
 // ── Export Timesheet PDF ──────────────────────────────────────────────────────
+// ── Admin save edits to a submitted timesheet ────────────────────────────────
+function saveAdminTSEdits() {
+  if (!_editTSId) return;
+  var data = buildTSData('submitted');   // keep status as submitted
+  data.adminEdited    = true;
+  data.adminEditedBy  = CURRENT_VIEWER;
+  data.adminEditedDate = today();
+  try {
+    saveTimesheetToStorage(Object.assign({id: _editTSId}, data));
+    _timesheets = _timesheets.map(function(t) {
+      return t.id === _editTSId ? Object.assign({id: _editTSId}, data) : t;
+    });
+    closeModal('ts-modal');
+    renderTimesheets();
+    toast('Timesheet updated by admin', 'success');
+  } catch(e) { toast('Save failed: ' + e.message, 'error'); }
+}
+
+
 function exportTimesheet(tsId) {
   var resolvedId = tsId || _editTSId;
   var ts = resolvedId ? (_timesheets.find(function(t) { return t.id === resolvedId; }) || {}) : {};
@@ -6248,5 +6366,17 @@ document.addEventListener('click', function(e) {
 });
 
 </script>
+<!-- ══ Approval Actions Modal ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="approval-actions-modal">
+  <div class="modal" style="max-width:420px;width:90%">
+    <div class="modal-header">
+      <div class="modal-title">✓ Work Order Approved</div>
+      <button class="modal-close" onclick="closeModal('approval-actions-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="approval-actions-body" style="padding:1.25rem"></div>
+  </div>
+</div>
+
+
 </body>
 </html>
