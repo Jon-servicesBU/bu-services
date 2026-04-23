@@ -5924,14 +5924,7 @@ function renderTimesheets() {
 
   // Filter: admins see all, techs see only their own
   var list = _timesheets.filter(function(ts) {
-    if (!isAdmin()) {
-      // Match tech name to viewer
-      var vp = (VIEWER_PEOPLE || []).find(function(p) { return p.id === viewer; });
-      if (!vp) return false;
-      var tsRows = ts.rows || [];
-      var hasMatch = tsRows.some(function(r) { return (r.technician||'').toLowerCase().includes(vp.name.toLowerCase()); });
-      if (!hasMatch && ts.technician && !ts.technician.toLowerCase().includes(vp.name.toLowerCase())) return false;
-    }
+    // Timesheets are localStorage — show all on this device
     if (filter && ts.status !== filter) return false;
     if (q) {
       var text = (ts.woNum||'') + (ts.client||'') + (ts.site||'');
@@ -6033,7 +6026,11 @@ function renderTimesheets() {
 
 // ── Margin Report ─────────────────────────────────────────────────────────────
 function renderMarginReport() {
-  if (!isAdmin()) return;
+  if (!isAdmin()) {
+    var kpiEl = document.getElementById('margin-kpis');
+    if (kpiEl) kpiEl.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:1rem">📈 Margin report is available to admin users only.</div>';
+    return;
+  }
 
   var filterTech = (document.getElementById('margin-filter-tech') || {}).value || '';
   var filterWO   = (document.getElementById('margin-filter-wo')   || {}).value || '';
