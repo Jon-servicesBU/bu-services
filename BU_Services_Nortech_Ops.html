@@ -2481,6 +2481,7 @@ async function loadAll(){
     if(results[3].status==='fulfilled') _rateSheets   = results[3].value.map(function(r){return Object.assign({id:r.id},r.data);});
     // Timesheets stored in localStorage (no Supabase table needed)
     _timesheets = loadTimesheetsFromStorage();
+    repairInvoiceTotals();  // fix any $0 totals from legacy/bug saves
     renderAll();
   }catch(e){ console.warn('loadAll failed:', e.message); renderAll(); }
 }
@@ -2535,7 +2536,18 @@ function renderDashboard(){
   }).length;
   var pendingAppr = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
   var outstanding = _invoices.filter(function(i){ return i.status==='sent'; })
-                             .reduce(function(s,i){ return s+(i.total||0); }, 0);
+                             .reduce(function(s,i){
+    var tot = i.total || 0;
+    if (!tot && (i.chargeSheetIds||[]).length) {
+      var oRS = _rateSheets.find(function(r){ return r.id === i.rateSheetId; }) || _rateSheets[0] || {};
+      var sub = (i.chargeSheetIds||[]).reduce(function(ss,wid){
+        var wo = _jobs.find(function(j){ return j.id === wid; }) || {};
+        return ss + priceChargeSheet(wo, oRS);
+      }, 0);
+      tot = sub * (1 + (i.taxRate||0)/100);
+    }
+    return s + tot;
+  }, 0);
   var paidMTD     = _invoices.filter(function(i){
     return i.status==='paid' && (i.paidDate||'').startsWith(today().slice(0,7));
   }).reduce(function(s,i){ return s+(i.total||0); }, 0);
@@ -2588,7 +2600,7 @@ function renderDashboard(){
       return '<tr onclick="viewInvoice(\''+i.id+'\')" style="cursor:pointer">'
         +'<td style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">'+(i.invNum||'—')+'</td>'
         +'<td style="font-size:.72rem">'+((i.client||'—').slice(0,22))+'</td>'
-        +'<td style="font-family:var(--mono);font-size:.75rem">'+fmtMoney(i.total)+'</td>'
+        +'<td style="font-family:var(--mono);font-size:.75rem">'+_fmtMoneyImpl(_calcInvDisplay(i))+'</td>'
         +'<td>'+chipHtml(i.status)+'</td>'
       +'</tr>';
     }).join('')
@@ -3371,9 +3383,9 @@ function renderInvoices(){
       + '<td style="font-weight:600">' + (i.client||'—') + '</td>'
       + '<td style="font-size:.72rem;color:var(--muted)">' + fmtDate(i.invDate||i.created) + '</td>'
       + '<td style="text-align:center;font-size:.72rem">' + (i.chargeSheetIds||[]).length + ' WO</td>'
-      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + _fmtMoneyImpl(i.subtotal) + '</td>'
-      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + _fmtMoneyImpl(i.tax) + '</td>'
-      + '<td style="font-family:var(--mono);font-size:.75rem;font-weight:700" class="hide-from-tech">' + _fmtMoneyImpl(i.total) + '</td>'
+      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + _fmtMoneyImpl(_calcInvDisplay(i,'sub')) + '</td>'
+      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + _fmtMoneyImpl(_calcInvDisplay(i,'tax')) + '</td>'
+      + '<td style="font-family:var(--mono);font-size:.75rem;font-weight:700" class="hide-from-tech">' + _fmtMoneyImpl(_calcInvDisplay(i,'total')) + '</td>'
       + '<td>' + chipHtml(i.status) + '</td>'
       + '<td style="white-space:nowrap;text-align:right">'
         + '<span style="font-size:.8rem;color:var(--muted);margin-right:.3rem" id="inv-chev-'+i.id+'">▼</span>'
@@ -3440,12 +3452,8 @@ function viewInvoice(id) {
     (wo.labourRows || []).forEach(function(row) {
       var reg = row.regHrs || 0, ot = row.otHrs || 0, dt = row.dtHrs || 0;
       if (!reg && !ot && !dt) return;
-      var cat = (invRS.labour||[]).find(function(l){ return l.name === row.category; })
-        || (invRS.labour||[]).find(function(l){
-             var base = (row.category||'').replace(/\s*\([^)]*\)/g,'').trim().toLowerCase();
-             return l.name.toLowerCase().indexOf(base) > -1;
-           }) || {};
-      var stRate = cat.stRate || 0;
+      var cat = _findRateEntry(row.category, invRS.labour) || {};
+      var stRate = cat.stRate || cat.rate || 0;
       var otRate = cat.otRate || stRate * 1.5;
       var dtRate = cat.dtRate || stRate * 2;
       var amt = reg * stRate + ot * otRate + dt * dtRate;
@@ -3600,6 +3608,50 @@ function printInvoice(){
 
 
 // ── Price a work order / charge sheet using a rate sheet ─────────────────────
+function _normCat(s) {
+  // Normalise a category name for fuzzy matching:
+  // strip bracketed abbreviations "(MT)", parenthetical counts "(2 Person crew)"
+  // strip em/en dash clauses "— 2 person", lowercase, collapse spaces
+  return (s || '').toLowerCase()
+    .replace(/\s*\([^)]*\)/g, '')      // remove (...) entirely
+    .replace(/\s*[\u2013\u2014\-]\s*\d+\s*person.*/i, '') // strip "— 2 person..."
+    .replace(/\s+/g, ' ').trim();
+}
+
+function _findRateEntry(category, rsLabour) {
+  var list = rsLabour || [];
+  // 1. Exact match
+  var m = list.find(function(l){ return l.name === category; });
+  if (m) return m;
+  var norm = _normCat(category);
+  // 2. Normalised exact
+  m = list.find(function(l){ return _normCat(l.name) === norm; });
+  if (m) return m;
+  // 3. One contains the other (normalised)
+  m = list.find(function(l){
+    var ln = _normCat(l.name);
+    return ln && norm && (ln.indexOf(norm) > -1 || norm.indexOf(ln) > -1);
+  });
+  if (m) return m;
+  // 4. Key-word overlap: match on the first 3 significant words
+  var words = norm.split(' ').filter(function(w){ return w.length > 2; }).slice(0, 3);
+  if (words.length) {
+    m = list.find(function(l){
+      var ln = _normCat(l.name);
+      return words.every(function(w){ return ln.indexOf(w) > -1; });
+    });
+    if (m) return m;
+    // 5. Any 2 of 3 words
+    m = list.find(function(l){
+      var ln = _normCat(l.name);
+      var hits = words.filter(function(w){ return ln.indexOf(w) > -1; });
+      return hits.length >= Math.min(2, words.length);
+    });
+    if (m) return m;
+  }
+  return null;
+}
+
 function priceChargeSheet(cs, rs) {
   if (!cs) return 0;
   var total = 0;
@@ -3609,19 +3661,14 @@ function priceChargeSheet(cs, rs) {
   if (hasNewFormat) {
     if (rs && rs.labour) {
       (cs.labourRows || []).forEach(function(row) {
-        // Match: exact first, then strip abbreviations like "(ECT)" → "Eddy Current Testing"
-        var cat = (rs.labour || []).find(function(l){ return l.name === row.category; })
-          || (rs.labour || []).find(function(l){
-               var base = (row.category||'').replace(/\s*\([^)]*\)/g,'').trim().toLowerCase();
-               return l.name.toLowerCase().indexOf(base) > -1 || base.indexOf(l.name.toLowerCase()) > -1;
-             }) || {};
-        var stRate = cat.stRate || 0;
+        var cat = _findRateEntry(row.category, rs.labour) || {};
+        var stRate = cat.stRate || cat.rate || 0;
         var otRate = cat.otRate || stRate * 1.5;
         var dtRate = cat.dtRate || stRate * 2;
         var nsRate = stRate * 1.15;
-        var reg = row.regHrs !== undefined ? row.regHrs : (row.st||0);
-        var ot  = row.otHrs  !== undefined ? row.otHrs  : (row.ot||0);
-        var dt  = row.dtHrs  !== undefined ? row.dtHrs  : (row.dt||0);
+        var reg = row.regHrs   !== undefined ? row.regHrs   : (row.st||0);
+        var ot  = row.otHrs    !== undefined ? row.otHrs    : (row.ot||0);
+        var dt  = row.dtHrs    !== undefined ? row.dtHrs    : (row.dt||0);
         var ns  = row.nightHrs !== undefined ? row.nightHrs : (row.ns||0);
         total += reg*stRate + ot*otRate + dt*dtRate + ns*nsRate;
       });
@@ -3664,6 +3711,56 @@ function priceChargeSheet(cs, rs) {
     }
   }
   return cs.total || 0;
+}
+
+
+// ── Repair any invoices saved with $0 totals (run once after loadAll) ─────────
+
+// ── Display helper: return recalculated invoice value (fallback when saved as 0) ──
+function _calcInvDisplay(inv, field) {
+  if (!inv) return 0;
+  // If saved total is non-zero, trust it
+  if (inv.total && field !== 'sub' && field !== 'tax') return inv.total;
+  if (inv.subtotal && field === 'sub') return inv.subtotal;
+  if (inv.tax && field === 'tax') return inv.tax;
+  // Recalculate
+  if (!(inv.chargeSheetIds||[]).length) {
+    return field === 'sub' ? (inv.subtotal||0) : field === 'tax' ? (inv.tax||0) : (inv.total||0);
+  }
+  var iRS = _rateSheets.find(function(r){ return r.id === inv.rateSheetId; }) || _rateSheets[0] || {};
+  var sub = (inv.chargeSheetIds||[]).reduce(function(s, wid){
+    var wo = _jobs.find(function(j){ return j.id === wid; }) || {};
+    return s + priceChargeSheet(wo, iRS);
+  }, 0);
+  var disc = inv.discount || 0;
+  var tax  = (sub - disc) * (inv.taxRate || 0) / 100;
+  var tot  = sub - disc + tax;
+  if (field === 'sub')   return sub;
+  if (field === 'tax')   return tax;
+  return tot;
+}
+
+function repairInvoiceTotals() {
+  var dirty = false;
+  _invoices.forEach(function(inv) {
+    if (inv.total || !(inv.chargeSheetIds||[]).length) return;
+    var iRS = _rateSheets.find(function(r){ return r.id === inv.rateSheetId; }) || _rateSheets[0] || {};
+    var sub = (inv.chargeSheetIds||[]).reduce(function(s, wid){
+      var wo = _jobs.find(function(j){ return j.id === wid; }) || {};
+      return s + priceChargeSheet(wo, iRS);
+    }, 0);
+    if (!sub) return;
+    var disc = inv.discount || 0;
+    var tax  = (sub - disc) * (inv.taxRate || 0) / 100;
+    var tot  = sub - disc + tax;
+    inv.subtotal = sub;
+    inv.tax      = tax;
+    inv.total    = tot;
+    dirty = true;
+    // Persist the fix back to Supabase silently
+    sbUpsert('invoices', inv.id, inv).catch(function(){});
+  });
+  if (dirty) console.log('[Nortech] Repaired invoice totals');
 }
 
 
@@ -6229,8 +6326,13 @@ function renderMarginReport() {
     var woNum = wo.woNum || wo.number || '—';
     if (filterWO && !woNum.toLowerCase().includes(filterWO.toLowerCase())) return;
 
-    // Get rate sheet
-    var rs = _rateSheets.find(function(r){ return r.id === wo.rateSheetId; }) || _rateSheets[0] || {};
+    // Get rate sheet — prefer WO rate sheet, then look for any invoice that used this WO, else first RS
+    var rs = _rateSheets.find(function(r){ return r.id === wo.rateSheetId; });
+    if (!rs) {
+      var linkedInv = _invoices.find(function(i){ return (i.chargeSheetIds||[]).indexOf(wo.id) > -1; });
+      rs = linkedInv ? _rateSheets.find(function(r){ return r.id === linkedInv.rateSheetId; }) : null;
+    }
+    rs = rs || _rateSheets[0] || {};
 
     (wo.labourRows || []).forEach(function(row) {
       var tech = row.technician || '—';
@@ -6243,12 +6345,8 @@ function renderMarginReport() {
       if (!totalHrs) return;
 
       // Billed: from rate sheet
-      var cat = (rs.labour||[]).find(function(l){ return l.name === row.category; })
-             || (rs.labour||[]).find(function(l){
-                  var base = (row.category||'').replace(/\s*\([^)]*\)/g,'').trim().toLowerCase();
-                  return l.name.toLowerCase().indexOf(base) > -1;
-                }) || {};
-      var stRate = cat.stRate || 0;
+      var cat = _findRateEntry(row.category, rs.labour) || {};
+      var stRate = cat.stRate || cat.rate || 0;
       var otRate = cat.otRate || stRate * 1.5;
       var nsRate = stRate * 1.15;
       var billed = reg * stRate + ot * otRate + night * nsRate;
