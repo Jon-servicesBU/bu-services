@@ -1446,7 +1446,23 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
-<script>// ── Push actuals to Command Centre via Supabase ───────────────────────────────
+<script>// ══ GLOBAL STATE ══════════════════════════════════════════════════════════════
+var _jobs         = [];
+var _chargeSheets = [];
+var _invoices     = [];
+var _rateSheets   = [];
+var _timesheets   = [];
+var _currentView  = 'dashboard';
+var _editWOId     = null;
+var _editTSId     = null;
+var _tsRowCount   = 0;
+var _currentInvId = null;
+var _csLabourRowCount    = 0;
+var _csEquipmentRowCount = 0;
+var _csConsumableRowCount= 0;
+var _csFilmRowCount      = 0;
+
+// ── Push actuals to Command Centre via Supabase ───────────────────────────────
 async function pushActualsToCC(){
   try{
     var now=new Date().toISOString().slice(0,7); // YYYY-MM
