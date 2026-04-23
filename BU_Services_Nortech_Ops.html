@@ -1678,24 +1678,49 @@ function deleteTimesheetFromStorage(id) {
 
 
 // ── Push actuals to Command Centre via Supabase ───────────────────────────────
-async function pushActualsToCC(){
-  try{
-    var now=new Date().toISOString().slice(0,7); // YYYY-MM
-    var thisYear=new Date().getFullYear().toString();
-    var paidThisYear=_invoices.filter(function(i){return i.status==='paid'&&(i.paidDate||'').startsWith(thisYear);});
-    var totalPaidYTD=paidThisYear.reduce(function(s,i){return s+(i.total||0);},0);
-    // Write to crm_sync nortech actuals
-    var res=await fetch(_SB_URL+'/rest/v1/crm_sync',{
-      method:'POST',
-      headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-      body:JSON.stringify({id:'nortech_actuals',data:{
-        nortech_invoiced_ytd:totalPaidYTD/1e6,
-        nortech_paid_invoices:paidThisYear.length,
-        last_updated:new Date().toISOString(),
-      },updated_at:new Date().toISOString()})
+function pushActualsToCC(){
+  // ── Write Nortech invoiced $ directly to localStorage crm_actuals_sync ──
+  // The Command Centre reads this key — no Supabase table needed.
+  try {
+    var now       = new Date();
+    var thisMM    = now.toISOString().slice(0, 7); // YYYY-MM
+    var thisYear  = now.getFullYear().toString();
+
+    // Invoiced this month (sent or paid)
+    var invoicedMTD = _invoices.filter(function(i){
+      return (i.status === 'sent' || i.status === 'paid')
+          && (i.invDate || i.created || '').startsWith(thisMM);
+    }).reduce(function(s, i){ return s + (_calcInvDisplay(i) || i.total || 0); }, 0);
+
+    // Invoiced YTD (sent or paid)
+    var invoicedYTD = _invoices.filter(function(i){
+      return (i.status === 'sent' || i.status === 'paid')
+          && (i.invDate || i.created || '').startsWith(thisYear);
+    }).reduce(function(s, i){ return s + (_calcInvDisplay(i) || i.total || 0); }, 0);
+
+    // Read existing sync object — preserve all other fields
+    var existing = {};
+    try { existing = JSON.parse(localStorage.getItem('crm_actuals_sync') || '{}'); } catch(e){}
+
+    // Update only the Nortech actuals fields
+    existing.recon_nor = Object.assign({}, existing.recon_nor || {}, {
+      bc_invoiced_mtd:  invoicedMTD,
+      bc_invoiced_ytd:  invoicedYTD,
+      last_bc_pull:     now.toISOString().slice(0, 10),
+      last_updated:     now.toISOString().slice(0, 10),
     });
-    if(res.ok) console.log('Nortech actuals pushed to CC');
-  }catch(e){ console.warn('pushActualsToCC failed:', e.message); }
+
+    // Also update the _source / _synced markers
+    existing._source  = existing._source || 'BU_Services_CRM';
+    existing._synced  = now.toISOString();
+    existing._version = existing._version || '3.0';
+
+    localStorage.setItem('crm_actuals_sync', JSON.stringify(existing));
+    console.log('[Nortech] Actuals pushed to Command Centre — MTD:', invoicedMTD, 'YTD:', invoicedYTD);
+    toast('Actuals updated in Command Centre', 'success');
+  } catch(e) {
+    console.warn('pushActualsToCC failed:', e.message);
+  }
 }
 
 // ── Modal helpers ─────────────────────────────────────────────────────────────
@@ -2032,7 +2057,7 @@ async function markInvSent(id) {
   if (!inv) return;
   if (!confirm('Mark invoice ' + inv.invNum + ' as Sent? This means it has been delivered to the client. Continue?')) return;
   inv.status = 'sent'; inv.sentDate = today(); inv.modified = today(); inv.sentDate=today(); inv.modified=today();
-  try { await sbUpsert('invoices',id,inv); renderInvoices(); renderDashboard(); toast('Invoice marked as sent','success'); }
+  try { await sbUpsert('invoices',id,inv); renderInvoices(); renderDashboard(); pushActualsToCC(); toast('Invoice marked as sent','success'); }
   catch(e){ toast('Error: '+e.message,'error'); }
 }
 async function markInvoiceSent(){ if(!_currentInvId)return; await markInvSent(_currentInvId); closeModal('inv-view-modal'); }
@@ -2482,6 +2507,7 @@ async function loadAll(){
     // Timesheets stored in localStorage (no Supabase table needed)
     _timesheets = loadTimesheetsFromStorage();
     repairInvoiceTotals();  // fix any $0 totals from legacy/bug saves
+    pushActualsToCC();       // sync Nortech actuals to Command Centre localStorage
     renderAll();
   }catch(e){ console.warn('loadAll failed:', e.message); renderAll(); }
 }
@@ -3329,6 +3355,7 @@ async function saveInvoice(status){
     // Push actuals to CC if paid
     if(status==='paid') pushActualsToCC();
     toast(status==='sent'?'Invoice generated and marked sent':'Invoice saved','success');
+    pushActualsToCC();
     // Auto-open the invoice view
     if(status==='sent') viewInvoice(id);
   }catch(e){toast('Save failed: '+e.message,'error');}
