@@ -1463,6 +1463,95 @@ var _csConsumableRowCount= 0;
 var _csFilmRowCount      = 0;
 
 
+// ── Supabase config ───────────────────────────────────────────────────────────
+var _SB_URL = 'https://tbcoktkpjwdvnhqtuups.supabase.co';
+var _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiY29rdGtwandkdm5ocXR1dXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MDM1OTIsImV4cCI6MjA5MjM3OTU5Mn0.8Zw75YQYmNPXKoLE_bK23Vs2j3ZeqCUwAYUFt5-8YWs';
+
+// ── Login / viewer ────────────────────────────────────────────────────────────
+var CURRENT_VIEWER = localStorage.getItem('hub_viewer') || '';
+var VIEWER_PEOPLE = [
+  { id: 'jon',     name: 'Jon Eustace',               role: 'CEO North America · EIG',           initials: 'JE', color: '#00AEEF' },
+  { id: 'jason',   name: 'Jason Borza',                role: 'Operations Director — Nortech',      initials: 'JB', color: '#DC2626' },
+  { id: 'joel_c',  name: 'Joel Carlton',               role: 'Pipeline Integrity Lead',            initials: 'JC', color: '#368CD9' },
+  { id: 'renee',   name: 'Renée Lachance',             role: 'Sr. Director Finance & Controller', initials: 'RL', color: '#BE185D' },
+  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',       initials: 'JI', color: '#0891B2' },
+  { id: 'mathieu', name: 'Mathieu Beauchesne',         role: 'EVP · Powerline',                   initials: 'MB', color: '#E97132' },
+];
+
+// ── Nortech labour categories ─────────────────────────────────────────────────
+var NORTECH_LABOUR_CATEGORIES = [
+  'Magnetic Particle Testing (MT)',
+  'Liquid Penetrant Testing (PT)',
+  'Hardness Testing (HT)',
+  'Ferrite Testing',
+  'Manual UT Level 1',
+  'Manual UT Level 2',
+  'Visual CWB Level 2',
+  'Visual CWB Level 3',
+  'NACE Level 2',
+  'Positive Material Identification (PMI)',
+  'Spectrographic Analysis',
+  'Radiographic Testing (RT) — 2 person',
+  'PAUT / TOFD — 2 person',
+  'AUT Corrosion Testing — 2 person',
+  'Data Analysis',
+  'NDT Assistant / CEDO',
+  'Supervisor / Project Coordinator',
+  'HSE Supervisor',
+  'API 510 ISI-PVPP Inspector',
+  'API 653 Inspector',
+  'API 570 Inspector',
+  'Rope Access Level 3',
+  'UAV UT/Visual Drone — 2 person',
+  'CGSB Level 3',
+  'Engineering',
+  'Inspection ISO / PID Drafter',
+  'Office Clerical',
+  'MFL Tank Floor Inspection',
+  'Guided Wave Testing (GWT)',
+  'Eddy Current Testing (ECT)',
+];
+
+// ── Nortech standard equipment ────────────────────────────────────────────────
+var NORTECH_EQUIPMENT_LIST = [
+  'MP Yoke, calibration block, light meter',
+  'Liquid Penetrant testing kit',
+  'Ultrasonic unit, calibration blocks, probes',
+  'Radiographic exposure device, dark room',
+  'NorScan Digital Imaging Acquisition (DDA)',
+  'Optical Emission Spectrometry unit',
+  'LIPPS unit, argon, calibration blocks',
+  'PMI (XRF) unit & calibration blocks',
+  'Hardness Tester (UCI)',
+  'Hardness Tester (Telebrineller)',
+  'Hardness Tester (King Tester)',
+  'Ferrite Tester unit',
+  'PAUT/TOFD unit, scanners, cables, probes',
+  'AUT unit, cables, probes, calibration blocks',
+  'Coating Tester unit',
+  'Voltmeter',
+  'Digital Pit Gauge',
+  'Airal Robot, UT Thickness unit',
+  'Service Vehicle & Fuel',
+];
+
+// ── Nortech standard consumables ─────────────────────────────────────────────
+var NORTECH_CONSUMABLES_LIST = [
+  'Ultrasonic Couplant',
+  'Ultrasonic Couplant High/Low temp',
+  'MT Contrast Paint / Wet Particles',
+  'Dry Magnetic Particle',
+  'PT Penetrant, Developer, Cleaner',
+  'Grinding Discs',
+  'Temp Sticks',
+  'NDT Cleaner',
+  'Nital Acid Etchant',
+  'Methanol Neutralizer',
+  'PAUT Antifreeze',
+  'Environmental Fee (MT/PT/RT)',
+];
+
+
 // ── Formatting utilities ──────────────────────────────────────────────────────
 function _fmtMoneyImpl(n) {
   if (n == null || isNaN(n)) return '$0.00';
