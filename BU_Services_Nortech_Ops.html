@@ -739,6 +739,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div style="flex:1"></div>
       <button class="btn btn-secondary" onclick="saveWO('draft')">Save Draft</button>
       <button class="btn btn-primary" onclick="saveWO('submitted')">Submit Work Order</button>
+      <button class="btn btn-primary" onclick="saveWOAndTimesheet()" style="background:var(--nor-accent);border-color:var(--nor-accent)">Submit + Timesheet ⏱</button>
     </div>
   </div>
 </div>
@@ -2501,7 +2502,15 @@ function renderAll(){
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function renderDashboard(){
-  var activeWOs   = _jobs.filter(function(j){
+  var _myJobs = isAdmin() ? _jobs : _jobs.filter(function(j){
+    var vp=(VIEWER_PEOPLE||[]).find(function(p){return p.id===CURRENT_VIEWER;});
+    if(!vp) return true;
+    return (j.labourRows||[]).some(function(r){
+      return (r.technician||'').toLowerCase().includes(vp.name.split(' ')[0].toLowerCase())||
+             (r.technician||'').toLowerCase().includes(vp.name.split(' ').pop().toLowerCase());
+    });
+  });
+  var activeWOs = _myJobs.filter(function(j){
     return j.status==='draft'||j.status==='submitted'||j.status==='approved';
   }).length;
   var pendingAppr = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
@@ -2528,7 +2537,7 @@ function renderDashboard(){
 
   var csEl = document.getElementById('dash-cs-table');
   if (csEl) {
-    var recent = _jobs.slice(0, 8);
+    var recent = _myJobs.slice(0, 8);
     var tbody  = csEl.querySelector('tbody');
     if (tbody) tbody.innerHTML = recent.length ? recent.map(function(j){
       var reg   = (j.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
@@ -2573,7 +2582,15 @@ function renderJobs() {
   var filter = (document.getElementById('job-filter-status') || {}).value || '';
 
   var validStatuses = ['draft','submitted','approved','invoiced','paid'];
-  var filtered = _jobs.filter(function(j) {
+  var _viewJobs = isAdmin() ? _jobs : _jobs.filter(function(j){
+    var vp=(VIEWER_PEOPLE||[]).find(function(p){return p.id===CURRENT_VIEWER;});
+    if(!vp) return true;
+    return (j.labourRows||[]).some(function(r){
+      return (r.technician||'').toLowerCase().includes(vp.name.split(' ')[0].toLowerCase())||
+             (r.technician||'').toLowerCase().includes(vp.name.split(' ').pop().toLowerCase());
+    });
+  });
+  var filtered = _viewJobs.filter(function(j) {
     // Hide legacy jobs that don't have WO format
     if (validStatuses.indexOf(j.status) === -1 && !j.woNum) return false;
     if (filter && j.status !== filter) return false;
@@ -3235,20 +3252,23 @@ async function saveInvoice(status){
   if(!client){toast('Select a client','error');return;}
   var selectedCSIds=Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el){return el.value;});
   if(!selectedCSIds.length){toast('Select at least one work order','error');return;}
-  var selectedCS=selectedCSIds.map(function(id){return _chargeSheets.find(function(c){return c.id===id;})||{};});
-  var subtotal=selectedCS.reduce(function(s,c){return s+(c.total||0);},0);
+  var selectedWOs=selectedCSIds.map(function(wid){return _jobs.find(function(j){return j.id===wid;})||{};});
+  var rsId=(document.getElementById('inv-rate-sheet')||{}).value||'';
+  var rs=_rateSheets.find(function(r){return r.id===rsId;})||_rateSheets[0]||{};
+  var discount=parseFloat((document.getElementById('inv-discount')||{}).value)||0;
+  var subtotal=selectedWOs.reduce(function(s,wo){return s+priceChargeSheet(wo,rs);},0);
   var taxRate=parseFloat(document.getElementById('inv-tax-rate').value)||0;
-  var tax=subtotal*taxRate/100;
-  var total=subtotal+tax;
+  var tax=(subtotal-discount)*taxRate/100;
+  var total=subtotal-discount+tax;
   var id=uid();
   var data={
     id, client, status,
     invNum:nextNum('INV-',_invoices,'invNum'),
     invDate:document.getElementById('inv-date').value,
     terms:document.getElementById('inv-terms').value,
-    taxRate,
+    taxRate, rateSheetId:rsId, discount,
     chargeSheetIds:selectedCSIds,
-    chargeSheets:selectedCS.map(function(c){return{id:c.id,csNum:c.csNum,technician:c.technician,weekStart:c.weekStart,total:c.total};}),
+    chargeSheets:selectedWOs.map(function(wo){return{id:wo.id,woNum:wo.woNum||wo.number,client:wo.client,date:wo.date,total:priceChargeSheet(wo,rs)};}),
     subtotal, tax, total,
     notes:document.getElementById('inv-notes').value.trim(),
     created:today(), modified:today(),
@@ -3256,11 +3276,15 @@ async function saveInvoice(status){
   try{
     await sbUpsert('invoices',id,data);
     // Mark work orders as invoiced
-    await Promise.all(selectedCSIds.map(async function(csId){
-      var cs=_chargeSheets.find(function(c){return c.id===csId;}); if(!cs)return;
-      cs.status='invoiced'; cs.invoiceId=id; cs.modified=today();
-      await sbUpsert('charge_sheets',csId,cs);
+    await Promise.all(selectedCSIds.map(async function(woId){
+      var wo=_jobs.find(function(j){return j.id===woId;}); if(!wo)return;
+      wo.status='invoiced'; wo.invoiceId=id; wo.modified=today();
+      await sbUpsert('jobs',woId,wo);
     }));
+    _jobs=_jobs.map(function(j){
+      if(selectedCSIds.indexOf(j.id)>-1){return Object.assign({},j,{status:'invoiced',invoiceId:id});}
+      return j;
+    });
     _invoices.unshift(data);
     closeModal('inv-modal');
     renderInvoices(); renderCSList(); renderDashboard(); updatePendingBadge();
@@ -3321,9 +3345,9 @@ function renderInvoices(){
       + '<td style="font-weight:600">' + (i.client||'—') + '</td>'
       + '<td style="font-size:.72rem;color:var(--muted)">' + fmtDate(i.invDate||i.created) + '</td>'
       + '<td style="text-align:center;font-size:.72rem">' + (i.chargeSheetIds||[]).length + ' WO</td>'
-      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + fmtMoney(i.subtotal) + '</td>'
-      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + fmtMoney(i.tax) + '</td>'
-      + '<td style="font-family:var(--mono);font-size:.75rem;font-weight:700" class="hide-from-tech">' + fmtMoney(i.total) + '</td>'
+      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + _fmtMoneyImpl(i.subtotal) + '</td>'
+      + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + _fmtMoneyImpl(i.tax) + '</td>'
+      + '<td style="font-family:var(--mono);font-size:.75rem;font-weight:700" class="hide-from-tech">' + _fmtMoneyImpl(i.total) + '</td>'
       + '<td>' + chipHtml(i.status) + '</td>'
       + '<td style="white-space:nowrap;text-align:right">'
         + '<span style="font-size:.8rem;color:var(--muted);margin-right:.3rem" id="inv-chev-'+i.id+'">▼</span>'
@@ -3927,6 +3951,39 @@ async function saveWO(status) {
 }
 
 // ── WO: Approve / Unapprove ───────────────────────────────────────────────────
+// ── Submit WO then immediately open its timesheet ────────────────────────────
+async function saveWOAndTimesheet() {
+  // Validate first
+  var client = (document.getElementById('job-client')||{}).value||'';
+  var site   = (document.getElementById('job-site')||{}).value||'';
+  if (!client.trim()||!site.trim()) { toast('Client and location are required','error'); return; }
+
+  // Store pending id so we can grab it after save
+  var pendingId = _editWOId || uid();
+  window._pendingTSWoId = pendingId;
+
+  await saveWO('submitted');
+
+  // Wait for saveWO to complete and timesheet to be created
+  await new Promise(function(r){ setTimeout(r, 600); });
+
+  var ts = _timesheets.find(function(t){ return t.woId === pendingId; });
+  if (!ts) {
+    var wo = _jobs.find(function(j){ return j.id === pendingId; });
+    if (wo) {
+      await createTimesheetFromWO(wo);
+      ts = _timesheets.find(function(t){ return t.woId === pendingId; });
+    }
+  }
+  if (ts) {
+    showView('timesheets', document.getElementById('nav-timesheets'));
+    _editTSId = ts.id;
+    openTSModal(ts.id);
+    toast('Work order submitted — fill in your timesheet hours', 'info');
+  }
+}
+
+
 async function approveWO(id) {
   var wo = _jobs.find(function(j){ return j.id === id; }); if (!wo) return;
   if (!confirm('Approve Work Order ' + (wo.woNum||wo.number) + '?\n\nThis will mark it ready for invoicing.')) return;
