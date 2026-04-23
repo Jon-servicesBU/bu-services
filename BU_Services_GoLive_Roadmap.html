@@ -184,18 +184,22 @@ code{font-family:'IBM Plex Mono',monospace;font-size:.79rem;background:rgba(0,0,
 
 <div class="callout c-blue">
   <div class="c-title" style="color:var(--blue)">The distinction: built vs connected</div>
-  <div class="c-body">Everything in the "Built" columns below exists as a file in your outputs folder right now — designed, structured, and ready. What is missing is the implementation step: uploading files to SharePoint, creating fields in Salesforce, building the Power Automate flows. The guides for every implementation step have been written. None of it requires new design decisions. It is all execution.</div>
+  <div class="c-body">Everything in the "Built" columns below exists as a file in your outputs folder right now — designed, structured, and ready. What is missing is the implementation step: uploading files to SharePoint, creating fields in the CRM, building the Power Automate flows. The guides for every implementation step have been written. None of it requires new design decisions. It is all execution.</div>
 </div>
 
 <div class="phases">
   <div class="phase">
-    <div class="phase-hdr" style="background:var(--blue)"><div><div style="font-size:.62rem;opacity:.65;margin-bottom:2px">BUILT — READY TO DEPLOY</div>Documents &amp; Data Structures</div></div>
+    <div class="phase-hdr" style="background:var(--blue)"><div><div style="font-size:.62rem;opacity:.65;margin-bottom:2px">✅ LIVE — GITHUB PAGES</div>Tools &amp; Data Structures</div></div>
     <div class="phase-body">
-      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>actuals.json</strong> — 135-field data bridge, structured, not yet on SharePoint</div></div>
-      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>Command Centre</strong> — 11-section portal, reads actuals.json, not yet deployed</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>actuals.json</strong> — 135-field data bridge, live on GitHub, manual entry operational</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--red)"></div><div><strong>Nortech Field Operations</strong> — Work Order → Invoice billing system, live on GitHub Pages, Supabase backend, 1,235 customers, 79 employees</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>Command Centre</strong> — live on GitHub Pages, reads actuals.json, Supabase integrated</div></div>
       <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>Execution Tracker</strong> — 38 actions, 6 gates, 6 risks, standalone HTML</div></div>
       <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>11 plan documents</strong> — master plan, 5 initiative plans, execution plan, playbooks</div></div>
-      <div class="pi"><div class="pi-dot" style="background:var(--sky)"></div><div><strong>People &amp; Capacity Dashboard</strong> — overhead %, cumulative utilization, vacation liability · 126-employee roster · BC live data · P6/P7/P8 PA guide v2 built</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--sky)"></div><div><strong>Management Hub</strong> — sprint board, 1:1 tracker, action items · Supabase · login layer live</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--sky)"></div><div><strong>CRM</strong> — Supabase shared records, login layer live</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--sky)"></div><div><strong>People &amp; Capacity Dashboard</strong> — utilization, overhead, roster, vacation, anniversaries, heatmap · login layer live</div></div>
+      <div class="pi"><div class="pi-dot" style="background:var(--sky)"></div><div><strong>Meeting Hub</strong> — meeting agendas, login layer live</div>
       <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>Deck generation script</strong> — python-pptx, reads actuals.json, outputs .pptx</div></div>
       <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>Utilisation Tracker xlsx</strong> — 26-week, 5 regions, 520 formulas</div></div>
       <div class="pi"><div class="pi-dot" style="background:var(--blue)"></div><div><strong>FY24/FY25 KPI averages</strong> — pre-loaded in actuals.json</div></div>
@@ -242,7 +246,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:.79rem;background:rgba(0,0,
     <div style="background:var(--bluel);border:1.5px dashed var(--sf);border-radius:7px;padding:.55rem .8rem">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:800;color:var(--sf)">☁ Salesforce</div>
       <div style="font-size:.65rem;color:var(--body);margin-top:.1rem;line-height:1.4">Closed Won · Pipeline<br>Bookings · Commit · Upside</div>
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;background:var(--redl);color:var(--red);padding:.05rem .3rem;border-radius:2px;display:inline-block;margin-top:.2rem">Step 1+2 pending</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;background:var(--redl);color:var(--red);padding:.05rem .3rem;border-radius:2px;display:inline-block;margin-top:.2rem">Steps 1+2 pending</span>
     </div>
     <div style="display:flex;align-items:center;justify-content:center;position:relative;height:50px">
       <div style="position:absolute;left:4px;right:18px;border-top:2px dashed var(--red);opacity:.55"></div>
@@ -349,7 +353,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:.79rem;background:rgba(0,0,
 
 <div class="callout c-blue">
   <div class="c-title" style="color:var(--blue)">Why Salesforce comes before Power Automate</div>
-  <div class="c-body">The Sunday PA flow queries Salesforce using the <code>BU_Initiative__c</code> field as a filter — to separate Mining deals from Pipeline deals from Powerline deals etc. That field does not exist in Salesforce yet. Éric must create it before the PA flow can be built. P1 (field creation) is the prerequisite for Step 2.</div>
+  <div class="c-body">The Sunday PA flow queries Salesforce using the <code>BU_Initiative__c</code> field as a filter — to separate Mining deals from Pipeline deals from Powerline deals etc. That field does not exist in the CRM yet. Éric must create it before the PA flow can be built. P1 (field creation) is the prerequisite for Step 2.</div>
 </div>
 
 <div class="conn-grid">
@@ -428,7 +432,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:.79rem;background:rgba(0,0,
 
 <div class="callout c-amber">
   <div class="c-title" style="color:var(--amber)">Prerequisite: Step 1 must be complete before Step 2 can start</div>
-  <div class="c-body">The Sunday PA flow queries Salesforce using <code>BU_Initiative__c</code> as a filter. If that field doesn't exist yet in Salesforce, the Get Records actions will fail on build. Complete Step 1 first.</div>
+  <div class="c-body">The Sunday PA flow queries Salesforce using <code>BU_Initiative__c</code> as a filter. If that field doesn't exist yet in the CRM, the Get Records actions will fail on build. Complete Step 1 first.</div>
 </div>
 
 <div class="conn-card">
@@ -482,7 +486,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:.79rem;background:rgba(0,0,
       <p>The Command Centre HTML has 5 placeholder <code>sfValue</code> entries in the CONFIG block at the top of the file. Once the Region field API name is confirmed in Step 1, update these before uploading the HTML to SharePoint.</p>
       <div class="task" style="border-left-color:var(--pa)">
         <div class="task-hdr"><span class="task-title">Open Command Centre HTML → Ctrl+F "regions: [" → update 5 sfValue entries</span><span class="task-time">15 min</span></div>
-        <div class="task-body">Set each <code>sfValue</code> to the exact picklist value in Salesforce (e.g. <code>"HQ"</code>, <code>"Montreal"</code>). Save and re-upload to SharePoint root folder (same location as actuals.json).</div>
+        <div class="task-body">Set each <code>sfValue</code> to the exact picklist value in the CRM (e.g. <code>"HQ"</code>, <code>"Montreal"</code>). Save and re-upload to SharePoint root folder (same location as actuals.json).</div>
         <div class="task-result">↳ Regional revenue cards show correct filtered values from Salesforce</div>
       </div>
     </div>
@@ -844,7 +848,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:.79rem;background:rgba(0,0,
     <tbody>
       <tr><td><span class="badge b-notstarted">Step 0</span></td><td><strong>Upload all files to SharePoint</strong></td><td>Jon / Éric</td><td>10 min</td><td>Everything — nothing else works without this</td><td class="stbl-doc">BU_Services_SharePoint_Setup_Guide.docx</td></tr>
       <tr><td></td><td><strong>Enter budget figures + EUR rate</strong></td><td>Jeremy Irwin</td><td>5 min</td><td>Deck slide 2 % Perf/Budget column</td><td class="stbl-doc">Edit actuals.json on SharePoint</td></tr>
-      <tr><td><span class="badge b-eric">Step 1</span></td><td><strong>Create BU_Initiative__c picklist field in Salesforce</strong></td><td>Éric</td><td>20 min</td><td>Required before PA flow can be built</td><td class="stbl-doc">BU_Services_Salesforce_Integration_Guide.docx</td></tr>
+      <tr><td><span class="badge b-eric">Step 1</span></td><td><strong>Create BU_Initiative__c picklist field in the CRM</strong></td><td>Éric</td><td>20 min</td><td>Required before PA flow can be built</td><td class="stbl-doc">BU_Services_the CRM_Integration_Guide.docx</td></tr>
       <tr><td></td><td><strong>Confirm Region field API name + picklist values</strong></td><td>Éric</td><td>10 min</td><td>Regional revenue cards in Command Centre</td><td class="stbl-doc">BU_Services_Salesforce_Integration_Guide.docx</td></tr>
       <tr><td></td><td><strong>Add Assigned_Technicians__c field (Phase 1)</strong></td><td>Éric</td><td>5 min</td><td>Crew deployment tracking begins</td><td class="stbl-doc">BU_Services_SF_Technician_Tracking.docx</td></tr>
       <tr><td></td><td><strong>Backfill 2026 opportunities with BU Initiative value</strong></td><td>Vinoth, Emmanuel, Rick, Olivier</td><td>30–60 min</td><td>Accurate YTD figures from first PA run</td><td class="stbl-doc">BU_Services_Salesforce_Integration_Guide.docx</td></tr>
@@ -875,7 +879,7 @@ code{font-family:'IBM Plex Mono',monospace;font-size:.79rem;background:rgba(0,0,
 </div>
 
 <div style="background:var(--navy2);padding:1.25rem 2rem;text-align:center;margin-top:0">
-  <p style="font-size:.71rem;color:rgba(255,255,255,.22)">BU Services Commercial Management System — Go-Live Roadmap &nbsp;·&nbsp; Jon Eustace, CEO North America &nbsp;·&nbsp; Ekoscan Integrity Group &nbsp;·&nbsp; Confidential — April 2026</p>
+  <p style="font-size:.71rem;color:rgba(255,255,255,.22)">BU Services Commercial Management System — Go-Live Roadmap (Updated April 22, 2026) &nbsp;·&nbsp; Jon Eustace, CEO North America &nbsp;·&nbsp; Ekoscan Integrity Group &nbsp;·&nbsp; Confidential — April 2026</p>
 </div>
 
 <script>

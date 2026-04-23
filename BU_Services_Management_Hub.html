@@ -1207,12 +1207,13 @@ var PEOPLE = {
     name:'Mathieu Beauchesne', color:'var(--blue)',
     role:'EVP · Powerline · Cigre',
     employer:'Nucleom Inc.',
-    mandate:'Executive leadership of Nucleom operations. Leads the Powerline initiative commercially. Manages Dynamics BC Q&A (prerequisite for BC connector). Direct reports: Alex Cyr (Sr. Ops Director), Francis Boudreault-Leclerc (Engineering & Technical Manager), Louis-Pier Théberge (Nuclear Sector).',
+    mandate:'Executive leadership of Nucleom operations. Leads the Powerline initiative commercially. Admin access to Nortech Field Operations (approve WOs, create invoices, manage rate sheets). Manages Dynamics BC Q&A (prerequisite for BC connector). Direct reports: Alex Cyr (Sr. Ops Director), Francis Boudreault-Leclerc (Engineering & Technical Manager), Louis-Pier Théberge (Nuclear Sector).',
     initiatives:['Powerline — LineCore, LineOhm, LineRay ($10.2M 5yr)','Dynamics BC environment Q&A (blocks Step 3 of go-live)','Cigre Paris — international positioning'],
     rhythm:['Weekly: Ops meeting support','Monthly: Enter BC interim data into actuals.json (until P4 live)','Quarterly: Budget figures + EUR rate into actuals.json'],
     docs:[
       {icon:'📊',name:'Dynamics Q&A Workbook',file:'BU_Services_Dynamics_QA_Workbook.xlsx'},
       {icon:'📋',name:'Dynamics Integration Guide',file:'BU_Services_Dynamics_Integration_Guide.docx'},
+      {icon:'👤',name:'Role Brief',file:'BU_Services_Mathieu_Beauchesne_Role_Brief.html'},
     ]
   },
   olivier: {
@@ -1569,7 +1570,7 @@ var MEETINGS = [
   { title:'Post-Conference Debrief', color:'var(--teal)',
     cadence:'After each BU Services conference', chair:'Jon or commercial lead', attendees:'Attending commercial lead + Shanny',
     agenda:[
-      {n:1,t:'Leads entered in Salesforce?',d:'48-hour rule: every conversation = a Lead in SF with BU_Initiative__c tagged'},
+      {n:1,t:'Leads entered in the CRM?',d:'48-hour rule: every conversation = a Lead in SF with BU_Initiative__c tagged'},
       {n:2,t:'Actuals entered in tracker?',d:'Shanny: enter total actual spend in Conference Action Tracker — Year Calendar Col S'},
       {n:3,t:'SF outcomes entered?',d:'Jon/commercial lead: log outcomes via Teams Adaptive Card (leads, opps created)'},
       {n:4,t:'Hot leads — immediate follow-up',d:'Any HOT-rated leads: follow-up committed within 5 business days'},
@@ -1596,7 +1597,7 @@ var DOC_GROUPS = [
       {icon:'📊',name:'Command Centre',file:'BU_Services_Command_Centre.html',desc:'Live KPI portal — 15 sections · 135 actuals.json fields',status:'ready'},
       {icon:'📦',name:'actuals.json',file:'actuals.json',desc:'135-field data bridge — single source of truth for all dashboards',status:'ready'},
       {icon:'📖',name:'actuals.json Reference',file:'BU_Services_actuals_json_Reference.html',desc:'Annotated field reference — who writes what, 135 fields explained'},
-      {icon:'✅',name:'SF Backfill Tracker',file:'BU_Services_Salesforce_Backfill_Tracker.html',desc:'Audit BU_Initiative__c on all 2026 opportunities before go-live'},
+      {icon:'✅',name:'CRM Backfill Tracker',file:'BU_Services_Salesforce_Backfill_Tracker.html',desc:'Audit BU_Initiative__c on all 2026 opportunities before go-live'},
       {icon:'📋',name:'Go-Live Roadmap',file:'BU_Services_GoLive_Roadmap.html',desc:'Step-by-step build guide for Éric — all 9 steps with owners and times',status:'ready'},
       {icon:'📄',name:'System Overview',file:'BU_Services_System_Overview.html',desc:'Master reference — all files, all data flows, all 135 fields',status:'ready'},
       {icon:'🏦',name:'Eurazeo Quarterly Pack Template',file:'BU_Services_Eurazeo_Quarterly_Pack_Template.docx',desc:'Quarterly Eurazeo reporting template — 6 sections pre-structured'},

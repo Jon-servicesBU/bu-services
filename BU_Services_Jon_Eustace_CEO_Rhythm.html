@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jon Eustace — CEO Weekly Rhythm</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0A1F5C;--blue:#1A5CA8;--sky:#00AEEF;--orange:#E97132;
+  --amber:#C9860A;--green:#16A34A;--red:#DC2626;--purp:#5A3FA0;
+  --bg:#080F1E;--dark:#0D1528;--mid:rgba(255,255,255,.08);--dgrey:#64748B;
+  --mono:'JetBrains Mono',monospace;--fd:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:#E2E8F0;font-family:var(--fd);font-size:14px;min-height:100vh}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(8,15,30,.96);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--mid);height:48px;display:flex;align-items:center;gap:0;padding:0 1.5rem}
+.nav-brand{font-size:.7rem;font-weight:700;color:var(--sky);letter-spacing:2.5px;text-transform:uppercase;margin-right:1.5rem;white-space:nowrap}
+.nav-sep{width:1px;height:18px;background:rgba(255,255,255,.12);margin-right:1.5rem}
+.nav-tabs{display:flex;gap:0;flex:1}
+.nav-tab{padding:0 1.1rem;height:48px;display:inline-flex;align-items:center;font-size:.72rem;font-weight:500;
+  color:var(--dgrey);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.nav-tab:hover{color:#E2E8F0}
+.nav-tab.active{color:var(--sky);border-bottom-color:var(--sky)}
+.nav-date{margin-left:auto;font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.25)}
+.nav-back{margin-left:1rem;font-size:.68rem;font-weight:600;color:var(--sky);background:rgba(0,174,239,.1);
+  border:1px solid rgba(0,174,239,.25);border-radius:6px;padding:.25rem .75rem;text-decoration:none;transition:all .15s;white-space:nowrap}
+.nav-back:hover{background:rgba(0,174,239,.2)}
+
+/* PAGE HDR */
+.page-hdr{background:linear-gradient(135deg,#060D1A 0%,#0D1A3A 60%,var(--navy) 100%);
+  padding:2rem 2rem 1.5rem;border-bottom:1px solid var(--mid)}
+.page-hdr .eyebrow{font-size:.65rem;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--sky);margin-bottom:.5rem}
+.page-hdr h1{font-size:1.75rem;font-weight:800;color:#fff;letter-spacing:-.3px;margin-bottom:.25rem}
+.page-hdr .sub{font-size:.8rem;color:var(--dgrey)}
+
+/* LAYOUT */
+.page-body{max-width:1400px;margin:0 auto;padding:1.5rem 2rem 4rem}
+.section{display:none}.section.active{display:block}
+
+/* LEGEND */
+.legend{display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.leg-item{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:rgba(255,255,255,.6)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* SECTION HDR */
+.section-hdr{margin-bottom:1.25rem}
+.section-hdr h2{font-size:1rem;font-weight:700;color:#fff;margin-bottom:.25rem}
+.section-hdr .sh-sub{font-size:.75rem;color:var(--dgrey)}
+
+/* WEEKLY GRID */
+.week-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem}
+@media(max-width:900px){.week-grid{grid-template-columns:repeat(2,1fr)}}
+.day-col{background:rgba(255,255,255,.04);border:1px solid var(--mid);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+.day-hdr{padding:.6rem .85rem;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between}
+.day-name{font-family:var(--fd);font-size:.9rem;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.day-badge{font-size:.55rem;font-weight:700;padding:.15rem .45rem;border-radius:8px;text-transform:uppercase;letter-spacing:.6px}
+.badge-gate{background:rgba(220,38,38,.2);color:#FCA5A5}
+.badge-review{background:rgba(90,63,160,.2);color:#C4B5FD}
+.badge-ops{background:rgba(22,163,74,.15);color:#86EFAC}
+.badge-finance{background:rgba(0,174,239,.15);color:var(--sky)}
+.badge-light{background:rgba(0,174,239,.15);color:var(--sky)}
+.day-body{padding:.75rem .85rem;flex:1;display:flex;flex-direction:column;gap:.55rem}
+.task{display:flex;flex-direction:column;gap:.15rem}
+.task-who{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.7}
+.task-title{font-size:.78rem;font-weight:600;line-height:1.3}
+.task-desc{font-size:.68rem;color:rgba(255,255,255,.5);line-height:1.4}
+.task-divider{height:1px;background:rgba(255,255,255,.05);margin:.1rem 0}
+
+/* MONTHLY */
+.month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:.75rem}
+.month-card{background:rgba(255,255,255,.04);border:1px solid var(--mid);border-radius:8px;overflow:hidden}
+.month-card-hdr{padding:.65rem .9rem;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:.6rem}
+.month-card-icon{font-size:.9rem}
+.month-card-title{font-family:var(--fd);font-size:.88rem;font-weight:700;color:#fff;flex:1}
+.month-card-when{font-family:var(--mono);font-size:.62rem;color:var(--dgrey)}
+.month-card-body{padding:.75rem .9rem}
+.month-task{display:flex;gap:.6rem;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.month-task:last-child{border-bottom:none}
+.month-num{font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--amber);width:16px;flex-shrink:0;padding-top:.05rem}
+.month-text{font-size:.75rem;line-height:1.4;color:rgba(255,255,255,.75)}
+.month-sub{font-size:.65rem;color:var(--dgrey);margin-top:.1rem}
+
+/* DASHBOARDS CARD */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem;margin-top:1.25rem}
+.dash-card{background:rgba(255,255,255,.04);border:1px solid var(--mid);border-radius:8px;
+  padding:1rem 1.1rem;cursor:pointer;transition:all .18s;text-decoration:none;display:block}
+.dash-card:hover{border-color:rgba(0,174,239,.35);background:rgba(0,174,239,.06);transform:translateY(-1px)}
+.dash-icon{font-size:1.4rem;margin-bottom:.5rem}
+.dash-name{font-size:.85rem;font-weight:600;color:#fff;margin-bottom:.2rem}
+.dash-desc{font-size:.7rem;color:var(--dgrey);line-height:1.4}
+
+/* KPI REF */
+.kpi-ref{background:rgba(255,255,255,.03);border:1px solid var(--mid);border-radius:8px;padding:1rem 1.25rem;margin-top:1rem}
+.kpi-ref-title{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:.75rem}
+.kpi-tags{display:flex;flex-wrap:wrap;gap:.4rem}
+.kpi-tag{font-family:var(--mono);font-size:.62rem;padding:.2rem .55rem;border-radius:4px;
+  background:rgba(0,174,239,.08);border:1px solid rgba(0,174,239,.2);color:var(--sky)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-brand">CEO Rhythm</span>
+  <div class="nav-sep"></div>
+  <div class="nav-tabs">
+    <span class="nav-tab active" onclick="showTab('weekly',this)">Weekly</span>
+    <span class="nav-tab" onclick="showTab('monthly',this)">Monthly</span>
+    <span class="nav-tab" onclick="showTab('dashboards',this)">Dashboards</span>
+  </div>
+  <span class="nav-date" id="nav-date"></span>
+  <a class="nav-back" href="BU_Services_Management_Hub.html" target="buservices">← Hub</a>
+</nav>
+
+<div class="page-hdr">
+  <div class="eyebrow">Ekoscan Integrity Group — BU Services</div>
+  <h1>Jon Eustace — CEO North America</h1>
+  <div class="sub">Standing cadence · Commercial leadership · P&L oversight · Eurazeo reporting</div>
+</div>
+
+<div class="page-body">
+
+<!-- ── WEEKLY ── -->
+<div class="section active" id="tab-weekly">
+  <div class="section-hdr">
+    <h2>Weekly Rhythm</h2>
+    <span class="sh-sub">Standing tasks by day — CEO North America</span>
+  </div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:var(--sky)"></div>Commercial</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div>Finance</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div>Operations</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--orange)"></div>Reporting</div>
+  </div>
+  <div class="week-grid" id="week-grid"></div>
+</div>
+
+<!-- ── MONTHLY ── -->
+<div class="section" id="tab-monthly">
+  <div class="section-hdr">
+    <h2>Monthly Cadence</h2>
+    <span class="sh-sub">Standing tasks by week of month</span>
+  </div>
+  <div class="month-grid" id="month-grid"></div>
+</div>
+
+<!-- ── DASHBOARDS ── -->
+<div class="section" id="tab-dashboards">
+  <div class="section-hdr">
+    <h2>Dashboards & Key Files</h2>
+    <span class="sh-sub">All systems Jon uses weekly</span>
+  </div>
+  <div class="dash-grid" id="dash-grid"></div>
+  <div class="kpi-ref">
+    <div class="kpi-ref-title">Key actuals.json fields Jon monitors</div>
+    <div class="kpi-tags" id="kpi-tags"></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+document.getElementById('nav-date').textContent =
+  new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+
+var C = {
+  commercial: '#00AEEF',
+  finance:    '#C9860A',
+  ops:        '#16A34A',
+  reporting:  '#E97132',
+  gate:       '#DC2626',
+};
+
+function showTab(id, el) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── WEEKLY DATA ───────────────────────────────────────────────────────────────
+var DAYS = [
+  { name:'Monday', badge:'gate', badgeTxt:'Commercial', tasks:[
+    { who:'Jon', color:C.reporting,
+      title:'Read KPI email digest',
+      desc:'Review actuals.json-generated email. Flag any overhead spikes, revenue anomalies, or utilization issues before Commercial Meeting.' },
+    { who:'Jon', color:C.commercial,
+      title:'Chair Commercial Meeting',
+      desc:'Pipeline review across all 5 initiatives. Gate decisions. Cross-initiative coordination with Mathieu, Olivier, Max, Vinoth.' },
+    { who:'Jon', color:C.commercial,
+      title:'CRM pipeline review',
+      desc:'Review Closed Won, Commit, and Upside by initiative. Confirm actuals vs target trajectory.' },
+  ]},
+  { name:'Tuesday', badge:null, tasks:[
+    { who:'Jon', color:C.ops,
+      title:'Initiative follow-ups',
+      desc:'Action items from Monday Commercial Meeting. Owner accountability check.' },
+    { who:'Jon', color:C.commercial,
+      title:'Eurazeo / partner communications',
+      desc:'As needed — investor updates, strategic partner calls, M&A activity.' },
+  ]},
+  { name:'Wednesday', badge:'review', badgeTxt:'Ops review', tasks:[
+    { who:'Jon + Alex Cyr', color:C.ops,
+      title:'Utilization review (from Alex)',
+      desc:'Receive escalations from Alex Cyr after his Wednesday util review. Review People Dashboard: overhead %, cumulative utilization, zero-hours technicians.' },
+    { who:'Jon', color:C.ops,
+      title:'3X protocol check',
+      desc:'Confirm any same-day 3X escalations received from ops directors this week.' },
+    { who:'Jon', color:C.reporting,
+      title:'Mid-week dashboard check',
+      desc:'Spot-check Command Centre — pipeline movement, tech deployment counts, action items.' },
+  ]},
+  { name:'Thursday', badge:'ops', badgeTxt:'Nortech', tasks:[
+    { who:'Via Alex Cyr', color:C.ops,
+      title:'Nortech check-in (Jason Borza)',
+      desc:'Alex Cyr → Jason Borza Thursday call. Escalations reach Jon same-day if required.' },
+    { who:'Jon', color:C.commercial,
+      title:'IPC / conference prep (seasonal)',
+      desc:'When in-season: review conference pipeline, approve registrations, coordinate with Shanny Tremblay.' },
+  ]},
+  { name:'Friday', badge:'finance', badgeTxt:'Close-out', tasks:[
+    { who:'Jon', color:C.ops,
+      title:'People Dashboard review',
+      desc:'Check overhead % by office, cumulative utilization vs 75% target, vacation liability balances. Flag terminated employees with outstanding liability.' },
+    { who:'Jon', color:C.reporting,
+      title:'Week-end actuals check',
+      desc:'Confirm actuals.json is current — last SF sync, BC export landed Sunday, all people fields updated.' },
+    { who:'Jon', color:C.commercial,
+      title:'Cert & deployment scan',
+      desc:'Review certification pipeline for 90-day advance warnings. Confirm no deployment conflicts next week.' },
+  ]},
+];
+
+var weekGrid = document.getElementById('week-grid');
+weekGrid.innerHTML = DAYS.map(function(day) {
+  var badgeHtml = day.badge ? '<span class="day-badge badge-'+day.badge+'">'+day.badgeTxt+'</span>' : '';
+  var tasksHtml = day.tasks.map(function(t,i) {
+    return (i>0?'<div class="task-divider"></div>':'')+'<div class="task">'
+      +'<div class="task-who" style="color:'+t.color+'">'+t.who+'</div>'
+      +'<div class="task-title">'+t.title+'</div>'
+      +(t.desc?'<div class="task-desc">'+t.desc+'</div>':'')
+      +'</div>';
+  }).join('');
+  return '<div class="day-col">'
+    +'<div class="day-hdr"><span class="day-name">'+day.name+'</span>'+badgeHtml+'</div>'
+    +'<div class="day-body">'+tasksHtml+'</div>'
+    +'</div>';
+}).join('');
+
+// ── MONTHLY DATA ──────────────────────────────────────────────────────────────
+var MONTHS = [
+  { icon:'💰', title:'Finance Review', when:'First Monday of month',
+    tasks:[
+      { n:'1', text:'Review actuals.json finance fields with Jeremy Irwin', sub:'Nucleom + Nortech actuals vs budget · bookings · cash position' },
+      { n:'2', text:'Review Nucleom entity financials with Renée Lachance', sub:'P&L · balance sheet · BC data integrity check' },
+      { n:'3', text:'Confirm EUR rate and budget figures are current', sub:'Update actuals.json eur_rate if changed' },
+    ]},
+  { icon:'👥', title:'People Review', when:'Monthly',
+    tasks:[
+      { n:'1', text:'Review vacation liability report', sub:'Flag high balances — Khan ($41K), Marcotte ($24K), Tharma ($19K) top watch list' },
+      { n:'2', text:'Review terminated employees for outstanding liability', sub:'Keosseuian, Raffi — $17K still on books' },
+      { n:'3', text:'Headcount vs plan check', sub:'133 active employees — flag material changes to Hugo Cence (Founder & CEO, Ekoscan Integrity Group)' },
+      { n:'4', text:'Confirm BC Sunday exports running', sub:'Coordinate with Renée if people fields stale in actuals.json' },
+    ]},
+  { icon:'📊', title:'Commercial Gate Review', when:'Monthly or milestone-triggered',
+    tasks:[
+      { n:'1', text:'Nuclear / OPG — MSA track (Vinoth) + Aecon/SMR track (Olivier)', sub:'Pass/fail against milestone gates' },
+      { n:'2', text:'Pipeline DA — bookings vs $30M target (Rick Carlton)', sub:'' },
+      { n:'3', text:'Mining NDT — proposal win rate (Emmanuel Aggrey)', sub:'' },
+      { n:'4', text:'Powerline — LineCore/LineOhm/LineRay progress (Olivier)', sub:'' },
+      { n:'5', text:'3X Composite — commercial pipeline (Vinoth)', sub:'' },
+    ]},
+  { icon:'🏦', title:'Eurazeo Reporting', when:'Quarterly',
+    tasks:[
+      { n:'1', text:'Review Eurazeo quarterly pack with Jeremy Irwin', sub:'Revenue actuals · EBITDA · initiative progress · headcount' },
+      { n:'2', text:'Sign off and submit to Hugo Cence (Founder & CEO, Ekoscan Integrity Group)', sub:'' },
+      { n:'3', text:'Prepare strategic narrative — NA market position update', sub:'' },
+    ]},
+  { icon:'📋', title:'Dynamics BC Q&A (Until P4 Live)', when:'Monthly',
+    tasks:[
+      { n:'1', text:'Coordinate with Mathieu Beauchesne on BC environment Q&A status', sub:'Blocks Step 3 of go-live roadmap' },
+      { n:'2', text:'Jeremy manually enters BC interim actuals into actuals.json', sub:'Until P4 BC connector is built by Éric Rodrigue' },
+    ]},
+  { icon:'🎓', title:'Conference Calendar', when:'Seasonal',
+    tasks:[
+      { n:'1', text:'Review and approve conference registrations', sub:'Coordinate with Shanny Tremblay — conference budget gating' },
+      { n:'2', text:'Confirm IPC, PPIM, NDTMA, CNA attendance decisions', sub:'Key annual events for commercial pipeline' },
+    ]},
+];
+
+var monthGrid = document.getElementById('month-grid');
+monthGrid.innerHTML = MONTHS.map(function(m) {
+  var tasks = m.tasks.map(function(t) {
+    return '<div class="month-task">'
+      +'<div class="month-num">'+t.n+'</div>'
+      +'<div><div class="month-text">'+t.text+'</div>'
+      +(t.sub?'<div class="month-sub">'+t.sub+'</div>':'')
+      +'</div></div>';
+  }).join('');
+  return '<div class="month-card">'
+    +'<div class="month-card-hdr">'
+    +'<span class="month-card-icon">'+m.icon+'</span>'
+    +'<span class="month-card-title">'+m.title+'</span>'
+    +'<span class="month-card-when">'+m.when+'</span>'
+    +'</div>'
+    +'<div class="month-card-body">'+tasks+'</div>'
+    +'</div>';
+}).join('');
+
+// ── DASHBOARDS ────────────────────────────────────────────────────────────────
+var DASHES = [
+  { icon:'👥', name:'People & Capacity Dashboard', file:'BU_Services_People_Dashboard.html',
+    desc:'Overhead % · Cumulative utilization · Vacation liability · Roster — BC live data' },
+  { icon:'📊', name:'Command Centre', file:'BU_Services_Command_Centre.html',
+    desc:'Live KPI portal — revenue, pipeline, utilization, people, cash' },
+  { icon:'🗺️', name:'Management Hub', file:'BU_Services_Management_Hub.html',
+    desc:'Central navigation — org chart, doc library, weekly flow' },
+  { icon:'☢️', name:'Nuclear / OPG Commercial Plan', file:'Nuclear_OPG_Commercial_Plan.html',
+    desc:'$47.9M initiative plan — OPG MSA + Aecon/SMR' },
+  { icon:'📦', name:'actuals.json', file:'actuals.json',
+    desc:'110-field data bridge — single source of truth for all dashboards' },
+];
+
+var dashGrid = document.getElementById('dash-grid');
+dashGrid.innerHTML = DASHES.map(function(d) {
+  return '<a class="dash-card" href="'+d.file+'" target="_blank">'
+    +'<div class="dash-icon">'+d.icon+'</div>'
+    +'<div class="dash-name">'+d.name+'</div>'
+    +'<div class="dash-desc">'+d.desc+'</div>'
+    +'</a>';
+}).join('');
+
+var KPI_FIELDS = [
+  'util_total_latest','util_by_office','cum_util_company','cum_util_by_office',
+  'vac_liability_total_cad','vac_high_balance_count','headcount_active',
+  'nucleom','nortech','bookings_nuc','bookings_nor',
+  'commit_nuc','commit_nor','upside_nuc','upside_nor',
+  'budget_nuc','budget_nor','eur_rate','people_updated',
+];
+document.getElementById('kpi-tags').innerHTML = KPI_FIELDS.map(function(k) {
+  return '<span class="kpi-tag">'+k+'</span>';
+}).join('');
+</script>
+</body>
+</html>

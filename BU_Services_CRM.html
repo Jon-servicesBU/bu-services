@@ -1496,7 +1496,7 @@ function renderPipeline() {
   const bannerTxt = document.getElementById('stale-banner-text');
   if (stale.length > 0) {
     banner.style.display = 'flex';
-    bannerTxt.textContent = `${stale.length} open ${stale.length===1?'opportunity has':'opportunities have'} no activity in ${STALE_DAYS}+ days — update Salesforce or close.`;
+    bannerTxt.textContent = `${stale.length} open ${stale.length===1?'opportunity has':'opportunities have'} no activity in ${STALE_DAYS}+ days — update the CRM or close.`;
   } else {
     banner.style.display = 'none';
   }

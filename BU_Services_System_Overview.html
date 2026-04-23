@@ -224,16 +224,16 @@ body{font-family:var(--fs);font-size:0.95rem;color:var(--body);background:#F5F7F
       <div class="card-title">The Data Infrastructure</div>
       <div class="card-desc">actuals.json on SharePoint. Power Automate Sunday flow querying Salesforce. Manual update process for Nortech and utilisation. Three pending connections: Dynamics 365 for invoiced actuals, SharePoint Lists for meeting actions, OneNote for meeting minutes.</div>
     </div>
-    <div class="card-footer"><span class="pill pill-amber"><span class="pill-dot"></span>MOSTLY LIVE</span><span>3 pending</span></div>
+    <div class="card-footer"><span class="pill pill-green"><span class="pill-dot"></span>LIVE</span><span>6 tools live</span></div>
   </div>
   <div class="card">
     <div class="card-top" style="background:var(--teal)"></div>
     <div class="card-body">
       <div class="sec-eyebrow">Layer 4</div>
       <div class="card-title">The People &amp; Operations Layer</div>
-      <div class="card-desc">The Management Hub, Meeting Hub, 16 role briefs, three weekly rhythm card sets, and the onboarding one-pager. Covers the full org structure, individual mandates, the Mon–Sun operating rhythm, 9 standing meeting agendas with the 2026 gate schedule, and a complete document library. Designed to work independently — the org and role structure is self-contained even before the data integrations are live.</div>
+      <div class="card-desc">The Management Hub, Meeting Hub, People Dashboard, 16 role briefs, three weekly rhythm card sets, CRM, and the Nortech Field Operations tool. Covers the full org structure, individual mandates, the Mon–Sun operating rhythm, 9 standing meeting agendas, a complete document library, and end-to-end field billing from Work Order to Invoice.</div>
     </div>
-    <div class="card-footer"><span class="pill pill-green"><span class="pill-dot"></span>COMPLETE</span><span>Ready to distribute</span></div>
+    <div class="card-footer"><span class="pill pill-green"><span class="pill-dot"></span>LIVE</span><span>6 tools on GitHub Pages</span></div>
   </div>
 </div>
 
@@ -788,7 +788,7 @@ body{font-family:var(--fs);font-size:0.95rem;color:var(--body);background:#F5F7F
 
   <div class="pending-item critical">
     <div class="pending-title"><span style="background:var(--amber);color:#fff;font-family:var(--mono);font-size:0.65rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:3px;">PRIORITY 2</span>Dynamics 365 connection — answer 10 questions, then 2-hour Power Automate build</div>
-    <div class="pending-body">Dynamics 365 is the source of truth for all invoiced revenue including callout jobs that don't make it into Salesforce. The monthly revenue chart has <code>dyn_nucleom</code> through <code>dyn_base</code> fields ready in actuals.json — they are all 0.00 until the connection is built.<br><br>The most critical question: does Dynamics already tag invoices with a project category that maps to Mining / Pipeline / Powerline / Nuclear / 3X / Base Business? If yes, the initiative split in the monthly chart is automatic. If no, all Dynamics revenue arrives as one total per entity and the initiative split remains manual.<br><br>Fix: Complete the <code>BU_Services_Dynamics_QA_Workbook.xlsx</code> — all 10 questions answered. Then use the Dynamics Integration Guide to build the Power Automate branch. Until then, Mathieu Beauchesne updates <code>dyn_nucleom</code> and <code>dyn_nortech</code> manually on the first Monday of each month using the Interim Manual Process tab in the workbook.</div>
+    <div class="pending-body">Dynamics 365 is the source of truth for all invoiced revenue including callout jobs that don't make it into the CRM. The monthly revenue chart has <code>dyn_nucleom</code> through <code>dyn_base</code> fields ready in actuals.json — they are all 0.00 until the connection is built.<br><br>The most critical question: does Dynamics already tag invoices with a project category that maps to Mining / Pipeline / Powerline / Nuclear / 3X / Base Business? If yes, the initiative split in the monthly chart is automatic. If no, all Dynamics revenue arrives as one total per entity and the initiative split remains manual.<br><br>Fix: Complete the <code>BU_Services_Dynamics_QA_Workbook.xlsx</code> — all 10 questions answered. Then use the Dynamics Integration Guide to build the Power Automate branch. Until then, Mathieu Beauchesne updates <code>dyn_nucleom</code> and <code>dyn_nortech</code> manually on the first Monday of each month using the Interim Manual Process tab in the workbook.</div>
     <div class="pending-owner">Owner: Mathieu Beauchesne (questions) + IT admin or Dynamics partner (build) · Time: Q&A 1hr + build 2hrs · Guide: BU_Services_Dynamics_Integration_Guide.docx + QA workbook</div>
   </div>
 
@@ -944,7 +944,7 @@ body{font-family:var(--fs);font-size:0.95rem;color:var(--body);background:#F5F7F
       <tr>
         <td><code>BU_Services_Salesforce_Backfill_Tracker.html</code></td>
         <td>Setup</td>
-        <td>Interactive checklist for auditing BU_Initiative__c on all 2026 Salesforce opportunities before go-live. Includes SOQL query, progress bar, per-opp initiative dropdown, bulk actions, CSV export. Share with Emmanuel Aggrey, Vinoth Tharma, and Rick Carlton.</td>
+        <td>Interactive checklist for auditing BU_Initiative__c on all 2026 the CRM opportunities before go-live. Includes SOQL query, progress bar, per-opp initiative dropdown, bulk actions, CSV export. Share with Emmanuel Aggrey, Vinoth Tharma, and Rick Carlton.</td>
         <td><span class="pill pill-amber">Action required</span></td>
       </tr>
       <tr>
@@ -960,6 +960,12 @@ body{font-family:var(--fs);font-size:0.95rem;color:var(--body);background:#F5F7F
         <td><span class="pill pill-green">Ready</span></td>
       </tr>
       <tr>
+        <td><code>BU_Services_Nortech_Ops.html</code></td>
+        <td>Operational Tool</td>
+        <td>Nortech Field Operations — complete Work Order to Invoice billing system. 1,235 customer dropdown, 79-employee technician list, rate sheet management, AI rate sheet import, PDF/Word export. Built April 2026.</td>
+        <td><span class="pill pill-green">Live</span></td>
+      </tr>
+      <tr>
         <td><code>BU_Services_Eric_GoLive_File_Map.html</code></td>
         <td>Reference</td>
         <td>File-by-file go-live reference for Éric Carmichael — every file he needs organised by build step (Step 0–5), with exact filenames, descriptions, and action chips (READ / BUILD / UPLOAD). Cross-linked to Go-Live Roadmap.</td>
@@ -967,6 +973,70 @@ body{font-family:var(--fs);font-size:0.95rem;color:var(--body);background:#F5F7F
       </tr>
     </tbody>
   </table>
+</div>
+
+
+<div id="nortech-ops" style="margin-top:2.5rem;">
+<div class="sec-hdr"><h2>Nortech Field Operations</h2><span class="sec-sub">Work Orders · Invoicing · Rate Sheets</span></div>
+<p style="font-size:.9rem;color:var(--body);line-height:1.7;margin-bottom:1.25rem;">
+  <code>BU_Services_Nortech_Ops.html</code> — complete field billing system for Nortech Advanced NDT. Built April 2026. Replaces the old 3-step Job → Charge Sheet → Invoice flow with a clean 2-step: <strong>Create Work Order → Approve → Invoice</strong>.
+</p>
+
+<div class="card-grid card-grid-2" style="margin-bottom:1rem;">
+
+  <div class="card">
+    <div class="card-top" style="background:#C0392B;"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Step 1</div>
+      <div class="card-title">Work Orders <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>Live</span></div>
+      <div class="card-sub">Create · Submit · Approve · Export</div>
+      <div class="card-desc">
+        Technicians create work orders with all field data: client (from 1,235-customer dropdown), location, PO, AFE, RIG, labour rows (technician autocomplete from 79-employee list, category, Reg/OT/DT/Night hours, start/end time), consumables, equipment, film, travel, and description of service. Export to PDF or Word matching the Nortech work order template. Status chain: <strong>Draft → Submitted → Approved → Invoiced → Paid</strong> with full reversal at every step and confirmation prompts. Admins: jon, jason, joel_c, renee, jeremy, mathieu.
+      </div>
+    </div>
+    <div class="card-footer"><span>Supabase: jobs table</span><span class="pill pill-green"><span class="pill-dot"></span>Live</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-top" style="background:#1A5CA8;"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Step 2</div>
+      <div class="card-title">Invoicing <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>Live</span></div>
+      <div class="card-sub">Select approved WOs → Rate Sheet → Generate Invoice</div>
+      <div class="card-desc">
+        Admins select approved work orders for a client, choose a rate sheet, and generate a priced invoice. System fuzzy-matches labour categories (e.g. "Eddy Current Testing (ECT)" → rate sheet "Eddy Current Testing") and prices each line item. Invoice PDF matches Nortech invoice template with full line items, GST/HST by province, and reference grid. Status chain: <strong>Draft → Sent → Paid</strong> with reversal chain and delete (returns WOs to Approved).
+      </div>
+    </div>
+    <div class="card-footer"><span>Supabase: invoices table</span><span class="pill pill-green"><span class="pill-dot"></span>Live</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-top" style="background:#00AEEF;"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Pricing</div>
+      <div class="card-title">Rate Sheets <span class="pill pill-green" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>Live</span></div>
+      <div class="card-sub">AI import · Manual create · Per-customer pricing</div>
+      <div class="card-desc">
+        Import rate sheets from PDF or Word via AI (Cloudflare Worker proxy to Anthropic API). EllisDon 2026 rate sheet pre-built with 30 labour categories. Supports labour (ST/OT/DT rates), equipment, consumables, and film pricing. Rate sheets are stored in Supabase and available to all admins.
+      </div>
+    </div>
+    <div class="card-footer"><span>Supabase: rate_sheets table</span><span class="pill pill-green"><span class="pill-dot"></span>Live</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-top" style="background:#E97132;"></div>
+    <div class="card-body">
+      <div class="sec-eyebrow">Pending</div>
+      <div class="card-title">Timesheet System <span class="pill pill-amber" style="vertical-align:middle;margin-left:0.4rem;"><span class="pill-dot"></span>Deferred</span></div>
+      <div class="card-sub">Internal hours vs billable hours</div>
+      <div class="card-desc">
+        Technicians log their own time separately from billable Work Order time. Internal hours are for payroll and may differ from what is billed to the client. Architecture planned — build deferred pending capacity decision.
+      </div>
+    </div>
+    <div class="card-footer"><span>Not yet started</span><span class="pill pill-amber"><span class="pill-dot"></span>Deferred</span></div>
+  </div>
+
+</div>
 </div>
 
 <div class="callout callout-green" style="margin-top:1.5rem;">
@@ -978,12 +1048,12 @@ body{font-family:var(--fs);font-size:0.95rem;color:var(--body);background:#F5F7F
 
 <!-- ── FOOTER ── -->
 <div class="doc-footer">
-  <p>BU Services System Overview &nbsp;·&nbsp; Ekoscan Integrity Group &nbsp;·&nbsp; Jon Eustace, CEO North America &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; April 2026</p>
+  <p>BU Services System Overview &nbsp;·&nbsp; Ekoscan Integrity Group &nbsp;·&nbsp; Jon Eustace, CEO North America &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; Updated April 22, 2026</p>
 </div>
 
 <script>
 // Scroll spy
-var sections = ['overview','plan','command-centre','deck','data-flow','done','pending','howto','files'];
+var sections = ['overview','plan','command-centre','deck','data-flow','nortech-ops','done','pending','howto','files'];
 var links = document.querySelectorAll('.topbar-nav a');
 window.addEventListener('scroll', function() {
   var current = '';
