@@ -1700,6 +1700,8 @@ function handleImportDrop(e) {
   if (file) handleImportFile(file);
 }
 
+
+function getApiKey() { return localStorage.getItem('anthropic_api_key') || ''; }
 async function handleImportFile(file) {
   if (!file) return;
   var ext = file.name.split('.').pop().toLowerCase();
@@ -1768,7 +1770,12 @@ var RATE_PROMPT = 'You are a data extraction assistant. Extract rate sheet prici
 async function parseRateSheetText(text) {
   var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getApiKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-ipc': 'true'
+      },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
       max_tokens: 1000,
@@ -1798,7 +1805,12 @@ async function parseRateSheetPDF(file) {
   });
   var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getApiKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-ipc': 'true'
+      },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
       max_tokens: 1000,

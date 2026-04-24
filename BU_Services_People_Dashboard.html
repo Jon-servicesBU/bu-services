@@ -445,6 +445,11 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 @keyframes bcspin{to{transform:rotate(360deg)}}
 .bc-reading-title{font-size:1rem;font-weight:700;color:#fff;}
 .bc-reading-sub{font-size:.78rem;color:rgba(255,255,255,.5);}
+
+.api-key-banner{background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.3);border-radius:8px;padding:.65rem 1rem;margin-bottom:.75rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+.api-key-banner.ok{background:rgba(22,163,74,.1);border-color:rgba(22,163,74,.3);}
+.api-key-input{flex:1;min-width:200px;padding:.4rem .65rem;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:rgba(255,255,255,.06);color:#fff;font-size:.78rem;font-family:monospace;}
+.api-key-save{padding:.4rem .85rem;background:#1A5CA8;border:none;border-radius:6px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -480,6 +485,13 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     <span class="upload-status" id="upload-status"></span>
   </div>
 </div>
+<div id="api-key-banner" class="api-key-banner" style="display:none">
+  <span style="font-size:.78rem;color:rgba(255,255,255,.7);white-space:nowrap">🔑 Anthropic API key needed for BC import:</span>
+  <input class="api-key-input" id="api-key-input" type="password" placeholder="sk-ant-api03-...">
+  <button class="api-key-save" onclick="saveApiKey()">Save</button>
+  <span id="api-key-status" style="font-size:.72rem"></span>
+</div>
+
 
 <div class="page-body">
 
@@ -1329,9 +1341,20 @@ Respond ONLY with valid JSON. No markdown, no explanation.`;
       }];
     }
 
+    var apiKey = getApiKey();
+    if (!apiKey) {
+      var b = document.getElementById('api-key-banner');
+      if (b) { b.style.display = 'flex'; }
+      throw new Error('No API key — enter your Anthropic API key above first');
+    }
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-ipc': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -1481,6 +1504,32 @@ function nbRow(label, value, color, large) {
     '<span style="font-family:monospace;font-size:' + (large?'.95rem':'0.78rem') + ';font-weight:' + (large?'800':'600') + ';color:' + color + '">' + value + '</span>' +
   '</div>';
 }
+
+// ── API key management ────────────────────────────────────────────────────────
+function getApiKey() { return localStorage.getItem('anthropic_api_key') || ''; }
+
+function saveApiKey() {
+  var key = document.getElementById('api-key-input').value.trim();
+  if (!key.startsWith('sk-')) {
+    document.getElementById('api-key-status').textContent = '✗ Must start with sk-';
+    document.getElementById('api-key-status').style.color = '#DC2626';
+    return;
+  }
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('api-key-status').textContent = '✓ Saved';
+  document.getElementById('api-key-status').style.color = '#16A34A';
+  document.getElementById('api-key-banner').className = 'api-key-banner ok';
+  document.getElementById('api-key-input').value = '';
+  setTimeout(function(){ document.getElementById('api-key-banner').style.display='none'; }, 1500);
+}
+
+// Show banner if no key stored
+(function() {
+  if (!getApiKey()) {
+    var b = document.getElementById('api-key-banner');
+    if (b) b.style.display = 'flex';
+  }
+})();
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
 renderUtil();
