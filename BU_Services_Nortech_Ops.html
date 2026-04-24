@@ -1767,7 +1767,7 @@ async function extractDocxText(file) {
   });
 }
 
-var RATE_PROMPT = 'This is a rate sheet for a field NDT / inspection services company. Extract all pricing and return ONLY valid JSON in this exact format: {"name":"<sheet name>","customer":"<client name or empty>","effective":"<YYYY-MM-DD or today>","currency":"CAD","labour":[{"name":"<category>","stRate":<number>,"otRate":<number>,"dtRate":<number>}],"equipment":[{"name":"<item>","rate":<number>,"unit":"<day/trip/km>"}]} Extract ALL labour categories. If only one rate listed, set OT=ST*1.5, DT=ST*2. Return ONLY the JSON object.';
+var RATE_PROMPT = 'This is a rate sheet for a field NDT / inspection services company. Extract all pricing and return ONLY valid JSON in this exact format: {"name":"<sheet name>","customer":"<client name or empty>","effective":"<YYYY-MM-DD or today>","currency":"CAD","labour":[{"name":"<category>","stRate":<number>,"otRate":<number>,"dtRate":<number>}],"equipment":[{"name":"<item>","rate":<number>,"unit":"<day/trip/km>"}]} Rules: (1) Labour rates are always per HOUR — stRate, otRate, dtRate are all hourly rates. (2) Extract ALL labour categories. (3) If only one rate listed, set OT=ST*1.5, DT=ST*2. (4) Equipment/materials use per day, per trip, or per km as appropriate. (5) Return ONLY the JSON object.';
 
 async function parseRateSheetText(text) {
   var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {

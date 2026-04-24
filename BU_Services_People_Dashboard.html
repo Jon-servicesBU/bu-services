@@ -1339,7 +1339,7 @@ Respond ONLY with valid JSON. No markdown, no explanation.`;
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         system: systemPrompt,
         messages: messages
@@ -1347,6 +1347,7 @@ Respond ONLY with valid JSON. No markdown, no explanation.`;
     });
 
     var data = await res.json();
+    if (data.type === 'error') throw new Error('API: ' + data.error.message);
     var text = data.content && data.content[0] ? data.content[0].text : '';
     var clean = text.replace(/```json|```/g, '').trim();
     var extracted = JSON.parse(clean);
