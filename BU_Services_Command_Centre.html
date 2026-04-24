@@ -1215,6 +1215,78 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
       <h2>Revenue Foundation</h2>
       <span class="sec-count" id="rf-count">Base business actuals vs. 2026 sure forecast</span>
     </div>
+
+  <div id="actuals-panel" class="actuals-panel"></div>
+  <!-- rf-entities removed — replaced by actuals-panel above -->
+
+  <!-- ── Vision-to-Data Panel — replaces Power Automate ── -->
+  <div id="v2d-panel" style="margin-bottom:1.5rem;background:#fff;border:1px solid #D0DCF0;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(10,31,92,.06)">
+    <div onclick="document.getElementById('v2d-body').classList.toggle('v2d-open')"
+      style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.1rem;border-bottom:1px solid #EEF2FA;cursor:pointer;background:linear-gradient(135deg,#0A1F5C 0%,#1A5CA8 100%)">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <span style="font-size:1.1rem">📸</span>
+        <div>
+          <div style="font-weight:800;font-size:.85rem;color:#fff;letter-spacing:-.01em">Vision-to-Data — Update Actuals</div>
+          <div style="font-size:.65rem;color:rgba(255,255,255,.55);margin-top:.05rem">Drop a screenshot · Claude reads it · applies to the right company automatically</div>
+        </div>
+      </div>
+      <span style="font-size:.7rem;color:rgba(255,255,255,.5);font-family:monospace" id="v2d-last-update-lbl">▼ expand</span>
+    </div>
+    <div id="v2d-body" style="display:none">
+      <div style="padding:.85rem 1.1rem;border-bottom:1px solid #EEF2FA;background:#FAFBFF">
+        <div style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8899BB;margin-bottom:.5rem">How it works</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;font-size:.72rem;color:#4A5568">
+          <div style="background:#EEF2FA;border-radius:6px;padding:.45rem .6rem"><strong>1.</strong> Drop or paste any screenshot — BC report, SF dashboard, Excel file, anything</div>
+          <div style="background:#EEF2FA;border-radius:6px;padding:.45rem .6rem"><strong>2.</strong> Claude identifies the company (Nucleom / Nortech / Intact) and extracts every number</div>
+          <div style="background:#EEF2FA;border-radius:6px;padding:.45rem .6rem"><strong>3.</strong> All matching fields update across the CC — actuals, monthly, performance, regions</div>
+        </div>
+      </div>
+      <div style="padding:.85rem 1.1rem">
+        <!-- Image drop / paste zone -->
+        <div id="v2d-dropzone"
+          onclick="document.getElementById('v2d-file-input').click()"
+          ondragover="event.preventDefault();this.style.borderColor='#1A5CA8';this.style.background='#EEF5FF'"
+          ondragleave="this.style.borderColor='#D0DCF0';this.style.background=''"
+          ondrop="v2dHandleDrop(event)"
+          style="border:2px dashed #D0DCF0;border-radius:8px;padding:1.4rem;text-align:center;cursor:pointer;margin-bottom:.75rem;transition:all .2s;position:relative">
+          <div id="v2d-drop-prompt">
+            <div style="font-size:2rem;margin-bottom:.35rem">📋</div>
+            <div style="font-size:.82rem;font-weight:600;color:#4A5568;margin-bottom:.2rem">Drop screenshot here, or click to select</div>
+            <div style="font-size:.7rem;color:#8899BB">PNG · JPG · PDF · Ctrl+V to paste from clipboard</div>
+          </div>
+          <div id="v2d-preview" style="display:none">
+            <img id="v2d-img" style="max-height:140px;max-width:100%;border-radius:6px;border:1px solid #D0DCF0;margin-bottom:.4rem" />
+            <div id="v2d-img-name" style="font-size:.68rem;color:#8899BB"></div>
+          </div>
+          <input id="v2d-file-input" type="file" accept="image/*,.pdf" style="display:none" onchange="v2dHandleFile(this.files[0])" />
+        </div>
+        <!-- Text hint (optional) -->
+        <div style="margin-bottom:.75rem">
+          <label style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8899BB;display:block;margin-bottom:.3rem">
+            Optional context hint <span style="font-weight:400;text-transform:none;letter-spacing:0">(or paste numbers directly if no screenshot)</span>
+          </label>
+          <input id="v2d-hint" type="text" placeholder="e.g. 'Nucleom April invoiced $2.3M YTD' or paste any text with numbers"
+            style="width:100%;padding:.42rem .7rem;border:1px solid #D0DCF0;border-radius:6px;font-size:.78rem;color:#0A1F5C;box-sizing:border-box" />
+        </div>
+        <!-- Action row -->
+        <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+          <button onclick="v2dPasteClipboard()" style="padding:.38rem .8rem;background:#EEF2FA;border:1px solid #D0DCF0;border-radius:6px;font-size:.75rem;font-weight:600;color:#0A1F5C;cursor:pointer">📋 Paste Clipboard</button>
+          <button id="v2d-extract-btn" onclick="v2dExtract()"
+            style="padding:.42rem 1.3rem;background:#0A1F5C;border:none;border-radius:6px;font-size:.8rem;font-weight:700;color:#fff;cursor:pointer">
+            ⚡ Extract &amp; Apply to CC
+          </button>
+          <button onclick="v2dShowStore()" style="padding:.38rem .7rem;background:#F7F8FC;border:1px solid #D0DCF0;border-radius:6px;font-size:.72rem;color:#8899BB;cursor:pointer">📊 View Store</button>
+          <div id="v2d-result" style="flex:1;font-size:.76rem;color:#1A7A4A;padding:.38rem 0;min-height:1.4rem;font-weight:500"></div>
+        </div>
+        <!-- Result detail -->
+        <div id="v2d-detail" style="display:none;margin-top:.65rem;background:#F7FBF7;border:1px solid #C6E6CC;border-radius:6px;padding:.65rem .85rem;font-size:.73rem;line-height:1.7;color:#2D6A4F"></div>
+        <!-- Log -->
+        <div id="v2d-log" style="margin-top:.6rem;font-size:.65rem;color:#A0AEC0;border-top:1px solid #EEF2FA;padding-top:.45rem"></div>
+      </div>
+    </div>
+  </div>
+
+    
     <button class="currency-toggle-btn" onclick="toggleCurrency()" title="Currently showing CAD">€ Switch to EUR</button>
   </div>
 <div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text">The Sunday Power Automate flow (runs 7PM ET weekly) queries Salesforce for Closed Won opportunities and writes the results to <strong>actuals.json</strong> on SharePoint. Nucleom revenue figures come from Salesforce automatically. Nortech pipeline is entered manually by Jeremy Irwin (Director of Finance, EIG NA) each month since Nortech is not in Salesforce. The Command Centre reads actuals.json fresh on every page load.</span></div>
