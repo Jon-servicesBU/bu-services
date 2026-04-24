@@ -2667,6 +2667,8 @@ async function initCRMData() {
     const total = opps.length + leads.length + accounts.length;
     if (total > 0) {
       toast('Loaded ' + opps.length + ' opps · ' + leads.length + ' leads from team database', 'info');
+      // Sync fresh data to Command Centre immediately
+      syncToActuals();
     } else {
       // Empty database — seed demo data
       seedDemoData();
@@ -2857,18 +2859,54 @@ async function syncToActuals() {
         avg_conversion_rate:allClosed.length>0?Math.round(allClosed.filter(o=>o.stage==='Closed Won').length/allClosed.length*100)/100:0,
         stalled_alert:totalStalled>3, last_updated:now,
       },
-      recon_nuc:{
-        sf_closed_won_mtd:wonMTD.filter(o=>o.initiative==='Nuclear/OPG').reduce((s,o)=>s+Number(o.amount||0),0),
-        sf_closed_won_ytd:wonYTD.filter(o=>o.initiative==='Nuclear/OPG').reduce((s,o)=>s+Number(o.amount||0),0),
-        bc_invoiced_mtd:0,bc_invoiced_ytd:0,variance_mtd:0,variance_ytd:0,
-        variance_pct_mtd:0,callout_gap_mtd:0,last_sf_pull:now,last_bc_pull:now,last_updated:now,
-      },
-      recon_nor:{
-        sf_closed_won_mtd:wonMTD.filter(o=>['rick','jason','joel_c'].includes(o.owner)).reduce((s,o)=>s+Number(o.amount||0),0),
-        sf_closed_won_ytd:wonYTD.filter(o=>['rick','jason','joel_c'].includes(o.owner)).reduce((s,o)=>s+Number(o.amount||0),0),
-        bc_invoiced_mtd:0,bc_invoiced_ytd:0,variance_mtd:0,variance_ytd:0,
-        variance_pct_mtd:0,callout_gap_mtd:0,last_sf_pull:now,last_bc_pull:now,last_updated:now,
-      },
+      recon_nuc:(function(){
+        // Nucleom = ALL BU Services pipeline (Base Business maps to nucleom in CC)
+        // Preserve existing bc_invoiced values written by other sources
+        var existing_nuc = {};
+        try { existing_nuc = JSON.parse(localStorage.getItem('crm_actuals_sync')||'{}').recon_nuc || {}; } catch(e){}
+        var nuc_sf_mtd = wonMTD.reduce(function(s,o){ return s+Number(o.amount||0); },0);
+        var nuc_sf_ytd = wonYTD.reduce(function(s,o){ return s+Number(o.amount||0); },0);
+        var nuc_pipeline = openOpps.reduce(function(s,o){ return s+Number(o.amount||0); },0);
+        var bc_mtd = existing_nuc.bc_invoiced_mtd || 0;
+        var bc_ytd = existing_nuc.bc_invoiced_ytd || 0;
+        return {
+          sf_closed_won_mtd:  nuc_sf_mtd,
+          sf_closed_won_ytd:  nuc_sf_ytd,
+          pipeline_open_cad:  nuc_pipeline,
+          bc_invoiced_mtd:    bc_mtd,
+          bc_invoiced_ytd:    bc_ytd,
+          variance_mtd:       nuc_sf_mtd - bc_mtd,
+          variance_ytd:       nuc_sf_ytd - bc_ytd,
+          variance_pct_mtd:   bc_mtd > 0 ? Math.round((nuc_sf_mtd - bc_mtd)/bc_mtd*100) : 0,
+          callout_gap_mtd:    0,
+          last_sf_pull:       now,
+          last_bc_pull:       existing_nuc.last_bc_pull || now,
+          last_updated:       now,
+        };
+      })(),
+      recon_nor:(function(){
+        // Nortech pipeline from CRM + preserve bc_invoiced written by Nortech Ops
+        var existing_nor = {};
+        try { existing_nor = JSON.parse(localStorage.getItem('crm_actuals_sync')||'{}').recon_nor || {}; } catch(e){}
+        // Nortech CRM opps = Base Business initiative owned by nortech owners
+        var nor_sf_mtd = wonMTD.filter(function(o){ return ['rick','jason','joel_c'].includes(o.owner); }).reduce(function(s,o){ return s+Number(o.amount||0); },0);
+        var nor_sf_ytd = wonYTD.filter(function(o){ return ['rick','jason','joel_c'].includes(o.owner); }).reduce(function(s,o){ return s+Number(o.amount||0); },0);
+        var bc_mtd = existing_nor.bc_invoiced_mtd || 0;
+        var bc_ytd = existing_nor.bc_invoiced_ytd || 0;
+        return {
+          sf_closed_won_mtd:  nor_sf_mtd,
+          sf_closed_won_ytd:  nor_sf_ytd,
+          bc_invoiced_mtd:    bc_mtd,
+          bc_invoiced_ytd:    bc_ytd,
+          variance_mtd:       nor_sf_mtd - bc_mtd,
+          variance_ytd:       nor_sf_ytd - bc_ytd,
+          variance_pct_mtd:   bc_mtd > 0 ? Math.round((nor_sf_mtd - bc_mtd)/bc_mtd*100) : 0,
+          callout_gap_mtd:    0,
+          last_sf_pull:       now,
+          last_bc_pull:       existing_nor.last_bc_pull || now,
+          last_updated:       now,
+        };
+      })(),
       recon_summary:{total_sf_ytd:wonYTD.reduce((s,o)=>s+Number(o.amount||0),0),total_bc_ytd:0,total_variance_ytd:0,last_updated:now},
       conf_summary_partial:{leads_ytd:confLeads.length,opps_ytd:oppsFromLeads.length,opp_value_ytd:oppsFromLeads.reduce((s,o)=>s+Number(o.amount||0),0),last_updated:now},
       owner_pipeline,
