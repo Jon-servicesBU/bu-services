@@ -812,7 +812,17 @@ document.addEventListener('DOMContentLoaded', function() {
         <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="renderTimesheets()">
       </div>
     </div>
-    <div id="ts-grid" style="display:grid;gap:.75rem"></div>
+    <!-- Weekly Hours Summary -->
+        <div style="margin-bottom:1rem">
+          <button id="ts-weekly-toggle" onclick="var p=document.getElementById('ts-weekly-panel');p.style.display=p.style.display==='none'?'block':'none';renderWeeklySummary()"
+            style="background:rgba(0,174,239,.1);border:1px solid rgba(0,174,239,.25);color:var(--sky);border-radius:6px;padding:.45rem .9rem;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.5rem">
+            📊 Weekly Hours Summary (Payroll View)
+          </button>
+          <div id="ts-weekly-panel" style="display:none;margin-top:.75rem;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:1rem">
+            <div id="ts-weekly-summary"></div>
+          </div>
+        </div>
+        <div id="ts-grid" style="display:grid;gap:.75rem"></div>
     <div class="empty-state" id="ts-empty" style="display:none">
       <div class="empty-state-icon">⏱</div>
       <div class="empty-state-title">No Timesheets Yet</div>
@@ -1633,6 +1643,16 @@ document.addEventListener('click',function(e){
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+
+// Click delegation for weekly summary rows
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('[data-filter-tech]');
+  if (el) {
+    filterTSByTech(decodeURIComponent(el.getAttribute('data-filter-tech')));
+    return;
+  }
+});
+
 document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('nav-date').textContent=
     new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
@@ -5893,61 +5913,92 @@ function calcRowCost(techName, regHrs, otHrs, nightHrs) {
 
 // ── Auto-create timesheet when WO is submitted ───────────────────────────────
 async function createTimesheetFromWO(wo) {
+  // Creates ONE timesheet PER TECHNICIAN on the WO
+  // Groups labour rows by technician name
   if (!wo || !wo.id) return;
-  // Check if one already exists for this WO
-  var existing = _timesheets.find(function(t) { return t.woId === wo.id; });
-  if (existing) return;
 
-  var id = uid();
-  var ts = {
-    id,
-    woId:    wo.id,
-    woNum:   wo.woNum || wo.number || '—',
-    client:  wo.client || '',
-    date:    wo.date || today(),
-    site:    wo.site || '',
-    // Pre-fill rows from WO labour rows — tech can adjust
-    rows: (wo.labourRows || []).map(function(r) {
-      return {
-        date:      r.date || wo.date || today(),
-        category:  r.category || '',
-        regHrs:    r.regHrs || 0,
-        otHrs:     r.otHrs  || 0,
-        nightHrs:  r.nightHrs || 0,
-        startTime: r.startTime || '',
-        endTime:   r.endTime   || '',
-        billable:  true,
-        technician: r.technician || '',
-      };
-    }),
-    notes:    '',
-    status:   'draft',
-    created:  today(),
-    modified: today(),
-  };
+  var labourRows = wo.labourRows || [];
+  if (!labourRows.length) return;
 
-  try {
-    saveTimesheetToStorage(ts);
-    _timesheets.unshift(ts);
-  } catch(e) {
-    console.warn('Timesheet auto-create failed:', e.message);
-  }
+  // Get distinct technicians on this WO
+  var techs = [];
+  labourRows.forEach(function(r) {
+    var t = (r.technician || '').trim();
+    if (t && techs.indexOf(t) === -1) techs.push(t);
+  });
+  if (!techs.length) techs = [''];  // fallback: one anon sheet
+
+  var created = 0;
+  techs.forEach(function(techName) {
+    // Check if a timesheet already exists for this WO + tech combo
+    var existing = _timesheets.find(function(t) {
+      return t.woId === wo.id && (t.technician || '') === techName;
+    });
+    if (existing) return;
+
+    // Get only this tech's rows
+    var techRows = labourRows
+      .filter(function(r) { return (r.technician||'').trim() === techName; })
+      .map(function(r) {
+        return {
+          date:       r.date || wo.date || today(),
+          category:   r.category || '',
+          regHrs:     r.regHrs   || 0,
+          otHrs:      r.otHrs    || 0,
+          nightHrs:   r.nightHrs || 0,
+          startTime:  r.startTime || '',
+          endTime:    r.endTime   || '',
+          billable:   true,
+          technician: techName,
+        };
+      });
+
+    var ts = {
+      id:          uid(),
+      woId:        wo.id,
+      woNum:       wo.woNum || wo.number || '—',
+      technician:  techName,
+      client:      wo.client || '',
+      date:        wo.date || today(),
+      site:        wo.site || '',
+      province:    wo.province || '',
+      po:          wo.po || '',
+      rows:        techRows,
+      notes:       '',
+      status:      'draft',
+      created:     today(),
+      modified:    today(),
+    };
+
+    try {
+      saveTimesheetToStorage(ts);
+      _timesheets.unshift(ts);
+      created++;
+    } catch(e) {
+      console.warn('Timesheet auto-create failed for ' + techName + ':', e.message);
+    }
+  });
+  return created;
 }
 
 
 // ── Create or open timesheet for a WO ────────────────────────────────────────
-async function createOrOpenTS(woId) {
+function createOrOpenTS(woId, techName) {
   var wo = _jobs.find(function(j){ return j.id === woId; });
   if (!wo) return;
-  // Check if one already exists
-  var existing = _timesheets.find(function(t){ return t.woId === woId; });
-  if (!existing) {
-    await createTimesheetFromWO(wo);
-    existing = _timesheets.find(function(t){ return t.woId === woId; });
+  // Create per-tech sheets if none exist
+  var existing = _timesheets.filter(function(t){ return t.woId === woId; });
+  if (!existing.length) {
+    createTimesheetFromWO(wo);
+    existing = _timesheets.filter(function(t){ return t.woId === woId; });
   }
-  if (existing) {
-    _editTSId = existing.id;
-    openTSModal(existing.id);
+  // If techName specified, open that tech's sheet; else open first
+  var target = techName
+    ? existing.find(function(t){ return t.technician === techName; })
+    : existing[0];
+  if (target) {
+    _editTSId = target.id;
+    openTSModal(target.id);
     showView('timesheets', document.getElementById('nav-timesheets'));
   }
 }
@@ -6243,6 +6294,128 @@ function exportTimesheet(tsId) {
 }
 
 // ── Render Timesheets List ────────────────────────────────────────────────────
+
+// ── Weekly timesheet summary ──────────────────────────────────────────────────
+// Returns hours grouped by technician for a given ISO week (YYYY-Www)
+function getWeekStart(dateStr) {
+  var d = new Date((dateStr || today()) + 'T00:00:00');
+  var day = d.getDay(); // 0=Sun
+  var diff = (day === 0) ? -6 : 1 - day; // Monday = start
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
+function getISOWeek(dateStr) {
+  var d = new Date((dateStr || today()) + 'T00:00:00');
+  // ISO week: Mon-Sun
+  var thu = new Date(d); thu.setDate(d.getDate() + (4 - (d.getDay()||7)));
+  var yearStart = new Date(thu.getFullYear(), 0, 1);
+  var wk = Math.ceil(((thu - yearStart) / 86400000 + 1) / 7);
+  return thu.getFullYear() + '-W' + String(wk).padStart(2, '0');
+}
+
+function buildWeeklySummary() {
+  // Group all TS rows by tech + ISO week
+  var summary = {}; // { 'techName|YYYY-Www': { tech, week, weekStart, reg, ot, night, sheets:[] } }
+  _timesheets.forEach(function(ts) {
+    var tech = ts.technician || '(unknown)';
+    (ts.rows || []).forEach(function(r) {
+      var rowDate = r.date || ts.date || today();
+      var wk = getISOWeek(rowDate);
+      var ws = getWeekStart(rowDate);
+      var key = tech + '|' + wk;
+      if (!summary[key]) {
+        summary[key] = {
+          tech: tech, week: wk, weekStart: ws,
+          reg: 0, ot: 0, night: 0,
+          sheets: [], wos: [],
+        };
+      }
+      summary[key].reg   += (r.regHrs   || 0);
+      summary[key].ot    += (r.otHrs    || 0);
+      summary[key].night += (r.nightHrs || 0);
+      if (summary[key].sheets.indexOf(ts.id) === -1) summary[key].sheets.push(ts.id);
+      if (ts.woNum && summary[key].wos.indexOf(ts.woNum) === -1) summary[key].wos.push(ts.woNum);
+    });
+  });
+  return Object.values(summary).sort(function(a, b) {
+    if (a.week !== b.week) return b.week.localeCompare(a.week); // newest first
+    return a.tech.localeCompare(b.tech);
+  });
+}
+
+function renderWeeklySummary() {
+  var container = document.getElementById('ts-weekly-summary');
+  if (!container) return;
+  var rows = buildWeeklySummary();
+  if (!rows.length) {
+    container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:1.5rem;font-size:.78rem">No timesheet data yet</div>';
+    return;
+  }
+
+  // Group by week
+  var weeks = {};
+  rows.forEach(function(r) {
+    if (!weeks[r.week]) weeks[r.week] = { week: r.week, weekStart: r.weekStart, rows: [] };
+    weeks[r.week].rows.push(r);
+  });
+
+  container.innerHTML = Object.values(weeks).map(function(wk) {
+    var weekEnd = new Date(wk.weekStart + 'T00:00:00');
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    var wkEndStr = weekEnd.toISOString().slice(0,10);
+    var totalReg   = wk.rows.reduce(function(s,r){ return s+r.reg;   }, 0);
+    var totalOT    = wk.rows.reduce(function(s,r){ return s+r.ot;    }, 0);
+    var totalNight = wk.rows.reduce(function(s,r){ return s+r.night; }, 0);
+
+    return '<div style="margin-bottom:1.2rem">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;padding:.4rem .6rem;background:var(--surface2);border-radius:4px">'
+        + '<div style="font-family:var(--mono);font-size:.65rem;color:var(--nor-accent);font-weight:700">' + wk.week + '</div>'
+        + '<div style="font-size:.7rem;color:var(--muted)">' + fmtDate(wk.weekStart) + ' — ' + fmtDate(wkEndStr) + '</div>'
+        + '<div style="font-family:var(--mono);font-size:.72rem">'
+          + (totalReg   ? '<span style="color:var(--nor-accent);margin-right:.5rem">' + totalReg + ' Reg</span>' : '')
+          + (totalOT    ? '<span style="color:#F0A832;margin-right:.5rem">' + totalOT + ' OT</span>' : '')
+          + (totalNight ? '<span style="color:#9B5DE5">' + totalNight + ' Night</span>' : '')
+        + '</div>'
+      + '</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:.74rem">'
+        + '<thead><tr style="border-bottom:1px solid var(--border)">'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:left">Technician</th>'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Reg</th>'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">OT</th>'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Night</th>'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Total</th>'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:left">Work Orders</th>'
+          + '<th style="padding:.3rem .5rem;font-size:.58rem"></th>'
+        + '</tr></thead>'
+        + '<tbody>' + wk.rows.map(function(r) {
+            var total = r.reg + r.ot + r.night;
+            return '<tr style="border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer" data-filter-tech="' + encodeURIComponent(r.tech) + '">'  
+              + '<td style="padding:.3rem .5rem;font-weight:600">' + r.tech + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono)">' + (r.reg || '—') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#F0A832">' + (r.ot || '—') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#9B5DE5">' + (r.night || '—') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);font-weight:700;color:var(--nor-accent)">' + total + '</td>'
+              + '<td style="padding:.3rem .5rem;font-size:.68rem;color:var(--muted)">' + r.wos.join(', ') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:right">'
+                + '<button class="btn btn-ghost btn-sm" data-filter-tech="' + encodeURIComponent(r.tech) + '" style="font-size:.65rem;padding:.15rem .4rem">View Sheets</button>'
+              + '</td>'
+            + '</tr>';
+          }).join('')
+        + '</tbody>'
+      + '</table>'
+    + '</div>';
+  }).join('');
+}
+
+function filterTSByTech(techName) {
+  // Switch to timesheets tab and filter by tech name
+  var searchEl = document.getElementById('ts-search');
+  if (searchEl) { searchEl.value = techName; }
+  showView('timesheets', document.getElementById('nav-timesheets'));
+  renderTimesheets();
+}
+
 function renderTimesheets() {
   var q      = (document.getElementById('ts-search')        || {}).value || '';
   var filter = (document.getElementById('ts-filter-status') || {}).value || '';
@@ -6278,6 +6451,7 @@ function renderTimesheets() {
     var totalNight = rows.reduce(function(s,r){ return s+(r.nightHrs||0); }, 0);
     var techs = [...new Set(rows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ');
 
+    var techDisplay = ts.technician || techs || '—';
     return '<div class="card" style="padding:.85rem 1.1rem">'
       + '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.4rem">'
         + '<div>'
@@ -6287,8 +6461,8 @@ function renderTimesheets() {
             + '<span style="font-size:.75rem;color:var(--muted)">' + (ts.client||'—') + '</span>'
             + chipHtml(ts.status)
           + '</div>'
+          + '<div style="font-size:.8rem;font-weight:700;color:var(--text);margin-bottom:.15rem">👷 ' + techDisplay + '</div>'
           + '<div style="font-size:.72rem;color:var(--muted)">' + fmtDate(ts.date) + (ts.site ? ' · ' + ts.site.slice(0,30) : '') + '</div>'
-          + (techs ? '<div style="font-size:.68rem;color:var(--faint);margin-top:.15rem">' + techs + '</div>' : '')
         + '</div>'
         + '<div style="font-size:.72rem;color:var(--muted);text-align:right">'
           + (totalReg   ? '<div>' + totalReg   + ' Reg</div>' : '')
