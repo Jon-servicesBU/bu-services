@@ -814,13 +814,7 @@ var exclMgr      = false; // exclude managers/admin from util calculations
 var visRows      = [];   // current visible roster rows — global so onclick can reference
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
-document.getElementById('page-meta').textContent =
-  'Source: BC export · Week ending ' + DATA.util_week_ending +
-  ' · Updated ' + DATA.people_updated + ' · Jon Eustace CEO NA';
-var utilWk = document.getElementById('util-week');
-if(utilWk) utilWk.textContent = DATA.util_week_ending;
-var pdEl = document.getElementById('people-date');
-if(pdEl) pdEl.textContent = DATA.people_updated;
+// Dates set after localStorage restore via refreshDates()
 
 // nav scroll
 var navAs = document.querySelectorAll('.unav-links a');
@@ -1321,12 +1315,6 @@ function refreshDates() {
   if (pm) pm.textContent = 'Source: BC export · Week ending ' + d + ' · Updated ' + updated + ' · Jon Eustace CEO NA';
   var uw = document.getElementById('util-week'); if (uw) uw.textContent = d;
   var pd = document.getElementById('people-date'); if (pd) pd.textContent = updated;
-  // Update util section subtitle
-  document.querySelectorAll('.sec-sub').forEach(function(el) {
-    if (el.textContent.indexOf('rolling weeks') > -1) {
-      el.textContent = el.textContent.replace(/week ending [0-9-]+/, 'week ending ' + d);
-    }
-  });
 }
 
 async function handleUpload(files) {
@@ -1662,6 +1650,7 @@ function nbRow(label, value, color, large) {
 
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
+refreshDates();
 renderUtil();
 renderRoster();
 renderPeople();
