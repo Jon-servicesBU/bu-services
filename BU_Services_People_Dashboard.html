@@ -433,6 +433,18 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   white-space:nowrap;margin-left:.75rem;flex-shrink:0}
 .sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5)}
 .sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF}
+
+/* ── BC upload dropzone ── */
+.bc-dropzone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;padding:.6rem 1.2rem;border:2px dashed rgba(255,255,255,.15);border-radius:8px;cursor:pointer;transition:all .2s;min-width:220px;text-align:center;background:rgba(255,255,255,.03);}
+.bc-dropzone:hover,.bc-dz-over{border-color:rgba(0,174,239,.5);background:rgba(0,174,239,.07);}
+.bc-dz-icon{font-size:1.2rem;opacity:.6;}
+.bc-dz-text{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.7);}
+.bc-dz-sub{font-size:.65rem;color:rgba(255,255,255,.35);}
+.bc-reading-overlay{position:fixed;inset:0;background:rgba(8,15,30,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;z-index:9999;}
+.bc-reading-spinner{width:40px;height:40px;border:3px solid rgba(0,174,239,.2);border-top-color:#00AEEF;border-radius:50%;animation:bcspin .7s linear infinite;}
+@keyframes bcspin{to{transform:rotate(360deg)}}
+.bc-reading-title{font-size:1rem;font-weight:700;color:#fff;}
+.bc-reading-sub{font-size:.78rem;color:rgba(255,255,255,.5);}
 </style>
 </head>
 <body>
@@ -450,11 +462,21 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 </div>
 
 <div class="upload-banner">
-  <div class="upload-banner-text"><strong>Refresh data</strong> — upload BC exports to update all figures.
-    Once Power Automate is live, this updates automatically every Sunday.</div>
-  <div style="display:flex;align-items:center;gap:.75rem">
-    <input type="file" id="bc-upload" accept=".xlsx" multiple style="display:none" onchange="handleUpload(this.files)">
-    <button class="upload-btn" onclick="document.getElementById('bc-upload').click()">↑ Upload BC Files</button>
+  <div class="upload-banner-text">
+    <strong>Refresh 13-week rolling data</strong> — drop your BC utilization export (xlsx) and Claude reads it automatically.
+  </div>
+  <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+    <input type="file" id="bc-upload" accept=".xlsx,.csv" style="display:none" onchange="handleUpload(this.files)">
+    <div id="bc-dropzone"
+         onclick="document.getElementById('bc-upload').click()"
+         ondragover="event.preventDefault();this.classList.add('bc-dz-over')"
+         ondragleave="this.classList.remove('bc-dz-over')"
+         ondrop="this.classList.remove('bc-dz-over');handleBcDrop(event)"
+         class="bc-dropzone">
+      <span class="bc-dz-icon">📊</span>
+      <span class="bc-dz-text">Drop BC export here or click to browse</span>
+      <span class="bc-dz-sub">.xlsx or .csv · Claude reads it automatically</span>
+    </div>
     <span class="upload-status" id="upload-status"></span>
   </div>
 </div>
@@ -565,15 +587,11 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 <!-- ── VACATION ── -->
 <div class="section" id="vacation">
   <div class="sec-hdr">
-    <div class="sec-title"><span class="icon">🏖</span> Vacation Liability</div>
-    <div class="sec-sub">Unionized · balance sheet exposure · source: BC Vacation export · as of 2026-04-04</div>
+    <div class="sec-title"><span class="icon">⏱</span> Non-Billable Hours</div>
+    <div class="sec-sub">Total paid hours minus billable hours · 13 rolling weeks · source: BC timesheet export</div>
   </div>
   <div class="vac-strip" id="vac-strip"></div>
-  <div class="vac-note">
-    <strong style="color:var(--sky)">Source:</strong> Unionizeds vacation bank (Bank 306) · Actif employees only ·
-    Non-unionized balances now included · unionized: $43K · non-unionized: $132K · total liability: $175K ·
-    <strong style="color:var(--sky)">PA path:</strong> PA P7 writes to <code>vac_liability_syn_cad</code> in actuals.json every Sunday
-  </div>
+  <div id="nonbill-chart-wrap" style="margin-top:1rem"></div>
 </div>
 
 <!-- ── ANNIVERSARIES ── -->
@@ -1079,16 +1097,109 @@ function renderPeople() {
 
 // ── VACATION ─────────────────────────────────────────────────────────────────
 function renderVacation() {
-  document.getElementById('vac-strip').innerHTML = [
-    {v:'$'+(DATA.vac_liability_total_cad||0).toLocaleString('en-CA',{maximumFractionDigits:0}), l:'Total liability', s:'Both unionized + non-unionized · CAD', w:(DATA.vac_liability_total_cad||0)>100000},
-    {v:'$'+(DATA.vac_liability_syn_cad||0).toLocaleString('en-CA',{maximumFractionDigits:0}), l:'Unionized liability', s:'Hourly workers · CAD', w:false},
-    {v:'$'+(DATA.vac_liability_nonsyn_cad||0).toLocaleString('en-CA',{maximumFractionDigits:0}), l:'Non-unionized liability', s:'Salaried staff · CAD', w:(DATA.vac_liability_nonsyn_cad||0)>100000},
-    {v:DATA.vac_high_balance_count, l:'High balance', s:'> 4 weeks accrued (all staff)', w:DATA.vac_high_balance_count>5},
-  ].map(function(k){
-    return '<div class="vac-stat"><div class="vac-val'+(k.w?' w':'')+'" >'+k.v+'<\/div><div class="vac-lbl">'+k.l+'<\/div><div class="vac-sub">'+k.s+'<\/div><\/div>';
-  }).join('');
-}
+  var trend = DATA.util_13wk_trend || [];
+  if (!trend.length) {
+    document.getElementById('vac-strip').innerHTML = '<div style="color:var(--muted);font-size:.8rem">No data — upload BC export above</div>';
+    return;
+  }
 
+  // ── Filter out weeks with zero total hours (holidays / shutdowns) ──────────
+  // Also strip vacation hours from each week so we're left with:
+  //   worked_total  = tot - vac_hrs  (hours actually worked, billable + non-bill)
+  //   worked_bill   = bill            (billable worked hours, unchanged)
+  //   worked_nonbill = worked_total - worked_bill
+  // If a week's worked_total is 0 after stripping vacation, exclude it entirely.
+  var activeWeeks = trend.filter(function(w) {
+    var vac = w.vac || 0;                    // vacation hours if BC provides them
+    var workedTotal = (w.tot || 0) - vac;
+    return workedTotal > 0;                  // exclude zero-worked-hour weeks
+  });
+
+  if (!activeWeeks.length) {
+    document.getElementById('vac-strip').innerHTML = '<div style="color:var(--muted);font-size:.8rem">All weeks excluded — check data</div>';
+    return;
+  }
+
+  // Per-week rate helper
+  function weekRate(w) {
+    var vac = w.vac || 0;
+    var workedTotal = (w.tot || 0) - vac;
+    if (workedTotal <= 0) return null;
+    var nonBill = workedTotal - (w.bill || 0);
+    return { nb: nonBill, wt: workedTotal, rate: nonBill / workedTotal * 100 };
+  }
+
+  // Bar colour thresholds: >30% red, 26-30% amber, ≤25% green
+  function barColor(rate) {
+    if (rate > 30)  return '#DC2626';  // red
+    if (rate >= 26) return '#D97706';  // amber
+    return '#16A34A';                  // green
+  }
+  function rateClass(rate) {
+    if (rate > 30)  return 'r';
+    if (rate >= 26) return 'a';
+    return 'g';
+  }
+
+  var latestCalc = weekRate(activeWeeks[0]);
+  var totalNonBill = activeWeeks.reduce(function(s,w){ var c=weekRate(w); return s+(c?c.nb:0); }, 0);
+  var totalWorked  = activeWeeks.reduce(function(s,w){ var c=weekRate(w); return s+(c?c.wt:0); }, 0);
+  var avgRate      = totalWorked > 0 ? totalNonBill / totalWorked * 100 : 0;
+  var avgNonBillPerWk = totalNonBill / activeWeeks.length;
+  var rateNow      = latestCalc ? latestCalc.rate : 0;
+  var excludedCount = trend.length - activeWeeks.length;
+
+  document.getElementById('vac-strip').innerHTML = [
+    {v: rateNow.toFixed(1)+'%',           l:'Overhead rate this week',  s:'Latest week · '+(activeWeeks[0].date||'')+' · vacation excl.', cls: rateClass(rateNow)},
+    {v: avgRate.toFixed(1)+'%',           l:'13-week overhead rate',    s:'Non-billable worked hrs ÷ total worked hrs', cls: rateClass(avgRate)},
+    {v: Math.round(avgNonBillPerWk)+'h/wk', l:'Avg non-billable',       s:'Per active week · vacation & zero-hr days removed', cls:''},
+    {v: Math.round(totalNonBill)+'h',     l:'Total 13-wk non-billable', s:(excludedCount?excludedCount+' zero/vac week'+(excludedCount>1?'s':'')+' excluded':'All 13 weeks active'), cls:''},
+  ].map(function(k){
+    return '<div class="vac-stat"><div class="kpi-val '+(k.cls||'')+'" style="font-size:1.25rem">'+k.v+'</div><div class="vac-lbl">'+k.l+'</div><div class="vac-sub">'+k.s+'</div></div>';
+  }).join('');
+
+  // Bar chart — one bar per active week, coloured by threshold
+  var wrap = document.getElementById('nonbill-chart-wrap');
+  if (!wrap) return;
+  var calcs = activeWeeks.map(weekRate);
+  var maxRate = Math.max.apply(null, calcs.map(function(c){ return c?c.rate:0; })) || 1;
+
+  // Store week data for click handler
+  window._nbWeekData = {};
+  var bars = activeWeeks.slice().reverse().map(function(w, i) {
+    var c = weekRate(w);
+    if (!c) return '';
+    var pct = Math.max(4, Math.round((c.rate / Math.max(maxRate, 35)) * 100));
+    var col = barColor(c.rate);
+    var key = 'w' + i;
+    window._nbWeekData[key] = {
+      date: w.date, rate: c.rate.toFixed(1)+'%', bill: Math.round(w.bill||0),
+      nb: Math.round(c.nb), wt: Math.round(c.wt), vac: Math.round(w.vac||0), col: col
+    };
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;min-width:0;cursor:pointer"'+
+      ' onclick="nbShowWeek(this,\''+key+'\')">'+
+      '<div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:64px">'+
+        '<div style="width:100%;background:'+col+';opacity:.8;border-radius:3px 3px 0 0;height:'+pct+'%"'+
+          ' title="'+c.rate.toFixed(1)+'% overhead · click for detail"></div>'+
+      '</div>'+
+      '<div style="font-size:.52rem;color:var(--muted,rgba(255,255,255,.4));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center">'+(w.date||'').slice(5)+'</div>'+
+    '</div>';
+  }).join('');
+
+  // Reference lines at 25% and 30%
+  wrap.innerHTML =
+    '<div style="position:relative">' +
+      '<div style="display:flex;gap:3px;align-items:flex-end;padding:.5rem .25rem .15rem;background:var(--surface2,rgba(255,255,255,.04));border-radius:8px">' +
+        bars +
+      '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:.45rem;font-size:.65rem;color:var(--muted,rgba(255,255,255,.4))">' +
+      '<span><span style="display:inline-block;width:9px;height:9px;background:#16A34A;border-radius:2px;margin-right:.3rem;opacity:.8"></span>≤ 25% — on target</span>' +
+      '<span><span style="display:inline-block;width:9px;height:9px;background:#D97706;border-radius:2px;margin-right:.3rem;opacity:.8"></span>26–30% — monitor</span>' +
+      '<span><span style="display:inline-block;width:9px;height:9px;background:#DC2626;border-radius:2px;margin-right:.3rem;opacity:.8"></span>&gt; 30% — above target</span>' +
+      '<span style="margin-left:auto">Vacation hours &amp; zero-hr days excluded from all figures</span>' +
+    '</div>';
+}
 // ── ANNIVERSARIES ─────────────────────────────────────────────────────────────
 function setAnn(v, el) {
   annFilter = v;
@@ -1133,10 +1244,242 @@ function renderAnniversaries() {
 }
 
 // ── UPLOAD STUB ───────────────────────────────────────────────────────────────
-function handleUpload(files) {
-  var s = document.getElementById('upload-status');
-  s.textContent = 'Processing '+files.length+' file(s)...';
-  setTimeout(function(){ s.textContent = '⚠ Manual parsing coming soon — use PA flow for auto-update'; }, 1500);
+
+// ── BC drag-and-drop handler ─────────────────────────────────────────────────
+function handleBcDrop(event) {
+  event.preventDefault();
+  var files = event.dataTransfer.files;
+  if (files.length) handleUpload(files);
+}
+
+async function handleUpload(files) {
+  var file = files[0];
+  if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (ext !== 'xlsx' && ext !== 'csv') {
+    setUploadStatus('Only .xlsx or .csv files supported', 'error');
+    return;
+  }
+
+  // Show reading overlay
+  showBcOverlay('Reading ' + file.name + '…', 'Claude is extracting 13-week utilization data');
+
+  try {
+    var fileData, mediaType;
+
+    if (ext === 'csv') {
+      // Read as text
+      fileData = await new Promise(function(res, rej) {
+        var reader = new FileReader();
+        reader.onload = function(e) { res(e.target.result); };
+        reader.onerror = rej;
+        reader.readAsText(file);
+      });
+      mediaType = null; // text mode
+    } else {
+      // Read xlsx as base64
+      fileData = await new Promise(function(res, rej) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var bytes = new Uint8Array(e.target.result);
+          var binary = '';
+          for (var i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+          res(btoa(binary));
+        };
+        reader.onerror = rej;
+        reader.readAsArrayBuffer(file);
+      });
+      mediaType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    }
+
+    showBcOverlay('Analysing with Claude…', 'Extracting weekly utilization, billable hours, and office breakdown');
+
+    var systemPrompt = `You are reading a Business Central (BC) payroll/timesheet export for Nucleom.
+Extract the 13 most recent weekly utilization figures.
+
+The data you need:
+- util_week_ending: most recent week-ending date (YYYY-MM-DD, Saturday)
+- util_13wk_trend: array of 13 objects [{date, bill, tot, vac, util}] newest first
+  - date: week-ending date YYYY-MM-DD
+  - bill: billable worked hours that week (exclude vacation — only actual worked billable hours)
+  - tot: total paid hours that week INCLUDING vacation
+  - vac: vacation hours that week (sick leave, statutory holidays, vacation bank draws — any paid non-worked time)
+  - util: overhead % = (worked_total - bill) / worked_total * 100 where worked_total = tot - vac
+         If worked_total is 0 (e.g. shutdown week), set util to null
+- util_total_latest: overhead % for most recent active (non-zero worked) week
+- util_13wk_avg: average overhead % across active weeks only (exclude zero-worked-hour weeks)
+- util_by_office: array of {office, util, bill, tot, vac} per Nucleom office
+- util_hq, util_montreal, util_central, util_edmonton, util_vancouver: latest overhead % per office
+
+Respond ONLY with valid JSON. No markdown, no explanation.`;
+
+    var messages;
+    if (mediaType) {
+      messages = [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: mediaType, data: fileData } },
+          { type: 'text', text: 'Extract the 13-week rolling utilization data from this BC export.' }
+        ]
+      }];
+    } else {
+      messages = [{
+        role: 'user',
+        content: 'Here is the BC export (CSV):\n\n' + fileData.slice(0, 50000) + '\n\nExtract the 13-week rolling utilization data.'
+      }];
+    }
+
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: messages
+      })
+    });
+
+    var data = await res.json();
+    var text = data.content && data.content[0] ? data.content[0].text : '';
+    var clean = text.replace(/```json|```/g, '').trim();
+    var extracted = JSON.parse(clean);
+
+    // Merge extracted data into DATA
+    if (extracted.util_13wk_trend && Array.isArray(extracted.util_13wk_trend)) {
+      DATA.util_week_ending = extracted.util_week_ending || extracted.util_13wk_trend[0].date;
+      DATA.util_13wk_trend  = extracted.util_13wk_trend;
+      DATA.util_total_latest = extracted.util_total_latest || extracted.util_13wk_trend[0].util;
+      DATA.util_13wk_avg    = extracted.util_13wk_avg || (
+        extracted.util_13wk_trend.reduce(function(s,w){ return s+w.util; }, 0) / extracted.util_13wk_trend.length
+      );
+      if (extracted.util_by_office) DATA.util_by_office = extracted.util_by_office;
+      if (extracted.util_hq       !== undefined) DATA.util_hq = extracted.util_hq;
+      if (extracted.util_montreal  !== undefined) DATA.util_montreal = extracted.util_montreal;
+      if (extracted.util_central   !== undefined) DATA.util_central = extracted.util_central;
+      if (extracted.util_edmonton  !== undefined) DATA.util_edmonton = extracted.util_edmonton;
+      if (extracted.util_vancouver !== undefined) DATA.util_vancouver = extracted.util_vancouver;
+
+      // Persist to localStorage so it survives page refresh
+      try {
+        localStorage.setItem('bc_util_data', JSON.stringify({
+          updated: new Date().toISOString(),
+          file: file.name,
+          data: extracted
+        }));
+      } catch(e) {}
+
+      hideBcOverlay();
+      renderUtil();
+      setUploadStatus('✓ Updated ' + (extracted.util_13wk_trend.length) + ' weeks from ' + file.name, 'success');
+    } else {
+      throw new Error('No util_13wk_trend array in response');
+    }
+
+  } catch(e) {
+    hideBcOverlay();
+    setUploadStatus('Error: ' + e.message, 'error');
+  }
+}
+
+function setUploadStatus(msg, type) {
+  var el = document.getElementById('upload-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = type === 'error' ? '#DC2626' : type === 'success' ? '#16A34A' : 'rgba(255,255,255,.6)';
+  if (type === 'success') setTimeout(function(){ el.textContent = ''; }, 5000);
+}
+
+function showBcOverlay(title, sub) {
+  var existing = document.getElementById('bc-overlay');
+  if (existing) existing.remove();
+  var overlay = document.createElement('div');
+  overlay.id = 'bc-overlay';
+  overlay.className = 'bc-reading-overlay';
+  overlay.innerHTML = '<div class="bc-reading-spinner"></div>' +
+    '<div class="bc-reading-title">' + title + '</div>' +
+    '<div class="bc-reading-sub">' + sub + '</div>';
+  document.body.appendChild(overlay);
+}
+
+function hideBcOverlay() {
+  var el = document.getElementById('bc-overlay');
+  if (el) el.remove();
+}
+
+// On load: restore from localStorage if newer than hardcoded data
+(function() {
+  try {
+    var stored = JSON.parse(localStorage.getItem('bc_util_data') || '{}');
+    if (stored.data && stored.data.util_13wk_trend) {
+      var storedDate = stored.data.util_week_ending || stored.data.util_13wk_trend[0].date;
+      if (storedDate >= DATA.util_week_ending) {
+        Object.assign(DATA, stored.data);
+      }
+    }
+  } catch(e) {}
+})();
+
+
+// ── Non-billable chart week click ────────────────────────────────────────────
+function nbShowWeek(barEl, key) {
+  var d = (window._nbWeekData || {})[key];
+  if (!d) return;
+  // Remove any existing tooltip
+  var existing = document.getElementById('nb-week-tooltip');
+  if (existing) {
+    existing.remove();
+    // If clicking the same bar, just close
+    if (barEl.dataset.ttOpen === '1') { barEl.dataset.ttOpen = '0'; return; }
+  }
+  barEl.dataset.ttOpen = '1';
+
+  var tt = document.createElement('div');
+  tt.id = 'nb-week-tooltip';
+  tt.style.cssText = 'position:absolute;z-index:999;background:#0D1528;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:.85rem 1rem;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,.5);pointer-events:none';
+
+  var billPct  = d.wt > 0 ? (d.bill / d.wt * 100).toFixed(1) : '—';
+  var nbPct    = d.rate;
+
+  tt.innerHTML =
+    '<div style="font-size:.65rem;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem">Week ending ' + d.date + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:.45rem">' +
+      nbRow('Overhead rate',    d.rate,             d.col,  true) +
+      nbRow('Non-billable hrs', d.nb+'h',           'rgba(255,255,255,.7)', false) +
+      nbRow('Billable hrs',     d.bill+'h ('+billPct+'%)', '#16A34A', false) +
+      nbRow('Total worked',     d.wt+'h',           'rgba(255,255,255,.5)', false) +
+      (d.vac > 0 ? nbRow('Vacation excl.', d.vac+'h', 'rgba(255,255,255,.3)', false) : '') +
+    '</div>';
+
+  // Position: above the bar, centered
+  var rect = barEl.getBoundingClientRect();
+  var wrap = document.getElementById('nonbill-chart-wrap');
+  var wrapRect = wrap ? wrap.getBoundingClientRect() : {left:0, top:0};
+  tt.style.left = Math.max(0, (rect.left - wrapRect.left + rect.width/2 - 100)) + 'px';
+  tt.style.bottom = (wrap ? wrap.offsetHeight - (rect.top - wrapRect.top) + 8 : 80) + 'px';
+
+  if (wrap) {
+    wrap.style.position = 'relative';
+    wrap.appendChild(tt);
+  }
+
+  // Close on outside click
+  setTimeout(function() {
+    document.addEventListener('click', function closeNb(e) {
+      if (!tt.contains(e.target) && e.target !== barEl) {
+        tt.remove();
+        barEl.dataset.ttOpen = '0';
+        document.removeEventListener('click', closeNb);
+      }
+    });
+  }, 10);
+}
+
+function nbRow(label, value, color, large) {
+  return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:.5rem">' +
+    '<span style="font-size:.7rem;color:rgba(255,255,255,.45)">' + label + '</span>' +
+    '<span style="font-family:monospace;font-size:' + (large?'.95rem':'0.78rem') + ';font-weight:' + (large?'800':'600') + ';color:' + color + '">' + value + '</span>' +
+  '</div>';
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
