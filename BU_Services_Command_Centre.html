@@ -1155,6 +1155,85 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 .avb-export-spinner{display:none;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
+body{font-family:Arial,sans-serif;background:#F0F3FA;margin:0;padding:20px;}
+  .wrap{max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
+  .hdr{background:#161C60;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .hdr-brand{font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;letter-spacing:1px;}
+  .hdr-date{font-size:11px;color:#4A5F88;font-family:monospace;}
+  .body{padding:20px 24px;}
+  .section{margin-bottom:20px;}
+  .sec-hdr{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#8892A4;border-bottom:1px solid #DDE3F0;padding-bottom:6px;margin-bottom:10px;}
+  .kpi-row{display:flex;gap:8px;margin-bottom:8px;}
+  .kpi{flex:1;background:#F0F3FA;border-radius:6px;padding:10px 12px;text-align:center;}
+  .kpi-val{font-size:22px;font-weight:700;color:#161C60;font-family:Arial,sans-serif;}
+  .kpi-lbl{font-size:10px;color:#8892A4;margin-top:2px;}
+  .gate-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:#384660;border-bottom:1px solid #F0F3FA;}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .d-green{background:#22882F;} .d-amber{background:#D97706;} .d-grey{background:#DDE3F0;} .d-red{background:#CC2222;}
+  .init-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #F0F3FA;font-size:13px;}
+  .prog-bar{height:4px;background:#DDE3F0;border-radius:2px;width:80px;overflow:hidden;display:inline-block;}
+  .prog-fill{height:100%;border-radius:2px;}
+  .footer{background:#F0F3FA;padding:14px 24px;font-size:11px;color:#8892A4;text-align:center;}
+  .cta{display:inline-block;background:#161C60;color:#ffffff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:5px;text-decoration:none;margin:4px;}
+
+/* ── BU Services sysbar ── */
+.sysbar{position:sticky;top:48px;z-index:99;background:rgba(5,12,25,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 1.25rem;gap:.5rem;height:36px;backdrop-filter:blur(8px);}
+.sysbar-label{font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2);margin-right:.35rem;white-space:nowrap;font-family:"Courier New",monospace;}
+.sysbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;text-decoration:none;cursor:pointer;border:1.5px solid;transition:.18s;white-space:nowrap;font-family:inherit;background:none;}
+.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7);}
+.sysbtn-hub:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);color:#00AEEF;box-shadow:0 0 8px rgba(0,174,239,.2);}
+.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7);}
+.sysbtn-people:hover{background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);color:#FCD34D;}
+.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7);}
+.sysbtn-meetings:hover{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);color:#6EE7B7;}
+.sysbtn-cc.current{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);cursor:default;pointer-events:none;}
+.sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5);}
+.sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF;}
+.sysbtn-nortech{border-color:rgba(232,64,64,.3);color:rgba(232,64,64,.7);}
+.sysbtn-nortech:hover{background:rgba(232,64,64,.15);border-color:rgba(232,64,64,.7);color:#F87171;}
+
+/* ── Revenue Actuals Panel ── */
+.actuals-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#D0DCF0;border:1px solid #D0DCF0;border-radius:12px;overflow:hidden;margin-bottom:1.5rem;box-shadow:0 4px 20px rgba(10,31,92,.10);}
+.ap-tile{background:#fff;padding:1.25rem 1.4rem 1.1rem;display:flex;flex-direction:column;gap:0;position:relative;}
+.ap-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+.ap-tile.nuc::before{background:linear-gradient(90deg,#0A1F5C,#1A5CA8);}
+.ap-tile.nor::before{background:linear-gradient(90deg,#1A5CA8,#00AEEF);}
+.ap-tile.int::before{background:linear-gradient(90deg,#1A7A4A,#22C55E);}
+.ap-label{font-family:var(--mono,monospace);font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8899BB;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem;}
+.ap-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ap-name{font-size:1.05rem;font-weight:800;color:#0A1F5C;line-height:1.1;margin-bottom:.9rem;letter-spacing:-.01em;}
+.ap-metrics{display:flex;flex-direction:column;}
+.ap-metric{display:flex;justify-content:space-between;align-items:baseline;padding:.38rem 0;border-bottom:1px solid #EEF2FA;}
+.ap-metric:last-child{border-bottom:none;}
+.ap-metric-lbl{font-size:.71rem;color:#7A8BB0;font-weight:400;}
+.ap-metric-val{font-family:var(--mono,monospace);font-size:.82rem;font-weight:700;color:#0A1F5C;}
+.ap-metric-val.live{color:#1A7A4A;}
+.ap-metric-val.dim{color:#8899BB;font-weight:400;}
+.ap-metric-val.pipeline{color:#1A5CA8;}
+.ap-bar-row{margin-top:.7rem;padding-top:.7rem;border-top:1px solid #EEF2FA;}
+.ap-bar-lbl{display:flex;justify-content:space-between;font-size:.65rem;color:#8899BB;margin-bottom:.3rem;}
+.ap-bar-track{height:5px;background:#E8EDF8;border-radius:10px;overflow:hidden;}
+.ap-bar-fill{height:100%;border-radius:10px;transition:width .6s ease;}
+.ap-source{margin-top:.65rem;font-size:.6rem;color:#A0AEC0;display:flex;align-items:center;gap:.3rem;}
+.ap-src-dot{width:5px;height:5px;border-radius:50%;background:#22C55E;flex-shrink:0;}
+.ap-src-dot.manual{background:#F59E0B;}
+@media(max-width:700px){.actuals-panel{grid-template-columns:1fr;}}
+
+/* ── BU Services sysbar ── */
+.sysbar{position:sticky;top:48px;z-index:99;background:rgba(5,12,25,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 1.25rem;gap:.5rem;height:36px;backdrop-filter:blur(8px);}
+.sysbar-label{font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2);margin-right:.35rem;white-space:nowrap;font-family:"Courier New",monospace;}
+.sysbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;text-decoration:none;cursor:pointer;border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);transition:.18s;white-space:nowrap;background:none;}
+.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7);}
+.sysbtn-hub:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);color:#00AEEF;}
+.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7);}
+.sysbtn-people:hover{background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);color:#FCD34D;}
+.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7);}
+.sysbtn-meetings:hover{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);color:#6EE7B7;}
+.sysbtn-cc.current{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);cursor:default;pointer-events:none;}
+.sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5);}
+.sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF;}
+.sysbtn-nortech{border-color:rgba(232,64,64,.3);color:rgba(232,64,64,.7);}
+.sysbtn-nortech:hover{background:rgba(232,64,64,.15);border-color:rgba(232,64,64,.7);color:#F87171;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js"></script>
 </head>
@@ -1183,11 +1262,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <a href="#digest">Email Digest</a>
     <a href="BU_Services_Management_Hub.html" target="buservices" style="flex-shrink:0;color:#00AEEF;background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;align-self:center;margin-left:.5rem">⚙ Management Hub →</a>
   </div>
-  <div class="topbar-right">
-    <div class="live-dot"></div>
-    <span class="live-label" id="live-label">Live</span>
-    <span class="update-label" id="update-label"></span>
-  </div>
+  <div class="topbar-right"></div>
 </nav>
 <div class="sysbar">
   <span class="sysbar-label">BU Services</span>
@@ -1206,8 +1281,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <div class="hero-eyebrow">Ekoscan Integrity Group &nbsp;·&nbsp; North America</div>
     <h1>BU Services<br><em>Command Centre</em></h1>
     <p class="hero-sub">Master Commercial Plan 2026–2030. Five growth initiatives. Live gate tracking. All documents in one place.</p>
-    <div style="display:inline-flex;align-items:center;gap:0.6rem;background:rgba(233,113,50,0.15);border:1px solid rgba(233,113,50,0.35);border-radius:6px;padding:0.35rem 0.9rem;margin-bottom:1rem;">
-      <div style="width:7px;height:7px;border-radius:50%;background:#F59E0B;animation:pulse 2s infinite;flex-shrink:0;"></div>    </div>
+        </div>
     <div class="kpi-row" id="kpi-row"></div>
   </div>
 </div>
@@ -1228,7 +1302,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <button class="currency-toggle-btn" onclick="toggleCurrency()" title="Currently showing CAD">€ Switch to EUR</button>
   </div>
 <div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>Nucleom</strong> revenue — BU Services CRM auto on every page load. <strong>Nortech</strong> — Nortech Ops auto-push. <strong>Intact + initiatives</strong> — paste any report via 📸 Vision-to-Data.</span></div>
-v id="actuals-panel" class="actuals-panel"></div>
+  <div id="actuals-panel" class="actuals-panel"></div>
   <!-- rf-entities removed — replaced by actuals-panel above -->
 
   <!-- ── Vision-to-Data Panel — replaces Power Automate ── -->
@@ -1543,6 +1617,7 @@ v id="actuals-panel" class="actuals-panel"></div>
 </div>
 
 <div class="footer">
+  <div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.35rem"><div class="live-dot"></div><span id="live-label" style="font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.4)">Live</span><span style="color:rgba(255,255,255,.2)"> · </span><span id="update-label" style="font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.3)"></span></div>
   <p>BU Services Command Centre · Ekoscan Integrity Group · Jon Eustace, CEO North America · Confidential</p>
   <p class="config-hint">To update: edit the CONFIG block at the top of this file → save → refresh browser. No server required.</p>
 </div>
@@ -2892,7 +2967,7 @@ function renderRevenueFoundation() {
           '</div>' +
         '</div>' +
         '<div class="rf-footer">' +
-          (b.source === 'manual' ? '⚠ Update manually — not in Salesforce' : '↻ Auto-updated by Power Automate every Sunday') +
+          (b.source === 'manual' ? '⚠ Update manually — not in Salesforce' : '↻ CRM sync · auto on page load') +
         '</div>' +
       '</div>';
     }).join('');
@@ -3517,44 +3592,7 @@ function buildDigestHTML() {
 
   return `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
-<style>
-  body{font-family:Arial,sans-serif;background:#F0F3FA;margin:0;padding:20px;}
-  .wrap{max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);}
-  .hdr{background:#161C60;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;}
-  .hdr-brand{font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;letter-spacing:1px;}
-  .hdr-date{font-size:11px;color:#4A5F88;font-family:monospace;}
-  .body{padding:20px 24px;}
-  .section{margin-bottom:20px;}
-  .sec-hdr{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#8892A4;border-bottom:1px solid #DDE3F0;padding-bottom:6px;margin-bottom:10px;}
-  .kpi-row{display:flex;gap:8px;margin-bottom:8px;}
-  .kpi{flex:1;background:#F0F3FA;border-radius:6px;padding:10px 12px;text-align:center;}
-  .kpi-val{font-size:22px;font-weight:700;color:#161C60;font-family:Arial,sans-serif;}
-  .kpi-lbl{font-size:10px;color:#8892A4;margin-top:2px;}
-  .gate-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:#384660;border-bottom:1px solid #F0F3FA;}
-  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-  .d-green{background:#22882F;} .d-amber{background:#D97706;} .d-grey{background:#DDE3F0;} .d-red{background:#CC2222;}
-  .init-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #F0F3FA;font-size:13px;}
-  .prog-bar{height:4px;background:#DDE3F0;border-radius:2px;width:80px;overflow:hidden;display:inline-block;}
-  .prog-fill{height:100%;border-radius:2px;}
-  .footer{background:#F0F3FA;padding:14px 24px;font-size:11px;color:#8892A4;text-align:center;}
-  .cta{display:inline-block;background:#161C60;color:#ffffff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:5px;text-decoration:none;margin:4px;}
-
-/* ── BU Services sysbar ── */
-.sysbar{position:sticky;top:48px;z-index:99;background:rgba(5,12,25,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 1.25rem;gap:.5rem;height:36px;backdrop-filter:blur(8px);}
-.sysbar-label{font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2);margin-right:.35rem;white-space:nowrap;font-family:"Courier New",monospace;}
-.sysbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;text-decoration:none;cursor:pointer;border:1.5px solid;transition:.18s;white-space:nowrap;font-family:inherit;background:none;}
-.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7);}
-.sysbtn-hub:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);color:#00AEEF;box-shadow:0 0 8px rgba(0,174,239,.2);}
-.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7);}
-.sysbtn-people:hover{background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);color:#FCD34D;}
-.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7);}
-.sysbtn-meetings:hover{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);color:#6EE7B7;}
-.sysbtn-cc.current{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);cursor:default;pointer-events:none;}
-.sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5);}
-.sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF;}
-.sysbtn-nortech{border-color:rgba(232,64,64,.3);color:rgba(232,64,64,.7);}
-.sysbtn-nortech:hover{background:rgba(232,64,64,.15);border-color:rgba(232,64,64,.7);color:#F87171;}
-</style></head>
+</head>
 <body><div class="wrap">
 <div class="hdr">
   <span class="hdr-brand">BU SERVICES &nbsp;·&nbsp; WEEKLY UPDATE</span>
