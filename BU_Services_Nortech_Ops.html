@@ -308,10 +308,7 @@ body.tech-view .cs-lb-tot           { display: none !important; }
 
 </style>
 </head>
-<body>
-
-<script>
-// ══════════════════════════════════════════════════════════════════════════════
+<script>// ══════════════════════════════════════════════════════════════════════════════
 // BU SERVICES — VIEWER IDENTITY
 // Reads from: 1) URL param ?viewer=X  2) localStorage hub_viewer  3) login screen
 // ══════════════════════════════════════════════════════════════════════════════
@@ -448,6 +445,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
+<body>
+
 <!-- ── NAV ──────────────────────────────────────────────────────────────── -->
 <nav class="unav">
   <div class="unav-brand">
@@ -735,8 +734,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
-      <button class="btn btn-secondary" onclick="showSharePicker('wo')" id="wo-share-btn" style="display:none">✉ Send</button>
       <button class="btn btn-secondary" onclick="exportWO('pdf')" id="wo-export-pdf-btn" style="display:none">⬇ Export PDF</button>
+      <button class="btn btn-secondary" id="wo-email-btn" onclick="emailPDF('wo')" style="display:none">✉ Email PDF</button>
       <button class="btn btn-secondary" onclick="exportWO('word')" id="wo-export-word-btn" style="display:none">⬇ Export Word</button>
       <div style="flex:1"></div>
       <button class="btn btn-secondary" onclick="saveWO('draft')">Save Draft</button>
@@ -924,8 +923,8 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
         <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
-        <button class="btn btn-secondary" id="ts-share-btn" onclick="showSharePicker('timesheet')" style="display:none">✉ Send</button>
         <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
+        <button class="btn btn-secondary" id="ts-email-btn" onclick="emailPDF('ts')" style="display:none">✉ Email PDF</button>
         <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
         <button class="btn btn-primary" id="ts-admin-save-btn" onclick="saveAdminTSEdits()" style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">💾 Save Admin Edits</button>
         <div style="flex:1"></div>
@@ -1303,7 +1302,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('inv-view-modal')">Close</button>
       <button class="btn btn-secondary" onclick="printInvoice()">🖨 Print / PDF</button>
-      <button class="btn btn-secondary" onclick="showSharePicker('invoice')">✉ Send</button>
+      <button class="btn btn-secondary" onclick="emailPDF('inv')">✉ Email PDF</button>
       <button class="btn btn-secondary" id="inv-mark-sent-btn" onclick="markInvoiceSent()" style="display:none">Mark Sent</button>
       <button class="btn btn-success" id="inv-mark-paid-btn" onclick="markInvoicePaid()" style="display:none">✓ Mark Paid</button>
       <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)" style="display:none">↩ Unpay</button>
@@ -1358,6 +1357,8 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
 
 // ══ GLOBAL STATE ══════════════════════════════════════════════════════════════
+<script>
+
 var _jobs         = [];
 var _chargeSheets = [];
 var _invoices     = [];
@@ -6529,152 +6530,16 @@ function renderTimesheets() {
   }).join('');
 }
 
-// ── Margin Report ─────────────────────────────────────────────────────────────
-function renderMarginReport() {
-  if (!isAdmin()) {
-    var kpiEl = document.getElementById('margin-kpis');
-    if (kpiEl) kpiEl.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:1rem">📈 Margin report is available to admin users only.</div>';
-    return;
-  }
-
-  var filterTech = (document.getElementById('margin-filter-tech') || {}).value || '';
-  var filterWO   = (document.getElementById('margin-filter-wo')   || {}).value || '';
-
-  // Populate tech filter dropdown
-  var techSel = document.getElementById('margin-filter-tech');
-  if (techSel && techSel.options.length <= 1) {
-    var allTechs = [...new Set(_jobs.flatMap(function(j) {
-      return (j.labourRows||[]).map(function(r){ return r.technician; });
-    }).filter(Boolean))].sort();
-    allTechs.forEach(function(t) {
-      var opt = document.createElement('option');
-      opt.value = t; opt.textContent = t;
-      techSel.appendChild(opt);
-    });
-  }
-
-  // Build per-WO margin rows
-  var woRows = [];
-  _jobs.forEach(function(wo) {
-    var woNum = wo.woNum || wo.number || '—';
-    if (filterWO && !woNum.toLowerCase().includes(filterWO.toLowerCase())) return;
-
-    // Get rate sheet — prefer WO rate sheet, then look for any invoice that used this WO, else first RS
-    var rs = _rateSheets.find(function(r){ return r.id === wo.rateSheetId; });
-    if (!rs) {
-      var linkedInv = _invoices.find(function(i){ return (i.chargeSheetIds||[]).indexOf(wo.id) > -1; });
-      rs = linkedInv ? _rateSheets.find(function(r){ return r.id === linkedInv.rateSheetId; }) : null;
-    }
-    rs = rs || _rateSheets[0] || {};
-
-    (wo.labourRows || []).forEach(function(row) {
-      var tech = row.technician || '—';
-      if (filterTech && tech !== filterTech) return;
-
-      var reg   = row.regHrs   || 0;
-      var ot    = row.otHrs    || 0;
-      var night = row.nightHrs || 0;
-      var totalHrs = reg + ot + night;
-      if (!totalHrs) return;
-
-      // Billed: from rate sheet
-      var cat = _findRateEntry(row.category, rs.labour) || {};
-      var stRate = cat.stRate || cat.rate || 0;
-      var otRate = cat.otRate || stRate * 1.5;
-      var nsRate = stRate * 1.15;
-      var billed = reg * stRate + ot * otRate + night * nsRate;
-
-      // Cost: from employee pay rate
-      var cost = calcRowCost(tech, reg, ot, night);
-
-      var margin    = billed - cost;
-      var marginPct = billed > 0 ? (margin / billed * 100) : (cost > 0 ? -100 : 0);
-
-      woRows.push({
-        woNum, client: wo.client||'—', tech, date: wo.date||'—',
-        reg, ot, night, billed, cost, margin, marginPct
-      });
-    });
-  });
-
-  // Summary KPIs
-  var totalBilled = woRows.reduce(function(s,r){ return s+r.billed; }, 0);
-  var totalCost   = woRows.reduce(function(s,r){ return s+r.cost;   }, 0);
-  var totalMargin = totalBilled - totalCost;
-  var avgPct = totalBilled > 0 ? (totalMargin / totalBilled * 100) : 0;
-
-  var kpiEl = document.getElementById('margin-kpis');
-  if (kpiEl) {
-    kpiEl.innerHTML = [
-      { val: _fmtMoneyImpl(totalBilled), lbl: 'Total Billed',  sub: 'Across filtered WOs',    color: '' },
-      { val: _fmtMoneyImpl(totalCost),   lbl: 'Total Cost',    sub: 'Employee pay (labour)',   color: 'rgba(239,68,68,.4)' },
-      { val: _fmtMoneyImpl(totalMargin), lbl: 'Gross Margin',  sub: 'Billed minus cost',       color: totalMargin >= 0 ? 'rgba(22,163,74,.4)' : 'rgba(239,68,68,.4)' },
-      { val: avgPct.toFixed(1) + '%',    lbl: 'Margin %',      sub: 'Gross margin / billed',   color: avgPct >= 30 ? 'rgba(22,163,74,.4)' : avgPct >= 0 ? 'rgba(245,158,11,.4)' : 'rgba(239,68,68,.4)' },
-    ].map(function(k) {
-      return '<div class="kpi-tile" style="border-color:' + (k.color||'rgba(255,255,255,.1)') + '">'
-        + '<div class="kpi-tile-val">' + k.val + '</div>'
-        + '<div class="kpi-tile-lbl">' + k.lbl + '</div>'
-        + '<div class="kpi-tile-sub">' + k.sub + '</div>'
-      + '</div>';
-    }).join('');
-  }
-
-  // WO-level table
-  var woBody = document.getElementById('margin-wo-body');
-  if (woBody) {
-    if (!woRows.length) {
-      woBody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:1.5rem;color:var(--muted)">No data — approve Work Orders and assign rate sheets to see margins</td></tr>';
-    } else {
-      woBody.innerHTML = woRows.map(function(r) {
-        var pctColor = r.marginPct >= 30 ? '#22C55E' : r.marginPct >= 0 ? '#F59E0B' : '#EF4444';
-        return '<tr>'
-          + '<td style="font-family:var(--mono);font-size:.72rem">' + r.woNum + '</td>'
-          + '<td style="font-size:.72rem">' + r.client.slice(0,20) + '</td>'
-          + '<td>' + r.tech + '</td>'
-          + '<td style="font-size:.72rem;color:var(--muted)">' + fmtDate(r.date) + '</td>'
-          + '<td style="text-align:right;font-family:var(--mono)">' + r.reg + '</td>'
-          + '<td style="text-align:right;font-family:var(--mono)">' + r.ot + '</td>'
-          + '<td style="text-align:right;font-family:var(--mono)">' + r.night + '</td>'
-          + '<td style="text-align:right;font-family:var(--mono)">' + _fmtMoneyImpl(r.billed) + '</td>'
-          + '<td style="text-align:right;font-family:var(--mono);color:#EF4444">' + _fmtMoneyImpl(r.cost) + '</td>'
-          + '<td style="text-align:right;font-family:var(--mono);color:' + pctColor + '">' + _fmtMoneyImpl(r.margin) + '</td>'
-          + '<td style="text-align:right;font-family:var(--mono);font-weight:700;color:' + pctColor + '">' + r.marginPct.toFixed(1) + '%</td>'
-        + '</tr>';
-      }).join('');
-    }
-  }
-
-  // Tech-level rollup
-  var techMap = {};
-  woRows.forEach(function(r) {
-    if (!techMap[r.tech]) techMap[r.tech] = { wos: new Set(), hrs: 0, billed: 0, cost: 0 };
-    techMap[r.tech].wos.add(r.woNum);
-    techMap[r.tech].hrs    += r.reg + r.ot + r.night;
-    techMap[r.tech].billed += r.billed;
-    techMap[r.tech].cost   += r.cost;
-  });
-
-  var techBody = document.getElementById('margin-tech-body');
-  if (techBody) {
-    var techRows = Object.keys(techMap).sort().map(function(tech) {
-      var d = techMap[tech];
-      var margin = d.billed - d.cost;
-      var pct = d.billed > 0 ? (margin / d.billed * 100) : 0;
-      var pctColor = pct >= 30 ? '#22C55E' : pct >= 0 ? '#F59E0B' : '#EF4444';
-      var emp = (NORTECH_EMPLOYEES||[]).find(function(e){ return e.name.toLowerCase()===tech.toLowerCase(); }) || {};
-      return '<tr>'
-        + '<td style="font-weight:600">' + tech + '</td>'
-        + '<td style="font-size:.72rem;color:var(--muted)">' + (emp.payType==='salary' ? 'Salary' : 'Hourly') + '</td>'
-        + '<td style="text-align:right;font-family:var(--mono)">' + d.wos.size + '</td>'
-        + '<td style="text-align:right;font-family:var(--mono)">' + d.hrs.toFixed(1) + '</td>'
-        + '<td style="text-align:right;font-family:var(--mono)">' + _fmtMoneyImpl(d.billed) + '</td>'
-        + '<td style="text-align:right;font-family:var(--mono);color:#EF4444">' + _fmtMoneyImpl(d.cost) + '</td>'
-        + '<td style="text-align:right;font-family:var(--mono);color:' + pctColor + '">' + _fmtMoneyImpl(margin) + '</td>'
-        + '<td style="text-align:right;font-family:var(--mono);font-weight:700;color:' + pctColor + '">' + pct.toFixed(1) + '%</td>'
-      + '</tr>';
-    });
-    techBody.innerHTML = techRows.length ? techRows.join('') : '<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--muted)">No data</td></tr>';
-  }
+// ── Email PDF ─────────────────────────────────────────────────────────────────
+function emailPDF(type, id) {
+  // Open print dialog first — user saves as PDF, then attaches to email
+  if (type === 'wo')         exportWO('pdf', id);
+  else if (type === 'ts')    exportTimesheet(id);
+  else                       printInvoice();
+  // Open default email client (Outlook, Apple Mail, etc.)
+  setTimeout(function() {
+    window.open('mailto:?subject=' + encodeURIComponent('Nortech Advanced NDT — Document'), '_blank');
+  }, 800);
 }
 
 // ── Event delegation for timesheets ──────────────────────────────────────────
@@ -6719,170 +6584,9 @@ document.addEventListener('click', function(e) {
 
 // ── Email / Share ────────────────────────────────────────────────────────────
 
-function showSharePicker(docType, docId) {
-  // docType: 'wo' | 'timesheet' | 'invoice'
-  // Build the document HTML and metadata first
-  var meta = buildShareMeta(docType, docId);
-  if (!meta) return;
 
-  // Remove any existing picker
-  var old = document.getElementById('share-picker-overlay');
-  if (old) old.remove();
 
-  var overlay = document.createElement('div');
-  overlay.className = 'share-picker-overlay';
-  overlay.id = 'share-picker-overlay';
-  overlay.innerHTML =
-    '<div class="share-picker">' +
-      '<div class="share-picker-title">Send ' + meta.label + '</div>' +
-      '<div class="share-picker-opts">' +
-        '<div class="share-opt" onclick="shareViaEmail('' + docType + '','' + docId + '')">' +
-          '<span class="share-opt-icon">✉️</span>Default email app (Outlook / Apple Mail)' +
-        '</div>' +
-        '<div class="share-opt" onclick="shareViaGmail('' + docType + '','' + docId + '')">' +
-          '<span class="share-opt-icon">📧</span>Gmail (browser)' +
-        '</div>' +
-        '<div class="share-opt" onclick="shareViaCopy('' + docType + '','' + docId + '')">' +
-          '<span class="share-opt-icon">📋</span>Copy summary to clipboard' +
-        '</div>' +
-      '</div>' +
-      '<button class="share-picker-cancel" onclick="document.getElementById('share-picker-overlay').remove()">Cancel</button>' +
-    '</div>';
 
-  // Close on backdrop click
-  overlay.addEventListener('click', function(e) {
-    if (e.target === overlay) overlay.remove();
-  });
-  document.body.appendChild(overlay);
-}
-
-function buildShareMeta(docType, docId) {
-  if (docType === 'wo') {
-    var id = docId || _editWOId;
-    var wo = _jobs.find(function(j){ return j.id === id; });
-    if (!wo) { toast('Work order not found', 'error'); return null; }
-    return {
-      label: 'Work Order',
-      subject: 'Work Order ' + (wo.woNum || wo.number || id) + ' — ' + (wo.client || ''),
-      body: 'Please find attached Work Order ' + (wo.woNum || wo.number || id) + '.
-
-' +
-            'Client: ' + (wo.client || '—') + '
-' +
-            'Site: ' + (wo.site || '—') + '
-' +
-            'Work Type: ' + (wo.workType || '—') + '
-' +
-            'Start Date: ' + (wo.startDate || '—') + '
-
-' +
-            'Please review and confirm receipt.
-
-Nortech Advanced NDT',
-      html: buildWOPrintHTML(wo),
-      filename: 'WorkOrder-' + (wo.woNum || wo.number || id) + '.html'
-    };
-  }
-  if (docType === 'timesheet') {
-    var tsId = docId || _editTSId;
-    var ts = _timesheets.find(function(t){ return t.id === tsId; });
-    if (!ts) { toast('Timesheet not found', 'error'); return null; }
-    var wo2 = ts.woId ? _jobs.find(function(j){ return j.id === ts.woId; }) : null;
-    var totalHrs = (ts.rows||[]).reduce(function(s,r){ return s+(r.regHrs||0)+(r.otHrs||0); }, 0);
-    return {
-      label: 'Timesheet',
-      subject: 'Timesheet — ' + (wo2 ? (wo2.woNum||wo2.number) : tsId) + ' — ' + (ts.techName || ''),
-      body: 'Please find attached timesheet for approval.
-
-' +
-            'Technician: ' + (ts.techName || '—') + '
-' +
-            'Work Order: ' + (wo2 ? (wo2.woNum||wo2.number||'') : '—') + '
-' +
-            'Client: ' + (wo2 ? (wo2.client||'') : '—') + '
-' +
-            'Total Hours: ' + totalHrs.toFixed(1) + '
-
-' +
-            'Please review and approve.
-
-Nortech Advanced NDT',
-      html: null,  // timesheet uses print window
-      filename: 'Timesheet-' + (wo2 ? (wo2.woNum||wo2.number||tsId) : tsId) + '.html'
-    };
-  }
-  if (docType === 'invoice') {
-    var body = document.getElementById('inv-view-body');
-    var title = document.getElementById('inv-view-title');
-    return {
-      label: 'Invoice',
-      subject: (title ? title.textContent : 'Invoice') + ' — Nortech Advanced NDT',
-      body: 'Please find attached invoice from Nortech Advanced NDT.
-
-Please remit payment as per the terms on the invoice.
-
-Nortech Advanced NDT',
-      html: body ? '<html><body style="font-family:Arial,sans-serif;padding:20px">' + body.innerHTML + '</body></html>' : null,
-      filename: (title ? title.textContent.replace(/[^a-z0-9]/gi,'_') : 'Invoice') + '.html'
-    };
-  }
-  return null;
-}
-
-function shareViaEmail(docType, docId) {
-  document.getElementById('share-picker-overlay').remove();
-  var meta = buildShareMeta(docType, docId);
-  if (!meta) return;
-
-  // Use mailto: — opens default email client (Outlook, Apple Mail, etc.)
-  var mailto = 'mailto:?subject=' + encodeURIComponent(meta.subject) +
-               '&body=' + encodeURIComponent(meta.body + (meta.html ? '
-
-[Document attached — see PDF export for file]' : ''));
-  window.open(mailto, '_blank');
-
-  // Also trigger PDF/print so they can attach it
-  setTimeout(function() {
-    toast('Email app opened. Use Export PDF to get the attachment file.', 'info');
-  }, 500);
-}
-
-function shareViaGmail(docType, docId) {
-  document.getElementById('share-picker-overlay').remove();
-  var meta = buildShareMeta(docType, docId);
-  if (!meta) return;
-
-  var gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1' +
-    '&su=' + encodeURIComponent(meta.subject) +
-    '&body=' + encodeURIComponent(meta.body);
-  window.open(gmailUrl, '_blank');
-  setTimeout(function() {
-    toast('Gmail opened. Use Export PDF to get the attachment file.', 'info');
-  }, 500);
-}
-
-function shareViaCopy(docType, docId) {
-  document.getElementById('share-picker-overlay').remove();
-  var meta = buildShareMeta(docType, docId);
-  if (!meta) return;
-
-  var text = meta.subject + '\n\n' + meta.body;
-  navigator.clipboard.writeText(text).then(function() {
-    toast('Email draft copied to clipboard — paste into any email', 'success');
-  }).catch(function() {
-    // Fallback
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    toast('Copied to clipboard', 'success');
-  });
-}
-t-align:center;padding:1.5rem;color:var(--muted)">No data</td></tr>';
-  }
-}
 
 // ── Event delegation for timesheets ──────────────────────────────────────────
 document.addEventListener('click', function(e) {
@@ -6921,19 +6625,8 @@ document.addEventListener('click', function(e) {
     return;
   }
 });
+
 
 </script>
-<!-- ══ Approval Actions Modal ══════════════════════════════════════════════ -->
-<div class="modal-overlay" id="approval-actions-modal">
-  <div class="modal" style="max-width:420px;width:90%">
-    <div class="modal-header">
-      <div class="modal-title">✓ Work Order Approved</div>
-      <button class="modal-close" onclick="closeModal('approval-actions-modal')">✕</button>
-    </div>
-    <div class="modal-body" id="approval-actions-body" style="padding:1.25rem"></div>
-  </div>
-</div>
-
-
 </body>
 </html>
