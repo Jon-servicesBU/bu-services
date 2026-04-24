@@ -817,6 +817,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <option value="submitted">Submitted</option>
         </select>
         <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="renderTimesheets()">
+        <button class="btn btn-secondary" onclick="exportPayroll()">⬇ Payroll Export</button>
       </div>
     </div>
     <!-- Weekly Hours Summary -->
@@ -6537,6 +6538,114 @@ function renderTimesheets() {
   }).join('');
 }
 
+
+// ── Payroll Export ─────────────────────────────────────────────────────────────
+function exportPayroll() {
+  var tsList = _timesheets;
+  if (!tsList.length) { toast('No timesheets to export', 'error'); return; }
+
+  // Build a flat record per technician per week
+  // Key: techName + weekEnding (Saturday of the row's week)
+  var records = {}; // key → {tech, week, reg, ot, dt, night, woNums}
+
+  function weekEnding(dateStr) {
+    // Return the Saturday of the week containing dateStr
+    var d = new Date(dateStr + 'T00:00:00');
+    if (isNaN(d)) return dateStr;
+    var day = d.getDay(); // 0=Sun,6=Sat
+    var diff = (6 - day + 7) % 7;
+    d.setDate(d.getDate() + diff);
+    return d.toISOString().slice(0,10);
+  }
+
+  tsList.forEach(function(ts) {
+    var wo = ts.woId ? (_jobs.find(function(j){ return j.id === ts.woId; }) || {}) : {};
+    var woNum = wo.woNum || wo.number || ts.woId || '';
+    (ts.rows || []).forEach(function(row) {
+      var tech = row.technician || ts.techName || 'Unknown';
+      var week = row.date ? weekEnding(row.date) : (ts.weekEnding || 'Unknown');
+      var key  = tech + '|' + week;
+      if (!records[key]) records[key] = { tech: tech, week: week, reg: 0, ot: 0, dt: 0, night: 0, woNums: [] };
+      records[key].reg   += row.regHrs   || 0;
+      records[key].ot    += row.otHrs    || 0;
+      records[key].dt    += row.dtHrs    || 0;
+      records[key].night += row.nightHrs || 0;
+      if (woNum && records[key].woNums.indexOf(woNum) === -1) records[key].woNums.push(woNum);
+    });
+  });
+
+  // Sort by week then tech
+  var rows = Object.values(records).sort(function(a,b) {
+    return a.week < b.week ? -1 : a.week > b.week ? 1 : a.tech < b.tech ? -1 : 1;
+  });
+
+  if (!rows.length) { toast('No hour data found in timesheets', 'error'); return; }
+
+  // Build per-technician cumulative totals
+  var cumulative = {};
+  rows.forEach(function(r) {
+    if (!cumulative[r.tech]) cumulative[r.tech] = { reg: 0, ot: 0, dt: 0, night: 0 };
+    cumulative[r.tech].reg   += r.reg;
+    cumulative[r.tech].ot    += r.ot;
+    cumulative[r.tech].dt    += r.dt;
+    cumulative[r.tech].night += r.night;
+  });
+
+  // Build CSV
+  var lines = [];
+  lines.push('NORTECH ADVANCED NDT — PAYROLL EXPORT');
+  lines.push('Generated: ' + new Date().toLocaleString());
+  lines.push('');
+  lines.push('WEEKLY HOURS BY TECHNICIAN');
+  lines.push('Technician,Week Ending,Reg Hours,OT Hours,DT Hours,Night Hours,Total Hours,Work Orders');
+  rows.forEach(function(r) {
+    var total = r.reg + r.ot + r.dt + r.night;
+    lines.push([
+      '"' + r.tech + '"',
+      r.week,
+      r.reg.toFixed(2),
+      r.ot.toFixed(2),
+      r.dt.toFixed(2),
+      r.night.toFixed(2),
+      total.toFixed(2),
+      '"' + r.woNums.join(', ') + '"'
+    ].join(','));
+  });
+
+  lines.push('');
+  lines.push('CUMULATIVE TOTALS BY TECHNICIAN');
+  lines.push('Technician,Total Reg,Total OT,Total DT,Total Night,Grand Total');
+  Object.keys(cumulative).sort().forEach(function(tech) {
+    var c = cumulative[tech];
+    var grand = c.reg + c.ot + c.dt + c.night;
+    lines.push([
+      '"' + tech + '"',
+      c.reg.toFixed(2),
+      c.ot.toFixed(2),
+      c.dt.toFixed(2),
+      c.night.toFixed(2),
+      grand.toFixed(2)
+    ].join(','));
+  });
+
+  // All-technician grand total
+  var allReg = 0, allOT = 0, allDT = 0, allNight = 0;
+  Object.values(cumulative).forEach(function(c) { allReg+=c.reg; allOT+=c.ot; allDT+=c.dt; allNight+=c.night; });
+  lines.push(['"TOTAL (ALL TECHNICIANS)"', allReg.toFixed(2), allOT.toFixed(2), allDT.toFixed(2), allNight.toFixed(2), (allReg+allOT+allDT+allNight).toFixed(2)].join(','));
+
+  // Download
+  var csv  = lines.join('\r\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url;
+  a.download = 'Nortech_Payroll_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Payroll CSV downloaded — ' + rows.length + ' weekly records, ' + Object.keys(cumulative).length + ' technicians', 'success');
+}
 
 // ── Event delegation for timesheets ──────────────────────────────────────────
 document.addEventListener('click', function(e) {
