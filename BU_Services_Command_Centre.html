@@ -425,23 +425,23 @@ function renderReconciliation(live) {
       var bg  = pos ? 'rgba(22,163,74,.12)' : v < 0 ? 'rgba(185,28,28,.12)' : 'rgba(100,120,160,.1)';
       var col = pos ? '#6EE7B7' : v < 0 ? '#F87171' : '#6678A0';
       var arrow = pos ? '▲ ' : v < 0 ? '▼ ' : '';
-      var note  = pos ? 'BC > SF — callout jobs not in Salesforce' :
-                  v < 0 ? 'SF > BC — check for early Closed Won entries' : 'No variance';
-      return '<div class="recon-variance" style="background:'+bg+'">' +
-        '<span style="color:'+col+';font-weight:700">'+arrow+(nd?'—':fmtDollar(Math.abs(v)))+'</span>' +
-        '<span style="color:var(--body);font-size:.68rem">' + (nd?'PENDING — BC connector not yet live':note) + '</span></div>';
+      var note  = pos ? 'BC > CRM — includes callout/T&M work' :
+                  v < 0 ? 'CRM > BC — check for early Closed Won entries' : 'Matched';
+      return '<div class="recon-variance" style="background:'+bg+';border-radius:5px;">' +
+        '<span style="color:'+col+';font-weight:700;font-family:var(--mono);font-size:.78rem">'+arrow+(nd?'—':fmtDollar(Math.abs(v)))+'</span>' +
+        '<span style="color:#7A8BB0;font-size:.66rem;margin-left:.3rem">' + (nd?'paste BC screenshot ↑':note) + '</span></div>';
     }
 
     return '<div class="recon-card">' +
-      '<div class="rc-title" style="border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:.5rem;margin-bottom:.65rem">' +
+      '<div class="rc-title" style="border-bottom:1px solid #EEF2FA;padding-bottom:.6rem;margin-bottom:.75rem">' +
         '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+color+';margin-right:.4rem"></span>' +
-        label + (nd?' <span style="font-size:.58rem;color:var(--body);font-weight:400">(awaiting BC connector)</span>':'') +
+        label + (nd?' <span style="font-size:.58rem;color:#E97132;font-weight:600">↑ paste BC screenshot</span>':'') +
       '</div>' +
-      '<div style="font-family:var(--mono);font-size:.6rem;color:var(--body);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.05em">This Month</div>' +
+      '<div style="font-family:var(--mono);font-size:.6rem;color:#8899BB;font-weight:700;margin:.25rem 0 .4rem;text-transform:uppercase;letter-spacing:.08em">This Month</div>' +
       barRow('SF Closed Won', sf_mtd, maxMtd, '#00AEEF') +
       barRow('BC Invoiced',   bc_mtd, maxMtd, color) +
       varRow(vMtd) +
-      '<div style="font-family:var(--mono);font-size:.6rem;color:var(--body);margin:.5rem 0 .3rem;text-transform:uppercase;letter-spacing:.05em">Year to Date</div>' +
+      '<div style="font-family:var(--mono);font-size:.6rem;color:#8899BB;font-weight:700;margin:.6rem 0 .4rem;text-transform:uppercase;letter-spacing:.08em">Year to Date</div>' +
       barRow('SF Closed Won', sf_ytd, maxYtd, '#00AEEF') +
       barRow('BC Invoiced',   bc_ytd, maxYtd, color) +
       varRow(vYtd) +
@@ -476,102 +476,133 @@ function statusBadge(s) {
 }
 
 function renderNuclearOutages(live) {
-  var alertEl  = document.getElementById('nuc-alert-container');
-  var summEl   = document.getElementById('nuc-summary-bar');
-  var gridEl   = document.getElementById('nuc-outage-grid');
-  var certEl   = document.getElementById('nuc-cert-bar');
+  var alertEl = document.getElementById('nuc-alert-container');
+  var summEl  = document.getElementById('nuc-summary-bar');
+  var gridEl  = document.getElementById('nuc-outage-grid');
+  var certEl  = document.getElementById('nuc-cert-bar');
   if (!gridEl) return;
 
-  var outages  = live.nuclear_outages  || [];
-  var summary  = live.nuclear_outage_summary || {};
+  var outages = live.nuclear_outages         || [];
+  var summary = live.nuclear_outage_summary  || {};
 
-  // Compute live days_until and rag
-  var red=0, amber=0, green=0, certAlerts=0, pipelineVal=0;
+  // Compute live countdown + RAG per outage
+  var red=0, amber=0, green=0, pipelineVal=0;
   outages.forEach(function(o) {
     o._days = daysUntil(o.start_date);
-    o._rag  = ragClass(o._days);
-    if (o._rag==='rag-red')   red++;
-    if (o._rag==='rag-amber') amber++;
-    if (o._rag==='rag-green') green++;
-
-    if (o.contract_status !== 'Not Pursuing') pipelineVal += (o.value_est_cad||0);
+    // RAG: <30d = red, 30-89 = amber, ≥90 = green
+    o._rag = o._days < 0 ? 'rag-past' : o._days < 30 ? 'rag-red' : o._days < 90 ? 'rag-amber' : 'rag-green';
+    if (o._rag === 'rag-red')   red++;
+    if (o._rag === 'rag-amber') amber++;
+    if (o._rag === 'rag-green') green++;
+    if (o.contract_status !== 'Not Pursuing') pipelineVal += (o.value_est_cad || 0);
   });
 
   // Alert banner
-  var alerts = [];
-  if (red > 0) alerts.push(red + ' outage window' + (red>1?'s are':'is') + ' less than 30 days away — action required');
+  if (alertEl) {
+    alertEl.innerHTML = red > 0
+      ? '<div class="nuc-alert-banner"><span class="nab-icon">⚠️</span><span class="nab-text"><strong>Alert:</strong> '
+          + red + ' outage window' + (red>1?'s':'') + ' less than 30 days away — action required</span></div>'
+      : '';
+  }
 
-  alertEl.innerHTML = alerts.length > 0 ? alerts.map(function(a) {
-    return '<div class="nuc-alert-banner"><span class="nab-icon">⚠️</span>' +
-      '<span class="nab-text"><strong>Alert: </strong>' + a + '</span></div>';
-  }).join('') : '';
+  // Summary tiles
+  var next = outages.slice().sort(function(a,b){ return a._days - b._days; })
+                    .find(function(o){ return o._days >= 0; });
+  var dCol = next ? (next._rag==='rag-red'?'#EF4444': next._rag==='rag-amber'?'#F59E0B':'#22C55E') : '#A0AEC0';
 
-  // Summary bar
-  var next = outages.slice().sort(function(a,b){return a._days - b._days}).find(function(o){return o._days >= 0;});
-  summEl.innerHTML = [
-    {val: outages.length,                    lbl:'Outages Tracked'},
-    {val: next ? next._days + 'd' : '—',     lbl:'Next Outage In',    col: next && next._rag==='rag-red'?'#F87171':next && next._rag==='rag-amber'?'#FCD34D':'#6EE7B7'},
-    {val: outages.filter(function(o){return o.contract_status!=='Not Pursuing';}).length, lbl:'Active Pipeline'},
-    {val: fmtDollar(pipelineVal)||'—',        lbl:'Pipeline Value Est.'},
-  ].map(function(t) {
-    return '<div class="prop-sum-tile"><div class="pst-val" style="' +
-      (t.col?'color:'+t.col:'') + '">' + t.val + '</div>' +
-      '<div class="pst-lbl">' + t.lbl + '</div></div>';
-  }).join('');
-
-  // Outage cards
-  // If only the blank template exists, show a prompt
   var realOutages = outages.filter(function(o){ return o.station && o.station.length > 0; });
+
+  if (summEl) {
+    summEl.innerHTML = [
+      { val: realOutages.length,                                                   lbl: 'Outages Tracked',   col: '' },
+      { val: next ? next._days + 'd' : '—',                                        lbl: 'Next Outage In',    col: dCol },
+      { val: realOutages.filter(function(o){return o.contract_status!=='Not Pursuing';}).length, lbl: 'Active Pipeline', col: '' },
+      { val: pipelineVal > 0 ? fmtDollar(pipelineVal) : '—',                      lbl: 'Pipeline Value',    col: pipelineVal>0?'#22C55E':'' },
+      { val: red > 0 ? red : green > 0 ? green : '—',                             lbl: red>0?'🔴 Urgent':'🟢 On Track', col: red>0?'#EF4444':'#22C55E' },
+    ].map(function(t) {
+      return '<div class="nuc-sum-tile">'
+        + '<div class="nst-val" style="' + (t.col ? 'color:'+t.col : '') + '">' + t.val + '</div>'
+        + '<div class="nst-lbl">' + t.lbl + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Empty state
   if (realOutages.length === 0) {
-    gridEl.innerHTML = '<div style="grid-column:1/-1;padding:1.5rem;text-align:center;' +
-      'background:var(--dark,#1C2B4A);border:1px dashed rgba(0,174,239,.3);border-radius:8px;">' +
-      '<div style="font-family:var(--mono);font-size:.72rem;color:#00AEEF;margin-bottom:.5rem;">NO OUTAGE RECORDS YET</div>' +
-      '<div style="font-size:.78rem;color:var(--body,#A8B8D0);line-height:1.7;">' +
-      'Jon or Olivier: open actuals.json on SharePoint → find <code>nuclear_outages</code> → ' +
-      'copy the <code>outage_001</code> template → fill in station, unit, dates, contract status → save.<br>' +
-      'The Command Centre will update automatically on next page load.</div></div>';
-    summEl.innerHTML = '<div class="prop-sum-tile"><div class="pst-val">0</div><div class="pst-lbl">Outages Tracked</div></div>' +
-      '<div class="prop-sum-tile"><div class="pst-val" style="color:var(--body)">—</div><div class="pst-lbl">Next Outage In</div></div>' +
-      '<div class="prop-sum-tile"><div class="pst-val">0</div><div class="pst-lbl">Active Pipeline</div></div>' +
-      '<div class="prop-sum-tile"><div class="pst-val">—</div><div class="pst-lbl">Pipeline Value Est.</div></div>';
-    certEl.innerHTML = '<div class="ncb-title">Nuclear Commercial Lead</div>' +
-      '<div style="font-size:.75rem;color:var(--body,#A8B8D0);line-height:1.7;">' +
-      '<strong>Olivier Marcotte</strong> — CRO · leads all Nuclear/OPG commercial activity<br>' +
-      'Nuclear specialist (legacy Nucleom): <strong style=\'color:var(--white)\'>Louis-Pier Théberge</strong> — Lead on new builds and refurbishments.</div>';
+    gridEl.innerHTML = '<div class="nuc-empty">'
+      + '<div class="nuc-empty-icon">⚛️</div>'
+      + '<div class="nuc-empty-title">No outage records yet</div>'
+      + '<div class="nuc-empty-sub">Jon or Olivier: paste an OPG/Bruce Power outage schedule via 📸 Vision-to-Data above<br>or update the nuclear_outages array in v2d_actuals</div>'
+      + '</div>';
+    if (certEl) certEl.innerHTML = _nucCommLeadHTML();
     return;
   }
-  outages = realOutages;
-  gridEl.innerHTML = outages.map(function(o) {
-    var isPast = o._days < 0;
-    var dLabel = isPast ? 'Completed ' + Math.abs(o._days) + 'd ago' :
-                 o._days === 0 ? 'STARTS TODAY' : o._days + ' days away';
-    var dColor = o._rag==='rag-red'?'#F87171':o._rag==='rag-amber'?'#FCD34D':'#6EE7B7';
-    return '<div class="nuc-card ' + o._rag + '">' +
-      '<div class="nc-station">' + o.station + '</div>' +
-      '<div class="nc-unit">' + o.unit + ' · ' + o.outage_type + '</div>' +
-      '<div class="nc-days" style="color:' + dColor + '">' + (isPast?'✓':o._days) + '</div>' +
-      '<div class="nc-days-label">' + dLabel + '</div>' +
-      '<div class="nc-row"><span class="nc-row-label">Window</span>' +
-        '<span class="nc-row-val">' + o.start_date + ' → ' + o.end_date + '</span></div>' +
-      '<div class="nc-row"><span class="nc-row-label">Status</span>' +
-        '<span>' + statusBadge(o.contract_status) + '</span></div>' +
-      '<div class="nc-row"><span class="nc-row-label">Value est.</span>' +
-        '<span class="nc-row-val">' + (o.value_est_cad ? fmtDollar(o.value_est_cad) : '—') + '</span></div>' +
 
-      (o.notes ? '<div style="margin-top:.4rem;font-size:.65rem;color:var(--body);font-style:italic">' + o.notes + '</div>' : '') +
-      '</div>';
+  // Sort: upcoming first by proximity, then past
+  var upcoming = realOutages.filter(function(o){ return o._days >= 0; })
+                             .sort(function(a,b){ return a._days - b._days; });
+  var past     = realOutages.filter(function(o){ return o._days < 0; })
+                             .sort(function(a,b){ return b._days - a._days; });
+  var sorted   = upcoming.concat(past);
+
+  gridEl.innerHTML = sorted.map(function(o) {
+    var isPast  = o._days < 0;
+    var ragColor = { 'rag-red':'#EF4444', 'rag-amber':'#F59E0B', 'rag-green':'#22C55E', 'rag-past':'#A0AEC0' };
+    var ragBg    = { 'rag-red':'rgba(239,68,68,.08)', 'rag-amber':'rgba(245,158,11,.08)', 'rag-green':'rgba(34,197,94,.08)', 'rag-past':'rgba(160,174,192,.06)' };
+    var col      = ragColor[o._rag] || '#A0AEC0';
+    var bg       = ragBg[o._rag]    || 'rgba(160,174,192,.06)';
+    var dLabel   = isPast ? 'Completed ' + Math.abs(o._days) + 'd ago'
+                          : o._days === 0 ? 'STARTS TODAY'
+                          : o._days + ' days away';
+
+    var statusColors = {
+      'Contracted':'#22C55E', 'Bid Submitted':'#3B82F6', 'Qualifying':'#F59E0B',
+      'Not Pursuing':'#A0AEC0', 'In Discussion':'#8B5CF6'
+    };
+    var stCol = statusColors[o.contract_status] || '#8899BB';
+
+    return '<div class="noc-card" style="border-top:3px solid ' + col + ';background:' + bg + '">'
+      // Header row: station + RAG dot
+      + '<div class="noc-hdr">'
+        + '<div>'
+          + '<div class="noc-station">' + (o.station || 'Station TBC') + '</div>'
+          + '<div class="noc-unit">' + (o.unit || '') + (o.outage_type ? ' · ' + o.outage_type : '') + '</div>'
+        + '</div>'
+        + '<div class="noc-countdown" style="color:' + col + '">'
+          + '<div class="noc-days">' + (isPast ? '✓' : o._days) + '</div>'
+          + '<div class="noc-days-lbl">' + dLabel + '</div>'
+        + '</div>'
+      + '</div>'
+      // Date window
+      + '<div class="noc-dates">'
+        + '<span class="noc-dates-lbl">Window</span>'
+        + '<span class="noc-dates-val">' + (o.start_date||'TBC') + ' → ' + (o.end_date||'TBC') + '</span>'
+      + '</div>'
+      // Contract status + value
+      + '<div class="noc-row">'
+        + '<span class="noc-status-pill" style="background:' + stCol + '20;color:' + stCol + ';border:1px solid ' + stCol + '40">' + (o.contract_status||'Unknown') + '</span>'
+        + (o.value_est_cad ? '<span class="noc-value">' + fmtDollar(o.value_est_cad) + '</span>' : '')
+      + '</div>'
+      // Leads
+      + '<div class="noc-leads">'
+        + (o.lead_owner ? '<span class="noc-lead">Commercial: ' + o.lead_owner + '</span>' : '')
+        + (o.nuclear_lead ? '<span class="noc-lead">Nuclear: ' + o.nuclear_lead + '</span>' : '')
+      + '</div>'
+      + (o.notes ? '<div class="noc-notes">' + o.notes + '</div>' : '')
+    + '</div>';
   }).join('');
 
-  // Cert bar
-
-  certEl.innerHTML = '<div class="ncb-title">Nuclear Commercial Lead</div>' +
-    '<div style="font-size:.75rem;color:var(--body,#A8B8D0);line-height:1.7;">' +
-    '<strong>Olivier Marcotte</strong> — CRO · leads all Nuclear/OPG commercial activity<br>' +
-    'Nuclear specialist (legacy Nucleom nuclear work): ' +
-    '<strong style=\'color:var(--white)\'>Louis-Pier Théberge</strong> — ' +
-    'Lead on new builds and refurbishments. Contact Olivier for eligibility and outage qualification details.' +
-    '</div>';
+  if (certEl) certEl.innerHTML = _nucCommLeadHTML();
 }
+
+function _nucCommLeadHTML() {
+  return '<div class="ncb-title">Nuclear Commercial Lead</div>'
+    + '<div style="font-size:.75rem;color:#4A5568;line-height:1.7;">'
+    + '<strong>Olivier Marcotte</strong> — CRO · leads all Nuclear/OPG commercial activity<br>'
+    + 'Nuclear specialist: <strong>Louis-Pier Théberge</strong> — Lead on new builds and refurbishments.'
+    + '</div>';
+}
+
 
 function renderAddOns(live) {
   renderProposals(live);
@@ -865,15 +896,918 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 .monthly-table .row-total td{color:#0A1F5C;border-top:1px solid rgba(255,255,255,0.12);}
 .monthly-table .row-total td:first-child{color:#0A1F5C;}
 .mc-zero{color:rgba(255,255,255,0.2)!important;}
-.monthly-toggle{display:flex;gap:0.5rem;margin-left:auto;}
 .mt-btn{font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.22rem 0.6rem;border-radius:4px;border:1px solid rgba(255,255,255,0.15);color:#6678A0;background:transparent;cursor:pointer;transition:all .15s;}
 .mt-btn.active{background:rgba(255,255,255,0.1);color:#0A1F5C;border-color:rgba(255,255,255,0.3);}
-/* ── REVENUE CHART ── */
-.rev-chart-wrap{background:#F4F7FB;border:1px solid #D0DCF0;border-radius:10px;padding:1.5rem;}
-.rev-chart-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;}
-.rev-chart-title{font-family:var(--fd);font-size:1rem;font-weight:700;color:#0A1F5C;}
-.rev-chart-sub{font-size:0.75rem;color:rgba(255,255,255,0.3);margin-top:0.2rem;}
-.rev-legend{display:flex;gap:1.2rem;flex-wrap:wrap;}
+.monthly-toggle{display:flex;gap:0.5rem;margin-left:auto;}.rev-legend{display:flex;gap:1.2rem;flex-wrap:wrap;}
+.rev-leg-item{display:flex;align-items:center;gap:0.4rem;font-size:0.72rem;color:#4A5F88;}
+.rev-leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.chart-bars{display:flex;gap:1rem;align-items:flex-end;height:200px;padding-bottom:1.5rem;position:relative;}
+.chart-bars::before{content:'';position:absolute;left:0;right:0;bottom:1.5rem;height:1px;background:#FFFFFF;}
+.bar-group{flex:1;display:flex;gap:3px;align-items:flex-end;position:relative;}
+.bar{flex:1;border-radius:3px 3px 0 0;min-width:8px;transition:opacity .2s;}
+.bar:hover{opacity:0.85;}
+.bar-year{position:absolute;bottom:-1.2rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:0.65rem;color:rgba(255,255,255,0.3);white-space:nowrap;}
+
+/* ── TIMELINE ── */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-row{display:flex;gap:1rem;align-items:flex-start;padding:0.75rem 0;border-bottom:1px solid #E2EAF5;}
+.tl-row:last-child{border-bottom:none;}
+.tl-date{font-family:var(--mono);font-size:0.72rem;color:rgba(255,255,255,0.3);min-width:90px;padding-top:0.1rem;}
+.tl-dot-col{display:flex;flex-direction:column;align-items:center;padding-top:0.25rem;}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.tl-content{flex:1;}
+.tl-label{font-size:0.84rem;color:rgba(255,255,255,0.8);}
+.tl-note{font-size:0.74rem;color:rgba(255,255,255,0.3);margin-top:0.15rem;}
+
+/* ── FOOTER ── */
+.footer{background:#F4F7FB;border-top:1px solid #E2EAF5;padding:1.5rem 2rem;text-align:center;}
+.footer p{font-size:0.72rem;color:rgba(255,255,255,0.2);}
+.config-hint{margin-top:0.4rem;font-family:var(--mono);font-size:0.65rem;color:#4A5F88;}
+
+/* ── EMAIL DIGEST SECTION ── */
+.digest-box{background:#F4F7FB;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:1.5rem;position:relative;overflow:hidden;}
+.digest-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green2),transparent);}
+.digest-title{font-family:var(--fd);font-size:1rem;font-weight:700;color:#0A1F5C;margin-bottom:0.35rem;}
+.digest-sub{font-size:0.8rem;color:#6678A0;margin-bottom:1.25rem;line-height:1.6;}
+.digest-preview{background:var(--white);border-radius:8px;padding:1.5rem;color:#1A1A2E;}
+.dp-header{background:#161C60;border-radius:6px 6px 0 0;margin:-1.5rem -1.5rem 1.25rem;padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.dp-brand{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:900;color:#FFFFFF;letter-spacing:1px;}
+.dp-date{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:#4A5F88;}
+.dp-section{margin-bottom:1.1rem;}
+.dp-section-hdr{font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#8892A4;border-bottom:1px solid #E0E4EF;padding-bottom:0.35rem;margin-bottom:0.65rem;}
+.dp-gate-row{display:flex;align-items:center;gap:0.6rem;padding:0.3rem 0;font-size:0.8rem;color:#384660;}
+.dp-gate-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dp-num{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:900;color:#161C60;}
+.dp-num-lbl{font-size:0.68rem;color:#8892A4;}
+.dp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-top:0.5rem;}
+.dp-kpi{background:#F0F3FA;border-radius:6px;padding:0.65rem 0.75rem;text-align:center;}
+.dp-footer{font-size:0.7rem;color:#8892A4;text-align:center;border-top:1px solid #E0E4EF;padding-top:0.75rem;margin-top:0.5rem;}
+.copy-btn{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(61,219,80,0.12);border:1px solid rgba(61,219,80,0.3);color:#16A34A;font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.4rem 0.9rem;border-radius:5px;cursor:pointer;margin-top:1rem;transition:background .15s;}
+.copy-btn:hover{background:rgba(61,219,80,0.2);}
+
+/* ── CONFERENCE ROI SECTION ── */
+.conf-roi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin:.75rem 0 1.5rem;}
+.conf-roi-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;position:relative;}
+.conf-roi-card .card-label{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.3rem;}
+.conf-roi-card .card-value{font-size:1.6rem;font-weight:700;color:var(--text);line-height:1;}
+.conf-roi-card .card-sub{font-size:.68rem;color:var(--muted);margin-top:.2rem;}
+.conf-roi-card .card-delta{position:absolute;top:.7rem;right:.85rem;font-family:var(--mono);font-size:.65rem;font-weight:700;padding:.15rem .4rem;border-radius:4px;}
+.conf-table-wrap{overflow-x:auto;margin:.5rem 0 1.5rem;}
+.conf-table{width:100%;border-collapse:collapse;font-size:.78rem;}
+.conf-table th{text-align:left;font-family:var(--mono);font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:.4rem .7rem;border-bottom:2px solid var(--border);white-space:nowrap;}
+.conf-table td{padding:.42rem .7rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+.conf-table tr:hover td{background:var(--hover,rgba(255,255,255,.04));}
+.conf-badge-bu{display:inline-block;font-size:.6rem;font-weight:700;padding:.1rem .38rem;border-radius:3px;background:#DCFCE7;color:#16A34A;}
+.conf-badge-ek{display:inline-block;font-size:.6rem;font-weight:700;padding:.1rem .38rem;border-radius:3px;background:#DBEAFE;color:#1A5CA8;}
+.conf-badge-jt{display:inline-block;font-size:.6rem;font-weight:700;padding:.1rem .38rem;border-radius:3px;background:#FEF3C7;color:#C9860A;}
+.conf-status-done{color:#16A34A;font-weight:700;}
+.conf-status-upcoming{color:#6678A0;}
+.conf-status-approved{color:#16A34A;}
+.conf-status-pending{color:#C9860A;}
+.conf-status-rejected{color:#B91C1C;}
+.conf-bar-wrap{display:flex;align-items:center;gap:.5rem;}
+.conf-bar-bg{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.conf-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
+.conf-toggle-btn{font-family:var(--mono);font-size:.65rem;font-weight:600;padding:.28rem .7rem;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;margin:.5rem .5rem .5rem 0;transition:all .15s;}
+.conf-toggle-btn.active{background:var(--accent,#00AEEF);color:#fff;border-color:transparent;}
+.conf-toggle-btn:hover{border-color:var(--accent,#00AEEF);color:var(--accent,#00AEEF);}
+
+
+/* ── DATA SOURCE BANNER ── */
+.data-src-banner{display:flex;align-items:center;gap:.55rem;padding:.3rem .85rem;
+  background:rgba(0,174,239,.07);border:1px solid rgba(0,174,239,.18);
+  border-radius:5px;margin:.5rem 0 .9rem;flex-wrap:wrap;}
+.data-src-banner .dsb-icon{font-size:.75rem;opacity:.7;flex-shrink:0;}
+.data-src-banner .dsb-text{font-family:var(--mono);font-size:.62rem;color:#00AEEF;
+  letter-spacing:.04em;opacity:.85;}
+.data-src-banner .dsb-sep{color:rgba(0,174,239,.3);font-size:.65rem;}
+.data-src-banner .dsb-tag{font-family:var(--mono);font-size:.58rem;font-weight:700;
+  padding:.1rem .32rem;border-radius:3px;background:rgba(0,174,239,.15);
+  color:#7DD3FC;letter-spacing:.03em;}
+.data-src-banner.dsb-manual{background:rgba(201,134,10,.07);border-color:rgba(201,134,10,.25);}
+.data-src-banner.dsb-manual .dsb-text{color:#C9860A;}
+.data-src-banner.dsb-manual .dsb-tag{background:rgba(201,134,10,.15);color:#FCD34D;}
+.data-src-banner.dsb-green{background:rgba(22,163,74,.07);border-color:rgba(22,163,74,.25);}
+.data-src-banner.dsb-green .dsb-text{color:#16A34A;}
+.data-src-banner.dsb-green .dsb-tag{background:rgba(22,163,74,.15);color:#6EE7B7;}
+
+/* ── PROPOSAL HEALTH SECTION ── */
+.prop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin:.75rem 0 1.5rem;}
+.prop-card{background:var(--dark,#1C2B4A);border:1px solid var(--mid,#2D4A7A);
+  border-radius:8px;padding:.85rem 1rem;position:relative;overflow:hidden;}
+.prop-card .pc-init{font-family:var(--mono);font-size:.62rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;}
+.prop-card .pc-row{display:flex;justify-content:space-between;align-items:baseline;
+  margin:.25rem 0;}
+.prop-card .pc-label{font-size:.7rem;color:var(--body,#A8B8D0);}
+.prop-card .pc-val{font-family:var(--mono);font-size:.95rem;font-weight:700;}
+.prop-card .pc-stalled{font-family:var(--mono);font-size:1.3rem;font-weight:800;}
+.prop-card.stalled-alert{border-color:#B91C1C;box-shadow:0 0 0 1px rgba(185,28,28,.3);}
+.prop-card .pc-pill{font-size:.6rem;font-weight:700;padding:.12rem .38rem;
+  border-radius:3px;margin-left:.35rem;}
+.prop-summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;
+  margin:.5rem 0 1.5rem;}
+.prop-sum-tile{background:var(--dark,#1C2B4A);border:1px solid var(--mid,#2D4A7A);
+  border-radius:6px;padding:.6rem .8rem;text-align:center;}
+.prop-sum-tile .pst-val{font-family:var(--mono);font-size:1.4rem;font-weight:800;
+  color:var(--white,#E8EDF5);}
+.prop-sum-tile .pst-lbl{font-size:.65rem;color:var(--body,#A8B8D0);margin-top:.2rem;}
+
+/* ── RECONCILIATION SECTION ── */
+.recon-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin:.85rem 0 1.5rem;}
+.recon-card{background:#fff;border:1px solid #D0DCF0;border-radius:10px;padding:1rem 1.1rem;box-shadow:0 2px 8px rgba(10,31,92,.06);}
+.recon-card .rc-title{font-family:var(--mono);font-size:.72rem;font-weight:700;color:#0A1F5C;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:.5rem;}
+.recon-bar-row{display:flex;align-items:center;gap:.6rem;margin:.3rem 0;}
+.recon-bar-row .rb-label{font-size:.7rem;color:#7A8BB0;width:120px;flex-shrink:0;}
+.recon-bar-row .rb-bar{flex:1;height:8px;background:#E8EDF8;border-radius:4px;overflow:hidden;}
+.recon-bar-row .rb-fill{height:100%;border-radius:4px;transition:width .4s;}
+.recon-bar-row .rb-val{font-family:var(--mono);font-size:.68rem;
+  color:var(--white,#E8EDF5);min-width:60px;text-align:right;}
+.recon-variance{display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;
+  border-radius:5px;margin:.5rem 0;font-family:var(--mono);font-size:.72rem;}
+.recon-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;
+  margin:.5rem 0 1.5rem;}
+.recon-kpi{background:var(--dark,#1C2B4A);border:1px solid var(--mid,#2D4A7A);
+  border-radius:6px;padding:.6rem .8rem;text-align:center;}
+.recon-kpi .rk-val{font-family:var(--mono);font-size:1.3rem;font-weight:800;}
+.recon-kpi .rk-lbl{font-size:.63rem;color:var(--body,#A8B8D0);margin-top:.2rem;}
+
+/* ── NUCLEAR OUTAGE CALENDAR ── */
+.nuc-outage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin:.85rem 0;}
+.nuc-card{background:var(--dark,#1C2B4A);border:1px solid var(--mid,#2D4A7A);
+  border-radius:8px;padding:.85rem 1rem;position:relative;overflow:hidden;}
+.nuc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+.nuc-card.rag-green::before{background:#16A34A;}
+.nuc-card.rag-amber::before{background:#C9860A;}
+.nuc-card.rag-red::before{background:#B91C1C;}
+.nuc-card .nc-station{font-weight:700;font-size:.85rem;color:var(--white,#E8EDF5);
+  margin-bottom:.15rem;}
+.nuc-card .nc-unit{font-size:.72rem;color:var(--body,#A8B8D0);margin-bottom:.55rem;}
+.nuc-card .nc-days{font-family:var(--mono);font-size:2rem;font-weight:800;
+  line-height:1;margin-bottom:.1rem;}
+.nuc-card .nc-days-label{font-size:.62rem;color:var(--body,#A8B8D0);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:.55rem;}
+.nuc-card .nc-row{display:flex;justify-content:space-between;align-items:center;
+  padding:.25rem 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.72rem;}
+.nuc-card .nc-row:last-child{border-bottom:none;}
+.nuc-card .nc-row-label{color:var(--body,#A8B8D0);}
+.nuc-card .nc-row-val{font-weight:600;color:var(--white,#E8EDF5);}
+.nuc-status-badge{display:inline-block;font-size:.6rem;font-weight:700;
+  padding:.1rem .4rem;border-radius:3px;}
+.nuc-status-badge.msa{background:#EDE9FE;color:#6D28D9;}
+.nuc-status-badge.quoted{background:#DBEAFE;color:#1A5CA8;}
+.nuc-status-badge.awarded{background:#DCFCE7;color:#16A34A;}
+.nuc-status-badge.not-pursuing{background:#F4F7FB;color:#6678A0;}
+.nuc-cert-bar{background:var(--dark,#1C2B4A);border:1px solid var(--mid,#2D4A7A);
+  border-radius:8px;padding:.85rem 1rem;margin:.5rem 0 1.5rem;}
+.nuc-cert-bar .ncb-title{font-family:var(--mono);font-size:.65rem;font-weight:700;
+  color:var(--body,#A8B8D0);text-transform:uppercase;letter-spacing:.06em;
+  margin-bottom:.65rem;}
+.nuc-cert-row{display:flex;align-items:center;gap:.6rem;margin:.3rem 0;}
+.nuc-cert-row .ncr-label{font-size:.72rem;font-weight:600;
+  color:var(--white,#E8EDF5);width:90px;flex-shrink:0;}
+.nuc-cert-row .ncr-expiry{font-family:var(--mono);font-size:.68rem;
+  color:var(--body,#A8B8D0);width:120px;}
+.nuc-cert-row .ncr-status{font-size:.62rem;font-weight:700;padding:.1rem .38rem;
+  border-radius:3px;}
+.nuc-cert-row .ncr-status.valid{background:#DCFCE7;color:#16A34A;}
+.nuc-cert-row .ncr-status.warn{background:#FEF3C7;color:#C9860A;}
+.nuc-cert-row .ncr-status.expired{background:#FEE2E2;color:#B91C1C;}
+.nuc-alert-banner{display:flex;align-items:flex-start;gap:.6rem;padding:.65rem .85rem;
+  background:rgba(185,28,28,.1);border:1px solid rgba(185,28,28,.35);
+  border-radius:6px;margin:.5rem 0 .75rem;}
+.nuc-alert-banner .nab-icon{font-size:1rem;flex-shrink:0;margin-top:.05rem;}
+.nuc-alert-banner .nab-text{font-size:.75rem;color:#FCA5A5;line-height:1.6;}
+
+
+
+
+
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION GROUP BANNERS + SECTION BREAKS
+   Group banners: full-bleed dark bands dividing major sections
+   Section headers: full-bleed light band for each individual section
+   Both use negative margin to escape the .page max-width container
+   ══════════════════════════════════════════════════════════════════ */
+
+/* GROUP BANNER — large dark divider between major groups */
+.group-break {
+  margin: 4.5rem -2rem 0;
+  padding: 1.2rem 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: linear-gradient(90deg, #0A1F5C 0%, #1A3A7A 55%, #1A5CA8 100%);
+  border-top: 4px solid #00AEEF;
+  border-bottom: 3px solid #00AEEF;
+  box-shadow: 0 4px 16px rgba(10,31,92,0.22);
+}
+.group-break-label {
+  font-family: var(--fb);
+  font-size: 0.95rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+.group-break-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.25);
+}
+.group-break-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #00AEEF;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(0,174,239,0.9);
+}
+
+/* SECTION HEADER — full-bleed strip for each individual section */
+.sec-hdr {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 3rem -2rem 1.5rem;
+  padding: 0.8rem 2.5rem;
+  background: #F0F3FA;
+  border-top: 3px solid #DDE3F0;
+  border-bottom: 3px solid #DDE3F0;
+}
+/* First sec-hdr after a group banner needs less top margin */
+.group-break + .sec-hdr,
+.group-break + .data-src-banner + .sec-hdr {
+  margin-top: 1.75rem;
+}
+
+/* ── CURRENCY TOGGLE BUTTON ── */
+.currency-toggle-btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-family:var(--fd);font-size:.68rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  padding:.35rem .85rem;border-radius:6px;cursor:pointer;
+  border:1px solid #E97132;
+  background:#E97132;color:#fff;transition:all .15s;white-space:nowrap;
+}
+.currency-toggle-btn:hover{background:#c75e1f;border-color:#c75e1f;}
+
+/* ── EXPORT BUTTON ── */
+.avb-export-btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-family:var(--fd);font-size:.72rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  padding:.45rem 1.1rem;border-radius:6px;cursor:pointer;border:none;
+  background:#161C60;color:#fff;transition:background .15s;
+}
+.avb-export-btn:hover{background:#2D5A8E;}
+.avb-export-btn:disabled{background:#8892A4;cursor:not-allowed;}
+.avb-export-spinner{display:none;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js"></script>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <div class="topbar-brand">BU Services</div>
+  <div class="topbar-sep"></div>
+  <div class="topbar-nav">
+    <a href="#overview" class="active">Overview</a>
+    <a href="#revenue">Revenue</a>
+    <a href="#actuals-vs-budget">Actuals vs Budget</a>
+    <a href="#monthly">Monthly</a>
+    <a href="#regions">Regions</a>
+    <a href="#performance">Performance</a>
+    <a href="#initiatives">Initiatives</a>
+    <a href="#gates">Gates</a>
+    <a href="#meetings">Meeting Health</a>
+    <a href="#risks">Risks</a>
+    <a href="#documents">Documents</a>
+    <a href="#conferences">Conferences</a>
+    <a href="#proposals">Proposals</a>
+    <a href="#reconciliation">Recon</a>
+    <a href="#nuclear">Nuclear</a>
+    <a href="#digest">Email Digest</a>
+  </div>
+  <div class="topbar-right">
+    <div class="live-dot"></div>
+    <span class="live-label" id="live-label">Live</span>
+    <span class="update-label" id="update-label"></span>
+  </div>
+</nav>
+<!-- ── BU Services system navigation ──────────────────────────────────── -->
+<div class="sysbar">
+  <span class="sysbar-label">BU Services</span>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">Hub</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_People_Dashboard.html" target="buservices">People</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">Meetings</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">CRM</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Nortech_Ops.html" target="buservices">Nortech Ops</a>
+  <span class="sysbtn sysbtn-active">Command Centre</span>
+</div>
+
+
+
+<!-- HERO -->
+<div class="hero" id="overview">
+  <div class="hero-wrap">
+    <div class="hero-eyebrow">Ekoscan Integrity Group &nbsp;·&nbsp; North America</div>
+    <h1>BU Services<br><em>Command Centre</em></h1>
+    <p class="hero-sub">Master Commercial Plan 2026–2030. Five growth initiatives. Live gate tracking. All documents in one place.</p>
+
+</div>
+    <div class="kpi-row" id="kpi-row"></div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="group-break" style="margin-top:0">
+    <span class="group-break-dot"></span>
+    <span class="group-break-label">💰&nbsp; Revenue &amp; Performance</span>
+    <span class="group-break-line"></span>
+  </div>
+
+  <!-- ── REVENUE FOUNDATION ── -->
+  <div class="sec-hdr" id="revenue" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+    <div>
+      <h2>Revenue Actuals</h2>
+      <span class="sec-count" id="rf-count">Live actuals · Nucleom · Nortech · Intact</span>
+    </div>
+    <button class="currency-toggle-btn" onclick="toggleCurrency()" title="Currently showing CAD">€ Switch to EUR</button>
+  </div>
+
+  <div id="actuals-panel" class="actuals-panel"></div>
+  <!-- rf-entities removed — replaced by actuals-panel above -->
+
+  <!-- ── Vision-to-Data Panel — replaces Power Automate ── -->
+  <div id="v2d-panel" style="margin-bottom:1.5rem;background:#fff;border:1px solid #D0DCF0;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(10,31,92,.06)">
+    <div onclick="document.getElementById('v2d-body').classList.toggle('v2d-open')"
+      style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.1rem;border-bottom:1px solid #EEF2FA;cursor:pointer;background:linear-gradient(135deg,#0A1F5C 0%,#1A5CA8 100%)">
+      <div style="display:flex;align-items:center;gap:.65rem">
+        <span style="font-size:1.1rem">📸</span>
+        <div>
+          <div style="font-weight:800;font-size:.85rem;color:#fff;letter-spacing:-.01em">Vision-to-Data — Update Actuals</div>
+          <div style="font-size:.65rem;color:rgba(255,255,255,.55);margin-top:.05rem">Drop a screenshot · Claude reads it · applies to the right company automatically</div>
+        </div>
+      </div>
+      <span style="font-size:.7rem;color:rgba(255,255,255,.5);font-family:monospace" id="v2d-last-update-lbl">▼ expand</span>
+    </div>
+    <div id="v2d-body" style="display:none">
+      <div style="padding:.85rem 1.1rem;border-bottom:1px solid #EEF2FA;background:#FAFBFF">
+        <div style="font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#8899BB;margin-bottom:.5rem">How it works</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;font-size:.72rem;color:#4A5568">
+          <div style="background:#EEF2FA;border-radius:6px;padding:.45rem .6rem"><strong>1.</strong> Drop or paste any screenshot — BC report, SF dashboard, Excel file, anything</div>
+          <div style="background:#EEF2FA;border-radius:6px;padding:.45rem .6rem"><strong>2.</strong> Claude identifies the company (Nucleom / Nortech / Intact) and extracts every number</div>
+          <div style="background:#EEF2FA;border-radius:6px;padding:.45rem .6rem"><strong>3.</strong> All matching fields update across the CC — actuals, monthly, performance, regions</div>
+        </div>
+      </div>
+      <div style="padding:.85rem 1.1rem">
+        <!-- Image drop / paste zone -->
+        <div id="v2d-dropzone"
+          onclick="document.getElementById('v2d-file-input').click()"
+          ondragover="event.preventDefault();this.style.borderColor='#1A5CA8';this.style.background='#EEF5FF'"
+          ondragleave="this.style.borderColor='#D0DCF0';this.style.background=''"
+          ondrop="v2dHandleDrop(event)"
+          style="border:2px dashed #D0DCF0;border-radius:8px;padding:1.4rem;text-align:center;cursor:pointer;margin-bottom:.75rem;transition:all .2s;position:relative">
+          <div id="v2d-drop-prompt">
+            <div style="font-size:2rem;margin-bottom:.35rem">📋</div>
+            <div style="font-size:.82rem;font-weight:600;color:#4A5568;margin-bottom:.2rem">Drop screenshot here, or click to select</div>
+            <div style="font-size:.7rem;color:#8899BB">PNG · JPG · PDF · Ctrl+V to paste from clipboard</div>
+          </div>
+          <div id="v2d-preview" style="display:none">
+            <img id="v2d-img" style="max-height:140px;max-width:100%;border-radius:6px;border:1px solid #D0DCF0;margin-bottom:.4rem" />
+            <div id="v2d-img-name" style="font-size:.68rem;color:#8899BB"></div>
+          </div>
+          <input id="v2d-file-input" type="file" accept="image/*,.pdf" style="display:none" onchange="v2dHandleFile(this.files[0])" />
+        </div>
+        <!-- Text hint (optional) -->
+        <div style="margin-bottom:.75rem">
+          <label style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8899BB;display:block;margin-bottom:.3rem">
+            Optional context hint <span style="font-weight:400;text-transform:none;letter-spacing:0">(or paste numbers directly if no screenshot)</span>
+          </label>
+          <input id="v2d-hint" type="text" placeholder="e.g. 'Nucleom April invoiced $2.3M YTD' or paste any text with numbers"
+            style="width:100%;padding:.42rem .7rem;border:1px solid #D0DCF0;border-radius:6px;font-size:.78rem;color:#0A1F5C;box-sizing:border-box" />
+        </div>
+        <!-- Action row -->
+        <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+          <button onclick="v2dPasteClipboard()" style="padding:.38rem .8rem;background:#EEF2FA;border:1px solid #D0DCF0;border-radius:6px;font-size:.75rem;font-weight:600;color:#0A1F5C;cursor:pointer">📋 Paste Clipboard</button>
+          <button id="v2d-extract-btn" onclick="v2dExtract()"
+            style="padding:.42rem 1.3rem;background:#0A1F5C;border:none;border-radius:6px;font-size:.8rem;font-weight:700;color:#fff;cursor:pointer">
+            ⚡ Extract &amp; Apply to CC
+          </button>
+          <button onclick="v2dShowStore()" style="padding:.38rem .7rem;background:#F7F8FC;border:1px solid #D0DCF0;border-radius:6px;font-size:.72rem;color:#8899BB;cursor:pointer">📊 View Store</button>
+          <div id="v2d-result" style="flex:1;font-size:.76rem;color:#1A7A4A;padding:.38rem 0;min-height:1.4rem;font-weight:500"></div>
+        </div>
+        <!-- Result detail -->
+        <div id="v2d-detail" style="display:none;margin-top:.65rem;background:#F7FBF7;border:1px solid #C6E6CC;border-radius:6px;padding:.65rem .85rem;font-size:.73rem;line-height:1.7;color:#2D6A4F"></div>
+        <!-- Log -->
+        <div id="v2d-log" style="margin-top:.6rem;font-size:.65rem;color:#A0AEC0;border-top:1px solid #EEF2FA;padding-top:.45rem"></div>
+      </div>
+    </div>
+  </div>
+
+    <!-- ── ACTUALS VS BUDGET ── -->
+  <div class="sec-hdr" id="actuals-vs-budget" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+    <div>
+      <h2>Actuals vs. Budget — 2026 Monthly</h2>
+      <span class="sec-count" id="avb-count">Monthly actuals vs. EIG/Eurazeo 2026 budget · EUR k converted to CAD</span>
+    </div>
+    <button class="currency-toggle-btn" onclick="toggleCurrency()" title="Currently showing CAD">€ Switch to EUR</button>
+  </div>
+  <div class="data-src-banner"><span class="dsb-icon">✏️</span><span class="dsb-text">Budget figures are loaded from the EIG/Eurazeo 2026 forecast (EUR k) hardcoded in CONFIG.budget2026. Actuals for each entity are entered monthly in CONFIG.monthly — same keys as the monthly revenue section. EUR→CAD conversion uses CONFIG.eur_cad (update as the rate changes). Consolidated view merges Nucleom + Arcanite → "Nucleom" and Nortech + RockX → "Nortech".</span></div>
+  <div class="avb-wrap" id="avb-wrap"></div>
+
+  <!-- ── MONTHLY REVENUE ── -->
+  <div class="sec-hdr" id="monthly" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+    <div>
+      <h2>Revenue by Month — 2026 Actuals</h2>
+      <span class="sec-count" id="monthly-count">Base business + initiative actuals · Jan–Dec 2026</span>
+    </div>
+    <button class="currency-toggle-btn" onclick="toggleCurrency()" title="Currently showing CAD">€ Switch to EUR</button>
+  </div>
+<div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>Nucleom</strong> revenue by month — from BU Services CRM (Closed Won grouped by close date, updates on every page load). <strong>Nortech</strong> revenue by month — from Nortech Ops (auto-push on every invoice mark-sent/paid). <strong>Intact + Initiatives</strong> — paste any BC/management report screenshot via the 📸 Vision-to-Data panel; Claude identifies the company and populates the correct month. <strong>KPI fields</strong> (hours, utilisation, rate, cost, margin) — paste Jeremy's monthly payroll summary via Vision-to-Data; Claude reads nuc_hours, nor_hours etc. and fills the KPI rows.</span></div>
+  <div class="monthly-wrap" id="monthly-wrap">
+  <div class="group-break">
+    <span class="group-break-dot"></span>
+    <span class="group-break-label">📋&nbsp; Operations</span>
+    <span class="group-break-line"></span>
+  </div>
+</div>
+
+  <!-- ── NUCLEOM REGIONS ── -->
+  <div class="sec-hdr" id="regions">
+    <h2>Nucleom Revenue by Region</h2>
+    <span class="sec-count" id="reg-count">2026 actuals vs. pipeline · Salesforce live</span>
+  </div>
+<div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>Closed Won by region</strong> comes from BU Services CRM automatically — opportunities are grouped by their Region field on every page load. <strong>Utilisation %</strong> per region — paste the ops leads weekly report via 📸 Vision-to-Data; Claude reads each region's utilisation figure and applies it to the right card. <strong>Pipeline by region</strong> — also extractable via Vision-to-Data from any SF or BC regional report.</span></div>
+  <div class="region-share-bar" id="region-share-bar"></div>
+  <div class="regions-grid" id="regions-grid"></div>
+
+  <!-- ── DECK PERFORMANCE REPORT ── -->
+  <div class="sec-hdr" id="performance">
+    <h2>Deck Report</h2>
+    <span class="sec-count" id="perf-subtitle">INT BU bi-weekly review data · updated from actuals.json</span>
+  </div>
+<div class="data-src-banner"><span class="dsb-icon">✏️</span><span class="dsb-text"><strong>Budget figures</strong> (budget_nuc, budget_nor, budget_int) — paste Jeremy's annual budget summary via 📸 Vision-to-Data; Claude reads company names and fills all budget fields. <strong>Bookings, Commit, Upside, Sure Forecast</strong> — paste any pipeline review screenshot; Claude detects Nucleom vs Nortech and fills the right fields. <strong>Previous-review snapshot</strong> — captured automatically each time you update. <strong>KPI reference averages</strong> (FY24/FY25 hours, rate, utilisation, margin) — paste Jeremy's annual KPI report via Vision-to-Data. All fields update instantly across the CC — no actuals.json editing required.</span></div>
+  <div id="perf-content"></div>
+
+
+  <!-- ── MEETING HEALTH ── -->
+  <!-- ── INITIATIVE PROGRESS ── -->
+  <div class="sec-hdr" id="initiatives">
+    <h2>Initiative Progress</h2>
+    <span class="sec-count">5 initiatives · 2026 actuals vs. targets</span>
+  </div>
+<div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>Initiative Closed Won revenue</strong> comes from BU Services CRM automatically — opportunities are tagged with an initiative category and grouped on every page load. <strong>Initiative targets and gate data</strong> come from CONFIG (updated once per quarter). Paste any initiative pipeline or forecast report via 📸 Vision-to-Data to update actuals; Claude detects which initiative the data belongs to and applies it correctly.</span></div>
+  <div class="init-grid" id="init-grid"></div>
+
+
+  <!-- ── GATE MILESTONES ── -->
+  <!-- ── GATE MILESTONES ── -->
+  <div class="sec-hdr" id="gates">
+    <h2>Gate Milestones</h2>
+    <span class="sec-count" id="gate-count"></span>
+  </div>
+<div class="data-src-banner dsb-manual"><span class="dsb-icon">✏️</span><span class="dsb-text">Gate milestone data is fully manual. Statuses, owners, and descriptions are hardcoded in the Command Centre CONFIG block — search for <strong>gates: [</strong> in the HTML to edit them. Gate action counts come from the SharePoint Meeting Actions List once Éric completes Task P5. There is no automated feed for gate pass/fail decisions — Jon updates these directly after each gate review meeting.</span></div>
+  <table class="gate-table" id="gate-table">
+    <thead>
+      <tr>
+        <th style="width:14px"></th>
+        <th>Milestone</th>
+        <th>Initiative</th>
+        <th>Target Date</th>
+        <th>Note</th>
+      </tr>
+    </thead>
+    <tbody id="gate-tbody"></tbody>
+  </table>
+
+  <!-- ── RISK REGISTER ── -->
+  <div class="sec-hdr" id="meetings">
+    <h2>Meeting Health</h2>
+    <span class="sec-count" id="mtg-count">Open action counts by meeting series · live data from actuals.json · for meeting agendas and cadences see Management Hub</span>
+  </div>
+<div class="data-src-banner"><span class="dsb-icon">📋</span><span class="dsb-text">Meeting health data comes from two SharePoint Lists that Éric creates as Task P5: <strong>BU Services Meeting Log</strong> and <strong>BU Services Meeting Actions</strong>. The Sunday PA flow queries both lists, counts open and overdue actions per meeting series (Commercial, Ops, Nuclear, Gate, Finance, HR, Eurazeo), and writes those eight counts to actuals.json. Until those lists are created and the PA branch is built, this section shows zeros across all seven meeting series.</span></div>
+  <div id="mtg-overdue-bar"></div>
+  <div class="mtg-grid" id="mtg-grid"></div>
+
+<div class="sec-hdr" id="risks">
+    <h2>Risk Register</h2>
+    <span class="sec-count" id="risk-count"></span>
+  </div>
+<div class="data-src-banner dsb-manual"><span class="dsb-icon">✏️</span><span class="dsb-text">The risk register is entirely manual. All risk entries — title, likelihood, impact, owner, status, and mitigation — are hardcoded in the Command Centre HTML under <strong>risks: [</strong> in the CONFIG block. Jon edits this directly on SharePoint and re-saves when risk status changes. New risks are added as new objects in the array; resolved risks should have their status set to Closed rather than being deleted, to preserve the history.</span></div>
+  <div class="risk-grid" id="risk-grid"></div>
+
+  <div class="group-break">
+    <span class="group-break-dot"></span>
+    <span class="group-break-label">📊&nbsp; Commercial Intelligence</span>
+    <span class="group-break-line"></span>
+  </div>
+
+  <!-- ── DOCUMENTS ── -->
+  <div class="sec-hdr" id="documents">
+    <h2>Document Library</h2>
+    <span class="sec-count" id="doc-count"></span>
+  </div>
+<div class="data-src-banner dsb-green"><span class="dsb-icon">📁</span><span class="dsb-text">Document links are hardcoded in the Command Centre CONFIG block under <strong>docs: [</strong>. Each entry has a filename, description, category tag, and SharePoint URL. When a new document is added to SharePoint, Éric adds a corresponding entry to the docs array in the HTML and re-saves. Documents open directly in the browser from their SharePoint URL — no download needed.</span></div>
+  <div class="docs-grid" id="docs-grid"></div>
+
+
+  <div class="sec-hdr" id="conferences">
+    <h2>Conference Programme</h2>
+    <span class="sec-count" id="conf-subtitle">BU Services + Joint conferences only (Nucleom/Nortech staff) · Ekoscan BU-only shows excluded · updated from actuals.json</span>
+  </div>
+<div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text">Conference cost data flows from Shanny Tremblay's Excel Action Tracker through Power Automate into actuals.json. After each BU Services conference, Shanny enters the total actual spend into Column S of the Year Calendar tab in the tracker on SharePoint. The Monday 7AM PA flow (Step 2b — built by Éric) reads that column and writes values to the 14 <strong>conf_*</strong> keys. Salesforce outcomes (leads, opportunities) are entered by Jon via a Teams Adaptive Card sent automatically after each show. Ekoscan BU-only shows are excluded from this section.</span></div>
+
+  <!-- Summary KPI cards -->
+  <div class="conf-roi-grid" id="conf-kpi-cards"></div>
+
+  <!-- Filter buttons -->
+  <div id="conf-filter-bar">
+    <button class="conf-toggle-btn active" onclick="filterConferences('all',this)">All BU Services (14)</button>
+    <button class="conf-toggle-btn" onclick="filterConferences('bu',this)">BU Services</button>
+    <button class="conf-toggle-btn" onclick="filterConferences('joint',this)">Joint</button>
+    <button class="conf-toggle-btn" onclick="filterConferences('past',this)">Completed</button>
+    <button class="conf-toggle-btn" onclick="filterConferences('upcoming',this)">Upcoming</button>
+  </div>
+
+  <!-- Main table -->
+  <div class="conf-table-wrap">
+    <table class="conf-table" id="conf-table">
+      <thead>
+        <tr>
+          <th>Conference</th>
+          <th>Dates</th>
+          <th>Initiative</th>
+          <th>Logistics</th>
+          <th>Status</th>
+          <th>Approval</th>
+          <th>Budget Est.</th>
+          <th>Actual Total</th>
+          <th>Variance</th>
+          <th>Budget Used</th>
+          <th>Leads</th>
+          <th>Opps</th>
+          <th>Opp Value</th>
+          <th>Cost/Lead</th>
+          <th>SF Done?</th>
+        </tr>
+      </thead>
+      <tbody id="conf-table-body"></tbody>
+      <tfoot id="conf-table-foot"></tfoot>
+    </table>
+  </div>
+
+  <!-- Cost breakdown chart -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:.5rem 0 1.5rem;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem;">
+      <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.75rem;">Budget Allocation by Initiative</div>
+      <div id="conf-budget-bars"></div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem;">
+      <div style="font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.75rem;">Actual Spend YTD vs Budget (BU Services)</div>
+      <div id="conf-spend-progress"></div>
+    </div>
+  </div>
+
+
+  <!-- ── PROPOSAL HEALTH ── -->
+  <div class="sec-hdr" id="proposals">
+    <h2>Proposal Health</h2>
+    <span class="sec-count" id="prop-subtitle">Open proposals · stalled deals · conversion rates · by initiative</span>
+  </div>
+  <div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>Proposal counts and pipeline values</strong> come from BU Services CRM automatically — open proposals (Qualifying, Proposing, Proposal Sent, Negotiating) are counted by initiative on every page load. Stalled proposals (no update >30 days) and conversion rates are also derived from CRM data. Paste any pipeline export or proposal tracker screenshot via 📸 Vision-to-Data to supplement or override the CRM figures for any initiative.</span><span class="dsb-sep">·</span><span class="dsb-tag">PENDING — SF queries not yet added to PA flow</span></div>
+  <div class="prop-summary-bar" id="prop-summary-bar"></div>
+  <div class="prop-grid" id="prop-grid"></div>
+
+  <!-- ── REVENUE RECONCILIATION ── -->
+  <div class="sec-hdr" id="reconciliation">
+    <h2>Revenue Reconciliation</h2>
+    <span class="sec-count" id="recon-subtitle">Salesforce Closed Won vs Business Central invoiced · variance tracking</span>
+  </div>
+  <div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>CRM Closed Won (SF column)</strong> — auto-synced from BU Services CRM on every page load. <strong>BC Invoiced (BC column)</strong> — Nortech via Nortech Ops auto-push; Nucleom and Intact via 📸 Vision-to-Data (paste a BC invoiced revenue report). A positive variance (BC &gt; SF) is normal — callout/T&amp;M work that never enters the CRM. A negative variance is a data quality flag to investigate.</span><span class="dsb-sep">·</span><span class="dsb-tag">PENDING — live once BC connector (P4) is built</span></div>
+  <div class="recon-kpi-row" id="recon-kpi-row"></div>
+  <div class="recon-grid" id="recon-grid"></div>
+
+  <!-- ── NUCLEAR OUTAGE CALENDAR ── -->
+  <div class="sec-hdr" id="nuclear">
+    <h2>Nuclear Outage Calendar</h2>
+    <span class="sec-count" id="nuclear-subtitle">Live countdown · RAG auto-calculated · Jon &amp; Olivier maintain via Vision-to-Data</span>
+  </div>
+  <div class="data-src-banner dsb-manual">
+    <span class="dsb-icon">✏️</span>
+    <span class="dsb-text"><strong>Outage records</strong> are added manually by Jon Eustace or Olivier Marcotte via 📸 Vision-to-Data — paste any OPG/Bruce Power outage schedule; Claude extracts station, unit, dates, outage type and writes directly to the calendar. RAG status (🟢 ≥90d · 🟡 30–89d · 🔴 &lt;30d) and days-until are calculated automatically on every page load.</span>
+  </div>
+  
+  <div id="nuc-alert-container"></div>
+  <div class="prop-summary-bar" id="nuc-summary-bar"></div>
+  <div class="nuc-outage-grid" id="nuc-outage-grid"></div>
+  <div class="nuc-cert-bar" id="nuc-cert-bar" style="padding:.85rem 1rem;background:var(--dark,#1C2B4A);border:1px solid var(--mid,#2D4A7A);border-radius:8px;margin:.5rem 0 1.5rem;"></div>
+
+
+  <div class="group-break">
+    <span class="group-break-dot"></span>
+    <span class="group-break-label">📨&nbsp; Reporting</span>
+    <span class="group-break-line"></span>
+  </div>
+
+  <!-- ── EMAIL DIGEST ── -->
+  function renderAddOns(live) {
+  renderProposals(live);
+  renderReconciliation(live);
+  renderNuclearOutages(live);
+}
+
+</script>
+
+<style>
+:root {
+  --navy:#0A1F5C; --navy2:#1A5CA8; --dark:#0A1F5C;
+  --white:#FFFFFF; --mid:#F0F3FA; --lgrey:#DDE3F0; --body:#384660;
+  --green:#22882F; --green2:#3DDB50; --green-l:#E8F5E9;
+  --amber:#D97706; --amber-l:#FFF8E1;
+  --red:#CC2222; --red-l:#FFEBEE;
+  --blue:#368CD9; --blue-l:#E8F4FD;
+  --fd:'Barlow Condensed',sans-serif;
+  --fb:'Barlow',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothing:antialiased;line-height:1.6;min-height:100vh;}
+
+/* ── TOP BAR ── */
+.topbar{background:#0A1F5C;border-bottom:3px solid #00AEEF;padding:0 2rem;display:flex;align-items:center;height:62px;position:sticky;top:0;z-index:100;}
+.topbar-brand{font-family:var(--fd);font-size:0.9rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:#FFFFFF;}
+.topbar-sep{width:1px;height:24px;background:rgba(255,255,255,0.25);margin:0 1.2rem;}
+.topbar-nav{display:flex;gap:0;flex:1;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-ms-overflow-style:none;}
+.topbar-nav::-webkit-scrollbar{display:none;}
+.topbar-nav a{display:block;height:62px;line-height:62px;padding:0 1rem;font-size:0.76rem;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.6);text-decoration:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;white-space:nowrap;}
+.topbar-nav a:hover{color:#FFFFFF;}
+.topbar-nav a.active{color:#FFFFFF;border-bottom-color:#00AEEF;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:0.75rem;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#22C55E;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+.live-label{font-size:0.75rem;color:rgba(255,255,255,0.8);font-family:var(--mono);}
+.update-label{font-size:0.75rem;color:rgba(255,255,255,0.5);font-family:var(--mono);}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(160deg,#0A1F5C 0%,#1A5CA8 55%,#0A1F5C 100%);padding:4rem 2rem 3.5rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;right:-5%;top:-10%;width:50%;height:120%;background:radial-gradient(ellipse,rgba(0,174,239,0.12) 0%,transparent 70%);pointer-events:none;}
+.hero-wrap{max-width:1200px;margin:0 auto;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:0.5rem;font-family:var(--fd);font-size:0.72rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#00AEEF;background:rgba(0,174,239,0.12);border:1px solid rgba(0,174,239,0.4);border-radius:3px;padding:0.22rem 0.7rem;margin-bottom:1rem;}
+.hero h1{font-family:var(--fd);font-size:3.6rem;font-weight:900;line-height:1.05;color:#FFFFFF;letter-spacing:-0.5px;margin-bottom:0.5rem;}
+.hero h1 em{color:#00AEEF;font-style:normal;}
+.hero-sub{font-size:1.05rem;color:rgba(255,255,255,0.7);max-width:620px;line-height:1.7;margin-bottom:2rem;}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#D0DCF0;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(10,31,92,0.08);}
+.kpi{background:#FFFFFF;padding:1.3rem 1.5rem;}
+.kpi-val{font-family:var(--fd);font-size:2rem;font-weight:900;color:#0A1F5C;line-height:1;}
+.kpi-val.green{color:#16A34A;}
+.kpi-lbl{font-size:0.8rem;color:#4A5F88;margin-top:0.3rem;line-height:1.35;font-weight:500;}
+
+/* ── SECTIONS ── */
+.page{max-width:1200px;margin:0 auto;padding:0 2rem 4rem;}
+
+.sec-hdr h2{font-family:var(--fd);font-size:1.35rem;font-weight:900;color:#0A1F5C;letter-spacing:0.5px;text-transform:uppercase;}
+.sec-hdr .sec-count{font-family:var(--mono);font-size:0.78rem;color:#6678A0;}
+
+/* ── INITIATIVE CARDS ── */
+.init-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;}
+.icard{background:#FFFFFF;border:1px solid #D0DCF0;border-radius:10px;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s;cursor:pointer;text-decoration:none;box-shadow:0 2px 8px rgba(10,31,92,0.06);}
+.icard:hover{transform:translateY(-3px);border-color:#00AEEF;box-shadow:0 6px 20px rgba(10,31,92,0.12);}
+.icard-top{height:4px;}
+.icard-body{padding:1.1rem 1.25rem;}
+.icard-num{font-family:var(--mono);font-size:0.68rem;color:#6678A0;margin-bottom:0.3rem;}
+.icard-name{font-family:var(--fd);font-size:1.05rem;font-weight:800;color:#0A1F5C;line-height:1.25;margin-bottom:0.65rem;}
+.icard-owner{font-size:0.78rem;color:#4A5F88;line-height:1.4;margin-bottom:0.75rem;}
+.icard-progress{margin-bottom:0.6rem;}
+.icard-progress-lbl{display:flex;justify-content:space-between;font-size:0.72rem;color:#6678A0;margin-bottom:0.3rem;}
+.icard-bar{height:5px;background:#E2EAF5;border-radius:3px;overflow:hidden;}
+.icard-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+.icard-nums{display:flex;justify-content:space-between;align-items:baseline;margin-top:0.5rem;}
+.icard-actual{font-family:var(--fd);font-size:1.35rem;font-weight:900;color:#0A1F5C;}
+.icard-target{font-size:0.78rem;color:#4A5F88;}
+.icard-footer{padding:0.7rem 1.25rem;border-top:1px solid #E2EAF5;display:flex;align-items:center;justify-content:space-between;}
+.status-chip{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.22rem 0.65rem;border-radius:4px;}
+.sc-green{background:#DCFCE7;color:#15803D;}
+.sc-amber{background:#FEF3C7;color:#B45309;}
+.sc-grey{background:#E2EAF5;color:#6678A0;}
+.sc-red{background:#FEE2E2;color:#B91C1C;}
+.icard-5yr{font-size:0.72rem;color:#6678A0;}
+
+/* ── GATE TABLE ── */
+.gate-table{width:100%;border-collapse:collapse;font-size:0.92rem;background:#FFFFFF;border-radius:10px;overflow:hidden;}
+.gate-table th{background:#0A1F5C;color:rgba(255,255,255,0.85);font-family:var(--fd);font-size:0.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:0.8rem 1rem;text-align:left;border-bottom:1px solid #1A5CA8;}
+.gate-table td{padding:0.78rem 1rem;border-bottom:1px solid #E2EAF5;vertical-align:middle;color:#1A2A4A;}
+.gate-table tr:hover td{background:#EEF4FF;}
+.gate-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.gd-green{background:var(--green2);}
+.gd-amber{background:#F59E0B;}
+.gd-grey{background:rgba(255,255,255,0.2);}
+.gd-red{background:#FF5555;}
+.gate-label{color:#1A2A4A;font-weight:500;}
+.gate-date{font-family:var(--mono);font-size:0.82rem;color:#4A5F88;}
+.gate-note{font-size:0.86rem;color:#4A5F88;}
+.gate-init{font-family:var(--mono);font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:3px;background:#E2EAF5;color:#1A5CA8;}
+
+/* ── RISK CARDS ── */
+.risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.rcard{background:#FFFFFF;border:1px solid #D0DCF0;border-radius:10px;padding:1.1rem 1.2rem;box-shadow:0 2px 8px rgba(10,31,92,0.05);}
+.rcard-top{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;}
+.rcard-id{font-family:var(--mono);font-size:0.7rem;color:#6678A0;}
+.rcard-label{font-family:var(--fd);font-size:1.02rem;font-weight:700;color:#0A1F5C;flex:1;line-height:1.25;}
+.risk-level{font-family:var(--fd);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.22rem 0.65rem;border-radius:4px;}
+.rl-critical{background:#FEE2E2;color:#B91C1C;border:1px solid #FCA5A5;}
+.rl-high{background:#FEF3C7;color:#B45309;border:1px solid #FDE68A;}
+.rl-medium{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;}
+.rcard-trigger{font-size:0.86rem;color:#4A5F88;line-height:1.55;margin-top:0.35rem;}
+.rcard-footer{margin-top:0.65rem;padding-top:0.55rem;border-top:1px solid #E2EAF5;display:flex;align-items:center;justify-content:space-between;}
+.rcard-status{font-size:0.74rem;color:#6678A0;}
+.monitoring-dot{width:7px;height:7px;border-radius:50%;background:#D97706;display:inline-block;margin-right:0.35rem;animation:pulse 2s infinite;}
+
+/* ── DOCS GRID ── */
+.docs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;}
+.doc-row{background:#FFFFFF;border:1px solid #D0DCF0;border-radius:8px;padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;text-decoration:none;transition:background .15s,border-color .15s,box-shadow .15s;}
+.doc-row:hover{background:#EEF4FF;border-color:#00AEEF;box-shadow:0 2px 8px rgba(10,31,92,0.08);}
+.doc-num{font-family:var(--mono);font-size:0.7rem;color:#6678A0;min-width:1.5rem;}
+.doc-info{flex:1;}
+.doc-name{font-family:var(--fd);font-size:1.02rem;font-weight:700;color:#0A1F5C;}
+.doc-meta{font-size:0.79rem;color:#4A5F88;margin-top:0.15rem;}
+.doc-ver{font-family:var(--mono);font-size:0.7rem;padding:0.15rem 0.45rem;border-radius:3px;background:#E2EAF5;color:#1A5CA8;}
+.doc-arrow{color:#6678A0;font-size:1rem;transition:transform .15s;}
+.doc-row:hover .doc-arrow{transform:translateX(3px);color:#00AEEF;}
+
+/* ── REVENUE FOUNDATION ── */
+.rev-foundation{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.rf-entity{background:#FFFFFF;border:1px solid #D0DCF0;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(10,31,92,0.06);}
+.rf-entity-hdr{padding:1rem 1.2rem 0.8rem;border-bottom:1px solid #D0DCF0;}
+.rf-entity-name{font-family:var(--fd);font-size:1.05rem;font-weight:800;color:#0A1F5C;margin-bottom:0.2rem;}
+.rf-entity-note{font-size:0.75rem;color:#6678A0;line-height:1.45;}
+.rf-entity-body{padding:0.9rem 1.1rem;}
+.rf-row{display:flex;justify-content:space-between;align-items:center;padding:0.45rem 0;border-bottom:1px solid #E2EAF5;}
+.rf-row:last-child{border-bottom:none;}
+.rf-lbl{font-size:0.82rem;color:#4A5F88;}
+.rf-val{font-family:var(--fd);font-size:1.2rem;font-weight:800;color:#0A1F5C;}
+.rf-val.muted{color:#6678A0;font-size:0.94rem;font-weight:600;}
+.rf-progress{margin:0.65rem 0 0.4rem;}
+.rf-prog-lbl{display:flex;justify-content:space-between;font-size:0.72rem;color:#6678A0;margin-bottom:0.3rem;}
+.rf-bar{height:5px;background:#E2EAF5;border-radius:3px;overflow:hidden;}
+.rf-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.rag-pip{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:0.35rem;flex-shrink:0;}
+.rag-green{background:#16A34A;}
+.rag-amber{background:#F59E0B;}
+.rag-red{background:#FF5555;}
+.rf-source-tag{font-family:var(--mono);font-size:0.6rem;padding:0.15rem 0.45rem;border-radius:3px;margin-left:0.5rem;}
+.src-sf{background:rgba(0,84,122,0.4);color:#5BC4F5;}
+.src-manual{background:#FFFFFF;color:#6678A0;}
+.rf-footer{padding:0.55rem 1.1rem;border-top:1px solid #E2EAF5;font-size:0.7rem;color:#6678A0;display:flex;align-items:center;gap:0.4rem;}
+.cumulative-bar{background:#F4F7FB;border:1px solid #D0DCF0;border-radius:10px;padding:1.1rem 1.4rem;margin-bottom:1rem;}
+.cum-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:0.9rem;}
+.cum-title{font-family:var(--fd);font-size:0.85rem;font-weight:700;color:#4A5F88;text-transform:uppercase;letter-spacing:1px;}
+.cum-total{font-family:var(--fd);font-size:1.6rem;font-weight:900;color:#0A1F5C;}
+.cum-total-lbl{font-size:0.72rem;color:rgba(255,255,255,0.3);margin-left:0.4rem;}
+.cum-stack{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;border-radius:5px;overflow:hidden;height:24px;margin-bottom:0.55rem;}
+.cum-seg{height:100%;transition:width 1s ease;}
+.cum-legend{display:flex;flex-wrap:wrap;gap:0.75rem;}
+.cum-leg-item{display:flex;align-items:center;gap:0.35rem;font-size:0.7rem;color:#6678A0;}
+.cum-leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.regions-section{margin-top:0;}
+.regions-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;margin-bottom:1rem;}
+.reg-card{background:#FFFFFF;border:1px solid #D0DCF0;border-radius:8px;overflow:hidden;transition:border-color .2s;}
+.reg-card:hover{border-color:#4A5F88;}
+.reg-card-top{height:3px;}
+.reg-card-body{padding:0.8rem 0.9rem;}
+.reg-name{font-family:var(--fd);font-size:0.82rem;font-weight:800;color:#0A1F5C;line-height:1.2;margin-bottom:0.2rem;}
+.reg-ops{font-size:0.68rem;color:rgba(255,255,255,0.3);margin-bottom:0.6rem;}
+.reg-row{display:flex;justify-content:space-between;align-items:baseline;padding:0.22rem 0;border-bottom:1px solid #E2EAF5;}
+.reg-row:last-child{border-bottom:none;}
+.reg-lbl{font-size:0.68rem;color:#6678A0;}
+.reg-val{font-family:var(--fd);font-size:0.88rem;font-weight:800;color:#0A1F5C;}
+.reg-val.muted{color:rgba(255,255,255,0.3);font-size:0.78rem;font-weight:600;}
+.reg-bar-wrap{margin:0.5rem 0 0.4rem;}
+.reg-bar{height:3px;background:#FFFFFF;border-radius:2px;overflow:hidden;}
+.reg-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+.reg-footer{padding:0.35rem 0.9rem 0.6rem;font-size:0.63rem;color:rgba(255,255,255,0.2);}
+.region-share-bar{background:#F4F7FB;border:1px solid #D0DCF0;border-radius:8px;padding:0.9rem 1.2rem;margin-bottom:0.75rem;}
+.rsb-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;}
+.rsb-title{font-size:0.72rem;color:#6678A0;font-family:var(--fd);font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.rsb-total{font-family:var(--fd);font-size:1rem;font-weight:900;color:#0A1F5C;}
+.rsb-stack{display:flex;height:12px;border-radius:4px;overflow:hidden;gap:1px;margin-bottom:0.5rem;}
+.rsb-seg{height:100%;transition:flex .8s ease;min-width:2px;}
+.rsb-legend{display:flex;flex-wrap:wrap;gap:0.6rem;}
+.rsb-leg-item{display:flex;align-items:center;gap:0.3rem;font-size:0.68rem;color:#6678A0;}
+.rsb-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+/* ── PERFORMANCE DECK ── */
+.perf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.65rem;margin-bottom:0.75rem;}
+.perf-card{background:#FFFFFF;border:1px solid #D0DCF0;border-radius:8px;overflow:hidden;}
+.perf-top{height:3px;}
+.perf-body{padding:0.75rem 0.9rem;}
+.perf-label{font-family:var(--fd);font-size:0.75rem;font-weight:800;color:#4A5F88;margin-bottom:0.25rem;text-transform:uppercase;letter-spacing:1px;}
+.perf-val{font-family:var(--fd);font-size:1.6rem;font-weight:900;color:#0A1F5C;line-height:1;}
+.perf-sub{font-size:0.66rem;color:rgba(255,255,255,0.3);margin-top:0.2rem;}
+.perf-delta{font-family:var(--fd);font-size:0.75rem;font-weight:700;margin-top:0.4rem;}
+.delta-up{color:#3DDB50;} .delta-down{color:#FF5555;} .delta-flat{color:#6678A0;}
+.kpi-table{width:100%;border-collapse:collapse;font-size:0.78rem;margin-bottom:0.75rem;}
+.kpi-table th{background:#FFFFFF;color:#4A5F88;font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.4rem 0.6rem;text-align:right;}
+.kpi-table th:first-child{text-align:left;}
+.kpi-table td{padding:0.38rem 0.6rem;border-bottom:1px solid #E2EAF5;color:#0A1F5C;text-align:right;font-family:var(--mono);}
+.kpi-table td:first-child{text-align:left;font-family:var(--fd);font-weight:700;color:#0A1F5C;font-size:0.82rem;}
+.kpi-table tr:last-child td{border-bottom:none;}
+.kpi-null{color:rgba(255,255,255,0.2);font-style:italic;}
+.ebitda-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+.ebitda-table th{background:#FFFFFF;color:#4A5F88;font-family:var(--fd);font-size:0.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:0.4rem 0.6rem;text-align:left;}
+.ebitda-table td{padding:0.38rem 0.6rem;border-bottom:1px solid #E2EAF5;color:#0A1F5C;font-size:0.78rem;}
+.ebitda-table tr:last-child td{border-bottom:none;}
+.cash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.65rem;margin-bottom:0.75rem;}
+/* ── MEETING HEALTH ── */
+.mtg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.65rem;margin-bottom:0.75rem;}
+.mtg-card{background:#FFFFFF;border:1px solid #D0DCF0;border-radius:8px;overflow:hidden;transition:border-color .2s;}
+.mtg-card:hover{border-color:#4A5F88;}
+.mtg-top{height:3px;}
+.mtg-body{padding:0.75rem 0.9rem;}
+.mtg-label{font-family:var(--fd);font-size:0.82rem;font-weight:800;color:#0A1F5C;margin-bottom:0.15rem;line-height:1.2;}
+.mtg-cadence{font-size:0.66rem;color:rgba(255,255,255,0.3);margin-bottom:0.55rem;}
+.mtg-actions-num{font-family:var(--fd);font-size:1.5rem;font-weight:900;line-height:1;}
+.mtg-actions-lbl{font-size:0.66rem;color:#6678A0;margin-top:0.1rem;margin-bottom:0.45rem;}
+.mtg-footer{padding:0.3rem 0.9rem 0.55rem;font-size:0.64rem;color:rgba(255,255,255,0.2);}
+.mtg-overdue-banner{display:flex;align-items:center;gap:0.6rem;background:rgba(204,34,34,0.12);border:1px solid rgba(204,34,34,0.3);border-radius:6px;padding:0.5rem 0.85rem;margin-bottom:0.75rem;}
+.mtg-overdue-num{font-family:var(--fd);font-size:1.1rem;font-weight:900;color:#FF6B6B;}
+.mtg-overdue-text{font-size:0.76rem;color:#1A2A4A;}
+.mtg-all-clear{background:rgba(34,136,47,0.1);border:1px solid rgba(34,136,47,0.25);border-radius:6px;padding:0.5rem 0.85rem;margin-bottom:0.75rem;font-size:0.76rem;color:rgba(61,219,80,0.8);}
+/* ── ACTUALS VS BUDGET ── */
+.avb-wrap{background:#F4F7FB;border:1px solid #D0DCF0;border-radius:10px;overflow:hidden;margin-bottom:1rem;}
+.avb-hdr{padding:.85rem 1.4rem;border-bottom:1px solid #E2EAF5;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;background:#fff;}
+.avb-hdr-left{flex:1;min-width:0;}
+.avb-hdr-title{font-family:var(--fd);font-size:.95rem;font-weight:700;color:#0A1F5C;}
+.avb-hdr-sub{font-size:.7rem;color:#6678A0;margin-top:.15rem;}
+.avb-hdr-right{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;}
+.avb-toggle-group{display:flex;gap:0;}
+.avb-toggle-btn{font-family:var(--fd);font-size:.65rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:.32rem .8rem;border:1px solid #C8D5EE;background:#fff;color:#5570A0;cursor:pointer;transition:all .15s;}
+.avb-toggle-btn:first-child{border-radius:6px 0 0 6px;}
+.avb-toggle-btn:last-child{border-radius:0 6px 6px 0;}
+.avb-toggle-btn.active{background:#161C60;color:#fff;border-color:#161C60;}
+.avb-legend{display:flex;gap:.75rem;align-items:center;}
+.avb-leg-item{display:flex;align-items:center;gap:.35rem;font-size:.68rem;color:#5570A0;}
+.avb-leg-budget{width:14px;height:10px;background:rgba(22,28,96,.1);border:1px dashed rgba(22,28,96,.35);border-radius:2px;flex-shrink:0;}
+.avb-leg-actual{width:14px;height:10px;background:#161C60;border-radius:2px;opacity:.8;flex-shrink:0;}
+/* Rows layout */
+.avb-rows-wrap{padding:.75rem 1.4rem .9rem;}
+.avb-row{display:grid;grid-template-columns:140px 180px 1fr;align-items:center;gap:.75rem;padding:.55rem 0;border-bottom:1px solid #EEF3FB;}
+.avb-row:last-child{border-bottom:none;}
+.avb-row-label{display:flex;align-items:center;gap:.45rem;min-width:0;}
+.avb-row-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.avb-row-name{font-family:var(--fd);font-size:.78rem;font-weight:700;color:#0A1F5C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.avb-row-stats{display:flex;align-items:center;gap:.6rem;flex-wrap:nowrap;}
+.avb-stat-grp{text-align:right;min-width:52px;}
+.avb-stat-val{font-family:var(--mono);font-size:.75rem;font-weight:600;white-space:nowrap;}
+.avb-stat-lbl{font-size:.58rem;color:#8892A4;text-transform:uppercase;letter-spacing:.6px;}
+.avb-pill{font-size:.6rem;font-weight:700;padding:.15rem .45rem;border-radius:8px;white-space:nowrap;}
+.avb-pill-ahead{background:#DCF5E4;color:#166534;}
+.avb-pill-behind{background:#FEE2E2;color:#991B1B;}
+.avb-pill-nodata{background:#F3F4F6;color:#9CA3AF;}
+/* Chart */
+.avb-row-chart{min-width:0;overflow:hidden;}
+.avb-bars-row{display:flex;align-items:flex-end;height:68px;gap:2px;padding-bottom:14px;position:relative;}
+.avb-col{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;}
+.avb-col-bars{display:flex;align-items:flex-end;gap:1px;width:100%;justify-content:center;}
+.avb-bar-bud{flex:1;background:rgba(22,28,96,.12);border:1px solid rgba(22,28,96,.25);border-radius:2px 2px 0 0;min-height:2px;}
+.avb-bar-act{flex:1;border-radius:2px 2px 0 0;min-height:2px;opacity:.85;}
+.avb-col-lbl{font-size:.5rem;color:#8892A4;font-family:var(--mono);margin-top:2px;}
+
+/* ── MONTHLY REVENUE ── *//* ── MONTHLY REVENUE ── */
+.monthly-wrap{background:#F4F7FB;border:1px solid #D0DCF0;border-radius:10px;overflow:hidden;margin-bottom:1rem;}
+.monthly-hdr{padding:1rem 1.4rem 0.75rem;border-bottom:1px solid #E2EAF5;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;}
+.monthly-hdr-title{font-family:var(--fd);font-size:1rem;font-weight:700;color:#0A1F5C;}
+.monthly-hdr-sub{font-size:0.72rem;color:rgba(255,255,255,0.3);}
+.monthly-legend{display:flex;flex-wrap:wrap;gap:0.75rem;}
+.ml-item{display:flex;align-items:center;gap:0.3rem;font-size:0.7rem;color:#4A5F88;}
+.ml-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.monthly-chart{padding:1.2rem 1.4rem 0.5rem;position:relative;}
+.mc-bars{display:flex;gap:3px;align-items:flex-end;height:180px;padding-bottom:1.6rem;position:relative;}
+.mc-bars::before{content:'';position:absolute;left:0;right:0;bottom:1.6rem;height:1px;background:#FFFFFF;}
+.mc-group{flex:1;display:flex;gap:1px;align-items:flex-end;position:relative;min-width:0;}
+.mc-bar{flex:1;border-radius:2px 2px 0 0;min-width:4px;transition:opacity .2s;cursor:default;}
+.mc-bar:hover{opacity:0.8;}
+.mc-month-lbl{position:absolute;bottom:-1.3rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:0.6rem;color:rgba(255,255,255,0.3);white-space:nowrap;}
+.mc-y-axis{position:absolute;left:0;top:0;bottom:1.6rem;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none;}
+.mc-y-lbl{font-family:var(--mono);font-size:0.6rem;color:rgba(255,255,255,0.2);white-space:nowrap;}
+.monthly-table-wrap{overflow-x:auto;border-top:1px solid #D0DCF0;;scrollbar-width:none;-ms-overflow-style:none}
+.monthly-table-wrap::-webkit-scrollbar{display:none}
+.monthly-table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+.monthly-table th{background:#EEF4FF;color:#1A5CA8;font-family:var(--fd);font-size:0.62rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:0.55rem 0.75rem;text-align:right;border-bottom:1px solid #E2EAF5;white-space:nowrap;}
+.monthly-table th:first-child{text-align:left;position:sticky;left:0;background:rgba(13,16,64,0.98);}
+.monthly-table td{padding:0.48rem 0.75rem;border-bottom:1px solid #E2EAF5;text-align:right;white-space:nowrap;color:#0A1F5C;}
+.monthly-table td:first-child{text-align:left;font-family:var(--fd);font-size:0.78rem;font-weight:700;position:sticky;left:0;background:rgba(13,16,64,0.98);}
+.monthly-table tr:hover td{background:rgba(255,255,255,0.025);}
+.monthly-table tr:hover td:first-child{background:rgba(13,16,64,0.99);}
+.monthly-table .row-total{background:#FFFFFF;font-weight:700;}
+.monthly-table .row-total td{color:#0A1F5C;border-top:1px solid rgba(255,255,255,0.12);}
+.monthly-table .row-total td:first-child{color:#0A1F5C;}
+.mc-zero{color:rgba(255,255,255,0.2)!important;}
+.monthly-toggle{display:flex;gap:0.5rem;margin-left:auto;}.rev-legend{display:flex;gap:1.2rem;flex-wrap:wrap;}
 .rev-leg-item{display:flex;align-items:center;gap:0.4rem;font-size:0.72rem;color:#4A5F88;}
 .rev-leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
 .chart-bars{display:flex;gap:1rem;align-items:flex-end;height:200px;padding-bottom:1.5rem;position:relative;}
@@ -1169,9 +2103,9 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <a href="#proposals">Proposals</a>
     <a href="#reconciliation">Recon</a>
     <a href="#nuclear">Nuclear</a>
-    <a href="#system">System</a>
+    System</a>
     <a href="#digest">Email Digest</a>
-    <a href="BU_Services_Management_Hub.html" target="buservices" style="flex-shrink:0;color:#00AEEF;background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;align-self:center;margin-left:.5rem">⚙ Management Hub →</a>
+    
   </div>
   <div class="topbar-right">
     <div class="live-dot"></div>
@@ -1187,8 +2121,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <h1>BU Services<br><em>Command Centre</em></h1>
     <p class="hero-sub">Master Commercial Plan 2026–2030. Five growth initiatives. Live gate tracking. All documents in one place.</p>
     <div style="display:inline-flex;align-items:center;gap:0.6rem;background:rgba(233,113,50,0.15);border:1px solid rgba(233,113,50,0.35);border-radius:6px;padding:0.35rem 0.9rem;margin-bottom:1rem;">
-      <div style="width:7px;height:7px;border-radius:50%;background:#F59E0B;animation:pulse 2s infinite;flex-shrink:0;"></div>
-      <span style="font-family:var(--mono);font-size:0.7rem;color:#F59E0B;font-weight:600;">STANDING: All commercial owners update Salesforce every Friday by 4 PM ET &mdash; Power Automate runs Sunday 7 PM ET</span>
+      
     </div>
     <div class="kpi-row" id="kpi-row"></div>
   </div>
@@ -1302,28 +2235,6 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 <div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>Nucleom</strong> revenue by month — from BU Services CRM (Closed Won grouped by close date, updates on every page load). <strong>Nortech</strong> revenue by month — from Nortech Ops (auto-push on every invoice mark-sent/paid). <strong>Intact + Initiatives</strong> — paste any BC/management report screenshot via the 📸 Vision-to-Data panel; Claude identifies the company and populates the correct month. <strong>KPI fields</strong> (hours, utilisation, rate, cost, margin) — paste Jeremy's monthly payroll summary via Vision-to-Data; Claude reads nuc_hours, nor_hours etc. and fills the KPI rows.</span></div>
   <div class="monthly-wrap" id="monthly-wrap"></div>
 
-  <!-- ── REVENUE CHART ── -->
-  <div class="sec-hdr">
-    <h2>Revenue Trajectory 2026–2030</h2>
-    <span class="sec-count">Base business + commercial plan</span>
-  </div>
-  <div class="rev-chart-wrap">
-    <div class="rev-chart-hdr">
-      <div>
-        <div class="rev-chart-title">BU Services Revenue — Base + Initiatives (CAD)</div>
-        <div class="rev-chart-sub">Base business shown in navy · Each initiative stacked above</div>
-      </div>
-      <div class="rev-legend" id="rev-legend"></div>
-    </div>
-    <div class="chart-bars" id="chart-bars"></div>
-  </div>
-
-  <div class="group-break">
-    <span class="group-break-dot"></span>
-    <span class="group-break-label">📋&nbsp; Operations</span>
-    <span class="group-break-line"></span>
-  </div>
-
   <!-- ── NUCLEOM REGIONS ── -->
   <div class="sec-hdr" id="regions">
     <h2>Nucleom Revenue by Region</h2>
@@ -1403,152 +2314,6 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
   <div class="docs-grid" id="docs-grid"></div>
 
 
-  <!-- ── SYSTEM STATUS ── -->
-  <div class="sec-hdr" id="system">
-    <h2>System Status</h2>
-    <span class="sec-count">Go-live critical path · 7 steps + 3 add-ons · Nothing is connected yet</span>
-  </div>
-<div class="data-src-banner dsb-manual"><span class="dsb-icon">🔧</span><span class="dsb-text">System status is manually maintained. Update step statuses directly in the Command Centre HTML — search for <strong>STEPS config</strong>. When a step goes live, change its status from <strong>pending</strong> to <strong>live</strong>. See <strong>BU_Services_GoLive_Roadmap.html</strong> for full step-by-step build instructions for Éric. Full system reference: <strong>BU_Services_System_Overview.html</strong>.</span></div>
-
-  <!-- Core Steps -->
-  <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8892A4;margin:.75rem 0 .4rem">Core Steps — 0 to 5</div>
-  <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #DDE3F0;border-radius:8px;overflow:hidden">
-    <thead>
-      <tr style="background:#F0F3FA;border-bottom:2px solid #DDE3F0">
-        <th style="width:10px"></th>
-        <th style="padding:.4rem .6rem;text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Step</th>
-        <th style="padding:.4rem .6rem;text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Owner</th>
-        <th style="padding:.4rem .6rem;text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Time</th>
-        <th style="padding:.4rem .6rem;text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Unlocks</th>
-        <th style="padding:.4rem .6rem;text-align:right;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Status</th>
-      </tr>
-    </thead>
-    <tbody style="border-top:1px solid #F0F3FA">
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#D97706;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Step 0: SharePoint Upload</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Jon / Éric</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">10 min</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Prereq for everything</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#FFF8E1;color:#D97706;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Pending</span>
-        </td>
-      </tr>
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#D97706;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Step 1: Salesforce Fields</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Éric + commercial team</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">~1.5 hrs</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Unlocks all SF queries</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#FFF8E1;color:#D97706;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Pending</span>
-        </td>
-      </tr>
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#D97706;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Step 2: Sunday PA Flow</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Éric</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">~2.75 hrs</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Core automation backbone</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#FFF8E1;color:#D97706;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Pending</span>
-        </td>
-      </tr>
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#D97706;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Step 2b: Conference Cost Flow</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Éric + Shanny</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">~2.5 hrs</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Unlocks Conference ROI section</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#FFF8E1;color:#D97706;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Pending</span>
-        </td>
-      </tr>
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#CC2222;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Step 3: Business Central</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Éric (needs Mathieu Q&A first)</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">~2 hrs</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Unlocks monthly revenue actuals</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#FFEBEE;color:#CC2222;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Blocked</span>
-        </td>
-      </tr>
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#D97706;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Step 4: SharePoint Meeting Lists</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Éric</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">~2.25 hrs</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Unlocks Meeting Health section</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#FFF8E1;color:#D97706;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Pending</span>
-        </td>
-      </tr>
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#D97706;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Step 5: Deck Scheduling</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Éric</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">15 min</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Auto-generates bi-weekly review deck</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#FFF8E1;color:#D97706;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Pending</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- Add-On Modules -->
-  <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8892A4;margin:1rem 0 .4rem">Add-On Modules</div>
-  <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #DDE3F0;border-radius:8px;overflow:hidden;margin-bottom:.75rem">
-    <thead>
-      <tr style="background:#F0F3FA;border-bottom:2px solid #DDE3F0">
-        <th style="width:10px"></th>
-        <th style="padding:.4rem .6rem;text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Add-On</th>
-        <th style="padding:.4rem .6rem;text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Owner</th>
-        <th style="padding:.4rem .6rem;text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Time</th>
-        <th style="padding:.4rem .6rem;text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Unlocks</th>
-        <th style="padding:.4rem .6rem;text-align:right;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#8892A4">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#22882F;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Add-On 1: Proposal Tracker</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Éric (after Step 1)</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">~1.5 hrs</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Proposal Health section live</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#E8F5E9;color:#22882F;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Ready</span>
-        </td>
-      </tr>
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#22882F;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Add-On 2: Recon (with Step 3)</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Éric</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">~45 min</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Revenue Reconciliation section live</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#E8F5E9;color:#22882F;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Ready</span>
-        </td>
-      </tr>
-      <tr class="gate-row">
-        <td style="width:10px;padding:.4rem .3rem .4rem .5rem"><span class="dot" style="background:#22882F;width:8px;height:8px;border-radius:50%;display:inline-block"></span></td>
-        <td style="padding:.45rem .6rem;font-size:.82rem;font-weight:600;color:#1A2A4A;white-space:nowrap">Add-On 3: Nuclear Calendar</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap">Jon + Olivier</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#8892A4;white-space:nowrap;font-family:'IBM Plex Mono',monospace">15 min</td>
-        <td style="padding:.45rem .6rem;font-size:.75rem;color:#384660">Nuclear Outage Calendar live</td>
-        <td style="padding:.45rem .6rem;text-align:right">
-          <span style="background:#E8F5E9;color:#22882F;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em">Ready</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="data-src-banner" style="margin-top:.25rem"><span class="dsb-icon">📋</span><span class="dsb-text">Full step-by-step instructions for each task: <strong>BU_Services_GoLive_Roadmap.html</strong> · Full system reference: <strong>BU_Services_System_Overview.html</strong> · All 110 actuals.json field definitions documented in the System Overview.</span></div>
-
-
-
-  <!-- ── CONFERENCE ROI ── -->
   <div class="sec-hdr" id="conferences">
     <h2>Conference Programme</h2>
     <span class="sec-count" id="conf-subtitle">BU Services + Joint conferences only (Nucleom/Nortech staff) · Ekoscan BU-only shows excluded · updated from actuals.json</span>
@@ -1778,6 +2543,57 @@ const INIT_LABEL = { mining:'Mining', pipeline:'Pipeline', powerline:'Powerline'
           }
         });
         localStorage.setItem('v2d_actuals', JSON.stringify(live));
+      }
+    } catch(e) { /* non-fatal */ }
+
+    // ── CRM → Nucleom regions ────────────────────────────────────────────────
+    // Map CRM opportunity region strings to CONFIG.regions ids.
+    // CRM uses broad strings; map them to the five Nucleom region ids.
+    try {
+      var crmOppsReg = [];
+      try { crmOppsReg = JSON.parse(localStorage.getItem('bucrm_opps') || '[]'); } catch(er) {}
+      var wonReg = crmOppsReg.filter(function(o){ return o.stage === 'Closed Won' && o.region; });
+      if (wonReg.length > 0) {
+        // CRM region → CONFIG region id mapping
+        var REGION_MAP = {
+          'hq':        ['hq','quebec','québec city','yqb','hq —'],
+          'montreal':  ['montréal','montreal','mtl','montréal'],
+          'central':   ['central','ontario','whitby','oakville','thunder bay','on/mb'],
+          'edmonton':  ['edmonton','alberta','bc/ab/sk','western','yeg'],
+          'vancouver': ['vancouver','bc','yvr'],
+        };
+        function regionIdFromStr(str) {
+          var s = (str || '').toLowerCase();
+          for (var id in REGION_MAP) {
+            var keywords = REGION_MAP[id];
+            for (var ki = 0; ki < keywords.length; ki++) {
+              if (s.indexOf(keywords[ki]) > -1) return id;
+            }
+          }
+          return null;
+        }
+        // Tally closed won by region id
+        var regTotals = {};
+        wonReg.forEach(function(o) {
+          var rid = regionIdFromStr(o.region);
+          if (!rid) return;
+          var amtM = (Number(o.amount) || 0) / 1e6;
+          regTotals[rid] = (regTotals[rid] || 0) + amtM;
+        });
+        // Write to v2d_actuals and CONFIG.regions
+        if (Object.keys(regTotals).length > 0) {
+          Object.keys(regTotals).forEach(function(rid) {
+            var key = 'region_' + rid;
+            live[key] = regTotals[rid];
+            // Also update CONFIG.regions directly
+            if (CONFIG.regions) {
+              var reg = CONFIG.regions.find(function(r){ return r.id === rid; });
+              if (reg) reg.actual2026 = regTotals[rid];
+            }
+          });
+          // Persist
+          localStorage.setItem('v2d_actuals', JSON.stringify(live));
+        }
       }
     } catch(e) { /* non-fatal */ }
 
@@ -2484,9 +3300,15 @@ function v2dApplyLive(live) {
   });
   if (CONFIG.regions) {
     CONFIG.regions.forEach(function(reg) {
-      if (live['region_'+reg.id] !== undefined) reg.actual2026 = live['region_'+reg.id];
-      if (live['region_'+reg.id+'_pipeline'] !== undefined) reg.pipeline2026 = live['region_'+reg.id+'_pipeline'];
-      if (live['util_'+reg.id] !== undefined) reg.util = live['util_'+reg.id];
+      // Check v2d_actuals store for region data (from V2D paste or CRM inject)
+      var v2dActualsReg = {};
+      try { v2dActualsReg = JSON.parse(localStorage.getItem('v2d_actuals') || '{}'); } catch(e) {}
+      var actualVal   = live['region_'+reg.id] !== undefined ? live['region_'+reg.id] : (v2dActualsReg['region_'+reg.id] || reg.actual2026 || 0);
+      var pipelineVal = live['region_'+reg.id+'_pipeline'] !== undefined ? live['region_'+reg.id+'_pipeline'] : (v2dActualsReg['region_'+reg.id+'_pipeline'] || reg.pipeline2026 || 0);
+      var utilVal     = live['util_'+reg.id] !== undefined ? live['util_'+reg.id] : (v2dActualsReg['util_'+reg.id] || reg.util || 0);
+      if (actualVal   > 0) reg.actual2026   = actualVal;
+      if (pipelineVal > 0) reg.pipeline2026 = pipelineVal;
+      if (utilVal     > 0) reg.util         = utilVal;
     });
   }
   var perfKeys = ['budget_nuc','budget_nor','budget_int','budget_arcndt',
@@ -2612,7 +3434,7 @@ async function v2dExtract() {
     + '    "commit_nor": <committed $M or null>,\n'
     + '    "sure_forecast_nuc": <sure forecast $M or null>,\n'
     + '    "sure_forecast_nor": <sure forecast $M or null>\n'
-    + '  },\n'
+    + '    "region_hq": <Nucleom HQ/Quebec City closed won $M or null>,\n'    + '    "region_montreal": <Nucleom Montreal closed won $M or null>,\n'    + '    "region_central": <Nucleom Central/Ontario closed won $M or null>,\n'    + '    "region_edmonton": <Nucleom Edmonton/Western closed won $M or null>,\n'    + '    "region_vancouver": <Nucleom Vancouver closed won $M or null>,\n'    + '    "util_hq": <HQ utilisation decimal 0-1 or null>,\n'    + '    "util_montreal": <Montreal utilisation decimal 0-1 or null>,\n'    + '    "util_central": <Central utilisation decimal 0-1 or null>,\n'    + '    "util_edmonton": <Edmonton utilisation decimal 0-1 or null>,\n'    + '    "util_vancouver": <Vancouver utilisation decimal 0-1 or null>\n'    + '  },\n'
     + '  "monthly": <object or null — if screenshot shows monthly data: { "2026_01": {"nucleom":val,"nortech":val,"intact":val,"mining":val,...}, ... }. Keys "2026_01"–"2026_12". Values $M CAD.>,\n'
     + '  "kpi": <object or null — if payroll/KPI report: { "nuc_hours":int, "nuc_rate":CAD, "nuc_util":0-1, "nuc_cost":CAD, "nuc_margin":0-1, "nor_hours":int, "nor_rate":CAD, "nor_util":0-1, "nor_cost":CAD, "nor_margin":0-1 }>,\n'
     + '  "month": "2026_MM" or null (set this if the report covers exactly one month),\n'
@@ -3751,6 +4573,87 @@ function buildDigestHTML() {
 .ap-source .ap-src-dot.manual { background: #F59E0B; }
 @media (max-width: 700px) {
   .actuals-panel { grid-template-columns: 1fr; }
+}
+.nuc-sum-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin:.85rem 0;}
+
+/* ── Nuclear Outage Calendar ── */
+.nuc-sum-tile{background:#fff;border:1px solid #D0DCF0;border-radius:8px;padding:.6rem .85rem;text-align:center;box-shadow:0 1px 4px rgba(10,31,92,.05);}
+.nst-val{font-family:var(--mono);font-size:1.1rem;font-weight:800;color:#0A1F5C;letter-spacing:-.02em;}
+.nst-lbl{font-size:.62rem;color:#8899BB;margin-top:.15rem;text-transform:uppercase;letter-spacing:.06em;}
+.noc-card{background:#fff;border:1px solid #D0DCF0;border-radius:10px;padding:.9rem 1rem;box-shadow:0 2px 8px rgba(10,31,92,.06);}
+.noc-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;}
+.noc-station{font-size:.9rem;font-weight:800;color:#0A1F5C;line-height:1.2;}
+.noc-unit{font-size:.72rem;color:#7A8BB0;margin-top:.15rem;}
+.noc-countdown{text-align:right;}
+.noc-days{font-family:var(--mono);font-size:1.8rem;font-weight:800;line-height:1;letter-spacing:-.04em;}
+.noc-days-lbl{font-size:.6rem;color:#8899BB;white-space:nowrap;}
+.noc-dates{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-top:1px solid #EEF2FA;border-bottom:1px solid #EEF2FA;margin:.5rem 0;}
+.noc-dates-lbl{font-size:.65rem;color:#8899BB;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
+.noc-dates-val{font-family:var(--mono);font-size:.72rem;color:#0A1F5C;font-weight:600;}
+.noc-row{display:flex;align-items:center;justify-content:space-between;margin:.45rem 0;}
+.noc-status-pill{font-size:.65rem;font-weight:700;padding:.18rem .55rem;border-radius:20px;letter-spacing:.03em;}
+.noc-value{font-family:var(--mono);font-size:.75rem;font-weight:700;color:#1A7A4A;}
+.noc-leads{display:flex;flex-direction:column;gap:.1rem;margin-top:.35rem;}
+.noc-lead{font-size:.65rem;color:#7A8BB0;}
+.noc-notes{font-size:.65rem;color:#8899BB;font-style:italic;margin-top:.4rem;padding-top:.4rem;border-top:1px solid #EEF2FA;}
+.nuc-empty{text-align:center;padding:2.5rem 1rem;background:#FAFBFF;border:2px dashed #D0DCF0;border-radius:10px;grid-column:1/-1;}
+.nuc-empty-icon{font-size:2.5rem;margin-bottom:.6rem;}
+.nuc-empty-title{font-size:.9rem;font-weight:700;color:#0A1F5C;margin-bottom:.4rem;}
+.nuc-empty-sub{font-size:.75rem;color:#8899BB;line-height:1.7;}
+
+/* ── BU Services cross-page nav bar ── */
+.sysbar {
+  position: sticky;
+  top: 48px;
+  z-index: 199;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: #050F2E;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  padding: 0 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.sysbar-label {
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.22);
+  margin-right: 1.2rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.sysbtn {
+  font-size: .72rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.38);
+  text-decoration: none;
+  padding: 0 .85rem;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid rgba(255,255,255,.06);
+  white-space: nowrap;
+  transition: color .15s, background .15s;
+  letter-spacing: .01em;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-bottom: 2px solid transparent;
+}
+.sysbtn:first-of-type { border-left: 1px solid rgba(255,255,255,.06); }
+.sysbtn:hover { color: rgba(255,255,255,.75); background: rgba(255,255,255,.04); }
+.sysbtn-active {
+  color: #00AEEF !important;
+  background: rgba(0,174,239,.08) !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid #00AEEF !important;
+  cursor: default !important;
 }
 </style></head>
 <body><div class="wrap">
