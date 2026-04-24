@@ -1152,6 +1152,25 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 .avb-export-spinner{display:none;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
+
+/* ── BU Services system nav bar ── */
+.sysbar{position:sticky;top:48px;z-index:99;background:rgba(5,12,25,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 1.25rem;gap:.5rem;height:36px;backdrop-filter:blur(8px);}
+.sysbar-label{font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2);margin-right:.35rem;white-space:nowrap;font-family:"Courier New",monospace;}
+.sysbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;text-decoration:none;cursor:pointer;border:1.5px solid;transition:.18s;white-space:nowrap;font-family:inherit;background:none;}
+.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7);}
+.sysbtn-hub:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);color:#00AEEF;box-shadow:0 0 8px rgba(0,174,239,.2);}
+.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7);}
+.sysbtn-people:hover{background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);color:#FCD34D;box-shadow:0 0 8px rgba(201,134,10,.2);}
+.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7);}
+.sysbtn-meetings:hover{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);color:#6EE7B7;box-shadow:0 0 8px rgba(22,163,74,.2);}
+.sysbtn-cc{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.4);}
+.sysbtn-cc:hover,.sysbtn-cc.active{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.85);}
+.sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5);}
+.sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF;}
+.sysbtn-nortech{border-color:rgba(232,64,64,.3);color:rgba(232,64,64,.7);}
+.sysbtn-nortech:hover{background:rgba(232,64,64,.15);border-color:rgba(232,64,64,.7);color:#F87171;}
+.sysbtn.current{cursor:default;pointer-events:none;}
+.sysbtn-cc.current{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js"></script>
 </head>
@@ -1177,16 +1196,20 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <a href="#proposals">Proposals</a>
     <a href="#reconciliation">Recon</a>
     <a href="#nuclear">Nuclear</a>
-    
     <a href="#digest">Email Digest</a>
-  </div>  </div>
-
-  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a>
-  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_People_Dashboard.html" target="buservices">👥 People</a>
-  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a>
-  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a>
-  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Nortech_Ops.html" target="buservices">🔧 Nortech Ops</a>
+  </div>
+  <div class="topbar-right"></div>
 </nav>
+<div class="sysbar">
+  <span class="sysbar-label">BU Services</span>
+  <a class="sysbtn sysbtn-hub" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a>
+  <a class="sysbtn sysbtn-people" href="https://jon-servicesbu.github.io/bu-services/BU_Services_People_Dashboard.html" target="buservices">👥 People</a>
+  <a class="sysbtn sysbtn-meetings" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a>
+  <span class="sysbtn sysbtn-cc current">📊 Command Centre</span>
+  <a class="sysbtn sysbtn-crm" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a>
+  <a class="sysbtn sysbtn-nortech" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Nortech_Ops.html" target="buservices">🔧 Nortech Ops</a>
+</div>
+
 
 
 
@@ -3524,6 +3547,53 @@ function buildDigestHTML() {
 
 .nav-btn{color:var(--sky,#00AEEF);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;text-decoration:none;flex-shrink:0;margin-left:.5rem}
 .nav-btn:hover{background:rgba(0,174,239,.22)}
+
+/* ── Revenue Actuals Panel ── */
+.actuals-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#D0DCF0;border:1px solid #D0DCF0;border-radius:12px;overflow:hidden;margin-bottom:1.5rem;box-shadow:0 4px 20px rgba(10,31,92,.10);}
+.ap-tile{background:#fff;padding:1.25rem 1.4rem 1.1rem;display:flex;flex-direction:column;position:relative;}
+.ap-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
+.ap-tile.nuc::before{background:linear-gradient(90deg,#0A1F5C,#1A5CA8);}
+.ap-tile.nor::before{background:linear-gradient(90deg,#1A5CA8,#00AEEF);}
+.ap-tile.int::before{background:linear-gradient(90deg,#1A7A4A,#22C55E);}
+.ap-label{font-family:var(--mono,monospace);font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8899BB;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem;}
+.ap-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ap-name{font-size:1.05rem;font-weight:800;color:#0A1F5C;line-height:1.1;margin-bottom:.9rem;letter-spacing:-.01em;}
+.ap-metrics{display:flex;flex-direction:column;}
+.ap-metric{display:flex;justify-content:space-between;align-items:baseline;padding:.38rem 0;border-bottom:1px solid #EEF2FA;}
+.ap-metric:last-child{border-bottom:none;}
+.ap-metric-lbl{font-size:.71rem;color:#7A8BB0;}
+.ap-metric-val{font-family:var(--mono,monospace);font-size:.82rem;font-weight:700;color:#0A1F5C;}
+.ap-metric-val.live{color:#1A7A4A;}
+.ap-metric-val.dim{color:#8899BB;font-weight:400;}
+.ap-metric-val.pipeline{color:#1A5CA8;}
+.ap-bar-row{margin-top:.7rem;padding-top:.7rem;border-top:1px solid #EEF2FA;}
+.ap-bar-lbl{display:flex;justify-content:space-between;font-size:.65rem;color:#8899BB;margin-bottom:.3rem;}
+.ap-bar-track{height:5px;background:#E8EDF8;border-radius:10px;overflow:hidden;}
+.ap-bar-fill{height:100%;border-radius:10px;transition:width .6s ease;}
+.ap-source{margin-top:.65rem;font-size:.6rem;color:#A0AEC0;display:flex;align-items:center;gap:.3rem;}
+.ap-src-dot{width:5px;height:5px;border-radius:50%;background:#22C55E;flex-shrink:0;}
+.ap-src-dot.manual{background:#F59E0B;}
+@media(max-width:700px){.actuals-panel{grid-template-columns:1fr;}}
+
+
+/* ── BU Services system nav bar ── */
+.sysbar{position:sticky;top:48px;z-index:99;background:rgba(5,12,25,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 1.25rem;gap:.5rem;height:36px;backdrop-filter:blur(8px);}
+.sysbar-label{font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2);margin-right:.35rem;white-space:nowrap;font-family:"Courier New",monospace;}
+.sysbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;text-decoration:none;cursor:pointer;border:1.5px solid;transition:.18s;white-space:nowrap;font-family:inherit;background:none;}
+.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7);}
+.sysbtn-hub:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);color:#00AEEF;box-shadow:0 0 8px rgba(0,174,239,.2);}
+.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7);}
+.sysbtn-people:hover{background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);color:#FCD34D;box-shadow:0 0 8px rgba(201,134,10,.2);}
+.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7);}
+.sysbtn-meetings:hover{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);color:#6EE7B7;box-shadow:0 0 8px rgba(22,163,74,.2);}
+.sysbtn-cc{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.4);}
+.sysbtn-cc:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.85);}
+.sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5);}
+.sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF;}
+.sysbtn-nortech{border-color:rgba(232,64,64,.3);color:rgba(232,64,64,.7);}
+.sysbtn-nortech:hover{background:rgba(232,64,64,.15);border-color:rgba(232,64,64,.7);color:#F87171;}
+.sysbtn.current{cursor:default;pointer-events:none;}
+.sysbtn-cc.current{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);}
 </style></head>
 <body><div class="wrap">
 <div class="hdr">
