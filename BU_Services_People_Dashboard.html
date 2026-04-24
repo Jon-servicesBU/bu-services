@@ -1267,73 +1267,47 @@ async function handleUpload(files) {
     return;
   }
 
-  // Show reading overlay
-  showBcOverlay('Reading ' + file.name + '…', 'Claude is extracting 13-week utilization data');
+  showBcOverlay('Reading ' + file.name + '\u2026', 'Converting to text\u2026');
 
   try {
-    var fileData, mediaType;
+    var textContent;
 
     if (ext === 'csv') {
-      // Read as text
-      fileData = await new Promise(function(res, rej) {
+      textContent = await new Promise(function(res, rej) {
         var reader = new FileReader();
         reader.onload = function(e) { res(e.target.result); };
         reader.onerror = rej;
         reader.readAsText(file);
       });
-      mediaType = null; // text mode
     } else {
-      // Read xlsx as base64
-      fileData = await new Promise(function(res, rej) {
+      // Convert xlsx to CSV text using SheetJS
+      if (!window.XLSX) {
+        await new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+          s.onload = resolve; s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      textContent = await new Promise(function(res, rej) {
         var reader = new FileReader();
         reader.onload = function(e) {
-          var bytes = new Uint8Array(e.target.result);
-          var binary = '';
-          for (var i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-          res(btoa(binary));
+          try {
+            var wb = XLSX.read(e.target.result, { type: 'array' });
+            var csv = wb.SheetNames.map(function(name) {
+              return '=== Sheet: ' + name + ' ===\n' + XLSX.utils.sheet_to_csv(wb.Sheets[name]);
+            }).join('\n\n');
+            res(csv);
+          } catch(err) { rej(err); }
         };
         reader.onerror = rej;
         reader.readAsArrayBuffer(file);
       });
-      mediaType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     }
 
-    showBcOverlay('Analysing with Claude…', 'Extracting weekly utilization, billable hours, and office breakdown');
+    showBcOverlay('Analysing with Claude\u2026', 'Extracting weekly utilization, billable hours, and office breakdown');
 
-    var systemPrompt = `You are reading a Business Central (BC) payroll/timesheet export for Nucleom.
-Extract the 13 most recent weekly utilization figures.
-
-The data you need:
-- util_week_ending: most recent week-ending date (YYYY-MM-DD, Saturday)
-- util_13wk_trend: array of 13 objects [{date, bill, tot, vac, util}] newest first
-  - date: week-ending date YYYY-MM-DD
-  - bill: billable worked hours that week (exclude vacation — only actual worked billable hours)
-  - tot: total paid hours that week INCLUDING vacation
-  - vac: vacation hours that week (sick leave, statutory holidays, vacation bank draws — any paid non-worked time)
-  - util: overhead % = (worked_total - bill) / worked_total * 100 where worked_total = tot - vac
-         If worked_total is 0 (e.g. shutdown week), set util to null
-- util_total_latest: overhead % for most recent active (non-zero worked) week
-- util_13wk_avg: average overhead % across active weeks only (exclude zero-worked-hour weeks)
-- util_by_office: array of {office, util, bill, tot, vac} per Nucleom office
-- util_hq, util_montreal, util_central, util_edmonton, util_vancouver: latest overhead % per office
-
-Respond ONLY with valid JSON. No markdown, no explanation.`;
-
-    var messages;
-    if (mediaType) {
-      messages = [{
-        role: 'user',
-        content: [
-          { type: 'document', source: { type: 'base64', media_type: mediaType, data: fileData } },
-          { type: 'text', text: 'Extract the 13-week rolling utilization data from this BC export.' }
-        ]
-      }];
-    } else {
-      messages = [{
-        role: 'user',
-        content: 'Here is the BC export (CSV):\n\n' + fileData.slice(0, 50000) + '\n\nExtract the 13-week rolling utilization data.'
-      }];
-    }
+    var systemPrompt = 'You are reading a Business Central (BC) payroll/timesheet export for Nucleom.\nExtract the 13 most recent weekly utilization figures.\n\nThe data you need:\n- util_week_ending: most recent week-ending date (YYYY-MM-DD, Saturday)\n- util_13wk_trend: array of 13 objects [{date, bill, tot, vac, util}] newest first\n  - date: week-ending date YYYY-MM-DD\n  - bill: billable worked hours that week (exclude vacation)\n  - tot: total paid hours that week INCLUDING vacation\n  - vac: vacation hours that week\n  - util: overhead % = (worked_total - bill) / worked_total * 100 where worked_total = tot - vac, null if worked_total is 0\n- util_total_latest: overhead % for most recent active week\n- util_13wk_avg: average overhead % across active weeks only\n- util_by_office: array of {office, util, bill, tot, vac} per Nucleom office\n- util_hq, util_montreal, util_central, util_edmonton, util_vancouver: latest overhead % per office\n\nRespond ONLY with valid JSON. No markdown, no explanation.';
 
     var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
       method: 'POST',
@@ -1342,7 +1316,7 @@ Respond ONLY with valid JSON. No markdown, no explanation.`;
         model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         system: systemPrompt,
-        messages: messages
+        messages: [{ role: 'user', content: 'BC export data:\n\n' + textContent.slice(0, 50000) + '\n\nExtract the 13-week rolling utilization data.' }]
       })
     });
 
@@ -1354,20 +1328,19 @@ Respond ONLY with valid JSON. No markdown, no explanation.`;
 
     // Merge extracted data into DATA
     if (extracted.util_13wk_trend && Array.isArray(extracted.util_13wk_trend)) {
-      DATA.util_week_ending = extracted.util_week_ending || extracted.util_13wk_trend[0].date;
-      DATA.util_13wk_trend  = extracted.util_13wk_trend;
+      DATA.util_week_ending  = extracted.util_week_ending || extracted.util_13wk_trend[0].date;
+      DATA.util_13wk_trend   = extracted.util_13wk_trend;
       DATA.util_total_latest = extracted.util_total_latest || extracted.util_13wk_trend[0].util;
-      DATA.util_13wk_avg    = extracted.util_13wk_avg || (
-        extracted.util_13wk_trend.reduce(function(s,w){ return s+w.util; }, 0) / extracted.util_13wk_trend.length
+      DATA.util_13wk_avg     = extracted.util_13wk_avg || (
+        extracted.util_13wk_trend.reduce(function(s,w){ return s+(w.util||0); }, 0) / extracted.util_13wk_trend.length
       );
       if (extracted.util_by_office) DATA.util_by_office = extracted.util_by_office;
-      if (extracted.util_hq       !== undefined) DATA.util_hq = extracted.util_hq;
-      if (extracted.util_montreal  !== undefined) DATA.util_montreal = extracted.util_montreal;
-      if (extracted.util_central   !== undefined) DATA.util_central = extracted.util_central;
-      if (extracted.util_edmonton  !== undefined) DATA.util_edmonton = extracted.util_edmonton;
+      if (extracted.util_hq        !== undefined) DATA.util_hq        = extracted.util_hq;
+      if (extracted.util_montreal  !== undefined) DATA.util_montreal  = extracted.util_montreal;
+      if (extracted.util_central   !== undefined) DATA.util_central   = extracted.util_central;
+      if (extracted.util_edmonton  !== undefined) DATA.util_edmonton  = extracted.util_edmonton;
       if (extracted.util_vancouver !== undefined) DATA.util_vancouver = extracted.util_vancouver;
 
-      // Persist to localStorage so it survives page refresh
       try {
         localStorage.setItem('bc_util_data', JSON.stringify({
           updated: new Date().toISOString(),
@@ -1378,7 +1351,7 @@ Respond ONLY with valid JSON. No markdown, no explanation.`;
 
       hideBcOverlay();
       renderUtil();
-      setUploadStatus('✓ Updated ' + (extracted.util_13wk_trend.length) + ' weeks from ' + file.name, 'success');
+      setUploadStatus('\u2713 Updated ' + extracted.util_13wk_trend.length + ' weeks from ' + file.name, 'success');
     } else {
       throw new Error('No util_13wk_trend array in response');
     }
@@ -1388,7 +1361,6 @@ Respond ONLY with valid JSON. No markdown, no explanation.`;
     setUploadStatus('Error: ' + e.message, 'error');
   }
 }
-
 function setUploadStatus(msg, type) {
   var el = document.getElementById('upload-status');
   if (!el) return;
