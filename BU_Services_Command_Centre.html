@@ -2271,13 +2271,23 @@ var MTG_COLOURS = {
       if (wonOpps.length > 0) {
         var v2dMoCRM = {};
         try { v2dMoCRM = JSON.parse(localStorage.getItem('v2d_monthly') || '{}'); } catch(e2) {}
-        // Group won opps by month
+        // Build fresh CRM totals — reset nucleom for all months first so we
+        // don't accumulate across page loads
+        Object.keys(v2dMoCRM).forEach(function(mk) {
+          if (v2dMoCRM[mk]._crm_source === 'CRM Closed Won') {
+            delete v2dMoCRM[mk].nucleom;
+          }
+        });
+        // Group won opps by month (fresh calculation each page load)
+        var crmTotals = {};
         wonOpps.forEach(function(o) {
           var mk = o.closeDate.slice(0,7).replace('-','_'); // '2026_04'
+          crmTotals[mk] = (crmTotals[mk] || 0) + (Number(o.amount) || 0) / 1e6;
+        });
+        // Merge fresh totals into v2d_monthly
+        Object.keys(crmTotals).forEach(function(mk) {
           if (!v2dMoCRM[mk]) v2dMoCRM[mk] = {};
-          // Nucleom opps (Base Business initiative or any — all CRM opps are Nucleom)
-          var amtM = (Number(o.amount) || 0) / 1e6;
-          v2dMoCRM[mk].nucleom = (v2dMoCRM[mk].nucleom || 0) + amtM;
+          v2dMoCRM[mk].nucleom = crmTotals[mk];
           v2dMoCRM[mk]._crm_source = 'CRM Closed Won';
         });
         localStorage.setItem('v2d_monthly', JSON.stringify(v2dMoCRM));
