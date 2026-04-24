@@ -1174,16 +1174,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <a href="BU_Services_Management_Hub.html" target="buservices" style="flex-shrink:0;color:#00AEEF;background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;align-self:center;margin-left:.5rem">⚙ Management Hub →</a>
   </div>  </div>
 </nav>
-<!-- ── BU Services system navigation ── -->
-<div class="sysbar">
-  <span class="sysbar-label">BU Services</span>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_People_Dashboard.html" target="buservices">👥 People</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Nortech_Ops.html" target="buservices">🔧 Nortech Ops</a>
-  <span class="sysbtn sysbtn-cc">📊 Command Centre</span>
-</div>
+
 
 
 <!-- HERO -->
@@ -3379,6 +3370,7 @@ function ragLabel(actual, forecast) {
 }
 
 // Revenue Foundation rendered via renderRevenueFoundation() — supports CAD/EUR toggle
+renderActualsPanel();
 renderRevenueFoundation();
 renderPerformance();
 renderMeetings();
@@ -3507,64 +3499,6 @@ function buildDigestHTML() {
   .prog-fill{height:100%;border-radius:2px;}
   .footer{background:#F0F3FA;padding:14px 24px;font-size:11px;color:#8892A4;text-align:center;}
   .cta{display:inline-block;background:#161C60;color:#ffffff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:5px;text-decoration:none;margin:4px;}
-
-
-/* ── BU Services cross-page nav bar ── */
-.sysbar{position:sticky;top:48px;z-index:199;height:36px;display:flex;align-items:stretch;background:#08142E;border-bottom:1px solid rgba(255,255,255,.08);padding:0 1.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:0;}
-.sysbar-label{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.2);display:flex;align-items:center;padding-right:1.25rem;border-right:1px solid rgba(255,255,255,.07);margin-right:.5rem;flex-shrink:0;white-space:nowrap;}
-.sysbtn{display:flex;align-items:center;padding:0 .9rem;font-size:.72rem;font-weight:500;letter-spacing:.01em;color:rgba(255,255,255,.4);text-decoration:none;border:none;border-bottom:2px solid transparent;background:transparent;white-space:nowrap;flex-shrink:0;cursor:pointer;transition:color .12s,background .12s;height:36px;box-sizing:border-box;}
-.sysbtn:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.04);}
-.sysbtn-active{color:#00AEEF !important;border-bottom-color:#00AEEF !important;font-weight:600 !important;background:rgba(0,174,239,.07) !important;cursor:default !important;}
-
-.sysbar{
-  position:sticky;top:48px;z-index:199;
-  height:34px;display:flex;align-items:center;gap:.3rem;
-  background:rgba(19,22,31,.98);border-bottom:1px solid rgba(255,255,255,.08);
-  padding:0 1.25rem;overflow-x:auto;
-}
-.sysbar-label{font-size:.62rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.18);margin-right:.5rem;flex-shrink:0}
-.sysbtn{
-  font-size:.67rem;font-weight:600;color:rgba(255,255,255,.45);
-  text-decoration:none;padding:.2rem .6rem;border-radius:4px;
-  border:1px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0;
-}
-.sysbtn:hover{color:rgba(255,255,255,.9);border-color:rgba(255,255,255,.12)}
-.sysbtn-cc{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7)}
-.sysbtn-cc:hover{background:rgba(0,174,239,.1);color:#00AEEF}
-
-/* ── Nuclear Outage Calendar cards ── */
-.noc-card{background:#fff;border:1px solid #D0DCF0;border-radius:10px;padding:.9rem 1rem;box-shadow:0 2px 8px rgba(10,31,92,.06);}
-.noc-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem;}
-.noc-station{font-size:.9rem;font-weight:800;color:#0A1F5C;line-height:1.2;}
-.noc-unit{font-size:.72rem;color:#7A8BB0;margin-top:.15rem;}
-.noc-countdown{text-align:right;}
-.noc-days{font-family:var(--mono);font-size:1.8rem;font-weight:800;line-height:1;letter-spacing:-.04em;}
-.noc-days-lbl{font-size:.6rem;color:#8899BB;white-space:nowrap;}
-.noc-dates{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-top:1px solid #EEF2FA;border-bottom:1px solid #EEF2FA;margin:.5rem 0;}
-.noc-dates-lbl{font-size:.65rem;color:#8899BB;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
-.noc-dates-val{font-family:var(--mono);font-size:.72rem;color:#0A1F5C;font-weight:600;}
-.noc-row{display:flex;align-items:center;justify-content:space-between;margin:.45rem 0;}
-.noc-status-pill{font-size:.65rem;font-weight:700;padding:.18rem .55rem;border-radius:20px;letter-spacing:.03em;}
-.noc-value{font-family:var(--mono);font-size:.75rem;font-weight:700;color:#1A7A4A;}
-.noc-leads{display:flex;flex-direction:column;gap:.1rem;margin-top:.35rem;}
-.noc-lead{font-size:.65rem;color:#7A8BB0;}
-.noc-notes{font-size:.65rem;color:#8899BB;font-style:italic;margin-top:.4rem;padding-top:.4rem;border-top:1px solid #EEF2FA;}
-.nuc-empty{text-align:center;padding:2.5rem 1rem;background:#FAFBFF;border:2px dashed #D0DCF0;border-radius:10px;grid-column:1/-1;}
-.nuc-sum-tile{background:#fff;border:1px solid #D0DCF0;border-radius:8px;padding:.6rem .85rem;text-align:center;box-shadow:0 1px 4px rgba(10,31,92,.05);}
-.nst-val{font-family:var(--mono);font-size:1.1rem;font-weight:800;color:#0A1F5C;letter-spacing:-.02em;}
-.nst-lbl{font-size:.62rem;color:#8899BB;margin-top:.15rem;text-transform:uppercase;letter-spacing:.06em;}
-.nuc-sum-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin:.85rem 0;}
-.nuc-outage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin:.85rem 0;}
-/* ── Recon light mode ── */
-.recon-card{background:#fff;border:1px solid #D0DCF0;border-radius:10px;padding:1rem 1.1rem;box-shadow:0 2px 8px rgba(10,31,92,.06);}
-.recon-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin:.85rem 0;}
-.recon-kpi{background:#fff;border:1px solid #D0DCF0;border-radius:8px;padding:.65rem .85rem;text-align:center;box-shadow:0 1px 4px rgba(10,31,92,.05);}
-.rb-label{font-size:.7rem;color:#7A8BB0;width:120px;flex-shrink:0;}
-.rb-bar{flex:1;height:8px;background:#E8EDF8;border-radius:4px;overflow:hidden;}
-.rb-fill{height:100%;border-radius:4px;transition:width .4s;}
-.rb-val{font-family:var(--mono);font-size:.68rem;color:#0A1F5C;font-weight:600;min-width:80px;text-align:right;}
-.rk-val{font-family:var(--mono);font-size:1.1rem;font-weight:800;letter-spacing:-.02em;}
-.rk-lbl{font-size:.62rem;color:#8899BB;margin-top:.15rem;text-transform:uppercase;letter-spacing:.06em;}
 </style></head>
 <body><div class="wrap">
 <div class="hdr">
