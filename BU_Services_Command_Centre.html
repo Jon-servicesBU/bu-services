@@ -2497,6 +2497,20 @@ var MONTHLY_ENTITIES = [
   { id:'x3',        label:'3X',        colour:'#6B3FA0', group:'initiative' },
 ];
 
+
+var MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+var monthlyView = 'both';
+
+var EUR_CAD = 1.6;
+
+var currencyMode = 'CAD';
+
+var MTG_COLOURS = {
+  commercial:'#196B24', ops:'#1A3A6B', nuclear:'#7A3800',
+  gate:'#3D1A60', finance:'#2D5A8E', hr:'#0D5050', eurazeo:'#161C60'
+};
+
 // ── LIVE SALESFORCE ACTUALS ─────────────────────────────────────────────────
 // Vision-to-Data replaces Power Automate — paste a screenshot to update any field.
 // Falls back to actuals.json (SharePoint) if no localStorage data, then CONFIG defaults.
@@ -2980,9 +2994,7 @@ function exportAvbSlide() {
 }
 
 
-// ── CURRENCY TOGGLE ─────────────────────────────────────────────────────────
-var EUR_CAD = 1.6;          // 1 EUR = 1.60 CAD (constant)
-var currencyMode = 'CAD';   // 'CAD' | 'EUR' — toggled by user
+// ── CURRENCY TOGGLE ─────────────────────────────────────────────────────────          // 1 EUR = 1.60 CAD (constant)   // 'CAD' | 'EUR' — toggled by user
 
 function cvAmt(cadVal) {
   // Convert a CAD $M value for display
@@ -3821,10 +3833,8 @@ function renderRevenueFoundation() {
 }
 
 
-// ── MONTHLY REVENUE ──────────────────────────────────────────────────────────
-var monthlyView = 'both'; // 'chart' | 'table' | 'both'
+// ── MONTHLY REVENUE ────────────────────────────────────────────────────────── // 'chart' | 'table' | 'both'
 
-var MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 // MONTH_KEYS declared globally above renderAll
 
 function getMonthlyData() {
@@ -4120,10 +4130,6 @@ function renderPerformance() {
 }
 
 // ── MEETING HEALTH ───────────────────────────────────────────────────────────
-var MTG_COLOURS = {
-  commercial:'#196B24', ops:'#1A3A6B', nuclear:'#7A3800',
-  gate:'#3D1A60', finance:'#2D5A8E', hr:'#0D5050', eurazeo:'#161C60'
-};
 
 function mtgRag(m) {
   if (m.overdue > 0 || m.actions >= 4) return 'rag-red';
