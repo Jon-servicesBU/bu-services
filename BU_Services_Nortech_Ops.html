@@ -917,120 +917,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-  <!-- ══ TIMESHEETS VIEW ══════════════════════════════════════════════════════ -->
-  <div id="view-timesheets" class="view" style="display:none">
-    <div class="sec-hdr">
-      <div><h2>Timesheets</h2><div class="sec-sub" id="ts-view-sub">Hours per work order — submit for payroll</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:130px;font-size:.72rem" id="ts-filter-status" onchange="renderTimesheets()">
-          <option value="">All</option>
-          <option value="draft">Draft</option>
-          <option value="submitted">Submitted</option>
-        </select>
-        <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="renderTimesheets()">
-      </div>
-    </div>
-    <div id="ts-grid" style="display:grid;gap:.75rem"></div>
-    <div class="empty-state" id="ts-empty" style="display:none">
-      <div class="empty-state-icon">⏱</div>
-      <div class="empty-state-title">No Timesheets Yet</div>
-      <div class="empty-state-sub">Timesheets are created when a Work Order is submitted</div>
-    </div>
-  </div>
-
-  <!-- ══ MARGIN REPORT VIEW ═══════════════════════════════════════════════════ -->
-  <div id="view-margin" class="view" style="display:none">
-    <div class="sec-hdr">
-      <div><h2>Margin Report</h2><div class="sec-sub">Billed vs Cost — admin only</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:160px;font-size:.72rem" id="margin-filter-tech" onchange="renderMarginReport()">
-          <option value="">All Technicians</option>
-        </select>
-        <input class="form-input" style="width:130px" placeholder="Filter by WO…" id="margin-filter-wo" oninput="renderMarginReport()">
-      </div>
-    </div>
-    <div class="kpi-row" id="margin-kpis" style="margin-bottom:1.25rem"></div>
-    <div class="section" style="margin-bottom:1.25rem">
-      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Work Order</h2></div></div>
-      <div class="card" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="margin-wo-table">
-          <thead><tr>
-            <th>WO #</th><th>Client</th><th>Technician</th><th>Date</th>
-            <th style="text-align:right">Reg</th><th style="text-align:right">OT</th><th style="text-align:right">Night</th>
-            <th style="text-align:right">Billed $</th>
-            <th style="text-align:right">Cost $</th>
-            <th style="text-align:right">Margin $</th>
-            <th style="text-align:right">Margin %</th>
-          </tr></thead>
-          <tbody id="margin-wo-body"></tbody>
-        </table>
-      </div>
-    </div>
-    <div class="section">
-      <div class="sec-hdr" style="margin-bottom:.5rem"><div><h2 style="font-size:1rem">By Technician</h2></div></div>
-      <div class="card" style="padding:0;overflow-x:auto">
-        <table class="data-table" id="margin-tech-table">
-          <thead><tr>
-            <th>Technician</th><th>Pay Type</th><th style="text-align:right">WOs</th>
-            <th style="text-align:right">Total Hrs</th>
-            <th style="text-align:right">Billed $</th>
-            <th style="text-align:right">Cost $</th>
-            <th style="text-align:right">Margin $</th>
-            <th style="text-align:right">Margin %</th>
-          </tr></thead>
-          <tbody id="margin-tech-body"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ TIMESHEET MODAL ═══════════════════════════════════════════════════════ -->
-  <div class="modal-overlay" id="ts-modal">
-    <div class="modal" style="max-width:860px;width:96vw">
-      <div class="modal-hdr">
-        <span class="modal-title" id="ts-modal-title">Timesheet</span>
-        <button class="modal-close" onclick="closeModal('ts-modal')">✕</button>
-      </div>
-      <div class="modal-body" style="padding:1rem 1.25rem">
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;margin-bottom:1rem;font-size:.78rem;display:flex;gap:1.5rem;flex-wrap:wrap">
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Work Order</div><strong id="ts-wo-ref">—</strong></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Client</div><span id="ts-wo-client">—</span></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Date</div><span id="ts-wo-date">—</span></div>
-          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Site</div><span id="ts-wo-site">—</span></div>
-        </div>
-        <div style="font-size:.62rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:.5rem">Hours — adjust as needed, add non-billable rows</div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-            <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:110px">Date</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:150px">Category / Activity</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">OT Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Night</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">Start</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:88px">End</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:72px">Billable?</th>
-              <th style="width:24px"></th>
-            </tr></thead>
-            <tbody id="ts-rows-body"></tbody>
-          </table>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="addTSRow()" style="margin-top:.5rem" id="ts-add-row-btn">+ Add Row</button>
-        <div class="form-group" style="margin-top:.9rem">
-          <label class="form-label">Notes (optional)</label>
-          <textarea class="form-textarea" id="ts-notes" placeholder="Any notes about your time on this job…" style="min-height:64px"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
-        <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
-        <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
-        <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
-        <div style="flex:1"></div>
-        <button class="btn btn-secondary" id="ts-draft-btn" onclick="saveTSDraft()">Save Draft</button>
-        <button class="btn btn-primary" id="ts-submit-btn" onclick="submitTS()">Submit Timesheet</button>
-      </div>
-    </div>
-  </div>
+  
 
 
 <!-- ══ WORK ORDER MODAL ══════════════════════════════════════════════════════ -->
@@ -1347,6 +1234,16 @@ document.addEventListener('DOMContentLoaded', function() {
       <div id="inv-cs-selector" style="max-height:200px;overflow-y:auto;background:var(--surface2);border-radius:6px;padding:.5rem">
         <div style="color:var(--muted);font-size:.75rem;padding:.5rem">Select a client first</div>
       </div>
+
+      <!-- Manual Line Items — admin only, shown/hidden via applyAdminVisibility -->
+      <div id="manual-lines-section" style="margin-top:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+          <label style="font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Additional Line Items</label>
+          <button type="button" class="btn btn-sm btn-ghost" onclick="addManualLine()" style="font-size:.72rem;padding:.2rem .6rem">+ Add Line</button>
+        </div>
+        <div id="manual-lines-container"></div>
+        <div style="font-size:.68rem;color:var(--muted);font-style:italic;margin-top:.25rem">Mileage · Mobilisation · Materials · Per diem · Equipment not in rate sheet</div>
+      </div>
       <div style="display:flex;justify-content:flex-end;gap:1.5rem;padding:.75rem 0;font-size:.8rem;border-top:1px solid var(--border);margin-top:.5rem">
         <span><span style="color:var(--muted)">Subtotal:</span> <span id="inv-subtotal" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
         <span><span style="color:var(--muted)">Tax:</span> <span id="inv-tax" style="font-family:var(--mono);font-weight:700">$0.00</span></span>
@@ -1431,26 +1328,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.5rem">Extracted Data — Review Before Importing</div>
         <div class="form-grid form-grid-2" style="gap:.5rem;margin-bottom:.75rem">
           <div class="form-group">
-            <label class="form-label">Rate Sheet Name</label>
-            <input class="form-input" id="import-rs-name" placeholder="Rate sheet name">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Customer (if client-specific)</label>
-            <input class="form-input" id="import-rs-customer" placeholder="Leave blank for standard">
-          </div>
-        </div>
-        <div id="import-labour-preview" style="margin-bottom:.75rem"></div>
-        <div id="import-equipment-preview"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('import-rate-modal')">Cancel</button>
-      <button class="btn btn-primary" id="import-confirm-btn" style="display:none" onclick="confirmImport()">Import Rate Sheet</button>
-    </div>
-  </div>
-</div>
-
-<script>// ══ GLOBAL STATE ══════════════════════════════════════════════════════════════
+            <label class="form-label">Rate Sheet Name// ══ GLOBAL STATE ══════════════════════════════════════════════════════════════
 var _jobs         = [];
 var _chargeSheets = [];
 var _invoices     = [];
@@ -1667,7 +1545,19 @@ function saveTimesheetToStorage(ts) {
 function loadTimesheetsFromStorage() {
   try {
     var raw = localStorage.getItem('nortech_timesheets');
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    var all = JSON.parse(raw);
+    // Auto-purge orphaned timesheets (WO no longer in Supabase)
+    if (_jobs && _jobs.length > 0) {
+      var validIds = _jobs.map(function(j){ return j.id; });
+      var clean = all.filter(function(t){ return validIds.indexOf(t.woId) > -1; });
+      if (clean.length !== all.length) {
+        localStorage.setItem('nortech_timesheets', JSON.stringify(clean));
+        console.log('[Nortech] Purged ' + (all.length - clean.length) + ' orphaned timesheet(s)');
+        return clean;
+      }
+    }
+    return all;
   } catch(e) { return []; }
 }
 function deleteTimesheetFromStorage(id) {
@@ -2084,6 +1974,8 @@ function applyAdminVisibility() {
       var el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
+    var mlSec = document.getElementById('manual-lines-section');
+    if (mlSec) mlSec.style.display = 'none';
     // If currently on a hidden view, redirect to dashboard
     var hiddenViews = ['invoices','rate-sheets','margin'];
     if (hiddenViews.indexOf(_currentView) > -1) {
@@ -2096,6 +1988,8 @@ function applyAdminVisibility() {
       var el = document.getElementById(id);
       if (el) el.style.display = '';
     });
+    var mlSec = document.getElementById('manual-lines-section');
+    if (mlSec) mlSec.style.display = '';
   }
 }
 
@@ -3230,6 +3124,7 @@ function renderRateSheets(){
 // ── Invoices ──────────────────────────────────────────────────────────────────
 function openInvoiceModal(preClient){
   _editInvId=null;
+  clearManualLines();
   // Populate client select from work orders
   var clients=[...new Set(_jobs.filter(function(j){ return j.status==='approved'; }).map(function(j){return j.client;}).filter(Boolean))];
   // Also include all clients from all WOs for flexibility
@@ -3320,7 +3215,13 @@ async function saveInvoice(status){
   var rsId=(document.getElementById('inv-rate-sheet')||{}).value||'';
   var rs=_rateSheets.find(function(r){return r.id===rsId;})||_rateSheets[0]||{};
   var discount=parseFloat((document.getElementById('inv-discount')||{}).value)||0;
-  var subtotal=selectedWOs.reduce(function(s,wo){return s+priceChargeSheet(wo,rs);},0);
+  var woSubtotal=selectedWOs.reduce(function(s,wo){return s+priceChargeSheet(wo,rs);},0);
+  // Capture current manual lines
+  var manualLinesSaved = _manualLines.map(function(l){
+    return {id:l.id, description:l.description, qty:l.qty||1, unitPrice:l.unitPrice||0, total:(l.qty||1)*(l.unitPrice||0)};
+  });
+  var manualTotal = manualLinesSaved.reduce(function(s,l){return s+l.total;},0);
+  var subtotal = woSubtotal + manualTotal;
   var taxRate=parseFloat(document.getElementById('inv-tax-rate').value)||0;
   var tax=(subtotal-discount)*taxRate/100;
   var total=subtotal-discount+tax;
@@ -3331,6 +3232,7 @@ async function saveInvoice(status){
     invDate:document.getElementById('inv-date').value,
     terms:document.getElementById('inv-terms').value,
     taxRate, rateSheetId:rsId, discount,
+    manualLines: manualLinesSaved,
     chargeSheetIds:selectedCSIds,
     chargeSheets:selectedWOs.map(function(wo){return{id:wo.id,woNum:wo.woNum||wo.number,client:wo.client,date:wo.date,total:priceChargeSheet(wo,rs)};}),
     subtotal, tax, total,
@@ -3525,6 +3427,19 @@ function viewInvoice(id) {
     }
   });
 
+  // Add manual line items to PDF
+  (inv.manualLines || []).forEach(function(ml) {
+    if (!ml.description && !ml.total) return;
+    lineItems += '<tr style="background:#fafaf8">'
+      + '<td style="padding:.3rem .5rem;font-size:10px">' + (ml.description||'Additional Item') + '</td>'
+      + '<td style="padding:.3rem .5rem;text-align:center;font-size:10px">ea</td>'
+      + '<td style="padding:.3rem .5rem;text-align:center;font-size:10px">' + (ml.qty||1) + '</td>'
+      + '<td style="padding:.3rem .5rem;text-align:center;font-size:10px"></td>'
+      + '<td style="padding:.3rem .5rem;text-align:right;font-size:10px;font-family:monospace">' + _fmtMoneyImpl(ml.unitPrice||0) + '</td>'
+      + '<td style="padding:.3rem .5rem;text-align:right;font-size:10px;font-family:monospace">' + _fmtMoneyImpl(ml.total||0) + '</td>'
+    + '</tr>';
+  });
+
   var html = '<div class="inv-preview">'
     // Header
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem">'
@@ -3582,7 +3497,7 @@ function viewInvoice(id) {
       + '<table style="font-size:10px;border-collapse:collapse;min-width:200px">'
         + '<tr><td style="padding:.2rem .5rem;color:#666">Subtotal:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace"><strong>' + _fmtMoneyImpl(invSubtotal) + '</strong></td></tr>'
         + '<tr><td style="padding:.2rem .5rem;color:#666">Invoice Discount:</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">' + _fmtMoneyImpl(discount) + '</td></tr>'
-        + '<tr><td style="padding:.2rem .5rem;color:#666">Total Tax (' + inv.taxLabel + '):</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">' + _fmtMoneyImpl(invTax) + '</td></tr>'
+        + '<tr><td style="padding:.2rem .5rem;color:#666">Total Tax (' + (inv.taxLabel || (inv.taxRate ? 'GST ' + inv.taxRate + '%' : 'Tax')) + '):</td><td style="padding:.2rem .5rem;text-align:right;font-family:monospace">' + _fmtMoneyImpl(invTax) + '</td></tr>'
         + '<tr style="border-top:2px solid #111"><td style="padding:.3rem .5rem;font-weight:900;font-size:12px">Total CAD:</td><td style="padding:.3rem .5rem;text-align:right;font-family:monospace;font-weight:900;font-size:12px">' + _fmtMoneyImpl(invTotal) + '</td></tr>'
       + '</table>'
     + '</div>'
@@ -5804,6 +5719,105 @@ async function reopenJob(id) {
 }
 
 
+
+// ── Manual Line Items (admin-only, added directly to invoice) ─────────────────
+var _manualLines = [];  // [{id, description, qty, unitPrice, total}]
+
+function addManualLine() {
+  var id = uid();
+  _manualLines.push({ id: id, description: '', qty: 1, unitPrice: 0 });
+  renderManualLines();
+  // Focus the description field of the new row
+  var descField = document.getElementById('ml-desc-' + id);
+  if (descField) descField.focus();
+}
+
+function removeManualLine(id) {
+  _manualLines = _manualLines.filter(function(l) { return l.id !== id; });
+  renderManualLines();
+  updateInvTotals();
+}
+
+function updateManualLine(id, field, value) {
+  var line = _manualLines.find(function(l) { return l.id === id; });
+  if (!line) return;
+  if (field === 'qty' || field === 'unitPrice') {
+    line[field] = parseFloat(value) || 0;
+  } else {
+    line[field] = value;
+  }
+  line.total = (line.qty || 1) * (line.unitPrice || 0);
+  // Update the line total display
+  var totalEl = document.getElementById('ml-total-' + id);
+  if (totalEl) totalEl.textContent = fmtMoney(line.total);
+  updateInvTotals();
+}
+
+function renderManualLines() {
+  var container = document.getElementById('manual-lines-container');
+  if (!container) return;
+  container.innerHTML = '';
+  if (!_manualLines.length) return;
+  _manualLines.forEach(function(line) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 70px 90px 80px 28px;gap:.4rem;align-items:center;margin-bottom:.4rem';
+
+    var desc = document.createElement('input');
+    desc.id = 'ml-desc-' + line.id;
+    desc.className = 'form-input';
+    desc.type = 'text';
+    desc.placeholder = 'Description (e.g. Mileage, Mobilisation, Materials…)';
+    desc.value = line.description || '';
+    desc.style.cssText = 'font-size:.78rem;padding:.38rem .6rem';
+    desc.addEventListener('input', (function(id){ return function(){ updateManualLine(id,'description',this.value); }; })(line.id));
+
+    var qty = document.createElement('input');
+    qty.id = 'ml-qty-' + line.id;
+    qty.className = 'form-input';
+    qty.type = 'number';
+    qty.min = '0'; qty.step = 'any';
+    qty.placeholder = 'Qty';
+    qty.value = line.qty || 1;
+    qty.style.cssText = 'font-size:.78rem;padding:.38rem .6rem;text-align:right';
+    qty.addEventListener('input', (function(id){ return function(){ updateManualLine(id,'qty',this.value); }; })(line.id));
+
+    var price = document.createElement('input');
+    price.id = 'ml-price-' + line.id;
+    price.className = 'form-input';
+    price.type = 'number';
+    price.min = '0'; price.step = '0.01';
+    price.placeholder = 'Unit $';
+    price.value = line.unitPrice || '';
+    price.style.cssText = 'font-size:.78rem;padding:.38rem .6rem;text-align:right';
+    price.addEventListener('input', (function(id){ return function(){ updateManualLine(id,'unitPrice',this.value); }; })(line.id));
+
+    var total = document.createElement('span');
+    total.id = 'ml-total-' + line.id;
+    total.style.cssText = 'font-family:var(--mono);font-size:.78rem;text-align:right;color:var(--nor-accent)';
+    total.textContent = fmtMoney((line.qty||1)*(line.unitPrice||0));
+
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.title = 'Remove';
+    del.textContent = '✕';
+    del.style.cssText = 'background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0;line-height:1';
+    del.addEventListener('click', (function(id){ return function(){ removeManualLine(id); }; })(line.id));
+
+    row.appendChild(desc); row.appendChild(qty); row.appendChild(price);
+    row.appendChild(total); row.appendChild(del);
+    container.appendChild(row);
+  });
+}
+
+function getManualLinesTotal() {
+  return _manualLines.reduce(function(s, l) { return s + ((l.qty||1) * (l.unitPrice||0)); }, 0);
+}
+
+function clearManualLines() {
+  _manualLines = [];
+  renderManualLines();
+}
+
 function updateInvTotals() {
   var rsId = (document.getElementById('inv-rate-sheet') || {}).value || '';
   var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || _rateSheets[0] || {};
@@ -5818,6 +5832,9 @@ function updateInvTotals() {
     var priced = priceChargeSheet(wo, rs);
     return sum + (priced > 0 ? priced : (wo.total || 0));
   }, 0);
+
+  // Add manual line items
+  subtotal += getManualLinesTotal();
 
   var discount = parseFloat((document.getElementById('inv-discount') || {}).value) || 0;
   var taxable  = subtotal - discount;
@@ -6468,6 +6485,29 @@ function renderMarginReport() {
       + '</tr>';
     });
     techBody.innerHTML = techRows.length ? techRows.join('') : '<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--muted)">No data</td></tr>';
+  }
+}
+
+// ── Event delegation for timesheets ──────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var el;
+  el = e.target.closest('[data-open-ts]');
+  if (el) { openTSModal(el.getAttribute('data-open-ts')); return; }
+  el = e.target.closest('[data-ts-for-wo]');
+  if (el) { createOrOpenTS(el.getAttribute('data-ts-for-wo')); return; }
+  el = e.target.closest('[data-export-ts]');
+  if (el) { _editTSId = el.getAttribute('data-export-ts'); exportTimesheet(); return; }
+  el = e.target.closest('[data-export-pkg]');
+  if (el) { exportPackage(el.getAttribute('data-export-pkg')); return; }
+  el = e.target.closest('[data-revert-ts]');
+  if (el) {
+    _editTSId = el.getAttribute('data-revert-ts');
+    revertTS();
+    return;
+  }
+});
+
+var(--muted)">No data</td></tr>';
   }
 }
 
