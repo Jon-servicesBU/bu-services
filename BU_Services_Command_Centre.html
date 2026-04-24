@@ -1192,22 +1192,19 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <a href="#nuclear">Nuclear</a>
     <a href="#digest">Email Digest</a>
   </div>
-  <div class="topbar-right">
-    <div class="live-dot"></div>
-    <span class="live-label" id="live-label">Live</span>
-    <span class="update-label" id="update-label"></span>
-  </div>
+  <div class="topbar-right"></div>
 </nav>
-<!-- ── BU Services system navigation ──────────────────────────────────── -->
+<!-- ── BU Services system navigation ── -->
 <div class="sysbar">
   <span class="sysbar-label">BU Services</span>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">Hub</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_People_Dashboard.html" target="buservices">People</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">Meetings</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">CRM</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Nortech_Ops.html" target="buservices">Nortech Ops</a>
-  <span class="sysbtn sysbtn-active">Command Centre</span>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_People_Dashboard.html" target="buservices">👥 People</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Nortech_Ops.html" target="buservices">🔧 Nortech Ops</a>
+  <span class="sysbtn sysbtn-cc">📊 Command Centre</span>
 </div>
+
 
 
 
@@ -2431,6 +2428,12 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 </div>
 
 <div class="footer">
+  <div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.35rem">
+    <div class="live-dot"></div>
+    <span class="live-label" id="live-label" style="font-size:.72rem;color:rgba(255,255,255,.5);font-family:var(--mono)">Live</span>
+    <span style="color:rgba(255,255,255,.2)">·</span>
+    <span class="update-label" id="update-label" style="font-size:.72rem;color:rgba(255,255,255,.35);font-family:var(--mono)"></span>
+  </div>
   <p>BU Services Command Centre · Ekoscan Integrity Group · Jon Eustace, CEO North America · Confidential</p>
   <p class="config-hint">To update: edit the CONFIG block at the top of this file → save → refresh browser. No server required.</p>
 </div>
@@ -4349,39 +4352,6 @@ $('init-grid').innerHTML = CONFIG.initiatives.map(init => {
 }).join('');
 
 // ── REVENUE CHART ─────────────────────────────────────────────────────────────
-const BASE = [47.2, 53.1, 58.0, 59.9, 55.4];
-const YEARS = [2026, 2027, 2028, 2029, 2030];
-const INIT_CONTRIB = [
-  [0.41, 1.91, 3.62, 5.20, 6.72],  // mining
-  [2.00, 4.00, 6.00, 8.00,10.00],  // pipeline
-  [0.365,1.09, 2.03, 2.90, 3.80],  // powerline
-  [0.30,11.00,12.20,12.20,12.20],  // nuclear
-  [0.05, 0.60, 1.85, 4.25, 4.65],  // 3x
-];
-const TOTALS = YEARS.map((_,yi) => BASE[yi] + INIT_CONTRIB.reduce((s,ic) => s+ic[yi], 0));
-const MAX_VAL = Math.max(...TOTALS);
-const BAR_H = 160;
-
-$('rev-legend').innerHTML = `
-  <span class="rev-leg-item"><span class="rev-leg-dot" style="background:#1E2580"></span>Base</span>
-  ${CONFIG.initiatives.map(i => `<span class="rev-leg-item"><span class="rev-leg-dot" style="background:${i.colour}"></span>${i.num.replace('0','')}</span>`).join('')}
-`;
-
-$('chart-bars').innerHTML = YEARS.map((yr, yi) => {
-  const baseH = Math.round(BASE[yi]/MAX_VAL*BAR_H);
-  const initBars = INIT_CONTRIB.map((ic, ii) => {
-    const h = Math.round(ic[yi]/MAX_VAL*BAR_H);
-    const c = CONFIG.initiatives[ii].colour;
-    const tip = `${CONFIG.initiatives[ii].name}: ${fmt(ic[yi],2)}`;
-    return `<div class="bar" style="height:${h}px;background:${c}" title="${tip}"></div>`;
-  }).join('');
-  return `
-  <div class="bar-group" title="Total ${yr}: ${fmt(TOTALS[yi],1)}">
-    <div class="bar" style="height:${baseH}px;background:#1E2580" title="Base: ${fmt(BASE[yi],1)}"></div>
-    ${initBars}
-    <div class="bar-year">${yr}</div>
-  </div>`;
-}).join('');
 
 // ── GATES ────────────────────────────────────────────────────────────────────
 $('gate-count').textContent = `${gatesGreen} complete · ${CONFIG.gates.filter(g=>g.status==='amber').length} in progress · ${CONFIG.gates.filter(g=>g.status==='grey').length} upcoming`;
@@ -4455,12 +4425,20 @@ function buildDigestHTML() {
   .cta{display:inline-block;background:#161C60;color:#ffffff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:5px;text-decoration:none;margin:4px;}
 
 
-/* ── BU Services cross-page nav bar ── */
-.sysbar{position:sticky;top:48px;z-index:199;height:36px;display:flex;align-items:stretch;background:#08142E;border-bottom:1px solid rgba(255,255,255,.08);padding:0 1.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;gap:0;}
-.sysbar-label{font-size:.58rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.2);display:flex;align-items:center;padding-right:1.25rem;border-right:1px solid rgba(255,255,255,.07);margin-right:.5rem;flex-shrink:0;white-space:nowrap;}
-.sysbtn{display:flex;align-items:center;padding:0 .9rem;font-size:.72rem;font-weight:500;letter-spacing:.01em;color:rgba(255,255,255,.4);text-decoration:none;border:none;border-bottom:2px solid transparent;background:transparent;white-space:nowrap;flex-shrink:0;cursor:pointer;transition:color .12s,background .12s;height:36px;box-sizing:border-box;}
-.sysbtn:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.04);}
-.sysbtn-active{color:#00AEEF !important;border-bottom-color:#00AEEF !important;font-weight:600 !important;background:rgba(0,174,239,.07) !important;cursor:default !important;}
+.sysbar{
+  position:sticky;top:48px;z-index:199;
+  height:34px;display:flex;align-items:center;gap:.3rem;
+  background:rgba(10,15,28,.98);border-bottom:1px solid rgba(255,255,255,.08);
+  padding:0 1.25rem;overflow-x:auto;
+}
+.sysbar-label{font-size:.62rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.18);margin-right:.5rem;flex-shrink:0}
+.sysbtn{
+  font-size:.67rem;font-weight:600;color:rgba(255,255,255,.45);
+  text-decoration:none;padding:.2rem .6rem;border-radius:4px;
+  border:1px solid transparent;transition:all .15s;white-space:nowrap;flex-shrink:0;
+}
+.sysbtn:hover{color:rgba(255,255,255,.9);border-color:rgba(255,255,255,.12)}
+.sysbtn-cc{border-color:rgba(0,174,239,.35);color:rgba(0,174,239,.8)}
 </style></head>
 <body><div class="wrap">
 <div class="hdr">
