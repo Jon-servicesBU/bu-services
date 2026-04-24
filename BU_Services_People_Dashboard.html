@@ -1306,6 +1306,29 @@ function handleVacDrop(event) {
   if (event.dataTransfer.files.length) handleVacUpload(event.dataTransfer.files);
 }
 
+function refreshDates() {
+  // Always derive week-ending from the actual trend data max date
+  if (DATA.util_13wk_trend && DATA.util_13wk_trend.length) {
+    var maxDate = DATA.util_13wk_trend.reduce(function(mx, w) {
+      return (w.date && w.date > mx) ? w.date : mx;
+    }, '');
+    if (maxDate) DATA.util_week_ending = maxDate;
+  }
+  var d = DATA.util_week_ending || '';
+  var updated = new Date().toISOString().slice(0,10);
+  // Update every date-showing element
+  var pm = document.getElementById('page-meta');
+  if (pm) pm.textContent = 'Source: BC export · Week ending ' + d + ' · Updated ' + updated + ' · Jon Eustace CEO NA';
+  var uw = document.getElementById('util-week'); if (uw) uw.textContent = d;
+  var pd = document.getElementById('people-date'); if (pd) pd.textContent = updated;
+  // Update util section subtitle
+  document.querySelectorAll('.sec-sub').forEach(function(el) {
+    if (el.textContent.indexOf('rolling weeks') > -1) {
+      el.textContent = el.textContent.replace(/week ending [0-9-]+/, 'week ending ' + d);
+    }
+  });
+}
+
 async function handleUpload(files) {
   var file = files[0];
   if (!file) return;
@@ -1417,9 +1440,7 @@ async function handleUpload(files) {
       } catch(e) {}
 
       hideBcOverlay();
-      var pm = document.getElementById('page-meta');
-      if (pm) pm.textContent = 'Source: BC export · Week ending ' + DATA.util_week_ending + ' · Updated ' + new Date().toISOString().slice(0,10) + ' · Jon Eustace CEO NA';
-      var uw = document.getElementById('util-week'); if (uw) uw.textContent = DATA.util_week_ending;
+      refreshDates();
       renderUtil();
       renderRoster();
       renderVacation();
@@ -1571,11 +1592,7 @@ function hideBcOverlay() {
           d2.util_by_office = obo;
         }
         Object.assign(DATA, d2);
-        // Update header with restored date
-        var pm = document.getElementById('page-meta');
-        if (pm) pm.textContent = 'Source: BC export · Week ending ' + DATA.util_week_ending + ' · Updated ' + (DATA.people_updated||new Date().toISOString().slice(0,10)) + ' · Jon Eustace CEO NA';
-        var uw = document.getElementById('util-week'); if (uw) uw.textContent = DATA.util_week_ending;
-        var pd = document.getElementById('people-date'); if (pd) pd.textContent = DATA.people_updated||'';
+        refreshDates();
       }
     }
   } catch(e) {}
