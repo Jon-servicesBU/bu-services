@@ -763,14 +763,22 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </div>
     <div class="card" style="padding:0">
-      <table class="data-table">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <table class="data-table" style="min-width:600px">
         <thead><tr>
-          <th>Invoice #</th><th>Client</th><th>Date</th>
-          <th>Work Orders</th><th class="hide-from-tech">Subtotal</th><th class="hide-from-tech">Tax</th><th class="hide-from-tech">Total</th>
-          <th>Status</th><th></th>
+          <th style="white-space:nowrap">Invoice #</th>
+          <th>Client</th>
+          <th style="white-space:nowrap">Date</th>
+          <th style="white-space:nowrap">WOs</th>
+          <th class="hide-from-tech" style="white-space:nowrap">Subtotal</th>
+          <th class="hide-from-tech" style="white-space:nowrap">Tax</th>
+          <th class="hide-from-tech" style="white-space:nowrap">Total</th>
+          <th>Status</th>
+          <th style="min-width:160px;white-space:nowrap"></th>
         </tr></thead>
         <tbody id="inv-tbody"></tbody>
       </table>
+      </div>
       <div class="empty-state" id="inv-empty" style="display:none">
         <div class="empty-state-icon">🧾</div>
         <div class="empty-state-title">No Invoices</div>
@@ -3346,11 +3354,11 @@ function renderInvoices(){
       + '<td style="font-family:var(--mono);font-size:.75rem" class="hide-from-tech">' + _fmtMoneyImpl(_calcInvDisplay(i,'tax')) + '</td>'
       + '<td style="font-family:var(--mono);font-size:.75rem;font-weight:700" class="hide-from-tech">' + _fmtMoneyImpl(_calcInvDisplay(i,'total')) + '</td>'
       + '<td>' + chipHtml(i.status) + '</td>'
-      + '<td style="white-space:nowrap;text-align:right">'
+      + '<td style="white-space:nowrap;text-align:right;padding:.4rem .5rem">'
         + '<span style="font-size:.8rem;color:var(--muted);margin-right:.3rem" id="inv-chev-'+i.id+'">▼</span>'
         + '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewInvoice(\''+i.id+'\')">View</button>'
         + (isAdmin()&&i.status==='draft'?'<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();markInvSent(\''+i.id+'\')">Mark Sent</button>':'')
-        + (isAdmin()&&i.status==='sent'?'<button class="btn btn-success btn-sm" onclick="event.stopPropagation();markInvoicePaid()">Mark Paid</button>':'')
+        + (isAdmin()&&i.status==='sent'?'<button class="btn btn-success btn-sm" onclick="event.stopPropagation();markPaid(\''+i.id+'\')" >Mark Paid</button>':'')
         + (isAdmin()?'<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();deleteInvoice(\''+i.id+'\')">🗑</button>':'')
       + '</td>'
     + '</tr>';
@@ -6479,7 +6487,7 @@ function renderTimesheets() {
       + '</div>'
       // ── Collapsible detail panel
       + '<div style="border-top:1px solid var(--border);margin-top:.5rem;padding-top:.5rem">'
-        + '<button onclick="toggleDetail(\'ts-d-\'+ts.id)" '
+        + '<button onclick="toggleDetail(\'ts-d-'+ts.id+'\')" '
           + 'style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:.72rem;padding:.1rem .3rem;width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center">'
           + '<span style="font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:.62rem">Details</span>'
           + '<span id="ts-chev-'+ts.id+'">▼</span>'
