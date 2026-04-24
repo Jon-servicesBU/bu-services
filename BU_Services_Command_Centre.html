@@ -2175,11 +2175,11 @@ var AVB_DETAIL = [
 ];
 
 var MONTHLY_ENTITIES = [
-  { id:'nucleom',   label:'Nucleom',   colour:'#161C60', group:'base' },
-  { id:'nortech',   label:'Nortech',   colour:'#2D5A8E', group:'base' },
-  { id:'intact',    label:'Intact',    colour:'#196B24', group:'base' },
-  { id:'mining',    label:'Mining',    colour:'#C9860A', group:'initiative' },
-  { id:'pipeline',  label:'Pipeline',  colour:'#368CD9', group:'initiative' },
+  { id:'nucleom',   label:'Nucleom',   colour:'#1A5CA8', group:'base' },
+  { id:'nortech',   label:'Nortech',   colour:'#E97132', group:'base' },
+  { id:'intact',    label:'Intact',    colour:'#16A34A', group:'base' },
+  { id:'mining',    label:'Mining',    colour:'#D97706', group:'initiative' },
+  { id:'pipeline',  label:'Pipeline',  colour:'#00AEEF', group:'initiative' },
   { id:'powerline', label:'Powerline', colour:'#E97132', group:'initiative' },
   { id:'nuclear',   label:'Nuclear',   colour:'#22882F', group:'initiative' },
   { id:'x3',        label:'3X',        colour:'#6B3FA0', group:'initiative' },
@@ -3588,7 +3588,11 @@ function renderMonthly() {
         ? '<div class="mc-bar" style="height:'+h+'px;background:'+e.colour+'" title="'+e.label+': '+fmt(val,2)+'"></div>'
         : '';
     }).join('');
+    var totalLbl = d.total > 0 
+      ? '<div class="mc-bar-total-lbl">'+cvFmt(d.total,1)+'</div>'
+      : '';
     return '<div class="mc-group" title="'+MONTH_LABELS[mi]+': '+cvFmt(d.total,2)+'">' +
+      totalLbl +
       segments +
       '<div class="mc-month-lbl">'+MONTH_LABELS[mi]+'</div>' +
     '</div>';
@@ -3606,8 +3610,8 @@ function renderMonthly() {
 
   var rowsHtml = MONTHLY_ENTITIES.map(function(e) {
     var rowTotal = 0;
-    var cells = MONTH_KEYS.map(function(mk) {
-      var v = (CONFIG.monthly && CONFIG.monthly[mk] && CONFIG.monthly[mk][e.id]) || 0;
+    var cells = data.map(function(d) {
+      var v = d.raw[e.id] || 0;
       rowTotal += v;
       return '<td class="'+(v===0?'mc-zero':'')+'">'+( v===0 ? '—' : cvFmt(v,2) )+'</td>';
     }).join('');
