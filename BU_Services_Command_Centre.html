@@ -1299,7 +1299,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     </div>
     <button class="currency-toggle-btn" onclick="toggleCurrency()" title="Currently showing CAD">€ Switch to EUR</button>
   </div>
-<div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text">Monthly figures are assembled from three sources. Nucleom Closed Won by month comes from Salesforce via the Sunday PA flow. Business Central invoiced revenue comes from the BC connector Éric builds as Task P4 — until then, Jeremy Irwin (Director of Finance, EIG NA) enters these manually on the first Monday of each month by editing actuals.json. Chargeable hours and cost-per-hour for the KPI charts also require payroll cost data that Jeremy Irwin (Director of Finance, EIG NA) provides monthly. The monthly object holds 25 fields across all 12 months of the year.</span></div>
+<div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>Nucleom</strong> revenue by month — from BU Services CRM (Closed Won grouped by close date, updates on every page load). <strong>Nortech</strong> revenue by month — from Nortech Ops (auto-push on every invoice mark-sent/paid). <strong>Intact + Initiatives</strong> — paste any BC/management report screenshot via the 📸 Vision-to-Data panel; Claude identifies the company and populates the correct month. <strong>KPI fields</strong> (hours, utilisation, rate, cost, margin) — paste Jeremy's monthly payroll summary via Vision-to-Data; Claude reads nuc_hours, nor_hours etc. and fills the KPI rows.</span></div>
   <div class="monthly-wrap" id="monthly-wrap"></div>
 
   <!-- ── REVENUE CHART ── -->
@@ -1712,31 +1712,75 @@ const INIT_LABEL = { mining:'Mining', pipeline:'Pipeline', powerline:'Powerline'
 
     // ── Merge Nortech Ops live push into the actuals store ──────────────────
     // Nortech Ops writes bc_invoiced_mtd/ytd to crm_actuals_sync.recon_nor
-    // on every invoice mark-sent/paid. Absorb that here so the full CC
-    // (monthly charts, performance, revenue cards) also sees the latest Nortech actuals.
+    // on every invoice mark-sent/paid. Absorb into YTD actuals AND monthly chart.
     try {
       var syncRaw = localStorage.getItem('crm_actuals_sync');
       if (syncRaw) {
         var sync = JSON.parse(syncRaw);
         var rnor = sync.recon_nor || {};
-        // Convert from raw $ to $M for the actuals store
         if (rnor.bc_invoiced_ytd > 0) {
-          var nortechM = rnor.bc_invoiced_ytd / 1e6;
-          // Only update if Nortech Ops value is newer or v2d store has no Nortech value
-          var storedNor = live.nortech || 0;
+          var nortechYTDM = rnor.bc_invoiced_ytd / 1e6;
+          var nortechMTDM = (rnor.bc_invoiced_mtd || 0) / 1e6;
+          var storedNor   = live.nortech || 0;
           var nortechNewer = rnor.last_bc_pull && (!live._nortech_ops_pull ||
             rnor.last_bc_pull >= live._nortech_ops_pull);
           if (nortechNewer || storedNor === 0) {
-            live.nortech     = nortechM;
-            live.nortech_mtd = (rnor.bc_invoiced_mtd || 0) / 1e6;
+            live.nortech         = nortechYTDM;
+            live.nortech_mtd     = nortechMTDM;
             live._nortech_ops_pull = rnor.last_bc_pull || new Date().toISOString().slice(0,10);
-            live._nortech_source   = 'Nortech Ops (auto)';
-            // Persist the merge back so next load also sees it
+            live._nortech_source = 'Nortech Ops (auto)';
             localStorage.setItem('v2d_actuals', JSON.stringify(live));
+            // ── Write MTD into current month of v2d_monthly ────────────────
+            // This feeds the Monthly chart and AVB per-month bars
+            if (nortechMTDM > 0) {
+              var curMonthKey = new Date().toISOString().slice(0,7).replace('-','_');
+              // Reformat: '2026-04' → '2026_04'
+              curMonthKey = curMonthKey.replace('-','_');
+              var v2dMo = {};
+              try { v2dMo = JSON.parse(localStorage.getItem('v2d_monthly') || '{}'); } catch(e2) {}
+              if (!v2dMo[curMonthKey]) v2dMo[curMonthKey] = {};
+              v2dMo[curMonthKey].nortech = nortechMTDM;
+              v2dMo[curMonthKey]._nortech_source = 'Nortech Ops (auto)';
+              v2dMo[curMonthKey]._nortech_updated = rnor.last_bc_pull;
+              localStorage.setItem('v2d_monthly', JSON.stringify(v2dMo));
+            }
           }
         }
       }
     } catch(e) { /* non-fatal */ }
+    // ── CRM → monthly Nucleom Closed Won ────────────────────────────────────
+    // BU Services CRM stores opps in bucrm_opps (localStorage).
+    // Derive per-month Nucleom closed won and merge into v2d_monthly.
+    try {
+      var crmOpps = [];
+      try { crmOpps = JSON.parse(localStorage.getItem('bucrm_opps') || '[]'); } catch(e2) {}
+      var wonOpps = crmOpps.filter(function(o){ return o.stage === 'Closed Won' && o.closeDate; });
+      if (wonOpps.length > 0) {
+        var v2dMoCRM = {};
+        try { v2dMoCRM = JSON.parse(localStorage.getItem('v2d_monthly') || '{}'); } catch(e2) {}
+        // Group won opps by month
+        wonOpps.forEach(function(o) {
+          var mk = o.closeDate.slice(0,7).replace('-','_'); // '2026_04'
+          if (!v2dMoCRM[mk]) v2dMoCRM[mk] = {};
+          // Nucleom opps (Base Business initiative or any — all CRM opps are Nucleom)
+          var amtM = (Number(o.amount) || 0) / 1e6;
+          v2dMoCRM[mk].nucleom = (v2dMoCRM[mk].nucleom || 0) + amtM;
+          v2dMoCRM[mk]._crm_source = 'CRM Closed Won';
+        });
+        localStorage.setItem('v2d_monthly', JSON.stringify(v2dMoCRM));
+        // Also push into live for this page load
+        if (!live.monthly) live.monthly = {};
+        Object.keys(v2dMoCRM).forEach(function(mk) {
+          if (!live.monthly[mk]) live.monthly[mk] = {};
+          // CRM closed won feeds nucleom per month — only override if CRM value > 0
+          if (v2dMoCRM[mk].nucleom > 0) {
+            live.monthly[mk].nucleom = v2dMoCRM[mk].nucleom;
+          }
+        });
+        localStorage.setItem('v2d_actuals', JSON.stringify(live));
+      }
+    } catch(e) { /* non-fatal */ }
+
     CONFIG.initiatives.forEach(init => {
       if (live[init.id] !== undefined) init.actual2026 = live[init.id];
     });
@@ -2145,9 +2189,19 @@ function getAvbBudget(keys, monthIdx) {
 }
 
 function getAvbActual(keys, monthIdx) {
+  // Merge CONFIG.monthly (from actuals.json/v2d_actuals) with v2d_monthly (direct monthly paste)
   var monthly = CONFIG.monthly || {};
   var mk  = MONTH_KEYS[monthIdx];
-  var row = monthly[mk] || {};
+  var cfgRow = monthly[mk] || {};
+  // v2d_monthly can have month-level overrides written by Vision-to-Data or Nortech Ops
+  var v2dMonthly = {};
+  try { v2dMonthly = JSON.parse(localStorage.getItem('v2d_monthly') || '{}'); } catch(e) {}
+  var v2dRow = v2dMonthly[mk] || {};
+  // v2d_monthly values win over CONFIG.monthly if non-zero
+  var row = Object.assign({}, cfgRow);
+  Object.keys(v2dRow).forEach(function(k) {
+    if (v2dRow[k] > 0) row[k] = v2dRow[k];
+  });
   return keys.reduce(function(s, k) { return s + (row[k] || 0); }, 0);
 }
 
@@ -2380,15 +2434,43 @@ function v2dRenderLog() {
 
 // ── Show store ────────────────────────────────────────────────────────────────
 function v2dShowStore() {
-  var raw = localStorage.getItem('v2d_actuals');
-  if (!raw) { v2dSetResult('No data in store yet','#E97132'); return; }
-  try {
-    var data = JSON.parse(raw);
-    var lines = Object.entries(data)
-      .filter(function(e){ return typeof e[1] !== 'object'; })
-      .map(function(e){ return e[0] + ': ' + e[1]; });
-    v2dSetDetail('<strong>Current v2d_actuals store (' + lines.length + ' fields):</strong><br>' + lines.join('<br>'));
-  } catch(e) { v2dSetResult('Store parse error: ' + e.message,'#E97132'); }
+  var raw  = localStorage.getItem('v2d_actuals');
+  var rawM = localStorage.getItem('v2d_monthly');
+  if (!raw && !rawM) { v2dSetResult('No data in store yet','#E97132'); return; }
+  var html = '';
+  if (raw) {
+    try {
+      var data = JSON.parse(raw);
+      var lines = Object.entries(data)
+        .filter(function(e){ return typeof e[1] !== 'object'; })
+        .map(function(e){ return '<strong>'+e[0]+'</strong>: '+e[1]; });
+      html += '<strong>v2d_actuals (' + lines.length + ' fields):</strong><br>' + lines.join(' · ') + '<br><br>';
+    } catch(e) {}
+  }
+  if (rawM) {
+    try {
+      var mData = JSON.parse(rawM);
+      var mKeys = Object.keys(mData).sort();
+      html += '<strong>v2d_monthly (' + mKeys.length + ' months):</strong><br>';
+      mKeys.forEach(function(mk) {
+        var row = mData[mk];
+        var vals = Object.entries(row)
+          .filter(function(e){ return typeof e[1]==='number' && e[1]>0; })
+          .map(function(e){ return e[0]+': $'+e[1].toFixed(2)+'M'; });
+        if (vals.length) html += '<strong>'+mk+'</strong>: ' + vals.join(', ') + '<br>';
+      });
+    } catch(e) {}
+  }
+  html += '<br><button onclick="v2dResetStore()" style="padding:.25rem .6rem;background:#FEE2E2;border:1px solid #FCA5A5;border-radius:4px;font-size:.7rem;cursor:pointer;color:#B91C1C">⚠ Reset All V2D Data</button>';
+  v2dSetDetail(html);
+}
+
+function v2dResetStore() {
+  if (!confirm('Reset all Vision-to-Data actuals? This will clear all pasted data. CONFIG defaults will be used until you paste again.')) return;
+  localStorage.removeItem('v2d_actuals');
+  localStorage.removeItem('v2d_monthly');
+  // Re-init from actuals.json
+  location.reload();
 }
 
 // ── Apply live data to CONFIG and re-render ───────────────────────────────────
@@ -2412,7 +2494,46 @@ function v2dApplyLive(live) {
     'upside_nuc','upside_nor','sure_forecast_nuc','sure_forecast_nor',
     'arcndt_invoiced','arcndt_pipeline','int_invoiced','int_pipeline','eur_rate'];
   perfKeys.forEach(function(k){ if(live[k]!==undefined) CONFIG[k]=live[k]; });
-  if (live.monthly) CONFIG.monthly = live.monthly;
+  if (live.monthly) {
+    CONFIG.monthly = CONFIG.monthly || {};
+    // Merge: non-zero, non-null v2d values win over CONFIG defaults
+    Object.keys(live.monthly).forEach(function(mk) {
+      if (!CONFIG.monthly[mk]) CONFIG.monthly[mk] = {};
+      Object.keys(live.monthly[mk]).forEach(function(k) {
+        var v = live.monthly[mk][k];
+        if (v !== null && v !== undefined && v !== 0) CONFIG.monthly[mk][k] = v;
+      });
+    });
+    // Persist to v2d_monthly (drives getAvbActual + getMonthlyData)
+    var v2dMo = {};
+    try { v2dMo = JSON.parse(localStorage.getItem('v2d_monthly') || '{}'); } catch(e) {}
+    Object.keys(live.monthly).forEach(function(mk) {
+      if (!v2dMo[mk]) v2dMo[mk] = {};
+      Object.keys(live.monthly[mk]).forEach(function(k) {
+        var v = live.monthly[mk][k];
+        if (v !== null && v !== undefined && v !== 0) v2dMo[mk][k] = v;
+      });
+    });
+    localStorage.setItem('v2d_monthly', JSON.stringify(v2dMo));
+  }
+  // KPI payroll fields from a single-month report (Jeremy's monthly payroll summary)
+  if (live.kpi && live.month) {
+    var kpiMk = live.month;
+    if (!CONFIG.monthly) CONFIG.monthly = {};
+    if (!CONFIG.monthly[kpiMk]) CONFIG.monthly[kpiMk] = {};
+    var kpiFields = ['nuc_hours','nuc_rate','nuc_util','nuc_cost','nuc_margin',
+                     'nor_hours','nor_rate','nor_util','nor_cost','nor_margin'];
+    var v2dKpi = {};
+    try { v2dKpi = JSON.parse(localStorage.getItem('v2d_monthly') || '{}'); } catch(e) {}
+    if (!v2dKpi[kpiMk]) v2dKpi[kpiMk] = {};
+    kpiFields.forEach(function(f) {
+      if (live.kpi[f] !== null && live.kpi[f] !== undefined) {
+        CONFIG.monthly[kpiMk][f] = live.kpi[f];
+        v2dKpi[kpiMk][f] = live.kpi[f];
+      }
+    });
+    localStorage.setItem('v2d_monthly', JSON.stringify(v2dKpi));
+  }
   if (live.lastUpdated) CONFIG.lastUpdated = live.lastUpdated;
   // Also update recon_nuc/recon_nor in crm_actuals_sync for actuals panel
   var today = new Date().toISOString().slice(0,10);
@@ -2492,12 +2613,14 @@ async function v2dExtract() {
     + '    "sure_forecast_nuc": <sure forecast $M or null>,\n'
     + '    "sure_forecast_nor": <sure forecast $M or null>\n'
     + '  },\n'
-    + '  "monthly": <object with keys "2026_MM": {"nucleom":val,"nortech":val,"intact":val} or null>,\n'
-    + '  "notes": "<brief explanation of what you found and how you identified the company>"\n'
+    + '  "monthly": <object or null — if screenshot shows monthly data: { "2026_01": {"nucleom":val,"nortech":val,"intact":val,"mining":val,...}, ... }. Keys "2026_01"–"2026_12". Values $M CAD.>,\n'
+    + '  "kpi": <object or null — if payroll/KPI report: { "nuc_hours":int, "nuc_rate":CAD, "nuc_util":0-1, "nuc_cost":CAD, "nuc_margin":0-1, "nor_hours":int, "nor_rate":CAD, "nor_util":0-1, "nor_cost":CAD, "nor_margin":0-1 }>,\n'
+    + '  "month": "2026_MM" or null (set this if the report covers exactly one month),\n'
+    + '  "notes": "<brief explanation of what you found>"\n'
     + '}\n'
-    + 'Rules: Values should be in $M CAD (divide raw dollar amounts by 1,000,000). '
-    + 'If EUR, multiply by 1.48. Leave fields as null if not found. '
-    + 'Only fill fields for the detected company — do not guess values for other companies.';
+    + 'Rules: Revenue values in $M CAD (divide raw $ by 1M). EUR multiply by 1.48. '
+    + 'Null for anything not clearly visible. Only fill the detected company — never guess other companies. '
+    + 'For single-month payroll paste: set month and populate kpi block.';
 
   var msgContent = [];
   if (_v2dImageBase64) {
@@ -2868,6 +2991,7 @@ var MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct',
 var MONTHLY_ENTITIES = [
   { id:'nucleom',   label:'Nucleom',   colour:'#161C60', group:'base' },
   { id:'nortech',   label:'Nortech',   colour:'#2D5A8E', group:'base' },
+  { id:'intact',    label:'Intact',    colour:'#196B24', group:'base' },
   { id:'mining',    label:'Mining',    colour:'#C9860A', group:'initiative' },
   { id:'pipeline',  label:'Pipeline',  colour:'#368CD9', group:'initiative' },
   { id:'powerline', label:'Powerline', colour:'#E97132', group:'initiative' },
@@ -2877,9 +3001,18 @@ var MONTHLY_ENTITIES = [
 
 function getMonthlyData() {
   var src = CONFIG.monthly || {};
+  // Merge with v2d_monthly (Vision-to-Data monthly store)
+  var v2dMonthly = {};
+  try { v2dMonthly = JSON.parse(localStorage.getItem('v2d_monthly') || '{}'); } catch(e) {}
   return MONTH_KEYS.map(function(mk) {
-    var row = src[mk] || {};
-    var base = (row.nucleom||0) + (row.nortech||0);
+    var cfgRow = src[mk] || {};
+    var v2dRow = v2dMonthly[mk] || {};
+    // Merge: v2d_monthly wins for non-zero values
+    var row = Object.assign({}, cfgRow);
+    Object.keys(v2dRow).forEach(function(k) {
+      if (v2dRow[k] > 0) row[k] = v2dRow[k];
+    });
+    var base = (row.nucleom||0) + (row.nortech||0) + (row.intact||0);
     var inits = (row.mining||0)+(row.pipeline||0)+(row.powerline||0)+(row.nuclear||0)+(row.x3||0);
     return { key: mk, raw: row, base: base, initiatives: inits, total: base + inits };
   });
@@ -2967,7 +3100,7 @@ function renderMonthly() {
     '<div class="monthly-hdr">' +
       '<div>' +
         '<div class="monthly-hdr-title">BU Services Revenue by Month — 2026 (' + cvUnit() + ')</div>' +
-        '<div class="monthly-hdr-sub">Salesforce Closed Won + Nortech manual · All entities</div>' +
+        '<div class="monthly-hdr-sub">CRM auto · Nortech Ops auto · Intact via 📸 V2D · KPI fields via 📸 V2D</div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:1rem;">' +
         '<div class="monthly-legend">'+legHtml+'</div>' +
