@@ -735,7 +735,6 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
       <button class="btn btn-secondary" onclick="exportWO('pdf')" id="wo-export-pdf-btn" style="display:none">⬇ Export PDF</button>
-      <button class="btn btn-secondary" id="wo-email-btn" onclick="emailPDF('wo')" style="display:none">✉ Email PDF</button>
       <button class="btn btn-secondary" onclick="exportWO('word')" id="wo-export-word-btn" style="display:none">⬇ Export Word</button>
       <div style="flex:1"></div>
       <button class="btn btn-secondary" onclick="saveWO('draft')">Save Draft</button>
@@ -924,7 +923,6 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
         <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
         <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
-        <button class="btn btn-secondary" id="ts-email-btn" onclick="emailPDF('ts')" style="display:none">✉ Email PDF</button>
         <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
         <button class="btn btn-primary" id="ts-admin-save-btn" onclick="saveAdminTSEdits()" style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">💾 Save Admin Edits</button>
         <div style="flex:1"></div>
@@ -1302,7 +1300,6 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('inv-view-modal')">Close</button>
       <button class="btn btn-secondary" onclick="printInvoice()">🖨 Print / PDF</button>
-      <button class="btn btn-secondary" onclick="emailPDF('inv')">✉ Email PDF</button>
       <button class="btn btn-secondary" id="inv-mark-sent-btn" onclick="markInvoiceSent()" style="display:none">Mark Sent</button>
       <button class="btn btn-success" id="inv-mark-paid-btn" onclick="markInvoicePaid()" style="display:none">✓ Mark Paid</button>
       <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)" style="display:none">↩ Unpay</button>
@@ -6530,17 +6527,6 @@ function renderTimesheets() {
   }).join('');
 }
 
-// ── Email PDF ─────────────────────────────────────────────────────────────────
-function emailPDF(type, id) {
-  // Open print dialog first — user saves as PDF, then attaches to email
-  if (type === 'wo')         exportWO('pdf', id);
-  else if (type === 'ts')    exportTimesheet(id);
-  else                       printInvoice();
-  // Open default email client (Outlook, Apple Mail, etc.)
-  setTimeout(function() {
-    window.open('mailto:?subject=' + encodeURIComponent('Nortech Advanced NDT — Document'), '_blank');
-  }, 800);
-}
 
 // ── Event delegation for timesheets ──────────────────────────────────────────
 document.addEventListener('click', function(e) {
