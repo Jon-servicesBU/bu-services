@@ -1355,7 +1355,7 @@ async function handleUpload(files) {
 
     showBcOverlay('Analysing with Claude\u2026', 'Extracting weekly utilization, billable hours, and office breakdown');
 
-    var systemPrompt = 'You are reading a Business Central (BC) payroll/timesheet export for Nucleom.\nExtract the 13 most recent weekly utilization figures.\n\nThe data you need:\n- util_week_ending: most recent week-ending date (YYYY-MM-DD, Saturday)\n- util_13wk_trend: array of 13 objects [{date, bill, tot, vac, util}] newest first\n  - date: week-ending date YYYY-MM-DD\n  - bill: billable worked hours that week (exclude vacation)\n  - tot: total paid hours that week INCLUDING vacation\n  - vac: vacation hours that week\n  - util: overhead % = (worked_total - bill) / worked_total * 100 where worked_total = tot - vac, null if worked_total is 0\n- util_total_latest: overhead % for most recent active week\n- util_13wk_avg: average overhead % across active weeks only\n- util_by_office: array of {office, util, bill, tot, vac} per Nucleom office\n- util_hq, util_montreal, util_central, util_edmonton, util_vancouver: latest overhead % per office\n\nRespond ONLY with valid JSON. No markdown, no explanation.';
+    var systemPrompt = 'Extract 13-week utilization from this BC payroll export. Return ONLY valid JSON: {"util_week_ending":"YYYY-MM-DD","util_13wk_trend":[{"date":"YYYY-MM-DD","bill":0,"tot":0,"vac":0,"util":0}],"util_total_latest":0,"util_13wk_avg":0,"util_by_office":[{"office":"CODE","util":0,"bill":0,"tot":0,"vac":0}],"util_hq":0,"util_montreal":0,"util_central":0,"util_edmonton":0,"util_vancouver":0} util=overhead%=(tot-vac-bill)/(tot-vac)*100. util_week_ending=most recent date in file exactly as written. Newest first. No markdown.';
 
     var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
       method: 'POST',
@@ -1364,7 +1364,7 @@ async function handleUpload(files) {
         model: 'claude-sonnet-4-5',
         max_tokens: 4000,
         system: systemPrompt,
-        messages: [{ role: 'user', content: 'BC export data:\n\n' + textContent.slice(0, 50000) + '\n\nExtract the 13-week rolling utilization data.' }]
+        messages: [{ role: 'user', content: 'BC export data:\n\n' + textContent.slice(0, 20000) + '\n\nExtract the 13-week rolling utilization data.' }]
       })
     });
 
@@ -1392,7 +1392,16 @@ async function handleUpload(files) {
       DATA.util_13wk_avg     = extracted.util_13wk_avg || (
         extracted.util_13wk_trend.reduce(function(s,w){ return s+(w.util||0); }, 0) / extracted.util_13wk_trend.length
       );
-      if (extracted.util_by_office) DATA.util_by_office = extracted.util_by_office;
+      if (extracted.util_by_office) {
+        // Normalise: array [{office,util,...}] → object {EDM:{latest,avg_13wk,trend}}
+        if (Array.isArray(extracted.util_by_office)) {
+          var obo = {};
+          extracted.util_by_office.forEach(function(o) { if (o.office) obo[o.office] = {latest: o.util, avg_13wk: o.util, trend: []}; });
+          DATA.util_by_office = obo;
+        } else {
+          DATA.util_by_office = extracted.util_by_office;
+        }
+      }
       if (extracted.util_hq        !== undefined) DATA.util_hq        = extracted.util_hq;
       if (extracted.util_montreal  !== undefined) DATA.util_montreal  = extracted.util_montreal;
       if (extracted.util_central   !== undefined) DATA.util_central   = extracted.util_central;
@@ -1433,10 +1442,10 @@ async function handleEmbUpload(files) {
   try {
     var textContent = await xlsxToText(file, ext);
     showBcOverlay('Analysing with Claude\u2026', 'Extracting hire dates, tenure, headcount');
-    var systemPrompt = 'You are reading a Business Central employee hire date export for Nucleom. Extract headcount and tenure data. Respond ONLY with valid JSON, no markdown. Format: {"headcount_active":<number>,"tenure_avg_years":<number>,"retention_risk_under_1yr":<number>,"tenure_buckets":{"under_1yr":<n>,"yr_1_3":<n>,"yr_3_5":<n>,"yr_5_10":<n>,"yr_10_plus":<n>},"employees":[{"name":"Last, First","hire":"YYYY-MM-DD","years":<number>,"milestone":<number or null>,"days_until":<number>}]} milestone is the next anniversary year (5,10,15,20,25) if within 365 days, else null.';
+    var systemPrompt = 'Extract headcount and tenure from this BC hire date export. Return ONLY valid JSON: {"headcount_active":0,"tenure_avg_years":0,"retention_risk_under_1yr":0,"tenure_buckets":{"under_1yr":0,"yr_1_3":0,"yr_3_5":0,"yr_5_10":0,"yr_10_plus":0},"employees":[{"name":"Last, First","hire":"YYYY-MM-DD","years":0,"milestone":null,"days_until":0}]} milestone=next anniversary year (5,10,15,20,25) if within 365 days else null. No markdown.';
     var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, system: systemPrompt, messages: [{ role: 'user', content: 'BC hire date export:\n\n' + textContent.slice(0, 50000) }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 8000, system: systemPrompt, messages: [{ role: 'user', content: 'BC hire date export:\n\n' + textContent.slice(0, 20000) }] })
     });
     var data = await res.json();
     if (data.type === 'error') throw new Error('API: ' + data.error.message);
@@ -1466,10 +1475,10 @@ async function handleVacUpload(files) {
   try {
     var textContent = await xlsxToText(file, ext);
     showBcOverlay('Analysing with Claude\u2026', 'Extracting vacation balances and liability');
-    var systemPrompt = 'You are reading a Business Central vacation balance export for Nucleom. Extract vacation liability and balances. Respond ONLY with valid JSON, no markdown. Format: {"vac_liability_total_cad":<number>,"vac_liability_syn_cad":<number>,"vac_liability_nonsyn_cad":<number>,"vac_avg_weeks_syn":<number>,"vac_high_balance_count":<number>,"employees":[{"name":"Last, First","solde":<dollar amount>,"weeks":<number>,"type":"Unionized or Non-unionized"}]}';
+    var systemPrompt = 'Extract vacation balances from this BC export. Return ONLY valid JSON: {"vac_liability_total_cad":0,"vac_liability_syn_cad":0,"vac_liability_nonsyn_cad":0,"vac_avg_weeks_syn":0,"vac_high_balance_count":0,"employees":[{"name":"Last, First","solde":0,"weeks":0,"type":"Unionized"}]} vac_high_balance_count=employees with more than 4 weeks balance. No markdown.';
     var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, system: systemPrompt, messages: [{ role: 'user', content: 'BC vacation export:\n\n' + textContent.slice(0, 50000) }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, system: systemPrompt, messages: [{ role: 'user', content: 'BC vacation export:\n\n' + textContent.slice(0, 20000) }] })
     });
     var data = await res.json();
     if (data.type === 'error') throw new Error('API: ' + data.error.message);
@@ -1554,7 +1563,19 @@ function hideBcOverlay() {
     if (stored.data && stored.data.util_13wk_trend) {
       var storedDate = stored.data.util_week_ending || stored.data.util_13wk_trend[0].date;
       if (storedDate >= DATA.util_week_ending) {
-        Object.assign(DATA, stored.data);
+        // Normalise util_by_office: convert array [{office,util,...}] to object {EDM:{...}}
+        var d2 = Object.assign({}, stored.data);
+        if (Array.isArray(d2.util_by_office)) {
+          var obo = {};
+          d2.util_by_office.forEach(function(o) { if (o.office) obo[o.office] = {latest: o.util, avg_13wk: o.util, trend: []}; });
+          d2.util_by_office = obo;
+        }
+        Object.assign(DATA, d2);
+        // Update header with restored date
+        var pm = document.getElementById('page-meta');
+        if (pm) pm.textContent = 'Source: BC export · Week ending ' + DATA.util_week_ending + ' · Updated ' + (DATA.people_updated||new Date().toISOString().slice(0,10)) + ' · Jon Eustace CEO NA';
+        var uw = document.getElementById('util-week'); if (uw) uw.textContent = DATA.util_week_ending;
+        var pd = document.getElementById('people-date'); if (pd) pd.textContent = DATA.people_updated||'';
       }
     }
   } catch(e) {}
