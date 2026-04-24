@@ -1352,8 +1352,16 @@ document.addEventListener('DOMContentLoaded', function() {
             <label class="form-label">Customer</label>
             <input class="form-input" id="import-rs-customer" placeholder="Customer name">
           </div>
+        </div>
+        <div id="import-labour-preview" style="margin-bottom:.5rem"></div>
+        <div id="import-equipment-preview" style="margin-bottom:.75rem"></div>
+      </div>
+      <button class="btn btn-primary" id="import-confirm-btn" style="display:none" onclick="confirmImport()">✓ Import Rate Sheet</button>
+    </div>
+  </div>
+</div>
 
-// ══ GLOBAL STATE ══════════════════════════════════════════════════════════════
+<!-- ══ GLOBAL STATE ══════════════════════════════════════════════════════════════ -->
 <script>
 
 var _jobs         = [];
@@ -1706,8 +1714,10 @@ async function handleImportFile(file) {
     return;
   }
   showImportStatus('Reading file…', 'loading');
-  document.getElementById('import-preview').style.display = 'none';
-  document.getElementById('import-confirm-btn').style.display = 'none';
+  var _prev = document.getElementById('import-preview');
+  var _conf = document.getElementById('import-confirm-btn');
+  if (_prev) _prev.style.display = 'none';
+  if (_conf) _conf.style.display = 'none';
   try {
     var payload;
     if (ext === 'docx') {
@@ -1729,7 +1739,7 @@ async function handleImportFile(file) {
     _importedRateData = payload;
     showImportPreview(payload);
     showImportStatus('✓ Rate sheet extracted — review and confirm below', 'success');
-    document.getElementById('import-confirm-btn').style.display = 'inline-flex';
+    document.getElementById('import-confirm-btn') && (document.getElementById('import-confirm-btn').style.display = 'inline-flex');
   } catch(e) {
     showImportStatus('Error: ' + e.message, 'error');
   }
