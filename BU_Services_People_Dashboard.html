@@ -1347,7 +1347,7 @@ Respond ONLY with valid JSON. No markdown, no explanation.`;
       if (b) { b.style.display = 'flex'; }
       throw new Error('No API key — enter your Anthropic API key above first');
     }
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
+    var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
