@@ -735,6 +735,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
+      <button class="btn btn-secondary" onclick="showSharePicker('wo')" id="wo-share-btn" style="display:none">✉ Send</button>
       <button class="btn btn-secondary" onclick="exportWO('pdf')" id="wo-export-pdf-btn" style="display:none">⬇ Export PDF</button>
       <button class="btn btn-secondary" onclick="exportWO('word')" id="wo-export-word-btn" style="display:none">⬇ Export Word</button>
       <div style="flex:1"></div>
@@ -923,6 +924,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
         <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
+        <button class="btn btn-secondary" id="ts-share-btn" onclick="showSharePicker('timesheet')" style="display:none">✉ Send</button>
         <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
         <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
         <button class="btn btn-primary" id="ts-admin-save-btn" onclick="saveAdminTSEdits()" style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">💾 Save Admin Edits</button>
@@ -1301,6 +1303,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('inv-view-modal')">Close</button>
       <button class="btn btn-secondary" onclick="printInvoice()">🖨 Print / PDF</button>
+      <button class="btn btn-secondary" onclick="showSharePicker('invoice')">✉ Send</button>
       <button class="btn btn-secondary" id="inv-mark-sent-btn" onclick="markInvoiceSent()" style="display:none">Mark Sent</button>
       <button class="btn btn-success" id="inv-mark-paid-btn" onclick="markInvoicePaid()" style="display:none">✓ Mark Paid</button>
       <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)" style="display:none">↩ Unpay</button>
@@ -1353,16 +1356,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <label class="form-label">Customer</label>
             <input class="form-input" id="import-rs-customer" placeholder="Customer name">
           </div>
-        </div>
-        <div id="import-labour-preview" style="margin-bottom:.5rem"></div>
-        <div id="import-equipment-preview" style="margin-bottom:.75rem"></div>
-      </div>
-      <button class="btn btn-primary" id="import-confirm-btn" style="display:none" onclick="confirmImport()">✓ Import Rate Sheet</button>
-    </div>
-  </div>
-</div>
 
-<script>
 // ══ GLOBAL STATE ══════════════════════════════════════════════════════════════
 var _jobs         = [];
 var _chargeSheets = [];
@@ -1765,7 +1759,7 @@ async function extractDocxText(file) {
   });
 }
 
-var RATE_PROMPT = 'You are a data extraction assistant. Extract rate sheet pricing data and return ONLY a valid JSON object. No markdown, no explanation, no code blocks. Just the raw JSON. Use this exact structure: {"name":"rate sheet name","customer":"client name or empty string","effective":"YYYY-MM-DD","currency":"CAD","labour":[{"name":"category name","stRate":0,"otRate":0,"dtRate":0}],"equipment":[{"name":"item name","rate":0,"unit":"day"}]} Rules: (1) all rate values must be plain numbers not strings. (2) Extract every labour category. (3) If only ST rate shown set OT=ST*1.5 and DT=ST*2. (4) All string values must use only plain ASCII characters — replace any special characters, accents, or symbols with plain equivalents. (5) Do not include any newlines or tab characters inside string values. (6) Return ONLY the JSON object starting with { and ending with }.';
+var RATE_PROMPT = 'This is a rate sheet for a field NDT / inspection services company. Extract all pricing and return ONLY valid JSON in this exact format: {"name":"<sheet name>","customer":"<client name or empty>","effective":"<YYYY-MM-DD or today>","currency":"CAD","labour":[{"name":"<category>","stRate":<number>,"otRate":<number>,"dtRate":<number>}],"equipment":[{"name":"<item>","rate":<number>,"unit":"<day/trip/km>"}]} Extract ALL labour categories. If only one rate listed, set OT=ST*1.5, DT=ST*2. Return ONLY the JSON object.';
 
 async function parseRateSheetText(text) {
   var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
@@ -1773,50 +1767,18 @@ async function parseRateSheetText(text) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1500,
-      messages: [{ role: 'user', content: RATE_PROMPT + ' Document text: ' + text.slice(0, 8000) }]
+      max_tokens: 4000,
+      messages: [{ role: 'user', content: RATE_PROMPT + '\n\nDocument text:\n' + text.slice(0, 8000) }]
     })
   });
   if (!res.ok) throw new Error('API error ' + res.status);
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-  console.log('AI response:', txt.slice(0, 300));
-  return safeParseJSON(txt);
-}
-
-function safeParseJSON(txt) {
-  // Strip markdown fences
-  var clean = txt.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-  // Extract JSON object
+  var clean = txt.replace(/```json|```/g,'').trim();
   var match = clean.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
-  var s = match[0];
-
-  // Fix common AI JSON issues:
-  // 1. Remove trailing commas before } or ]
-  s = s.replace(/,(\s*[}\]])/g, '$1');
-  // 2. Strip control characters except \n \r \t inside strings
-  s = s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-  // 3. Replace literal newlines/tabs INSIDE string values with spaces
-  s = s.replace(/"([^"]*)"/g, function(m, inner) {
-    return '"' + inner.replace(/[\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim() + '"';
-  });
-  // 4. Fix unescaped backslashes (e.g. from Windows paths in doc)
-  s = s.replace(/"([^"]*)"/g, function(m, inner) {
-    return '"' + inner.replace(/\\(?!["\\/bfnrtu])/g, '\\\\') + '"';
-  });
-  // 5. Ensure numeric values aren't quoted strings
-  s = s.replace(/"(stRate|otRate|dtRate|rate)"\s*:\s*"([\d.]+)"/g, '"$1": $2');
-
-  try {
-    return JSON.parse(s);
-  } catch(e) {
-    // Last resort: try to fix by re-building just the structure
-    console.error('JSON parse failed:', e.message, '\nJSON was:', s.slice(0, 300));
-    throw new Error('Could not parse rate sheet data: ' + e.message + '. Try a simpler document format.');
-  }
+  if (!match) throw new Error('No JSON in response');
+  return JSON.parse(match[0]);
 }
-
 
 async function parseRateSheetPDF(file) {
   var base64 = await new Promise(function(resolve, reject) {
@@ -1830,7 +1792,7 @@ async function parseRateSheetPDF(file) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1000,
+      max_tokens: 4000,
       messages: [{
         role: 'user',
         content: [
@@ -1844,9 +1806,10 @@ async function parseRateSheetPDF(file) {
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
   var clean = txt.replace(/```json|```/g,'').trim();
-  return safeParseJSON(txt);
+  var match = clean.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('No JSON in response');
+  return JSON.parse(match[0]);
 }
-
 function showImportPreview(data) {
   document.getElementById('import-rs-name').value = data.name || '';
   document.getElementById('import-rs-customer').value = data.customer || '';
@@ -6711,6 +6674,213 @@ function renderMarginReport() {
       + '</tr>';
     });
     techBody.innerHTML = techRows.length ? techRows.join('') : '<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--muted)">No data</td></tr>';
+  }
+}
+
+// ── Event delegation for timesheets ──────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var el;
+  el = e.target.closest('[data-open-ts]');
+  if (el) { openTSModal(el.getAttribute('data-open-ts')); return; }
+  el = e.target.closest('[data-ts-for-wo]');
+  if (el) { createOrOpenTS(el.getAttribute('data-ts-for-wo')); return; }
+  el = e.target.closest('[data-export-ts]');
+  if (el) { _editTSId = el.getAttribute('data-export-ts'); exportTimesheet(); return; }
+  el = e.target.closest('[data-export-pkg]');
+  if (el) { exportPackage(el.getAttribute('data-export-pkg')); return; }
+  el = e.target.closest('[data-revert-ts]');
+  if (el) {
+    _editTSId = el.getAttribute('data-revert-ts');
+    revertTS();
+    return;
+  }
+});
+
+// ── Event delegation for timesheets ──────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var el;
+  el = e.target.closest('[data-open-ts]');
+  if (el) { openTSModal(el.getAttribute('data-open-ts')); return; }
+  el = e.target.closest('[data-ts-for-wo]');
+  if (el) { createOrOpenTS(el.getAttribute('data-ts-for-wo')); return; }
+  el = e.target.closest('[data-export-ts]');
+  if (el) { _editTSId = el.getAttribute('data-export-ts'); exportTimesheet(); return; }
+  el = e.target.closest('[data-export-pkg]');
+  if (el) { exportPackage(el.getAttribute('data-export-pkg')); return; }
+  el = e.target.closest('[data-revert-ts]');
+  if (el) {
+    _editTSId = el.getAttribute('data-revert-ts');
+    revertTS();
+    return;
+  }
+});
+
+
+
+// ── Email / Share ────────────────────────────────────────────────────────────
+
+function showSharePicker(docType, docId) {
+  // docType: 'wo' | 'timesheet' | 'invoice'
+  // Build the document HTML and metadata first
+  var meta = buildShareMeta(docType, docId);
+  if (!meta) return;
+
+  // Remove any existing picker
+  var old = document.getElementById('share-picker-overlay');
+  if (old) old.remove();
+
+  var overlay = document.createElement('div');
+  overlay.className = 'share-picker-overlay';
+  overlay.id = 'share-picker-overlay';
+  overlay.innerHTML =
+    '<div class="share-picker">' +
+      '<div class="share-picker-title">Send ' + meta.label + '</div>' +
+      '<div class="share-picker-opts">' +
+        '<div class="share-opt" onclick="shareViaEmail('' + docType + '','' + docId + '')">' +
+          '<span class="share-opt-icon">✉️</span>Default email app (Outlook / Apple Mail)' +
+        '</div>' +
+        '<div class="share-opt" onclick="shareViaGmail('' + docType + '','' + docId + '')">' +
+          '<span class="share-opt-icon">📧</span>Gmail (browser)' +
+        '</div>' +
+        '<div class="share-opt" onclick="shareViaCopy('' + docType + '','' + docId + '')">' +
+          '<span class="share-opt-icon">📋</span>Copy summary to clipboard' +
+        '</div>' +
+      '</div>' +
+      '<button class="share-picker-cancel" onclick="document.getElementById('share-picker-overlay').remove()">Cancel</button>' +
+    '</div>';
+
+  // Close on backdrop click
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.remove();
+  });
+  document.body.appendChild(overlay);
+}
+
+function buildShareMeta(docType, docId) {
+  if (docType === 'wo') {
+    var id = docId || _editWOId;
+    var wo = _jobs.find(function(j){ return j.id === id; });
+    if (!wo) { toast('Work order not found', 'error'); return null; }
+    return {
+      label: 'Work Order',
+      subject: 'Work Order ' + (wo.woNum || wo.number || id) + ' — ' + (wo.client || ''),
+      body: 'Please find attached Work Order ' + (wo.woNum || wo.number || id) + '.
+
+' +
+            'Client: ' + (wo.client || '—') + '
+' +
+            'Site: ' + (wo.site || '—') + '
+' +
+            'Work Type: ' + (wo.workType || '—') + '
+' +
+            'Start Date: ' + (wo.startDate || '—') + '
+
+' +
+            'Please review and confirm receipt.
+
+Nortech Advanced NDT',
+      html: buildWOPrintHTML(wo),
+      filename: 'WorkOrder-' + (wo.woNum || wo.number || id) + '.html'
+    };
+  }
+  if (docType === 'timesheet') {
+    var tsId = docId || _editTSId;
+    var ts = _timesheets.find(function(t){ return t.id === tsId; });
+    if (!ts) { toast('Timesheet not found', 'error'); return null; }
+    var wo2 = ts.woId ? _jobs.find(function(j){ return j.id === ts.woId; }) : null;
+    var totalHrs = (ts.rows||[]).reduce(function(s,r){ return s+(r.regHrs||0)+(r.otHrs||0); }, 0);
+    return {
+      label: 'Timesheet',
+      subject: 'Timesheet — ' + (wo2 ? (wo2.woNum||wo2.number) : tsId) + ' — ' + (ts.techName || ''),
+      body: 'Please find attached timesheet for approval.
+
+' +
+            'Technician: ' + (ts.techName || '—') + '
+' +
+            'Work Order: ' + (wo2 ? (wo2.woNum||wo2.number||'') : '—') + '
+' +
+            'Client: ' + (wo2 ? (wo2.client||'') : '—') + '
+' +
+            'Total Hours: ' + totalHrs.toFixed(1) + '
+
+' +
+            'Please review and approve.
+
+Nortech Advanced NDT',
+      html: null,  // timesheet uses print window
+      filename: 'Timesheet-' + (wo2 ? (wo2.woNum||wo2.number||tsId) : tsId) + '.html'
+    };
+  }
+  if (docType === 'invoice') {
+    var body = document.getElementById('inv-view-body');
+    var title = document.getElementById('inv-view-title');
+    return {
+      label: 'Invoice',
+      subject: (title ? title.textContent : 'Invoice') + ' — Nortech Advanced NDT',
+      body: 'Please find attached invoice from Nortech Advanced NDT.
+
+Please remit payment as per the terms on the invoice.
+
+Nortech Advanced NDT',
+      html: body ? '<html><body style="font-family:Arial,sans-serif;padding:20px">' + body.innerHTML + '</body></html>' : null,
+      filename: (title ? title.textContent.replace(/[^a-z0-9]/gi,'_') : 'Invoice') + '.html'
+    };
+  }
+  return null;
+}
+
+function shareViaEmail(docType, docId) {
+  document.getElementById('share-picker-overlay').remove();
+  var meta = buildShareMeta(docType, docId);
+  if (!meta) return;
+
+  // Use mailto: — opens default email client (Outlook, Apple Mail, etc.)
+  var mailto = 'mailto:?subject=' + encodeURIComponent(meta.subject) +
+               '&body=' + encodeURIComponent(meta.body + (meta.html ? '
+
+[Document attached — see PDF export for file]' : ''));
+  window.open(mailto, '_blank');
+
+  // Also trigger PDF/print so they can attach it
+  setTimeout(function() {
+    toast('Email app opened. Use Export PDF to get the attachment file.', 'info');
+  }, 500);
+}
+
+function shareViaGmail(docType, docId) {
+  document.getElementById('share-picker-overlay').remove();
+  var meta = buildShareMeta(docType, docId);
+  if (!meta) return;
+
+  var gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1' +
+    '&su=' + encodeURIComponent(meta.subject) +
+    '&body=' + encodeURIComponent(meta.body);
+  window.open(gmailUrl, '_blank');
+  setTimeout(function() {
+    toast('Gmail opened. Use Export PDF to get the attachment file.', 'info');
+  }, 500);
+}
+
+function shareViaCopy(docType, docId) {
+  document.getElementById('share-picker-overlay').remove();
+  var meta = buildShareMeta(docType, docId);
+  if (!meta) return;
+
+  var text = meta.subject + '\n\n' + meta.body;
+  navigator.clipboard.writeText(text).then(function() {
+    toast('Email draft copied to clipboard — paste into any email', 'success');
+  }).catch(function() {
+    // Fallback
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('Copied to clipboard', 'success');
+  });
+}
+t-align:center;padding:1.5rem;color:var(--muted)">No data</td></tr>';
   }
 }
 
