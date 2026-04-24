@@ -579,6 +579,14 @@ function renderAddOns(live) {
   renderNuclearOutages(live);
 }
 
+
+function _nucCommLeadHTML() {
+  return '<div class="ncb-title">Nuclear Commercial Lead</div>'
+    + '<div style="font-size:.75rem;color:#4A5568;line-height:1.7;">'
+    + '<strong>Olivier Marcotte</strong> — CRO · leads all Nuclear/OPG commercial activity<br>'
+    + 'Nuclear specialist: <strong>Louis-Pier Théberge</strong> — Lead on new builds and refurbishments.'
+    + '</div>';
+}
 </script>
 
 <style>
@@ -1171,8 +1179,13 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <a href="#nuclear">Nuclear</a>
     
     <a href="#digest">Email Digest</a>
-    <a href="BU_Services_Management_Hub.html" target="buservices" style="flex-shrink:0;color:#00AEEF;background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;align-self:center;margin-left:.5rem">⚙ Management Hub →</a>
   </div>  </div>
+
+  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a>
+  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_People_Dashboard.html" target="buservices">👥 People</a>
+  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Meeting_Hub.html" target="buservices">📅 Meetings</a>
+  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a>
+  <a class="nav-btn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Nortech_Ops.html" target="buservices">🔧 Nortech Ops</a>
 </nav>
 
 
@@ -1496,7 +1509,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 </div>
 
 <div class="footer">
-  </div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.35rem"><div class="live-dot"></div><span id="live-label" style="font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.4)">Live</span><span style="color:rgba(255,255,255,.2)"> · </span><span id="update-label" style="font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.3)"></span></div>
   <p>BU Services Command Centre · Ekoscan Integrity Group · Jon Eustace, CEO North America · Confidential</p>
   <p class="config-hint">To update: edit the CONFIG block at the top of this file → save → refresh browser. No server required.</p>
 </div>
@@ -3027,13 +3040,19 @@ function setMonthlyView(v) {
   renderMonthly();
 }
 
+
+function renderAddOns(liveData) {
+  renderProposals(liveData);
+  renderReconciliation(liveData);
+  renderNuclearOutages(liveData);
+}
+
 function renderAll() {
 // ── TOPBAR ───────────────────────────────────────────────────────────────────
-$('live-label').textContent = 'Live · ' + CONFIG.version;
-$('update-label').textContent = 'Updated ' + CONFIG.lastUpdated;
+if ($('live-label')) $('live-label').textContent = 'Live · ' + CONFIG.version;
+if ($('update-label')) $('update-label').textContent = 'Updated ' + CONFIG.lastUpdated;
 
 
-renderMonthly();
 
 // ── DECK PERFORMANCE REPORT ─────────────────────────────────────────────────
 function fmt(val, decimals, suffix) {
@@ -3377,6 +3396,9 @@ renderMeetings();
 renderAvb();
 renderMonthly();
 renderRegions();
+renderProposals({});
+renderReconciliation({});
+renderNuclearOutages({});
 
 // ── KPI ROW ──────────────────────────────────────────────────────────────────
 const totalActual = CONFIG.initiatives.reduce((s,i) => s+i.actual2026, 0);
@@ -3499,6 +3521,9 @@ function buildDigestHTML() {
   .prog-fill{height:100%;border-radius:2px;}
   .footer{background:#F0F3FA;padding:14px 24px;font-size:11px;color:#8892A4;text-align:center;}
   .cta{display:inline-block;background:#161C60;color:#ffffff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:5px;text-decoration:none;margin:4px;}
+
+.nav-btn{color:var(--sky,#00AEEF);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;text-decoration:none;flex-shrink:0;margin-left:.5rem}
+.nav-btn:hover{background:rgba(0,174,239,.22)}
 </style></head>
 <body><div class="wrap">
 <div class="hdr">
