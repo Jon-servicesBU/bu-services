@@ -1297,6 +1297,14 @@ function handleBcDrop(event) {
   var files = event.dataTransfer.files;
   if (files.length) handleUpload(files);
 }
+function handleEmbDrop(event) {
+  event.preventDefault();
+  if (event.dataTransfer.files.length) handleEmbUpload(event.dataTransfer.files);
+}
+function handleVacDrop(event) {
+  event.preventDefault();
+  if (event.dataTransfer.files.length) handleVacUpload(event.dataTransfer.files);
+}
 
 async function handleUpload(files) {
   var file = files[0];
@@ -1400,8 +1408,13 @@ async function handleUpload(files) {
       } catch(e) {}
 
       hideBcOverlay();
+      var pm = document.getElementById('page-meta');
+      if (pm) pm.textContent = 'Source: BC export · Week ending ' + DATA.util_week_ending + ' · Updated ' + new Date().toISOString().slice(0,10) + ' · Jon Eustace CEO NA';
+      var uw = document.getElementById('util-week'); if (uw) uw.textContent = DATA.util_week_ending;
       renderUtil();
-      setUploadStatus('\u2713 Updated ' + extracted.util_13wk_trend.length + ' weeks from ' + file.name, 'success');
+      renderRoster();
+      renderVacation();
+      setUploadStatus('✓ Updated ' + extracted.util_13wk_trend.length + ' weeks from ' + file.name, 'success');
     } else {
       throw new Error('No util_13wk_trend array in response');
     }
