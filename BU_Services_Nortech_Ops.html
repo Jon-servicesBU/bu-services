@@ -1765,7 +1765,7 @@ async function extractDocxText(file) {
   });
 }
 
-var RATE_PROMPT = 'You are a data extraction assistant. Extract rate sheet pricing data and return ONLY a valid JSON object. No markdown, no explanation, no code blocks. Just the raw JSON. Use this exact structure: {"name":"rate sheet name","customer":"client name or empty string","effective":"YYYY-MM-DD","currency":"CAD","labour":[{"name":"category name","stRate":0,"otRate":0,"dtRate":0}],"equipment":[{"name":"item name","rate":0,"unit":"day"}]} Rules: all rate values must be numbers not strings. Extract every labour category. If only ST rate shown set OT=ST*1.5 and DT=ST*2. Return ONLY the JSON object starting with { and ending with }.';
+var RATE_PROMPT = 'You are a data extraction assistant. Extract rate sheet pricing data and return ONLY a valid JSON object. No markdown, no explanation, no code blocks. Just the raw JSON. Use this exact structure: {"name":"rate sheet name","customer":"client name or empty string","effective":"YYYY-MM-DD","currency":"CAD","labour":[{"name":"category name","stRate":0,"otRate":0,"dtRate":0}],"equipment":[{"name":"item name","rate":0,"unit":"day"}]} Rules: (1) all rate values must be plain numbers not strings. (2) Extract every labour category. (3) If only ST rate shown set OT=ST*1.5 and DT=ST*2. (4) All string values must use only plain ASCII characters — replace any special characters, accents, or symbols with plain equivalents. (5) Do not include any newlines or tab characters inside string values. (6) Return ONLY the JSON object starting with { and ending with }.';
 
 async function parseRateSheetText(text) {
   var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
@@ -1773,7 +1773,7 @@ async function parseRateSheetText(text) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1000,
+      max_tokens: 1500,
       messages: [{ role: 'user', content: RATE_PROMPT + ' Document text: ' + text.slice(0, 8000) }]
     })
   });
@@ -1781,15 +1781,42 @@ async function parseRateSheetText(text) {
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
   console.log('AI response:', txt.slice(0, 300));
-  var clean = txt.replace(/```json|```/g,'').trim();
+  return safeParseJSON(txt);
+}
+
+function safeParseJSON(txt) {
+  // Strip markdown fences
+  var clean = txt.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+  // Extract JSON object
   var match = clean.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('No JSON found in AI response: ' + txt.slice(0,100));
-  var jsonStr = match[0];
-  jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
-  jsonStr = jsonStr.replace(/[\x00-\x1F\x7F]/g, ' ');
-  try { return JSON.parse(jsonStr); }
-  catch(e2) { throw new Error('Could not parse AI response as JSON: ' + e2.message); }
+  var s = match[0];
+
+  // Fix common AI JSON issues:
+  // 1. Remove trailing commas before } or ]
+  s = s.replace(/,(\s*[}\]])/g, '$1');
+  // 2. Strip control characters except \n \r \t inside strings
+  s = s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  // 3. Replace literal newlines/tabs INSIDE string values with spaces
+  s = s.replace(/"([^"]*)"/g, function(m, inner) {
+    return '"' + inner.replace(/[\n\r\t]/g, ' ').replace(/\s+/g, ' ').trim() + '"';
+  });
+  // 4. Fix unescaped backslashes (e.g. from Windows paths in doc)
+  s = s.replace(/"([^"]*)"/g, function(m, inner) {
+    return '"' + inner.replace(/\\(?!["\\/bfnrtu])/g, '\\\\') + '"';
+  });
+  // 5. Ensure numeric values aren't quoted strings
+  s = s.replace(/"(stRate|otRate|dtRate|rate)"\s*:\s*"([\d.]+)"/g, '"$1": $2');
+
+  try {
+    return JSON.parse(s);
+  } catch(e) {
+    // Last resort: try to fix by re-building just the structure
+    console.error('JSON parse failed:', e.message, '\nJSON was:', s.slice(0, 300));
+    throw new Error('Could not parse rate sheet data: ' + e.message + '. Try a simpler document format.');
+  }
 }
+
 
 async function parseRateSheetPDF(file) {
   var base64 = await new Promise(function(resolve, reject) {
@@ -1817,9 +1844,7 @@ async function parseRateSheetPDF(file) {
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
   var clean = txt.replace(/```json|```/g,'').trim();
-  var match = clean.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('No JSON in response');
-  return JSON.parse(match[0]);
+  return safeParseJSON(txt);
 }
 
 function showImportPreview(data) {
