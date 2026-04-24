@@ -2451,6 +2451,48 @@ const GATE_DOT = { green:'gd-green', amber:'gd-amber', grey:'gd-grey', red:'gd-r
 const RISK_BADGE = { critical:'rl-critical', high:'rl-high', medium:'rl-medium' };
 const INIT_LABEL = { mining:'Mining', pipeline:'Pipeline', powerline:'Powerline', nuclear:'Nuclear', x3:'3X', all:'All' };
 
+// ── SHARED MONTH CONSTANTS (global — used by AVB and Monthly render) ─────────
+var MONTH_KEYS = ['2026_01','2026_02','2026_03','2026_04','2026_05','2026_06',
+                  '2026_07','2026_08','2026_09','2026_10','2026_11','2026_12'];
+
+// ── NUCLEOM REGIONS ──────────────────────────────────────────────────────────
+// ── ACTUALS VS BUDGET ─────────────────────────────────────────────────────────
+var avbView = 'consolidated'; // 'consolidated' | 'detail'
+
+var MONTH_KEYS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Entity definitions for each view
+var AVB_CONSOLIDATED = [
+  { id:'nucleom_cons', label:'Nucleom',  colour:'#161C60',
+    budgetKeys:['nucleom_raw','arcanite'],
+    actualKeys:['nucleom','arcanite'] },
+  { id:'nortech_cons', label:'Nortech',  colour:'#2D5A8E',
+    budgetKeys:['nortech','rockx'],
+    actualKeys:['nortech','rockx'] },
+  { id:'intact_cons',  label:'Intact',   colour:'#196B24',
+    budgetKeys:['intact'],
+    actualKeys:['intact'] },
+];
+
+var AVB_DETAIL = [
+  { id:'nucleom_d', label:'Nucleom',  colour:'#161C60', budgetKeys:['nucleom_raw'], actualKeys:['nucleom'] },
+  { id:'nortech_d', label:'Nortech',  colour:'#2D5A8E', budgetKeys:['nortech'],     actualKeys:['nortech'] },
+  { id:'rockx_d',   label:'RockX',    colour:'#1A7A9A', budgetKeys:['rockx'],       actualKeys:['rockx'] },
+  { id:'arcanite_d',label:'Arcanite', colour:'#5A4FA0', budgetKeys:['arcanite'],    actualKeys:['arcanite'] },
+  { id:'intact_d',  label:'Intact',   colour:'#196B24', budgetKeys:['intact'],      actualKeys:['intact'] },
+];
+
+var MONTHLY_ENTITIES = [
+  { id:'nucleom',   label:'Nucleom',   colour:'#161C60', group:'base' },
+  { id:'nortech',   label:'Nortech',   colour:'#2D5A8E', group:'base' },
+  { id:'intact',    label:'Intact',    colour:'#196B24', group:'base' },
+  { id:'mining',    label:'Mining',    colour:'#C9860A', group:'initiative' },
+  { id:'pipeline',  label:'Pipeline',  colour:'#368CD9', group:'initiative' },
+  { id:'powerline', label:'Powerline', colour:'#E97132', group:'initiative' },
+  { id:'nuclear',   label:'Nuclear',   colour:'#22882F', group:'initiative' },
+  { id:'x3',        label:'3X',        colour:'#6B3FA0', group:'initiative' },
+];
+
 // ── LIVE SALESFORCE ACTUALS ─────────────────────────────────────────────────
 // Vision-to-Data replaces Power Automate — paste a screenshot to update any field.
 // Falls back to actuals.json (SharePoint) if no localStorage data, then CONFIG defaults.
@@ -2648,7 +2690,7 @@ const INIT_LABEL = { mining:'Mining', pipeline:'Pipeline', powerline:'Powerline'
 
 // Active nav on scroll — outside renderAll so it only binds once
 (function() {
-  var NAV_SECTIONS = ['overview','revenue','actuals-vs-budget','monthly','regions','performance','initiatives','gates','meetings','risks','documents','system','digest'];
+  var NAV_SECTIONS = ['overview','revenue','actuals-vs-budget','monthly','regions','performance','initiatives','gates','meetings','risks','documents','digest'];
   window.addEventListener('scroll', function() {
     var y = window.scrollY + 80;
     NAV_SECTIONS.forEach(function(id) {
@@ -2967,36 +3009,7 @@ function toggleCurrency() {
   renderMonthly();
 }
 
-// ── SHARED MONTH CONSTANTS (global — used by AVB and Monthly render) ─────────
-var MONTH_KEYS = ['2026_01','2026_02','2026_03','2026_04','2026_05','2026_06',
-                  '2026_07','2026_08','2026_09','2026_10','2026_11','2026_12'];
 
-// ── NUCLEOM REGIONS ──────────────────────────────────────────────────────────
-// ── ACTUALS VS BUDGET ─────────────────────────────────────────────────────────
-var avbView = 'consolidated'; // 'consolidated' | 'detail'
-
-var MONTH_KEYS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-// Entity definitions for each view
-var AVB_CONSOLIDATED = [
-  { id:'nucleom_cons', label:'Nucleom',  colour:'#161C60',
-    budgetKeys:['nucleom_raw','arcanite'],
-    actualKeys:['nucleom','arcanite'] },
-  { id:'nortech_cons', label:'Nortech',  colour:'#2D5A8E',
-    budgetKeys:['nortech','rockx'],
-    actualKeys:['nortech','rockx'] },
-  { id:'intact_cons',  label:'Intact',   colour:'#196B24',
-    budgetKeys:['intact'],
-    actualKeys:['intact'] },
-];
-
-var AVB_DETAIL = [
-  { id:'nucleom_d', label:'Nucleom',  colour:'#161C60', budgetKeys:['nucleom_raw'], actualKeys:['nucleom'] },
-  { id:'nortech_d', label:'Nortech',  colour:'#2D5A8E', budgetKeys:['nortech'],     actualKeys:['nortech'] },
-  { id:'rockx_d',   label:'RockX',    colour:'#1A7A9A', budgetKeys:['rockx'],       actualKeys:['rockx'] },
-  { id:'arcanite_d',label:'Arcanite', colour:'#5A4FA0', budgetKeys:['arcanite'],    actualKeys:['arcanite'] },
-  { id:'intact_d',  label:'Intact',   colour:'#196B24', budgetKeys:['intact'],      actualKeys:['intact'] },
-];
 
 function getAvbBudget(keys, monthIdx) {
   var bud = CONFIG.budget2026 || {};
@@ -3809,17 +3822,6 @@ var monthlyView = 'both'; // 'chart' | 'table' | 'both'
 
 var MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 // MONTH_KEYS declared globally above renderAll
-
-var MONTHLY_ENTITIES = [
-  { id:'nucleom',   label:'Nucleom',   colour:'#161C60', group:'base' },
-  { id:'nortech',   label:'Nortech',   colour:'#2D5A8E', group:'base' },
-  { id:'intact',    label:'Intact',    colour:'#196B24', group:'base' },
-  { id:'mining',    label:'Mining',    colour:'#C9860A', group:'initiative' },
-  { id:'pipeline',  label:'Pipeline',  colour:'#368CD9', group:'initiative' },
-  { id:'powerline', label:'Powerline', colour:'#E97132', group:'initiative' },
-  { id:'nuclear',   label:'Nuclear',   colour:'#22882F', group:'initiative' },
-  { id:'x3',        label:'3X',        colour:'#6B3FA0', group:'initiative' },
-];
 
 function getMonthlyData() {
   var src = CONFIG.monthly || {};
