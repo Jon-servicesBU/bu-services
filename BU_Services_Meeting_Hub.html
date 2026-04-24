@@ -1593,8 +1593,18 @@ document.addEventListener('DOMContentLoaded', function() {
 function copyMtgNotes(id) {
   var ta = document.getElementById(id + '-notes-ta');
   if (!ta || !ta.value.trim()) { showToast('No notes to copy', 'warn'); return; }
+  var mtgMap = {'view-commercial':'commercial', 'view-ops':'ops', 'view-nuclear':'nuclear', 'view-nuclear-track':'nuclear', 'view-gate':'gate', 'view-finance':'finance', 'view-hr':'other', 'view-eurazeo':'other', 'view-conference':'other'};
+  // Save to localStorage so Management Hub can pick it up
+  try {
+    localStorage.setItem('mm_prefill', JSON.stringify({
+      notes: ta.value,
+      meeting: mtgMap[id] || 'other',
+      date: new Date().toISOString().slice(0,10),
+      source: id
+    }));
+  } catch(e) {}
   navigator.clipboard.writeText(ta.value).then(function() {
-    showToast('Notes copied to clipboard', 'ok');
+    showToast('Notes copied — open Hub → Meeting Minutes to extract actions', 'ok');
   }).catch(function() {
     var t = document.createElement('textarea');
     t.value = ta.value;
@@ -1602,7 +1612,7 @@ function copyMtgNotes(id) {
     t.select();
     document.execCommand('copy');
     document.body.removeChild(t);
-    showToast('Notes copied to clipboard', 'ok');
+    showToast('Notes copied — open Hub → Meeting Minutes to extract actions', 'ok');
   });
 }
 </script>
