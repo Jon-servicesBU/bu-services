@@ -863,31 +863,37 @@ function getPool() {
   });
 }
 function calcUtil() {
-  // 13-week cumulative overhead: total non-bill / total paid across all weeks and pool
-  // overhead_avg per employee = non_13wk / paid_13wk, stored directly
+  // Use uploaded trend data if available
+  if (DATA.util_13wk_trend && DATA.util_13wk_trend.length) {
+    var active = DATA.util_13wk_trend.filter(function(w){ return (w.tot-(w.vac||0)) > 0; });
+    if (active.length) {
+      return Math.round(active.reduce(function(s,w){ return s+(w.util||0); },0)/active.length*10)/10;
+    }
+  }
+  if (DATA.util_13wk_avg) return DATA.util_13wk_avg;
   var pool = getPool().filter(function(e){ return e.overhead_avg!==null && e.overhead_avg!==undefined; });
-  if(!pool.length) return DATA.util_total_latest||0;
-  // Weighted average: weight each employee by their total paid hours (bill_13wk is a proxy)
-  // Exact: use overhead_avg * weight where weight = bill_13wk + non_13wk + vac_hrs_13wk
-  // We have bill_13wk and vac_hrs_13wk stored. non_13wk = overhead_avg/100 * paid_13wk
-  // paid_13wk = bill_13wk / (1 - overhead_avg/100) ... circular
-  // Simplest correct approach: simple average of overhead_avg across pool employees
-  // (matches what the roster column shows and is consistent)
+  if (!pool.length) return DATA.util_total_latest||0;
   return Math.round(pool.reduce(function(s,e){ return s+(e.overhead_avg||0); },0)/pool.length*10)/10;
 }
+
 function calcCumUtil() {
-  // Cumulative util for current pool: bill_13wk / (capacity - vac)
+  // Use uploaded trend data if available
+  if (DATA.util_13wk_trend && DATA.util_13wk_trend.length) {
+    var active = DATA.util_13wk_trend.filter(function(w){ return (w.tot-(w.vac||0)) > 0; });
+    if (active.length) {
+      var totBill = active.reduce(function(s,w){ return s+(w.bill||0); },0);
+      var totWork = active.reduce(function(s,w){ return s+(w.tot-(w.vac||0)); },0);
+      return Math.round(totBill/Math.max(1,totWork)*1000)/10;
+    }
+  }
   var pool = getPool();
   var CAPACITY_13WK = DATA.capacity_hrs_13wk || 520.0;
-  var totalBill = pool.reduce(function(s,e){ return s + (e.bill_13wk||0); }, 0);
-  var totalVac  = pool.reduce(function(s,e){
-    // estimate vac from capacity difference: cap - (cap * (1 - overhead_avg/100))
-    // simpler: use vac weeks from vac file if available, else 0
-    return s + (e.vac_weeks ? e.vac_weeks * 40 : 0);
-  }, 0);
-  var capLessVac = Math.max(1, pool.length * CAPACITY_13WK - totalVac);
-  return Math.round(totalBill / capLessVac * 1000) / 10;
+  var totalBill = pool.reduce(function(s,e){ return s+(e.bill_13wk||0); },0);
+  var totalVac  = pool.reduce(function(s,e){ return s+(e.vac_weeks?e.vac_weeks*40:0); },0);
+  var capLessVac = Math.max(1, pool.length*CAPACITY_13WK - totalVac);
+  return Math.round(totalBill/capLessVac*1000)/10;
 }
+
 function calc13wkAvg() {
   // Average across all 13 weeks and all non-excluded employees with data that week
   var pool = getPool();
@@ -1301,6 +1307,10 @@ function handleVacDrop(event) {
 }
 
 function refreshDates() {
+  // Sync alias variables with latest DATA
+  if (DATA.employees    && DATA.employees.length)     EMPS   = DATA.employees;
+  if (DATA.vac_employees&& DATA.vac_employees.length) VACEMP = DATA.vac_employees;
+  if (DATA.emb_employees&& DATA.emb_employees.length) EMBEMP = DATA.emb_employees;
   // Always derive week-ending from the actual trend data max date
   if (DATA.util_13wk_trend && DATA.util_13wk_trend.length) {
     var maxDate = DATA.util_13wk_trend.reduce(function(mx, w) {
@@ -1432,6 +1442,8 @@ async function handleUpload(files) {
       renderUtil();
       renderRoster();
       renderVacation();
+      renderPeople();
+      renderAnniversaries();
       setUploadStatus('✓ Updated ' + extracted.util_13wk_trend.length + ' weeks from ' + file.name, 'success');
     } else {
       throw new Error('No util_13wk_trend array in response');
@@ -1470,7 +1482,7 @@ async function handleEmbUpload(files) {
     if (extracted.tenure_buckets) DATA.tenure_buckets = extracted.tenure_buckets;
     if (extracted.employees && extracted.employees.length) DATA.emb_employees = extracted.employees;
     try { localStorage.setItem('bc_emb_data', JSON.stringify({ updated: new Date().toISOString(), file: file.name, data: extracted })); } catch(ex) {}
-    hideBcOverlay(); renderPeople(); renderAnniversaries();
+    hideBcOverlay(); refreshDates(); renderPeople(); renderAnniversaries(); renderRoster();
     setStatus('\u2713 Updated from ' + file.name, 'success');
   } catch(err) { hideBcOverlay(); setStatus('Error: ' + err.message, 'error'); }
 }
@@ -1504,7 +1516,7 @@ async function handleVacUpload(files) {
     if (extracted.vac_high_balance_count !== undefined) DATA.vac_high_balance_count = extracted.vac_high_balance_count;
     if (extracted.employees && extracted.employees.length) DATA.vac_employees = extracted.employees;
     try { localStorage.setItem('bc_vac_data', JSON.stringify({ updated: new Date().toISOString(), file: file.name, data: extracted })); } catch(ex) {}
-    hideBcOverlay(); renderVacation();
+    hideBcOverlay(); refreshDates(); renderVacation(); renderRoster(); renderPeople();
     setStatus('\u2713 Updated from ' + file.name, 'success');
   } catch(err) { hideBcOverlay(); setStatus('Error: ' + err.message, 'error'); }
 }
@@ -1580,6 +1592,25 @@ function hideBcOverlay() {
           d2.util_by_office = obo;
         }
         Object.assign(DATA, d2);
+        // Also load emb and vac cached data
+        try {
+          var embS = JSON.parse(localStorage.getItem('bc_emb_data')||'null');
+          if (embS && embS.data) {
+            if (embS.data.headcount_active) DATA.headcount_active = embS.data.headcount_active;
+            if (embS.data.tenure_avg_years) DATA.tenure_avg_years = embS.data.tenure_avg_years;
+            if (embS.data.retention_risk_under_1yr !== undefined) DATA.retention_risk_under_1yr = embS.data.retention_risk_under_1yr;
+            if (embS.data.tenure_buckets) DATA.tenure_buckets = embS.data.tenure_buckets;
+            if (embS.data.employees && embS.data.employees.length) DATA.emb_employees = embS.data.employees;
+          }
+        } catch(e2) {}
+        try {
+          var vacS = JSON.parse(localStorage.getItem('bc_vac_data')||'null');
+          if (vacS && vacS.data) {
+            if (vacS.data.vac_liability_total_cad !== undefined) DATA.vac_liability_total_cad = vacS.data.vac_liability_total_cad;
+            if (vacS.data.vac_high_balance_count !== undefined) DATA.vac_high_balance_count = vacS.data.vac_high_balance_count;
+            if (vacS.data.employees && vacS.data.employees.length) DATA.vac_employees = vacS.data.employees;
+          }
+        } catch(e2) {}
         refreshDates();
       }
     }
