@@ -468,21 +468,61 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 
 <div class="upload-banner">
   <div class="upload-banner-text">
-    <strong>Refresh 13-week rolling data</strong> — drop your BC utilization export (xlsx) and Claude reads it automatically.
+    <strong>Refresh live data</strong> — drop any of the three BC exports below and Claude reads them automatically.
   </div>
-  <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
-    <input type="file" id="bc-upload" accept=".xlsx,.csv" style="display:none" onchange="handleUpload(this.files)">
-    <div id="bc-dropzone"
-         onclick="document.getElementById('bc-upload').click()"
-         ondragover="event.preventDefault();this.classList.add('bc-dz-over')"
-         ondragleave="this.classList.remove('bc-dz-over')"
-         ondrop="this.classList.remove('bc-dz-over');handleBcDrop(event)"
-         class="bc-dropzone">
-      <span class="bc-dz-icon">📊</span>
-      <span class="bc-dz-text">Drop BC export here or click to browse</span>
-      <span class="bc-dz-sub">.xlsx or .csv · Claude reads it automatically</span>
+  <div style="display:flex;align-items:flex-start;gap:.75rem;flex-wrap:wrap;margin-top:.5rem">
+
+    <!-- Zone 1: 13-week rolling hours -->
+    <div style="display:flex;flex-direction:column;gap:.25rem">
+      <span style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4)">Rolling Hours</span>
+      <input type="file" id="bc-upload" accept=".xlsx,.csv" style="display:none" onchange="handleUpload(this.files)">
+      <div id="bc-dropzone"
+           onclick="document.getElementById('bc-upload').click()"
+           ondragover="event.preventDefault();this.classList.add('bc-dz-over')"
+           ondragleave="this.classList.remove('bc-dz-over')"
+           ondrop="this.classList.remove('bc-dz-over');handleBcDrop(event)"
+           class="bc-dropzone">
+        <span class="bc-dz-icon">📊</span>
+        <span class="bc-dz-text">Hours Rolling 13 Weeks</span>
+        <span class="bc-dz-sub">.xlsx or .csv</span>
+      </div>
+      <span class="upload-status" id="upload-status" style="font-size:.65rem"></span>
     </div>
-    <span class="upload-status" id="upload-status"></span>
+
+    <!-- Zone 2: Hire dates / tenure -->
+    <div style="display:flex;flex-direction:column;gap:.25rem">
+      <span style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4)">Headcount & Tenure</span>
+      <input type="file" id="emb-upload" accept=".xlsx,.csv" style="display:none" onchange="handleEmbUpload(this.files)">
+      <div id="emb-dropzone"
+           onclick="document.getElementById('emb-upload').click()"
+           ondragover="event.preventDefault();this.classList.add('bc-dz-over')"
+           ondragleave="this.classList.remove('bc-dz-over')"
+           ondrop="this.classList.remove('bc-dz-over');handleEmbDrop(event)"
+           class="bc-dropzone">
+        <span class="bc-dz-icon">👥</span>
+        <span class="bc-dz-text">Date_d_embauche</span>
+        <span class="bc-dz-sub">.xlsx or .csv</span>
+      </div>
+      <span class="upload-status" id="emb-status" style="font-size:.65rem"></span>
+    </div>
+
+    <!-- Zone 3: Vacation balances -->
+    <div style="display:flex;flex-direction:column;gap:.25rem">
+      <span style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4)">Vacation Balances</span>
+      <input type="file" id="vac-upload" accept=".xlsx,.csv" style="display:none" onchange="handleVacUpload(this.files)">
+      <div id="vac-dropzone"
+           onclick="document.getElementById('vac-upload').click()"
+           ondragover="event.preventDefault();this.classList.add('bc-dz-over')"
+           ondragleave="this.classList.remove('bc-dz-over')"
+           ondrop="this.classList.remove('bc-dz-over');handleVacDrop(event)"
+           class="bc-dropzone">
+        <span class="bc-dz-icon">🏖</span>
+        <span class="bc-dz-text">Vacances</span>
+        <span class="bc-dz-sub">.xlsx or .csv</span>
+      </div>
+      <span class="upload-status" id="vac-status" style="font-size:.65rem"></span>
+    </div>
+
   </div>
 </div>
 
@@ -1371,6 +1411,104 @@ async function handleUpload(files) {
     setUploadStatus('Error: ' + e.message, 'error');
   }
 }
+async function handleEmbUpload(files) {
+  var file = files[0]; if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  var setStatus = function(msg, type) { var el = document.getElementById('emb-status'); if (el) { el.textContent = msg; el.style.color = type==='error'?'#DC2626':type==='success'?'#16A34A':'rgba(255,255,255,.5)'; } };
+  setStatus('Reading\u2026', 'info');
+  showBcOverlay('Reading ' + file.name + '\u2026', 'Extracting headcount and tenure data');
+  try {
+    var textContent = await xlsxToText(file, ext);
+    showBcOverlay('Analysing with Claude\u2026', 'Extracting hire dates, tenure, headcount');
+    var systemPrompt = 'You are reading a Business Central employee hire date export for Nucleom. Extract headcount and tenure data. Respond ONLY with valid JSON, no markdown. Format: {"headcount_active":<number>,"tenure_avg_years":<number>,"retention_risk_under_1yr":<number>,"tenure_buckets":{"under_1yr":<n>,"yr_1_3":<n>,"yr_3_5":<n>,"yr_5_10":<n>,"yr_10_plus":<n>},"employees":[{"name":"Last, First","hire":"YYYY-MM-DD","years":<number>,"milestone":<number or null>,"days_until":<number>}]} milestone is the next anniversary year (5,10,15,20,25) if within 365 days, else null.';
+    var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, system: systemPrompt, messages: [{ role: 'user', content: 'BC hire date export:\n\n' + textContent.slice(0, 50000) }] })
+    });
+    var data = await res.json();
+    if (data.type === 'error') throw new Error('API: ' + data.error.message);
+    var txt = data.content && data.content[0] ? data.content[0].text : '';
+    var clean = txt.replace(/```json|```/g,'').trim();
+    var s = clean.indexOf('{'); if (s>-1) clean = clean.slice(s);
+    var e = clean.lastIndexOf('}'); if (e>-1) clean = clean.slice(0,e+1);
+    clean = clean.replace(/[\x00-\x1F\x7F]/g,' ').replace(/,\s*([}\]])/g,'$1');
+    var extracted = JSON.parse(clean);
+    if (extracted.headcount_active) DATA.headcount_active = extracted.headcount_active;
+    if (extracted.tenure_avg_years) DATA.tenure_avg_years = extracted.tenure_avg_years;
+    if (extracted.retention_risk_under_1yr !== undefined) DATA.retention_risk_under_1yr = extracted.retention_risk_under_1yr;
+    if (extracted.tenure_buckets) DATA.tenure_buckets = extracted.tenure_buckets;
+    if (extracted.employees && extracted.employees.length) DATA.emb_employees = extracted.employees;
+    try { localStorage.setItem('bc_emb_data', JSON.stringify({ updated: new Date().toISOString(), file: file.name, data: extracted })); } catch(ex) {}
+    hideBcOverlay(); renderPeople(); renderAnniversaries();
+    setStatus('\u2713 Updated from ' + file.name, 'success');
+  } catch(err) { hideBcOverlay(); setStatus('Error: ' + err.message, 'error'); }
+}
+
+async function handleVacUpload(files) {
+  var file = files[0]; if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  var setStatus = function(msg, type) { var el = document.getElementById('vac-status'); if (el) { el.textContent = msg; el.style.color = type==='error'?'#DC2626':type==='success'?'#16A34A':'rgba(255,255,255,.5)'; } };
+  setStatus('Reading\u2026', 'info');
+  showBcOverlay('Reading ' + file.name + '\u2026', 'Extracting vacation balances');
+  try {
+    var textContent = await xlsxToText(file, ext);
+    showBcOverlay('Analysing with Claude\u2026', 'Extracting vacation balances and liability');
+    var systemPrompt = 'You are reading a Business Central vacation balance export for Nucleom. Extract vacation liability and balances. Respond ONLY with valid JSON, no markdown. Format: {"vac_liability_total_cad":<number>,"vac_liability_syn_cad":<number>,"vac_liability_nonsyn_cad":<number>,"vac_avg_weeks_syn":<number>,"vac_high_balance_count":<number>,"employees":[{"name":"Last, First","solde":<dollar amount>,"weeks":<number>,"type":"Unionized or Non-unionized"}]}';
+    var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, system: systemPrompt, messages: [{ role: 'user', content: 'BC vacation export:\n\n' + textContent.slice(0, 50000) }] })
+    });
+    var data = await res.json();
+    if (data.type === 'error') throw new Error('API: ' + data.error.message);
+    var txt = data.content && data.content[0] ? data.content[0].text : '';
+    var clean = txt.replace(/```json|```/g,'').trim();
+    var s = clean.indexOf('{'); if (s>-1) clean = clean.slice(s);
+    var e = clean.lastIndexOf('}'); if (e>-1) clean = clean.slice(0,e+1);
+    clean = clean.replace(/[\x00-\x1F\x7F]/g,' ').replace(/,\s*([}\]])/g,'$1');
+    var extracted = JSON.parse(clean);
+    if (extracted.vac_liability_total_cad !== undefined) DATA.vac_liability_total_cad = extracted.vac_liability_total_cad;
+    if (extracted.vac_liability_syn_cad !== undefined) DATA.vac_liability_syn_cad = extracted.vac_liability_syn_cad;
+    if (extracted.vac_liability_nonsyn_cad !== undefined) DATA.vac_liability_nonsyn_cad = extracted.vac_liability_nonsyn_cad;
+    if (extracted.vac_avg_weeks_syn !== undefined) DATA.vac_avg_weeks_syn = extracted.vac_avg_weeks_syn;
+    if (extracted.vac_high_balance_count !== undefined) DATA.vac_high_balance_count = extracted.vac_high_balance_count;
+    if (extracted.employees && extracted.employees.length) DATA.vac_employees = extracted.employees;
+    try { localStorage.setItem('bc_vac_data', JSON.stringify({ updated: new Date().toISOString(), file: file.name, data: extracted })); } catch(ex) {}
+    hideBcOverlay(); renderVacation();
+    setStatus('\u2713 Updated from ' + file.name, 'success');
+  } catch(err) { hideBcOverlay(); setStatus('Error: ' + err.message, 'error'); }
+}
+
+async function xlsxToText(file, ext) {
+  if (ext === 'csv') {
+    return new Promise(function(res, rej) {
+      var reader = new FileReader();
+      reader.onload = function(e) { res(e.target.result); };
+      reader.onerror = rej;
+      reader.readAsText(file);
+    });
+  }
+  if (!window.XLSX) {
+    await new Promise(function(resolve, reject) {
+      var sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      sc.onload = resolve; sc.onerror = reject;
+      document.head.appendChild(sc);
+    });
+  }
+  return new Promise(function(res, rej) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var wb = XLSX.read(e.target.result, { type: 'array' });
+        var csv = wb.SheetNames.map(function(name) { return '=== Sheet: ' + name + ' ===\n' + XLSX.utils.sheet_to_csv(wb.Sheets[name]); }).join('\n\n');
+        res(csv);
+      } catch(err) { rej(err); }
+    };
+    reader.onerror = rej;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 function setUploadStatus(msg, type) {
   var el = document.getElementById('upload-status');
   if (!el) return;
