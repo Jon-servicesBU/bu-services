@@ -580,6 +580,9 @@ function renderAddOns(live) {
 }
 
 
+
+// ── V2D additions ──
+
 function _nucCommLeadHTML() {
   return '<div class="ncb-title">Nuclear Commercial Lead</div>'
     + '<div style="font-size:.75rem;color:#4A5568;line-height:1.7;">'
@@ -1152,25 +1155,6 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 .avb-export-spinner{display:none;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-
-/* ── BU Services system nav bar ── */
-.sysbar{position:sticky;top:48px;z-index:99;background:rgba(5,12,25,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 1.25rem;gap:.5rem;height:36px;backdrop-filter:blur(8px);}
-.sysbar-label{font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2);margin-right:.35rem;white-space:nowrap;font-family:"Courier New",monospace;}
-.sysbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;text-decoration:none;cursor:pointer;border:1.5px solid;transition:.18s;white-space:nowrap;font-family:inherit;background:none;}
-.sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7);}
-.sysbtn-hub:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);color:#00AEEF;box-shadow:0 0 8px rgba(0,174,239,.2);}
-.sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7);}
-.sysbtn-people:hover{background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);color:#FCD34D;box-shadow:0 0 8px rgba(201,134,10,.2);}
-.sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7);}
-.sysbtn-meetings:hover{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);color:#6EE7B7;box-shadow:0 0 8px rgba(22,163,74,.2);}
-.sysbtn-cc{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.4);}
-.sysbtn-cc:hover,.sysbtn-cc.active{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.85);}
-.sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5);}
-.sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF;}
-.sysbtn-nortech{border-color:rgba(232,64,64,.3);color:rgba(232,64,64,.7);}
-.sysbtn-nortech:hover{background:rgba(232,64,64,.15);border-color:rgba(232,64,64,.7);color:#F87171;}
-.sysbtn.current{cursor:default;pointer-events:none;}
-.sysbtn-cc.current{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js"></script>
 </head>
@@ -1197,8 +1181,13 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <a href="#reconciliation">Recon</a>
     <a href="#nuclear">Nuclear</a>
     <a href="#digest">Email Digest</a>
+    <a href="BU_Services_Management_Hub.html" target="buservices" style="flex-shrink:0;color:#00AEEF;background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;align-self:center;margin-left:.5rem">⚙ Management Hub →</a>
   </div>
-  <div class="topbar-right"></div>
+  <div class="topbar-right">
+    <div class="live-dot"></div>
+    <span class="live-label" id="live-label">Live</span>
+    <span class="update-label" id="update-label"></span>
+  </div>
 </nav>
 <div class="sysbar">
   <span class="sysbar-label">BU Services</span>
@@ -1211,15 +1200,14 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 </div>
 
 
-
-
 <!-- HERO -->
 <div class="hero" id="overview">
   <div class="hero-wrap">
     <div class="hero-eyebrow">Ekoscan Integrity Group &nbsp;·&nbsp; North America</div>
     <h1>BU Services<br><em>Command Centre</em></h1>
     <p class="hero-sub">Master Commercial Plan 2026–2030. Five growth initiatives. Live gate tracking. All documents in one place.</p>
-    </div>
+    <div style="display:inline-flex;align-items:center;gap:0.6rem;background:rgba(233,113,50,0.15);border:1px solid rgba(233,113,50,0.35);border-radius:6px;padding:0.35rem 0.9rem;margin-bottom:1rem;">
+      <div style="width:7px;height:7px;border-radius:50%;background:#F59E0B;animation:pulse 2s infinite;flex-shrink:0;"></div>    </div>
     <div class="kpi-row" id="kpi-row"></div>
   </div>
 </div>
@@ -1237,8 +1225,10 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
       <h2>Revenue Actuals</h2>
       <span class="sec-count" id="rf-count">Live actuals · Nucleom · Nortech · Intact</span>
     </div>
-
-  <div id="actuals-panel" class="actuals-panel"></div>
+    <button class="currency-toggle-btn" onclick="toggleCurrency()" title="Currently showing CAD">€ Switch to EUR</button>
+  </div>
+<div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>Nucleom</strong> revenue — BU Services CRM auto on every page load. <strong>Nortech</strong> — Nortech Ops auto-push. <strong>Intact + initiatives</strong> — paste any report via 📸 Vision-to-Data.</span></div>
+v id="actuals-panel" class="actuals-panel"></div>
   <!-- rf-entities removed — replaced by actuals-panel above -->
 
   <!-- ── Vision-to-Data Panel — replaces Power Automate ── -->
@@ -1309,9 +1299,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
   </div>
 
     
-    <button class="currency-toggle-btn" onclick="toggleCurrency()" title="Currently showing CAD">€ Switch to EUR</button>
-  </div>
-<div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text"><strong>Nucleom</strong> revenue comes from BU Services CRM automatically — Closed Won opportunities grouped by month on every page load. <strong>Nortech</strong> revenue by month — from Nortech Ops (auto-push on every invoice mark-sent/paid). <strong>Intact + Initiative actuals</strong> — paste any report via 📸 Vision-to-Data; Claude reads the company name and fills the right fields automatically.</span></div>
+
   <div class="rev-foundation" id="rf-entities"></div>
   <div class="cumulative-bar" id="cumulative-bar"></div>
 
@@ -1337,6 +1325,29 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 <div class="data-src-banner"><span class="dsb-icon">⚡</span><span class="dsb-text">Monthly figures are assembled from three sources. Nucleom Closed Won by month comes from Salesforce via the Sunday PA flow. Business Central invoiced revenue comes from the BC connector Éric builds as Task P4 — until then, Jeremy Irwin (Director of Finance, EIG NA) enters these manually on the first Monday of each month by editing actuals.json. Chargeable hours and cost-per-hour for the KPI charts also require payroll cost data that Jeremy Irwin (Director of Finance, EIG NA) provides monthly. The monthly object holds 25 fields across all 12 months of the year.</span></div>
   <div class="monthly-wrap" id="monthly-wrap"></div>
 
+  <!-- ── REVENUE CHART ── -->
+  <div class="sec-hdr">
+    <h2>Revenue Trajectory 2026–2030</h2>
+    <span class="sec-count">Base business + commercial plan</span>
+  </div>
+  <div class="rev-chart-wrap">
+    <div class="rev-chart-hdr">
+      <div>
+        <div class="rev-chart-title">BU Services Revenue — Base + Initiatives (CAD)</div>
+        <div class="rev-chart-sub">Base business shown in navy · Each initiative stacked above</div>
+      </div>
+      <div class="rev-legend" id="rev-legend"></div>
+    </div>
+    <div class="chart-bars" id="chart-bars"></div>
+  </div>
+
+  <div class="group-break">
+    <span class="group-break-dot"></span>
+    <span class="group-break-label">📋&nbsp; Operations</span>
+    <span class="group-break-line"></span>
+  </div>
+
+  <!-- ── NUCLEOM REGIONS ── -->
   <div class="sec-hdr" id="regions">
     <h2>Nucleom Revenue by Region</h2>
     <span class="sec-count" id="reg-count">2026 actuals vs. pipeline · Salesforce live</span>
@@ -1389,7 +1400,7 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
     <h2>Meeting Health</h2>
     <span class="sec-count" id="mtg-count">Open action counts by meeting series · live data from actuals.json · for meeting agendas and cadences see Management Hub</span>
   </div>
-<div class="data-src-banner"><span class="dsb-icon">📋</span><span class="dsb-text"><strong>Open action counts</strong> per meeting series come from 📸 Vision-to-Data — paste a screenshot of your SharePoint Meeting Actions list; Claude reads each series' open count and updates the cards instantly. <strong>Overdue actions</strong> are also extracted automatically. Meeting series structure (chair, cadence) is set once in CONFIG.</span></div>
+<div class="data-src-banner"><span class="dsb-icon">📋</span><span class="dsb-text">Meeting health data comes from two SharePoint Lists that Éric creates as Task P5: <strong>BU Services Meeting Log</strong> and <strong>BU Services Meeting Actions</strong>. The Sunday PA flow queries both lists, counts open and overdue actions per meeting series (Commercial, Ops, Nuclear, Gate, Finance, HR, Eurazeo), and writes those eight counts to actuals.json. Until those lists are created and the PA branch is built, this section shows zeros across all seven meeting series.</span></div>
   <div id="mtg-overdue-bar"></div>
   <div class="mtg-grid" id="mtg-grid"></div>
 
@@ -1532,12 +1543,12 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 </div>
 
 <div class="footer">
-  <div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:.35rem"><div class="live-dot"></div><span id="live-label" style="font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.4)">Live</span><span style="color:rgba(255,255,255,.2)"> · </span><span id="update-label" style="font-family:var(--mono);font-size:.68rem;color:rgba(255,255,255,.3)"></span></div>
   <p>BU Services Command Centre · Ekoscan Integrity Group · Jon Eustace, CEO North America · Confidential</p>
   <p class="config-hint">To update: edit the CONFIG block at the top of this file → save → refresh browser. No server required.</p>
 </div>
 
-<script>// ── HELPERS ──────────────────────────────────────────────────────────────────
+<script>
+// ── HELPERS ──────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const fmt = (n, dec=1) => n >= 1 ? `$${n.toFixed(dec)}M` : `$${(n*1000).toFixed(0)}K`;
 const pct = (a,t) => t > 0 ? Math.min(100, Math.round(a/t*100)) : 0;
@@ -2424,14 +2435,6 @@ function v2dApplyLive(live) {
     if (live[b.id] !== undefined) b.actual2026 = live[b.id];
     if (live[b.id+'_pipeline'] !== undefined) b.pipeline2026 = live[b.id+'_pipeline'];
   });
-
-  // Meeting actions from V2D paste
-  if (CONFIG.meetings && live) {
-    CONFIG.meetings.forEach(function(m) {
-      if (live['actions_' + m.id] !== undefined) m.actions = Number(live['actions_' + m.id]) || 0;
-    });
-    if (live.actions_overdue !== undefined) CONFIG.actions_overdue = Number(live.actions_overdue) || 0;
-  }
   if (CONFIG.regions) {
     CONFIG.regions.forEach(function(reg) {
       // Check v2d_actuals store for region data (from V2D paste or CRM inject)
@@ -2569,7 +2572,7 @@ async function v2dExtract() {
     + '    "sure_forecast_nuc": <sure forecast $M or null>,\n'
     + '    "sure_forecast_nor": <sure forecast $M or null>\n'
     + '    "region_hq": <Nucleom HQ/Quebec City closed won $M or null>,\n'    + '    "region_montreal": <Nucleom Montreal closed won $M or null>,\n'    + '    "region_central": <Nucleom Central/Ontario closed won $M or null>,\n'    + '    "region_edmonton": <Nucleom Edmonton/Western closed won $M or null>,\n'    + '    "region_vancouver": <Nucleom Vancouver closed won $M or null>,\n'    + '    "util_hq": <HQ utilisation decimal 0-1 or null>,\n'    + '    "util_montreal": <Montreal utilisation decimal 0-1 or null>,\n'    + '    "util_central": <Central utilisation decimal 0-1 or null>,\n'    + '    "util_edmonton": <Edmonton utilisation decimal 0-1 or null>,\n'    + '    "util_vancouver": <Vancouver utilisation decimal 0-1 or null>\n'    + '  },\n'
-    + '    "actions_commercial": <Commercial Weekly open action count or null>,\n'    + '    "actions_ops": <Ops Weekly open action count or null>,\n'    + '    "actions_nuclear": <Nuclear Steering open action count or null>,\n'    + '    "actions_gate": <Gate Reviews open action count or null>,\n'    + '    "actions_finance": <Financial Review open action count or null>,\n'    + '    "actions_hr": <HR meeting open action count or null>,\n'    + '    "actions_overdue": <total overdue actions across all meetings or null>\n'    + '  "monthly": <object or null — if screenshot shows monthly data: { "2026_01": {"nucleom":val,"nortech":val,"intact":val,"mining":val,...}, ... }. Keys "2026_01"–"2026_12". Values $M CAD.>,\n'
+    + '  "monthly": <object or null — if screenshot shows monthly data: { "2026_01": {"nucleom":val,"nortech":val,"intact":val,"mining":val,...}, ... }. Keys "2026_01"–"2026_12". Values $M CAD.>,\n'
     + '  "kpi": <object or null — if payroll/KPI report: { "nuc_hours":int, "nuc_rate":CAD, "nuc_util":0-1, "nuc_cost":CAD, "nuc_margin":0-1, "nor_hours":int, "nor_rate":CAD, "nor_util":0-1, "nor_cost":CAD, "nor_margin":0-1 }>,\n'
     + '  "month": "2026_MM" or null (set this if the report covers exactly one month),\n'
     + '  "notes": "<brief explanation of what you found>"\n'
@@ -3063,19 +3066,13 @@ function setMonthlyView(v) {
   renderMonthly();
 }
 
-
-function renderAddOns(liveData) {
-  renderProposals(liveData);
-  renderReconciliation(liveData);
-  renderNuclearOutages(liveData);
-}
-
 function renderAll() {
 // ── TOPBAR ───────────────────────────────────────────────────────────────────
-if ($('live-label')) $('live-label').textContent = 'Live · ' + CONFIG.version;
-if ($('update-label')) $('update-label').textContent = 'Updated ' + CONFIG.lastUpdated;
+if($('live-label')) $('live-label').textContent = 'Live · ' + CONFIG.version;
+if($('update-label')) $('update-label').textContent = 'Updated ' + CONFIG.lastUpdated;
 
 
+renderMonthly();
 
 // ── DECK PERFORMANCE REPORT ─────────────────────────────────────────────────
 function fmt(val, decimals, suffix) {
@@ -3419,9 +3416,6 @@ renderMeetings();
 renderAvb();
 renderMonthly();
 renderRegions();
-renderProposals({});
-renderReconciliation({});
-renderNuclearOutages({});
 
 // ── KPI ROW ──────────────────────────────────────────────────────────────────
 const totalActual = CONFIG.initiatives.reduce((s,i) => s+i.actual2026, 0);
@@ -3545,55 +3539,21 @@ function buildDigestHTML() {
   .footer{background:#F0F3FA;padding:14px 24px;font-size:11px;color:#8892A4;text-align:center;}
   .cta{display:inline-block;background:#161C60;color:#ffffff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:5px;text-decoration:none;margin:4px;}
 
-.nav-btn{color:var(--sky,#00AEEF);background:rgba(0,174,239,.12);border:1px solid rgba(0,174,239,.25);border-radius:4px;padding:.25rem .65rem;font-size:.68rem;font-weight:700;white-space:nowrap;text-decoration:none;flex-shrink:0;margin-left:.5rem}
-.nav-btn:hover{background:rgba(0,174,239,.22)}
-
-/* ── Revenue Actuals Panel ── */
-.actuals-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#D0DCF0;border:1px solid #D0DCF0;border-radius:12px;overflow:hidden;margin-bottom:1.5rem;box-shadow:0 4px 20px rgba(10,31,92,.10);}
-.ap-tile{background:#fff;padding:1.25rem 1.4rem 1.1rem;display:flex;flex-direction:column;position:relative;}
-.ap-tile::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;}
-.ap-tile.nuc::before{background:linear-gradient(90deg,#0A1F5C,#1A5CA8);}
-.ap-tile.nor::before{background:linear-gradient(90deg,#1A5CA8,#00AEEF);}
-.ap-tile.int::before{background:linear-gradient(90deg,#1A7A4A,#22C55E);}
-.ap-label{font-family:var(--mono,monospace);font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8899BB;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem;}
-.ap-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.ap-name{font-size:1.05rem;font-weight:800;color:#0A1F5C;line-height:1.1;margin-bottom:.9rem;letter-spacing:-.01em;}
-.ap-metrics{display:flex;flex-direction:column;}
-.ap-metric{display:flex;justify-content:space-between;align-items:baseline;padding:.38rem 0;border-bottom:1px solid #EEF2FA;}
-.ap-metric:last-child{border-bottom:none;}
-.ap-metric-lbl{font-size:.71rem;color:#7A8BB0;}
-.ap-metric-val{font-family:var(--mono,monospace);font-size:.82rem;font-weight:700;color:#0A1F5C;}
-.ap-metric-val.live{color:#1A7A4A;}
-.ap-metric-val.dim{color:#8899BB;font-weight:400;}
-.ap-metric-val.pipeline{color:#1A5CA8;}
-.ap-bar-row{margin-top:.7rem;padding-top:.7rem;border-top:1px solid #EEF2FA;}
-.ap-bar-lbl{display:flex;justify-content:space-between;font-size:.65rem;color:#8899BB;margin-bottom:.3rem;}
-.ap-bar-track{height:5px;background:#E8EDF8;border-radius:10px;overflow:hidden;}
-.ap-bar-fill{height:100%;border-radius:10px;transition:width .6s ease;}
-.ap-source{margin-top:.65rem;font-size:.6rem;color:#A0AEC0;display:flex;align-items:center;gap:.3rem;}
-.ap-src-dot{width:5px;height:5px;border-radius:50%;background:#22C55E;flex-shrink:0;}
-.ap-src-dot.manual{background:#F59E0B;}
-@media(max-width:700px){.actuals-panel{grid-template-columns:1fr;}}
-
-
-/* ── BU Services system nav bar ── */
+/* ── BU Services sysbar ── */
 .sysbar{position:sticky;top:48px;z-index:99;background:rgba(5,12,25,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 1.25rem;gap:.5rem;height:36px;backdrop-filter:blur(8px);}
 .sysbar-label{font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2);margin-right:.35rem;white-space:nowrap;font-family:"Courier New",monospace;}
 .sysbtn{display:inline-flex;align-items:center;gap:.3rem;padding:.22rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;text-decoration:none;cursor:pointer;border:1.5px solid;transition:.18s;white-space:nowrap;font-family:inherit;background:none;}
 .sysbtn-hub{border-color:rgba(0,174,239,.3);color:rgba(0,174,239,.7);}
 .sysbtn-hub:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.7);color:#00AEEF;box-shadow:0 0 8px rgba(0,174,239,.2);}
 .sysbtn-people{border-color:rgba(201,134,10,.3);color:rgba(201,134,10,.7);}
-.sysbtn-people:hover{background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);color:#FCD34D;box-shadow:0 0 8px rgba(201,134,10,.2);}
+.sysbtn-people:hover{background:rgba(201,134,10,.15);border-color:rgba(201,134,10,.7);color:#FCD34D;}
 .sysbtn-meetings{border-color:rgba(22,163,74,.3);color:rgba(22,163,74,.7);}
-.sysbtn-meetings:hover{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);color:#6EE7B7;box-shadow:0 0 8px rgba(22,163,74,.2);}
-.sysbtn-cc{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.4);}
-.sysbtn-cc:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.85);}
+.sysbtn-meetings:hover{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.7);color:#6EE7B7;}
+.sysbtn-cc.current{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);cursor:default;pointer-events:none;}
 .sysbtn-crm{background:rgba(0,174,239,.07);border-color:rgba(0,174,239,.2);color:rgba(0,174,239,.5);}
 .sysbtn-crm:hover{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.5);color:#00AEEF;}
 .sysbtn-nortech{border-color:rgba(232,64,64,.3);color:rgba(232,64,64,.7);}
 .sysbtn-nortech:hover{background:rgba(232,64,64,.15);border-color:rgba(232,64,64,.7);color:#F87171;}
-.sysbtn.current{cursor:default;pointer-events:none;}
-.sysbtn-cc.current{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);}
 </style></head>
 <body><div class="wrap">
 <div class="hdr">
@@ -3676,8 +3636,7 @@ const previewBody = digestFull
   .replace(/<body[^>]*>/,'')
   .replace(/<\/body>/,'')
   .replace(/max-width:600px;/g,'max-width:100%;');
-var cleanPreview = previewBody.replace(/<style[\s\S]*?<\/style>/gi, '');
-$('digest-preview').innerHTML = cleanPreview;
+$('digest-preview').innerHTML = previewBody;
 
 function copyDigest() {
   const full = buildDigestHTML();
@@ -3827,6 +3786,7 @@ function renderConferences(){
   renderConferenceBudgetBars();
   renderConferenceSpendProgress();
 }
+
 </script>
 </body>
 </html>
