@@ -598,8 +598,8 @@ document.addEventListener('DOMContentLoaded', function() {
     <button onclick="showView('jobs',this)" id="nav-jobs">🔧 Work Orders</button>
     <button onclick="showView('timesheets',this)" id="nav-timesheets">⏱ Timesheets</button>
     <button onclick="showView('invoices',this)" id="nav-invoices" data-admin-only>🧾 Invoices</button>
-    <button onclick="showView('rate-sheets',this)" id="nav-rates" data-admin-only>💲 Rate Sheets</button>
     <button onclick="showView('margin',this)" id="nav-margin" data-admin-only>📈 Margins</button>
+    <button onclick="showView('rate-sheets',this)" id="nav-rates" data-admin-only>💲 Rate Sheets</button>
   </div>
   <div class="unav-right">
     <span class="nav-badge" id="pending-badge" style="display:none">0 Pending</span>
@@ -667,10 +667,17 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="sec-hdr">
       <div><h2>Work Orders</h2><div class="sec-sub">Tap a work order to view details or log more work</div></div>
       <div class="sec-actions">
-        <input class="form-input" style="width:180px" placeholder="Search…" id="job-search" oninput="_jobsPage=1;renderJobs()">
+        <input class="form-input" style="width:160px" placeholder="WO # / Site / PO…" id="job-search" oninput="_jobsPage=1;renderJobs()">
+        <input class="form-input" style="width:150px" placeholder="Customer…" id="job-client-search" oninput="_jobsPage=1;renderJobs()">
         <input type="date" class="form-input" style="width:140px" id="job-date-from" title="From date" onchange="_jobsPage=1;renderJobs()">
         <input type="date" class="form-input" style="width:140px" id="job-date-to" title="To date" onchange="_jobsPage=1;renderJobs()">
-        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('job-date-from').value='';document.getElementById('job-date-to').value='';_jobsPage=1;renderJobs()">Clear</button>
+        <select class="form-select" style="width:110px;font-size:.72rem" id="job-sort-order" onchange="_jobsPage=1;renderJobs()">
+          <option value="date_desc">Newest</option>
+          <option value="date_asc">Oldest</option>
+          <option value="client_asc">Customer A–Z</option>
+          <option value="client_desc">Customer Z–A</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('job-search').value='';document.getElementById('job-client-search').value='';document.getElementById('job-date-from').value='';document.getElementById('job-date-to').value='';_jobsPage=1;renderJobs()">Clear</button>
         <select class="form-select" style="width:120px;font-size:.72rem" id="job-filter-status" onchange="renderJobs()">
           <option value="">All</option>
           <option value="draft">Draft</option>
@@ -909,7 +916,8 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="sec-hdr">
       <div><h2>Invoices</h2><div class="sec-sub">Generated from approved work orders</div></div>
       <div class="sec-actions">
-        <input class="form-input" style="width:150px" placeholder="Search…" id="inv-search" oninput="renderInvoices()">
+        <input class="form-input" style="width:140px" placeholder="Invoice # …" id="inv-search" oninput="renderInvoices()">
+        <input class="form-input" style="width:150px" placeholder="Customer…" id="inv-client-search" oninput="renderInvoices()">
         <select class="form-select" style="width:130px;font-size:.72rem" id="inv-filter-status" onchange="renderInvoices()">
           <option value="">All Status</option>
           <option value="draft">Draft</option>
@@ -975,7 +983,8 @@ document.addEventListener('DOMContentLoaded', function() {
           <option value="draft">Draft</option>
           <option value="submitted">Submitted</option>
         </select>
-        <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="_tsPage=1;renderTimesheets()">
+        <input class="form-input" style="width:130px" placeholder="WO #…" id="ts-search-wo" oninput="_tsPage=1;renderTimesheets()">
+        <input class="form-input" style="width:150px" placeholder="Employee name…" id="ts-search-emp" oninput="_tsPage=1;renderTimesheets()">
         <input type="date" class="form-input" style="width:140px" id="ts-date-from" title="From date" onchange="_tsPage=1;renderTimesheets()">
         <input type="date" class="form-input" style="width:140px" id="ts-date-to" title="To date" onchange="_tsPage=1;renderTimesheets()">
         <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ts-date-from').value='';document.getElementById('ts-date-to').value='';_tsPage=1;renderTimesheets()">Clear</button>
@@ -3124,8 +3133,10 @@ function renderTSPager(page, totalPages, totalItems) {
 }
 
 function renderJobs() {
-  var q      = (document.getElementById('job-search')        || {}).value || '';
-  var filter = (document.getElementById('job-filter-status') || {}).value || '';
+  var q          = (document.getElementById('job-search')        || {}).value || '';
+  var qClient    = (document.getElementById('job-client-search') || {}).value || '';
+  var sortOrder  = (document.getElementById('job-sort-order')    || {}).value || 'date_desc';
+  var filter     = (document.getElementById('job-filter-status') || {}).value || '';
 
   var validStatuses = ['draft','submitted','approved','invoiced','paid'];
   var _viewJobs = isAdmin() ? _jobs : _jobs.filter(function(j){
@@ -3144,12 +3155,18 @@ function renderJobs() {
     if (filter && j.status !== filter) return false;
     if (dateFrom && j.date && j.date < dateFrom) return false;
     if (dateTo   && j.date && j.date > dateTo)   return false;
+    if (qClient && !(j.client||'').toLowerCase().includes(qClient.toLowerCase())) return false;
     if (!q) return true;
-    return ((j.client||'')+(j.site||'')+(j.woNum||j.number||'')+(j.po||'')+(j.jobNum||'')).toLowerCase().includes(q.toLowerCase());
+    return ((j.site||'')+(j.woNum||j.number||'')+(j.po||'')+(j.jobNum||'')).toLowerCase().includes(q.toLowerCase());
   });
 
-  // Sort newest first
-  filtered.sort(function(a,b){ return (b.date||b.created||'').localeCompare(a.date||a.created||''); });
+  // Sort by selected order
+  filtered.sort(function(a,b){
+    if (sortOrder==='client_asc')  return (a.client||'').localeCompare(b.client||'');
+    if (sortOrder==='client_desc') return (b.client||'').localeCompare(a.client||'');
+    if (sortOrder==='date_asc')    return (a.date||a.created||'').localeCompare(b.date||b.created||'');
+    return (b.date||b.created||'').localeCompare(a.date||a.created||''); // date_desc default
+  });
 
   var totalItems = filtered.length;
   var totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
@@ -3876,9 +3893,11 @@ async function saveInvoice(status){
 function renderInvoices(){
   var filter   = (document.getElementById('inv-filter-status')||{}).value||'';
   var q        = (document.getElementById('inv-search')||{}).value||'';
+  var qClient  = (document.getElementById('inv-client-search')||{}).value||'';
   var filtered = _invoices.filter(function(i){
     if (filter && i.status !== filter) return false;
-    if (q && !((i.invNum||'')+(i.client||'')).toLowerCase().includes(q.toLowerCase())) return false;
+    if (q && !(i.invNum||'').toLowerCase().includes(q.toLowerCase())) return false;
+    if (qClient && !(i.client||'').toLowerCase().includes(qClient.toLowerCase())) return false;
     return true;
   });
   var tbody = document.getElementById('inv-tbody');
@@ -7186,15 +7205,16 @@ function renderWeeklySummary() {
 }
 
 function filterTSByTech(techName) {
-  // Switch to timesheets tab and filter by tech name
-  var searchEl = document.getElementById('ts-search');
-  if (searchEl) { searchEl.value = techName; }
+  var empEl = document.getElementById('ts-search-emp');
+  if (empEl) { empEl.value = techName; }
   showView('timesheets', document.getElementById('nav-timesheets'));
   renderTimesheets();
 }
 
 function renderTimesheets() {
-  var q      = (document.getElementById('ts-search')        || {}).value || '';
+  var qWO    = (document.getElementById('ts-search-wo')  || {}).value || '';
+  var qEmp   = (document.getElementById('ts-search-emp') || {}).value || '';
+  var q      = qWO || qEmp; // used for pending conf cards fallback
   var filter = (document.getElementById('ts-filter-status') || {}).value || '';
   var viewer = CURRENT_VIEWER;
 
@@ -7207,10 +7227,8 @@ function renderTimesheets() {
     if (filter && ts.status !== filter) return false;
     if (tsDateFrom && ts.date && ts.date < tsDateFrom) return false;
     if (tsDateTo   && ts.date && ts.date > tsDateTo)   return false;
-    if (q) {
-      var text = (ts.woNum||'') + (ts.client||'') + (ts.site||'');
-      if (!text.toLowerCase().includes(q.toLowerCase())) return false;
-    }
+    if (qWO  && !(ts.woNum||'').toLowerCase().includes(qWO.toLowerCase())) return false;
+    if (qEmp && !(ts.technician||'').toLowerCase().includes(qEmp.toLowerCase())) return false;
     if (!isAdmin() && myName) {
       var tsTech = (ts.technician || '').trim();
       if (!tsTech) return false;  // no owner set — admin only
