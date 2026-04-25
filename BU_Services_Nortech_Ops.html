@@ -1256,14 +1256,15 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('inv-view-modal')">Close</button>
       <div style="flex:1"></div>
-      <!-- Print / PDF options -->
+      <!-- Print / PDF -->
       <button class="btn btn-secondary btn-sm" onclick="exportWO('pdf', _currentInvWoId())">🖨 WO</button>
-      <button class="btn btn-secondary btn-sm" id="inv-print-ts-btn"  onclick="printInvTS()"      style="display:none">🖨 TS</button>
+      <button class="btn btn-secondary btn-sm" id="inv-print-ts-btn" onclick="printInvTS()" style="display:none">🖨 TS</button>
       <button class="btn btn-secondary btn-sm" onclick="printInvoice()">🖨 Invoice</button>
       <button class="btn btn-secondary btn-sm" onclick="printInvAll()">🖨 All</button>
       <!-- Status actions -->
-      <button class="btn btn-success"   id="inv-mark-paid-btn"    onclick="markInvoicePaid()"                       style="display:none">✓ Mark Paid</button>
-      <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)"    style="display:none">↩ Unpay</button>
+      <button class="btn btn-secondary" id="inv-mark-sent-btn"    onclick="markInvoiceSent()"                    style="display:none">Mark Sent</button>
+      <button class="btn btn-success"   id="inv-mark-paid-btn"    onclick="markInvoicePaid()"                    style="display:none">✓ Mark Paid</button>
+      <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)" style="display:none">↩ Unpay</button>
     </div>
   </div>
 </div>
@@ -3957,9 +3958,10 @@ function viewInvoice(id) {
 
   document.getElementById('inv-view-body').innerHTML = html;
 
-  // Button visibility — Mark Paid (sent), Unpay (paid), TS print if TS exists
+  // Button visibility
   var st = inv.status;
   var setBtn = function(id, show) { var el = document.getElementById(id); if (el) el.style.display = show ? 'inline-flex' : 'none'; };
+  setBtn('inv-mark-sent-btn',    st === 'draft');
   setBtn('inv-mark-paid-btn',    st === 'sent');
   setBtn('inv-reverse-paid-btn', st === 'paid');
   // Show TS print button only if a linked timesheet exists
