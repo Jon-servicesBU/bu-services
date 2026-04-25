@@ -508,13 +508,12 @@ document.addEventListener('DOMContentLoaded', function() {
     <span class="unav-brand-page">Field Operations</span>
   </div>
   <div class="unav-links">
-    <button class="active" onclick="showView('dashboard',this)" id="nav-dashboard">📊 Dashboard</button>
+    <button onclick="showView('dashboard',this)" id="nav-dashboard" data-admin-only>📊 Dashboard</button>
     <button onclick="showView('jobs',this)" id="nav-jobs">🔧 Work Orders</button>
-    
+    <button onclick="showView('timesheets',this)" id="nav-timesheets">⏱ Timesheets</button>
     <button onclick="showView('invoices',this)" id="nav-invoices" data-admin-only>🧾 Invoices</button>
     <button onclick="showView('rate-sheets',this)" id="nav-rates" data-admin-only>💲 Rate Sheets</button>
-  <button onclick="showView('timesheets',this)" id="nav-timesheets">⏱ Timesheets</button>
-  <button onclick="showView('margin',this)" id="nav-margin" data-admin-only>📈 Margins</button>
+    <button onclick="showView('margin',this)" id="nav-margin" data-admin-only>📈 Margins</button>
   </div>
   <div class="unav-right">
     <span class="nav-badge" id="pending-badge" style="display:none">0 Pending</span>
@@ -1875,23 +1874,22 @@ function fmtMoneyShort(n) { return isAdmin() ? _fmtMoneyShortImpl(n) : '—'; }
 function applyAdminVisibility() {
   var admin = isAdmin();
   if (!admin) {
-    // Tech view — hide financial & admin tabs
     document.body.classList.add('tech-view');
-    ['nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
+    // Hide dashboard and all admin-only tabs
+    ['nav-dashboard','nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
     var mlSec = document.getElementById('manual-lines-section');
     if (mlSec) mlSec.style.display = 'none';
-    // If currently on a hidden view, redirect to dashboard
-    var hiddenViews = ['invoices','rate-sheets','margin'];
+    // Land techs on Work Orders — never dashboard
+    var hiddenViews = ['dashboard','invoices','rate-sheets','margin'];
     if (hiddenViews.indexOf(_currentView) > -1) {
-      showView('dashboard', document.getElementById('nav-dashboard'));
+      showView('jobs', document.getElementById('nav-jobs'));
     }
   } else {
-    // Admin — show all tabs
     document.body.classList.remove('tech-view');
-    ['nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
+    ['nav-dashboard','nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.style.display = '';
     });
@@ -2009,8 +2007,9 @@ function openWOModal(editId) {
   // Show export buttons only when editing existing WO
   var expPdf  = document.getElementById('wo-export-pdf-btn');
   var expWord = document.getElementById('wo-export-word-btn');
-  if (expPdf)  expPdf.style.display  = editId ? 'inline-flex' : 'none';
-  if (expWord) expWord.style.display = editId ? 'inline-flex' : 'none';
+  var showExportWO = editId && isAdmin();
+  if (expPdf)  expPdf.style.display  = showExportWO ? 'inline-flex' : 'none';
+  if (expWord) expWord.style.display = showExportWO ? 'inline-flex' : 'none';
 
   switchCSTab('labour', document.querySelector('#job-modal .cs-tab'));
 
@@ -2046,7 +2045,10 @@ function openWOModal(editId) {
         var banner = document.createElement('div');
         banner.id = 'wo-locked-banner';
         banner.style.cssText = 'background:rgba(232,64,64,.1);border:1px solid rgba(232,64,64,.3);border-left:4px solid #E84040;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCA5A5;margin-bottom:.75rem;font-weight:600';
-        banner.textContent = '🔒 This work order has been submitted. Contact admin to make changes.';
+        banner.innerHTML = '🔒 This work order has been submitted. Contact admin to make changes.'
+          + (_techFlowWoId
+            ? ' <button onclick="techContinueToTS()" style="margin-left:.75rem;background:var(--nor-accent);border:none;border-radius:5px;color:#fff;font-size:.72rem;font-weight:700;padding:.25rem .7rem;cursor:pointer">Continue to Timesheet →</button>'
+            : '');
         var body = document.querySelector('#job-modal .modal-body');
         if (body) body.insertBefore(banner, body.firstChild);
       }
@@ -2524,6 +2526,17 @@ function renderJobs() {
     var techs    = [...new Set((j.labourRows||[]).map(function(r){ return r.technician; }).filter(Boolean))];
     var province = (CANADA_TAX_RATES[j.province]||{}).name || j.province || '';
 
+    // ── Simplified tech card (submitted/approved/invoiced/paid) ──────────────
+    if (!isAdmin() && j.status !== 'draft') {
+      return '<div class="card" style="padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem" id="job-card-'+j.id+'">'
+        + '<div>'
+          + '<div style="font-family:var(--mono);font-size:.82rem;font-weight:800;color:var(--nor-accent)">' + woNum + '</div>'
+          + '<div style="font-size:.72rem;color:var(--muted);margin-top:.1rem">' + (j.date ? fmtDate(j.date) + ' · ' : '') + chipHtml(j.status) + '</div>'
+        + '</div>'
+        + '<button class="btn btn-ghost btn-sm" data-open-wo="'+j.id+'" style="flex-shrink:0">🔒 View</button>'
+      + '</div>';
+    }
+
     return '<div class="card" style="padding:0;overflow:hidden" id="job-card-'+j.id+'">'
       // Header — clickable to expand
       +'<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:.85rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer" data-toggle-job="'+j.id+'">'
@@ -2601,9 +2614,9 @@ function renderJobs() {
       +'</div>'
       // Action buttons
       +'<div style="padding:.55rem 1.1rem;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">'
-        +'<button class="btn btn-primary btn-sm" data-open-wo="'+j.id+'">✏ Edit / Add Work</button>'
-        +'<button class="btn btn-secondary btn-sm" data-export-wo="'+j.id+'">⬇ WO</button>'
-        +'<button class="btn btn-secondary btn-sm" data-export-pkg="'+j.id+'">⬇ WO + TS</button>'
+        +(isAdmin()?'<button class="btn btn-primary btn-sm" data-open-wo="'+j.id+'">✏ Edit / Add Work</button>':'')
+        +(isAdmin()?'<button class="btn btn-secondary btn-sm" data-export-wo="'+j.id+'">⬇ WO</button>':'')
+        +(isAdmin()?'<button class="btn btn-secondary btn-sm" data-export-pkg="'+j.id+'">⬇ WO + TS</button>':'')
         +(j.status==='submitted'&&isAdmin()?'<button class="btn btn-success btn-sm" data-approve-wo="'+j.id+'">✓ Approve</button>':'')
         +(j.status==='approved'&&isAdmin()?'<button class="btn btn-secondary btn-sm" data-invoice-wo="'+j.id+'">🧾 Invoice</button>':'')
         +(j.status==='approved'&&isAdmin()?'<button class="btn btn-ghost btn-sm" data-reverse-cs-approved="'+j.id+'">↩ Unapprove</button>':'')
@@ -4014,7 +4027,16 @@ function openTSModalTechFlow(tsId) {
 }
 
 async function techBackToWO() {
-  if (!confirm('Go back to the work order?\n\nYour timesheet will not be submitted — you can return to it from the Timesheets tab.')) return;
+  if (!confirm('Go back to the work order?\n\nYour timesheet hours will be saved as a draft.')) return;
+  // Save TS draft so hours are preserved
+  if (_editTSId) {
+    var rows = collectTSRows();
+    if (rows.length) {
+      var draft = buildTSData('draft');
+      saveTimesheetToStorage(Object.assign({id:_editTSId}, draft));
+      _timesheets = _timesheets.map(function(t){ return t.id === _editTSId ? Object.assign({id:_editTSId}, draft) : t; });
+    }
+  }
   closeModal('ts-modal');
   await new Promise(function(r){ setTimeout(r, 150); });
   if (_techFlowWoId) {
@@ -4048,6 +4070,14 @@ async function techSubmitBoth() {
   updatePendingBadge();
   _techFlowWoId = null;
   toast('Work order and timesheet submitted — pending admin approval ✓', 'success');
+}
+
+function techContinueToTS() {
+  closeModal('job-modal');
+  setTimeout(function() {
+    var ts = _timesheets.find(function(t){ return t.woId === _techFlowWoId; });
+    if (ts) { _editTSId = ts.id; openTSModalTechFlow(ts.id); }
+  }, 150);
 }
 
 // ── saveWOAndTimesheet kept for admin use ─────────────────────────────────────
@@ -6016,7 +6046,7 @@ function openTSModal(tsId) {
   var submitted = ts.status === 'submitted';
 
   // Button visibility
-  var showExport     = !!tsId;
+  var showExport     = !!tsId && isAdmin();
   var showBack       = submitted && isAdmin();
   var showAdminSave  = submitted && isAdmin();   // admin can save edits to submitted TS
   var showSubmit     = !submitted;
@@ -6318,9 +6348,17 @@ function getISOWeek(dateStr) {
 function buildWeeklySummary() {
   // Group all TS rows by tech + ISO week
   var summary = {}; // { 'techName|YYYY-Www': { tech, week, weekStart, reg, ot, night, sheets:[] } }
+  var myName = !isAdmin() ? ((VIEWER_PEOPLE||[]).find(function(p){ return p.id===CURRENT_VIEWER; })||{}).name || '' : '';
   _timesheets.forEach(function(ts) {
     var tech = ts.technician || '(unknown)';
     (ts.rows || []).forEach(function(r) {
+      // Techs only see their own rows
+      if (!isAdmin() && myName) {
+        var techLower = (r.technician||ts.technician||'').toLowerCase();
+        var fn = myName.split(' ')[0].toLowerCase();
+        var ln = myName.split(' ').pop().toLowerCase();
+        if (!techLower.includes(fn) && !techLower.includes(ln)) return;
+      }
       var rowDate = r.date || ts.date || today();
       var wk = getISOWeek(rowDate);
       var ws = getWeekStart(rowDate);
@@ -6398,9 +6436,7 @@ function renderWeeklySummary() {
               + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#9B5DE5">' + (r.night || '—') + '</td>'
               + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);font-weight:700;color:var(--nor-accent)">' + total + '</td>'
               + '<td style="padding:.3rem .5rem;font-size:.68rem;color:var(--muted)">' + r.wos.join(', ') + '</td>'
-              + '<td style="padding:.3rem .5rem;text-align:right">'
-                + '<button class="btn btn-ghost btn-sm" data-filter-tech="' + encodeURIComponent(r.tech) + '" style="font-size:.65rem;padding:.15rem .4rem">View Sheets</button>'
-              + '</td>'
+              + '<td style="padding:.3rem .5rem;"></td>'
             + '</tr>';
           }).join('')
         + '</tbody>'
@@ -6423,12 +6459,22 @@ function renderTimesheets() {
   var viewer = CURRENT_VIEWER;
 
   // Filter: admins see all, techs see only their own
+  var myName = !isAdmin() ? ((VIEWER_PEOPLE||[]).find(function(p){ return p.id===CURRENT_VIEWER; })||{}).name || '' : '';
+
   var list = _timesheets.filter(function(ts) {
-    // Timesheets are localStorage — show all on this device
     if (filter && ts.status !== filter) return false;
     if (q) {
       var text = (ts.woNum||'') + (ts.client||'') + (ts.site||'');
       if (!text.toLowerCase().includes(q.toLowerCase())) return false;
+    }
+    // Techs see only their own timesheets
+    if (!isAdmin() && myName) {
+      var techField = (ts.technician || '').toLowerCase();
+      var rowTechs  = (ts.rows||[]).map(function(r){ return (r.technician||'').toLowerCase(); }).join(' ');
+      var nameFirst = myName.split(' ')[0].toLowerCase();
+      var nameLast  = myName.split(' ').pop().toLowerCase();
+      if (!techField.includes(nameFirst) && !techField.includes(nameLast) &&
+          !rowTechs.includes(nameFirst)  && !rowTechs.includes(nameLast)) return false;
     }
     return true;
   });
@@ -6472,11 +6518,14 @@ function renderTimesheets() {
         + '</div>'
       + '</div>'
       + '<div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">'
-        + '<button class="btn btn-primary btn-sm" data-open-ts="' + ts.id + '">✏ Edit / View</button>'
-        + '<button class="btn btn-secondary btn-sm" data-export-ts="' + ts.id + '">⬇ TS</button>'
-        + (ts.woId ? '<button class="btn btn-secondary btn-sm" data-export-pkg="' + ts.woId + '">⬇ WO + TS</button>' : '')
-        + (ts.woId ? '<button class="btn btn-ghost btn-sm" data-open-wo="' + ts.woId + '">🔧 View WO ' + (ts.woNum||'') + '</button>' : '')
-        + (ts.status === 'submitted' && isAdmin() ? '<button class="btn btn-ghost btn-sm" data-revert-ts="' + ts.id + '">↩ Back to Draft</button>' : '')
+        + (isAdmin()
+          ? '<button class="btn btn-primary btn-sm" data-open-ts="' + ts.id + '">✏ Edit / View</button>'
+            + '<button class="btn btn-secondary btn-sm" data-export-ts="' + ts.id + '">⬇ TS</button>'
+            + (ts.woId ? '<button class="btn btn-secondary btn-sm" data-export-pkg="' + ts.woId + '">⬇ WO + TS</button>' : '')
+            + (ts.woId ? '<button class="btn btn-ghost btn-sm" data-open-wo="' + ts.woId + '">🔧 View WO ' + (ts.woNum||'') + '</button>' : '')
+            + (ts.status === 'submitted' ? '<button class="btn btn-ghost btn-sm" data-revert-ts="' + ts.id + '">↩ Back to Draft</button>' : '')
+          : '<button class="btn btn-ghost btn-sm" data-open-ts="' + ts.id + '">🔒 View</button>'
+        )
       + '</div>'
       // ── Collapsible detail panel
       + '<div style="border-top:1px solid var(--border);margin-top:.5rem;padding-top:.5rem">'
