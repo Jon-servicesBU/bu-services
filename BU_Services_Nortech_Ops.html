@@ -997,11 +997,11 @@ document.addEventListener('DOMContentLoaded', function() {
         <input type="date" class="form-input" style="width:140px" id="ts-date-from" title="From date" onchange="_tsPage=1;renderTimesheets()">
         <input type="date" class="form-input" style="width:140px" id="ts-date-to" title="To date" onchange="_tsPage=1;renderTimesheets()">
         <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ts-date-from').value='';document.getElementById('ts-date-to').value='';_tsPage=1;renderTimesheets()">Clear</button>
-        <button class="btn btn-secondary" onclick="exportPayroll()">⬇ Payroll Export</button>
+        <button class="btn btn-secondary" data-admin-only onclick="exportPayroll()">⬇ Payroll Export</button>
       </div>
     </div>
-    <!-- Weekly Hours Summary -->
-        <div style="margin-bottom:1rem">
+    <!-- Weekly Hours Summary — admin only -->
+        <div style="margin-bottom:1rem" data-admin-only>
           <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
             <button id="ts-weekly-toggle" onclick="var p=document.getElementById('ts-weekly-panel');p.style.display=p.style.display==='none'?'block':'none';renderWeeklySummary()"
               style="background:rgba(0,174,239,.1);border:1px solid rgba(0,174,239,.25);color:var(--sky);border-radius:6px;padding:.45rem .9rem;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.5rem">
@@ -1334,7 +1334,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="modal-close" onclick="closeModal('import-rate-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">
+      <p id="import-rate-hint" style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">
         Upload a Word (.docx) or PDF rate sheet. Claude will read it and extract labour categories, hourly rates, and equipment items automatically.
       </p>
 
@@ -2109,20 +2109,45 @@ function showImportPreview(data) {
         + data.labour.map(function(l) {
           return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
             + '<span style="font-weight:600">' + l.name + '</span>'
-            + '<span style="font-family:var(--mono);color:var(--muted)">ST:' + fmtMoney(l.stRate) + ' OT:' + fmtMoney(l.otRate) + ' DT:' + fmtMoney(l.dtRate) + '</span>'
+            + '<span style="font-family:var(--mono);color:var(--muted)">ST:' + _fmtMoneyImpl(l.stRate) + ' OT:' + _fmtMoneyImpl(l.otRate) + ' DT:' + _fmtMoneyImpl(l.dtRate) + '</span>'
           + '</div>';
         }).join('')
-      : '<div style="color:var(--muted);font-size:.75rem">No labour rates found</div>');
+      : (data.piecework && data.piecework.length
+          ? '<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Piecework (' + data.piecework.length + ' items)</div>'
+            + data.piecework.slice(0,8).map(function(p){
+                return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
+                  + '<span style="font-weight:600">' + (p.size||'') + ' — ' + (p.type||'') + '</span>'
+                  + '<span style="font-family:var(--mono);color:var(--muted)">' + _fmtMoneyImpl(p.rate) + (p.unit ? ' ' + p.unit : '') + '</span>'
+                + '</div>';
+              }).join('')
+            + (data.piecework.length > 8 ? '<div style="font-size:.65rem;color:var(--muted)">+' + (data.piecework.length-8) + ' more items</div>' : '')
+          : '<div style="color:var(--muted);font-size:.75rem">No rates found</div>'));
   }
   var eqEl = document.getElementById('import-equipment-preview');
-  if (eqEl && data.equipment && data.equipment.length) {
-    eqEl.innerHTML = '<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Equipment (' + data.equipment.length + ' items)</div>'
-      + data.equipment.map(function(e) {
-        return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
-          + '<span>' + e.name + '</span>'
-          + '<span style="font-family:var(--mono);color:var(--muted)">' + fmtMoney(e.rate) + '/' + e.unit + '</span>'
-        + '</div>';
-      }).join('');
+  if (eqEl) {
+    var sections = [];
+    if (data.equipment && data.equipment.length) {
+      sections.push('<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.3rem">Equipment (' + data.equipment.length + ' items)</div>'
+        + data.equipment.map(function(e) {
+          return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
+            + '<span>' + e.name + '</span>'
+            + '<span style="font-family:var(--mono);color:var(--muted)">' + _fmtMoneyImpl(e.rate) + '/' + (e.unit||'hr') + '</span>'
+          + '</div>';
+        }).join(''));
+    }
+    if (data.consumables && data.consumables.length) {
+      sections.push('<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin:.4rem 0 .3rem">Consumables (' + data.consumables.length + ' items)</div>'
+        + data.consumables.map(function(c) {
+          return '<div style="display:flex;justify-content:space-between;padding:.3rem .6rem;background:var(--surface2);border-radius:4px;margin-bottom:.2rem;font-size:.75rem">'
+            + '<span>' + c.name + '</span>'
+            + '<span style="font-family:var(--mono);color:var(--muted)">' + _fmtMoneyImpl(c.rate) + '/' + (c.unit||'ea') + '</span>'
+          + '</div>';
+        }).join(''));
+    }
+    if (data.filmPerWeld && data.filmPerWeld.length) {
+      sections.push('<div style="font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin:.4rem 0 .3rem">Film Per Weld (' + data.filmPerWeld.length + ' sizes)</div>');
+    }
+    eqEl.innerHTML = sections.join('');
   }
   document.getElementById('import-preview').style.display = 'block';
 }
@@ -7215,13 +7240,19 @@ async function createTimesheetFromWO(wo) {
 
   // Group rows by canonical tech name
   var byTech = {};
-  var hasAnyTech = labourRows.some(function(r){ return r.technician && r.technician.trim(); });
 
   labourRows.forEach(function(r) {
-    // If no technician on row: fall back to current logged-in tech (handles imported WOs)
-    var rawName = (r.technician && r.technician.trim()) ? r.technician : currentTechName;
-    var name = _canonical(rawName);
-    if (!name) return; // still no name — skip
+    var rawName = (r.technician && r.technician.trim()) ? r.technician : '';
+    var name = rawName ? _canonical(rawName) : '';
+
+    // If no name resolved, or it resolved to something that doesn't match any
+    // VIEWER_PEOPLE entry (e.g. a company name from the PDF), fall back to the
+    // logged-in tech so we never produce a phantom TS for an unknown person
+    if (!name || !(VIEWER_PEOPLE||[]).find(function(p){ return p.name === name; })) {
+      name = currentTechName;
+    }
+    if (!name) return; // no tech at all — skip
+
     if (!byTech[name]) byTech[name] = [];
     byTech[name].push({
       date:      r.date      || wo.date || today(),
@@ -7240,6 +7271,9 @@ async function createTimesheetFromWO(wo) {
   Object.keys(byTech).forEach(function(techName) {
     // Skip if TS already exists for this tech+WO
     if (_timesheets.find(function(t){ return t.woId === wo.id && t.technician === techName; })) return;
+    // Skip if techName doesn't match any known employee (prevents phantom TSes)
+    var knownPerson = (VIEWER_PEOPLE||[]).find(function(p){ return p.name === techName; });
+    if (!knownPerson) return;
 
     var ts = {
       id:           uid(),
