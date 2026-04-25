@@ -8408,8 +8408,8 @@ function exportWeeklySummary() {
     var weeks = {};
     rows.forEach(function(r){ if(!weeks[r.week]) weeks[r.week]={week:r.week,weekStart:r.weekStart,rows:[]}; weeks[r.week].rows.push(r); });
 
-    
     function fmt(n){ return n || 0; }
+    function pctColor(n){ return n>=80?'#22C55E':n>=60?'#F59E0B':'#EF4444'; }
 
     var tableRows = Object.values(weeks).map(function(wk){
       var weekEnd = new Date(wk.weekStart+'T00:00:00'); weekEnd.setDate(weekEnd.getDate()+6);
