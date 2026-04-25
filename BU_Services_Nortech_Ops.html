@@ -1290,8 +1290,11 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('inv-modal')">Cancel</button>
+      <button class="btn btn-ghost" id="inv-import-pdf-btn" onclick="triggerInvoiceImport()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">⬆ Import from PDF</button>
+      <input type="file" id="inv-import-file" accept=".pdf,.PDF" style="display:none" onchange="handleInvoiceImportFile(this)">
+      <div style="flex:1"></div>
       <button class="btn btn-secondary" onclick="saveInvoice('draft')">Save Draft</button>
-      <button class="btn btn-primary" onclick="saveInvoice('sent')">Generate & Mark Sent</button>
+      <button class="btn btn-primary" onclick="saveInvoice('sent')">Generate &amp; Mark Sent</button>
     </div>
   </div>
 </div>
@@ -2362,25 +2365,27 @@ async function handleWOImportFile(input) {
 
     if (btn) btn.textContent = '⏳ Extracting data…';
 
-    // Send to Claude API with the WO field schema
+    // Send to Claude API (uses same proxy as rate sheet import)
+    if (btn) btn.textContent = '\u23F3 Extracting data\u2026';
+    var apiKey = getApiKey ? getApiKey() : null;
+    if (!apiKey) { throw new Error('Claude API key not available. Make sure you are logged in to Claude.ai.'); }
+
     var resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 2000,
         messages: [{
           role: 'user',
           content: [
-            {
-              type: 'document',
-              source: { type: 'base64', media_type: 'application/pdf', data: base64 }
-            },
-            {
-              type: 'text',
-              text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n\n' +
-                '{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\n\nReturn ONLY the JSON, no explanation.'
-            }
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+            { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nReturn ONLY the JSON, no explanation.' }
           ]
         }]
       })
@@ -2388,8 +2393,7 @@ async function handleWOImportFile(input) {
 
     var data = await resp.json();
     var text = data.content && data.content[0] ? data.content[0].text : '';
-    // Strip markdown code fences if present
-    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    text = text.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
     var wo = JSON.parse(text);
 
     // Populate all WO modal fields
@@ -3984,31 +3988,107 @@ async function saveRateSheet(){
 }
 
 function renderRateSheets(){
-  var grid=document.getElementById('rate-sheets-grid');
-  var empty=document.getElementById('rates-empty');
-  if(!grid)return;
-  if(!_rateSheets.length){grid.innerHTML='';if(empty)empty.style.display='block';return;}
-  if(empty)empty.style.display='none';
-  grid.innerHTML=_rateSheets.map(function(r){
-    var labourRows=(r.labour||[]).map(function(l){
-      return '<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:.2rem 0;border-bottom:1px solid var(--border)">'
-        +'<span>'+l.name+'</span>'
-        +'<span style="font-family:var(--mono)">'+fmtMoney(l.stRate)+'/hr</span>'
+  var qClient    = ((document.getElementById('rate-search-client')||{}).value||'').toLowerCase();
+  var typeFilter = (document.getElementById('rate-filter-type')||{}).value||'';
+  var container  = document.getElementById('rate-sheets-list');
+  var emptyEl    = document.getElementById('rates-empty');
+  if (!container) return;
+
+  var filtered = _rateSheets.filter(function(r){
+    if (typeFilter && (r.type||'tm') !== typeFilter) return false;
+    if (qClient && !(r.customer||'Standard').toLowerCase().includes(qClient) && !(r.name||'').toLowerCase().includes(qClient)) return false;
+    return true;
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // Group by customer
+  var grouped = {};
+  filtered.forEach(function(r){
+    var key = r.customer || 'Standard';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(r);
+  });
+
+  var customerOrder = Object.keys(grouped).sort(function(a,b){
+    if (a==='Standard') return 1; if (b==='Standard') return -1;
+    return a.localeCompare(b);
+  });
+
+  container.innerHTML = customerOrder.map(function(customer){
+    var sheets  = grouped[customer];
+    var groupId = 'rsgroup-' + customer.replace(/[^a-z0-9]/gi,'_');
+
+    var rows = sheets.map(function(r){
+      var badge = r.type === 'piecework'
+        ? '<span style="background:rgba(155,93,229,.15);color:#9B5DE5;border:1px solid rgba(155,93,229,.3);border-radius:999px;font-size:.6rem;font-weight:700;padding:.1rem .45rem;margin-left:.4rem">Piece Work</span>'
+        : '<span style="background:rgba(0,174,239,.12);color:var(--sky);border:1px solid rgba(0,174,239,.25);border-radius:999px;font-size:.6rem;font-weight:700;padding:.1rem .45rem;margin-left:.4rem">T&M</span>';
+
+      var items  = r.piecework || [];
+      var labour = r.labour   || [];
+      var sheetId = 'rsdetail-' + r.id;
+
+      var detail = r.type === 'piecework'
+        ? (function(){
+            var types = [...new Set(items.map(function(i){ return i.type; }))];
+            return '<div style="margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border)">'
+              + '<div style="font-size:.62rem;color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:1.5px">'+items.length+' items · '+types.length+' types</div>'
+              + types.slice(0,5).map(function(t){
+                  var its=items.filter(function(i){return i.type===t;});
+                  var mn=Math.min.apply(null,its.map(function(i){return i.rate;}));
+                  var mx=Math.max.apply(null,its.map(function(i){return i.rate;}));
+                  return '<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.04)">'
+                    +'<span>'+t+'</span><span style="font-family:var(--mono);color:var(--muted)">'+(mn===mx?fmtMoney(mn):fmtMoney(mn)+' – '+fmtMoney(mx))+'</span></div>';
+                }).join('')
+              + (types.length>5?'<div style="font-size:.62rem;color:var(--muted);margin-top:.25rem">+'+(types.length-5)+' more</div>':'')
+              +'</div>';
+          })()
+        : (function(){
+            return '<div style="margin-top:.6rem;padding-top:.5rem;border-top:1px solid var(--border)">'
+              + labour.slice(0,6).map(function(l){
+                  return '<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.04)">'
+                    +'<span>'+l.name+'</span><span style="font-family:var(--mono);color:var(--muted)">'+fmtMoney(l.stRate)+' ST · '+fmtMoney(l.otRate)+' OT</span></div>';
+                }).join('')
+              + (labour.length>6?'<div style="font-size:.62rem;color:var(--muted);margin-top:.25rem">+'+(labour.length-6)+' more</div>':'')
+              + ((r.equipment&&r.equipment.length)?'<div style="font-size:.62rem;color:var(--muted);margin-top:.4rem">'+r.equipment.length+' equipment item'+(r.equipment.length!==1?'s':'')+'</div>':'')
+              +'</div>';
+          })();
+
+      return '<div style="padding:.65rem .85rem;border-bottom:1px solid var(--border)">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleRSDetail(\''+sheetId+'\')">'
+          +'<div style="display:flex;align-items:center;gap:.4rem;min-width:0">'
+            +'<span style="font-size:.72rem;color:var(--muted)" id="'+sheetId+'-chev">▶</span>'
+            +'<div>'
+              +'<div style="font-size:.8rem;font-weight:700;color:var(--text)">'+r.name+'</div>'
+              +'<div style="font-size:.65rem;color:var(--muted);margin-top:.05rem">Effective '+fmtDate(r.effective)+' · '+(r.currency||'CAD')+'</div>'
+            +'</div>'
+            +badge
+          +'</div>'
+          +'<div style="display:flex;gap:.3rem;flex-shrink:0">'
+            +(r.type==='piecework'
+              ?'<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewPWRateSheet(\''+r.id+'\')">View</button>'
+              :'<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openRateModal(\''+r.id+'\')">Edit</button>')
+            +'<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();deleteRateSheetConfirm(\''+r.id+'\')">🗑</button>'
+          +'</div>'
+        +'</div>'
+        +'<div id="'+sheetId+'" style="display:none">'+detail+'</div>'
       +'</div>';
     }).join('');
-    return '<div class="card">'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.6rem">'
-        +'<div>'
-          +'<div style="font-family:var(--ffc);font-weight:800;font-size:.9rem">'+r.name+'</div>'
-          +(r.customer?'<div style="font-size:.68rem;color:var(--nor-accent);margin-top:.1rem">'+r.customer+'</div>':'<div style="font-size:.68rem;color:var(--muted);margin-top:.1rem">Standard</div>')
-        +'</div>'
-        +'<div style="display:flex;gap:.3rem">'
-          +'<button class="btn btn-ghost btn-sm" onclick="openRateModal(\''+r.id+'\')">Edit</button>'
+
+    return '<div class="card" style="padding:0;overflow:hidden;margin-bottom:.75rem">'
+      +'<div style="padding:.6rem .85rem;background:var(--surface2);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none" onclick="toggleRSGroup(\''+groupId+'\')">'
+        +'<div style="display:flex;align-items:center;gap:.5rem">'
+          +'<span style="font-size:.72rem;color:var(--nor-accent)" id="'+groupId+'-chev">▼</span>'
+          +'<span style="font-weight:800;font-size:.85rem">'+customer+'</span>'
+          +'<span style="font-size:.65rem;color:var(--muted)">'+sheets.length+' sheet'+(sheets.length!==1?'s':'')+'</span>'
         +'</div>'
       +'</div>'
-      +'<div style="font-size:.65rem;color:var(--muted);margin-bottom:.5rem">Effective '+fmtDate(r.effective)+' · '+r.currency+'</div>'
-      +'<div>'+labourRows+'</div>'
-      +((r.equipment&&r.equipment.length)?'<div style="font-size:.65rem;color:var(--muted);margin-top:.4rem">'+r.equipment.length+' equipment/material item'+(r.equipment.length!==1?'s':'')+'</div>':'')
+      +'<div id="'+groupId+'">'+rows+'</div>'
     +'</div>';
   }).join('');
 }
@@ -4102,6 +4182,60 @@ function techHasPendingOnWO(woId) {
 }
 
 // ── Invoices ──────────────────────────────────────────────────────────────────
+
+// ── Invoice: Import from PDF ──────────────────────────────────────────────────
+function triggerInvoiceImport() {
+  document.getElementById('inv-import-file').click();
+}
+
+async function handleInvoiceImportFile(input) {
+  var file = input.files[0]; if (!file) return;
+  input.value = '';
+  var btn = document.getElementById('inv-import-pdf-btn');
+  if (btn) { btn.textContent = '\u23F3 Reading\u2026'; btn.disabled = true; }
+  try {
+    var base64 = await new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e){ resolve(e.target.result.split(',')[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    var apiKey = getApiKey ? getApiKey() : null;
+    if (!apiKey) throw new Error('Claude API key not available.');
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json','x-api-key':apiKey,
+        'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1500,
+        messages:[{ role:'user', content:[
+          { type:'document', source:{type:'base64',media_type:'application/pdf',data:base64} },
+          { type:'text', text:'Extract invoice data from this PDF and return ONLY JSON with these keys (null if not found):\n{"client":"","invNum":"","date":"YYYY-MM-DD","dueDate":"YYYY-MM-DD","po":"","notes":"","lineItems":[{"description":"","qty":1,"unit":"","unitPrice":0,"amount":0}],"subtotal":0,"tax":0,"total":0}\nReturn ONLY the JSON.' }
+        ]}] })
+    });
+    var d2 = await resp.json();
+    var text = (d2.content&&d2.content[0]?d2.content[0].text:'').replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+    var inv = JSON.parse(text);
+    // Populate invoice fields
+    if (inv.client) { var sel=document.getElementById('inv-client'); if(sel){ var opt=Array.from(sel.options).find(function(o){return o.value===inv.client;}); if(!opt){sel.add(new Option(inv.client,inv.client));} sel.value=inv.client; } }
+    if (inv.date)    { var el=document.getElementById('inv-date');  if(el) el.value=inv.date; }
+    if (inv.po)      { var el=document.getElementById('inv-po');    if(el) el.value=inv.po; }
+    if (inv.notes)   { var el=document.getElementById('inv-notes'); if(el) el.value=inv.notes; }
+    // Add line items as manual lines
+    if (inv.lineItems && inv.lineItems.length) {
+      inv.lineItems.forEach(function(item){
+        addManualLine(item.description, item.qty||1, item.unitPrice||item.amount||0);
+      });
+    }
+    updateInvTotals();
+    if (btn) { btn.textContent = '\u2713 Imported'; btn.style.color='var(--green)'; }
+    setTimeout(function(){ if(btn){btn.textContent='\u2B06 Import from PDF';btn.style.color='';btn.disabled=false;} },3000);
+    toast('Invoice data imported \u2014 review and save', 'success');
+  } catch(e) {
+    if (btn) { btn.textContent='\u2B06 Import from PDF'; btn.disabled=false; }
+    toast('Import failed: '+(e.message||'Unknown error'), 'error');
+  }
+}
+
 function openInvoiceModal(preClient){
   _editInvId=null;
   clearManualLines();
