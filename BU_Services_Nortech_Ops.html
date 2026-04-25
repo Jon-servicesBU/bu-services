@@ -2050,13 +2050,47 @@ var PW_PROMPT = 'This is a PIECEWORK / PIECE-RATE pricing sheet for a field NDT 
 
 var RATE_PROMPT = 'This is a T&M (Time and Materials) rate sheet for a field NDT / inspection services company. Extract ALL pricing sections and return ONLY valid JSON with these keys: name (string), customer (string), effective (YYYY-MM-DD), currency (CAD), type (tm), labour (array of {name, stRate, otRate, dtRate} - all per hour), equipment (array of {name, rate, unit} - per hr/day/shift), consumables (array of {name, rate, unit} - per liter/can/disc/each), filmPerWeld (array of {size, scheduleUpTo80, schedule100Over, unit, notes}), sheetFilm (array of {size, rate}), filmDigitizing (array of {item, rate, unit}), specialRates (array of {name, rate, unit, notes} for callout minimums, flat fees, PAUT bond etc), notes (string - ALL bullet point conditions concatenated). RULES: Labour dtRate = stRate*2 if not listed. Equipment per HOUR unless stated. Consumables are NOT hourly. Capture every film size. Capture every bullet point in notes. Return ONLY the JSON object, no markdown, no explanation.';
 
+
+// ── JSON repair: handles truncated responses from AI ─────────────────────────
+function _repairAndParseJSON(str) {
+  // First try clean parse
+  try { return JSON.parse(str); } catch(e) {}
+
+  // Try to close truncated JSON by counting open brackets/braces
+  var s = str.trim();
+  // Remove trailing incomplete key-value (e.g. last ", "someKey": )
+  s = s.replace(/,\s*"[^"]*"\s*:\s*$/, '');
+  s = s.replace(/,\s*"[^"]*"\s*$/, '');
+  s = s.replace(/,\s*$/, '');
+
+  // Count unclosed braces and brackets
+  var depth = [];
+  var inStr = false; var escape = false;
+  for (var i = 0; i < s.length; i++) {
+    var c = s[i];
+    if (escape) { escape = false; continue; }
+    if (c === '\\') { escape = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === '{') depth.push('}');
+    else if (c === '[') depth.push(']');
+    else if (c === '}' || c === ']') depth.pop();
+  }
+  // Close all open structures
+  while (depth.length) s += depth.pop();
+
+  try { return JSON.parse(s); } catch(e) {
+    throw new Error('Could not parse rate sheet response: ' + e.message);
+  }
+}
+
 async function parseRateSheetText(text) {
   var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 4000,
+      max_tokens: 8000,
       messages: [{ role: 'user', content: (function(){ var m=document.getElementById('import-rate-modal'); return m&&m.getAttribute('data-import-type')==='piecework' ? PW_PROMPT : RATE_PROMPT; })() + '\n\nDocument text:\n' + text.slice(0, 8000) }]
     })
   });
@@ -2064,9 +2098,9 @@ async function parseRateSheetText(text) {
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
   var clean = txt.replace(/```json|```/g,'').trim();
-  var match = clean.match(/\{[\s\S]*\}/);
+  var match = clean.match(/\{[\s\S]*/);
   if (!match) throw new Error('No JSON in response');
-  return JSON.parse(match[0]);
+  return _repairAndParseJSON(match[0]);
 }
 
 async function parseRateSheetPDF(file) {
@@ -2081,7 +2115,7 @@ async function parseRateSheetPDF(file) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 4000,
+      max_tokens: 8000,
       messages: [{
         role: 'user',
         content: [
@@ -2095,9 +2129,9 @@ async function parseRateSheetPDF(file) {
   var data = await res.json();
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
   var clean = txt.replace(/```json|```/g,'').trim();
-  var match = clean.match(/\{[\s\S]*\}/);
+  var match = clean.match(/\{[\s\S]*/);
   if (!match) throw new Error('No JSON in response');
-  return JSON.parse(match[0]);
+  return _repairAndParseJSON(match[0]);
 }
 function showImportPreview(data) {
   document.getElementById('import-rs-name').value = data.name || '';
@@ -5000,17 +5034,32 @@ async function deleteWO(id) {
     toast('Cannot delete a work order that has been invoiced or paid', 'error');
     return;
   }
+  var linkedTS = _timesheets.filter(function(t){ return t.woId === id; });
+  var tsWarning = linkedTS.length
+    ? '\n\n' + linkedTS.length + ' linked timesheet' + (linkedTS.length !== 1 ? 's' : '') + ' will also be deleted.'
+    : '';
   if (!confirm(
-    'Delete Work Order ' + woNum + '?\n\n' +
-    'Client: ' + (wo.client||'—') + '\n' +
-    'Date: ' + (wo.date||'—') + '\n\n' +
-    'This cannot be undone. Continue?'
+    'Delete Work Order ' + woNum + '?' +
+    '\n\nClient: ' + (wo.client||'—') +
+    '\nDate: ' + (wo.date||'—') +
+    tsWarning +
+    '\n\nThis cannot be undone. Continue?'
   )) return;
   try {
+    // Delete linked timesheets first
+    for (var i = 0; i < linkedTS.length; i++) {
+      try { await sbDelete('timesheets', linkedTS[i].id); } catch(e) { /* non-fatal */ }
+    }
+    _timesheets = _timesheets.filter(function(t){ return t.woId !== id; });
+    _tsCacheWrite(_timesheets);
+
+    // Delete the WO
     await sbDelete('jobs', id);
     _jobs = _jobs.filter(function(j){ return j.id !== id; });
-    renderJobs(); renderDashboard(); updatePendingBadge();
-    toast('Work order ' + woNum + ' deleted', 'info');
+
+    renderJobs(); renderDashboard(); renderTimesheets(); updatePendingBadge();
+    var tsMsg = linkedTS.length ? ' and ' + linkedTS.length + ' timesheet' + (linkedTS.length !== 1 ? 's' : '') : '';
+    toast('Work order ' + woNum + tsMsg + ' deleted', 'info');
   } catch(e) { toast('Delete failed: ' + e.message, 'error'); }
 }
 
