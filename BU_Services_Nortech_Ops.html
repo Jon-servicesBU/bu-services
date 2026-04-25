@@ -885,14 +885,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
-      <button class="btn btn-secondary" onclick="exportWO('pdf')" id="wo-export-pdf-btn" style="display:none">⬇ Export PDF</button>
-      <button class="btn btn-secondary" onclick="exportWO('word')" id="wo-export-word-btn" style="display:none">⬇ Export Word</button>
       <div style="flex:1"></div>
-      <!-- Admin buttons -->
-      <button class="btn btn-secondary" id="wo-btn-draft" onclick="saveWO('draft')" style="display:none">Save Draft</button>
-      <button class="btn btn-primary"   id="wo-btn-submit-admin" onclick="saveWO('submitted')" style="display:none">Submit Work Order</button>
-      <!-- Tech button -->
-      <button class="btn btn-primary" id="wo-btn-tech-save" onclick="techSaveWO()" style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">Save Work Order →</button>
+      <!-- Shown/hidden by openWOModal based on status -->
+      <button class="btn btn-ghost"     id="wo-btn-edit-unlock"  onclick="adminUnlockWO()"      style="display:none">✏ Edit</button>
+      <button class="btn btn-success"   id="wo-btn-approve"      onclick="approveWOFromModal()"  style="display:none">✓ Approve</button>
+      <button class="btn btn-primary"   id="wo-btn-save"         onclick="saveWO('approved')"    style="display:none">💾 Save</button>
+      <button class="btn btn-secondary" id="wo-btn-invoice"      onclick="invoiceWOFromModal()"  style="display:none">🧾 Invoice</button>
+      <!-- Tech only -->
+      <button class="btn btn-primary"   id="wo-btn-tech-save"    onclick="techSaveWO()"          style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">Save Work Order →</button>
     </div>
   </div>
 </div>
@@ -2357,47 +2357,111 @@ function openWOModal(editId) {
 
   // ── Apply role-based WO modal behaviour ───────────────────────────────────
   var woStatus = wo.status || 'new';
-  var locked   = !isAdmin() && (woStatus === 'submitted' || woStatus === 'approved' || woStatus === 'invoiced' || woStatus === 'paid');
   var admin    = isAdmin();
 
-  // Button visibility
-  var showDraft       = admin;
-  var showSubmitAdmin = admin;
-  var showTechSave    = !admin && !locked;
+  // Clean slate — remove stale banners, re-enable inputs
+  ['wo-locked-banner','wo-approved-banner'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.remove();
+  });
+  document.querySelectorAll('#job-modal input, #job-modal select, #job-modal textarea').forEach(function(el){
+    el.disabled = false; el.style.opacity = '';
+  });
 
-  var btnDraft = document.getElementById('wo-btn-draft');
-  var btnSubmitAdmin = document.getElementById('wo-btn-submit-admin');
-  var btnTechSave    = document.getElementById('wo-btn-tech-save');
-  if (btnDraft)       btnDraft.style.display       = showDraft       ? 'inline-flex' : 'none';
-  if (btnSubmitAdmin) btnSubmitAdmin.style.display  = showSubmitAdmin ? 'inline-flex' : 'none';
-  if (btnTechSave)    btnTechSave.style.display     = showTechSave    ? 'inline-flex' : 'none';
+  // Hide all action buttons first
+  ['wo-btn-edit-unlock','wo-btn-approve','wo-btn-save','wo-btn-invoice','wo-btn-tech-save'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
 
-  // Lock all inputs for submitted tech
-  if (locked) {
-    setTimeout(function() {
-      document.querySelectorAll('#job-modal input, #job-modal select, #job-modal textarea').forEach(function(el) {
-        el.disabled = true; el.style.opacity = '.55';
-      });
-      document.querySelectorAll('#job-modal button:not([onclick*="closeModal"]):not([id*="export"])').forEach(function(b) {
-        b.style.display = 'none';
-      });
-      // Show locked banner
-      var existing = document.getElementById('wo-locked-banner');
-      if (!existing) {
-        var banner = document.createElement('div');
-        banner.id = 'wo-locked-banner';
-        banner.style.cssText = 'background:rgba(232,64,64,.1);border:1px solid rgba(232,64,64,.3);border-left:4px solid #E84040;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCA5A5;margin-bottom:.75rem;font-weight:600';
-        banner.textContent = '🔒 This work order has been submitted. Contact admin to make changes.';
-        var body = document.querySelector('#job-modal .modal-body');
-        if (body) body.insertBefore(banner, body.firstChild);
-      }
-    }, 20);
+  function _showBtn(id){ var el=document.getElementById(id); if(el) el.style.display='inline-flex'; }
+  function _addBanner(id, css, txt){
+    if (document.getElementById(id)) return;
+    var b=document.createElement('div'); b.id=id; b.style.cssText=css; b.textContent=txt;
+    var mb=document.querySelector('#job-modal .modal-body'); if(mb) mb.insertBefore(b,mb.firstChild);
+  }
+  function _lockInputs(){ setTimeout(function(){
+    document.querySelectorAll('#job-modal input, #job-modal select, #job-modal textarea').forEach(function(el){ el.disabled=true; el.style.opacity='.7'; });
+  },20); }
+
+  if (!admin) {
+    if (!editId || woStatus==='draft') {
+      _showBtn('wo-btn-tech-save');
+    } else {
+      _lockInputs();
+      setTimeout(function(){
+        _addBanner('wo-locked-banner',
+          'background:rgba(232,64,64,.1);border:1px solid rgba(232,64,64,.3);border-left:4px solid #E84040;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCA5A5;margin-bottom:.75rem;font-weight:600',
+          '\uD83D\uDD12 This work order has been submitted. Contact admin to make changes.');
+      },20);
+    }
   } else {
-    var b = document.getElementById('wo-locked-banner');
-    if (b) b.remove();
+    if (woStatus==='submitted') {
+      _showBtn('wo-btn-approve');
+      _showBtn('wo-btn-save');
+      setTimeout(function(){
+        _addBanner('wo-approved-banner',
+          'background:rgba(201,134,10,.1);border:1px solid rgba(201,134,10,.3);border-left:4px solid #C9860A;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCD34D;margin-bottom:.75rem;font-weight:600',
+          '\u23F3 Submitted \u2014 review, edit if needed, then approve.');
+      },20);
+    } else if (woStatus==='approved') {
+      _showBtn('wo-btn-edit-unlock');
+      _showBtn('wo-btn-invoice');
+      _lockInputs();
+      setTimeout(function(){
+        _addBanner('wo-approved-banner',
+          'background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-left:4px solid #22C55E;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#86EFAC;margin-bottom:.75rem;font-weight:600',
+          '\u2713 Approved \u2014 click Edit to make changes.');
+      },20);
+    } else if (woStatus==='invoiced'||woStatus==='paid') {
+      _lockInputs();
+    } else {
+      // New or draft
+      _showBtn('wo-btn-save');
+    }
   }
 
   document.getElementById('job-modal').classList.add('open');
+}
+
+// ── Admin WO modal helpers ────────────────────────────────────────────────────
+function adminUnlockWO() {
+  if (!confirm('Edit this work order?\n\nYou can make changes and save.')) return;
+  document.querySelectorAll('#job-modal input, #job-modal select, #job-modal textarea').forEach(function(el){
+    el.disabled = false; el.style.opacity = '';
+  });
+  var bv = document.getElementById('wo-btn-edit-unlock'); if (bv) bv.style.display = 'none';
+  var bi = document.getElementById('wo-btn-invoice');     if (bi) bi.style.display = 'none';
+  var bs = document.getElementById('wo-btn-save');        if (bs) bs.style.display = 'inline-flex';
+  var banner = document.getElementById('wo-approved-banner');
+  if (banner) {
+    banner.style.background = 'rgba(201,134,10,.1)';
+    banner.style.borderLeftColor = '#C9860A';
+    banner.style.color = '#FCD34D';
+    banner.textContent = '\u270F Editing \u2014 save changes when done.';
+  }
+}
+
+async function approveWOFromModal() {
+  var id = _editWOId; if (!id) return;
+  var wo = _jobs.find(function(j){ return j.id === id; }); if (!wo) return;
+  if (!confirm('Approve Work Order ' + (wo.woNum||wo.number||'') + '?\n\nThis marks it ready for invoicing.')) return;
+  // Save any edits first, then approve
+  await saveWO('approved');
+  closeModal('job-modal');
+  showView('jobs', document.getElementById('nav-jobs'));
+  renderJobs(); renderDashboard();
+  toast('Work order approved \u2713', 'success');
+}
+
+function invoiceWOFromModal() {
+  var id = _editWOId; if (!id) return;
+  closeModal('job-modal');
+  setTimeout(function() {
+    var wo = _jobs.find(function(j){ return j.id === id; });
+    if (wo) {
+      showView('invoices', document.getElementById('nav-invoices'));
+      openInvoiceModal(wo.client);
+    }
+  }, 150);
 }
 
 // openInvoiceModal — also accepts WO id (preWOId)
