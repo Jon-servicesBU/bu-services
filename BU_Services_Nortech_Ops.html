@@ -1253,16 +1253,17 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="modal-close" onclick="closeModal('inv-view-modal')">✕</button>
     </div>
     <div class="modal-body" id="inv-view-body" style="padding:.5rem"></div>
-    <div class="modal-footer">
+    <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('inv-view-modal')">Close</button>
-      <button class="btn btn-secondary" onclick="printInvoice()">🖨 Print / PDF</button>
-      <button class="btn btn-secondary" id="inv-mark-sent-btn" onclick="markInvoiceSent()" style="display:none">Mark Sent</button>
-      <button class="btn btn-success" id="inv-mark-paid-btn" onclick="markInvoicePaid()" style="display:none">✓ Mark Paid</button>
-      <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)" style="display:none">↩ Unpay</button>
-      <button class="btn btn-secondary" id="inv-reverse-sent-btn" onclick="reverseInvoiceToApproved(_currentInvId)" style="display:none">↩ Back to Draft</button>
-      <button class="btn btn-secondary" id="inv-reverse-draft-btn" onclick="reverseInvoiceToApproved(_currentInvId)" style="display:none">↩ Release WOs</button>
-      <button class="btn btn-sm" id="inv-void-btn" onclick="markInvoiceVoid()" style="display:none;background:rgba(185,28,28,.15);color:#EF4444;border:1px solid rgba(185,28,28,.3)">Void</button>
-      <button class="btn btn-sm" id="inv-delete-btn" onclick="deleteInvoice(_currentInvId)" style="display:none;background:rgba(185,28,28,.15);color:#EF4444;border:1px solid rgba(185,28,28,.3)">🗑 Delete</button>
+      <div style="flex:1"></div>
+      <!-- Print / PDF options -->
+      <button class="btn btn-secondary btn-sm" onclick="exportWO('pdf', _currentInvWoId())">🖨 WO</button>
+      <button class="btn btn-secondary btn-sm" id="inv-print-ts-btn"  onclick="printInvTS()"      style="display:none">🖨 TS</button>
+      <button class="btn btn-secondary btn-sm" onclick="printInvoice()">🖨 Invoice</button>
+      <button class="btn btn-secondary btn-sm" onclick="printInvAll()">🖨 All</button>
+      <!-- Status actions -->
+      <button class="btn btn-success"   id="inv-mark-paid-btn"    onclick="markInvoicePaid()"                       style="display:none">✓ Mark Paid</button>
+      <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)"    style="display:none">↩ Unpay</button>
     </div>
   </div>
 </div>
@@ -2454,14 +2455,10 @@ async function approveWOFromModal() {
 
 function invoiceWOFromModal() {
   var id = _editWOId; if (!id) return;
+  var wo = _jobs.find(function(j){ return j.id === id; }); if (!wo) return;
   closeModal('job-modal');
-  setTimeout(function() {
-    var wo = _jobs.find(function(j){ return j.id === id; });
-    if (wo) {
-      showView('invoices', document.getElementById('nav-invoices'));
-      openInvoiceModal(wo.client);
-    }
-  }, 150);
+  showView('invoices', document.getElementById('nav-invoices'));
+  setTimeout(function() { openInvoiceModal(wo.client); }, 200);
 }
 
 // openInvoiceModal — also accepts WO id (preWOId)
@@ -3775,10 +3772,7 @@ function renderInvoices(){
       + '<td>' + chipHtml(i.status) + '</td>'
       + '<td style="white-space:nowrap;text-align:right;padding:.4rem .5rem">'
         + '<span style="font-size:.8rem;color:var(--muted);margin-right:.3rem" id="inv-chev-'+i.id+'">▼</span>'
-        + '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewInvoice(\''+i.id+'\')">View</button>'
-        + (isAdmin()&&i.status==='draft'?'<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();markInvSent(\''+i.id+'\')">Mark Sent</button>':'')
-        + (isAdmin()&&i.status==='sent'?'<button class="btn btn-success btn-sm" onclick="event.stopPropagation();markPaid(\''+i.id+'\')" >Mark Paid</button>':'')
-        + (isAdmin()?'<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();deleteInvoice(\''+i.id+'\')">🗑</button>':'')
+        + '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewInvoice(\'"+i.id+"\')" >View</button>'
       + '</td>'
     + '</tr>';
 
@@ -3963,20 +3957,42 @@ function viewInvoice(id) {
 
   document.getElementById('inv-view-body').innerHTML = html;
 
-  // Button visibility
+  // Button visibility — Mark Paid (sent), Unpay (paid), TS print if TS exists
   var st = inv.status;
   var setBtn = function(id, show) { var el = document.getElementById(id); if (el) el.style.display = show ? 'inline-flex' : 'none'; };
-  setBtn('inv-mark-sent-btn',    st === 'draft');
   setBtn('inv-mark-paid-btn',    st === 'sent');
   setBtn('inv-reverse-paid-btn', st === 'paid');
-  setBtn('inv-reverse-sent-btn', st === 'sent');
-  setBtn('inv-reverse-draft-btn',st === 'draft');
-  setBtn('inv-void-btn',         st !== 'void' && st !== 'paid' && isAdmin());
-  setBtn('inv-delete-btn',       isAdmin());
+  // Show TS print button only if a linked timesheet exists
+  var invWoId = (inv.chargeSheetIds||[])[0];
+  var invTs   = invWoId ? _timesheets.find(function(t){ return t.woId === invWoId; }) : null;
+  setBtn('inv-print-ts-btn', !!invTs);
 
   document.getElementById('inv-view-modal').classList.add('open');
 }
 
+
+
+// ── Invoice modal print helpers ───────────────────────────────────────────────
+function _currentInvWoId() {
+  var inv = _invoices.find(function(i){ return i.id === _currentInvId; });
+  return inv ? (inv.chargeSheetIds||[])[0] || null : null;
+}
+
+function printInvTS() {
+  var woId = _currentInvWoId();
+  if (!woId) { toast('No timesheet linked to this invoice', 'error'); return; }
+  var ts = _timesheets.find(function(t){ return t.woId === woId; });
+  if (!ts) { toast('No timesheet found', 'error'); return; }
+  toast('Timesheet export — coming soon', 'info');
+}
+
+function printInvAll() {
+  // Print all: WO + TS + Invoice together
+  var woId = _currentInvWoId();
+  if (woId) exportWO('pdf', woId);
+  setTimeout(function(){ printInvoice(); }, 400);
+  toast('Printing WO and Invoice…', 'info');
+}
 
 async function markInvoicePaid(){
   if(!_currentInvId)return;
@@ -4714,7 +4730,10 @@ document.addEventListener('click', function(e) {
   el = e.target.closest('[data-invoice-wo]');
   if (el) {
     var wo = _jobs.find(function(j){ return j.id === el.getAttribute('data-invoice-wo'); });
-    if (wo) openInvoiceModal(wo.client);
+    if (wo) {
+      showView('invoices', document.getElementById('nav-invoices'));
+      setTimeout(function(){ openInvoiceModal(wo.client); }, 200);
+    }
     return;
   }
   el = e.target.closest('[data-export-wo]');
