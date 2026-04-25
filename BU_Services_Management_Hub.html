@@ -227,6 +227,8 @@ hr.divider{border:none;border-top:1px solid var(--mid);margin:1.5rem 0}
 .ai-chip.gate{background:rgba(139,92,246,.1);color:#5B21B6;}
 .ai-chip.finance{background:rgba(217,119,6,.1);color:#92400E;}
 .ai-chip.nuclear{background:rgba(232,64,64,.1);color:#991B1B;}
+.ai-chip.hr{background:rgba(190,24,93,.1);color:#9D174D;}
+.ai-chip.eurazeo{background:rgba(107,114,128,.1);color:#374151;}
 .ai-chip.other{background:rgba(100,116,139,.1);color:#334155;}
 .ai-chip.minutes{background:rgba(0,174,239,.15);color:#1A5CA8;}
 .ai-add-btn{display:inline-flex;align-items:center;gap:.3rem;padding:.4rem .85rem;background:#1A5CA8;border:none;border-radius:6px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:.85rem;}
@@ -235,6 +237,44 @@ hr.divider{border:none;border-top:1px solid var(--mid);margin:1.5rem 0}
 .ai-filter-btn.active{background:rgba(0,174,239,.15);border-color:rgba(0,174,239,.4);color:#00AEEF;}
 .ai-remove-btn{background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:.85rem;padding:.1rem .25rem;}
 .ai-remove-btn:hover{color:#FF6B6B;}
+
+/* ── 1:1 Tracker ── */
+.ot-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:.85rem; margin-bottom:1.5rem; }
+.ot-card { background:#fff; border:1.5px solid #D0DCF0; border-radius:10px; overflow:hidden; cursor:pointer; transition:all .18s; }
+.ot-card:hover { border-color:var(--sky); box-shadow:0 4px 16px rgba(0,174,239,.12); transform:translateY(-1px); }
+.ot-card.ot-overdue { border-color:#FCA5A5; }
+.ot-top { height:4px; }
+.ot-body { padding:.85rem 1rem; }
+.ot-name { font-size:.88rem; font-weight:700; color:#0A1F5C; margin-bottom:.12rem; }
+.ot-role { font-size:.62rem; color:#6678A0; line-height:1.4; margin-bottom:.65rem; }
+.ot-meta { display:flex; justify-content:space-between; align-items:center; }
+.ot-last { font-size:.62rem; color:#6678A0; }
+.ot-last strong { color:#0A1F5C; }
+.ot-actions-badge { font-size:.6rem; font-weight:700; padding:.12rem .45rem; border-radius:10px; }
+.ot-actions-badge.has { background:rgba(201,134,10,.12); color:#C9860A; }
+.ot-actions-badge.clear { background:rgba(22,163,74,.1); color:#16A34A; }
+/* 1:1 Detail Panel */
+.ot-detail { display:none; background:#fff; border:1.5px solid #D0DCF0; border-radius:10px; overflow:hidden; margin-bottom:1rem; }
+.ot-detail.open { display:block; animation:fadein .2s; }
+.ot-detail-hdr { padding:1rem 1.25rem; border-bottom:1px solid #D0DCF0; display:flex; align-items:center; gap:.75rem; }
+.ot-detail-name { font-size:1rem; font-weight:800; color:#0A1F5C; flex:1; }
+.ot-detail-role { font-size:.7rem; color:#6678A0; }
+.ot-close-btn { background:none; border:none; font-size:1rem; color:#6678A0; cursor:pointer; padding:.1rem .3rem; border-radius:3px; }
+.ot-close-btn:hover { background:#F0F4FF; color:#0A1F5C; }
+.ot-detail-body { padding:1rem 1.25rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.ot-section-lbl { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#6678A0; margin-bottom:.45rem; }
+.ot-notes-ta { width:100%; min-height:100px; padding:.55rem .65rem; border:1.5px solid #D0DCF0; border-radius:6px; font-size:.8rem; font-family:inherit; resize:vertical; line-height:1.5; color:#0A1F5C; }
+.ot-notes-ta:focus { outline:none; border-color:var(--sky); }
+.ot-date-row { display:flex; gap:.5rem; align-items:center; margin-bottom:.75rem; }
+.ot-date-inp { padding:.38rem .6rem; border:1.5px solid #D0DCF0; border-radius:6px; font-size:.78rem; font-family:inherit; color:#0A1F5C; }
+.ot-save-btn { padding:.38rem .85rem; background:#0A1F5C; border:none; border-radius:6px; color:#fff; font-size:.75rem; font-weight:700; cursor:pointer; font-family:inherit; transition:background .15s; }
+.ot-save-btn:hover { background:#1A3A7A; }
+.ot-history { max-height:160px; overflow-y:auto; }
+.ot-hist-item { padding:.45rem .5rem; border-bottom:1px solid #EEF2FA; font-size:.72rem; color:#334155; }
+.ot-hist-item:last-child { border-bottom:none; }
+.ot-hist-date { font-size:.6rem; color:#6678A0; margin-bottom:.2rem; font-family:monospace; }
+.ot-hist-empty { font-size:.72rem; color:#A0AEB8; font-style:italic; padding:.5rem 0; }
+
 </style>
 </head>
 <body>
@@ -1155,7 +1195,7 @@ var PT_PEOPLE = {
   max:'Emmanuel Aggrey', vinoth:'Vinoth Tharma', eric_r:'Eric Rodrigue',
   joel_dj:'Joel Djordjevic', keith:'Keith Reichenbach', brook:'Brook Althouse',
   louisp:'Louis-Pier Théberge', jason:'Jason Borza', joel_c:'Joel Carlton',
-  francis:'Francis Boudreault-Leclerc', eric_c:'Éric Carmichael'
+  francis:'Francis Boudreault-Leclerc', eric_c:'Éric Carmichael', maud:'Maud Leivin Capuano'
 };
 
 // ── Tab switcher ───────────────────────────────────────────────────────────
@@ -1361,7 +1401,8 @@ function aiRender() {
 
   var SOURCE_CHIPS = {
     commercial:'commercial', ops:'ops', gate:'gate',
-    finance:'finance', nuclear:'nuclear', other:'other'
+    finance:'finance', nuclear:'nuclear', hr:'hr',
+    eurazeo:'eurazeo', other:'other'
   };
 
   tbody.innerHTML = filtered.map(a => {
@@ -1412,7 +1453,7 @@ function aiOpenAdd() {
   if (!action) return;
   var owner = prompt('Owner ID (e.g. jon, alex, keith):', 'jon');
   var due = prompt('Due date (YYYY-MM-DD):', new Date(Date.now()+7*86400000).toISOString().slice(0,10));
-  var source = prompt('Source meeting (commercial/ops/gate/finance/nuclear/other):', 'other');
+  var source = prompt('Source meeting (commercial/ops/gate/finance/nuclear/hr/eurazeo/other):', 'other');
   var actions = JSON.parse(localStorage.getItem('pt_actions') || '[]');
   actions.push({ id: Date.now().toString(), action, ownerId: owner||'jon', source: source||'other', due: due||'', done: false, created: new Date().toISOString().slice(0,10) });
   localStorage.setItem('pt_actions', JSON.stringify(actions));
@@ -1427,6 +1468,165 @@ aiRender();
 
 
 <script>
+
+// ── 1:1 Tracker ───────────────────────────────────────────────────────────────
+var OT_PEOPLE = [
+  { id:'mathieu', name:'Mathieu Beauchesne', role:'EVP · Powerline',              color:'#1A5CA8' },
+  { id:'olivier', name:'Olivier Marcotte',   role:'CRO · Nuclear',                color:'#6D28D9' },
+  { id:'alex',    name:'Alex Cyr',           role:'Sr. Ops Director',             color:'#0891B2' },
+  { id:'jeremy',  name:'Jeremy Irwin',       role:'Director Finance',             color:'#38BDF8' },
+  { id:'renee',   name:'Renée Lachance',     role:'Sr. Director Finance & Controller', color:'#BE185D' },
+  { id:'max',     name:'Emmanuel Aggrey',    role:'Commercial — West',            color:'#C9860A' },
+  { id:'vinoth',  name:'Vinoth Tharma',      role:'Commercial — East',            color:'#22882F' },
+  { id:'rick',    name:'Rick Carlton',       role:'Pipeline Integrity',           color:'#368CD9' },
+  { id:'eric_c',  name:'Éric Carmichael',    role:'Commercial Systems',           color:'#1A5CA8' },
+  { id:'maud',    name:'Maud Leivin Capuano',role:'HR Lead',                      color:'#9D174D' },
+];
+
+var _otOpen = null;
+
+function otLoad(id) {
+  try { return JSON.parse(localStorage.getItem('ot_' + id) || '{}'); } catch(e) { return {}; }
+}
+function otSave(id, data) {
+  localStorage.setItem('ot_' + id, JSON.stringify(data));
+}
+function otOpenActions(personId) {
+  var actions = JSON.parse(localStorage.getItem('pt_actions') || '[]');
+  return actions.filter(function(a) { return !a.done && a.ownerId === personId; });
+}
+
+function otRender() {
+  var grid = document.getElementById('ot-grid');
+  if (!grid) return;
+  var today = new Date().toISOString().slice(0,10);
+  var cardsHtml = OT_PEOPLE.map(function(p) {
+    var data = otLoad(p.id);
+    var openAct = otOpenActions(p.id);
+    var overdue = openAct.filter(function(a) { return a.due && a.due < today; }).length;
+    var lastLabel = data.lastDate || 'No meeting logged';
+    var badgeClass = openAct.length > 0 ? 'has' : 'clear';
+    var badgeText  = openAct.length > 0 ? openAct.length + ' open' : '✓ clear';
+    var cardClass  = 'ot-card' + (overdue > 0 ? ' ot-overdue' : '');
+    var initials   = p.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2);
+    return `<div class="${cardClass}" onclick="otToggle('${p.id}')">
+      <div class="ot-top" style="background:${p.color}"></div>
+      <div class="ot-body">
+        <div class="ot-name">${p.name}</div>
+        <div class="ot-role">${p.role}</div>
+        <div class="ot-meta">
+          <div class="ot-last">Last: <strong>${lastLabel}</strong></div>
+          <span class="ot-actions-badge ${badgeClass}">${badgeText}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  grid.innerHTML = '<div class="ot-grid">' + cardsHtml + '</div><div id="ot-detail" class="ot-detail"></div>';
+  if (_otOpen) otShowDetail(_otOpen);
+}
+
+function otToggle(id) {
+  _otOpen = (_otOpen === id) ? null : id;
+  otRender();
+  if (_otOpen) {
+    var d = document.getElementById('ot-detail');
+    if (d) setTimeout(function(){ d.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 50);
+  }
+}
+
+function otShowDetail(id) {
+  var p = OT_PEOPLE.find(function(x){ return x.id === id; });
+  if (!p) return;
+  var detail = document.getElementById('ot-detail');
+  if (!detail) return;
+  detail.classList.add('open');
+  var data     = otLoad(id);
+  var today    = new Date().toISOString().slice(0,10);
+  var openAct  = otOpenActions(id);
+  var history  = data.history || [];
+  var initials = p.name.split(' ').map(function(w){return w[0];}).join('').slice(0,2);
+
+  var actHtml = openAct.length === 0
+    ? '<div class="ot-hist-empty">No open actions for this person</div>'
+    : openAct.map(function(a) {
+        var od = a.due && a.due < today;
+        return `<div class="ot-hist-item" style="${od?'color:#DC2626':''}">
+          ${od ? '⚠ ' : '• '}${a.action}
+          ${a.due ? `<span style="color:#6678A0;font-size:.6rem">· due ${a.due}</span>` : ''}
+        </div>`;
+      }).join('');
+
+  var histHtml = history.length === 0
+    ? '<div class="ot-hist-empty">No previous notes</div>'
+    : history.slice(-5).reverse().map(function(h) {
+        return `<div class="ot-hist-item"><div class="ot-hist-date">${h.date}</div>${h.notes}</div>`;
+      }).join('');
+
+  detail.innerHTML = `
+    <div class="ot-detail-hdr">
+      <div style="width:32px;height:32px;border-radius:50%;background:${p.color};display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#fff;flex-shrink:0">${initials}</div>
+      <div><div class="ot-detail-name">${p.name}</div><div class="ot-detail-role">${p.role}</div></div>
+      <button class="ot-close-btn" onclick="otToggle('${id}')">✕</button>
+    </div>
+    <div class="ot-detail-body">
+      <div>
+        <div class="ot-section-lbl">Meeting notes</div>
+        <div class="ot-date-row">
+          <label style="font-size:.7rem;color:#6678A0;">Date</label>
+          <input type="date" class="ot-date-inp" id="ot-date-${id}" value="${today}">
+        </div>
+        <textarea class="ot-notes-ta" id="ot-notes-${id}" placeholder="Key discussion points, decisions, follow-ups…">${data.currentNotes || ''}</textarea>
+        <div style="margin-top:.5rem;display:flex;gap:.5rem;">
+          <button class="ot-save-btn" onclick="otSaveNotes('${id}')">Save notes</button>
+          <button class="ot-save-btn" style="background:#16A34A" onclick="otLogMeeting('${id}')">Log meeting &amp; archive</button>
+        </div>
+      </div>
+      <div>
+        <div class="ot-section-lbl">Open actions for ${p.name.split(' ')[0]}</div>
+        <div class="ot-history" style="margin-bottom:1rem;">${actHtml}</div>
+        <div class="ot-section-lbl">Previous notes</div>
+        <div class="ot-history">${histHtml}</div>
+      </div>
+    </div>`;
+}
+
+function otSaveNotes(id) {
+  var data  = otLoad(id);
+  var notes = document.getElementById('ot-notes-' + id);
+  if (notes) data.currentNotes = notes.value;
+  otSave(id, data);
+  var btn = event.target;
+  var orig = btn.textContent;
+  btn.textContent = 'Saved ✓'; btn.style.background = '#16A34A';
+  setTimeout(function(){ btn.textContent = orig; btn.style.background = '#0A1F5C'; }, 1500);
+}
+
+function otLogMeeting(id) {
+  var data    = otLoad(id);
+  var dateEl  = document.getElementById('ot-date-' + id);
+  var notesEl = document.getElementById('ot-notes-' + id);
+  var meetDate = dateEl ? dateEl.value : new Date().toISOString().slice(0,10);
+  var notes    = notesEl ? notesEl.value.trim() : '';
+  if (!notes) { alert('Add some notes before logging the meeting.'); return; }
+  if (!data.history) data.history = [];
+  data.history.push({ date: meetDate, notes: notes });
+  data.lastDate    = meetDate;
+  data.currentNotes = '';
+  otSave(id, data);
+  _otOpen = id;
+  otRender();
+}
+
+// Extend ptSwitch to trigger 1:1 render — use assignment (not declaration) to avoid hoisting
+(function() {
+  var _orig = ptSwitch;
+  ptSwitch = function(id, btn) {
+    _orig(id, btn);
+    if (id === 'oneon') otRender();
+  };
+})();
+
+
 // BU SERVICES — VIEWER IDENTITY
 // Reads from: 1) URL param ?viewer=X  2) localStorage hub_viewer  3) login screen
 // ══════════════════════════════════════════════════════════════════════════════

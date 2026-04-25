@@ -3849,6 +3849,53 @@ function mtgRagLabel(m) {
   return 'Clear';
 }
 
+
+// ── Inject live action counts from Management Hub pt_actions ─────────────────
+function injectLiveActionCounts() {
+  try {
+    var actions = JSON.parse(localStorage.getItem('pt_actions') || '[]');
+    var today = new Date().toISOString().slice(0, 10);
+
+    // Map source names to CONFIG.meetings ids
+    var sourceMap = {
+      'commercial': 'commercial',
+      'ops':        'ops',
+      'nuclear':    'nuclear',
+      'gate':       'gate',
+      'finance':    'finance',
+      'hr':         'hr',
+      'eurazeo':    'eurazeo',
+      // common variants
+      'Commercial': 'commercial',
+      'Ops':        'ops',
+      'Nuclear':    'nuclear',
+      'Gate':       'gate',
+      'Finance':    'finance',
+      'HR':         'hr',
+      'Eurazeo':    'eurazeo',
+    };
+
+    // Reset all counts
+    CONFIG.meetings.forEach(function(m) { m.actions = 0; m.overdue = 0; });
+    CONFIG.actions_overdue = 0;
+
+    actions.forEach(function(a) {
+      if (a.done) return; // skip completed actions
+      var mtgId = sourceMap[a.source];
+      if (!mtgId) return;
+      var mtg = CONFIG.meetings.find(function(m) { return m.id === mtgId; });
+      if (!mtg) return;
+      mtg.actions++;
+      if (a.due && a.due < today) {
+        mtg.overdue++;
+        CONFIG.actions_overdue++;
+      }
+    });
+  } catch(e) {
+    console.warn('injectLiveActionCounts:', e.message);
+  }
+}
+
 function renderMeetings() {
   if (!CONFIG.meetings) return;
   var overdue = CONFIG.actions_overdue || 0;
@@ -4010,10 +4057,19 @@ function ragLabel(actual, forecast) {
 renderActualsPanel();
 renderRevenueFoundation();
 renderPerformance();
-renderMeetings();
+injectLiveActionCounts();
+  renderMeetings();
 renderAvb();
 renderMonthly();
 renderRegions();
+
+// ── Live sync: refresh meeting health whenever Management Hub updates pt_actions ─
+window.addEventListener('storage', function(e) {
+  if (e.key === 'pt_actions') {
+    injectLiveActionCounts();
+    renderMeetings();
+  }
+});
 
 // ── KPI ROW ──────────────────────────────────────────────────────────────────
 const totalActual = CONFIG.initiatives.reduce((s,i) => s+i.actual2026, 0);
