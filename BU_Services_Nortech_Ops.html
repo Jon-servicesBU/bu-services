@@ -1255,6 +1255,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="modal-body" id="inv-view-body" style="padding:.5rem"></div>
     <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('inv-view-modal')">Close</button>
+      <button class="btn btn-sm" id="inv-delete-btn" onclick="deleteInvoiceFromView()" style="display:none;color:#EF4444;border-color:rgba(185,28,28,.3)">🗑 Delete</button>
       <div style="flex:1"></div>
       <!-- Print / PDF -->
       <button class="btn btn-secondary btn-sm" onclick="exportWO('pdf', _currentInvWoId())">🖨 WO</button>
@@ -1262,6 +1263,8 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-secondary btn-sm" onclick="printInvoice()">🖨 Invoice</button>
       <button class="btn btn-secondary btn-sm" onclick="printInvAll()">🖨 All</button>
       <!-- Status actions -->
+      <button class="btn btn-secondary" id="inv-return-draft-btn" onclick="returnInvToDraft()"                   style="display:none">↩ Return to Draft</button>
+      <button class="btn btn-ghost"     id="inv-release-wo-btn"  onclick="releaseInvWOs()"                       style="display:none">↩ Release WOs to Approved</button>
       <button class="btn btn-secondary" id="inv-mark-sent-btn"    onclick="markInvoiceSent()"                    style="display:none">Mark Sent</button>
       <button class="btn btn-success"   id="inv-mark-paid-btn"    onclick="markInvoicePaid()"                    style="display:none">✓ Mark Paid</button>
       <button class="btn btn-secondary" id="inv-reverse-paid-btn" onclick="reverseInvoicePayment(_currentInvId)" style="display:none">↩ Unpay</button>
@@ -3773,7 +3776,7 @@ function renderInvoices(){
       + '<td>' + chipHtml(i.status) + '</td>'
       + '<td style="white-space:nowrap;text-align:right;padding:.4rem .5rem">'
         + '<span style="font-size:.8rem;color:var(--muted);margin-right:.3rem" id="inv-chev-'+i.id+'">▼</span>'
-        + '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewInvoice(\'"+i.id+"\')" >View</button>'
+        + '<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewInvoice(\''+i.id+'\')" >View</button>'
       + '</td>'
     + '</tr>';
 
@@ -3964,6 +3967,9 @@ function viewInvoice(id) {
   setBtn('inv-mark-sent-btn',    st === 'draft');
   setBtn('inv-mark-paid-btn',    st === 'sent');
   setBtn('inv-reverse-paid-btn', st === 'paid');
+  setBtn('inv-return-draft-btn', st === 'sent');
+  setBtn('inv-release-wo-btn',   st === 'draft');
+  setBtn('inv-delete-btn',       st === 'draft');
   // Show TS print button only if a linked timesheet exists
   var invWoId = (inv.chargeSheetIds||[])[0];
   var invTs   = invWoId ? _timesheets.find(function(t){ return t.woId === invWoId; }) : null;
@@ -3994,6 +4000,50 @@ function printInvAll() {
   if (woId) exportWO('pdf', woId);
   setTimeout(function(){ printInvoice(); }, 400);
   toast('Printing WO and Invoice…', 'info');
+}
+
+// ── Invoice view modal actions ────────────────────────────────────────────────
+async function releaseInvWOs() {
+  if (!_currentInvId) return;
+  var inv = _invoices.find(function(i){ return i.id === _currentInvId; }); if (!inv) return;
+  var woCount = (inv.chargeSheetIds||[]).length;
+  if (!confirm('Release ' + woCount + ' work order(s) back to Approved?\n\nThis removes them from invoice ' + inv.invNum + '. The invoice will remain as a draft.')) return;
+  try {
+    for (var k = 0; k < (inv.chargeSheetIds||[]).length; k++) {
+      var woId = inv.chargeSheetIds[k];
+      var wo = _jobs.find(function(j){ return j.id === woId; });
+      if (wo && wo.status === 'invoiced') {
+        wo.status = 'approved'; wo.invoiceId = null; wo.modified = today();
+        await sbUpsert('jobs', woId, wo);
+        _jobs = _jobs.map(function(j){ return j.id === woId ? wo : j; });
+      }
+    }
+    closeModal('inv-view-modal');
+    renderJobs(); renderInvoices(); renderDashboard();
+    toast('Work orders released back to Approved \u2713', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function returnInvToDraft() {
+  if (!_currentInvId) return;
+  var inv = _invoices.find(function(i){ return i.id === _currentInvId; }); if (!inv) return;
+  if (!confirm('Return invoice ' + inv.invNum + ' to Draft?\n\nThis will allow editing and deletion.')) return;
+  inv.status = 'draft'; inv.modified = today();
+  try {
+    await sbUpsert('invoices', _currentInvId, inv);
+    _invoices = _invoices.map(function(i){ return i.id === _currentInvId ? inv : i; });
+    closeModal('inv-view-modal');
+    renderInvoices(); renderDashboard();
+    toast('Invoice returned to draft', 'info');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function deleteInvoiceFromView() {
+  if (!_currentInvId) return;
+  var inv = _invoices.find(function(i){ return i.id === _currentInvId; }); if (!inv) return;
+  if (!confirm('Delete invoice ' + inv.invNum + '?\n\nThis cannot be undone.')) return;
+  closeModal('inv-view-modal');
+  await deleteInvoice(_currentInvId);
 }
 
 async function markInvoicePaid(){
