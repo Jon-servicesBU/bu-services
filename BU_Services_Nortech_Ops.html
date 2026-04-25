@@ -6910,7 +6910,9 @@ function renderTimesheets() {
       if (!text.toLowerCase().includes(q.toLowerCase())) return false;
     }
     if (!isAdmin() && myName) {
-      if (ts.technician !== myName) return false;
+      var tsOwner = (ts.technician || '').trim();
+      var inRows  = (ts.rows || []).some(function(r){ return (r.technician||'').trim() === myName; });
+      if (tsOwner !== myName && !inRows) return false;
     }
     return true;
   });
