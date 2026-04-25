@@ -1059,7 +1059,6 @@ document.addEventListener('DOMContentLoaded', function() {
         <div style="overflow-x:auto">
           <table style="width:100%;border-collapse:collapse;font-size:.73rem">
             <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:120px">Technician</th>
               <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:110px">Date</th>
               <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:150px">Category / Activity</th>
               <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
@@ -1710,7 +1709,7 @@ function toast(msg, type) {
 function chipHtml(status) {
   var map = {
     draft:     {bg:'rgba(107,114,128,.15)', color:'#9CA3AF',  label:'Draft'},
-    submitted: {bg:'rgba(245,158,11,.15)',  color:'#F59E0B',  label:'Submitted'},
+    pending:   {bg:'rgba(201,134,10,.15)', color:'#FCD34D',  label:'Confirm Needed'},
     approved:  {bg:'rgba(59,130,246,.15)',  color:'#60A5FA',  label:'Approved'},
     invoiced:  {bg:'rgba(139,92,246,.15)',  color:'#A78BFA',  label:'Invoiced'},
     paid:      {bg:'rgba(22,163,74,.15)',   color:'#22C55E',  label:'Paid'},
@@ -6275,73 +6274,70 @@ function calcRowCost(techName, regHrs, otHrs, nightHrs) {
 
 // ── Auto-create timesheet when WO is submitted ───────────────────────────────
 async function createTimesheetFromWO(wo) {
-  // ONE timesheet per WO. Status immediately 'submitted' — each tech confirms their own rows.
-  // Confirmations keyed by canonical VIEWER_PEOPLE name so matching is always exact.
+  // ONE timesheet PER TECHNICIAN — each tech owns their own TS, sees only their rows.
   if (!wo || !wo.id) return;
   var labourRows = wo.labourRows || [];
   if (!labourRows.length) return;
 
-  // Don't create if already exists
-  if (_timesheets.find(function(t){ return t.woId === wo.id; })) return 0;
-
-  // Fuzzy-resolve each tech name to canonical VIEWER_PEOPLE name
-  function _canonicalName(raw) {
-    if (!raw) return raw;
+  // Fuzzy-resolve raw dropdown name → canonical VIEWER_PEOPLE name
+  function _canonical(raw) {
+    if (!raw) return '';
     var r = raw.toLowerCase().trim();
-    var match = (VIEWER_PEOPLE || []).find(function(p) {
+    var m = (VIEWER_PEOPLE || []).find(function(p) {
       var n = p.name.toLowerCase();
       if (n === r) return true;
       var fn = n.split(' ')[0]; var ln = n.split(' ').pop();
       return fn.length > 1 && ln.length > 1 && r.includes(fn) && r.includes(ln);
     });
-    return match ? match.name : raw.trim();
+    return m ? m.name : raw.trim();
   }
 
-  // Build confirmations map with canonical keys
-  var confirmations = {};
-  var seen = {};
+  // Group rows by canonical tech name
+  var byTech = {};
   labourRows.forEach(function(r) {
-    var canonical = _canonicalName(r.technician);
-    if (canonical && !seen[canonical]) {
-      seen[canonical] = true;
-      confirmations[canonical] = { confirmed: false, date: null };
-    }
+    var name = _canonical(r.technician);
+    if (!name) return;
+    if (!byTech[name]) byTech[name] = [];
+    byTech[name].push({
+      date:      r.date      || wo.date || today(),
+      category:  r.category  || '',
+      regHrs:    r.regHrs    || 0,
+      otHrs:     r.otHrs     || 0,
+      nightHrs:  r.nightHrs  || 0,
+      startTime: r.startTime || '',
+      endTime:   r.endTime   || '',
+      billable:  true,
+    });
   });
 
-  var rows = labourRows.map(function(r) {
-    return {
-      date:       r.date      || wo.date || today(),
-      category:   r.category  || '',
-      regHrs:     r.regHrs    || 0,
-      otHrs:      r.otHrs     || 0,
-      nightHrs:   r.nightHrs  || 0,
-      startTime:  r.startTime || '',
-      endTime:    r.endTime   || '',
-      billable:   true,
-      technician: _canonicalName(r.technician),  // store canonical name
+  var created = 0;
+  Object.keys(byTech).forEach(function(techName) {
+    // Skip if TS already exists for this tech+WO
+    if (_timesheets.find(function(t){ return t.woId === wo.id && t.technician === techName; })) return;
+
+    var ts = {
+      id:           uid(),
+      woId:         wo.id,
+      woNum:        wo.woNum || wo.number || '—',
+      technician:   techName,
+      client:       wo.client   || '',
+      date:         wo.date     || today(),
+      site:         wo.site     || '',
+      province:     wo.province || '',
+      po:           wo.po       || '',
+      rows:         byTech[techName],
+      notes:        '',
+      status:       'pending',    // awaiting tech confirmation
+      confirmed:    false,
+      confirmedDate: null,
+      created:      today(),
+      modified:     today(),
     };
+    saveTimesheetToStorage(ts);
+    _timesheets.unshift(ts);
+    created++;
   });
-
-  var ts = {
-    id:            uid(),
-    woId:          wo.id,
-    woNum:         wo.woNum || wo.number || '—',
-    client:        wo.client   || '',
-    date:          wo.date     || today(),
-    site:          wo.site     || '',
-    province:      wo.province || '',
-    po:            wo.po       || '',
-    rows:          rows,
-    notes:         '',
-    status:        'submitted',   // immediately available for confirmation
-    confirmations: confirmations,
-    created:       today(),
-    modified:      today(),
-  };
-
-  saveTimesheetToStorage(ts);
-  _timesheets.unshift(ts);
-  return 1;
+  return created;
 }
 
 
@@ -6354,63 +6350,36 @@ function getCurrentTechName() {
 
 // ── Confirm my hours on a submitted timesheet ─────────────────────────────────
 function confirmMyHours(tsId) {
-  var btn        = document.getElementById('ts-confirm-btn');
-  var confirmKey = btn ? (btn.getAttribute('data-confirm-key') || '') : '';
   var ts = _timesheets.find(function(t){ return t.id === tsId; });
   if (!ts) return;
-  var myName = getCurrentTechName();
-  if (!myName) { toast('Could not identify your account', 'error'); return; }
+  if (!confirm('Confirm your hours on WO ' + (ts.woNum||'') + '?\n\nOnce confirmed you cannot edit without admin approval.')) return;
 
-  if (!confirm('Confirm your hours on WO ' + (ts.woNum||'') + '?\n\nOnce confirmed your rows will be locked and cannot be changed without admin approval.')) return;
+  // Collect any edits the tech made
+  var editedRows = collectTSRows();
 
-  // Collect edited rows tagged with the exact confirmations key
-  var tagName    = confirmKey || myName;
-  var editedRows = collectTSRows().map(function(r){
-    return Object.assign({}, r, { technician: tagName });
-  });
+  ts.rows         = editedRows.length ? editedRows : ts.rows;
+  ts.status       = 'submitted';
+  ts.confirmed    = true;
+  ts.confirmedDate = today();
+  ts.modified     = today();
 
-  // Replace only this tech's rows using fuzzy match; keep all others
-  var mn = myName.toLowerCase().trim();
-  var fn = mn.split(' ')[0]; var ln = mn.split(' ').pop();
-  var otherRows = (ts.rows || []).filter(function(r){
-    var rt = (r.technician||'').toLowerCase().trim();
-    return !(rt === mn || (fn.length>1 && ln.length>1 && rt.includes(fn) && rt.includes(ln)));
-  });
-  ts.rows = otherRows.concat(editedRows);
-
-  if (!ts.confirmations) ts.confirmations = {};
-  ts.confirmations[confirmKey || myName] = { confirmed: true, date: today() };
-  ts.modified = today();
   saveTimesheetToStorage(ts);
   closeModal('ts-modal');
   renderTimesheets();
   renderJobs();
-  toast('Hours confirmed \u2713', 'success');
+  toast('Hours confirmed ✓', 'success');
 }
+
 
 // ── Check if current tech has a pending confirmation on any TS ────────────────
 function getPendingConfirmations() {
   var myName = getCurrentTechName();
   if (!myName || isAdmin()) return [];
   return _timesheets.filter(function(ts) {
-    if (ts.status !== 'submitted') return false;
-    var c = ts.confirmations && ts.confirmations[myName];
-    return c && !c.confirmed;
+    return ts.technician === myName && ts.status === 'pending' && !ts.confirmed;
   });
 }
 
-// Check if current tech appears anywhere on a WO (for WO card banner)
-function techHasPendingOnWO(woId) {
-  var myName = getCurrentTechName();
-  if (!myName || isAdmin()) return null;
-  return _timesheets.find(function(t) {
-    return t.woId === woId
-      && t.status === 'submitted'
-      && t.confirmations
-      && t.confirmations[myName]
-      && !t.confirmations[myName].confirmed;
-  }) || null;
-}
 
 // ── Create or open timesheet for a WO ────────────────────────────────────────
 function createOrOpenTS(woId, techName) {
@@ -6471,23 +6440,21 @@ function openTSModal(tsId) {
   }
 
   var isConfirmView = !isAdmin()
-    && submitted
-    && myConfirmKey !== null
-    && !ts.confirmations[myConfirmKey].confirmed;
+    && ts.status === 'pending'
+    && ts.technician === myName
+    && !ts.confirmed;
+  var submitted = ts.status === 'submitted' || ts.status === 'pending';
 
   // ── Populate rows ────────────────────────────────────────────────────────
   document.getElementById('ts-rows-body').innerHTML = '';
   _tsRowCount = 0;
 
   if (isConfirmView) {
-    // Show only this tech's rows, pre-filled from TS (or WO as fallback)
-    var srcRows = (ts.rows && ts.rows.length) ? ts.rows : (((_jobs.find(function(j){return j.id===ts.woId;})||{}).labourRows)||[]);
-    var myRows  = srcRows.filter(function(r){ return _techMatch(r.technician||'', myName); });
-    if (myRows.length) {
-      myRows.forEach(function(r){ addTSRow(r); });
-    } else {
-      addTSRow();
-    }
+    // All rows in this TS belong to this tech — show them all, pre-filled from TS
+    var srcRows = (ts.rows && ts.rows.length) ? ts.rows
+      : (((_jobs.find(function(j){return j.id===ts.woId;})||{}).labourRows)||[]);
+    if (srcRows.length) { srcRows.forEach(function(r){ addTSRow(r); }); }
+    else { addTSRow(); }
   } else {
     var allRows = (ts.rows && ts.rows.length) ? ts.rows : (((_jobs.find(function(j){return j.id===ts.woId;})||{}).labourRows)||[]);
     if (allRows.length) { allRows.forEach(function(r){ addTSRow(r); }); } else { addTSRow(); }
@@ -6524,7 +6491,6 @@ function openTSModal(tsId) {
     if (confirmBtn) {
       confirmBtn.style.display = 'inline-flex';
       confirmBtn.setAttribute('data-ts-id', tsId);
-      confirmBtn.setAttribute('data-confirm-key', myConfirmKey);
     }
     var ambBanner = document.createElement('div');
     ambBanner.id = 'ts-confirm-banner';
@@ -6566,8 +6532,7 @@ function addTSRow(prefill) {
   tr.id = 'ts-row-' + idx;
   tr.style.borderBottom = '1px solid rgba(255,255,255,.04)';
   tr.innerHTML =
-    '<td style="padding:.2rem .25rem"><input class="cs-input" id="ts-tech-' + idx + '" value="' + (p.technician || '') + '" placeholder="Technician" style="width:120px"></td>'
-    + '<td style="padding:.2rem .25rem"><input class="cs-input" type="date" id="ts-date-' + idx + '" value="' + (p.date || today()) + '" style="width:110px"></td>'
+    '<td style="padding:.2rem .25rem"><input class="cs-input" type="date" id="ts-date-' + idx + '" value="' + (p.date || today()) + '" style="width:110px"></td>'
     + '<td style="padding:.2rem .25rem"><input class="cs-input" id="ts-cat-' + idx + '" placeholder="Activity…" value="' + (p.category || '') + '" style="width:160px"></td>'
     + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="ts-reg-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.regHrs || '') + '" style="width:58px"></td>'
     + '<td style="padding:.2rem .25rem"><input class="cs-input cs-num" type="number" id="ts-ot-' + idx + '" placeholder="0" min="0" step="0.5" value="' + (p.otHrs || '') + '" style="width:58px"></td>'
@@ -6596,7 +6561,6 @@ function collectTSRows() {
     var night = parseFloat(nightEl.value) || 0;
     if (!reg && !ot && !night) continue;
     rows.push({
-      technician:(document.getElementById('ts-tech-'  + i) || {}).value || '',
       date:      (document.getElementById('ts-date-'  + i) || {}).value || today(),
       category:  (document.getElementById('ts-cat-'   + i) || {}).value || '',
       regHrs:    reg, otHrs: ot, nightHrs: night,
@@ -6809,18 +6773,16 @@ function getISOWeek(dateStr) {
 
 function buildWeeklySummary() {
   // Group all TS rows by tech + ISO week
-  var summary = {}; // { 'techName|YYYY-Www': { tech, week, weekStart, reg, ot, night, vac, unbill, sheets:[] } }
+  var summary = {};
   var myName = !isAdmin() ? ((VIEWER_PEOPLE||[]).find(function(p){ return p.id===CURRENT_VIEWER; })||{}).name || '' : '';
   _timesheets.forEach(function(ts) {
-    var tech = ts.technician || '(unknown)';
     (ts.rows || []).forEach(function(r) {
+      // Each row's tech = row-level technician (old TSes) OR TS owner (new per-tech TSes)
+      var tech = (r.technician || '').trim() || (ts.technician || '').trim() || '(unknown)';
+
       // Techs only see their own rows
-      if (!isAdmin() && myName) {
-        var techLower = (r.technician||ts.technician||'').toLowerCase();
-        var fn = myName.split(' ')[0].toLowerCase();
-        var ln = myName.split(' ').pop().toLowerCase();
-        if (!techLower.includes(fn) && !techLower.includes(ln)) return;
-      }
+      if (!isAdmin() && myName && tech !== myName) return;
+
       var rowDate = r.date || ts.date || today();
       var wk = getISOWeek(rowDate);
       var ws = getWeekStart(rowDate);
@@ -6832,29 +6794,23 @@ function buildWeeklySummary() {
           sheets: [], wos: [],
         };
       }
-      var isVac    = (r.category || '').toLowerCase().includes('vac');
-      var isBill   = r.billable !== false;
-      var hrs      = (r.regHrs || 0) + (r.otHrs || 0) + (r.nightHrs || 0);
+      var isVac  = (r.category || '').toLowerCase().includes('vac');
+      var isBill = r.billable !== false;
 
       if (isVac) {
-        summary[key].vac += hrs;
-      } else if (!isBill) {
-        summary[key].unbill += hrs;
-        // Still count in reg/ot/night for total hours worked
-        summary[key].reg   += (r.regHrs   || 0);
-        summary[key].ot    += (r.otHrs    || 0);
-        summary[key].night += (r.nightHrs || 0);
+        summary[key].vac += (r.regHrs||0) + (r.otHrs||0) + (r.nightHrs||0);
       } else {
         summary[key].reg   += (r.regHrs   || 0);
         summary[key].ot    += (r.otHrs    || 0);
         summary[key].night += (r.nightHrs || 0);
+        if (!isBill) summary[key].unbill += (r.regHrs||0) + (r.otHrs||0) + (r.nightHrs||0);
       }
       if (summary[key].sheets.indexOf(ts.id) === -1) summary[key].sheets.push(ts.id);
       if (ts.woNum && summary[key].wos.indexOf(ts.woNum) === -1) summary[key].wos.push(ts.woNum);
     });
   });
   return Object.values(summary).sort(function(a, b) {
-    if (a.week !== b.week) return b.week.localeCompare(a.week); // newest first
+    if (a.week !== b.week) return b.week.localeCompare(a.week);
     return a.tech.localeCompare(b.tech);
   });
 }
@@ -6954,12 +6910,7 @@ function renderTimesheets() {
       if (!text.toLowerCase().includes(q.toLowerCase())) return false;
     }
     if (!isAdmin() && myName) {
-      var techField = (ts.technician || '').toLowerCase();
-      var rowTechs  = (ts.rows||[]).map(function(r){ return (r.technician||'').toLowerCase(); }).join(' ');
-      var nameFirst = myName.split(' ')[0].toLowerCase();
-      var nameLast  = myName.split(' ').pop().toLowerCase();
-      if (!techField.includes(nameFirst) && !techField.includes(nameLast) &&
-          !rowTechs.includes(nameFirst)  && !rowTechs.includes(nameLast)) return false;
+      if (ts.technician !== myName) return false;
     }
     return true;
   });
