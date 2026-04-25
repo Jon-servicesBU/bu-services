@@ -958,17 +958,25 @@ document.addEventListener('DOMContentLoaded', function() {
   <div id="view-rate-sheets" class="view" style="display:none">
     <div class="sec-hdr">
       <div><h2>Rate Sheets</h2><div class="sec-sub">Standard and customer-specific pricing</div></div>
-      <div class="sec-actions">
-        <button class="btn btn-ghost" onclick="openImportRateModal()">⬆ Import from File</button>
+      <div class="sec-actions" style="flex-wrap:wrap;gap:.4rem">
+        <input class="form-input" style="width:160px" placeholder="Customer…" id="rate-search-client" oninput="renderRateSheets()">
+        <select class="form-select" style="width:150px;font-size:.72rem" id="rate-filter-type" onchange="renderRateSheets()">
+          <option value="">All Types</option>
+          <option value="tm">Time &amp; Material</option>
+          <option value="piecework">Piece Work</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rate-search-client').value='';document.getElementById('rate-filter-type').value='';renderRateSheets()">Clear</button>
+        <button class="btn btn-ghost" onclick="openImportRateModal()">⬆ Import T&amp;M</button>
+        <button class="btn btn-ghost" onclick="openImportPieceworkModal()">⬆ Import Piece Work</button>
         <button class="btn btn-ghost" onclick="importSeedRateSheet('ellisdon_march_2026')" title="Load pre-built EllisDon 2026 rate sheet">📋 EllisDon 2026</button>
         <button class="btn btn-primary" onclick="openRateModal()">+ New Rate Sheet</button>
       </div>
     </div>
-    <div class="card-grid card-grid-3" id="rate-sheets-grid"></div>
+    <div id="rate-sheets-list"></div>
     <div class="empty-state" id="rates-empty" style="display:none">
       <div class="empty-state-icon">💲</div>
       <div class="empty-state-title">No Rate Sheets</div>
-      <div class="empty-state-sub">Add a rate sheet to start pricing work orders</div>
+      <div class="empty-state-sub">Import or create a rate sheet to get started</div>
     </div>
   </div>
 
