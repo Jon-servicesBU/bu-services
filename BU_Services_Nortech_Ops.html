@@ -1556,6 +1556,8 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('nav-date').textContent=
     new Date().toLocaleDateString('en-CA',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+  // Apply role visibility immediately so techs never see dashboard flash
+  if (typeof applyAdminVisibility === 'function') applyAdminVisibility();
   loadAll();
 });
 
@@ -2419,6 +2421,7 @@ function renderForView(v){
   if(v==='margin')      renderMarginReport();
 }
 function renderAll(){
+  applyAdminVisibility();   // redirect techs away from dashboard, hide admin tabs
   renderDashboard();
   updatePendingBadge();
 }
@@ -2591,14 +2594,21 @@ function renderJobs() {
     var techs    = [...new Set((j.labourRows||[]).map(function(r){ return r.technician; }).filter(Boolean))];
     var province = (CANADA_TAX_RATES[j.province]||{}).name || j.province || '';
 
-    // ── Simplified tech card (submitted/approved/invoiced/paid) ──────────────
-    if (!isAdmin() && j.status !== 'draft') {
+    // ── Simplified tech card — all WOs are view-only for techs ─────────────
+    if (!isAdmin()) {
+      var isDraft = j.status === 'draft';
       return '<div class="card" style="padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem" id="job-card-'+j.id+'">'
-        + '<div>'
+        + '<div style="flex:1;min-width:0">'
           + '<div style="font-family:var(--mono);font-size:.82rem;font-weight:800;color:var(--nor-accent)">' + woNum + '</div>'
-          + '<div style="font-size:.72rem;color:var(--muted);margin-top:.1rem">' + (j.date ? fmtDate(j.date) + ' · ' : '') + chipHtml(j.status) + '</div>'
+          + '<div style="font-size:.72rem;color:var(--muted);margin-top:.1rem">'
+            + (j.client ? '<span style="color:var(--text);font-weight:600;margin-right:.4rem">' + j.client + '</span>' : '')
+            + (j.date ? fmtDate(j.date) + ' · ' : '')
+            + chipHtml(j.status)
+          + '</div>'
         + '</div>'
-        + '<button class="btn btn-ghost btn-sm" data-open-wo="'+j.id+'" style="flex-shrink:0">🔒 View</button>'
+        + (isDraft
+          ? '<button class="btn btn-primary btn-sm" data-open-wo="'+j.id+'" style="flex-shrink:0">Continue →</button>'
+          : '<button class="btn btn-ghost btn-sm" data-open-wo="'+j.id+'" style="flex-shrink:0">🔒 View</button>')
       + '</div>';
     }
 
