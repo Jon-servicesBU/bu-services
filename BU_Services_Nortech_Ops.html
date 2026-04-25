@@ -524,9 +524,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ── SYSBAR ────────────────────────────────────────────────────────────── -->
 <div class="sysbar">
   <span class="sysbar-label">BU Services</span>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices">🏠 Hub</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Command_Centre.html" target="buservices">📊 Command Centre</a>
-  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices">🗂 CRM</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Management_Hub.html" target="buservices" data-admin-only>🏠 Hub</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_Command_Centre.html" target="buservices" data-admin-only>📊 Command Centre</a>
+  <a class="sysbtn" href="https://jon-servicesbu.github.io/bu-services/BU_Services_CRM.html" target="buservices" data-admin-only>🗂 CRM</a>
   <span class="sysbtn sysbtn-nortech">🔧 Nortech Ops</span>
 </div>
 
@@ -566,7 +566,10 @@ document.addEventListener('DOMContentLoaded', function() {
     <div class="sec-hdr">
       <div><h2>Work Orders</h2><div class="sec-sub">Tap a work order to view details or log more work</div></div>
       <div class="sec-actions">
-        <input class="form-input" style="width:180px" placeholder="Search…" id="job-search" oninput="renderJobs()">
+        <input class="form-input" style="width:180px" placeholder="Search…" id="job-search" oninput="_jobsPage=1;renderJobs()">
+        <input type="date" class="form-input" style="width:140px" id="job-date-from" title="From date" onchange="_jobsPage=1;renderJobs()">
+        <input type="date" class="form-input" style="width:140px" id="job-date-to" title="To date" onchange="_jobsPage=1;renderJobs()">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('job-date-from').value='';document.getElementById('job-date-to').value='';_jobsPage=1;renderJobs()">Clear</button>
         <select class="form-select" style="width:120px;font-size:.72rem" id="job-filter-status" onchange="renderJobs()">
           <option value="">All</option>
           <option value="draft">Draft</option>
@@ -579,6 +582,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </div>
     <div id="jobs-grid" style="display:grid;gap:.75rem"></div>
+    <div id="jobs-pager"></div>
     <div class="empty-state" id="jobs-empty" style="display:none">
       <div class="empty-state-icon">🔧</div>
       <div class="empty-state-title">No Work Orders Yet</div>
@@ -870,7 +874,10 @@ document.addEventListener('DOMContentLoaded', function() {
           <option value="draft">Draft</option>
           <option value="submitted">Submitted</option>
         </select>
-        <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="renderTimesheets()">
+        <input class="form-input" style="width:160px" placeholder="Search…" id="ts-search" oninput="_tsPage=1;renderTimesheets()">
+        <input type="date" class="form-input" style="width:140px" id="ts-date-from" title="From date" onchange="_tsPage=1;renderTimesheets()">
+        <input type="date" class="form-input" style="width:140px" id="ts-date-to" title="To date" onchange="_tsPage=1;renderTimesheets()">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ts-date-from').value='';document.getElementById('ts-date-to').value='';_tsPage=1;renderTimesheets()">Clear</button>
         <button class="btn btn-secondary" onclick="exportPayroll()">⬇ Payroll Export</button>
       </div>
     </div>
@@ -885,6 +892,7 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         </div>
         <div id="ts-grid" style="display:grid;gap:.75rem"></div>
+        <div id="ts-pager"></div>
     <div class="empty-state" id="ts-empty" style="display:none">
       <div class="empty-state-icon">⏱</div>
       <div class="empty-state-title">No Timesheets Yet</div>
@@ -1220,6 +1228,14 @@ var _invoices     = [];
 var _rateSheets   = [];
 var _timesheets   = [];
 var _currentView  = 'dashboard';
+// ── Pagination state ─────────────────────────────────────────────────────────
+var _jobsPage     = 1;
+var _tsPage       = 1;
+var PAGE_SIZE     = 25;
+var _jobsDateFrom = '';
+var _jobsDateTo   = '';
+var _tsDateFrom   = '';
+var _tsDateTo     = '';
 var _editWOId     = null;
 var _editTSId     = null;
 var _tsRowCount   = 0;
@@ -1432,36 +1448,42 @@ function getFilmTypeOptions(selected) {
 
 
 // ── Timesheet localStorage storage ───────────────────────────────────────────
-function saveTimesheetToStorage(ts) {
+// ── Timesheet Supabase storage ───────────────────────────────────────────────
+// Timesheets live in Supabase 'timesheets' table (same {id,data,updated_at} schema).
+// localStorage is used as a write-through cache so the UI stays fast.
+var _TS_CACHE_KEY = 'nortech_ts_cache';
+
+function _tsCacheRead() {
+  try { return JSON.parse(localStorage.getItem(_TS_CACHE_KEY) || '[]'); } catch(e) { return []; }
+}
+function _tsCacheWrite(all) {
+  try { localStorage.setItem(_TS_CACHE_KEY, JSON.stringify(all)); } catch(e) {}
+}
+
+async function saveTimesheetToStorage(ts) {
   if (!ts || !ts.id) return;
-  var all = loadTimesheetsFromStorage();
+  // Write-through cache
+  var all = _tsCacheRead();
   var idx = all.findIndex(function(t){ return t.id === ts.id; });
   if (idx > -1) all[idx] = ts; else all.unshift(ts);
-  try { localStorage.setItem('nortech_timesheets', JSON.stringify(all)); } catch(e){}
+  _tsCacheWrite(all);
   _timesheets = all;
+  // Persist to Supabase (non-blocking)
+  try { await sbUpsert('timesheets', ts.id, ts); }
+  catch(e) { console.warn('[TS] Supabase write failed, cached locally:', e.message); }
 }
+
 function loadTimesheetsFromStorage() {
-  try {
-    var raw = localStorage.getItem('nortech_timesheets');
-    if (!raw) return [];
-    var all = JSON.parse(raw);
-    // Auto-purge orphaned timesheets (WO no longer in Supabase)
-    if (_jobs && _jobs.length > 0) {
-      var validIds = _jobs.map(function(j){ return j.id; });
-      var clean = all.filter(function(t){ return validIds.indexOf(t.woId) > -1; });
-      if (clean.length !== all.length) {
-        localStorage.setItem('nortech_timesheets', JSON.stringify(clean));
-        console.log('[Nortech] Purged ' + (all.length - clean.length) + ' orphaned timesheet(s)');
-        return clean;
-      }
-    }
-    return all;
-  } catch(e) { return []; }
+  // Return cache; Supabase load happens in loadAll()
+  return _tsCacheRead();
 }
-function deleteTimesheetFromStorage(id) {
-  var all = loadTimesheetsFromStorage().filter(function(t){ return t.id !== id; });
-  try { localStorage.setItem('nortech_timesheets', JSON.stringify(all)); } catch(e){}
+
+async function deleteTimesheetFromStorage(id) {
+  var all = _tsCacheRead().filter(function(t){ return t.id !== id; });
+  _tsCacheWrite(all);
   _timesheets = all;
+  try { await sbDelete('timesheets', id); }
+  catch(e) { console.warn('[TS] Supabase delete failed:', e.message); }
 }
 
 
@@ -2345,15 +2367,23 @@ async function sbDelete(table, id){
 // ── Data load ─────────────────────────────────────────────────────────────────
 async function loadAll(){
   try{
-    var results=await Promise.allSettled([sbList('jobs'),sbList('charge_sheets'),sbList('invoices'),sbList('rate_sheets')]);
+    var results=await Promise.allSettled([
+      sbList('jobs'), sbList('charge_sheets'),
+      sbList('invoices'), sbList('rate_sheets'), sbList('timesheets')
+    ]);
     if(results[0].status==='fulfilled') _jobs         = results[0].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[1].status==='fulfilled') _chargeSheets = results[1].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[2].status==='fulfilled') _invoices     = results[2].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[3].status==='fulfilled') _rateSheets   = results[3].value.map(function(r){return Object.assign({id:r.id},r.data);});
-    // Timesheets stored in localStorage (no Supabase table needed)
-    _timesheets = loadTimesheetsFromStorage();
-    repairInvoiceTotals();  // fix any $0 totals from legacy/bug saves
-    pushActualsToCC();       // sync Nortech actuals to Command Centre localStorage
+    if(results[4].status==='fulfilled') {
+      var sbTS = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
+      _timesheets = sbTS;
+      _tsCacheWrite(sbTS); // refresh local cache from Supabase
+    } else {
+      _timesheets = loadTimesheetsFromStorage(); // fallback to cache
+    }
+    repairInvoiceTotals();
+    pushActualsToCC();
     renderAll();
   }catch(e){ console.warn('loadAll failed:', e.message); renderAll(); }
 }
@@ -2487,6 +2517,26 @@ function updatePendingBadge(){
 }
 
 // ── Jobs ──────────────────────────────────────────────────────────────────────
+// ── Pagination helpers ─────────────────────────────────────────────────────────
+function _pagerHTML(page, totalPages, totalItems, prev, next) {
+  if (totalPages <= 1) return '<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);padding:.35rem 0">' + totalItems + ' records</div>';
+  return '<div style="display:flex;align-items:center;gap:.5rem;padding:.5rem 0;font-size:.74rem">'
+    + '<button class="btn btn-ghost btn-sm" onclick="' + prev + '" ' + (page <= 1 ? 'disabled style="opacity:.3"' : '') + '>‹ Prev</button>'
+    + '<span style="font-family:var(--mono);font-size:.68rem;color:var(--muted)">Page ' + page + ' of ' + totalPages + ' · ' + totalItems + ' records</span>'
+    + '<button class="btn btn-ghost btn-sm" onclick="' + next + '" ' + (page >= totalPages ? 'disabled style="opacity:.3"' : '') + '>Next ›</button>'
+    + '</div>';
+}
+function renderJobsPager(page, totalPages, totalItems) {
+  var el = document.getElementById('jobs-pager');
+  if (el) el.innerHTML = _pagerHTML(page, totalPages, totalItems,
+    '_jobsPage--;renderJobs()', '_jobsPage++;renderJobs()');
+}
+function renderTSPager(page, totalPages, totalItems) {
+  var el = document.getElementById('ts-pager');
+  if (el) el.innerHTML = _pagerHTML(page, totalPages, totalItems,
+    '_tsPage--;renderTimesheets()', '_tsPage++;renderTimesheets()');
+}
+
 function renderJobs() {
   var q      = (document.getElementById('job-search')        || {}).value || '';
   var filter = (document.getElementById('job-filter-status') || {}).value || '';
@@ -2500,13 +2550,26 @@ function renderJobs() {
              (r.technician||'').toLowerCase().includes(vp.name.split(' ').pop().toLowerCase());
     });
   });
+  var dateFrom = (document.getElementById('job-date-from')||{}).value || '';
+  var dateTo   = (document.getElementById('job-date-to')  ||{}).value || '';
+
   var filtered = _viewJobs.filter(function(j) {
-    // Hide legacy jobs that don't have WO format
     if (validStatuses.indexOf(j.status) === -1 && !j.woNum) return false;
     if (filter && j.status !== filter) return false;
+    if (dateFrom && j.date && j.date < dateFrom) return false;
+    if (dateTo   && j.date && j.date > dateTo)   return false;
     if (!q) return true;
     return ((j.client||'')+(j.site||'')+(j.woNum||j.number||'')+(j.po||'')+(j.jobNum||'')).toLowerCase().includes(q.toLowerCase());
   });
+
+  // Sort newest first
+  filtered.sort(function(a,b){ return (b.date||b.created||'').localeCompare(a.date||a.created||''); });
+
+  var totalItems = filtered.length;
+  var totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  if (_jobsPage > totalPages) _jobsPage = totalPages;
+  var pageStart  = (_jobsPage - 1) * PAGE_SIZE;
+  var paged      = filtered.slice(pageStart, pageStart + PAGE_SIZE);
 
   var grid  = document.getElementById('jobs-grid');
   var empty = document.getElementById('jobs-empty');
@@ -2515,11 +2578,13 @@ function renderJobs() {
   if (!filtered.length) {
     grid.innerHTML = '';
     if (empty) empty.style.display = 'block';
+    renderJobsPager(0, 0, 0);
     return;
   }
   if (empty) empty.style.display = 'none';
+  renderJobsPager(_jobsPage, totalPages, totalItems);
 
-  grid.innerHTML = filtered.map(function(j) {
+  grid.innerHTML = paged.map(function(j) {
     var woNum    = j.woNum || j.number || '—';
     var totalReg = j.totalReg || (j.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0);},0);
     var totalOT  = j.totalOT  || (j.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0);},0);
@@ -6164,8 +6229,7 @@ async function saveTSDraft() {
   if (!_editTSId) { toast('No timesheet to save', 'error'); return; }
   var data = buildTSData('draft');
   try {
-    saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
-    _timesheets = _timesheets.map(function(t) { return t.id === _editTSId ? Object.assign({id:_editTSId}, data) : t; });
+    await saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
     closeModal('ts-modal');
     renderTimesheets();
     toast('Timesheet draft saved', 'success');
@@ -6181,8 +6245,7 @@ async function submitTS() {
   var data = buildTSData('submitted');
   data.submittedDate = today();
   try {
-    saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
-    _timesheets = _timesheets.map(function(t) { return t.id === _editTSId ? Object.assign({id:_editTSId}, data) : t; });
+    await saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
     closeModal('ts-modal');
     renderTimesheets();
     toast('Timesheet submitted', 'success');
@@ -6460,14 +6523,17 @@ function renderTimesheets() {
 
   // Filter: admins see all, techs see only their own
   var myName = !isAdmin() ? ((VIEWER_PEOPLE||[]).find(function(p){ return p.id===CURRENT_VIEWER; })||{}).name || '' : '';
+  var tsDateFrom = (document.getElementById('ts-date-from')||{}).value || '';
+  var tsDateTo   = (document.getElementById('ts-date-to')  ||{}).value || '';
 
   var list = _timesheets.filter(function(ts) {
     if (filter && ts.status !== filter) return false;
+    if (tsDateFrom && ts.date && ts.date < tsDateFrom) return false;
+    if (tsDateTo   && ts.date && ts.date > tsDateTo)   return false;
     if (q) {
       var text = (ts.woNum||'') + (ts.client||'') + (ts.site||'');
       if (!text.toLowerCase().includes(q.toLowerCase())) return false;
     }
-    // Techs see only their own timesheets
     if (!isAdmin() && myName) {
       var techField = (ts.technician || '').toLowerCase();
       var rowTechs  = (ts.rows||[]).map(function(r){ return (r.technician||'').toLowerCase(); }).join(' ');
@@ -6479,6 +6545,15 @@ function renderTimesheets() {
     return true;
   });
 
+  // Sort newest first
+  list.sort(function(a,b){ return (b.date||b.modified||'').localeCompare(a.date||a.modified||''); });
+
+  var tsTotalItems = list.length;
+  var tsTotalPages = Math.max(1, Math.ceil(tsTotalItems / PAGE_SIZE));
+  if (_tsPage > tsTotalPages) _tsPage = tsTotalPages;
+  var tsPageStart  = (_tsPage - 1) * PAGE_SIZE;
+  var pagedTS      = list.slice(tsPageStart, tsPageStart + PAGE_SIZE);
+
   var grid  = document.getElementById('ts-grid');
   var empty = document.getElementById('ts-empty');
   if (!grid) return;
@@ -6486,11 +6561,13 @@ function renderTimesheets() {
   if (!list.length) {
     grid.innerHTML = '';
     if (empty) empty.style.display = 'block';
+    renderTSPager(0, 0, 0);
     return;
   }
   if (empty) empty.style.display = 'none';
+  renderTSPager(_tsPage, tsTotalPages, tsTotalItems);
 
-  grid.innerHTML = list.map(function(ts) {
+  grid.innerHTML = pagedTS.map(function(ts) {
     var wo = _jobs.find(function(j) { return j.id === ts.woId; }) || {};
     var rows = ts.rows || [];
     var totalReg   = rows.reduce(function(s,r){ return s+(r.regHrs||0);   }, 0);
