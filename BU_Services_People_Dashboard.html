@@ -863,56 +863,24 @@ function getPool() {
   });
 }
 function calcUtil() {
-  // Use same formula as bar chart: (tot - vac - bill) / (tot - vac)
-  // For office filter: use per-office data from upload
-  if (offFilter !== 'all' && DATA.util_by_office) {
-    var off = DATA.util_by_office[offFilter];
-    if (off) {
-      // Recalculate from raw if available, else use stored value
-      if (off.bill !== undefined && off.tot !== undefined) {
-        var worked = (off.tot||0) - (off.vac||0);
-        return worked > 0 ? Math.round(((off.tot - (off.vac||0) - off.bill) / worked) * 1000) / 10 : 0;
-      }
-      return off.avg_13wk || off.latest || 0;
-    }
-  }
-  // Company-wide: aggregate from trend data
-  var trend = DATA.util_13wk_trend || [];
-  var active = trend.filter(function(w){ return (w.tot - (w.vac||0)) > 0; });
-  if (active.length) {
-    var nb = active.reduce(function(s,w){ return s + (w.tot - (w.vac||0) - (w.bill||0)); }, 0);
-    var wt = active.reduce(function(s,w){ return s + (w.tot - (w.vac||0)); }, 0);
-    return wt > 0 ? Math.round(nb / wt * 1000) / 10 : 0;
-  }
-  // Fallback: employee data
-  var pool = getPool().filter(function(e){ return e.overhead_avg != null; });
-  if (!pool.length) return DATA.util_13wk_avg || 0;
-  return Math.round(pool.reduce(function(s,e){ return s+e.overhead_avg; },0)/pool.length*10)/10;
+  // Employee-based so office/name filters work
+  // Scale factor applied when upload provides aggregate data
+  var pool = getPool().filter(function(e){ return e.overhead_avg !== null && e.overhead_avg !== undefined; });
+  if (!pool.length) return DATA.util_13wk_avg || DATA.util_total_latest || 0;
+  var raw = pool.reduce(function(s,e){ return s + (e.overhead_avg||0); }, 0) / pool.length;
+  var scale = DATA._util_scale || 1;
+  return Math.round(raw * scale * 10) / 10;
 }
 
 function calcCumUtil() {
-  // Utilization = bill / (tot - vac) — same data source as bar chart
-  if (offFilter !== 'all' && DATA.util_by_office) {
-    var off = DATA.util_by_office[offFilter];
-    if (off && off.bill !== undefined && off.tot !== undefined) {
-      var worked = (off.tot||0) - (off.vac||0);
-      return worked > 0 ? Math.round((off.bill||0) / worked * 1000) / 10 : 0;
-    }
-    if (off) return off.cum_util || off.latest || 0;
-  }
-  var trend = DATA.util_13wk_trend || [];
-  var active = trend.filter(function(w){ return (w.tot - (w.vac||0)) > 0; });
-  if (active.length) {
-    var bill = active.reduce(function(s,w){ return s + (w.bill||0); }, 0);
-    var wt   = active.reduce(function(s,w){ return s + (w.tot - (w.vac||0)); }, 0);
-    return wt > 0 ? Math.round(bill / wt * 1000) / 10 : 0;
-  }
   var pool = getPool();
   var CAPACITY_13WK = DATA.capacity_hrs_13wk || 520.0;
-  var totalBill = pool.reduce(function(s,e){ return s+(e.bill_13wk||0); },0);
-  var totalVac  = pool.reduce(function(s,e){ return s+(e.vac_weeks?e.vac_weeks*40:0); },0);
-  var cap = Math.max(1, pool.length*CAPACITY_13WK - totalVac);
-  return Math.round(totalBill/cap*1000)/10;
+  var totalBill = pool.reduce(function(s,e){ return s + (e.bill_13wk||0); }, 0);
+  var totalVac  = pool.reduce(function(s,e){ return s + (e.vac_weeks ? e.vac_weeks * 40 : 0); }, 0);
+  var capLessVac = Math.max(1, pool.length * CAPACITY_13WK - totalVac);
+  var raw = totalBill / capLessVac * 100;
+  var scale = DATA._cum_util_scale || 1;
+  return Math.round(raw * scale * 10) / 10;
 }
 
 function calc13wkAvg() {
@@ -1430,6 +1398,23 @@ async function handleUpload(files) {
     if (extracted.util_13wk_trend && Array.isArray(extracted.util_13wk_trend)) {
       DATA.util_week_ending  = extracted.util_week_ending || extracted.util_13wk_trend[0].date;
       DATA.util_13wk_trend   = extracted.util_13wk_trend;
+      // Store scale factors so calcUtil/calcCumUtil reflect uploaded data company-wide
+      if (extracted.util_13wk_avg) {
+        var empAvg = (function(){
+          var p = (DATA.employees||[]).filter(function(e){ return e.overhead_avg!=null; });
+          return p.length ? p.reduce(function(s,e){ return s+e.overhead_avg; },0)/p.length : 0;
+        })();
+        DATA._util_scale = empAvg > 0 ? extracted.util_13wk_avg / empAvg : 1;
+      }
+      var empCum = (function(){
+        var p = DATA.employees||[];
+        var cap = (DATA.capacity_hrs_13wk||520)*p.length;
+        var bill = p.reduce(function(s,e){ return s+(e.bill_13wk||0); },0);
+        return cap > 0 ? bill/cap*100 : 0;
+      })();
+      if (empCum > 0 && extracted.util_total_latest) {
+        DATA._cum_util_scale = extracted.util_total_latest / empCum;
+      }
 
       DATA.util_total_latest = extracted.util_total_latest || extracted.util_13wk_trend[0].util;
       DATA.util_13wk_avg     = extracted.util_13wk_avg || (
@@ -1439,12 +1424,7 @@ async function handleUpload(files) {
         // Normalise: array [{office,util,...}] → object {EDM:{latest,avg_13wk,trend}}
         if (Array.isArray(extracted.util_by_office)) {
           var obo = {};
-          extracted.util_by_office.forEach(function(o) {
-            if (o.office) obo[o.office] = {
-              latest: o.util, avg_13wk: o.util, trend: [],
-              bill: o.bill, tot: o.tot, vac: o.vac||0
-            };
-          });
+          extracted.util_by_office.forEach(function(o) { if (o.office) obo[o.office] = {latest: o.util, avg_13wk: o.util, trend: []}; });
           DATA.util_by_office = obo;
         } else {
           DATA.util_by_office = extracted.util_by_office;
@@ -1615,7 +1595,7 @@ function hideBcOverlay() {
         var d2 = Object.assign({}, stored.data);
         if (Array.isArray(d2.util_by_office)) {
           var obo = {};
-          d2.util_by_office.forEach(function(o) { if (o.office) obo[o.office] = {latest: o.util, avg_13wk: o.util, trend: [], bill: o.bill, tot: o.tot, vac: o.vac||0}; });
+          d2.util_by_office.forEach(function(o) { if (o.office) obo[o.office] = {latest: o.util, avg_13wk: o.util, trend: []}; });
           d2.util_by_office = obo;
         }
         Object.assign(DATA, d2);
