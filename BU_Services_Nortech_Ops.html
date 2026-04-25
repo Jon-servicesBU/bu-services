@@ -306,6 +306,14 @@ body.tech-view .cs-lb-tot           { display: none !important; }
 .cust-no-results { padding:.6rem .75rem; color:var(--muted); font-size:.75rem; }
 .inv-wo-row:hover { background:rgba(255,255,255,.05); }
 
+/* ── Margin colour classes ─────────────────────────────────────────────────── */
+.sc-green { color: #22C55E; text-shadow: 0 0 8px rgba(34,197,94,.6), 0 0 20px rgba(34,197,94,.3); }
+.sc-amber { color: #F59E0B; }
+.sc-red   { color: #EF4444; }
+.status-chip.sc-green { background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.3); color:#22C55E; text-shadow:0 0 6px rgba(34,197,94,.5); padding:.15rem .55rem; border-radius:999px; font-size:.72rem; font-weight:700; font-family:var(--mono); white-space:nowrap; display:inline-block; }
+.status-chip.sc-amber { background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.3); color:#F59E0B; padding:.15rem .55rem; border-radius:999px; font-size:.72rem; font-weight:700; font-family:var(--mono); white-space:nowrap; display:inline-block; }
+.status-chip.sc-red   { background:rgba(239,68,68,.12);  border:1px solid rgba(239,68,68,.3);  color:#EF4444; padding:.15rem .55rem; border-radius:999px; font-size:.72rem; font-weight:700; font-family:var(--mono); white-space:nowrap; display:inline-block; }
+
 </style>
 </head>
 <script>// ══════════════════════════════════════════════════════════════════════════════
@@ -630,15 +638,6 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-ghost btn-sm" onclick="loadDemoData()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">🎬 Load Demo</button>
       <button class="btn btn-ghost btn-sm" onclick="clearDemoData()" style="border-color:rgba(232,64,64,.3);color:#EF4444">🗑 Clear Demo</button>
       <button class="btn btn-ghost btn-sm" onclick="clearAllData()" style="border-color:rgba(232,64,64,.5);color:#EF4444;font-weight:700">⚠ Clear All Data</button>
-    </div>
-    <!-- Supabase migration tool — admin only, shown until migration is complete -->
-    <div id="ts-migrate-panel" data-admin-only style="margin-bottom:1.25rem;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.25);border-radius:8px;padding:.85rem 1.1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:.78rem;font-weight:700;color:var(--sky);margin-bottom:.2rem">📤 Supabase Timesheet Migration</div>
-        <div style="font-size:.72rem;color:var(--muted)" id="ts-migrate-status">Timesheets cached locally — click to push all to Supabase.</div>
-      </div>
-      <button class="btn btn-primary btn-sm" onclick="migrateTimesheetsToSupabase()" id="ts-migrate-btn">Push to Supabase</button>
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ts-migrate-panel').style.display='none'">Dismiss</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
       <div id="dash-inv-panel" class="section">
@@ -1014,11 +1013,17 @@ document.addEventListener('DOMContentLoaded', function() {
   <div id="view-margin" class="view" style="display:none">
     <div class="sec-hdr">
       <div><h2>Margin Report</h2><div class="sec-sub">Billed vs Cost — admin only</div></div>
-      <div class="sec-actions">
-        <select class="form-select" style="width:160px;font-size:.72rem" id="margin-filter-tech" onchange="renderMarginReport()">
-          <option value="">All Technicians</option>
+      <div class="sec-actions" style="flex-wrap:wrap;gap:.4rem">
+        <input class="form-input" style="width:130px" placeholder="WO #…" id="margin-filter-wo" oninput="renderMarginReport()">
+        <input class="form-input" style="width:150px" placeholder="Customer…" id="margin-filter-client" oninput="renderMarginReport()">
+        <input class="form-input" style="width:150px" placeholder="Technician…" id="margin-filter-tech-text" oninput="renderMarginReport()">
+        <select class="form-select" style="width:150px;font-size:.72rem" id="margin-filter-pct" onchange="renderMarginReport()">
+          <option value="">All Margins</option>
+          <option value="green">≥ 40% (Green)</option>
+          <option value="amber">30–39% (Amber)</option>
+          <option value="red">&lt; 30% (Red)</option>
         </select>
-        <input class="form-input" style="width:130px" placeholder="Filter by WO…" id="margin-filter-wo" oninput="renderMarginReport()">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('margin-filter-wo').value='';document.getElementById('margin-filter-client').value='';document.getElementById('margin-filter-tech-text').value='';document.getElementById('margin-filter-pct').value='';renderMarginReport()">Clear</button>
       </div>
     </div>
     <div class="kpi-row" id="margin-kpis" style="margin-bottom:1.25rem"></div>
@@ -7098,33 +7103,28 @@ function buildWeeklySummary() {
   var myName = !isAdmin() ? ((VIEWER_PEOPLE||[]).find(function(p){ return p.id===CURRENT_VIEWER; })||{}).name || '' : '';
   _timesheets.forEach(function(ts) {
     (ts.rows || []).forEach(function(r) {
-      // Each row's tech = row-level technician (old TSes) OR TS owner (new per-tech TSes)
       var tech = (r.technician || '').trim() || (ts.technician || '').trim() || '(unknown)';
-
-      // Techs only see their own rows
       if (!isAdmin() && myName && tech !== myName) return;
-
       var rowDate = r.date || ts.date || today();
       var wk = getISOWeek(rowDate);
       var ws = getWeekStart(rowDate);
       var key = tech + '|' + wk;
       if (!summary[key]) {
-        summary[key] = {
-          tech: tech, week: wk, weekStart: ws,
-          reg: 0, ot: 0, night: 0, vac: 0, unbill: 0,
-          sheets: [], wos: [],
-        };
+        summary[key] = { tech: tech, week: wk, weekStart: ws,
+          reg: 0, ot: 0, night: 0, vac: 0, unbill: 0, billable: 0,
+          sheets: [], wos: [] };
       }
       var isVac  = (r.category || '').toLowerCase().includes('vac');
       var isBill = r.billable !== false;
-
+      var hrs    = (r.regHrs||0) + (r.otHrs||0) + (r.nightHrs||0);
       if (isVac) {
-        summary[key].vac += (r.regHrs||0) + (r.otHrs||0) + (r.nightHrs||0);
+        summary[key].vac += hrs;
       } else {
         summary[key].reg   += (r.regHrs   || 0);
         summary[key].ot    += (r.otHrs    || 0);
         summary[key].night += (r.nightHrs || 0);
-        if (!isBill) summary[key].unbill += (r.regHrs||0) + (r.otHrs||0) + (r.nightHrs||0);
+        if (!isBill) summary[key].unbill   += hrs;
+        else         summary[key].billable += hrs;
       }
       if (summary[key].sheets.indexOf(ts.id) === -1) summary[key].sheets.push(ts.id);
       if (ts.woNum && summary[key].wos.indexOf(ts.woNum) === -1) summary[key].wos.push(ts.woNum);
@@ -7135,6 +7135,8 @@ function buildWeeklySummary() {
     return a.tech.localeCompare(b.tech);
   });
 }
+
+var AVAILABLE_HRS_PER_WEEK = 40; // standard 5×8
 
 function renderWeeklySummary() {
   var container = document.getElementById('ts-weekly-summary');
@@ -7152,6 +7154,16 @@ function renderWeeklySummary() {
     weeks[r.week].rows.push(r);
   });
 
+  function utilColor(pct) {
+    if (pct >= 80) return '#22C55E';
+    if (pct >= 60) return '#F59E0B';
+    return '#EF4444';
+  }
+  function utilGlow(pct) {
+    if (pct >= 80) return 'text-shadow:0 0 8px rgba(34,197,94,.5)';
+    return '';
+  }
+
   container.innerHTML = Object.values(weeks).map(function(wk) {
     var weekEnd = new Date(wk.weekStart + 'T00:00:00');
     weekEnd.setDate(weekEnd.getDate() + 6);
@@ -7161,17 +7173,22 @@ function renderWeeklySummary() {
     var totalNight  = wk.rows.reduce(function(s,r){ return s+r.night;  }, 0);
     var totalVac    = wk.rows.reduce(function(s,r){ return s+(r.vac||0);    }, 0);
     var totalUnbill = wk.rows.reduce(function(s,r){ return s+(r.unbill||0); }, 0);
+    var totalBill   = wk.rows.reduce(function(s,r){ return s+(r.billable||0); }, 0);
+    var totalAvail  = wk.rows.length * AVAILABLE_HRS_PER_WEEK;
+    var totalUtil   = totalAvail > 0 ? (totalBill / totalAvail * 100) : 0;
 
     return '<div style="margin-bottom:1.2rem">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;padding:.4rem .6rem;background:var(--surface2);border-radius:4px;flex-wrap:wrap;gap:.3rem">'
         + '<div style="font-family:var(--mono);font-size:.65rem;color:var(--nor-accent);font-weight:700">' + wk.week + '</div>'
-        + '<div style="font-size:.7rem;color:var(--muted)">' + fmtDate(wk.weekStart) + ' — ' + fmtDate(wkEndStr) + '</div>'
+        + '<div style="font-size:.7rem;color:var(--muted)">' + fmtDate(wk.weekStart) + ' \u2014 ' + fmtDate(wkEndStr) + '</div>'
         + '<div style="font-family:var(--mono);font-size:.72rem;display:flex;gap:.5rem;flex-wrap:wrap">'
           + (totalReg    ? '<span style="color:var(--nor-accent)">'  + totalReg    + ' Reg</span>'      : '')
           + (totalOT     ? '<span style="color:#F0A832">'            + totalOT     + ' OT</span>'       : '')
           + (totalNight  ? '<span style="color:#9B5DE5">'            + totalNight  + ' Night</span>'    : '')
           + (totalVac    ? '<span style="color:#22C55E">'            + totalVac    + ' Vac</span>'      : '')
           + (totalUnbill ? '<span style="color:rgba(255,255,255,.4)">'+ totalUnbill + ' Non-Bill</span>' : '')
+          + '<span style="color:' + utilColor(totalUtil) + ';' + utilGlow(totalUtil) + ';font-weight:700">'
+            + totalUtil.toFixed(0) + '% Util</span>'
         + '</div>'
       + '</div>'
       + '<table style="width:100%;border-collapse:collapse;font-size:.74rem">'
@@ -7180,21 +7197,26 @@ function renderWeeklySummary() {
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Reg</th>'
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">OT</th>'
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Night</th>'
-          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Vacation</th>'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Vac</th>'
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Non-Bill</th>'
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Total</th>'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Util %</th>'
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:left">Work Orders</th>'
         + '</tr></thead>'
         + '<tbody>' + wk.rows.map(function(r) {
-            var total = r.reg + r.ot + r.night + (r.vac||0);
+            var total  = r.reg + r.ot + r.night + (r.vac||0);
+            var util   = r.billable / AVAILABLE_HRS_PER_WEEK * 100;
+            var uCol   = utilColor(util);
+            var uGlow  = utilGlow(util);
             return '<tr style="border-bottom:1px solid rgba(255,255,255,.04)">'
               + '<td style="padding:.3rem .5rem;font-weight:600">' + r.tech + '</td>'
-              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono)">' + (r.reg || '—') + '</td>'
-              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#F0A832">' + (r.ot || '—') + '</td>'
-              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#9B5DE5">' + (r.night || '—') + '</td>'
-              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#22C55E">' + (r.vac || '—') + '</td>'
-              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:rgba(255,255,255,.4)">' + (r.unbill || '—') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono)">' + (r.reg || '\u2014') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#F0A832">' + (r.ot || '\u2014') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#9B5DE5">' + (r.night || '\u2014') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#22C55E">' + (r.vac || '\u2014') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:rgba(255,255,255,.4)">' + (r.unbill || '\u2014') + '</td>'
               + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);font-weight:700;color:var(--nor-accent)">' + total + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);font-weight:700;color:' + uCol + ';' + uGlow + '">' + util.toFixed(0) + '%</td>'
               + '<td style="padding:.3rem .5rem;font-size:.68rem;color:var(--muted)">' + r.wos.join(', ') + '</td>'
             + '</tr>';
           }).join('')
@@ -7476,24 +7498,10 @@ function exportPayroll() {
 function renderMarginReport() {
   if (!isAdmin()) return;
 
-  var techFilter = (document.getElementById('margin-filter-tech')||{}).value || '';
-  var woFilter   = ((document.getElementById('margin-filter-wo')||{}).value || '').toLowerCase();
-
-  // Populate tech dropdown
-  var techSet = {};
-  _jobs.forEach(function(j) {
-    (j.labourRows||[]).forEach(function(r){ if(r.technician) techSet[r.technician] = 1; });
-    (_timesheets.filter(function(t){ return t.woId === j.id; })).forEach(function(t){
-      (t.rows||[]).forEach(function(r){ if(r.technician) techSet[r.technician] = 1; });
-    });
-  });
-  var techSel = document.getElementById('margin-filter-tech');
-  if (techSel && techSel.options.length <= 1) {
-    Object.keys(techSet).sort().forEach(function(tech) {
-      var opt = document.createElement('option'); opt.value = tech; opt.textContent = tech;
-      techSel.appendChild(opt);
-    });
-  }
+  var techFilter   = (document.getElementById('margin-filter-tech-text')||{}).value || '';
+  var woFilter     = ((document.getElementById('margin-filter-wo')||{}).value || '').toLowerCase();
+  var clientFilter = ((document.getElementById('margin-filter-client')||{}).value || '').toLowerCase();
+  var pctFilter    = (document.getElementById('margin-filter-pct')||{}).value || '';
 
   // Helper: find best labour rate for a category from a rate sheet
   function getRate(rs, category, type) {
@@ -7514,7 +7522,7 @@ function renderMarginReport() {
   var woRows = [];
   _jobs.forEach(function(j) {
     var woNum = j.woNum || j.number || j.id;
-    if (woFilter && !woNum.toLowerCase().includes(woFilter) && !(j.client||'').toLowerCase().includes(woFilter)) return;
+    if (woFilter && !woNum.toLowerCase().includes(woFilter)) return;
 
     // Get linked invoice total (billed)
     var inv = j.invoiceId ? _invoices.find(function(i){ return i.id === j.invoiceId; }) : null;
@@ -7532,7 +7540,7 @@ function renderMarginReport() {
       });
     });
 
-    if (techFilter) rows = rows.filter(function(r){ return r.technician === techFilter; });
+    if (techFilter) rows = rows.filter(function(r){ return (r.technician||'').toLowerCase().includes(techFilter.toLowerCase()); });
     if (!rows.length && techFilter) return;
 
     var cost = rows.reduce(function(s, r) {
@@ -7558,6 +7566,12 @@ function renderMarginReport() {
     });
   });
 
+  // Apply client and margin% filters post-build
+  if (clientFilter) woRows = woRows.filter(function(r){ return r.client.toLowerCase().includes(clientFilter); });
+  if (pctFilter === 'green') woRows = woRows.filter(function(r){ return r.marginPct >= 40; });
+  if (pctFilter === 'amber') woRows = woRows.filter(function(r){ return r.marginPct >= 30 && r.marginPct < 40; });
+  if (pctFilter === 'red')   woRows = woRows.filter(function(r){ return r.marginPct < 30; });
+
   // KPIs
   var totBilled = woRows.reduce(function(s,r){ return s+r.billed; }, 0);
   var totCost   = woRows.reduce(function(s,r){ return s+r.cost; }, 0);
@@ -7568,7 +7582,7 @@ function renderMarginReport() {
     {v: fmtMoney(totBilled), l: 'Total Billed', c: ''},
     {v: fmtMoney(totCost),   l: 'Total Cost',   c: ''},
     {v: fmtMoney(totMargin), l: 'Gross Margin', c: totMargin>=0?'sc-green':'sc-red'},
-    {v: totPct.toFixed(1)+'%', l: 'Margin %',  c: totPct>=20?'sc-green':totPct>=10?'sc-amber':'sc-red'}
+    {v: totPct.toFixed(1)+'%', l: 'Margin %',  c: totPct>=40?'sc-green':totPct>=30?'sc-amber':'sc-red'}
   ].map(function(k){
     return '<div class="kpi-card"><div class="kpi-val '+k.c+'">'+k.v+'</div><div class="kpi-lbl">'+k.l+'</div></div>';
   }).join('');
@@ -7580,7 +7594,7 @@ function renderMarginReport() {
       woBody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:1.5rem;color:var(--muted)">No data — add invoices to work orders to see margin</td></tr>';
     } else {
       woBody.innerHTML = woRows.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }).map(function(r){
-        var pctCls = r.marginPct>=20?'sc-green':r.marginPct>=10?'sc-amber':'sc-red';
+        var pctCls = r.marginPct>=40?'sc-green':r.marginPct>=30?'sc-amber':'sc-red';
         return '<tr>'+
           '<td><span class="wo-num">'+r.woNum+'</span></td>'+
           '<td>'+r.client+'</td>'+
@@ -7620,7 +7634,7 @@ function renderMarginReport() {
       var t = techMap[tech];
       var margin = t.billed - t.cost;
       var pct = t.cost > 0 ? margin/t.cost*100 : 0;
-      var pctCls = pct>=20?'sc-green':pct>=10?'sc-amber':'sc-red';
+      var pctCls = pct>=40?'sc-green':pct>=30?'sc-amber':'sc-red';
       var totalHrs = t.reg + t.ot + t.night;
       return '<tr>'+
         '<td><strong>'+tech+'</strong></td>'+
