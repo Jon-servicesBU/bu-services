@@ -897,6 +897,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
+      <button class="btn btn-ghost" id="wo-import-pdf-btn" onclick="triggerWOImport()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">⬆ Import from PDF</button>
+      <input type="file" id="wo-import-file" accept=".pdf,.PDF" style="display:none" onchange="handleWOImportFile(this)">
       <div style="flex:1"></div>
       <!-- Shown/hidden by openWOModal based on status -->
       <button class="btn btn-ghost"     id="wo-btn-edit-unlock"  onclick="adminUnlockWO()"      style="display:none">✏ Edit</button>
@@ -2327,6 +2329,150 @@ document.addEventListener('click', function(e) {
 var _editWOId = null;
 
 // ── Open WO Modal ─────────────────────────────────────────────────────────────
+
+// ── WO: Import from PDF ───────────────────────────────────────────────────────
+function triggerWOImport() {
+  document.getElementById('wo-import-file').click();
+}
+
+async function handleWOImportFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  input.value = '';
+
+  var btn = document.getElementById('wo-import-pdf-btn');
+  if (btn) { btn.textContent = '⏳ Reading PDF…'; btn.disabled = true; }
+
+  try {
+    // Convert PDF to base64
+    var base64 = await new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    if (btn) btn.textContent = '⏳ Extracting data…';
+
+    // Send to Claude API with the WO field schema
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: { type: 'base64', media_type: 'application/pdf', data: base64 }
+            },
+            {
+              type: 'text',
+              text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n\n' +
+                '{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\n\nReturn ONLY the JSON, no explanation.'
+            }
+          ]
+        }]
+      })
+    });
+
+    var data = await resp.json();
+    var text = data.content && data.content[0] ? data.content[0].text : '';
+    // Strip markdown code fences if present
+    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+    var wo = JSON.parse(text);
+
+    // Populate all WO modal fields
+    populateWOFromImport(wo);
+
+    if (btn) { btn.textContent = '✓ Import done'; btn.style.color = 'var(--green)'; }
+    setTimeout(function(){ if(btn){ btn.textContent = '⬆ Import from PDF'; btn.style.color = ''; btn.disabled = false; } }, 3000);
+    toast('Work order imported — review and save', 'success');
+
+  } catch(e) {
+    console.error('WO import error:', e);
+    if (btn) { btn.textContent = '⬆ Import from PDF'; btn.disabled = false; }
+    toast('Import failed: ' + (e.message||'Unknown error'), 'error');
+  }
+}
+
+function populateWOFromImport(wo) {
+  function setVal(id, val) { var el = document.getElementById(id); if (el && val != null && val !== '') el.value = val; }
+
+  // Header fields
+  setVal('job-client',      wo.client);
+  setVal('job-number',      wo.woNum);
+  setVal('wo-date',         wo.date);
+  setVal('job-site',        wo.site);
+  setVal('wo-equip-owner',  wo.equipOwner);
+  setVal('job-po',          wo.po);
+  setVal('job-client-wo',   wo.jobNum);
+  setVal('wo-afe',          wo.afe);
+  setVal('wo-rig',          wo.rig);
+  setVal('wo-customer-contact', wo.customerContact);
+  setVal('wo-field-reports', wo.fieldReports);
+  setVal('cs-notes',         wo.notes);
+
+  // Province dropdown
+  if (wo.province) {
+    var provEl = document.getElementById('job-province');
+    if (provEl) {
+      // Try exact match first, then partial
+      var opt = Array.from(provEl.options).find(function(o){ return o.value === wo.province; })
+             || Array.from(provEl.options).find(function(o){ return o.value.includes(wo.province) || wo.province.includes(o.value); });
+      if (opt) provEl.value = opt.value;
+    }
+  }
+
+  // Labour rows
+  if (wo.labourRows && wo.labourRows.length) {
+    document.getElementById('cs-labour-body').innerHTML = '';
+    _csLabourRowCount = 0;
+    wo.labourRows.forEach(function(r){ addLabourRow(null, null, r); });
+  }
+
+  // Consumables
+  if (wo.consumables && wo.consumables.length) {
+    var cb = document.getElementById('cs-consumables-body');
+    if (cb) cb.innerHTML = '';
+    _csConsumableRowCount = 0;
+    wo.consumables.forEach(function(r){ addConsumableRow(r); });
+  }
+
+  // Equipment
+  if (wo.equipment && wo.equipment.length) {
+    var eb = document.getElementById('cs-equipment-body');
+    if (eb) eb.innerHTML = '';
+    _csEquipmentRowCount = 0;
+    wo.equipment.forEach(function(r){ addEquipmentRow(r); });
+  }
+
+  // Film
+  if (wo.film && wo.film.length) {
+    var fb = document.getElementById('cs-film-body');
+    if (fb) fb.innerHTML = '';
+    _csFilmRowCount = 0;
+    wo.film.forEach(function(r){ addFilmRow(r); });
+  }
+
+  // Travel
+  if (wo.travel) {
+    var t = wo.travel;
+    setVal('cs-travel-km',       t.km);
+    setVal('cs-travel-km-rate',  t.kmRate);
+    setVal('cs-travel-hotels',   t.hotels);
+    setVal('wo-travel-camp',     t.camp);
+    setVal('cs-travel-flights',  t.flights);
+    setVal('cs-travel-loa-techs',t.loaTechs);
+    setVal('cs-travel-loa-days', t.loaDays);
+    setVal('cs-travel-loa-rate', t.loaRate);
+    setVal('wo-travel-misc',     t.misc);
+    setVal('wo-travel-misc-desc',t.miscDesc);
+  }
+}
+
 function openWOModal(editId) {
   _editWOId = editId || null;
   _csLabourRowCount = 0;
@@ -7591,94 +7737,119 @@ async function exportMarginReport() {
     var techF     = (document.getElementById('margin-filter-tech-text')||{}).value || '';
     var pctF      = (document.getElementById('margin-filter-pct')||{}).value || '';
 
-    var periodOptions = { this_week:'This Week', this_month:'This Month', last_month:'Last Month', this_quarter:'This Quarter', last_quarter:'Last Quarter', this_year:'This Year', last_year:'Last Year' };
-    var periodDisplay = periodLbl ? periodOptions[periodLbl] : (dateFrom||dateTo ? (dateFrom||'')+'—'+(dateTo||'') : 'All Time');
+    var periodOptions = { this_week:'This Week', this_month:'This Month', last_month:'Last Month',
+      this_quarter:'This Quarter', last_quarter:'Last Quarter', this_year:'This Year', last_year:'Last Year' };
+    var periodDisplay = periodLbl ? periodOptions[periodLbl] : (dateFrom||dateTo ? (dateFrom||'')+' — '+(dateTo||'') : 'All Time');
     var filtersDisplay = [clientF?'Customer: '+clientF:'', techF?'Tech: '+techF:'', pctF?'Margin: '+pctF:''].filter(Boolean).join(' · ');
 
-    // Scrape KPIs
-    var kpis = Array.from(document.querySelectorAll('#margin-kpis .kpi-val')).map(function(el){
-      return { val: el.textContent, lbl: el.nextElementSibling ? el.nextElementSibling.textContent : '', cls: el.className };
+    // Scrape EXACTLY what is rendered in the tab
+    var kpis = Array.from(document.querySelectorAll('#margin-kpis .kpi-card')).map(function(card){
+      var val = card.querySelector('.kpi-val'); var lbl = card.querySelector('.kpi-lbl');
+      return { val: val?val.textContent.trim():'', lbl: lbl?lbl.textContent.trim():'', cls: val?val.className:'' };
     });
 
-    // Scrape WO rows
+    // WO table — all 11 columns exactly as rendered
     var woRows = [];
     document.querySelectorAll('#margin-wo-body tr').forEach(function(tr){
       var c = tr.querySelectorAll('td');
-      if (c.length >= 8) woRows.push({ woNum:c[0].textContent, client:c[1].textContent, tech:c[2].textContent, date:c[3].textContent, billed:c[6].textContent, cost:c[7].textContent, margin:c[8]?c[8].textContent:'', pct:c[9]?c[9].textContent:'' });
+      if (c.length >= 11) woRows.push({
+        woNum: c[0].textContent.trim(), client: c[1].textContent.trim(),
+        tech: c[2].textContent.trim(), date: c[3].textContent.trim(),
+        reg: c[4].textContent.trim(), ot: c[5].textContent.trim(), night: c[6].textContent.trim(),
+        billed: c[7].textContent.trim(), cost: c[8].textContent.trim(),
+        margin: c[9].textContent.trim(), pct: c[10].textContent.trim()
+      });
     });
 
-    // Scrape by-client rows
-    var clientRows = [];
+    // Tech table — all 8 columns exactly as rendered
+    var techRows = [];
     document.querySelectorAll('#margin-tech-body tr').forEach(function(tr){
       var c = tr.querySelectorAll('td');
-      if (c.length >= 4) clientRows.push({ name:c[0].textContent, billed:c[1].textContent, cost:c[2].textContent, pct:c[3].textContent });
+      if (c.length >= 8) techRows.push({
+        tech: c[0].textContent.trim(), payType: c[1].textContent.trim(),
+        wos: c[2].textContent.trim(), hrs: c[3].textContent.trim(),
+        billed: c[4].textContent.trim(), cost: c[5].textContent.trim(),
+        margin: c[6].textContent.trim(), pct: c[7].textContent.trim()
+      });
     });
 
-    function pctNum(s){ return parseFloat((s||'').replace('%','')); }
+    function pctNum(s){ return parseFloat((s||'').replace('%','').trim()); }
     function pctColor(s){ var n=pctNum(s); return n>=40?'#22C55E':n>=30?'#F59E0B':'#EF4444'; }
-    function pctGlow(s){ return pctNum(s)>=40?'text-shadow:0 0 8px rgba(34,197,94,.5)':''; }
 
     // AI executive summary
     var aiSummary = '';
     try {
       var resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514', max_tokens:350,
-          messages:[{ role:'user', content:'Write a 3-4 sentence executive summary for this margin report. Be specific, use actual $ and % values. Reply with ONLY the paragraph. Period: '+periodDisplay+' Filters: '+(filtersDisplay||'None')+' KPIs: '+kpis.map(function(k){return k.lbl+': '+k.val;}).join(', ')+' Top clients: '+clientRows.slice(0,4).map(function(r){return r.name+' ('+r.pct+' margin, '+r.billed+' billed)';}).join('; ')+' WOs: '+woRows.length+', Low margin: '+woRows.filter(function(r){return pctNum(r.pct)<30;}).length }]
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:350,
+          messages:[{ role:'user', content:'Write a 3-4 sentence executive summary for this margin report. Be specific, use actual $ and % values. Reply with ONLY the paragraph. Period: '+periodDisplay+' Filters: '+(filtersDisplay||'None')+' KPIs: '+kpis.map(function(k){return k.lbl+': '+k.val;}).join(', ')+' WOs: '+woRows.length+', Low margin (<30%): '+woRows.filter(function(r){return pctNum(r.pct)<30;}).length }]
         })
       });
       var d2 = await resp.json();
       if (d2.content && d2.content[0]) aiSummary = d2.content[0].text || '';
     } catch(e) { console.warn('AI summary:', e); }
 
+    var logoSrc = _LOGO_HTML || '<b style="color:#1D4A8A;font-size:1.1rem">NORTECH ADVANCED NDT</b>';
+
     var kpiBoxes = kpis.map(function(k){
       var col = k.cls.includes('sc-green')?'#22C55E':k.cls.includes('sc-red')?'#EF4444':k.cls.includes('sc-amber')?'#F59E0B':'#1D4A8A';
-      var glow = k.cls.includes('sc-green')?'text-shadow:0 0 12px rgba(34,197,94,.4)':'';
-      return '<div style="background:#f8f9ff;border:1px solid #dde3f0;border-radius:8px;padding:.9rem 1.1rem;text-align:center;min-width:120px"><div style="font-size:1.5rem;font-weight:900;color:'+col+';'+glow+'">'+k.val+'</div><div style="font-size:.6rem;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-top:.2rem">'+k.lbl+'</div></div>';
+      return '<div style="background:#f8f9ff;border:1px solid #dde3f0;border-radius:8px;padding:.9rem 1.1rem;text-align:center;min-width:120px"><div style="font-size:1.5rem;font-weight:900;color:'+col+'">'+k.val+'</div><div style="font-size:.6rem;color:#888;text-transform:uppercase;letter-spacing:1.5px;margin-top:.2rem">'+k.lbl+'</div></div>';
     }).join('');
 
     var woTableRows = woRows.map(function(r){
-      var c=pctColor(r.pct), g=pctGlow(r.pct);
-      return '<tr><td>'+r.woNum+'</td><td>'+r.client+'</td><td>'+r.tech+'</td><td>'+r.date+'</td><td style="text-align:right">'+r.billed+'</td><td style="text-align:right">'+r.cost+'</td><td style="text-align:right;font-weight:700">'+r.margin+'</td><td style="text-align:right;font-weight:800;color:'+c+';'+g+'">'+r.pct+'</td></tr>';
+      var c=pctColor(r.pct);
+      return '<tr><td>'+r.woNum+'</td><td>'+r.client+'</td><td>'+r.tech+'</td><td>'+r.date+'</td>'
+        +'<td style="text-align:right">'+r.reg+'</td><td style="text-align:right">'+r.ot+'</td><td style="text-align:right">'+r.night+'</td>'
+        +'<td style="text-align:right">'+r.billed+'</td><td style="text-align:right">'+r.cost+'</td>'
+        +'<td style="text-align:right;font-weight:700">'+r.margin+'</td>'
+        +'<td style="text-align:right;font-weight:800;color:'+c+'">'+r.pct+'</td></tr>';
     }).join('');
 
-    var clientTableRows = clientRows.map(function(r){
-      var c=pctColor(r.pct), g=pctGlow(r.pct);
-      return '<tr><td style="font-weight:600">'+r.name+'</td><td style="text-align:right">'+r.billed+'</td><td style="text-align:right">'+r.cost+'</td><td style="text-align:right;font-weight:800;color:'+c+';'+g+'">'+r.pct+'</td></tr>';
+    var techTableRows = techRows.map(function(r){
+      var c=pctColor(r.pct);
+      return '<tr><td style="font-weight:600">'+r.tech+'</td><td>'+r.payType+'</td>'
+        +'<td style="text-align:right">'+r.wos+'</td><td style="text-align:right">'+r.hrs+'</td>'
+        +'<td style="text-align:right">'+r.billed+'</td><td style="text-align:right">'+r.cost+'</td>'
+        +'<td style="text-align:right;font-weight:700">'+r.margin+'</td>'
+        +'<td style="text-align:right;font-weight:800;color:'+c+'">'+r.pct+'</td></tr>';
     }).join('');
 
-    var logoSrc = _LOGO_HTML || '<b style="color:#1D4A8A;font-size:1.1rem">NORTECH ADVANCED NDT</b>';
-
-    var reportHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Margin Report</title><style>'
-      +'*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;color:#1a1a2e;padding:2.5rem;font-size:13px}'
-      +'h2{font-size:.7rem;font-weight:700;color:#888;margin:1.5rem 0 .5rem;text-transform:uppercase;letter-spacing:1.5px;border-bottom:1px solid #e0e0e0;padding-bottom:.3rem}'
-      +'table{width:100%;border-collapse:collapse;font-size:.8rem}th{text-align:left;padding:.4rem .6rem;font-size:.6rem;color:#888;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #ddd}'
-      +'td{padding:.38rem .6rem;border-bottom:1px solid #f0f0f0}tr:nth-child(even) td{background:#fafafa}'
-      +'.card{background:#fff;border:1px solid #e5e7f0;border-radius:8px;padding:1.1rem;margin-bottom:1.1rem}'
+    var css = '*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;color:#1a1a2e;padding:2.5rem;font-size:12px}'
+      +'h2{font-size:.65rem;font-weight:700;color:#888;margin:1.5rem 0 .5rem;text-transform:uppercase;letter-spacing:1.5px;border-bottom:1px solid #e0e0e0;padding-bottom:.3rem}'
+      +'table{width:100%;border-collapse:collapse}th{text-align:left;padding:.38rem .55rem;font-size:.6rem;color:#666;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #ddd;white-space:nowrap}'
+      +'td{padding:.35rem .55rem;border-bottom:1px solid #f0f0f0;font-size:.78rem}tr:nth-child(even) td{background:#fafafa}'
+      +'.card{border:1px solid #e5e7f0;border-radius:8px;padding:1rem;margin-bottom:1.1rem;overflow-x:auto}'
       +'.summary{font-size:.82rem;line-height:1.75;color:#444;background:#f8f9ff;border-left:3px solid #1D4A8A;border-radius:0 8px 8px 0;padding:.9rem 1.1rem;margin-bottom:1.25rem}'
-      +'@media print{body{padding:1rem}.card{break-inside:avoid}}'
-      +'</style></head><body>'
+      +'@media print{body{padding:1rem}.card{break-inside:avoid}}';
+
+    var reportHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Margin Report</title><style>'+css+'</style></head><body>'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #1D4A8A">'
         +'<div>'+logoSrc+'</div>'
         +'<div style="text-align:right">'
           +'<div style="font-size:.6rem;color:#888;text-transform:uppercase;letter-spacing:2px">Margin Report</div>'
-          +'<div style="font-size:1.2rem;font-weight:800;color:#1D4A8A">'+periodDisplay+'</div>'
-          +(filtersDisplay?'<div style="font-size:.65rem;color:#888;margin-top:.15rem">'+filtersDisplay+'</div>':'')
-          +'<div style="font-size:.6rem;color:#aaa;margin-top:.15rem">'+new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'})+'</div>'
+          +'<div style="font-size:1.1rem;font-weight:800;color:#1D4A8A">'+periodDisplay+'</div>'
+          +(filtersDisplay?'<div style="font-size:.65rem;color:#888;margin-top:.1rem">'+filtersDisplay+'</div>':'')
+          +'<div style="font-size:.6rem;color:#aaa;margin-top:.1rem">'+new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'})+'</div>'
         +'</div>'
       +'</div>'
       +(aiSummary?'<div class="summary"><div style="font-size:.6rem;color:#1D4A8A;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.35rem">Executive Summary</div>'+aiSummary+'</div>':'')
       +'<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.25rem">'+kpiBoxes+'</div>'
-      +'<div class="card"><h2>By Work Order</h2><table><thead><tr><th>WO #</th><th>Client</th><th>Technician</th><th>Date</th><th style="text-align:right">Billed</th><th style="text-align:right">Cost</th><th style="text-align:right">Margin $</th><th style="text-align:right">Margin %</th></tr></thead><tbody>'+woTableRows+'</tbody></table></div>'
-      +(clientTableRows?'<div class="card"><h2>Summary by Client / Technician</h2><table><thead><tr><th>Name</th><th style="text-align:right">Billed</th><th style="text-align:right">Cost</th><th style="text-align:right">Margin %</th></tr></thead><tbody>'+clientTableRows+'</tbody></table></div>':'')
+      +'<div class="card"><h2>By Work Order</h2><table><thead><tr>'
+        +'<th>WO #</th><th>Client</th><th>Technician</th><th>Date</th>'
+        +'<th style="text-align:right">Reg</th><th style="text-align:right">OT</th><th style="text-align:right">Night</th>'
+        +'<th style="text-align:right">Billed $</th><th style="text-align:right">Cost $</th>'
+        +'<th style="text-align:right">Margin $</th><th style="text-align:right">Margin %</th>'
+      +'</tr></thead><tbody>'+woTableRows+'</tbody></table></div>'
+      +(techTableRows?'<div class="card"><h2>By Technician</h2><table><thead><tr>'
+        +'<th>Technician</th><th>Pay Type</th><th style="text-align:right">WOs</th><th style="text-align:right">Total Hrs</th>'
+        +'<th style="text-align:right">Billed $</th><th style="text-align:right">Cost $</th>'
+        +'<th style="text-align:right">Margin $</th><th style="text-align:right">Margin %</th>'
+      +'</tr></thead><tbody>'+techTableRows+'</tbody></table></div>':'')
       +'</body></html>';
 
     var win = window.open('', '_blank');
     win.document.write(reportHtml);
-    win.document.close();
-    win.focus();
+    win.document.close(); win.focus();
     setTimeout(function(){ win.print(); }, 800);
     if (btn) { btn.textContent = '⬇ Export PDF'; btn.disabled = false; }
     toast('Report ready — Save as PDF in print dialog', 'success');
@@ -7695,43 +7866,44 @@ function exportWeeklySummary() {
     rows.forEach(function(r){ if(!weeks[r.week]) weeks[r.week]={week:r.week,weekStart:r.weekStart,rows:[]}; weeks[r.week].rows.push(r); });
 
     function pctColor(n){ return n>=80?'#22C55E':n>=60?'#F59E0B':'#EF4444'; }
+    function fmt(n){ return n || 0; }
 
     var tableRows = Object.values(weeks).map(function(wk){
-      var weekEnd=new Date(wk.weekStart+'T00:00:00'); weekEnd.setDate(weekEnd.getDate()+6);
-      var wkEndStr=weekEnd.toISOString().slice(0,10);
-      // Week subtotal row
-      var tReg=wk.rows.reduce(function(s,r){return s+r.reg;},0);
-      var tOT=wk.rows.reduce(function(s,r){return s+r.ot;},0);
-      var tNight=wk.rows.reduce(function(s,r){return s+r.night;},0);
-      var tVac=wk.rows.reduce(function(s,r){return s+(r.vac||0);},0);
-      var tUnbill=wk.rows.reduce(function(s,r){return s+(r.unbill||0);},0);
-      var tBill=wk.rows.reduce(function(s,r){return s+(r.billable||0);},0);
+      var weekEnd = new Date(wk.weekStart+'T00:00:00'); weekEnd.setDate(weekEnd.getDate()+6);
+      var wkEndStr = weekEnd.toISOString().slice(0,10);
+      var tReg=0,tOT=0,tNight=0,tVac=0,tUnbill=0,tBill=0;
+      wk.rows.forEach(function(r){ tReg+=r.reg; tOT+=r.ot; tNight+=r.night; tVac+=(r.vac||0); tUnbill+=(r.unbill||0); tBill+=(r.billable||0); });
       var tWorked=tReg+tOT+tNight;
       var tAvail=wk.rows.length*AVAILABLE_HRS_PER_WEEK;
       var u1=tAvail>0?(tBill/tAvail*100):0;
       var u3=tWorked>0?(tBill/tWorked*100):0;
-      var hdr='<tr style="background:#1D4A8A;color:#fff"><td colspan="9" style="padding:.45rem .6rem;font-weight:700;font-size:.78rem">'+wk.week+' &nbsp;<span style="font-weight:400;font-size:.7rem;opacity:.8">'+fmtDate(wk.weekStart)+' — '+fmtDate(wkEndStr)+'</span></td></tr>';
-      var techRows=wk.rows.map(function(r){
+
+      var hdr = '<tr style="background:#1D4A8A;color:#fff">'
+        +'<td colspan="10" style="padding:.45rem .65rem;font-weight:700;font-size:.78rem">'
+          +wk.week+' &nbsp;<span style="font-weight:400;font-size:.7rem;opacity:.8">'+fmtDate(wk.weekStart)+' — '+fmtDate(wkEndStr)+'</span>'
+        +'</td></tr>';
+
+      var techRows = wk.rows.map(function(r){
         var worked=r.reg+r.ot+r.night;
         var total=worked+(r.vac||0);
         var util1=r.billable/AVAILABLE_HRS_PER_WEEK*100;
         var util3=worked>0?(r.billable/worked*100):0;
-        var c1=pctColor(util1), c3=pctColor(util3);
         return '<tr>'
-          +'<td style="padding:.35rem .6rem">'+r.tech+'</td>'
-          +'<td style="text-align:center;padding:.35rem .6rem">'+r.reg+'</td>'
-          +'<td style="text-align:center;padding:.35rem .6rem;color:#B45309">'+r.ot+'</td>'
-          +'<td style="text-align:center;padding:.35rem .6rem;color:#6D28D9">'+r.night+'</td>'
-          +'<td style="text-align:center;padding:.35rem .6rem;color:#15803D">'+r.vac+'</td>'
-          +'<td style="text-align:center;padding:.35rem .6rem;color:#6B7280">'+r.unbill+'</td>'
-          +'<td style="text-align:center;padding:.35rem .6rem;font-weight:700">'+total+'</td>'
-          +'<td style="text-align:center;padding:.35rem .6rem;font-weight:700;color:'+c1+'">'+util1.toFixed(0)+'%</td>'
-          +'<td style="text-align:center;padding:.35rem .6rem;font-weight:700;color:'+c3+'">'+util3.toFixed(0)+'%</td>'
-          +'<td style="text-align:center;padding:.35rem .6rem;font-size:.65rem;color:#888">'+r.wos.join(', ')+'</td>'
+          +'<td style="padding:.35rem .55rem">'+r.tech+'</td>'
+          +'<td style="text-align:center;padding:.35rem .55rem">'+fmt(r.reg)+'</td>'
+          +'<td style="text-align:center;padding:.35rem .55rem;color:#B45309">'+fmt(r.ot)+'</td>'
+          +'<td style="text-align:center;padding:.35rem .55rem;color:#6D28D9">'+fmt(r.night)+'</td>'
+          +'<td style="text-align:center;padding:.35rem .55rem;color:#15803D">'+fmt(r.vac||0)+'</td>'
+          +'<td style="text-align:center;padding:.35rem .55rem;color:#6B7280">'+fmt(r.unbill||0)+'</td>'
+          +'<td style="text-align:center;padding:.35rem .55rem;font-weight:700">'+total+'</td>'
+          +'<td style="text-align:center;padding:.35rem .55rem;font-weight:700;color:'+pctColor(util1)+'">'+util1.toFixed(0)+'%</td>'
+          +'<td style="text-align:center;padding:.35rem .55rem;font-weight:700;color:'+pctColor(util3)+'">'+util3.toFixed(0)+'%</td>'
+          +'<td style="text-align:left;padding:.35rem .55rem;font-size:.68rem;color:#888">'+r.wos.join(', ')+'</td>'
         +'</tr>';
       }).join('');
-      var totRow='<tr style="background:#f0f4ff;font-weight:700;font-size:.78rem">'
-        +'<td style="padding:.4rem .6rem">Week Total</td>'
+
+      var totRow = '<tr style="background:#f0f4ff;font-weight:700;font-size:.78rem;border-top:2px solid #dde3f0">'
+        +'<td style="padding:.4rem .55rem">Week Total</td>'
         +'<td style="text-align:center">'+tReg+'</td>'
         +'<td style="text-align:center;color:#B45309">'+tOT+'</td>'
         +'<td style="text-align:center;color:#6D28D9">'+tNight+'</td>'
@@ -7740,20 +7912,22 @@ function exportWeeklySummary() {
         +'<td style="text-align:center">'+(tReg+tOT+tNight+tVac)+'</td>'
         +'<td style="text-align:center;color:'+pctColor(u1)+'">'+u1.toFixed(0)+'%</td>'
         +'<td style="text-align:center;color:'+pctColor(u3)+'">'+u3.toFixed(0)+'%</td>'
-        +'<td></td>'
-      +'</tr>';
+        +'<td></td></tr>';
+
       return hdr + techRows + totRow;
     }).join('');
 
     var logoSrc = _LOGO_HTML || '<b style="color:#1D4A8A;font-size:1.1rem">NORTECH ADVANCED NDT</b>';
 
-    var reportHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Weekly Hours Summary</title><style>'
-      +'*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;color:#1a1a2e;padding:2rem;font-size:12px}'
-      +'table{width:100%;border-collapse:collapse}th{text-align:center;padding:.4rem .5rem;font-size:.58rem;color:#888;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #ddd;background:#fafafa}'
-      +'th:first-child{text-align:left}td{padding:.35rem .5rem;border-bottom:1px solid #f0f0f0}tr:hover td{background:#fafafa}'
-      +'.util-legend{display:flex;gap:1.5rem;font-size:.65rem;color:#666;margin-bottom:.75rem}'
-      +'@media print{body{padding:1rem}tr{break-inside:avoid}}'
-      +'</style></head><body>'
+    var css = '*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;color:#1a1a2e;padding:2rem;font-size:12px}'
+      +'table{width:100%;border-collapse:collapse}'
+      +'th{text-align:center;padding:.38rem .5rem;font-size:.6rem;color:#666;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #ddd;background:#fafafa;white-space:nowrap}'
+      +'th:first-child,th:last-child{text-align:left}'
+      +'td{border-bottom:1px solid #f0f0f0}tr:hover td{background:#fafafa}'
+      +'.legend{display:flex;gap:1.5rem;font-size:.65rem;color:#555;margin-bottom:.75rem;flex-wrap:wrap}'
+      +'@media print{body{padding:1rem}tr{break-inside:avoid}}';
+
+    var reportHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Weekly Hours Summary</title><style>'+css+'</style></head><body>'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #1D4A8A">'
         +'<div>'+logoSrc+'</div>'
         +'<div style="text-align:right">'
@@ -7762,21 +7936,21 @@ function exportWeeklySummary() {
           +'<div style="font-size:.6rem;color:#aaa;margin-top:.15rem">'+new Date().toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'})+'</div>'
         +'</div>'
       +'</div>'
-      +'<div class="util-legend">'
-        +'<span><b style="color:#1D4A8A">Util (÷40h)</b> = Billable hours ÷ 40 available hours</span>'
-        +'<span><b style="color:#1D4A8A">Util (÷Worked)</b> = Billable hours ÷ total hours worked</span>'
+      +'<div class="legend">'
+        +'<span><b style="color:#1D4A8A">Util (÷40h)</b> = Billable ÷ 40 available hours</span>'
+        +'<span><b style="color:#1D4A8A">Util (÷Worked)</b> = Billable ÷ total hours worked</span>'
       +'</div>'
       +'<table><thead><tr>'
         +'<th style="text-align:left;min-width:130px">Technician</th>'
         +'<th>Reg</th><th>OT</th><th>Night</th><th>Vac</th><th>Non-Bill</th><th>Total</th>'
-        +'<th>Util<br>(÷40h)</th><th>Util<br>(÷Worked)</th><th style="text-align:left">Work Orders</th>'
+        +'<th>Util<br>(÷40h)</th><th>Util<br>(÷Worked)</th>'
+        +'<th style="text-align:left">Work Orders</th>'
       +'</tr></thead><tbody>'+tableRows+'</tbody></table>'
       +'</body></html>';
 
     var win = window.open('', '_blank');
     win.document.write(reportHtml);
-    win.document.close();
-    win.focus();
+    win.document.close(); win.focus();
     setTimeout(function(){ win.print(); }, 600);
     toast('Weekly summary ready — Save as PDF in print dialog', 'success');
   });
