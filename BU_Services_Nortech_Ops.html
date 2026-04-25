@@ -2489,6 +2489,14 @@ function invoiceWOFromModal() {
 // The real openInvoiceModal is defined earlier; preWOId handled via loadApprovedCS
 
 // ── Export Work Order as PDF or Word ─────────────────────────────────────────
+var _printGuard = false;
+function _withPrintGuard(fn) {
+  if (_printGuard) { toast('Print already in progress\u2026', 'info'); return; }
+  _printGuard = true;
+  setTimeout(function(){ _printGuard = false; }, 3000);
+  fn();
+}
+
 function exportWO(format, woId) {
   var id = woId || _editWOId;
   if (!id) { toast('Save the work order first', 'error'); return; }
@@ -2497,7 +2505,7 @@ function exportWO(format, woId) {
   var woNum = wo.woNum || wo.number || 'WO';
   var html  = buildWOPrintHTML(wo);
   if (format === 'word') {
-    var blob = new Blob(['﻿' + html], { type: 'application/msword' });
+    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
     var url  = URL.createObjectURL(blob);
     var a    = document.createElement('a');
     a.href = url; a.download = 'WorkOrder-' + woNum + '.doc';
@@ -2505,12 +2513,14 @@ function exportWO(format, woId) {
     document.body.removeChild(a); URL.revokeObjectURL(url);
     toast('Word document downloaded', 'success');
   } else {
-    var win = window.open('', '_blank');
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    setTimeout(function(){ win.print(); }, 600);
-    toast('Print dialog opened — choose Save as PDF', 'info');
+    _withPrintGuard(function() {
+      var win = window.open('', '_blank');
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      setTimeout(function(){ win.print(); }, 600);
+      toast('Print dialog opened \u2014 choose Save as PDF', 'info');
+    });
   }
 }
 
@@ -4171,11 +4181,24 @@ function printInvTS() {
 }
 
 function printInvAll() {
-  // Print all: WO + TS + Invoice together
-  var woId = _currentInvWoId();
-  if (woId) exportWO('pdf', woId);
-  setTimeout(function(){ printInvoice(); }, 400);
-  toast('Printing WO and Invoice…', 'info');
+  _withPrintGuard(function() {
+    var woId = _currentInvWoId();
+    var woHtml = '';
+    if (woId) {
+      var wo = _jobs.find(function(j){ return j.id === woId; });
+      if (wo) woHtml = buildWOPrintHTML(wo).replace(/^[\s\S]*?<body[^>]*>/i,'').replace(/<\/body>[\s\S]*$/i,'');
+    }
+    var invHtml = (document.getElementById('inv-view-body')||{}).innerHTML || '';
+    var win = window.open('', '_blank');
+    win.document.write('<html><head><title>WO + Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px}.page-break{page-break-before:always;margin-top:40px;padding-top:20px;border-top:2px solid #ccc}</style></head><body>'
+      + (woHtml ? woHtml + '<div class="page-break"></div>' : '')
+      + invHtml
+      + '</body></html>');
+    win.document.close();
+    win.focus();
+    setTimeout(function(){ win.print(); }, 700);
+    toast('Printing WO + Invoice\u2026', 'info');
+  });
 }
 
 // ── Invoice view modal actions ────────────────────────────────────────────────
@@ -4244,12 +4267,14 @@ async function markPaid(id){
 }
 
 function printInvoice(){
-  var content = document.getElementById('inv-view-body').innerHTML;
-  var win = window.open('', '_blank');
-  win.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px}</style></head><body>' + content + '</body></html>');
-  win.document.close();
-  win.focus();
-  setTimeout(function(){ win.print(); }, 500);
+  _withPrintGuard(function() {
+    var content = document.getElementById('inv-view-body').innerHTML;
+    var win = window.open('', '_blank');
+    win.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px}</style></head><body>' + content + '</body></html>');
+    win.document.close();
+    win.focus();
+    setTimeout(function(){ win.print(); }, 500);
+  });
 }
 
 
