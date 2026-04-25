@@ -2966,12 +2966,7 @@ function renderJobs() {
         + (isDraft
           ? '<button class="btn btn-primary btn-sm" data-open-wo="'+j.id+'" style="flex-shrink:0">Continue →</button>'
           : '<button class="btn btn-ghost btn-sm" data-open-wo="'+j.id+'" style="flex-shrink:0">🔒 View</button>')
-        + (function(){
-            var myName = getCurrentTechName();
-            var pendingTS = techHasPendingOnWO(j.id);
-            if (!pendingTS) return '';
-            return '<button class="btn btn-sm" data-open-ts="'+pendingTS.id+'" style="background:#C9860A;border:none;border-radius:5px;color:#fff;font-size:.68rem;font-weight:700;padding:.28rem .65rem;cursor:pointer;flex-shrink:0">\u23F3 Confirm Hours</button>';
-          })()
+        + ''
       + '</div>';
     }
 
