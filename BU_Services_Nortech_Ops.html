@@ -2839,13 +2839,17 @@ function renderDashboard(){
 
   var csEl = document.getElementById('dash-cs-table');
   if (csEl) {
-    var recent = _myJobs.slice(0, 8);
+    var recent = _myJobs.slice().sort(function(a,b){
+      var pa=a.status==='submitted'?0:1; var pb=b.status==='submitted'?0:1;
+      if(pa!==pb) return pa-pb;
+      return (b.date||'').localeCompare(a.date||'');
+    }).slice(0,10);
     var tbody  = csEl.querySelector('tbody');
     if (tbody) tbody.innerHTML = recent.length ? recent.map(function(j){
       var reg   = (j.labourRows||[]).reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
       var ot    = (j.labourRows||[]).reduce(function(s,r){ return s+(r.otHrs||0); }, 0);
       var techs = Array.from(new Set((j.labourRows||[]).map(function(r){ return r.technician; }).filter(Boolean))).join(', ');
-      return '<tr onclick="openWOModal(\''+j.id+'\')" style="cursor:pointer">'
+      return '<tr onclick="showView(\'jobs\',document.getElementById(\'nav-jobs\')); setTimeout(function(){openWOModal(\''+j.id+'\');},200);"  style="cursor:pointer">'
         +'<td style="font-family:var(--mono);font-size:.7rem;color:var(--muted)">'+(j.woNum||j.number||'—')+'</td>'
         +'<td><span style="font-weight:600">'+(techs||'—').slice(0,20)+'</span><br><span style="font-size:.68rem;color:var(--muted)">'+(j.date||'—')+'</span></td>'
         +'<td style="font-size:.72rem">'+((j.client||'—').slice(0,20))+'</td>'
