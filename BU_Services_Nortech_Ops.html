@@ -314,25 +314,84 @@ body.tech-view .cs-lb-tot           { display: none !important; }
 // ══════════════════════════════════════════════════════════════════════════════
 
 var VIEWER_PEOPLE = [
-  { id: 'jon',     name: 'Jon Eustace',               role: 'CEO North America · EIG',           initials: 'JE', color: '#00AEEF', pin: '0626' },
-  { id: 'olivier', name: 'Olivier Marcotte',           role: 'CRO · Nuclear',                     initials: 'OM', color: '#7C3AED', pin: '0001' },
-  { id: 'mathieu', name: 'Mathieu Beauchesne',         role: 'EVP · Powerline',                   initials: 'MB', color: '#E97132', pin: '0002' },
-  { id: 'max',     name: 'Emmanuel Aggrey',            role: 'Commercial Director — West',        initials: 'EA', color: '#C9860A', pin: '0003' },
-  { id: 'vinoth',  name: 'Vinoth Tharma',              role: 'Commercial Director — East',        initials: 'VT', color: '#22882F', pin: '0004' },
-  { id: 'alex',    name: 'Alex Cyr',                   role: 'Sr. Operations Director',          initials: 'AC', color: '#0891B2', pin: '0005' },
-  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',      initials: 'JI', color: '#38BDF8', pin: '0006' },
-  { id: 'renee',   name: 'Renée Lachance',             role: 'Sr. Director Finance & Controller', initials: 'RL', color: '#BE185D', pin: '0007' },
-  { id: 'rick',    name: 'Rick Carlton',               role: 'Pipeline Integrity Lead',           initials: 'RC', color: '#368CD9', pin: '0008' },
-  { id: 'joel_c',  name: 'Joel Carlton',               role: 'PI Operations Manager',             initials: 'JC', color: '#B45309', pin: '0009' },
-  { id: 'eric_r',  name: 'Eric Rodrigue',              role: 'Ops Director — Quebec',            initials: 'ER', color: '#1A5CA8', pin: '0010' },
-  { id: 'joel_dj', name: 'Joel Djordjevic',            role: 'Ops Director — Central',           initials: 'JD', color: '#2D5A8E', pin: '0011' },
-  { id: 'keith',   name: 'Keith Reichenbach',          role: 'Ops Director — Western',           initials: 'KR', color: '#4B5563', pin: '0012' },
-  { id: 'jason',   name: 'Jason Borza',                role: 'Ops Director — Nortech',           initials: 'JB', color: '#DC2626', pin: '0013' },
-  { id: 'brook',   name: 'Brook Althouse',             role: 'Northern Ops Manager',             initials: 'BA', color: '#6B7280', pin: '0014' },
-  { id: 'louisp',  name: 'Louis-Pier Théberge',        role: 'Ops Director — Nuclear',           initials: 'LT', color: '#059669', pin: '0015' },
-  { id: 'francis', name: 'Francis Boudreault-Leclerc', role: 'Engineering & Technical Manager',  initials: 'FB', color: '#6D28D9', pin: '0016' },
-  { id: 'eric_c',  name: 'Éric Carmichael',            role: 'Commercial Systems Manager',       initials: 'ÉC', color: '#0A1F5C', pin: '0017' },
-  { id: 'maud',    name: 'Maud Leivin Capuano',        role: 'HR Lead',                          initials: 'ML', color: '#9D174D', pin: '0018' },
+  { id: 'jon',     name: 'Jon Eustace',               role: 'CEO North America \u00b7 EIG',           initials: 'JE', color: '#00AEEF', pin: '0626' },
+  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',             initials: 'JI', color: '#38BDF8', pin: '0006' },
+  { id: 'joel_c',  name: 'Joel Carlton',               role: 'PI Operations Manager',                   initials: 'JC', color: '#B45309', pin: '0009' },
+  { id: 'jason',   name: 'Jason Borza',                role: 'Ops Director \u2014 Nortech',            initials: 'JB', color: '#DC2626', pin: '0013' },
+  // ── Nortech Field Staff ───────────────────────────────────────────────────
+  { id: 'e499', name: 'Cailyn Larison', role: 'Nortech · AB · Hourly', initials: 'CL', color: '#E84040', pin: '0499' },
+  { id: 'e469', name: 'Cole Mcgowan', role: 'Nortech · AB · Hourly', initials: 'CM', color: '#E84040', pin: '0469' },
+  { id: 'e510', name: 'Jessica Saunders', role: 'Nortech · AB · Hourly', initials: 'JS', color: '#E84040', pin: '0510' },
+  { id: 'e467', name: 'Jordan Mancini', role: 'Nortech · AB · Hourly', initials: 'JM', color: '#E84040', pin: '0467' },
+  { id: 'e534', name: 'Maxx Taylor', role: 'Nortech · AB · Hourly', initials: 'MT', color: '#E84040', pin: '0534' },
+  { id: 'e398', name: 'Scott Saunders', role: 'Nortech · AB · Hourly', initials: 'SS', color: '#E84040', pin: '0398' },
+  { id: 'e425', name: 'Matthew Isnor', role: 'Nortech · BC · Hourly', initials: 'MI', color: '#E84040', pin: '0425' },
+  { id: 'e497', name: 'Amanda Murphy', role: 'Nortech · AB · Hourly', initials: 'AM', color: '#E84040', pin: '0497' },
+  { id: 'e470', name: 'Fasil Teffera', role: 'Nortech · AB · Hourly', initials: 'FT', color: '#E84040', pin: '0470' },
+  { id: 'e537', name: 'Torin Keoughan', role: 'Nortech · AB · Hourly', initials: 'TK', color: '#E84040', pin: '0537' },
+  { id: 'e506', name: 'Natasha Bayrack', role: 'Nortech · BC · Hourly', initials: 'NB', color: '#E84040', pin: '0506' },
+  { id: 'e234', name: 'Sheldon Schwer', role: 'Nortech · AB · Hourly', initials: 'SS', color: '#E84040', pin: '0234' },
+  { id: 'e359', name: 'Peter Dutka', role: 'Nortech · AB · Hourly', initials: 'PD', color: '#E84040', pin: '0359' },
+  { id: 'e508', name: 'Kortney Adam', role: 'Nortech · AB · Hourly', initials: 'KA', color: '#E84040', pin: '0508' },
+  { id: 'e509', name: 'Caitlin Borza', role: 'Nortech · AB · Hourly', initials: 'CB', color: '#E84040', pin: '0509' },
+  { id: 'e538', name: 'Taylor Bertoia', role: 'Nortech · AB · Hourly', initials: 'TB', color: '#E84040', pin: '0538' },
+  { id: 'e242', name: 'Nicholas Cunningham', role: 'Nortech · AB · Hourly', initials: 'NC', color: '#E84040', pin: '0242' },
+  { id: 'e384', name: 'Adrian Ferg', role: 'Nortech · AB · Hourly', initials: 'AF', color: '#E84040', pin: '0384' },
+  { id: 'e438', name: 'Nolan Leduc', role: 'Nortech · AB · Hourly', initials: 'NL', color: '#E84040', pin: '0438' },
+  { id: 'e450', name: 'Tanner Gilpin', role: 'Nortech · AB · Hourly', initials: 'TG', color: '#E84040', pin: '0450' },
+  { id: 'e468', name: 'Brody Markin', role: 'Nortech · AB · Hourly', initials: 'BM', color: '#E84040', pin: '0468' },
+  { id: 'e222', name: 'Noel Patterson', role: 'Nortech · BC · Hourly', initials: 'NP', color: '#E84040', pin: '0222' },
+  { id: 'e532', name: 'Corey O\'Donoghue', role: 'Nortech · BC · Hourly', initials: 'CO', color: '#E84040', pin: '0532' },
+  { id: 'e427', name: 'Steven Jones', role: 'Nortech · BC · Hourly', initials: 'SJ', color: '#E84040', pin: '0427' },
+  { id: 'e530', name: 'Cole Wiebe', role: 'Nortech · BC · Hourly', initials: 'CW', color: '#E84040', pin: '0530' },
+  { id: 'e389', name: 'Justin Ford', role: 'Nortech · BC · Hourly', initials: 'JF', color: '#E84040', pin: '0389' },
+  { id: 'e207', name: 'Charles (Cj) Holst', role: 'Nortech · AB · Hourly', initials: 'CH', color: '#E84040', pin: '0207' },
+  { id: 'e28', name: 'Lyonal Struthers', role: 'Nortech · AB · Hourly', initials: 'LS', color: '#E84040', pin: '0028' },
+  { id: 'e437', name: 'Clint Hickey', role: 'Nortech · AB · Hourly', initials: 'CH', color: '#E84040', pin: '0437' },
+  { id: 'e496', name: 'Randy (Evan) Chislett', role: 'Nortech · BC · Hourly', initials: 'RC', color: '#E84040', pin: '0496' },
+  { id: 'e186', name: 'Cody Tondreau', role: 'Nortech · AB · Hourly', initials: 'CT', color: '#E84040', pin: '0186' },
+  { id: 'e251', name: 'Bryce Schram', role: 'Nortech · AB · Hourly', initials: 'BS', color: '#E84040', pin: '0251' },
+  { id: 'e282', name: 'Shannon Russell', role: 'Nortech · AB · Hourly', initials: 'SR', color: '#E84040', pin: '0282' },
+  { id: 'e404', name: 'Ethan Sarafinchan', role: 'Nortech · AB · Hourly', initials: 'ES', color: '#E84040', pin: '0404' },
+  { id: 'e238', name: 'Steven Lomond', role: 'Nortech · AB · Hourly', initials: 'SL', color: '#E84040', pin: '0238' },
+  { id: 'e10', name: 'Kelly Leitch', role: 'Nortech · AB · Hourly', initials: 'KL', color: '#E84040', pin: '0010' },
+  { id: 'e21', name: 'Michael Carreiro', role: 'Nortech · AB · Hourly', initials: 'MC', color: '#E84040', pin: '0021' },
+  { id: 'e372', name: 'Marc Ropivia', role: 'Nortech · AB · Hourly', initials: 'MR', color: '#E84040', pin: '0372' },
+  { id: 'e376', name: 'Bradley Churchill', role: 'Nortech · AB · Hourly', initials: 'BC', color: '#E84040', pin: '0376' },
+  { id: 'e445', name: 'Taylor Wright', role: 'Nortech · AB · Hourly', initials: 'TW', color: '#E84040', pin: '0445' },
+  { id: 'e452', name: 'Frank Ouellette', role: 'Nortech · AB · Hourly', initials: 'FO', color: '#E84040', pin: '0452' },
+  { id: 'e430', name: 'Kyle Farmer', role: 'Nortech · AB · Hourly', initials: 'KF', color: '#E84040', pin: '0430' },
+  { id: 'e453', name: 'Jeongho (Sam) Shin', role: 'Nortech · AB · Hourly', initials: 'JS', color: '#E84040', pin: '0453' },
+  { id: 'e441', name: 'Bradley Shaw', role: 'Nortech · BC · Hourly', initials: 'BS', color: '#E84040', pin: '0441' },
+  { id: 'e505', name: 'Nancy Gullberg', role: 'Nortech · AB · Hourly', initials: 'NG', color: '#E84040', pin: '0505' },
+  { id: 'e313', name: 'Cole Feschuk', role: 'Nortech · AB · Hourly', initials: 'CF', color: '#E84040', pin: '0313' },
+  { id: 'e347', name: 'Michel Cadieux', role: 'Nortech · AB · Hourly', initials: 'MC', color: '#E84040', pin: '0347' },
+  { id: 'e431', name: 'Mike Parsons', role: 'Nortech · AB · Hourly', initials: 'MP', color: '#E84040', pin: '0431' },
+  { id: 'e426', name: 'Ian Kerfoot', role: 'Nortech · AB · Hourly', initials: 'IK', color: '#E84040', pin: '0426' },
+  { id: 'e516', name: 'Tyler Hotte', role: 'Nortech · BC · Hourly', initials: 'TH', color: '#E84040', pin: '0516' },
+  { id: 'e531', name: 'Colton Sinclair', role: 'Nortech · AB · Hourly', initials: 'CS', color: '#E84040', pin: '0531' },
+  { id: 'e33', name: 'Raelene Beaudoin', role: 'Nortech · AB · Hourly', initials: 'RB', color: '#E84040', pin: '0033' },
+  { id: 'e49', name: 'Samho Ngai', role: 'Nortech · AB · Hourly', initials: 'SN', color: '#E84040', pin: '0049' },
+  { id: 'e268', name: 'Chantal Chesterman', role: 'Nortech · AB · Hourly', initials: 'CC', color: '#E84040', pin: '0268' },
+  { id: 'e273', name: 'Samuel Plowright', role: 'Nortech · AB · Hourly', initials: 'SP', color: '#E84040', pin: '0273' },
+  { id: 'e296', name: 'Francis Audet', role: 'Nortech · AB · Hourly', initials: 'FA', color: '#E84040', pin: '0296' },
+  { id: 'e301', name: 'Matthew Chwyl', role: 'Nortech · AB · Hourly', initials: 'MC', color: '#E84040', pin: '0301' },
+  { id: 'e348', name: 'Christopher Moses', role: 'Nortech · AB · Hourly', initials: 'CM', color: '#E84040', pin: '0348' },
+  { id: 'e501', name: 'Ryan Borza', role: 'Nortech · AB · Hourly', initials: 'RB', color: '#E84040', pin: '0501' },
+  { id: 'e73', name: 'Tyson Skinner', role: 'Nortech · AB · Hourly', initials: 'TS', color: '#E84040', pin: '0073' },
+  { id: 'e5', name: 'Ryan S Cherwoniak', role: 'Nortech · AB · Hourly', initials: 'RC', color: '#E84040', pin: '0005' },
+  { id: 'e502', name: 'Dana R Draper', role: 'Nortech · AB · Hourly', initials: 'DD', color: '#E84040', pin: '0502' },
+  { id: 'e280', name: 'Ken Brunlees', role: 'Nortech · AB · Hourly', initials: 'KB', color: '#E84040', pin: '0280' },
+  { id: 'e12', name: 'Murray Nethery', role: 'Nortech · AB · Hourly', initials: 'MN', color: '#E84040', pin: '0012' },
+  { id: 'e188', name: 'Leo Novak', role: 'Nortech · AB · Hourly', initials: 'LN', color: '#E84040', pin: '0188' },
+  { id: 'e14', name: 'Ryan Ouellette', role: 'Nortech · AB · Hourly', initials: 'RO', color: '#E84040', pin: '0014' },
+  { id: 'e55', name: 'Dalton Mabbutt', role: 'Nortech · AB · Hourly', initials: 'DM', color: '#E84040', pin: '0055' },
+  { id: 'e225', name: 'Kyle Stevenson', role: 'Nortech · AB · Hourly', initials: 'KS', color: '#E84040', pin: '0225' },
+  { id: 'e528', name: 'Teena Brown', role: 'Nortech · AB · Hourly', initials: 'TB', color: '#E84040', pin: '0528' },
+  { id: 'e529', name: 'David Jolivette', role: 'Nortech · AB · Hourly', initials: 'DJ', color: '#E84040', pin: '0529' },
+  { id: 'e503', name: 'Denise Saunders', role: 'Nortech · AB · Salary', initials: 'DS', color: '#C9860A', pin: '0503' },
+  { id: 'e536', name: 'Rose Fedoruk', role: 'Nortech · AB · Salary', initials: 'RF', color: '#C9860A', pin: '0536' },
+  { id: 'e511', name: 'Shan Switzer', role: 'Nortech · AB · Salary', initials: 'SS', color: '#C9860A', pin: '0511' },
 ];
 
 // Determine current viewer
@@ -539,6 +598,15 @@ document.addEventListener('DOMContentLoaded', function() {
   <!-- ══ DASHBOARD ══════════════════════════════════════════════════════════ -->
   <div id="view-dashboard" class="view active">
     <div class="kpi-row" id="dash-kpis"></div>
+    <!-- Supabase migration tool — admin only, shown until migration is complete -->
+    <div id="ts-migrate-panel" data-admin-only style="margin-bottom:1.25rem;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.25);border-radius:8px;padding:.85rem 1.1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.78rem;font-weight:700;color:var(--sky);margin-bottom:.2rem">📤 Supabase Timesheet Migration</div>
+        <div style="font-size:.72rem;color:var(--muted)" id="ts-migrate-status">Timesheets cached locally — click to push all to Supabase.</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="migrateTimesheetsToSupabase()" id="ts-migrate-btn">Push to Supabase</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ts-migrate-panel').style.display='none'">Dismiss</button>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
       <div id="dash-inv-panel" class="section">
         <div class="sec-hdr">
@@ -1253,25 +1321,244 @@ var _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 // ── Login / viewer ────────────────────────────────────────────────────────────
 var CURRENT_VIEWER = localStorage.getItem('hub_viewer') || '';
 var VIEWER_PEOPLE = [
-  { id: 'jon',     name: 'Jon Eustace',               role: 'CEO North America · EIG',           initials: 'JE', color: '#00AEEF', pin: '0626' },
-  { id: 'olivier', name: 'Olivier Marcotte',           role: 'CRO · Nuclear',                     initials: 'OM', color: '#7C3AED', pin: '0001' },
-  { id: 'mathieu', name: 'Mathieu Beauchesne',         role: 'EVP · Powerline',                   initials: 'MB', color: '#E97132', pin: '0002' },
-  { id: 'max',     name: 'Emmanuel Aggrey',            role: 'Commercial Director — West',        initials: 'EA', color: '#C9860A', pin: '0003' },
-  { id: 'vinoth',  name: 'Vinoth Tharma',              role: 'Commercial Director — East',        initials: 'VT', color: '#22882F', pin: '0004' },
-  { id: 'alex',    name: 'Alex Cyr',                   role: 'Sr. Operations Director',          initials: 'AC', color: '#0891B2', pin: '0005' },
-  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',      initials: 'JI', color: '#38BDF8', pin: '0006' },
-  { id: 'renee',   name: 'Renée Lachance',             role: 'Sr. Director Finance & Controller', initials: 'RL', color: '#BE185D', pin: '0007' },
-  { id: 'rick',    name: 'Rick Carlton',               role: 'Pipeline Integrity Lead',           initials: 'RC', color: '#368CD9', pin: '0008' },
-  { id: 'joel_c',  name: 'Joel Carlton',               role: 'PI Operations Manager',             initials: 'JC', color: '#B45309', pin: '0009' },
-  { id: 'eric_r',  name: 'Eric Rodrigue',              role: 'Ops Director — Quebec',            initials: 'ER', color: '#1A5CA8', pin: '0010' },
-  { id: 'joel_dj', name: 'Joel Djordjevic',            role: 'Ops Director — Central',           initials: 'JD', color: '#2D5A8E', pin: '0011' },
-  { id: 'keith',   name: 'Keith Reichenbach',          role: 'Ops Director — Western',           initials: 'KR', color: '#4B5563', pin: '0012' },
-  { id: 'jason',   name: 'Jason Borza',                role: 'Ops Director — Nortech',           initials: 'JB', color: '#DC2626', pin: '0013' },
-  { id: 'brook',   name: 'Brook Althouse',             role: 'Northern Ops Manager',             initials: 'BA', color: '#6B7280', pin: '0014' },
-  { id: 'louisp',  name: 'Louis-Pier Théberge',        role: 'Ops Director — Nuclear',           initials: 'LT', color: '#059669', pin: '0015' },
-  { id: 'francis', name: 'Francis Boudreault-Leclerc', role: 'Engineering & Technical Manager',  initials: 'FB', color: '#6D28D9', pin: '0016' },
-  { id: 'eric_c',  name: 'Éric Carmichael',            role: 'Commercial Systems Manager',       initials: 'ÉC', color: '#0A1F5C', pin: '0017' },
-  { id: 'maud',    name: 'Maud Leivin Capuano',        role: 'HR Lead',                          initials: 'ML', color: '#9D174D', pin: '0018' },
+  { id: 'jon',     name: 'Jon Eustace',               role: 'CEO North America \u00b7 EIG',           initials: 'JE', color: '#00AEEF', pin: '0626' },
+  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',             initials: 'JI', color: '#38BDF8', pin: '0006' },
+  { id: 'joel_c',  name: 'Joel Carlton',               role: 'PI Operations Manager',                   initials: 'JC', color: '#B45309', pin: '0009' },
+  { id: 'jason',   name: 'Jason Borza',                role: 'Ops Director \u2014 Nortech',            initials: 'JB', color: '#DC2626', pin: '0013' },
+  // ── Nortech Field Staff ───────────────────────────────────────────────────
+  { id: 'e499', name: 'Cailyn Larison', role: 'Nortech · AB · Hourly', initials: 'CL', color: '#E84040', pin: '0499' },
+  { id: 'e469', name: 'Cole Mcgowan', role: 'Nortech · AB · Hourly', initials: 'CM', color: '#E84040', pin: '0469' },
+  { id: 'e510', name: 'Jessica Saunders', role: 'Nortech · AB · Hourly', initials: 'JS', color: '#E84040', pin: '0510' },
+  { id: 'e467', name: 'Jordan Mancini', role: 'Nortech · AB · Hourly', initials: 'JM', color: '#E84040', pin: '0467' },
+  { id: 'e534', name: 'Maxx Taylor', role: 'Nortech · AB · Hourly', initials: 'MT', color: '#E84040', pin: '0534' },
+  { id: 'e398', name: 'Scott Saunders', role: 'Nortech · AB · Hourly', initials: 'SS', color: '#E84040', pin: '0398' },
+  { id: 'e425', name: 'Matthew Isnor', role: 'Nortech · BC · Hourly', initials: 'MI', color: '#E84040', pin: '0425' },
+  { id: 'e497', name: 'Amanda Murphy', role: 'Nortech · AB · Hourly', initials: 'AM', color: '#E84040', pin: '0497' },
+  { id: 'e470', name: 'Fasil Teffera', role: 'Nortech · AB · Hourly', initials: 'FT', color: '#E84040', pin: '0470' },
+  { id: 'e537', name: 'Torin Keoughan', role: 'Nortech · AB · Hourly', initials: 'TK', color: '#E84040', pin: '0537' },
+  { id: 'e506', name: 'Natasha Bayrack', role: 'Nortech · BC · Hourly', initials: 'NB', color: '#E84040', pin: '0506' },
+  { id: 'e234', name: 'Sheldon Schwer', role: 'Nortech · AB · Hourly', initials: 'SS', color: '#E84040', pin: '0234' },
+  { id: 'e359', name: 'Peter Dutka', role: 'Nortech · AB · Hourly', initials: 'PD', color: '#E84040', pin: '0359' },
+  { id: 'e508', name: 'Kortney Adam', role: 'Nortech · AB · Hourly', initials: 'KA', color: '#E84040', pin: '0508' },
+  { id: 'e509', name: 'Caitlin Borza', role: 'Nortech · AB · Hourly', initials: 'CB', color: '#E84040', pin: '0509' },
+  { id: 'e538', name: 'Taylor Bertoia', role: 'Nortech · AB · Hourly', initials: 'TB', color: '#E84040', pin: '0538' },
+  { id: 'e242', name: 'Nicholas Cunningham', role: 'Nortech · AB · Hourly', initials: 'NC', color: '#E84040', pin: '0242' },
+  { id: 'e384', name: 'Adrian Ferg', role: 'Nortech · AB · Hourly', initials: 'AF', color: '#E84040', pin: '0384' },
+  { id: 'e438', name: 'Nolan Leduc', role: 'Nortech · AB · Hourly', initials: 'NL', color: '#E84040', pin: '0438' },
+  { id: 'e450', name: 'Tanner Gilpin', role: 'Nortech · AB · Hourly', initials: 'TG', color: '#E84040', pin: '0450' },
+  { id: 'e468', name: 'Brody Markin', role: 'Nortech · AB · Hourly', initials: 'BM', color: '#E84040', pin: '0468' },
+  { id: 'e222', name: 'Noel Patterson', role: 'Nortech · BC · Hourly', initials: 'NP', color: '#E84040', pin: '0222' },
+  { id: 'e532', name: 'Corey O\'Donoghue', role: 'Nortech · BC · Hourly', initials: 'CO', color: '#E84040', pin: '0532' },
+  { id: 'e427', name: 'Steven Jones', role: 'Nortech · BC · Hourly', initials: 'SJ', color: '#E84040', pin: '0427' },
+  { id: 'e530', name: 'Cole Wiebe', role: 'Nortech · BC · Hourly', initials: 'CW', color: '#E84040', pin: '0530' },
+  { id: 'e389', name: 'Justin Ford', role: 'Nortech · BC · Hourly', initials: 'JF', color: '#E84040', pin: '0389' },
+  { id: 'e207', name: 'Charles (Cj) Holst', role: 'Nortech · AB · Hourly', initials: 'CH', color: '#E84040', pin: '0207' },
+  { id: 'e28', name: 'Lyonal Struthers', role: 'Nortech · AB · Hourly', initials: 'LS', color: '#E84040', pin: '0028' },
+  { id: 'e437', name: 'Clint Hickey', role: 'Nortech · AB · Hourly', initials: 'CH', color: '#E84040', pin: '0437' },
+  { id: 'e496', name: 'Randy (Evan) Chislett', role: 'Nortech · BC · Hourly', initials: 'RC', color: '#E84040', pin: '0496' },
+  { id: 'e186', name: 'Cody Tondreau', role: 'Nortech · AB · Hourly', initials: 'CT', color: '#E84040', pin: '0186' },
+  { id: 'e251', name: 'Bryce Schram', role: 'Nortech · AB · Hourly', initials: 'BS', color: '#E84040', pin: '0251' },
+  { id: 'e282', name: 'Shannon Russell', role: 'Nortech · AB · Hourly', initials: 'SR', color: '#E84040', pin: '0282' },
+  { id: 'e404', name: 'Ethan Sarafinchan', role: 'Nortech · AB · Hourly', initials: 'ES', color: '#E84040', pin: '0404' },
+  { id: 'e238', name: 'Steven Lomond', role: 'Nortech · AB · Hourly', initials: 'SL', color: '#E84040', pin: '0238' },
+  { id: 'e10', name: 'Kelly Leitch', role: 'Nortech · AB · Hourly', initials: 'KL', color: '#E84040', pin: '0010' },
+  { id: 'e21', name: 'Michael Carreiro', role: 'Nortech · AB · Hourly', initials: 'MC', color: '#E84040', pin: '0021' },
+  { id: 'e372', name: 'Marc Ropivia', role: 'Nortech · AB · Hourly', initials: 'MR', color: '#E84040', pin: '0372' },
+  { id: 'e376', name: 'Bradley Churchill', role: 'Nortech · AB · Hourly', initials: 'BC', color: '#E84040', pin: '0376' },
+  { id: 'e445', name: 'Taylor Wright', role: 'Nortech · AB · Hourly', initials: 'TW', color: '#E84040', pin: '0445' },
+  { id: 'e452', name: 'Frank Ouellette', role: 'Nortech · AB · Hourly', initials: 'FO', color: '#E84040', pin: '0452' },
+  { id: 'e430', name: 'Kyle Farmer', role: 'Nortech · AB · Hourly', initials: 'KF', color: '#E84040', pin: '0430' },
+  { id: 'e453', name: 'Jeongho (Sam) Shin', role: 'Nortech · AB · Hourly', initials: 'JS', color: '#E84040', pin: '0453' },
+  { id: 'e441', name: 'Bradley Shaw', role: 'Nortech · BC · Hourly', initials: 'BS', color: '#E84040', pin: '0441' },
+  { id: 'e505', name: 'Nancy Gullberg', role: 'Nortech · AB · Hourly', initials: 'NG', color: '#E84040', pin: '0505' },
+  { id: 'e313', name: 'Cole Feschuk', role: 'Nortech · AB · Hourly', initials: 'CF', color: '#E84040', pin: '0313' },
+  { id: 'e347', name: 'Michel Cadieux', role: 'Nortech · AB · Hourly', initials: 'MC', color: '#E84040', pin: '0347' },
+  { id: 'e431', name: 'Mike Parsons', role: 'Nortech · AB · Hourly', initials: 'MP', color: '#E84040', pin: '0431' },
+  { id: 'e426', name: 'Ian Kerfoot', role: 'Nortech · AB · Hourly', initials: 'IK', color: '#E84040', pin: '0426' },
+  { id: 'e516', name: 'Tyler Hotte', role: 'Nortech · BC · Hourly', initials: 'TH', color: '#E84040', pin: '0516' },
+  { id: 'e531', name: 'Colton Sinclair', role: 'Nortech · AB · Hourly', initials: 'CS', color: '#E84040', pin: '0531' },
+  { id: 'e33', name: 'Raelene Beaudoin', role: 'Nortech · AB · Hourly', initials: 'RB', color: '#E84040', pin: '0033' },
+  { id: 'e49', name: 'Samho Ngai', role: 'Nortech · AB · Hourly', initials: 'SN', color: '#E84040', pin: '0049' },
+  { id: 'e268', name: 'Chantal Chesterman', role: 'Nortech · AB · Hourly', initials: 'CC', color: '#E84040', pin: '0268' },
+  { id: 'e273', name: 'Samuel Plowright', role: 'Nortech · AB · Hourly', initials: 'SP', color: '#E84040', pin: '0273' },
+  { id: 'e296', name: 'Francis Audet', role: 'Nortech · AB · Hourly', initials: 'FA', color: '#E84040', pin: '0296' },
+  { id: 'e301', name: 'Matthew Chwyl', role: 'Nortech · AB · Hourly', initials: 'MC', color: '#E84040', pin: '0301' },
+  { id: 'e348', name: 'Christopher Moses', role: 'Nortech · AB · Hourly', initials: 'CM', color: '#E84040', pin: '0348' },
+  { id: 'e501', name: 'Ryan Borza', role: 'Nortech · AB · Hourly', initials: 'RB', color: '#E84040', pin: '0501' },
+  { id: 'e73', name: 'Tyson Skinner', role: 'Nortech · AB · Hourly', initials: 'TS', color: '#E84040', pin: '0073' },
+  { id: 'e5', name: 'Ryan S Cherwoniak', role: 'Nortech · AB · Hourly', initials: 'RC', color: '#E84040', pin: '0005' },
+  { id: 'e502', name: 'Dana R Draper', role: 'Nortech · AB · Hourly', initials: 'DD', color: '#E84040', pin: '0502' },
+  { id: 'e280', name: 'Ken Brunlees', role: 'Nortech · AB · Hourly', initials: 'KB', color: '#E84040', pin: '0280' },
+  { id: 'e12', name: 'Murray Nethery', role: 'Nortech · AB · Hourly', initials: 'MN', color: '#E84040', pin: '0012' },
+  { id: 'e188', name: 'Leo Novak', role: 'Nortech · AB · Hourly', initials: 'LN', color: '#E84040', pin: '0188' },
+  { id: 'e14', name: 'Ryan Ouellette', role: 'Nortech · AB · Hourly', initials: 'RO', color: '#E84040', pin: '0014' },
+  { id: 'e55', name: 'Dalton Mabbutt', role: 'Nortech · AB · Hourly', initials: 'DM', color: '#E84040', pin: '0055' },
+  { id: 'e225', name: 'Kyle Stevenson', role: 'Nortech · AB · Hourly', initials: 'KS', color: '#E84040', pin: '0225' },
+  { id: 'e528', name: 'Teena Brown', role: 'Nortech · AB · Hourly', initials: 'TB', color: '#E84040', pin: '0528' },
+  { id: 'e529', name: 'David Jolivette', role: 'Nortech · AB · Hourly', initials: 'DJ', color: '#E84040', pin: '0529' },
+  { id: 'e503', name: 'Denise Saunders', role: 'Nortech · AB · Salary', initials: 'DS', color: '#C9860A', pin: '0503' },
+  { id: 'e536', name: 'Rose Fedoruk', role: 'Nortech · AB · Salary', initials: 'RF', color: '#C9860A', pin: '0536' },
+  { id: 'e511', name: 'Shan Switzer', role: 'Nortech · AB · Salary', initials: 'SS', color: '#C9860A', pin: '0511' },
+];
+
+// ── Nortech employee roster with pay rates ─────────────────────────────────
+var NORTECH_EMPLOYEES = [
+  { id: 'e499', emp: '499', name: 'Cailyn Larison', rate: 21.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e469', emp: '469', name: 'Cole Mcgowan', rate: 22.77, province: 'AB', type: 'Hourly EE' },
+  { id: 'e510', emp: '510', name: 'Jessica Saunders', rate: 23.1, province: 'AB', type: 'Hourly EE' },
+  { id: 'e467', emp: '467', name: 'Jordan Mancini', rate: 25.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e534', emp: '534', name: 'Maxx Taylor', rate: 25.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e398', emp: '398', name: 'Scott Saunders', rate: 26.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e425', emp: '425', name: 'Matthew Isnor', rate: 27.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e497', emp: '497', name: 'Amanda Murphy', rate: 28.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e470', emp: '470', name: 'Fasil Teffera', rate: 28.94, province: 'AB', type: 'Hourly EE' },
+  { id: 'e537', emp: '537', name: 'Torin Keoughan', rate: 28.94, province: 'AB', type: 'Hourly EE' },
+  { id: 'e506', emp: '506', name: 'Natasha Bayrack', rate: 29.32, province: 'BC', type: 'Hourly EE' },
+  { id: 'e234', emp: '234', name: 'Sheldon Schwer', rate: 30.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e359', emp: '359', name: 'Peter Dutka', rate: 30.01, province: 'AB', type: 'Hourly EE' },
+  { id: 'e508', emp: '508', name: 'Kortney Adam', rate: 30.45, province: 'AB', type: 'Hourly EE' },
+  { id: 'e509', emp: '509', name: 'Caitlin Borza', rate: 32.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e538', emp: '538', name: 'Taylor Bertoia', rate: 32.5, province: 'AB', type: 'Hourly EE' },
+  { id: 'e242', emp: '242', name: 'Nicholas Cunningham', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e384', emp: '384', name: 'Adrian Ferg', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e438', emp: '438', name: 'Nolan Leduc', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e450', emp: '450', name: 'Tanner Gilpin', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e468', emp: '468', name: 'Brody Markin', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e222', emp: '222', name: 'Noel Patterson', rate: 34.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e532', emp: '532', name: 'Corey O\'Donoghue', rate: 34.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e427', emp: '427', name: 'Steven Jones', rate: 36.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e530', emp: '530', name: 'Cole Wiebe', rate: 36.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e389', emp: '389', name: 'Justin Ford', rate: 37.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e207', emp: '207', name: 'Charles (Cj) Holst', rate: 37.13, province: 'AB', type: 'Hourly EE' },
+  { id: 'e28', emp: '28', name: 'Lyonal Struthers', rate: 39.05, province: 'AB', type: 'Hourly EE' },
+  { id: 'e437', emp: '437', name: 'Clint Hickey', rate: 40.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e496', emp: '496', name: 'Randy (Evan) Chislett', rate: 40.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e186', emp: '186', name: 'Cody Tondreau', rate: 40.2, province: 'AB', type: 'Hourly EE' },
+  { id: 'e251', emp: '251', name: 'Bryce Schram', rate: 40.2, province: 'AB', type: 'Hourly EE' },
+  { id: 'e282', emp: '282', name: 'Shannon Russell', rate: 40.2, province: 'AB', type: 'Hourly EE' },
+  { id: 'e404', emp: '404', name: 'Ethan Sarafinchan', rate: 40.2, province: 'AB', type: 'Hourly EE' },
+  { id: 'e238', emp: '238', name: 'Steven Lomond', rate: 42.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e10', emp: '10', name: 'Kelly Leitch', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e21', emp: '21', name: 'Michael Carreiro', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e372', emp: '372', name: 'Marc Ropivia', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e376', emp: '376', name: 'Bradley Churchill', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e445', emp: '445', name: 'Taylor Wright', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e452', emp: '452', name: 'Frank Ouellette', rate: 42.96, province: 'AB', type: 'Hourly EE' },
+  { id: 'e430', emp: '430', name: 'Kyle Farmer', rate: 45.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e453', emp: '453', name: 'Jeongho (Sam) Shin', rate: 46.54, province: 'AB', type: 'Hourly EE' },
+  { id: 'e441', emp: '441', name: 'Bradley Shaw', rate: 48.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e505', emp: '505', name: 'Nancy Gullberg', rate: 48.07, province: 'AB', type: 'Hourly EE' },
+  { id: 'e313', emp: '313', name: 'Cole Feschuk', rate: 49.74, province: 'AB', type: 'Hourly EE' },
+  { id: 'e347', emp: '347', name: 'Michel Cadieux', rate: 50.04, province: 'AB', type: 'Hourly EE' },
+  { id: 'e431', emp: '431', name: 'Mike Parsons', rate: 50.04, province: 'AB', type: 'Hourly EE' },
+  { id: 'e426', emp: '426', name: 'Ian Kerfoot', rate: 50.67, province: 'AB', type: 'Hourly EE' },
+  { id: 'e516', emp: '516', name: 'Tyler Hotte', rate: 52.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e531', emp: '531', name: 'Colton Sinclair', rate: 52.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e33', emp: '33', name: 'Raelene Beaudoin', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e49', emp: '49', name: 'Samho Ngai', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e268', emp: '268', name: 'Chantal Chesterman', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e273', emp: '273', name: 'Samuel Plowright', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e296', emp: '296', name: 'Francis Audet', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e301', emp: '301', name: 'Matthew Chwyl', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e348', emp: '348', name: 'Christopher Moses', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e501', emp: '501', name: 'Ryan Borza', rate: 53.44, province: 'AB', type: 'Hourly EE' },
+  { id: 'e73', emp: '73', name: 'Tyson Skinner', rate: 54.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e5', emp: '5', name: 'Ryan S Cherwoniak', rate: 54.38, province: 'AB', type: 'Hourly EE' },
+  { id: 'e502', emp: '502', name: 'Dana R Draper', rate: 54.47, province: 'AB', type: 'Hourly EE' },
+  { id: 'e280', emp: '280', name: 'Ken Brunlees', rate: 54.75, province: 'AB', type: 'Hourly EE' },
+  { id: 'e12', emp: '12', name: 'Murray Nethery', rate: 55.07, province: 'AB', type: 'Hourly EE' },
+  { id: 'e188', emp: '188', name: 'Leo Novak', rate: 57.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e14', emp: '14', name: 'Ryan Ouellette', rate: 60.58, province: 'AB', type: 'Hourly EE' },
+  { id: 'e55', emp: '55', name: 'Dalton Mabbutt', rate: 62.78, province: 'AB', type: 'Hourly EE' },
+  { id: 'e225', emp: '225', name: 'Kyle Stevenson', rate: 68.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e528', emp: '528', name: 'Teena Brown', rate: 80.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e529', emp: '529', name: 'David Jolivette', rate: 90.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e503', emp: '503', name: 'Denise Saunders', rate: 39.66, province: 'AB', type: 'Salary EE' },
+  { id: 'e536', emp: '536', name: 'Rose Fedoruk', rate: 48.05, province: 'AB', type: 'Salary EE' },
+  { id: 'e511', emp: '511', name: 'Shan Switzer', rate: 61.73, province: 'AB', type: 'Salary EE' },
+  { id: 'joel_c', emp: '535', name: 'Joel Carlton', rate: 70.0, province: 'AB', type: 'Salary EE' },
+  { id: 'jason', emp: '500', name: 'Jason Borza', rate: 69.75, province: 'AB', type: 'Salary EE' },
+  { id: 'jeremy', emp: '525', name: 'Jeremy Irwin', rate: 85.0, province: 'AB', type: 'Salary EE' },
+];
+
+// ── Nortech employee roster with pay rates ─────────────────────────────────
+var NORTECH_EMPLOYEES = [
+  { id: 'e499', emp: '499', name: 'Cailyn Larison', rate: 21.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e469', emp: '469', name: 'Cole Mcgowan', rate: 22.77, province: 'AB', type: 'Hourly EE' },
+  { id: 'e510', emp: '510', name: 'Jessica Saunders', rate: 23.1, province: 'AB', type: 'Hourly EE' },
+  { id: 'e467', emp: '467', name: 'Jordan Mancini', rate: 25.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e534', emp: '534', name: 'Maxx Taylor', rate: 25.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e398', emp: '398', name: 'Scott Saunders', rate: 26.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e425', emp: '425', name: 'Matthew Isnor', rate: 27.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e497', emp: '497', name: 'Amanda Murphy', rate: 28.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e470', emp: '470', name: 'Fasil Teffera', rate: 28.94, province: 'AB', type: 'Hourly EE' },
+  { id: 'e537', emp: '537', name: 'Torin Keoughan', rate: 28.94, province: 'AB', type: 'Hourly EE' },
+  { id: 'e506', emp: '506', name: 'Natasha Bayrack', rate: 29.32, province: 'BC', type: 'Hourly EE' },
+  { id: 'e234', emp: '234', name: 'Sheldon Schwer', rate: 30.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e359', emp: '359', name: 'Peter Dutka', rate: 30.01, province: 'AB', type: 'Hourly EE' },
+  { id: 'e508', emp: '508', name: 'Kortney Adam', rate: 30.45, province: 'AB', type: 'Hourly EE' },
+  { id: 'e509', emp: '509', name: 'Caitlin Borza', rate: 32.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e538', emp: '538', name: 'Taylor Bertoia', rate: 32.5, province: 'AB', type: 'Hourly EE' },
+  { id: 'e242', emp: '242', name: 'Nicholas Cunningham', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e384', emp: '384', name: 'Adrian Ferg', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e438', emp: '438', name: 'Nolan Leduc', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e450', emp: '450', name: 'Tanner Gilpin', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e468', emp: '468', name: 'Brody Markin', rate: 33.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e222', emp: '222', name: 'Noel Patterson', rate: 34.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e532', emp: '532', name: 'Corey O\'Donoghue', rate: 34.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e427', emp: '427', name: 'Steven Jones', rate: 36.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e530', emp: '530', name: 'Cole Wiebe', rate: 36.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e389', emp: '389', name: 'Justin Ford', rate: 37.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e207', emp: '207', name: 'Charles (Cj) Holst', rate: 37.13, province: 'AB', type: 'Hourly EE' },
+  { id: 'e28', emp: '28', name: 'Lyonal Struthers', rate: 39.05, province: 'AB', type: 'Hourly EE' },
+  { id: 'e437', emp: '437', name: 'Clint Hickey', rate: 40.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e496', emp: '496', name: 'Randy (Evan) Chislett', rate: 40.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e186', emp: '186', name: 'Cody Tondreau', rate: 40.2, province: 'AB', type: 'Hourly EE' },
+  { id: 'e251', emp: '251', name: 'Bryce Schram', rate: 40.2, province: 'AB', type: 'Hourly EE' },
+  { id: 'e282', emp: '282', name: 'Shannon Russell', rate: 40.2, province: 'AB', type: 'Hourly EE' },
+  { id: 'e404', emp: '404', name: 'Ethan Sarafinchan', rate: 40.2, province: 'AB', type: 'Hourly EE' },
+  { id: 'e238', emp: '238', name: 'Steven Lomond', rate: 42.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e10', emp: '10', name: 'Kelly Leitch', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e21', emp: '21', name: 'Michael Carreiro', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e372', emp: '372', name: 'Marc Ropivia', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e376', emp: '376', name: 'Bradley Churchill', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e445', emp: '445', name: 'Taylor Wright', rate: 42.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e452', emp: '452', name: 'Frank Ouellette', rate: 42.96, province: 'AB', type: 'Hourly EE' },
+  { id: 'e430', emp: '430', name: 'Kyle Farmer', rate: 45.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e453', emp: '453', name: 'Jeongho (Sam) Shin', rate: 46.54, province: 'AB', type: 'Hourly EE' },
+  { id: 'e441', emp: '441', name: 'Bradley Shaw', rate: 48.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e505', emp: '505', name: 'Nancy Gullberg', rate: 48.07, province: 'AB', type: 'Hourly EE' },
+  { id: 'e313', emp: '313', name: 'Cole Feschuk', rate: 49.74, province: 'AB', type: 'Hourly EE' },
+  { id: 'e347', emp: '347', name: 'Michel Cadieux', rate: 50.04, province: 'AB', type: 'Hourly EE' },
+  { id: 'e431', emp: '431', name: 'Mike Parsons', rate: 50.04, province: 'AB', type: 'Hourly EE' },
+  { id: 'e426', emp: '426', name: 'Ian Kerfoot', rate: 50.67, province: 'AB', type: 'Hourly EE' },
+  { id: 'e516', emp: '516', name: 'Tyler Hotte', rate: 52.0, province: 'BC', type: 'Hourly EE' },
+  { id: 'e531', emp: '531', name: 'Colton Sinclair', rate: 52.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e33', emp: '33', name: 'Raelene Beaudoin', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e49', emp: '49', name: 'Samho Ngai', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e268', emp: '268', name: 'Chantal Chesterman', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e273', emp: '273', name: 'Samuel Plowright', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e296', emp: '296', name: 'Francis Audet', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e301', emp: '301', name: 'Matthew Chwyl', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e348', emp: '348', name: 'Christopher Moses', rate: 52.88, province: 'AB', type: 'Hourly EE' },
+  { id: 'e501', emp: '501', name: 'Ryan Borza', rate: 53.44, province: 'AB', type: 'Hourly EE' },
+  { id: 'e73', emp: '73', name: 'Tyson Skinner', rate: 54.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e5', emp: '5', name: 'Ryan S Cherwoniak', rate: 54.38, province: 'AB', type: 'Hourly EE' },
+  { id: 'e502', emp: '502', name: 'Dana R Draper', rate: 54.47, province: 'AB', type: 'Hourly EE' },
+  { id: 'e280', emp: '280', name: 'Ken Brunlees', rate: 54.75, province: 'AB', type: 'Hourly EE' },
+  { id: 'e12', emp: '12', name: 'Murray Nethery', rate: 55.07, province: 'AB', type: 'Hourly EE' },
+  { id: 'e188', emp: '188', name: 'Leo Novak', rate: 57.83, province: 'AB', type: 'Hourly EE' },
+  { id: 'e14', emp: '14', name: 'Ryan Ouellette', rate: 60.58, province: 'AB', type: 'Hourly EE' },
+  { id: 'e55', emp: '55', name: 'Dalton Mabbutt', rate: 62.78, province: 'AB', type: 'Hourly EE' },
+  { id: 'e225', emp: '225', name: 'Kyle Stevenson', rate: 68.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e528', emp: '528', name: 'Teena Brown', rate: 80.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e529', emp: '529', name: 'David Jolivette', rate: 90.0, province: 'AB', type: 'Hourly EE' },
+  { id: 'e503', emp: '503', name: 'Denise Saunders', rate: 39.66, province: 'AB', type: 'Salary EE' },
+  { id: 'e536', emp: '536', name: 'Rose Fedoruk', rate: 48.05, province: 'AB', type: 'Salary EE' },
+  { id: 'e511', emp: '511', name: 'Shan Switzer', rate: 61.73, province: 'AB', type: 'Salary EE' },
+  { id: 'joel_c', emp: '535', name: 'Joel Carlton', rate: 70.0, province: 'AB', type: 'Salary EE' },
+  { id: 'jason', emp: '500', name: 'Jason Borza', rate: 69.75, province: 'AB', type: 'Salary EE' },
+  { id: 'jeremy', emp: '525', name: 'Jeremy Irwin', rate: 85.0, province: 'AB', type: 'Salary EE' },
 ];
 
 // ── Nortech labour categories ─────────────────────────────────────────────────
@@ -1451,7 +1738,7 @@ function getFilmTypeOptions(selected) {
 // ── Timesheet Supabase storage ───────────────────────────────────────────────
 // Timesheets live in Supabase 'timesheets' table (same {id,data,updated_at} schema).
 // localStorage is used as a write-through cache so the UI stays fast.
-var _TS_CACHE_KEY = 'nortech_ts_cache';
+var _TS_CACHE_KEY = 'nortech_timesheets'; // original key — existing data preserved
 
 function _tsCacheRead() {
   try { return JSON.parse(localStorage.getItem(_TS_CACHE_KEY) || '[]'); } catch(e) { return []; }
@@ -1460,17 +1747,18 @@ function _tsCacheWrite(all) {
   try { localStorage.setItem(_TS_CACHE_KEY, JSON.stringify(all)); } catch(e) {}
 }
 
-async function saveTimesheetToStorage(ts) {
+function saveTimesheetToStorage(ts) {
   if (!ts || !ts.id) return;
-  // Write-through cache
+  // Synchronous cache write — always instant
   var all = _tsCacheRead();
   var idx = all.findIndex(function(t){ return t.id === ts.id; });
   if (idx > -1) all[idx] = ts; else all.unshift(ts);
   _tsCacheWrite(all);
   _timesheets = all;
-  // Persist to Supabase (non-blocking)
-  try { await sbUpsert('timesheets', ts.id, ts); }
-  catch(e) { console.warn('[TS] Supabase write failed, cached locally:', e.message); }
+  // Fire-and-forget Supabase write — non-blocking, doesn't need await
+  sbUpsert('timesheets', ts.id, ts).catch(function(e) {
+    console.warn('[TS] Supabase write failed, cached locally:', e.message);
+  });
 }
 
 function loadTimesheetsFromStorage() {
@@ -1885,7 +2173,7 @@ async function markInvoiceVoid(){ if(!_currentInvId)return; await markVoid(_curr
 
 
 // ── Price visibility guard ─────────────────────────────────────────────────────
-var _ADMIN_IDS = ['jon','jason','joel_c','renee','jeremy','mathieu'];
+var _ADMIN_IDS = ['jon','jason','joel_c','jeremy','e502','e536','e511'];
 
 function isAdmin() {
   var viewer = (window.CURRENT_VIEWER || localStorage.getItem('hub_viewer') || 'tech');
@@ -2381,6 +2669,11 @@ async function loadAll(){
       var sbTS = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
       _timesheets = sbTS;
       _tsCacheWrite(sbTS); // refresh local cache from Supabase
+      // Hide migration panel if Supabase already has data
+      if (sbTS.length > 0) {
+        var panel = document.getElementById('ts-migrate-panel');
+        if (panel) panel.style.display = 'none';
+      }
     } else {
       _timesheets = loadTimesheetsFromStorage(); // fallback to cache
     }
@@ -2420,6 +2713,45 @@ function renderForView(v){
   if(v==='timesheets')  renderTimesheets();
   if(v==='margin')      renderMarginReport();
 }
+// ── One-time migration: push all localStorage timesheets to Supabase ──────────
+async function migrateTimesheetsToSupabase() {
+  var btn    = document.getElementById('ts-migrate-btn');
+  var status = document.getElementById('ts-migrate-status');
+  var cached = _tsCacheRead();
+  if (!cached.length) {
+    if (status) status.textContent = 'No local timesheets found — nothing to migrate.';
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = 'Migrating…'; }
+  if (status) status.textContent = 'Pushing ' + cached.length + ' timesheet(s) to Supabase…';
+
+  var ok = 0; var fail = 0;
+  for (var i = 0; i < cached.length; i++) {
+    var ts = cached[i];
+    if (!ts || !ts.id) continue;
+    try {
+      await sbUpsert('timesheets', ts.id, ts);
+      ok++;
+    } catch(e) {
+      fail++;
+      console.warn('[Migrate] Failed for TS ' + ts.id + ':', e.message);
+    }
+    if (status) status.textContent = 'Progress: ' + (ok + fail) + ' / ' + cached.length + ' — ' + ok + ' succeeded, ' + fail + ' failed…';
+  }
+
+  if (fail === 0) {
+    if (status) status.textContent = '\u2713 Migration complete — ' + ok + ' timesheet(s) pushed to Supabase.';
+    if (btn) { btn.textContent = '\u2713 Done'; btn.style.background = 'var(--green)'; }
+    setTimeout(function() {
+      var panel = document.getElementById('ts-migrate-panel');
+      if (panel) panel.style.display = 'none';
+    }, 4000);
+  } else {
+    if (status) status.textContent = '\u26a0 Done with errors: ' + ok + ' succeeded, ' + fail + ' failed. Check console for details.';
+    if (btn) { btn.disabled = false; btn.textContent = 'Retry'; }
+  }
+}
+
 function renderAll(){
   applyAdminVisibility();   // redirect techs away from dashboard, hide admin tabs
   renderDashboard();
@@ -3776,10 +4108,18 @@ function getLabourOptions(rs) {
 }
 
 function getTechOptions() {
-  return '<option value="">— Select technician —</option>'
-    + (window.VIEWER_PEOPLE || []).map(function(p) {
-        return '<option value="' + p.name + '">' + p.name + '</option>';
-      }).join('');
+  var opts = '<option value="">\u2014 Select technician \u2014</option>';
+  if (typeof NORTECH_EMPLOYEES !== 'undefined' && NORTECH_EMPLOYEES.length) {
+    opts += NORTECH_EMPLOYEES.map(function(e){
+      return '<option value="' + e.name + '" data-rate="' + e.rate + '">' + e.name + '</option>';
+    }).join('');
+  } else {
+    opts += (VIEWER_PEOPLE || [])
+      .filter(function(p){ return _ADMIN_IDS.indexOf(p.id) === -1; })
+      .map(function(p){ return '<option value="'+p.name+'">'+p.name+'</option>'; })
+      .join('');
+  }
+  return opts;
 }
 
 function getEquipmentOptions(rs) {
@@ -4109,7 +4449,6 @@ async function techBackToWO() {
     if (rows.length) {
       var draft = buildTSData('draft');
       saveTimesheetToStorage(Object.assign({id:_editTSId}, draft));
-      _timesheets = _timesheets.map(function(t){ return t.id === _editTSId ? Object.assign({id:_editTSId}, draft) : t; });
     }
   }
   closeModal('ts-modal');
@@ -4135,7 +4474,6 @@ async function techSubmitBoth() {
   data.submittedDate = today();
   if (_editTSId) {
     saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
-    _timesheets = _timesheets.map(function(t){ return t.id === _editTSId ? Object.assign({id:_editTSId}, data) : t; });
   }
 
   closeModal('ts-modal');
@@ -5757,18 +6095,16 @@ function closeCustList() {
 
 // ── Employee dropdown for labour rows ─────────────────────────────────────────
 function getTechOptions() {
-  var active   = NORTECH_EMPLOYEES.filter(function(e){ return e.status === 'Active'; });
-  var inactive = NORTECH_EMPLOYEES.filter(function(e){ return e.status !== 'Active'; });
-  var opts = '<option value="">— Select technician —</option>';
-  if (active.length) {
-    opts += '<optgroup label="Active">' + active.map(function(e){
-      return '<option value="' + e.name + '">' + e.name + '</option>';
-    }).join('') + '</optgroup>';
-  }
-  if (inactive.length) {
-    opts += '<optgroup label="Inactive / On Leave">' + inactive.map(function(e){
-      return '<option value="' + e.name + '">' + e.name + ' (' + e.status + ')</option>';
-    }).join('') + '</optgroup>';
+  var opts = '<option value="">\u2014 Select technician \u2014</option>';
+  if (typeof NORTECH_EMPLOYEES !== 'undefined' && NORTECH_EMPLOYEES.length) {
+    opts += NORTECH_EMPLOYEES.map(function(e){
+      return '<option value="' + e.name + '" data-rate="' + e.rate + '">' + e.name + '</option>';
+    }).join('');
+  } else {
+    opts += (VIEWER_PEOPLE || [])
+      .filter(function(p){ return _ADMIN_IDS.indexOf(p.id) === -1; })
+      .map(function(p){ return '<option value="'+p.name+'">'+p.name+'</option>'; })
+      .join('');
   }
   return opts;
 }
@@ -6239,7 +6575,7 @@ async function saveTSDraft() {
   if (!_editTSId) { toast('No timesheet to save', 'error'); return; }
   var data = buildTSData('draft');
   try {
-    await saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
+    saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
     closeModal('ts-modal');
     renderTimesheets();
     toast('Timesheet draft saved', 'success');
@@ -6255,7 +6591,7 @@ async function submitTS() {
   var data = buildTSData('submitted');
   data.submittedDate = today();
   try {
-    await saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
+    saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
     closeModal('ts-modal');
     renderTimesheets();
     toast('Timesheet submitted', 'success');
