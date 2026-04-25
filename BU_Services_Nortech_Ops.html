@@ -2860,23 +2860,29 @@ async function migrateTimesheetsToSupabase() {
 var _DEMO_TAG = '__demo__';
 
 async function clearAllData() {
-  if (!confirm('⚠ CLEAR ALL DATA?\n\nThis permanently deletes all work orders, timesheets, invoices, charge sheets and rate sheets from Supabase AND localStorage.\n\nThis cannot be undone. Are you absolutely sure?')) return;
-  if (!confirm('Last chance — DELETE EVERYTHING?')) return;
+  if (!confirm('\u26a0 CLEAR ALL DATA?\n\nThis permanently deletes everything from Supabase AND localStorage.\n\nThis cannot be undone. Are you absolutely sure?')) return;
+  if (!confirm('Last chance \u2014 DELETE EVERYTHING?')) return;
   try {
-    // Clear Supabase
     var tables = ['jobs','timesheets','invoices','charge_sheets','rate_sheets'];
     for (var t = 0; t < tables.length; t++) {
-      var rows = await sbList(tables[t]);
-      for (var r = 0; r < rows.length; r++) {
-        await sbDelete(tables[t], rows[r].id);
-      }
+      var tbl = tables[t];
+      try {
+        // Bulk delete via neq trick
+        await fetch(_SB_URL+'/rest/v1/'+tbl+'?id=neq.NOMATCH', {
+          method:'DELETE', headers:{'apikey':_SB_KEY,'Authorization':'Bearer '+_SB_KEY}
+        });
+      } catch(e){ console.warn('clear '+tbl, e.message); }
+      // Also delete from in-memory list one by one as fallback
+      var arr = tbl==='jobs'?_jobs:tbl==='timesheets'?_timesheets:tbl==='invoices'?_invoices:tbl==='charge_sheets'?_chargeSheets:_rateSheets;
+      for (var r=0;r<arr.length;r++) { try{ await sbDelete(tbl,arr[r].id); }catch(e){} }
     }
-    // Clear localStorage
-    ['nortech_timesheets','nortech_ts_cache'].forEach(function(k){ localStorage.removeItem(k); });
+    // Wipe all nortech localStorage keys
+    Object.keys(localStorage).filter(function(k){ return k.includes('nortech'); })
+      .forEach(function(k){ localStorage.removeItem(k); });
     _jobs=[]; _timesheets=[]; _invoices=[]; _chargeSheets=[]; _rateSheets=[];
     renderAll();
-    toast('All data cleared ✓', 'success');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
+    toast('All data cleared \u2713', 'success');
+  } catch(e){ toast('Error: '+e.message,'error'); }
 }
 
 async function clearDemoData() {
