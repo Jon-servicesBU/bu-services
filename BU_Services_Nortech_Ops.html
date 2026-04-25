@@ -625,6 +625,12 @@ document.addEventListener('DOMContentLoaded', function() {
   <!-- ══ DASHBOARD ══════════════════════════════════════════════════════════ -->
   <div id="view-dashboard" class="view active">
     <div class="kpi-row" id="dash-kpis"></div>
+    <!-- Admin tools bar -->
+    <div id="admin-tools-bar" data-admin-only style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+      <button class="btn btn-ghost btn-sm" onclick="loadDemoData()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">🎬 Load Demo</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearDemoData()" style="border-color:rgba(232,64,64,.3);color:#EF4444">🗑 Clear Demo</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearAllData()" style="border-color:rgba(232,64,64,.5);color:#EF4444;font-weight:700">⚠ Clear All Data</button>
+    </div>
     <!-- Supabase migration tool — admin only, shown until migration is complete -->
     <div id="ts-migrate-panel" data-admin-only style="margin-bottom:1.25rem;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.25);border-radius:8px;padding:.85rem 1.1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
       <div style="flex:1;min-width:0">
@@ -2847,6 +2853,146 @@ async function migrateTimesheetsToSupabase() {
   }
 }
 
+
+// ════════════════════════════════════════════════════════════════════════════════
+// DEMO DATA — load / clear
+// ════════════════════════════════════════════════════════════════════════════════
+var _DEMO_TAG = '__demo__';
+
+async function clearAllData() {
+  if (!confirm('⚠ CLEAR ALL DATA?\n\nThis permanently deletes all work orders, timesheets, invoices, charge sheets and rate sheets from Supabase AND localStorage.\n\nThis cannot be undone. Are you absolutely sure?')) return;
+  if (!confirm('Last chance — DELETE EVERYTHING?')) return;
+  try {
+    // Clear Supabase
+    var tables = ['jobs','timesheets','invoices','charge_sheets','rate_sheets'];
+    for (var t = 0; t < tables.length; t++) {
+      var rows = await sbList(tables[t]);
+      for (var r = 0; r < rows.length; r++) {
+        await sbDelete(tables[t], rows[r].id);
+      }
+    }
+    // Clear localStorage
+    ['nortech_timesheets','nortech_ts_cache'].forEach(function(k){ localStorage.removeItem(k); });
+    _jobs=[]; _timesheets=[]; _invoices=[]; _chargeSheets=[]; _rateSheets=[];
+    renderAll();
+    toast('All data cleared ✓', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function clearDemoData() {
+  if (!confirm('Clear demo data?\n\nAll records tagged as demo will be removed.')) return;
+  try {
+    var tables = [['jobs',_jobs],['timesheets',_timesheets],['invoices',_invoices]];
+    for (var t = 0; t < tables.length; t++) {
+      var name = tables[t][0]; var arr = tables[t][1];
+      var demos = arr.filter(function(r){ return r._demo; });
+      for (var r = 0; r < demos.length; r++) {
+        await sbDelete(name, demos[r].id);
+      }
+    }
+    _jobs        = _jobs.filter(function(r){ return !r._demo; });
+    _timesheets  = _timesheets.filter(function(r){ return !r._demo; });
+    _invoices    = _invoices.filter(function(r){ return !r._demo; });
+    _tsCacheWrite(_timesheets);
+    renderAll();
+    toast('Demo data cleared ✓', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function loadDemoData() {
+  if (!confirm('Load demo data?\n\nThis creates sample work orders and timesheets to demonstrate the full tech + admin workflow.')) return;
+
+  var techPeople = (VIEWER_PEOPLE||[]).filter(function(p){
+    return ['e499','e469','e510'].indexOf(p.id) > -1;
+  });
+  if (techPeople.length < 2) techPeople = (VIEWER_PEOPLE||[]).filter(function(p){
+    return p.id.charAt(0)==='e';
+  }).slice(0,3);
+
+  var t1 = techPeople[0] ? techPeople[0].name : 'Tech One';
+  var t2 = techPeople[1] ? techPeople[1].name : 'Tech Two';
+
+  var d = today();
+
+  // ── WO 1: Draft (tech can still submit) ───────────────────────────────────
+  var wo1 = {
+    id: uid(), _demo: true,
+    woNum: 'DEMO-001', client: 'ATCO Gas', site: 'Fort McMurray Compressor Station', date: d,
+    province: 'AB', status: 'draft', po: 'PO-8821', notes: 'Pipeline inspection — demo WO',
+    labourRows: [
+      { technician: t1, date: d, category: 'ILI Inspection', regHrs: 8, otHrs: 2, nightHrs: 0, startTime: '07:00', endTime: '17:00', billable: true },
+    ],
+    equipRows: [], consumables: [], film: [], travel: {},
+    created: d, modified: d,
+  };
+
+  // ── WO 2: Submitted (admin needs to approve) ───────────────────────────────
+  var wo2 = {
+    id: uid(), _demo: true,
+    woNum: 'DEMO-002', client: 'TransMountain', site: 'Kamloops Pump Station', date: d,
+    province: 'BC', status: 'submitted', po: 'PO-4417', notes: 'Ultrasonic thickness testing — demo WO',
+    labourRows: [
+      { technician: t1, date: d, category: 'UT Inspection', regHrs: 10, otHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
+      { technician: t2, date: d, category: 'UT Inspection', regHrs: 10, otHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
+    ],
+    equipRows: [], consumables: [], film: [], travel: {},
+    created: d, modified: d,
+  };
+
+  // ── WO 3: Approved (ready to invoice) ─────────────────────────────────────
+  var wo3 = {
+    id: uid(), _demo: true,
+    woNum: 'DEMO-003', client: 'Keyera Corp', site: 'Edmonton Fractionation Plant', date: d,
+    province: 'AB', status: 'approved', po: 'PO-6631', approvedDate: d,
+    notes: 'Visual + MPI inspection — demo WO',
+    labourRows: [
+      { technician: t2, date: d, category: 'MPI Inspection', regHrs: 8, otHrs: 4, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true },
+    ],
+    equipRows: [], consumables: [], film: [], travel: {},
+    created: d, modified: d,
+  };
+
+  // ── Timesheets for WO2 (submitted — techs need to confirm) ────────────────
+  var ts1 = {
+    id: uid(), _demo: true,
+    woId: wo2.id, woNum: wo2.woNum, technician: t1,
+    client: wo2.client, date: d, site: wo2.site, province: wo2.province,
+    rows: [{ date: d, category: 'UT Inspection', regHrs: 10, otHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
+    notes: '', status: 'pending', confirmed: false, created: d, modified: d,
+  };
+  var ts2 = {
+    id: uid(), _demo: true,
+    woId: wo2.id, woNum: wo2.woNum, technician: t2,
+    client: wo2.client, date: d, site: wo2.site, province: wo2.province,
+    rows: [{ date: d, category: 'UT Inspection', regHrs: 10, otHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
+    notes: '', status: 'pending', confirmed: false, created: d, modified: d,
+  };
+
+  // ── Timesheet for WO3 (submitted + confirmed) ─────────────────────────────
+  var ts3 = {
+    id: uid(), _demo: true,
+    woId: wo3.id, woNum: wo3.woNum, technician: t2,
+    client: wo3.client, date: d, site: wo3.site, province: wo3.province,
+    rows: [{ date: d, category: 'MPI Inspection', regHrs: 8, otHrs: 4, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true }],
+    notes: '', status: 'submitted', confirmed: true, confirmedDate: d, created: d, modified: d,
+  };
+
+  try {
+    var items = [
+      ['jobs', wo1], ['jobs', wo2], ['jobs', wo3],
+      ['timesheets', ts1], ['timesheets', ts2], ['timesheets', ts3],
+    ];
+    for (var i = 0; i < items.length; i++) {
+      await sbUpsert(items[i][0], items[i][1].id, items[i][1]);
+    }
+    _jobs.unshift(wo3); _jobs.unshift(wo2); _jobs.unshift(wo1);
+    _timesheets.unshift(ts3); _timesheets.unshift(ts2); _timesheets.unshift(ts1);
+    _tsCacheWrite(_timesheets);
+    renderAll();
+    toast('Demo data loaded ✓  —  3 WOs, 3 timesheets created', 'success');
+  } catch(e) { toast('Error loading demo: ' + e.message, 'error'); }
+}
+
 function renderAll(){
   applyAdminVisibility();   // redirect techs away from dashboard, hide admin tabs
   renderDashboard();
@@ -4007,20 +4153,23 @@ async function releaseInvWOs() {
   if (!_currentInvId) return;
   var inv = _invoices.find(function(i){ return i.id === _currentInvId; }); if (!inv) return;
   var woCount = (inv.chargeSheetIds||[]).length;
-  if (!confirm('Release ' + woCount + ' work order(s) back to Approved?\n\nThis removes them from invoice ' + inv.invNum + '. The invoice will remain as a draft.')) return;
+  if (!confirm('Release ' + woCount + ' work order(s) back to Approved?\n\nThe invoice will be deleted and the WOs will be available to invoice again.')) return;
   try {
     for (var k = 0; k < (inv.chargeSheetIds||[]).length; k++) {
       var woId = inv.chargeSheetIds[k];
       var wo = _jobs.find(function(j){ return j.id === woId; });
-      if (wo && wo.status === 'invoiced') {
+      if (wo && (wo.status === 'invoiced' || wo.status === 'approved')) {
         wo.status = 'approved'; wo.invoiceId = null; wo.modified = today();
         await sbUpsert('jobs', woId, wo);
         _jobs = _jobs.map(function(j){ return j.id === woId ? wo : j; });
       }
     }
+    // Delete the draft invoice
+    await sbDelete('invoices', _currentInvId);
+    _invoices = _invoices.filter(function(i){ return i.id !== _currentInvId; });
     closeModal('inv-view-modal');
     renderJobs(); renderInvoices(); renderDashboard();
-    toast('Work orders released back to Approved \u2713', 'success');
+    toast('Work orders released back to Approved — invoice deleted \u2713', 'success');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -7138,8 +7287,6 @@ function renderTimesheets() {
       + '<div style="margin-top:.6rem;display:flex;gap:.4rem;flex-wrap:wrap">'
         + (isAdmin()
           ? '<button class="btn btn-primary btn-sm" data-open-ts="' + ts.id + '">✏ Edit / View</button>'
-            + '<button class="btn btn-secondary btn-sm" data-export-ts="' + ts.id + '">⬇ TS</button>'
-            + (ts.woId ? '<button class="btn btn-secondary btn-sm" data-export-pkg="' + ts.woId + '">⬇ WO + TS</button>' : '')
             + (ts.woId ? '<button class="btn btn-ghost btn-sm" data-open-wo="' + ts.woId + '">🔧 View WO ' + (ts.woNum||'') + '</button>' : '')
             + (ts.status === 'submitted' ? '<button class="btn btn-ghost btn-sm" data-revert-ts="' + ts.id + '">↩ Back to Draft</button>' : '')
           : '<button class="btn btn-ghost btn-sm" data-open-ts="' + ts.id + '">🔒 View</button>'
