@@ -1290,8 +1290,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('inv-modal')">Cancel</button>
-      <button class="btn btn-ghost" id="inv-import-pdf-btn" onclick="triggerInvoiceImport()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">⬆ Import from PDF</button>
-      <input type="file" id="inv-import-file" accept=".pdf,.PDF" style="display:none" onchange="handleInvoiceImportFile(this)">
       <div style="flex:1"></div>
       <button class="btn btn-secondary" onclick="saveInvoice('draft')">Save Draft</button>
       <button class="btn btn-primary" onclick="saveInvoice('sent')">Generate &amp; Mark Sent</button>
@@ -2405,7 +2403,7 @@ async function handleWOImportFile(input) {
           role: 'user',
           content: [
             { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-            { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nReturn ONLY the JSON, no explanation.' }
+            { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nIMPORTANT: If no technician name appears, leave technician as empty string. Extract ALL labour rows even with no technician. Return ONLY the JSON.' }
           ]
         }]
       })
@@ -2465,12 +2463,15 @@ function populateWOFromImport(wo) {
     wo.labourRows.forEach(function(r){ addLabourRow(null, null, r); });
   }
 
-  // Consumables
+  // Consumables — AI may return {type, qty, unit} or {item, qty, unit}
   if (wo.consumables && wo.consumables.length) {
     var cb = document.getElementById('cs-consumables-body');
     if (cb) cb.innerHTML = '';
     _csConsumableRowCount = 0;
-    wo.consumables.forEach(function(r){ addConsumableRow(r); });
+    wo.consumables.forEach(function(r){
+      // Normalise: accept both 'type' and 'item' key names
+      addConsumableRow({ item: r.item || r.type || r.name || '', qty: r.qty, unit: r.unit, notes: r.notes });
+    });
   }
 
   // Equipment
@@ -4290,61 +4291,8 @@ function techHasPendingOnWO(woId) {
 // ── Invoices ──────────────────────────────────────────────────────────────────
 
 
-// ── Invoice: Import from PDF (via Cloudflare proxy) ───────────────────────────
-function triggerInvoiceImport() {
-  document.getElementById('inv-import-file').click();
-}
 
-async function handleInvoiceImportFile(input) {
-  var file = input.files[0]; if (!file) return;
-  input.value = '';
-  var btn = document.getElementById('inv-import-pdf-btn');
-  if (btn) { btn.textContent = '\u23F3 Reading\u2026'; btn.disabled = true; }
-  try {
-    var base64 = await new Promise(function(resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function(e){ resolve(e.target.result.split(',')[1]); };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-    if (btn) btn.textContent = '\u23F3 Extracting\u2026';
-    var resp = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500,
-        messages: [{ role: 'user', content: [
-          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-          { type: 'text', text: 'Extract invoice data from this PDF and return ONLY JSON with these keys (null if not found):\n{"client":"","invNum":"","date":"YYYY-MM-DD","dueDate":"YYYY-MM-DD","po":"","notes":"","lineItems":[{"description":"","qty":1,"unit":"","unitPrice":0,"amount":0}],"subtotal":0,"tax":0,"total":0}\nReturn ONLY the JSON.' }
-        ]}]
-      })
-    });
-    if (!resp.ok) throw new Error('API error ' + resp.status);
-    var data = await resp.json();
-    var text = (data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-    text = text.replace(/```json|```/g,'').trim();
-    var matchJ = text.match(/\{[\s\S]*\}/);
-    if (!matchJ) throw new Error('No JSON in response');
-    var inv = JSON.parse(matchJ[0]);
-    // Populate fields
-    if (inv.client) {
-      var sel = document.getElementById('inv-client');
-      if (sel) { var opt=Array.from(sel.options).find(function(o){return o.value===inv.client;}); if(!opt){sel.add(new Option(inv.client,inv.client));} sel.value=inv.client; loadApprovedCS(); }
-    }
-    if (inv.date)  { var el=document.getElementById('inv-date');  if(el) el.value=inv.date; }
-    if (inv.po)    { var el=document.getElementById('inv-po');    if(el) el.value=inv.po; }
-    if (inv.notes) { var el=document.getElementById('inv-notes'); if(el) el.value=inv.notes; }
-    if (inv.lineItems && inv.lineItems.length) {
-      inv.lineItems.forEach(function(item){ addManualLine(item.description, item.qty||1, item.unitPrice||item.amount||0); });
-    }
-    updateInvTotals();
-    if (btn) { btn.textContent = '\u2713 Imported'; btn.style.color='var(--green)'; }
-    setTimeout(function(){ if(btn){btn.textContent='\u2B06 Import from PDF';btn.style.color='';btn.disabled=false;} },3000);
-    toast('Invoice data imported \u2014 review and save', 'success');
-  } catch(e) {
-    if (btn) { btn.textContent='\u2B06 Import from PDF'; btn.disabled=false; }
-    toast('Import failed: '+(e.message||'Unknown error'), 'error');
-  }
-}
+
 
 function openInvoiceModal(preClient){
   _editInvId=null;
@@ -5170,7 +5118,32 @@ function addConsumableRow(prefill) {
   tr.querySelectorAll('.cs-input').forEach(function(el) {
     el.style.cssText += ';background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:.72rem;padding:.25rem .35rem;font-family:var(--ff)';
   });
-  if (p.item) { var s = document.getElementById('cs-con-item-' + idx); if (s) s.value = p.item; }
+  if (p.item || p.type) {
+    var rawItem = p.item || p.type || '';
+    var sel = document.getElementById('cs-con-item-' + idx);
+    var manual = document.getElementById('cs-con-manual-' + idx);
+    if (sel) {
+      // Try exact match
+      sel.value = rawItem;
+      if (sel.value !== rawItem) {
+        // Try case-insensitive partial match against options
+        var rawLower = rawItem.toLowerCase();
+        var matched = Array.from(sel.options).find(function(o) {
+          var ol = o.value.toLowerCase();
+          return ol && (ol.includes(rawLower) || rawLower.includes(ol.split(' ')[0]));
+        });
+        if (matched) {
+          sel.value = matched.value;
+        } else {
+          // No match — put raw text in manual field so nothing is lost
+          sel.value = '';
+          if (manual) manual.value = rawItem;
+        }
+      }
+    } else if (manual) {
+      manual.value = rawItem;
+    }
+  }
 }
 
 function addFilmRow(prefill) {
@@ -5893,18 +5866,6 @@ var NORTECH_CUSTOMERS = [
   {id:"CN000000372",name:"CREATIVE CARBIDE WORKS LTD.",loc:"Leduc, AB"},
   {id:"CN000000373",name:"CREATIVE DOOR SERVICES LTD.",loc:"Edmonton, AB"},
   {id:"CN000000376",name:"CRIZMIC INDUSTRIES INC.",loc:"Leduc, AB"},
-  {id:"CN000000297",name:"CROPAC EQUIPMENT INC.",loc:"Oakville, ON"},
-  {id:"CN000000377",name:"CROSS COUNTRY CANADA SUPPLIES",loc:"Spruce Grove, AB"},
-  {id:"CN000000378",name:"CROSSBOW MACHINE CORP.",loc:"Edmonton, AB"},
-  {id:"CN000000380",name:"CS ENGINEERING",loc:"Armena, AB"},
-  {id:"CN000000381",name:"CSC VALVES CANADA",loc:"Edmonton, AB"},
-  {id:"CN000000382",name:"CSM PUMP PACKAGING INC.",loc:"Nisku, AB"},
-  {id:"CN000001205",name:"CUMMINS",loc:"Edmonton, AB"},
-  {id:"CN000000384",name:"CUSTOM ENERGIZED AIR LTD.",loc:"Edmonton, AB"},
-  {id:"CN000000385",name:"CVS CONTROLS LTD.",loc:"Edmonton, AB"},
-  {id:"CN000000386",name:"CW MANUFACTURING LTD.",loc:"Acheson, AB"},
-  {id:"CN000000387",name:"CWA DESIGN & FABRICATION LTD.",loc:"Leduc, AB"},
-  {id:"CN000000388",name:"CWC IRONHAND DRILLING",loc:"Sylvan Lake, AB"},
   {id:"CN000000389",name:"CWC WELL SERVICES",loc:"Provost, AB"},
   {id:"CN000000390",name:"CWF WELDING & FABRICATING LTD.",loc:"Edmonton, AB"},
   {id:"CN000000155",name:"Can Tire - CANADIAN TIRE #478",loc:"Edmonton, AB"},
@@ -7096,7 +7057,7 @@ function updateManualLine(id, field, value) {
   line.total = (line.qty || 1) * (line.unitPrice || 0);
   // Update the line total display
   var totalEl = document.getElementById('ml-total-' + id);
-  if (totalEl) totalEl.textContent = fmtMoney(line.total);
+  if (totalEl) totalEl.textContent = _fmtMoneyImpl(line.total);
   updateInvTotals();
 }
 
@@ -7189,9 +7150,10 @@ function updateInvTotals() {
   var tax      = taxable * taxRate;
   var total    = taxable + tax;
 
+  var fmt = function(n) { return _fmtMoneyImpl(n); }; // always show in invoice modal
   var set = function(id, val) {
     var el = document.getElementById(id);
-    if (el) el.textContent = fmtMoney(val);
+    if (el) el.textContent = fmt(val);
   };
   set('inv-subtotal', subtotal);
   set('inv-tax',      tax);
@@ -7235,9 +7197,12 @@ async function createTimesheetFromWO(wo) {
   var labourRows = wo.labourRows || [];
   if (!labourRows.length) return;
 
+  // Current viewer's canonical name (used as fallback when rows have no technician)
+  var currentTechName = getCurrentTechName ? getCurrentTechName() : '';
+
   // Fuzzy-resolve raw dropdown name → canonical VIEWER_PEOPLE name
   function _canonical(raw) {
-    if (!raw) return '';
+    if (!raw || !raw.trim()) return '';
     var r = raw.toLowerCase().trim();
     var m = (VIEWER_PEOPLE || []).find(function(p) {
       var n = p.name.toLowerCase();
@@ -7250,9 +7215,13 @@ async function createTimesheetFromWO(wo) {
 
   // Group rows by canonical tech name
   var byTech = {};
+  var hasAnyTech = labourRows.some(function(r){ return r.technician && r.technician.trim(); });
+
   labourRows.forEach(function(r) {
-    var name = _canonical(r.technician);
-    if (!name) return;
+    // If no technician on row: fall back to current logged-in tech (handles imported WOs)
+    var rawName = (r.technician && r.technician.trim()) ? r.technician : currentTechName;
+    var name = _canonical(rawName);
+    if (!name) return; // still no name — skip
     if (!byTech[name]) byTech[name] = [];
     byTech[name].push({
       date:      r.date      || wo.date || today(),
