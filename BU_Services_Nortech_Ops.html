@@ -475,33 +475,57 @@ function showLoginScreen() {
 
   // Header — fixed, doesn't scroll
   var header = document.createElement('div');
-  header.style.cssText = 'flex-shrink:0;padding-bottom:.75rem';
+  header.style.cssText = 'flex-shrink:0;padding-bottom:.6rem';
   header.innerHTML = '<div style="font-family:Barlow Condensed,sans-serif;font-size:.65rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(0,174,239,.7);margin-bottom:.4rem">Ekoscan Integrity Group</div>' +
     '<h1 style="font-family:Barlow Condensed,sans-serif;font-size:2rem;font-weight:900;color:#fff;margin:0 0 .25rem">BU Services</h1>' +
-    '<p style="font-size:.8rem;color:rgba(255,255,255,.4);margin:0">Select your name to continue</p>';
+    '<p style="font-size:.8rem;color:rgba(255,255,255,.4);margin:0 0 .75rem">Select your name to continue</p>' +
+    '<div style="position:relative;max-width:320px;margin:0 auto">' +
+      '<span style="position:absolute;left:.7rem;top:50%;transform:translateY(-50%);font-size:.8rem;opacity:.4">🔍</span>' +
+      '<input id="login-search" type="text" placeholder="Search by name…" autocomplete="off" ' +
+        'style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:8px;' +
+        'color:#fff;font-size:.82rem;padding:.45rem .75rem .45rem 2.1rem;outline:none;font-family:inherit;' +
+        'transition:border-color .15s;box-sizing:border-box" ' +
+        'oninput="filterLoginGrid(this.value)">' +
+    '</div>';
   inner.appendChild(header);
 
   // Scrollable grid
   var grid = document.createElement('div');
-  grid.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:.25rem .1rem';
+  grid.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:.25rem .1rem;margin-top:.5rem';
   var gridInner = document.createElement('div');
+  gridInner.id = 'login-grid-inner';
   gridInner.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem';
 
-  VIEWER_PEOPLE.forEach(function(p) {
-    var btn = document.createElement('button');
-    btn.style.cssText = 'display:flex;align-items:center;gap:.45rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.45rem .6rem;cursor:pointer;text-align:left;font-family:inherit;width:100%;min-width:0;transition:background .15s,border-color .15s';
-    btn.onmouseover = function(){this.style.background='rgba(255,255,255,.09)';this.style.borderColor='rgba(255,255,255,.25)'};
-    btn.onmouseout  = function(){this.style.background='rgba(255,255,255,.04)';this.style.borderColor='rgba(255,255,255,.1)'};
-    btn.onclick = function(){ setViewer(p.id); };
-    btn.innerHTML =
-      '<span style="width:28px;height:28px;border-radius:50%;background:'+p.color+';display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;flex-shrink:0">'+p.initials+'</span>' +
-      '<span style="min-width:0;overflow:hidden">' +
-        '<div style="font-size:.72rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>' +
-        '<div style="font-size:.58rem;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.05rem">'+p.role+'</div>' +
-      '</span>';
-    gridInner.appendChild(btn);
-  });
+  function buildGrid(people) {
+    gridInner.innerHTML = '';
+    if (!people.length) {
+      gridInner.innerHTML = '<div style="grid-column:span 3;padding:1.5rem;color:rgba(255,255,255,.3);font-size:.8rem">No results</div>';
+      return;
+    }
+    people.forEach(function(p) {
+      var btn = document.createElement('button');
+      btn.style.cssText = 'display:flex;align-items:center;gap:.45rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.45rem .6rem;cursor:pointer;text-align:left;font-family:inherit;width:100%;min-width:0;transition:background .15s,border-color .15s';
+      btn.onmouseover = function(){this.style.background='rgba(255,255,255,.09)';this.style.borderColor='rgba(255,255,255,.25)'};
+      btn.onmouseout  = function(){this.style.background='rgba(255,255,255,.04)';this.style.borderColor='rgba(255,255,255,.1)'};
+      btn.onclick = function(){ setViewer(p.id); };
+      btn.innerHTML =
+        '<span style="width:28px;height:28px;border-radius:50%;background:'+p.color+';display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;flex-shrink:0">'+p.initials+'</span>' +
+        '<span style="min-width:0;overflow:hidden">' +
+          '<div style="font-size:.72rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>' +
+          '<div style="font-size:.58rem;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.05rem">'+p.role+'</div>' +
+        '</span>';
+      gridInner.appendChild(btn);
+    });
+  }
 
+  window.filterLoginGrid = function(q) {
+    var filtered = q.trim()
+      ? VIEWER_PEOPLE.filter(function(p){ return p.name.toLowerCase().includes(q.toLowerCase()); })
+      : VIEWER_PEOPLE;
+    buildGrid(filtered);
+  };
+
+  buildGrid(VIEWER_PEOPLE);
   grid.appendChild(gridInner);
   inner.appendChild(grid);
 
@@ -513,6 +537,9 @@ function showLoginScreen() {
 
   overlay.appendChild(inner);
   document.body.appendChild(overlay);
+
+  // Auto-focus the search input
+  setTimeout(function(){ var s = document.getElementById('login-search'); if(s) s.focus(); }, 100);
 }
 
 // Show login if no viewer set
@@ -1062,6 +1089,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="btn btn-secondary" id="ts-draft-btn" onclick="saveTSDraft()">Save Draft</button>
         <button class="btn btn-primary" id="ts-submit-btn" onclick="submitTS()">Submit Timesheet</button>
         <button class="btn btn-primary" id="ts-submit-both-btn" onclick="techSubmitBoth()" style="display:none;background:var(--green);border-color:var(--green)">✓ Submit Work Order &amp; Timesheet</button>
+        <button class="btn btn-primary" id="ts-confirm-btn" onclick="confirmMyHours(this.getAttribute('data-ts-id'))" style="display:none;background:#C9860A;border-color:#C9860A">✓ Confirm My Hours</button>
       </div>
     </div>
   </div>
@@ -2941,6 +2969,15 @@ function renderJobs() {
         + (isDraft
           ? '<button class="btn btn-primary btn-sm" data-open-wo="'+j.id+'" style="flex-shrink:0">Continue →</button>'
           : '<button class="btn btn-ghost btn-sm" data-open-wo="'+j.id+'" style="flex-shrink:0">🔒 View</button>')
+        + (function(){
+            var myName = getCurrentTechName();
+            var pendingTS = _timesheets.find(function(t){
+              return t.woId === j.id && t.status === 'submitted'
+                && t.confirmations && t.confirmations[myName] && !t.confirmations[myName].confirmed;
+            });
+            if (!pendingTS) return '';
+            return '<button class="btn btn-sm" data-open-ts="'+pendingTS.id+'" style="background:#C9860A;border:none;border-radius:5px;color:#fff;font-size:.68rem;font-weight:700;padding:.28rem .65rem;cursor:pointer;flex-shrink:0">\u23F3 Confirm Hours</button>';
+          })()
       + '</div>';
     }
 
@@ -6337,74 +6374,97 @@ function calcRowCost(techName, regHrs, otHrs, nightHrs) {
 
 // ── Auto-create timesheet when WO is submitted ───────────────────────────────
 async function createTimesheetFromWO(wo) {
-  // Creates ONE timesheet PER TECHNICIAN on the WO
-  // Groups labour rows by technician name
+  // Creates ONE timesheet per WO covering all labour rows.
+  // Each technician listed gets a confirmations entry they must acknowledge.
   if (!wo || !wo.id) return;
 
   var labourRows = wo.labourRows || [];
-  if (!labourRows.length) return;
 
-  // Get distinct technicians on this WO
-  var techs = [];
+  // Check if TS already exists for this WO
+  var existing = _timesheets.find(function(t) { return t.woId === wo.id; });
+  if (existing) return 0;
+
+  // Build confirmations map — each distinct tech starts as unconfirmed
+  var confirmations = {};
   labourRows.forEach(function(r) {
     var t = (r.technician || '').trim();
-    if (t && techs.indexOf(t) === -1) techs.push(t);
+    if (t && !confirmations[t]) confirmations[t] = { confirmed: false, date: null };
   });
-  if (!techs.length) techs = [''];  // fallback: one anon sheet
 
-  var created = 0;
-  techs.forEach(function(techName) {
-    // Check if a timesheet already exists for this WO + tech combo
-    var existing = _timesheets.find(function(t) {
-      return t.woId === wo.id && (t.technician || '') === techName;
-    });
-    if (existing) return;
-
-    // Get only this tech's rows
-    var techRows = labourRows
-      .filter(function(r) { return (r.technician||'').trim() === techName; })
-      .map(function(r) {
-        return {
-          date:       r.date || wo.date || today(),
-          category:   r.category || '',
-          regHrs:     r.regHrs   || 0,
-          otHrs:      r.otHrs    || 0,
-          nightHrs:   r.nightHrs || 0,
-          startTime:  r.startTime || '',
-          endTime:    r.endTime   || '',
-          billable:   true,
-          technician: techName,
-        };
-      });
-
-    var ts = {
-      id:          uid(),
-      woId:        wo.id,
-      woNum:       wo.woNum || wo.number || '—',
-      technician:  techName,
-      client:      wo.client || '',
-      date:        wo.date || today(),
-      site:        wo.site || '',
-      province:    wo.province || '',
-      po:          wo.po || '',
-      rows:        techRows,
-      notes:       '',
-      status:      'draft',
-      created:     today(),
-      modified:    today(),
+  var rows = labourRows.map(function(r) {
+    return {
+      date:       r.date       || wo.date || today(),
+      category:   r.category   || '',
+      regHrs:     r.regHrs     || 0,
+      otHrs:      r.otHrs      || 0,
+      nightHrs:   r.nightHrs   || 0,
+      startTime:  r.startTime  || '',
+      endTime:    r.endTime    || '',
+      billable:   true,
+      technician: (r.technician || '').trim(),
     };
-
-    try {
-      saveTimesheetToStorage(ts);
-      _timesheets.unshift(ts);
-      created++;
-    } catch(e) {
-      console.warn('Timesheet auto-create failed for ' + techName + ':', e.message);
-    }
   });
-  return created;
+
+  var ts = {
+    id:            uid(),
+    woId:          wo.id,
+    woNum:         wo.woNum || wo.number || '—',
+    technician:    wo.labourRows && wo.labourRows[0] ? (wo.labourRows[0].technician||'') : '',
+    client:        wo.client   || '',
+    date:          wo.date     || today(),
+    site:          wo.site     || '',
+    province:      wo.province || '',
+    po:            wo.po       || '',
+    rows:          rows,
+    notes:         '',
+    status:        'draft',
+    confirmations: confirmations,
+    created:       today(),
+    modified:      today(),
+  };
+
+  saveTimesheetToStorage(ts);
+  _timesheets.unshift(ts);
+  return 1;
 }
 
+
+
+// ── Get current viewer's full name ────────────────────────────────────────────
+function getCurrentTechName() {
+  var p = (VIEWER_PEOPLE || []).find(function(p){ return p.id === CURRENT_VIEWER; });
+  return p ? p.name : '';
+}
+
+// ── Confirm my hours on a submitted timesheet ─────────────────────────────────
+function confirmMyHours(tsId) {
+  var ts = _timesheets.find(function(t){ return t.id === tsId; });
+  if (!ts) return;
+  var myName = getCurrentTechName();
+  if (!myName) { toast('Could not identify your account', 'error'); return; }
+
+  if (!confirm('Confirm your hours on WO ' + (ts.woNum||'') + '?\n\nThis confirms your rows are accurate.')) return;
+
+  if (!ts.confirmations) ts.confirmations = {};
+  ts.confirmations[myName] = { confirmed: true, date: today() };
+  ts.modified = today();
+  saveTimesheetToStorage(ts);
+  closeModal('ts-modal');
+  renderTimesheets();
+  renderJobs();
+  toast('Hours confirmed \u2713', 'success');
+}
+
+// ── Check if current tech has a pending confirmation on any TS ────────────────
+function getPendingConfirmations() {
+  var myName = getCurrentTechName();
+  if (!myName || isAdmin()) return [];
+  return _timesheets.filter(function(ts) {
+    if (ts.status !== 'submitted') return false;
+    var c = ts.confirmations && ts.confirmations[myName];
+    return c && !c.confirmed;
+  });
+}
 
 // ── Create or open timesheet for a WO ────────────────────────────────────────
 function createOrOpenTS(woId, techName) {
@@ -6496,9 +6556,59 @@ function openTSModal(tsId) {
   var backToWoBtn = document.getElementById('ts-back-to-wo-btn');
   var submitBoth  = document.getElementById('ts-submit-both-btn');
   var cancelBtn   = document.getElementById('ts-cancel-btn');
+  var confirmBtn  = document.getElementById('ts-confirm-btn');
   if (backToWoBtn) backToWoBtn.style.display = 'none';
   if (submitBoth)  submitBoth.style.display  = 'none';
   if (cancelBtn)   cancelBtn.style.display   = 'inline-flex';
+  if (confirmBtn)  confirmBtn.style.display  = 'none';
+
+  // ── Confirmation view for non-creator techs ───────────────────────────────
+  var myName = getCurrentTechName();
+  var isConfirmView = !isAdmin()
+    && ts.status === 'submitted'
+    && ts.confirmations
+    && ts.confirmations[myName]
+    && !ts.confirmations[myName].confirmed;
+
+  if (isConfirmView) {
+    // Filter rows to show only this tech's rows
+    document.getElementById('ts-rows-body').innerHTML = '';
+    _tsRowCount = 0;
+    var myRows = (ts.rows || []).filter(function(r){ return r.technician === myName; });
+    if (myRows.length) {
+      myRows.forEach(function(r){ addTSRow(r); });
+    } else {
+      addTSRow();
+    }
+    // Lock all inputs — read only
+    setTimeout(function() {
+      document.querySelectorAll('#ts-modal input, #ts-modal select, #ts-modal textarea').forEach(function(el){
+        el.disabled = true; el.style.opacity = '.7';
+      });
+      var addBtn = document.getElementById('ts-add-row-btn');
+      if (addBtn) addBtn.style.display = 'none';
+    }, 30);
+    // Show confirm button, hide others
+    if (confirmBtn)  { confirmBtn.style.display = 'inline-flex'; confirmBtn.setAttribute('data-ts-id', tsId); }
+    if (cancelBtn)   cancelBtn.style.display = 'inline-flex';
+    var draftBtn   = document.getElementById('ts-draft-btn');
+    var submitBtn  = document.getElementById('ts-submit-btn');
+    if (draftBtn)  draftBtn.style.display  = 'none';
+    if (submitBtn) submitBtn.style.display = 'none';
+    // Confirmation banner
+    var existing = document.getElementById('ts-confirm-banner');
+    if (!existing) {
+      var banner = document.createElement('div');
+      banner.id = 'ts-confirm-banner';
+      banner.style.cssText = 'background:rgba(201,134,10,.1);border:1px solid rgba(201,134,10,.3);border-left:4px solid #C9860A;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCD34D;margin-bottom:.75rem;font-weight:600';
+      banner.textContent = '⏳ Please review your hours below and confirm they are accurate.';
+      var body = document.querySelector('#ts-modal .modal-body');
+      if (body) body.insertBefore(banner, body.firstChild);
+    }
+  } else {
+    var b2 = document.getElementById('ts-confirm-banner');
+    if (b2) b2.remove();
+  }
 
   document.getElementById('ts-modal').classList.add('open');
 }
@@ -6756,7 +6866,7 @@ function getISOWeek(dateStr) {
 
 function buildWeeklySummary() {
   // Group all TS rows by tech + ISO week
-  var summary = {}; // { 'techName|YYYY-Www': { tech, week, weekStart, reg, ot, night, sheets:[] } }
+  var summary = {}; // { 'techName|YYYY-Www': { tech, week, weekStart, reg, ot, night, vac, unbill, sheets:[] } }
   var myName = !isAdmin() ? ((VIEWER_PEOPLE||[]).find(function(p){ return p.id===CURRENT_VIEWER; })||{}).name || '' : '';
   _timesheets.forEach(function(ts) {
     var tech = ts.technician || '(unknown)';
@@ -6775,13 +6885,27 @@ function buildWeeklySummary() {
       if (!summary[key]) {
         summary[key] = {
           tech: tech, week: wk, weekStart: ws,
-          reg: 0, ot: 0, night: 0,
+          reg: 0, ot: 0, night: 0, vac: 0, unbill: 0,
           sheets: [], wos: [],
         };
       }
-      summary[key].reg   += (r.regHrs   || 0);
-      summary[key].ot    += (r.otHrs    || 0);
-      summary[key].night += (r.nightHrs || 0);
+      var isVac    = (r.category || '').toLowerCase().includes('vac');
+      var isBill   = r.billable !== false;
+      var hrs      = (r.regHrs || 0) + (r.otHrs || 0) + (r.nightHrs || 0);
+
+      if (isVac) {
+        summary[key].vac += hrs;
+      } else if (!isBill) {
+        summary[key].unbill += hrs;
+        // Still count in reg/ot/night for total hours worked
+        summary[key].reg   += (r.regHrs   || 0);
+        summary[key].ot    += (r.otHrs    || 0);
+        summary[key].night += (r.nightHrs || 0);
+      } else {
+        summary[key].reg   += (r.regHrs   || 0);
+        summary[key].ot    += (r.otHrs    || 0);
+        summary[key].night += (r.nightHrs || 0);
+      }
       if (summary[key].sheets.indexOf(ts.id) === -1) summary[key].sheets.push(ts.id);
       if (ts.woNum && summary[key].wos.indexOf(ts.woNum) === -1) summary[key].wos.push(ts.woNum);
     });
@@ -6812,18 +6936,22 @@ function renderWeeklySummary() {
     var weekEnd = new Date(wk.weekStart + 'T00:00:00');
     weekEnd.setDate(weekEnd.getDate() + 6);
     var wkEndStr = weekEnd.toISOString().slice(0,10);
-    var totalReg   = wk.rows.reduce(function(s,r){ return s+r.reg;   }, 0);
-    var totalOT    = wk.rows.reduce(function(s,r){ return s+r.ot;    }, 0);
-    var totalNight = wk.rows.reduce(function(s,r){ return s+r.night; }, 0);
+    var totalReg    = wk.rows.reduce(function(s,r){ return s+r.reg;    }, 0);
+    var totalOT     = wk.rows.reduce(function(s,r){ return s+r.ot;     }, 0);
+    var totalNight  = wk.rows.reduce(function(s,r){ return s+r.night;  }, 0);
+    var totalVac    = wk.rows.reduce(function(s,r){ return s+(r.vac||0);    }, 0);
+    var totalUnbill = wk.rows.reduce(function(s,r){ return s+(r.unbill||0); }, 0);
 
     return '<div style="margin-bottom:1.2rem">'
-      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;padding:.4rem .6rem;background:var(--surface2);border-radius:4px">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;padding:.4rem .6rem;background:var(--surface2);border-radius:4px;flex-wrap:wrap;gap:.3rem">'
         + '<div style="font-family:var(--mono);font-size:.65rem;color:var(--nor-accent);font-weight:700">' + wk.week + '</div>'
         + '<div style="font-size:.7rem;color:var(--muted)">' + fmtDate(wk.weekStart) + ' — ' + fmtDate(wkEndStr) + '</div>'
-        + '<div style="font-family:var(--mono);font-size:.72rem">'
-          + (totalReg   ? '<span style="color:var(--nor-accent);margin-right:.5rem">' + totalReg + ' Reg</span>' : '')
-          + (totalOT    ? '<span style="color:#F0A832;margin-right:.5rem">' + totalOT + ' OT</span>' : '')
-          + (totalNight ? '<span style="color:#9B5DE5">' + totalNight + ' Night</span>' : '')
+        + '<div style="font-family:var(--mono);font-size:.72rem;display:flex;gap:.5rem;flex-wrap:wrap">'
+          + (totalReg    ? '<span style="color:var(--nor-accent)">'  + totalReg    + ' Reg</span>'      : '')
+          + (totalOT     ? '<span style="color:#F0A832">'            + totalOT     + ' OT</span>'       : '')
+          + (totalNight  ? '<span style="color:#9B5DE5">'            + totalNight  + ' Night</span>'    : '')
+          + (totalVac    ? '<span style="color:#22C55E">'            + totalVac    + ' Vac</span>'      : '')
+          + (totalUnbill ? '<span style="color:rgba(255,255,255,.4)">'+ totalUnbill + ' Non-Bill</span>' : '')
         + '</div>'
       + '</div>'
       + '<table style="width:100%;border-collapse:collapse;font-size:.74rem">'
@@ -6832,20 +6960,22 @@ function renderWeeklySummary() {
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Reg</th>'
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">OT</th>'
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Night</th>'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Vacation</th>'
+          + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Non-Bill</th>'
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:center">Total</th>'
           + '<th style="padding:.3rem .5rem;color:var(--muted);font-size:.58rem;text-transform:uppercase;text-align:left">Work Orders</th>'
-          + '<th style="padding:.3rem .5rem;font-size:.58rem"></th>'
         + '</tr></thead>'
         + '<tbody>' + wk.rows.map(function(r) {
-            var total = r.reg + r.ot + r.night;
-            return '<tr style="border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer" data-filter-tech="' + encodeURIComponent(r.tech) + '">'  
+            var total = r.reg + r.ot + r.night + (r.vac||0);
+            return '<tr style="border-bottom:1px solid rgba(255,255,255,.04)">'
               + '<td style="padding:.3rem .5rem;font-weight:600">' + r.tech + '</td>'
               + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono)">' + (r.reg || '—') + '</td>'
               + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#F0A832">' + (r.ot || '—') + '</td>'
               + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#9B5DE5">' + (r.night || '—') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:#22C55E">' + (r.vac || '—') + '</td>'
+              + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);color:rgba(255,255,255,.4)">' + (r.unbill || '—') + '</td>'
               + '<td style="padding:.3rem .5rem;text-align:center;font-family:var(--mono);font-weight:700;color:var(--nor-accent)">' + total + '</td>'
               + '<td style="padding:.3rem .5rem;font-size:.68rem;color:var(--muted)">' + r.wos.join(', ') + '</td>'
-              + '<td style="padding:.3rem .5rem;"></td>'
             + '</tr>';
           }).join('')
         + '</tbody>'
@@ -6913,7 +7043,22 @@ function renderTimesheets() {
   if (empty) empty.style.display = 'none';
   renderTSPager(_tsPage, tsTotalPages, tsTotalItems);
 
-  grid.innerHTML = pagedTS.map(function(ts) {
+  // Inject pending-confirmation entries at top for techs
+  var pendingConf = isAdmin() ? [] : getPendingConfirmations();
+
+  grid.innerHTML = pendingConf.map(function(ts) {
+    return '<div class="card" style="padding:.75rem 1.1rem;border-left:3px solid #C9860A">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem">'
+        + '<div>'
+          + '<div style="font-size:.65rem;font-weight:700;color:#C9860A;letter-spacing:1px;text-transform:uppercase;margin-bottom:.2rem">⏳ Confirmation Needed</div>'
+          + '<div style="font-family:var(--mono);font-size:.82rem;font-weight:800;color:var(--nor-accent)">' + (ts.woNum||'—') + '</div>'
+          + '<div style="font-size:.72rem;color:var(--muted);margin-top:.1rem">' + (ts.client||'') + (ts.date ? ' · ' + fmtDate(ts.date) : '') + '</div>'
+        + '</div>'
+        + '<button class="btn btn-primary btn-sm" data-open-ts="' + ts.id + '" style="background:#C9860A;border-color:#C9860A;flex-shrink:0">✓ Confirm My Hours</button>'
+      + '</div>'
+    + '</div>';
+  }).join('')
+  + pagedTS.map(function(ts) {
     var wo = _jobs.find(function(j) { return j.id === ts.woId; }) || {};
     var rows = ts.rows || [];
     var totalReg   = rows.reduce(function(s,r){ return s+(r.regHrs||0);   }, 0);
