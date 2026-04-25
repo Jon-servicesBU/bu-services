@@ -1587,15 +1587,18 @@ document.addEventListener('DOMContentLoaded', function() {
   var sysbar = document.querySelector('.sysbar') || document.querySelector('.topbar') || document.querySelector('.top-nav') || document.querySelector('.unav');
   if (!sysbar) return;
 
-  var badge = document.createElement('div');
+    var badge = document.createElement('div');
   badge.style.cssText = 'margin-left:auto;display:flex;align-items:center;gap:.5rem;flex-shrink:0;padding-right:.5rem';
-  badge.innerHTML =
-    '<span style="width:24px;height:24px;border-radius:50%;background:'+person.color+';display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;flex-shrink:0">'+person.initials+'</span>' +
-    '<span style="font-size:.68rem;color:rgba(255,255,255,.5);font-weight:600">'+person.name.split(' ')[0]+'</span>' +
-    '<button onclick="localStorage.removeItem('hub_viewer');window.location.reload()" ' +
-    'style="font-size:.6rem;color:rgba(255,255,255,.3);background:none;border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:.1rem .35rem;cursor:pointer;font-family:inherit;transition:all .15s" ' +
-    'onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,.4)'" ' +
-    'onmouseout="this.style.color='rgba(255,255,255,.3)';this.style.borderColor='rgba(255,255,255,.1)'">Switch</button>';
+  badge.innerHTML = `
+    <span style="width:24px;height:24px;border-radius:50%;background:${person.color};display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;flex-shrink:0">${person.initials}</span>
+    <span style="font-size:.68rem;color:rgba(255,255,255,.5);font-weight:600">${person.name.split(' ')[0]}</span>
+    <button onclick="localStorage.removeItem('hub_viewer');window.location.reload()"
+            style="font-size:.6rem;color:rgba(255,255,255,.3);background:none;border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:.1rem .35rem;cursor:pointer;font-family:inherit;transition:all .15s"
+            onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,.4)'"
+            onmouseout="this.style.color='rgba(255,255,255,.3)';this.style.borderColor='rgba(255,255,255,.1)'">
+      Switch
+    </button>
+  `;
   sysbar.appendChild(badge);
 });
 </script>
