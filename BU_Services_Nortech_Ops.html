@@ -2694,12 +2694,15 @@ async function loadAll(){
     if(results[3].status==='fulfilled') _rateSheets   = results[3].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[4].status==='fulfilled') {
       var sbTS = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
-      _timesheets = sbTS;
-      _tsCacheWrite(sbTS); // refresh local cache from Supabase
-      // Hide migration panel if Supabase already has data
       if (sbTS.length > 0) {
+        // Supabase has data — use it as source of truth
+        _timesheets = sbTS;
+        _tsCacheWrite(sbTS);
         var panel = document.getElementById('ts-migrate-panel');
         if (panel) panel.style.display = 'none';
+      } else {
+        // Supabase is empty — use local cache and keep migration panel visible
+        _timesheets = loadTimesheetsFromStorage();
       }
     } else {
       _timesheets = loadTimesheetsFromStorage(); // fallback to cache
