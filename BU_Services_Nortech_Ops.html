@@ -2567,6 +2567,10 @@ function openWOModal(editId) {
     el.disabled = false; el.style.opacity = '';
   });
 
+  // Import from PDF only on new WO
+  var importBtn = document.getElementById('wo-import-pdf-btn');
+  if (importBtn) importBtn.style.display = !editId ? 'inline-flex' : 'none';
+
   // Hide all action buttons first
   ['wo-btn-edit-unlock','wo-btn-approve','wo-btn-save','wo-btn-invoice','wo-btn-tech-save'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.style.display = 'none';
@@ -3116,84 +3120,156 @@ async function loadDemoData() {
   var t1 = techPeople[0] ? techPeople[0].name : 'Tech One';
   var t2 = techPeople[1] ? techPeople[1].name : 'Tech Two';
 
-  var d = today();
+  // Use fixed IDs so WO ↔ TS links are deterministic
+  var wo1id = 'demo-wo-001', wo2id = 'demo-wo-002', wo3id = 'demo-wo-003', wo4id = 'demo-wo-004';
+  var ts1id = 'demo-ts-001', ts2id = 'demo-ts-002', ts3id = 'demo-ts-003', ts4id = 'demo-ts-004';
 
-  // ── WO 1: Draft (tech can still submit) ───────────────────────────────────
+  // Dates: spread across last 2 weeks for realistic weekly summary
+  var now = new Date();
+  function daysAgo(n){ var d=new Date(now); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); }
+  var d1 = daysAgo(10), d2 = daysAgo(7), d3 = daysAgo(3), d4 = daysAgo(1);
+
+  // ── WO 1: DRAFT — tech logs in, fills out WO, saves ──────────────────────
   var wo1 = {
-    id: uid(), _demo: true,
-    woNum: 'DEMO-001', client: 'ATCO Gas', site: 'Fort McMurray Compressor Station', date: d,
-    province: 'AB', status: 'draft', po: 'PO-8821', notes: 'Pipeline inspection — demo WO',
+    id: wo1id, _demo: true,
+    woNum: 'DEMO-001', client: 'ATCO Gas',
+    site: 'Fort McMurray Compressor Station — Unit 4B',
+    equipOwner: 'ATCO Gas', province: 'AB',
+    date: d1, po: 'PO-8821', jobNum: 'AG-2026-0441', afe: 'AFE-4417', rig: '',
+    status: 'draft',
+    notes: 'MT inspection on main headers and flanges as per client request. Travel from Edmonton shop.',
     labourRows: [
-      { technician: t1, date: d, category: 'ILI Inspection', regHrs: 8, otHrs: 2, nightHrs: 0, startTime: '07:00', endTime: '17:00', billable: true },
+      { technician: t1, date: d1, category: 'MT Inspection', regHrs: 8, otHrs: 2, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
     ],
-    equipRows: [], consumables: [], film: [], travel: {},
-    created: d, modified: d,
+    consumables: [{ type: 'MPI/LPI Consumables', qty: 2, unit: 'can', notes: 'White contrast paint + MPI ink' }],
+    equipRows:   [{ item: 'Magnetic Particle Yoke + calibration block', qty: 1, unit: 'day', notes: '' }],
+    film: [], travel: { km: 740, kmRate: 1.20, hotels: 0, camp: 0, flights: 0, loaTechs: 1, loaDays: 1, loaRate: 70, misc: 0, miscDesc: '' },
+    created: d1, modified: d1,
   };
 
-  // ── WO 2: Submitted (admin needs to approve) ───────────────────────────────
+  // ── WO 2: SUBMITTED — awaiting admin approval, techs need to confirm TSes ─
+  var wo2labourRows = [
+    { technician: t1, date: d2, category: 'UT Inspection', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
+    { technician: t2, date: d2, category: 'UT Inspection', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
+  ];
   var wo2 = {
-    id: uid(), _demo: true,
-    woNum: 'DEMO-002', client: 'TransMountain', site: 'Kamloops Pump Station', date: d,
-    province: 'BC', status: 'submitted', po: 'PO-4417', notes: 'Ultrasonic thickness testing — demo WO',
-    labourRows: [
-      { technician: t1, date: d, category: 'UT Inspection', regHrs: 10, otHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
-      { technician: t2, date: d, category: 'UT Inspection', regHrs: 10, otHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
-    ],
-    equipRows: [], consumables: [], film: [], travel: {},
-    created: d, modified: d,
+    id: wo2id, _demo: true,
+    woNum: 'DEMO-002', client: 'TransMountain',
+    site: 'Kamloops Pump Station — Manifold Area',
+    equipOwner: 'TransMountain Corp', province: 'BC',
+    date: d2, po: 'PO-4417', jobNum: 'TM-2026-112', afe: '', rig: '',
+    status: 'submitted',
+    notes: 'Manual UT thickness measurements on pump casings and suction/discharge headers. Two-technician crew.',
+    labourRows: wo2labourRows,
+    consumables: [{ type: 'Ultrasonic Couplant', qty: 1, unit: 'litre', notes: '' }],
+    equipRows:   [{ item: 'UT Unit + probes + calibration blocks', qty: 1, unit: 'day', notes: '' }],
+    film: [], travel: { km: 430, kmRate: 1.20, hotels: 185, camp: 0, flights: 0, loaTechs: 2, loaDays: 1, loaRate: 70, misc: 0, miscDesc: '' },
+    created: d2, modified: d2,
   };
 
-  // ── WO 3: Approved (ready to invoice) ─────────────────────────────────────
+  // ── WO 3: APPROVED — ready to invoice ─────────────────────────────────────
+  var wo3labourRows = [
+    { technician: t2, date: d3, category: 'MPI Inspection', regHrs: 8, otHrs: 4, dtHrs: 0, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true },
+  ];
   var wo3 = {
-    id: uid(), _demo: true,
-    woNum: 'DEMO-003', client: 'Keyera Corp', site: 'Edmonton Fractionation Plant', date: d,
-    province: 'AB', status: 'approved', po: 'PO-6631', approvedDate: d,
-    notes: 'Visual + MPI inspection — demo WO',
-    labourRows: [
-      { technician: t2, date: d, category: 'MPI Inspection', regHrs: 8, otHrs: 4, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true },
+    id: wo3id, _demo: true,
+    woNum: 'DEMO-003', client: 'Keyera Corp',
+    site: 'Edmonton Fractionation Plant — Vessel V-201',
+    equipOwner: 'Keyera Corp', province: 'AB',
+    date: d3, po: 'PO-6631', jobNum: 'KEY-2026-089', afe: 'AFE-2201', rig: '',
+    status: 'approved', approvedDate: d3,
+    notes: 'Full MPI on vessel V-201 weld seams. Night shift work required due to plant operations.',
+    labourRows: wo3labourRows,
+    consumables: [
+      { type: 'MPI/LPI Consumables', qty: 3, unit: 'can', notes: '' },
+      { type: 'NDT Cleaner', qty: 2, unit: 'can', notes: '' },
     ],
-    equipRows: [], consumables: [], film: [], travel: {},
-    created: d, modified: d,
+    equipRows: [{ item: 'Magnetic Particle Yoke + calibration block + light meter', qty: 1, unit: 'shift', notes: '' }],
+    film: [], travel: { km: 0, kmRate: 1.20, hotels: 0, camp: 0, flights: 0, loaTechs: 0, loaDays: 0, loaRate: 70, misc: 25, miscDesc: 'Service vehicle — 17th St location' },
+    created: d3, modified: d3,
   };
 
-  // ── Timesheets for WO2 (submitted — techs need to confirm) ────────────────
+  // ── WO 4: INVOICED — full cycle complete ───────────────────────────────────
+  var wo4labourRows = [
+    { technician: t1, date: d4, category: 'RT Inspection', regHrs: 8, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '07:00', endTime: '15:00', billable: true },
+  ];
+  var wo4 = {
+    id: wo4id, _demo: true,
+    woNum: 'DEMO-004', client: 'ATCO Gas',
+    site: 'Grande Prairie — Meter Station Rebuild',
+    equipOwner: 'ATCO Gas', province: 'AB',
+    date: d4, po: 'PO-9201', jobNum: 'AG-2026-0502', afe: '', rig: '',
+    status: 'invoiced',
+    notes: 'RT inspection of welds on new meter station pipework. 8 welds inspected, all accepted.',
+    labourRows: wo4labourRows,
+    consumables: [],
+    equipRows: [{ item: 'Radiographic exposure device, cables & darkroom', qty: 8, unit: 'hr', notes: '' }],
+    film: [
+      { filmType: '2.75" x 8.5"', pipeSize: '2"', qty: 8, notes: 'One shot per weld' },
+    ],
+    travel: { km: 460, kmRate: 1.20, hotels: 0, camp: 0, flights: 0, loaTechs: 0, loaDays: 0, loaRate: 70, misc: 0, miscDesc: '' },
+    created: d4, modified: d4,
+  };
+
+  // ── TIMESHEETS — all fields mirror the WO exactly ──────────────────────────
+
+  // WO2 — t1 timesheet (pending confirmation)
   var ts1 = {
-    id: uid(), _demo: true,
-    woId: wo2.id, woNum: wo2.woNum, technician: t1,
-    client: wo2.client, date: d, site: wo2.site, province: wo2.province,
-    rows: [{ date: d, category: 'UT Inspection', regHrs: 10, otHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
-    notes: '', status: 'pending', confirmed: false, created: d, modified: d,
-  };
-  var ts2 = {
-    id: uid(), _demo: true,
-    woId: wo2.id, woNum: wo2.woNum, technician: t2,
-    client: wo2.client, date: d, site: wo2.site, province: wo2.province,
-    rows: [{ date: d, category: 'UT Inspection', regHrs: 10, otHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
-    notes: '', status: 'pending', confirmed: false, created: d, modified: d,
+    id: ts1id, _demo: true,
+    woId: wo2id, woNum: wo2.woNum,
+    technician: t1,
+    client: wo2.client, site: wo2.site, province: wo2.province,
+    date: d2, po: wo2.po, jobNum: wo2.jobNum,
+    rows: [{ technician: t1, date: d2, category: 'UT Inspection', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
+    notes: '', status: 'pending', confirmed: false, created: d2, modified: d2,
   };
 
-  // ── Timesheet for WO3 (submitted + confirmed) ─────────────────────────────
+  // WO2 — t2 timesheet (pending confirmation)
+  var ts2 = {
+    id: ts2id, _demo: true,
+    woId: wo2id, woNum: wo2.woNum,
+    technician: t2,
+    client: wo2.client, site: wo2.site, province: wo2.province,
+    date: d2, po: wo2.po, jobNum: wo2.jobNum,
+    rows: [{ technician: t2, date: d2, category: 'UT Inspection', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
+    notes: '', status: 'pending', confirmed: false, created: d2, modified: d2,
+  };
+
+  // WO3 — t2 timesheet (confirmed, submitted)
   var ts3 = {
-    id: uid(), _demo: true,
-    woId: wo3.id, woNum: wo3.woNum, technician: t2,
-    client: wo3.client, date: d, site: wo3.site, province: wo3.province,
-    rows: [{ date: d, category: 'MPI Inspection', regHrs: 8, otHrs: 4, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true }],
-    notes: '', status: 'submitted', confirmed: true, confirmedDate: d, created: d, modified: d,
+    id: ts3id, _demo: true,
+    woId: wo3id, woNum: wo3.woNum,
+    technician: t2,
+    client: wo3.client, site: wo3.site, province: wo3.province,
+    date: d3, po: wo3.po, jobNum: wo3.jobNum,
+    rows: [{ technician: t2, date: d3, category: 'MPI Inspection', regHrs: 8, otHrs: 4, dtHrs: 0, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true }],
+    notes: 'Night shift differential applies.', status: 'submitted', confirmed: true, confirmedDate: d3, created: d3, modified: d3,
+  };
+
+  // WO4 — t1 timesheet (submitted, invoiced WO)
+  var ts4 = {
+    id: ts4id, _demo: true,
+    woId: wo4id, woNum: wo4.woNum,
+    technician: t1,
+    client: wo4.client, site: wo4.site, province: wo4.province,
+    date: d4, po: wo4.po, jobNum: wo4.jobNum,
+    rows: [{ technician: t1, date: d4, category: 'RT Inspection', regHrs: 8, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '07:00', endTime: '15:00', billable: true }],
+    notes: '8 welds shot, all accepted. Processed same-day.', status: 'submitted', confirmed: true, confirmedDate: d4, created: d4, modified: d4,
   };
 
   try {
     var items = [
-      ['jobs', wo1], ['jobs', wo2], ['jobs', wo3],
-      ['timesheets', ts1], ['timesheets', ts2], ['timesheets', ts3],
+      ['jobs', wo1], ['jobs', wo2], ['jobs', wo3], ['jobs', wo4],
+      ['timesheets', ts1], ['timesheets', ts2], ['timesheets', ts3], ['timesheets', ts4],
     ];
     for (var i = 0; i < items.length; i++) {
       await sbUpsert(items[i][0], items[i][1].id, items[i][1]);
     }
-    _jobs.unshift(wo3); _jobs.unshift(wo2); _jobs.unshift(wo1);
-    _timesheets.unshift(ts3); _timesheets.unshift(ts2); _timesheets.unshift(ts1);
+    _jobs.unshift(wo4); _jobs.unshift(wo3); _jobs.unshift(wo2); _jobs.unshift(wo1);
+    _timesheets.unshift(ts4); _timesheets.unshift(ts3); _timesheets.unshift(ts2); _timesheets.unshift(ts1);
     _tsCacheWrite(_timesheets);
     renderAll();
-    toast('Demo data loaded ✓  —  3 WOs, 3 timesheets created', 'success');
+    toast('Demo data loaded \u2713  \u2014  4 WOs, 4 timesheets across 2 weeks', 'success');
   } catch(e) { toast('Error loading demo: ' + e.message, 'error'); }
 }
 
