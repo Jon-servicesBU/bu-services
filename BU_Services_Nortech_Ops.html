@@ -6647,6 +6647,171 @@ function exportPayroll() {
   toast('Payroll CSV downloaded — ' + rows.length + ' weekly records, ' + Object.keys(cumulative).length + ' technicians', 'success');
 }
 
+// ── Margin Report ─────────────────────────────────────────────────────────────
+function renderMarginReport() {
+  if (!isAdmin()) return;
+
+  var techFilter = (document.getElementById('margin-filter-tech')||{}).value || '';
+  var woFilter   = ((document.getElementById('margin-filter-wo')||{}).value || '').toLowerCase();
+
+  // Populate tech dropdown
+  var techSet = {};
+  _jobs.forEach(function(j) {
+    (j.labourRows||[]).forEach(function(r){ if(r.technician) techSet[r.technician] = 1; });
+    (_timesheets.filter(function(t){ return t.woId === j.id; })).forEach(function(t){
+      (t.rows||[]).forEach(function(r){ if(r.technician) techSet[r.technician] = 1; });
+    });
+  });
+  var techSel = document.getElementById('margin-filter-tech');
+  if (techSel && techSel.options.length <= 1) {
+    Object.keys(techSet).sort().forEach(function(tech) {
+      var opt = document.createElement('option'); opt.value = tech; opt.textContent = tech;
+      techSel.appendChild(opt);
+    });
+  }
+
+  // Helper: find best labour rate for a category from a rate sheet
+  function getRate(rs, category, type) {
+    if (!rs || !rs.labour) return 0;
+    var cat = rs.labour.find(function(l){
+      return l.name && category && l.name.toLowerCase().split('(')[0].trim() === category.toLowerCase().split('(')[0].trim();
+    }) || rs.labour.find(function(l){
+      return l.name && category && category.toLowerCase().includes(l.name.toLowerCase().split('(')[0].trim().toLowerCase());
+    });
+    if (!cat) return 0;
+    return type === 'ot' ? (cat.otRate||0) : type === 'dt' ? (cat.dtRate||0) : (cat.stRate||0);
+  }
+
+  // Default fallback cost rates (internal cost estimate)
+  var DEFAULT_COST = { st: 55, ot: 82.5, dt: 110 };
+
+  // Build per-WO margin rows
+  var woRows = [];
+  _jobs.forEach(function(j) {
+    var woNum = j.woNum || j.number || j.id;
+    if (woFilter && !woNum.toLowerCase().includes(woFilter) && !(j.client||'').toLowerCase().includes(woFilter)) return;
+
+    // Get linked invoice total (billed)
+    var inv = j.invoiceId ? _invoices.find(function(i){ return i.id === j.invoiceId; }) : null;
+    var billed = inv ? (inv.total || 0) : 0;
+
+    // Get rate sheet
+    var rs = j.rateSheetId ? _rateSheets.find(function(r){ return r.id === j.rateSheetId; }) : (_rateSheets[0] || null);
+
+    // Compute cost from labourRows on the WO
+    var rows = (j.labourRows || []);
+    // Also pull from linked timesheets
+    _timesheets.filter(function(t){ return t.woId === j.id; }).forEach(function(t){
+      (t.rows||[]).forEach(function(r){
+        rows.push({category: r.category, regHrs: r.regHrs||0, otHrs: r.otHrs||0, dtHrs: r.dtHrs||0, nightHrs: r.nightHrs||0, technician: r.technician||''});
+      });
+    });
+
+    if (techFilter) rows = rows.filter(function(r){ return r.technician === techFilter; });
+    if (!rows.length && techFilter) return;
+
+    var cost = rows.reduce(function(s, r) {
+      var stR = getRate(rs, r.category, 'st') || DEFAULT_COST.st;
+      var otR = getRate(rs, r.category, 'ot') || DEFAULT_COST.ot;
+      var dtR = getRate(rs, r.category, 'dt') || DEFAULT_COST.dt;
+      return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
+    }, 0);
+
+    var totalReg   = rows.reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
+    var totalOT    = rows.reduce(function(s,r){ return s+(r.otHrs||0); }, 0);
+    var totalNight = rows.reduce(function(s,r){ return s+(r.nightHrs||0); }, 0);
+    var margin = billed - cost;
+    var marginPct = cost > 0 ? margin / cost * 100 : (billed > 0 ? 100 : 0);
+
+    var techs = [...new Set(rows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
+
+    woRows.push({
+      woNum: woNum, client: j.client||'—', tech: techs,
+      date: j.date || j.created || '',
+      reg: totalReg, ot: totalOT, night: totalNight,
+      billed: billed, cost: cost, margin: margin, marginPct: marginPct
+    });
+  });
+
+  // KPIs
+  var totBilled = woRows.reduce(function(s,r){ return s+r.billed; }, 0);
+  var totCost   = woRows.reduce(function(s,r){ return s+r.cost; }, 0);
+  var totMargin = totBilled - totCost;
+  var totPct    = totCost > 0 ? totMargin/totCost*100 : 0;
+  var kpiEl = document.getElementById('margin-kpis');
+  if (kpiEl) kpiEl.innerHTML = [
+    {v: fmtMoney(totBilled), l: 'Total Billed', c: ''},
+    {v: fmtMoney(totCost),   l: 'Total Cost',   c: ''},
+    {v: fmtMoney(totMargin), l: 'Gross Margin', c: totMargin>=0?'sc-green':'sc-red'},
+    {v: totPct.toFixed(1)+'%', l: 'Margin %',  c: totPct>=20?'sc-green':totPct>=10?'sc-amber':'sc-red'}
+  ].map(function(k){
+    return '<div class="kpi-card"><div class="kpi-val '+k.c+'">'+k.v+'</div><div class="kpi-lbl">'+k.l+'</div></div>';
+  }).join('');
+
+  // WO table
+  var woBody = document.getElementById('margin-wo-body');
+  if (woBody) {
+    if (!woRows.length) {
+      woBody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:1.5rem;color:var(--muted)">No data — add invoices to work orders to see margin</td></tr>';
+    } else {
+      woBody.innerHTML = woRows.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }).map(function(r){
+        var pctCls = r.marginPct>=20?'sc-green':r.marginPct>=10?'sc-amber':'sc-red';
+        return '<tr>'+
+          '<td><span class="wo-num">'+r.woNum+'</span></td>'+
+          '<td>'+r.client+'</td>'+
+          '<td style="font-size:.72rem">'+r.tech+'</td>'+
+          '<td style="font-size:.72rem">'+r.date+'</td>'+
+          '<td style="text-align:right">'+r.reg.toFixed(1)+'</td>'+
+          '<td style="text-align:right">'+r.ot.toFixed(1)+'</td>'+
+          '<td style="text-align:right">'+r.night.toFixed(1)+'</td>'+
+          '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(r.billed)+'</td>'+
+          '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(r.cost)+'</td>'+
+          '<td style="text-align:right;font-family:var(--mono);font-weight:700">'+fmtMoney(r.margin)+'</td>'+
+          '<td style="text-align:right"><span class="status-chip '+pctCls+'">'+r.marginPct.toFixed(1)+'%</span></td>'+
+        '</tr>';
+      }).join('');
+    }
+  }
+
+  // By-technician summary
+  var techMap = {};
+  woRows.forEach(function(r) {
+    var techs = r.tech.split(', ').filter(Boolean);
+    techs.forEach(function(tech) {
+      if (!techMap[tech]) techMap[tech] = {wos:0, reg:0, ot:0, night:0, billed:0, cost:0};
+      techMap[tech].wos++;
+      // Distribute hours/cost equally if multiple techs
+      var n = techs.length;
+      techMap[tech].reg   += r.reg/n;
+      techMap[tech].ot    += r.ot/n;
+      techMap[tech].night += r.night/n;
+      techMap[tech].billed+= r.billed/n;
+      techMap[tech].cost  += r.cost/n;
+    });
+  });
+  var techBody = document.getElementById('margin-tech-body');
+  if (techBody) {
+    var techRows = Object.keys(techMap).sort().map(function(tech) {
+      var t = techMap[tech];
+      var margin = t.billed - t.cost;
+      var pct = t.cost > 0 ? margin/t.cost*100 : 0;
+      var pctCls = pct>=20?'sc-green':pct>=10?'sc-amber':'sc-red';
+      var totalHrs = t.reg + t.ot + t.night;
+      return '<tr>'+
+        '<td><strong>'+tech+'</strong></td>'+
+        '<td style="font-size:.72rem;color:var(--muted)">Field Tech</td>'+
+        '<td style="text-align:right">'+t.wos+'</td>'+
+        '<td style="text-align:right">'+totalHrs.toFixed(1)+'</td>'+
+        '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(t.billed)+'</td>'+
+        '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(t.cost)+'</td>'+
+        '<td style="text-align:right;font-family:var(--mono);font-weight:700">'+fmtMoney(margin)+'</td>'+
+        '<td style="text-align:right"><span class="status-chip '+pctCls+'">'+pct.toFixed(1)+'%</span></td>'+
+      '</tr>';
+    });
+    techBody.innerHTML = techRows.length ? techRows.join('') : '<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--muted)">No data</td></tr>';
+  }
+}
+
 // ── Event delegation for timesheets ──────────────────────────────────────────
 document.addEventListener('click', function(e) {
   var el;
