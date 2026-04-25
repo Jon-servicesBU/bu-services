@@ -6438,6 +6438,8 @@ function getCurrentTechName() {
 
 // ── Confirm my hours on a submitted timesheet ─────────────────────────────────
 function confirmMyHours(tsId) {
+  var btn        = document.getElementById('ts-confirm-btn');
+  var confirmKey = btn ? (btn.getAttribute('data-confirm-key') || '') : '';
   var ts = _timesheets.find(function(t){ return t.id === tsId; });
   if (!ts) return;
   var myName = getCurrentTechName();
@@ -6445,24 +6447,29 @@ function confirmMyHours(tsId) {
 
   if (!confirm('Confirm your hours on WO ' + (ts.woNum||'') + '?\n\nOnce confirmed your rows will be locked and cannot be changed without admin approval.')) return;
 
-  // Collect any edits the tech made to their rows
+  // Collect edited rows tagged with the exact confirmations key
+  var tagName    = confirmKey || myName;
   var editedRows = collectTSRows().map(function(r){
-    return Object.assign({}, r, { technician: myName });
+    return Object.assign({}, r, { technician: tagName });
   });
 
-  // Replace this tech's rows in the full TS, keep all other techs' rows intact
-  var otherRows = (ts.rows || []).filter(function(r){ return r.technician !== myName; });
+  // Replace only this tech's rows using fuzzy match; keep all others
+  var mn = myName.toLowerCase().trim();
+  var fn = mn.split(' ')[0]; var ln = mn.split(' ').pop();
+  var otherRows = (ts.rows || []).filter(function(r){
+    var rt = (r.technician||'').toLowerCase().trim();
+    return !(rt === mn || (fn.length>1 && ln.length>1 && rt.includes(fn) && rt.includes(ln)));
+  });
   ts.rows = otherRows.concat(editedRows);
 
-  // Mark confirmed
   if (!ts.confirmations) ts.confirmations = {};
-  ts.confirmations[myName] = { confirmed: true, date: today() };
+  ts.confirmations[confirmKey || myName] = { confirmed: true, date: today() };
   ts.modified = today();
   saveTimesheetToStorage(ts);
   closeModal('ts-modal');
   renderTimesheets();
   renderJobs();
-  toast('Hours confirmed ✓', 'success');
+  toast('Hours confirmed \u2713', 'success');
 }
 
 // ── Check if current tech has a pending confirmation on any TS ────────────────
@@ -6513,25 +6520,56 @@ function openTSModal(tsId) {
   document.getElementById('ts-modal-title').textContent = 'Timesheet — WO ' + (ts.woNum || wo.woNum || wo.number || '—') + ' · ' + (ts.client || wo.client || '');
   document.getElementById('ts-notes').value = ts.notes || '';
 
-  // Clear body
-  document.getElementById('ts-rows-body').innerHTML = '';
-
-  // Pre-fill from saved TS rows or WO labour rows
-  var rows = (ts.rows && ts.rows.length) ? ts.rows : (wo.labourRows || []);
-  if (rows.length) {
-    rows.forEach(function(r) { addTSRow(r); });
-  } else {
-    addTSRow();
-  }
-
+  // ── Determine confirmation state BEFORE populating rows ─────────────────
+  var myName    = getCurrentTechName();
   var submitted = ts.status === 'submitted';
 
-  // Button visibility
-  var showExport     = !!tsId && isAdmin();
-  var showBack       = submitted && isAdmin();
-  var showAdminSave  = submitted && isAdmin();   // admin can save edits to submitted TS
-  var showSubmit     = !submitted;
-  var showDraft      = !submitted;
+  // Fuzzy tech name match — tolerates case/spacing differences
+  function _techMatch(a, b) {
+    if (!a || !b) return false;
+    a = a.toLowerCase().trim(); b = b.toLowerCase().trim();
+    if (a === b) return true;
+    var fn = b.split(' ')[0]; var ln = b.split(' ').pop();
+    return fn.length > 1 && ln.length > 1 && a.includes(fn) && a.includes(ln);
+  }
+
+  // Find the confirmations key that matches this tech (fuzzy)
+  var myConfirmKey = null;
+  if (ts.confirmations && myName) {
+    Object.keys(ts.confirmations).forEach(function(k) {
+      if (_techMatch(k, myName) || _techMatch(myName, k)) myConfirmKey = k;
+    });
+  }
+
+  var isConfirmView = !isAdmin()
+    && submitted
+    && myConfirmKey !== null
+    && !ts.confirmations[myConfirmKey].confirmed;
+
+  // ── Populate rows ────────────────────────────────────────────────────────
+  document.getElementById('ts-rows-body').innerHTML = '';
+  _tsRowCount = 0;
+
+  if (isConfirmView) {
+    // Show only this tech's rows, pre-filled from TS (or WO as fallback)
+    var srcRows = (ts.rows && ts.rows.length) ? ts.rows : (((_jobs.find(function(j){return j.id===ts.woId;})||{}).labourRows)||[]);
+    var myRows  = srcRows.filter(function(r){ return _techMatch(r.technician||'', myName); });
+    if (myRows.length) {
+      myRows.forEach(function(r){ addTSRow(r); });
+    } else {
+      addTSRow();
+    }
+  } else {
+    var allRows = (ts.rows && ts.rows.length) ? ts.rows : (((_jobs.find(function(j){return j.id===ts.woId;})||{}).labourRows)||[]);
+    if (allRows.length) { allRows.forEach(function(r){ addTSRow(r); }); } else { addTSRow(); }
+  }
+
+  // ── Button visibility ───────────────────────────────────────────────────
+  var showExport    = !!tsId && isAdmin();
+  var showBack      = submitted && isAdmin();
+  var showAdminSave = submitted && isAdmin();
+  var showSubmit    = !submitted && !isConfirmView;
+  var showDraft     = !submitted && !isConfirmView;
 
   document.getElementById('ts-export-btn').style.display     = showExport    ? 'inline-flex' : 'none';
   document.getElementById('ts-back-btn').style.display       = showBack      ? 'inline-flex' : 'none';
@@ -6539,30 +6577,7 @@ function openTSModal(tsId) {
   document.getElementById('ts-submit-btn').style.display     = showSubmit    ? 'inline-flex' : 'none';
   document.getElementById('ts-draft-btn').style.display      = showDraft     ? 'inline-flex' : 'none';
 
-  // Lock if submitted and not admin — all fields + red banner
-  if (submitted && !isAdmin()) {
-    setTimeout(function() {
-      document.querySelectorAll('#ts-modal input, #ts-modal select, #ts-modal textarea').forEach(function(el) {
-        el.disabled = true; el.style.opacity = '.6';
-      });
-      document.getElementById('ts-add-row-btn').style.display = 'none';
-      var existing = document.getElementById('ts-locked-banner');
-      if (!existing) {
-        var banner = document.createElement('div');
-        banner.id = 'ts-locked-banner';
-        banner.style.cssText = 'background:rgba(232,64,64,.1);border:1px solid rgba(232,64,64,.3);border-left:4px solid #E84040;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCA5A5;margin-bottom:.75rem;font-weight:600';
-        banner.textContent = '🔒 This timesheet has been submitted. Contact admin to make changes.';
-        var body = document.querySelector('#ts-modal .modal-body');
-        if (body) body.insertBefore(banner, body.firstChild);
-      }
-    }, 30);
-  } else {
-    document.getElementById('ts-add-row-btn').style.display = 'inline-flex';
-    var b = document.getElementById('ts-locked-banner');
-    if (b) b.remove();
-  }
-
-  // Reset tech-flow buttons to hidden (openTSModalTechFlow shows them when needed)
+  // Reset tech-flow buttons
   var backToWoBtn = document.getElementById('ts-back-to-wo-btn');
   var submitBoth  = document.getElementById('ts-submit-both-btn');
   var cancelBtn   = document.getElementById('ts-cancel-btn');
@@ -6572,47 +6587,43 @@ function openTSModal(tsId) {
   if (cancelBtn)   cancelBtn.style.display   = 'inline-flex';
   if (confirmBtn)  confirmBtn.style.display  = 'none';
 
-  // ── Confirmation view for non-creator techs ───────────────────────────────
-  var myName = getCurrentTechName();
-  var isConfirmView = !isAdmin()
-    && ts.status === 'submitted'
-    && ts.confirmations
-    && ts.confirmations[myName]
-    && !ts.confirmations[myName].confirmed;
+  // ── Lock / banner ───────────────────────────────────────────────────────
+  // Remove stale banners
+  ['ts-locked-banner','ts-confirm-banner'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.remove();
+  });
 
   if (isConfirmView) {
-    // Filter rows to show only this tech's rows — EDITABLE until confirmed
-    document.getElementById('ts-rows-body').innerHTML = '';
-    _tsRowCount = 0;
-    var myRows = (ts.rows || []).filter(function(r){ return r.technician === myName; });
-    if (myRows.length) {
-      myRows.forEach(function(r){ addTSRow(r); });
-    } else {
-      addTSRow();
+    // EDITABLE — tech reviews and may adjust before confirming
+    document.getElementById('ts-add-row-btn').style.display = 'inline-flex';
+    if (confirmBtn) {
+      confirmBtn.style.display = 'inline-flex';
+      confirmBtn.setAttribute('data-ts-id', tsId);
+      confirmBtn.setAttribute('data-confirm-key', myConfirmKey);
     }
-    // Keep fields editable so tech can adjust before confirming
-    var addBtn = document.getElementById('ts-add-row-btn');
-    if (addBtn) addBtn.style.display = 'inline-flex';
-    // Show confirm button only, hide draft/submit
-    if (confirmBtn)  { confirmBtn.style.display = 'inline-flex'; confirmBtn.setAttribute('data-ts-id', tsId); }
-    if (cancelBtn)   cancelBtn.style.display = 'inline-flex';
-    var draftBtn   = document.getElementById('ts-draft-btn');
-    var submitBtn  = document.getElementById('ts-submit-btn');
-    if (draftBtn)  draftBtn.style.display  = 'none';
-    if (submitBtn) submitBtn.style.display = 'none';
-    // Amber banner — editable until confirmed
-    var existing = document.getElementById('ts-confirm-banner');
-    if (!existing) {
-      var banner = document.createElement('div');
-      banner.id = 'ts-confirm-banner';
-      banner.style.cssText = 'background:rgba(201,134,10,.1);border:1px solid rgba(201,134,10,.3);border-left:4px solid #C9860A;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCD34D;margin-bottom:.75rem;font-weight:600';
-      banner.textContent = '⏳ Your hours from this work order are shown below. Adjust if needed, then confirm.';
-      var body = document.querySelector('#ts-modal .modal-body');
-      if (body) body.insertBefore(banner, body.firstChild);
-    }
+    var ambBanner = document.createElement('div');
+    ambBanner.id = 'ts-confirm-banner';
+    ambBanner.style.cssText = 'background:rgba(201,134,10,.1);border:1px solid rgba(201,134,10,.3);border-left:4px solid #C9860A;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCD34D;margin-bottom:.75rem;font-weight:600';
+    ambBanner.textContent = '\u23F3 Your hours from this work order are shown below. Adjust if needed, then confirm. Fields lock after confirmation.';
+    var mbody = document.querySelector('#ts-modal .modal-body');
+    if (mbody) mbody.insertBefore(ambBanner, mbody.firstChild);
+
+  } else if (submitted && !isAdmin()) {
+    // Fully locked — already confirmed or not a listed tech
+    setTimeout(function() {
+      document.querySelectorAll('#ts-modal input, #ts-modal select, #ts-modal textarea').forEach(function(el) {
+        el.disabled = true; el.style.opacity = '.6';
+      });
+      document.getElementById('ts-add-row-btn').style.display = 'none';
+      var lockBanner = document.createElement('div');
+      lockBanner.id = 'ts-locked-banner';
+      lockBanner.style.cssText = 'background:rgba(232,64,64,.1);border:1px solid rgba(232,64,64,.3);border-left:4px solid #E84040;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCA5A5;margin-bottom:.75rem;font-weight:600';
+      lockBanner.textContent = '\U0001F512 This timesheet has been submitted. Contact admin to make changes.';
+      var mbody2 = document.querySelector('#ts-modal .modal-body');
+      if (mbody2) mbody2.insertBefore(lockBanner, mbody2.firstChild);
+    }, 30);
   } else {
-    var b2 = document.getElementById('ts-confirm-banner');
-    if (b2) b2.remove();
+    document.getElementById('ts-add-row-btn').style.display = 'inline-flex';
   }
 
   document.getElementById('ts-modal').classList.add('open');
