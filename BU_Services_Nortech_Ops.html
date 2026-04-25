@@ -2373,6 +2373,12 @@ async function handleWOImportFile(input) {
   if (!file) return;
   input.value = '';
 
+  // Safety: import only works on new WOs — _editWOId must be null
+  if (_editWOId) {
+    toast('Import only available when creating a new Work Order', 'error');
+    return;
+  }
+
   var btn = document.getElementById('wo-import-pdf-btn');
   if (btn) { btn.textContent = '⏳ Reading PDF…'; btn.disabled = true; }
 
@@ -5349,7 +5355,8 @@ async function saveWO(status) {
 
     closeModal('job-modal');
     renderJobs(); renderDashboard(); updatePendingBadge();
-    // Auto-create timesheets when WO is first submitted
+    // Auto-create timesheets on first submit — applies to BOTH manual entry AND PDF import
+    // _editWOId is null for new WOs regardless of how data was entered
     if (status === 'submitted' && !_editWOId) {
       await createTimesheetFromWO(data);
       renderTimesheets();
