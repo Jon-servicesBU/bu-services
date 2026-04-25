@@ -6915,20 +6915,24 @@ function renderTimesheets() {
     return true;
   });
 
-  // Sort newest first
-  list.sort(function(a,b){ return (b.date||b.modified||'').localeCompare(a.date||a.modified||''); });
+  // Sort newest first — exclude pending (shown as confirmation cards above)
+  var displayList = isAdmin() ? list : list.filter(function(ts){ return ts.status !== 'pending'; });
+  displayList.sort(function(a,b){ return (b.date||b.modified||'').localeCompare(a.date||a.modified||''); });
 
-  var tsTotalItems = list.length;
+  var tsTotalItems = displayList.length;
   var tsTotalPages = Math.max(1, Math.ceil(tsTotalItems / PAGE_SIZE));
   if (_tsPage > tsTotalPages) _tsPage = tsTotalPages;
   var tsPageStart  = (_tsPage - 1) * PAGE_SIZE;
-  var pagedTS      = list.slice(tsPageStart, tsPageStart + PAGE_SIZE);
+  var pagedTS      = displayList.slice(tsPageStart, tsPageStart + PAGE_SIZE);
 
   var grid  = document.getElementById('ts-grid');
   var empty = document.getElementById('ts-empty');
   if (!grid) return;
 
-  if (!list.length) {
+  // Pending confirmation cards — always show for techs regardless of list state
+  var pendingConf = isAdmin() ? [] : getPendingConfirmations();
+
+  if (!list.length && !pendingConf.length) {
     grid.innerHTML = '';
     if (empty) empty.style.display = 'block';
     renderTSPager(0, 0, 0);
@@ -6936,9 +6940,6 @@ function renderTimesheets() {
   }
   if (empty) empty.style.display = 'none';
   renderTSPager(_tsPage, tsTotalPages, tsTotalItems);
-
-  // Inject pending-confirmation entries at top for techs
-  var pendingConf = isAdmin() ? [] : getPendingConfirmations();
 
   grid.innerHTML = pendingConf.map(function(ts) {
     return '<div class="card" style="padding:.75rem 1.1rem;border-left:3px solid #C9860A">'
