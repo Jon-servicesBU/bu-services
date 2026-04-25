@@ -4411,6 +4411,14 @@ function loadApprovedCS() {
     sel.innerHTML = '<div style="color:var(--muted);font-size:.75rem;padding:.5rem">Select a client first</div>';
     return;
   }
+  // Auto-select best matching rate sheet (first T&M available)
+  var rsSel = document.getElementById('inv-rate-sheet');
+  if (rsSel && !rsSel.value) {
+    var defaultRS = _rateSheets.find(function(r){ return (r.type||'tm') === 'tm'; });
+    if (defaultRS && rsSel.querySelector('option[value="' + defaultRS.id + '"]')) {
+      rsSel.value = defaultRS.id;
+    }
+  }
   // Load approved work orders for this client
   var approved = _jobs.filter(function(j){ return j.client === client && j.status === 'approved'; });
   if (!approved.length) {
@@ -7202,7 +7210,23 @@ function clearManualLines() {
 
 function updateInvTotals() {
   var rsId = (document.getElementById('inv-rate-sheet') || {}).value || '';
-  var rs   = _rateSheets.find(function(r){ return r.id === rsId; }) || _rateSheets[0] || {};
+  var rs;
+  if (rsId) {
+    rs = _rateSheets.find(function(r){ return r.id === rsId; });
+  }
+  // Auto-find best rate sheet: first T&M available
+  if (!rs) {
+    rs = _rateSheets.find(function(r){ return (r.type||'tm') === 'tm'; })
+      || _rateSheets[0]
+      || {};
+    // Update the dropdown to reflect auto-selection
+    if (rs && rs.id) {
+      var rsSel = document.getElementById('inv-rate-sheet');
+      if (rsSel && rsSel.querySelector('option[value="' + rs.id + '"]')) {
+        rsSel.value = rs.id;
+      }
+    }
+  }
 
   var selected = Array.from(document.querySelectorAll('.inv-cs-check:checked')).map(function(el) {
     return _jobs.find(function(j){ return j.id === el.value; })
@@ -7317,9 +7341,14 @@ async function createTimesheetFromWO(wo) {
   });
 
   var created = 0;
+  // Read freshest TS list — union of in-memory and localStorage to catch stale entries
+  var freshTS = _timesheets.concat(_tsCacheRead().filter(function(c){
+    return !_timesheets.find(function(m){ return m.id === c.id; });
+  }));
+
   Object.keys(byTech).forEach(function(techName) {
-    // Skip if TS already exists for this tech+WO
-    if (_timesheets.find(function(t){ return t.woId === wo.id && t.technician === techName; })) return;
+    // Skip if TS already exists for this tech+WO (check both memory and cache)
+    if (freshTS.find(function(t){ return t.woId === wo.id && t.technician === techName; })) return;
     // Skip if techName doesn't match any known employee (prevents phantom TSes)
     var knownPerson = (VIEWER_PEOPLE||[]).find(function(p){ return p.name === techName; });
     if (!knownPerson) return;
@@ -7347,7 +7376,8 @@ async function createTimesheetFromWO(wo) {
       modified:     today(),
     };
     saveTimesheetToStorage(ts);
-    _timesheets.unshift(ts);
+    // Re-read _timesheets from storage after write to stay in sync
+    _timesheets = _tsCacheRead();
     created++;
   });
   return created;
