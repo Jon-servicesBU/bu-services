@@ -2385,10 +2385,7 @@ function openWOModal(editId) {
         var banner = document.createElement('div');
         banner.id = 'wo-locked-banner';
         banner.style.cssText = 'background:rgba(232,64,64,.1);border:1px solid rgba(232,64,64,.3);border-left:4px solid #E84040;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCA5A5;margin-bottom:.75rem;font-weight:600';
-        banner.innerHTML = '🔒 This work order has been submitted. Contact admin to make changes.'
-          + (_techFlowWoId
-            ? ' <button onclick="techContinueToTS()" style="margin-left:.75rem;background:var(--nor-accent);border:none;border-radius:5px;color:#fff;font-size:.72rem;font-weight:700;padding:.25rem .7rem;cursor:pointer">Continue to Timesheet →</button>'
-            : '');
+        banner.textContent = '🔒 This work order has been submitted. Contact admin to make changes.';
         var body = document.querySelector('#job-modal .modal-body');
         if (body) body.insertBefore(banner, body.firstChild);
       }
@@ -2971,10 +2968,7 @@ function renderJobs() {
           : '<button class="btn btn-ghost btn-sm" data-open-wo="'+j.id+'" style="flex-shrink:0">🔒 View</button>')
         + (function(){
             var myName = getCurrentTechName();
-            var pendingTS = _timesheets.find(function(t){
-              return t.woId === j.id && t.status === 'submitted'
-                && t.confirmations && t.confirmations[myName] && !t.confirmations[myName].confirmed;
-            });
+            var pendingTS = techHasPendingOnWO(j.id);
             if (!pendingTS) return '';
             return '<button class="btn btn-sm" data-open-ts="'+pendingTS.id+'" style="background:#C9860A;border:none;border-radius:5px;color:#fff;font-size:.68rem;font-weight:700;padding:.28rem .65rem;cursor:pointer;flex-shrink:0">\u23F3 Confirm Hours</button>';
           })()
@@ -4421,8 +4415,7 @@ async function saveWO(status) {
       renderTimesheets();
     }
     if (status === 'submitted') {
-      toast('Work order submitted — timesheet created', 'success');
-      // Refresh timesheet button on WO card
+      toast('Work order submitted — technicians will be prompted to confirm their hours', 'success');
       renderJobs();
     } else {
       toast('Draft saved', 'success');
@@ -4432,103 +4425,15 @@ async function saveWO(status) {
 
 // ── WO: Approve / Unapprove ───────────────────────────────────────────────────
 // ── Tech WO save flow: save → confirm → open timesheet ───────────────────────
-var _techFlowWoId = null; // tracks the WO being processed in tech flow
-
 async function techSaveWO() {
   var client = (document.getElementById('job-client')||{}).value||'';
   var site   = (document.getElementById('job-site')||{}).value||'';
   if (!client.trim()||!site.trim()) { toast('Client and site / location are required', 'error'); return; }
-
-  var pendingId = _editWOId || uid();
-  _techFlowWoId = pendingId;
-  _editWOId = pendingId;
-
   await saveWO('submitted');
-
-  await new Promise(function(r){ setTimeout(r, 400); });
-
-  var ts = _timesheets.find(function(t){ return t.woId === pendingId; });
-  if (!ts) {
-    var wo = _jobs.find(function(j){ return j.id === pendingId; });
-    if (wo) {
-      await createTimesheetFromWO(wo);
-      ts = _timesheets.find(function(t){ return t.woId === pendingId; });
-    }
-  }
-  if (ts) {
-    _editTSId = ts.id;
-    openTSModalTechFlow(ts.id);
-  } else {
-    toast('Work order saved. Open Timesheets to log your hours.', 'info');
-  }
+  // TS is created automatically by saveWO — each tech will be prompted to confirm their hours
 }
 
-function openTSModalTechFlow(tsId) {
-  openTSModal(tsId);
-  // Switch to tech flow buttons
-  var cancelBtn   = document.getElementById('ts-cancel-btn');
-  var draftBtn    = document.getElementById('ts-draft-btn');
-  var submitBtn   = document.getElementById('ts-submit-btn');
-  var backToWoBtn = document.getElementById('ts-back-to-wo-btn');
-  var submitBoth  = document.getElementById('ts-submit-both-btn');
-  if (cancelBtn)   cancelBtn.style.display   = 'none';
-  if (draftBtn)    draftBtn.style.display    = 'none';
-  if (submitBtn)   submitBtn.style.display   = 'none';
-  if (backToWoBtn) backToWoBtn.style.display = 'inline-flex';
-  if (submitBoth)  submitBoth.style.display  = 'inline-flex';
-}
-
-async function techBackToWO() {
-  if (!confirm('Go back to the work order?\n\nYour timesheet hours will be saved as a draft.')) return;
-  // Save TS draft so hours are preserved
-  if (_editTSId) {
-    var rows = collectTSRows();
-    if (rows.length) {
-      var draft = buildTSData('draft');
-      saveTimesheetToStorage(Object.assign({id:_editTSId}, draft));
-    }
-  }
-  closeModal('ts-modal');
-  await new Promise(function(r){ setTimeout(r, 150); });
-  if (_techFlowWoId) {
-    openWOModal(_techFlowWoId);
-  }
-}
-
-async function techSubmitBoth() {
-  var rows = collectTSRows();
-  if (!rows.length) { toast('Add at least one hour row before submitting', 'error'); return; }
-
-  var woNum = document.getElementById('ts-wo-ref').textContent || 'this work order';
-  if (!confirm(
-    'Submit Work Order ' + woNum + ' and your timesheet?\n\n' +
-    'Once submitted, neither can be edited without admin approval.\n\n' +
-    'Continue?'
-  )) return;
-
-  // Submit the timesheet
-  var data = buildTSData('submitted');
-  data.submittedDate = today();
-  if (_editTSId) {
-    saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
-  }
-
-  closeModal('ts-modal');
-  renderTimesheets();
-  renderJobs();
-  renderDashboard();
-  updatePendingBadge();
-  _techFlowWoId = null;
-  toast('Work order and timesheet submitted — pending admin approval ✓', 'success');
-}
-
-function techContinueToTS() {
-  closeModal('job-modal');
-  setTimeout(function() {
-    var ts = _timesheets.find(function(t){ return t.woId === _techFlowWoId; });
-    if (ts) { _editTSId = ts.id; openTSModalTechFlow(ts.id); }
-  }, 150);
-}
+// ── Legacy flow functions removed — new flow: each tech confirms individually
 
 // ── saveWOAndTimesheet kept for admin use ─────────────────────────────────────
 async function saveWOAndTimesheet() {
@@ -6374,34 +6279,50 @@ function calcRowCost(techName, regHrs, otHrs, nightHrs) {
 
 // ── Auto-create timesheet when WO is submitted ───────────────────────────────
 async function createTimesheetFromWO(wo) {
-  // Creates ONE timesheet per WO covering all labour rows.
-  // Each technician listed gets a confirmations entry they must acknowledge.
+  // ONE timesheet per WO. Status immediately 'submitted' — each tech confirms their own rows.
+  // Confirmations keyed by canonical VIEWER_PEOPLE name so matching is always exact.
   if (!wo || !wo.id) return;
-
   var labourRows = wo.labourRows || [];
+  if (!labourRows.length) return;
 
-  // Check if TS already exists for this WO
-  var existing = _timesheets.find(function(t) { return t.woId === wo.id; });
-  if (existing) return 0;
+  // Don't create if already exists
+  if (_timesheets.find(function(t){ return t.woId === wo.id; })) return 0;
 
-  // Build confirmations map — each distinct tech starts as unconfirmed
+  // Fuzzy-resolve each tech name to canonical VIEWER_PEOPLE name
+  function _canonicalName(raw) {
+    if (!raw) return raw;
+    var r = raw.toLowerCase().trim();
+    var match = (VIEWER_PEOPLE || []).find(function(p) {
+      var n = p.name.toLowerCase();
+      if (n === r) return true;
+      var fn = n.split(' ')[0]; var ln = n.split(' ').pop();
+      return fn.length > 1 && ln.length > 1 && r.includes(fn) && r.includes(ln);
+    });
+    return match ? match.name : raw.trim();
+  }
+
+  // Build confirmations map with canonical keys
   var confirmations = {};
+  var seen = {};
   labourRows.forEach(function(r) {
-    var t = (r.technician || '').trim();
-    if (t && !confirmations[t]) confirmations[t] = { confirmed: false, date: null };
+    var canonical = _canonicalName(r.technician);
+    if (canonical && !seen[canonical]) {
+      seen[canonical] = true;
+      confirmations[canonical] = { confirmed: false, date: null };
+    }
   });
 
   var rows = labourRows.map(function(r) {
     return {
-      date:       r.date       || wo.date || today(),
-      category:   r.category   || '',
-      regHrs:     r.regHrs     || 0,
-      otHrs:      r.otHrs      || 0,
-      nightHrs:   r.nightHrs   || 0,
-      startTime:  r.startTime  || '',
-      endTime:    r.endTime    || '',
+      date:       r.date      || wo.date || today(),
+      category:   r.category  || '',
+      regHrs:     r.regHrs    || 0,
+      otHrs:      r.otHrs     || 0,
+      nightHrs:   r.nightHrs  || 0,
+      startTime:  r.startTime || '',
+      endTime:    r.endTime   || '',
       billable:   true,
-      technician: (r.technician || '').trim(),
+      technician: _canonicalName(r.technician),  // store canonical name
     };
   });
 
@@ -6409,7 +6330,6 @@ async function createTimesheetFromWO(wo) {
     id:            uid(),
     woId:          wo.id,
     woNum:         wo.woNum || wo.number || '—',
-    technician:    wo.labourRows && wo.labourRows[0] ? (wo.labourRows[0].technician||'') : '',
     client:        wo.client   || '',
     date:          wo.date     || today(),
     site:          wo.site     || '',
@@ -6417,7 +6337,7 @@ async function createTimesheetFromWO(wo) {
     po:            wo.po       || '',
     rows:          rows,
     notes:         '',
-    status:        'draft',
+    status:        'submitted',   // immediately available for confirmation
     confirmations: confirmations,
     created:       today(),
     modified:      today(),
@@ -6481,6 +6401,19 @@ function getPendingConfirmations() {
     var c = ts.confirmations && ts.confirmations[myName];
     return c && !c.confirmed;
   });
+}
+
+// Check if current tech appears anywhere on a WO (for WO card banner)
+function techHasPendingOnWO(woId) {
+  var myName = getCurrentTechName();
+  if (!myName || isAdmin()) return null;
+  return _timesheets.find(function(t) {
+    return t.woId === woId
+      && t.status === 'submitted'
+      && t.confirmations
+      && t.confirmations[myName]
+      && !t.confirmations[myName].confirmed;
+  }) || null;
 }
 
 // ── Create or open timesheet for a WO ────────────────────────────────────────
@@ -6577,13 +6510,9 @@ function openTSModal(tsId) {
   document.getElementById('ts-submit-btn').style.display     = showSubmit    ? 'inline-flex' : 'none';
   document.getElementById('ts-draft-btn').style.display      = showDraft     ? 'inline-flex' : 'none';
 
-  // Reset tech-flow buttons
-  var backToWoBtn = document.getElementById('ts-back-to-wo-btn');
-  var submitBoth  = document.getElementById('ts-submit-both-btn');
+  // Reset confirm/cancel buttons
   var cancelBtn   = document.getElementById('ts-cancel-btn');
   var confirmBtn  = document.getElementById('ts-confirm-btn');
-  if (backToWoBtn) backToWoBtn.style.display = 'none';
-  if (submitBoth)  submitBoth.style.display  = 'none';
   if (cancelBtn)   cancelBtn.style.display   = 'inline-flex';
   if (confirmBtn)  confirmBtn.style.display  = 'none';
 
