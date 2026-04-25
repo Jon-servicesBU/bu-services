@@ -790,9 +790,11 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-secondary" onclick="exportWO('pdf')" id="wo-export-pdf-btn" style="display:none">⬇ Export PDF</button>
       <button class="btn btn-secondary" onclick="exportWO('word')" id="wo-export-word-btn" style="display:none">⬇ Export Word</button>
       <div style="flex:1"></div>
-      <button class="btn btn-secondary" onclick="saveWO('draft')">Save Draft</button>
-      <button class="btn btn-primary" onclick="saveWO('submitted')">Submit Work Order</button>
-      <button class="btn btn-primary" onclick="saveWOAndTimesheet()" style="background:var(--nor-accent);border-color:var(--nor-accent)">Submit + Timesheet ⏱</button>
+      <!-- Admin buttons -->
+      <button class="btn btn-secondary" id="wo-btn-draft" onclick="saveWO('draft')" style="display:none">Save Draft</button>
+      <button class="btn btn-primary"   id="wo-btn-submit-admin" onclick="saveWO('submitted')" style="display:none">Submit Work Order</button>
+      <!-- Tech button -->
+      <button class="btn btn-primary" id="wo-btn-tech-save" onclick="techSaveWO()" style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">Save Work Order →</button>
     </div>
   </div>
 </div>
@@ -975,13 +977,16 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
       <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
-        <button class="btn btn-ghost" onclick="closeModal('ts-modal')">Cancel</button>
+        <button class="btn btn-ghost" id="ts-cancel-btn" onclick="closeModal('ts-modal')">Cancel</button>
         <button class="btn btn-secondary" id="ts-export-btn" onclick="exportTimesheet()" style="display:none">⬇ Export PDF</button>
         <button class="btn btn-ghost" id="ts-back-btn" onclick="revertTS()" style="display:none">↩ Back to Draft</button>
         <button class="btn btn-primary" id="ts-admin-save-btn" onclick="saveAdminTSEdits()" style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">💾 Save Admin Edits</button>
+        <!-- Tech flow buttons (shown when opened from WO save) -->
+        <button class="btn btn-ghost" id="ts-back-to-wo-btn" onclick="techBackToWO()" style="display:none">← Back to Work Order</button>
         <div style="flex:1"></div>
         <button class="btn btn-secondary" id="ts-draft-btn" onclick="saveTSDraft()">Save Draft</button>
         <button class="btn btn-primary" id="ts-submit-btn" onclick="submitTS()">Submit Timesheet</button>
+        <button class="btn btn-primary" id="ts-submit-both-btn" onclick="techSubmitBoth()" style="display:none;background:var(--green);border-color:var(--green)">✓ Submit Work Order &amp; Timesheet</button>
       </div>
     </div>
   </div>
@@ -991,214 +996,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
 
 
-<!-- ══ WORK ORDER MODAL ══════════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="job-modal">
-  <div class="modal" style="max-width:900px;width:96vw">
-    <div class="modal-hdr">
-      <span class="modal-title" id="wo-modal-title">New Work Order</span>
-      <button class="modal-close" onclick="closeModal('job-modal')">✕</button>
-    </div>
-    <div class="modal-body" style="padding:1rem 1.25rem">
-
-      <!-- Header info -->
-      <div class="form-grid" style="grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem">
-        <div class="form-group" style="grid-column:1/3">
-          <label class="form-label">Client / Company <span style="color:var(--nor-accent)">*</span></label>
-          <div class="cust-dropdown">
-            <input class="form-input cust-input" id="job-client" placeholder="Search customers…" autocomplete="off"
-              oninput="filterCustomers(this.value)" onfocus="filterCustomers(this.value)" onblur="setTimeout(function(){closeCustList()},200)">
-            <div class="cust-list" id="cust-list"></div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">WO # (auto if blank)</label>
-          <input class="form-input" id="job-number" placeholder="W-99001">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Date of Work <span style="color:var(--nor-accent)">*</span></label>
-          <input class="form-input" id="wo-date" type="date">
-        </div>
-        <div class="form-group" style="grid-column:1/3">
-          <label class="form-label">Location / Site <span style="color:var(--nor-accent)">*</span></label>
-          <input class="form-input" id="job-site" placeholder="Site address or description">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Equipment Owner</label>
-          <input class="form-input" id="wo-equip-owner" placeholder="e.g. ALTEC">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Province</label>
-          <select class="form-select" id="job-province"></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">P.O. #</label>
-          <input class="form-input" id="job-po" placeholder="e.g. PO200231COC2510">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Job #</label>
-          <input class="form-input" id="job-client-wo" placeholder="e.g. CA23007-SCM-AGC-004">
-        </div>
-        <div class="form-group">
-          <label class="form-label">AFE #</label>
-          <input class="form-input" id="wo-afe" placeholder="e.g. MT REQ#15">
-        </div>
-        <div class="form-group">
-          <label class="form-label">RIG #</label>
-          <input class="form-input" id="wo-rig" placeholder="Rig number if applicable">
-        </div>
-      </div>
-
-      <!-- Tabs -->
-      <div style="display:flex;gap:.2rem;border-bottom:1px solid var(--border);margin-bottom:.75rem">
-        <button class="cs-tab active" onclick="switchCSTab('labour',this)">⏱ Labour</button>
-        <button class="cs-tab" onclick="switchCSTab('consumables',this)">🧪 Consumables</button>
-        <button class="cs-tab" onclick="switchCSTab('equipment',this)">🔧 Equipment</button>
-        <button class="cs-tab" onclick="switchCSTab('film',this)">🎞 Film</button>
-        <button class="cs-tab" onclick="switchCSTab('travel',this)">🚗 Travel</button>
-        <button class="cs-tab" onclick="switchCSTab('service',this)">📝 Description</button>
-      </div>
-
-      <!-- LABOUR TAB -->
-      <div id="cs-panel-labour" class="cs-panel">
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-            <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:90px">Date</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:140px">Technician</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;min-width:160px">Category</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Reg Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">OT Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">DT Hrs</th>
-              <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:65px">Night</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:90px">Start</th>
-              <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:90px">End</th>
-              <th style="width:24px"></th>
-            </tr></thead>
-            <tbody id="cs-labour-body"></tbody>
-          </table>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="addLabourRow()" style="margin-top:.5rem">+ Add Technician Row</button>
-      </div>
-
-      <!-- CONSUMABLES TAB -->
-      <div id="cs-panel-consumables" class="cs-panel" style="display:none">
-        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-          <thead><tr style="border-bottom:1px solid var(--border)">
-            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Consumable Type</th>
-            <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty</th>
-            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
-            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
-            <th style="width:24px"></th>
-          </tr></thead>
-          <tbody id="cs-consumables-body"></tbody>
-        </table>
-        <button class="btn btn-ghost btn-sm" onclick="addConsumableRow()" style="margin-top:.5rem">+ Add Consumable</button>
-      </div>
-
-      <!-- EQUIPMENT TAB -->
-      <div id="cs-panel-equipment" class="cs-panel" style="display:none">
-        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-          <thead><tr style="border-bottom:1px solid var(--border)">
-            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Equipment Item</th>
-            <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty / Hrs</th>
-            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Unit</th>
-            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
-            <th style="width:24px"></th>
-          </tr></thead>
-          <tbody id="cs-equipment-body"></tbody>
-        </table>
-        <button class="btn btn-ghost btn-sm" onclick="addEquipmentRow()" style="margin-top:.5rem">+ Add Equipment</button>
-      </div>
-
-      <!-- FILM TAB -->
-      <div id="cs-panel-film" class="cs-panel" style="display:none">
-        <table style="width:100%;border-collapse:collapse;font-size:.73rem">
-          <thead><tr style="border-bottom:1px solid var(--border)">
-            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Film Type</th>
-            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:120px">Pipe Size</th>
-            <th style="padding:.3rem .4rem;text-align:center;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;width:80px">Qty</th>
-            <th style="padding:.3rem .4rem;text-align:left;color:var(--muted);font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase">Notes</th>
-            <th style="width:24px"></th>
-          </tr></thead>
-          <tbody id="cs-film-body"></tbody>
-        </table>
-        <button class="btn btn-ghost btn-sm" onclick="addFilmRow()" style="margin-top:.5rem">+ Add Film</button>
-      </div>
-
-      <!-- TRAVEL TAB -->
-      <div id="cs-panel-travel" class="cs-panel" style="display:none">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem">
-          <div class="form-group">
-            <label class="form-label">Total Kilometers</label>
-            <input class="form-input" id="cs-travel-km" type="number" placeholder="0" min="0">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Rate / km ($)</label>
-            <input class="form-input" id="cs-travel-km-rate" type="number" placeholder="1.20" value="1.20" step="0.01">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Customer Contact</label>
-            <input class="form-input" id="wo-customer-contact" placeholder="Name / phone">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Hotel ($)</label>
-            <input class="form-input" id="cs-travel-hotels" type="number" placeholder="0.00" step="0.01">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Camp ($)</label>
-            <input class="form-input" id="wo-travel-camp" type="number" placeholder="0.00" step="0.01">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Flights ($)</label>
-            <input class="form-input" id="cs-travel-flights" type="number" placeholder="0.00" step="0.01">
-          </div>
-          <div class="form-group">
-            <label class="form-label">LOA — # Technicians</label>
-            <input class="form-input" id="cs-travel-loa-techs" type="number" placeholder="0" min="0">
-          </div>
-          <div class="form-group">
-            <label class="form-label">LOA — # Days</label>
-            <input class="form-input" id="cs-travel-loa-days" type="number" placeholder="0" min="0">
-          </div>
-          <div class="form-group">
-            <label class="form-label">LOA Rate ($/tech/day)</label>
-            <input class="form-input" id="cs-travel-loa-rate" type="number" placeholder="70.00" value="70.00" step="0.01">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Misc. Charges ($)</label>
-            <input class="form-input" id="wo-travel-misc" type="number" placeholder="0.00" step="0.01">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Misc. Description</label>
-            <input class="form-input" id="wo-travel-misc-desc" placeholder="Description of misc charges">
-          </div>
-        </div>
-      </div>
-
-      <!-- DESCRIPTION OF SERVICE TAB -->
-      <div id="cs-panel-service" class="cs-panel" style="display:none">
-        <div class="form-group" style="margin-bottom:.65rem">
-          <label class="form-label">Description of Service</label>
-          <textarea class="form-textarea" id="cs-notes" placeholder="e.g.&#10;-TRAVELED TO SITE FROM SHOP&#10;-SIGNED IN AT MAIN OFFICE&#10;-PERFORMED MT AND HT AS PER REQUEST&#10;-COMPLETED REPORTS&#10;-TRAVELED BACK TO SHOP" style="min-height:120px"></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Field Reports (comma separated)</label>
-          <input class="form-input" id="wo-field-reports" placeholder="e.g. 393474 (MT), 393475 (HT)">
-        </div>
-      </div>
-
-    </div><!-- /modal-body -->
-
-    <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
-      <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
-      <button class="btn btn-secondary" onclick="exportWO('pdf')" id="wo-export-pdf-btn" style="display:none">⬇ Export PDF</button>
-      <button class="btn btn-secondary" onclick="exportWO('word')" id="wo-export-word-btn" style="display:none">⬇ Export Word</button>
-      <div style="flex:1"></div>
-      <button class="btn btn-secondary" onclick="saveWO('draft')">Save Draft</button>
-      <button class="btn btn-primary" onclick="saveWO('submitted')">Submit Work Order</button>
-    </div>
-  </div>
-</div>
 
 
 <!-- Rate Sheet Modal -->
@@ -2216,6 +2013,49 @@ function openWOModal(editId) {
   if (expWord) expWord.style.display = editId ? 'inline-flex' : 'none';
 
   switchCSTab('labour', document.querySelector('#job-modal .cs-tab'));
+
+  // ── Apply role-based WO modal behaviour ───────────────────────────────────
+  var woStatus = wo.status || 'new';
+  var locked   = !isAdmin() && (woStatus === 'submitted' || woStatus === 'approved' || woStatus === 'invoiced' || woStatus === 'paid');
+  var admin    = isAdmin();
+
+  // Button visibility
+  var showDraft       = admin;
+  var showSubmitAdmin = admin;
+  var showTechSave    = !admin && !locked;
+
+  var btnDraft = document.getElementById('wo-btn-draft');
+  var btnSubmitAdmin = document.getElementById('wo-btn-submit-admin');
+  var btnTechSave    = document.getElementById('wo-btn-tech-save');
+  if (btnDraft)       btnDraft.style.display       = showDraft       ? 'inline-flex' : 'none';
+  if (btnSubmitAdmin) btnSubmitAdmin.style.display  = showSubmitAdmin ? 'inline-flex' : 'none';
+  if (btnTechSave)    btnTechSave.style.display     = showTechSave    ? 'inline-flex' : 'none';
+
+  // Lock all inputs for submitted tech
+  if (locked) {
+    setTimeout(function() {
+      document.querySelectorAll('#job-modal input, #job-modal select, #job-modal textarea').forEach(function(el) {
+        el.disabled = true; el.style.opacity = '.55';
+      });
+      document.querySelectorAll('#job-modal button:not([onclick*="closeModal"]):not([id*="export"])').forEach(function(b) {
+        b.style.display = 'none';
+      });
+      // Show locked banner
+      var existing = document.getElementById('wo-locked-banner');
+      if (!existing) {
+        var banner = document.createElement('div');
+        banner.id = 'wo-locked-banner';
+        banner.style.cssText = 'background:rgba(232,64,64,.1);border:1px solid rgba(232,64,64,.3);border-left:4px solid #E84040;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCA5A5;margin-bottom:.75rem;font-weight:600';
+        banner.textContent = '🔒 This work order has been submitted. Contact admin to make changes.';
+        var body = document.querySelector('#job-modal .modal-body');
+        if (body) body.insertBefore(banner, body.firstChild);
+      }
+    }, 20);
+  } else {
+    var b = document.getElementById('wo-locked-banner');
+    if (b) b.remove();
+  }
+
   document.getElementById('job-modal').classList.add('open');
 }
 
@@ -4126,21 +3966,21 @@ async function saveWO(status) {
 }
 
 // ── WO: Approve / Unapprove ───────────────────────────────────────────────────
-// ── Submit WO then immediately open its timesheet ────────────────────────────
-async function saveWOAndTimesheet() {
-  // Validate first
+// ── Tech WO save flow: save → confirm → open timesheet ───────────────────────
+var _techFlowWoId = null; // tracks the WO being processed in tech flow
+
+async function techSaveWO() {
   var client = (document.getElementById('job-client')||{}).value||'';
   var site   = (document.getElementById('job-site')||{}).value||'';
-  if (!client.trim()||!site.trim()) { toast('Client and location are required','error'); return; }
+  if (!client.trim()||!site.trim()) { toast('Client and site / location are required', 'error'); return; }
 
-  // Store pending id so we can grab it after save
   var pendingId = _editWOId || uid();
-  window._pendingTSWoId = pendingId;
+  _techFlowWoId = pendingId;
+  _editWOId = pendingId;
 
   await saveWO('submitted');
 
-  // Wait for saveWO to complete and timesheet to be created
-  await new Promise(function(r){ setTimeout(r, 600); });
+  await new Promise(function(r){ setTimeout(r, 400); });
 
   var ts = _timesheets.find(function(t){ return t.woId === pendingId; });
   if (!ts) {
@@ -4151,11 +3991,74 @@ async function saveWOAndTimesheet() {
     }
   }
   if (ts) {
-    showView('timesheets', document.getElementById('nav-timesheets'));
     _editTSId = ts.id;
-    openTSModal(ts.id);
-    toast('Work order submitted — fill in your timesheet hours', 'info');
+    openTSModalTechFlow(ts.id);
+  } else {
+    toast('Work order saved. Open Timesheets to log your hours.', 'info');
   }
+}
+
+function openTSModalTechFlow(tsId) {
+  openTSModal(tsId);
+  // Switch to tech flow buttons
+  var cancelBtn   = document.getElementById('ts-cancel-btn');
+  var draftBtn    = document.getElementById('ts-draft-btn');
+  var submitBtn   = document.getElementById('ts-submit-btn');
+  var backToWoBtn = document.getElementById('ts-back-to-wo-btn');
+  var submitBoth  = document.getElementById('ts-submit-both-btn');
+  if (cancelBtn)   cancelBtn.style.display   = 'none';
+  if (draftBtn)    draftBtn.style.display    = 'none';
+  if (submitBtn)   submitBtn.style.display   = 'none';
+  if (backToWoBtn) backToWoBtn.style.display = 'inline-flex';
+  if (submitBoth)  submitBoth.style.display  = 'inline-flex';
+}
+
+async function techBackToWO() {
+  if (!confirm('Go back to the work order?\n\nYour timesheet will not be submitted — you can return to it from the Timesheets tab.')) return;
+  closeModal('ts-modal');
+  await new Promise(function(r){ setTimeout(r, 150); });
+  if (_techFlowWoId) {
+    openWOModal(_techFlowWoId);
+  }
+}
+
+async function techSubmitBoth() {
+  var rows = collectTSRows();
+  if (!rows.length) { toast('Add at least one hour row before submitting', 'error'); return; }
+
+  var woNum = document.getElementById('ts-wo-ref').textContent || 'this work order';
+  if (!confirm(
+    'Submit Work Order ' + woNum + ' and your timesheet?\n\n' +
+    'Once submitted, neither can be edited without admin approval.\n\n' +
+    'Continue?'
+  )) return;
+
+  // Submit the timesheet
+  var data = buildTSData('submitted');
+  data.submittedDate = today();
+  if (_editTSId) {
+    saveTimesheetToStorage(Object.assign({id:_editTSId}, data));
+    _timesheets = _timesheets.map(function(t){ return t.id === _editTSId ? Object.assign({id:_editTSId}, data) : t; });
+  }
+
+  closeModal('ts-modal');
+  renderTimesheets();
+  renderJobs();
+  renderDashboard();
+  updatePendingBadge();
+  _techFlowWoId = null;
+  toast('Work order and timesheet submitted — pending admin approval ✓', 'success');
+}
+
+// ── saveWOAndTimesheet kept for admin use ─────────────────────────────────────
+async function saveWOAndTimesheet() {
+  if (!isAdmin()) { techSaveWO(); return; }
+  var pendingId = _editWOId || uid();
+  _editWOId = pendingId;
+  await saveWO('submitted');
+  await new Promise(function(r){ setTimeout(r, 400); });
+  var ts = _timesheets.find(function(t){ return t.woId === pendingId; });
+  if (ts) { _editTSId = ts.id; openTSModal(ts.id); }
 }
 
 
@@ -6125,18 +6028,36 @@ function openTSModal(tsId) {
   document.getElementById('ts-submit-btn').style.display     = showSubmit    ? 'inline-flex' : 'none';
   document.getElementById('ts-draft-btn').style.display      = showDraft     ? 'inline-flex' : 'none';
 
-  // Lock if submitted and not admin
+  // Lock if submitted and not admin — all fields + red banner
   if (submitted && !isAdmin()) {
     setTimeout(function() {
-      document.querySelectorAll('#ts-rows-body input, #ts-rows-body select').forEach(function(el) {
+      document.querySelectorAll('#ts-modal input, #ts-modal select, #ts-modal textarea').forEach(function(el) {
         el.disabled = true; el.style.opacity = '.6';
       });
-      document.getElementById('ts-notes').disabled = true;
       document.getElementById('ts-add-row-btn').style.display = 'none';
+      var existing = document.getElementById('ts-locked-banner');
+      if (!existing) {
+        var banner = document.createElement('div');
+        banner.id = 'ts-locked-banner';
+        banner.style.cssText = 'background:rgba(232,64,64,.1);border:1px solid rgba(232,64,64,.3);border-left:4px solid #E84040;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCA5A5;margin-bottom:.75rem;font-weight:600';
+        banner.textContent = '🔒 This timesheet has been submitted. Contact admin to make changes.';
+        var body = document.querySelector('#ts-modal .modal-body');
+        if (body) body.insertBefore(banner, body.firstChild);
+      }
     }, 30);
   } else {
     document.getElementById('ts-add-row-btn').style.display = 'inline-flex';
+    var b = document.getElementById('ts-locked-banner');
+    if (b) b.remove();
   }
+
+  // Reset tech-flow buttons to hidden (openTSModalTechFlow shows them when needed)
+  var backToWoBtn = document.getElementById('ts-back-to-wo-btn');
+  var submitBoth  = document.getElementById('ts-submit-both-btn');
+  var cancelBtn   = document.getElementById('ts-cancel-btn');
+  if (backToWoBtn) backToWoBtn.style.display = 'none';
+  if (submitBoth)  submitBoth.style.display  = 'none';
+  if (cancelBtn)   cancelBtn.style.display   = 'inline-flex';
 
   document.getElementById('ts-modal').classList.add('open');
 }
