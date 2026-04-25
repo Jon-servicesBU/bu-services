@@ -4013,6 +4013,94 @@ function renderRateSheets(){
   }).join('');
 }
 
+// ── Rate sheet helpers ────────────────────────────────────────────────────────
+function toggleRSGroup(id) {
+  var el = document.getElementById(id);
+  var chev = document.getElementById(id + '-chev');
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : '';
+  if (chev) chev.style.transform = open ? 'rotate(-90deg)' : '';
+}
+
+function toggleRSDetail(id) {
+  var el = document.getElementById(id);
+  var chev = document.getElementById(id + '-chev');
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : '';
+  if (chev) chev.textContent = open ? '\u25B6' : '\u25BC';
+}
+
+async function deleteRateSheetConfirm(id) {
+  var rs = _rateSheets.find(function(r){ return r.id === id; });
+  if (!rs) return;
+  if (!confirm('Delete rate sheet "' + rs.name + '"?\n\nThis cannot be undone.')) return;
+  try {
+    await sbDelete('rate_sheets', id);
+    _rateSheets = _rateSheets.filter(function(r){ return r.id !== id; });
+    renderRateSheets();
+    toast('Rate sheet deleted', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function viewPWRateSheet(id) {
+  var rs = _rateSheets.find(function(r){ return r.id === id; });
+  if (!rs) return;
+  var items = rs.piecework || [];
+  var types = [...new Set(items.map(function(i){ return i.type; }))];
+  var rows = types.map(function(t){
+    return '<tr style="background:#1D4A8A;color:#fff"><td colspan="3" style="padding:.35rem .6rem;font-size:.75rem;font-weight:700">' + t + '</td></tr>'
+      + items.filter(function(i){ return i.type===t; }).map(function(i){
+          return '<tr><td style="padding:.3rem .6rem">' + i.size + '</td>'
+            + '<td style="padding:.3rem .6rem;text-align:right;font-family:monospace">' + (i.rate != null ? '$'+i.rate.toFixed(2) : '—') + '</td>'
+            + '<td style="padding:.3rem .6rem;color:#888">' + (i.unit||'') + '</td></tr>';
+        }).join('');
+  }).join('');
+  _withPrintGuard(function() {
+    var logoSrc = _LOGO_HTML || '<b style="color:#1D4A8A">NORTECH ADVANCED NDT</b>';
+    var win = window.open('', '_blank');
+    win.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + rs.name + '</title>'
+      + '<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;padding:2rem;font-size:12px}'
+      + 'table{width:100%;border-collapse:collapse}th{text-align:left;padding:.38rem .6rem;font-size:.6rem;color:#888;text-transform:uppercase;border-bottom:2px solid #ddd}'
+      + 'td{border-bottom:1px solid #f0f0f0}tr:nth-child(even) td{background:#fafafa}'
+      + 'h1{font-size:1.1rem;font-weight:800;color:#1D4A8A;margin-bottom:.15rem}'
+      + 'h2{font-size:.75rem;color:#888;font-weight:normal;margin-bottom:1rem}'
+      + '@media print{body{padding:1rem}}</style></head><body>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #1D4A8A">'
+        + '<div>' + logoSrc + '</div>'
+        + '<div style="text-align:right"><h1>' + rs.name + '</h1><h2>' + (rs.customer||'Standard') + ' \u00b7 Effective ' + (rs.effective||'') + ' \u00b7 ' + (rs.currency||'CAD') + '</h2></div>'
+      + '</div>'
+      + '<table><thead><tr><th>Size</th><th style="text-align:right">Rate</th><th>Unit</th></tr></thead><tbody>' + rows + '</tbody></table>'
+      + (rs.notes ? '<div style="margin-top:1.5rem;font-size:.78rem;color:#666;line-height:1.6;white-space:pre-wrap">' + rs.notes + '</div>' : '')
+      + '</body></html>');
+    win.document.close(); win.focus();
+    setTimeout(function(){ win.print(); }, 500);
+  });
+}
+
+function openImportPieceworkModal() {
+  var modal = document.getElementById('import-rate-modal');
+  if (modal) {
+    modal.setAttribute('data-import-type', 'piecework');
+    var title = modal.querySelector('.modal-title');
+    if (title) title.textContent = 'Import Piece Work Rate Sheet';
+    var hint = document.getElementById('import-rate-hint');
+    if (hint) hint.textContent = 'Upload a PDF piece work rate sheet. Claude will extract all size/type combinations and unit rates automatically.';
+  }
+  document.getElementById('import-rate-modal').classList.add('open');
+}
+
+// ── Pending confirmation helper for WO cards ──────────────────────────────────
+function techHasPendingOnWO(woId) {
+  var myName = getCurrentTechName();
+  if (!myName || isAdmin()) return null;
+  return _timesheets.find(function(t) {
+    return t.woId === woId && t.status === 'pending'
+      && t.technician === myName && !t.confirmed;
+  }) || null;
+}
+
 // ── Invoices ──────────────────────────────────────────────────────────────────
 function openInvoiceModal(preClient){
   _editInvId=null;
@@ -4718,20 +4806,6 @@ function getLabourOptions(rs) {
       }).join('');
 }
 
-function getTechOptions() {
-  var opts = '<option value="">\u2014 Select technician \u2014</option>';
-  if (typeof NORTECH_EMPLOYEES !== 'undefined' && NORTECH_EMPLOYEES.length) {
-    opts += NORTECH_EMPLOYEES.map(function(e){
-      return '<option value="' + e.name + '" data-rate="' + e.rate + '">' + e.name + '</option>';
-    }).join('');
-  } else {
-    opts += (VIEWER_PEOPLE || [])
-      .filter(function(p){ return _ADMIN_IDS.indexOf(p.id) === -1; })
-      .map(function(p){ return '<option value="'+p.name+'">'+p.name+'</option>'; })
-      .join('');
-  }
-  return opts;
-}
 
 function getEquipmentOptions(rs) {
   return '<option value="">— Select equipment —</option>'
@@ -7949,7 +8023,7 @@ function exportWeeklySummary() {
     var weeks = {};
     rows.forEach(function(r){ if(!weeks[r.week]) weeks[r.week]={week:r.week,weekStart:r.weekStart,rows:[]}; weeks[r.week].rows.push(r); });
 
-    function pctColor(n){ return n>=80?'#22C55E':n>=60?'#F59E0B':'#EF4444'; }
+    
     function fmt(n){ return n || 0; }
 
     var tableRows = Object.values(weeks).map(function(wk){
