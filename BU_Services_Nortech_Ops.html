@@ -7531,12 +7531,12 @@ function renderMarginReport() {
     // Get rate sheet
     var rs = j.rateSheetId ? _rateSheets.find(function(r){ return r.id === j.rateSheetId; }) : (_rateSheets[0] || null);
 
-    // Compute cost from labourRows on the WO
-    var rows = (j.labourRows || []);
-    // Also pull from linked timesheets
+    // Compute cost from labourRows on the WO — use slice() to avoid mutating the live array
+    var rows = (j.labourRows || []).slice();
+    // Also pull from linked timesheets (TS rows are the confirmed source of truth)
     _timesheets.filter(function(t){ return t.woId === j.id; }).forEach(function(t){
       (t.rows||[]).forEach(function(r){
-        rows.push({category: r.category, regHrs: r.regHrs||0, otHrs: r.otHrs||0, dtHrs: r.dtHrs||0, nightHrs: r.nightHrs||0, technician: r.technician||''});
+        rows.push({category: r.category, regHrs: r.regHrs||0, otHrs: r.otHrs||0, dtHrs: r.dtHrs||0, nightHrs: r.nightHrs||0, technician: r.technician||t.technician||''});
       });
     });
 
