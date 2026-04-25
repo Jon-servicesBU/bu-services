@@ -6443,8 +6443,18 @@ function confirmMyHours(tsId) {
   var myName = getCurrentTechName();
   if (!myName) { toast('Could not identify your account', 'error'); return; }
 
-  if (!confirm('Confirm your hours on WO ' + (ts.woNum||'') + '?\n\nThis confirms your rows are accurate.')) return;
+  if (!confirm('Confirm your hours on WO ' + (ts.woNum||'') + '?\n\nOnce confirmed your rows will be locked and cannot be changed without admin approval.')) return;
 
+  // Collect any edits the tech made to their rows
+  var editedRows = collectTSRows().map(function(r){
+    return Object.assign({}, r, { technician: myName });
+  });
+
+  // Replace this tech's rows in the full TS, keep all other techs' rows intact
+  var otherRows = (ts.rows || []).filter(function(r){ return r.technician !== myName; });
+  ts.rows = otherRows.concat(editedRows);
+
+  // Mark confirmed
   if (!ts.confirmations) ts.confirmations = {};
   ts.confirmations[myName] = { confirmed: true, date: today() };
   ts.modified = today();
@@ -6452,7 +6462,7 @@ function confirmMyHours(tsId) {
   closeModal('ts-modal');
   renderTimesheets();
   renderJobs();
-  toast('Hours confirmed \u2713', 'success');
+  toast('Hours confirmed ✓', 'success');
 }
 
 // ── Check if current tech has a pending confirmation on any TS ────────────────
@@ -6571,7 +6581,7 @@ function openTSModal(tsId) {
     && !ts.confirmations[myName].confirmed;
 
   if (isConfirmView) {
-    // Filter rows to show only this tech's rows
+    // Filter rows to show only this tech's rows — EDITABLE until confirmed
     document.getElementById('ts-rows-body').innerHTML = '';
     _tsRowCount = 0;
     var myRows = (ts.rows || []).filter(function(r){ return r.technician === myName; });
@@ -6580,28 +6590,23 @@ function openTSModal(tsId) {
     } else {
       addTSRow();
     }
-    // Lock all inputs — read only
-    setTimeout(function() {
-      document.querySelectorAll('#ts-modal input, #ts-modal select, #ts-modal textarea').forEach(function(el){
-        el.disabled = true; el.style.opacity = '.7';
-      });
-      var addBtn = document.getElementById('ts-add-row-btn');
-      if (addBtn) addBtn.style.display = 'none';
-    }, 30);
-    // Show confirm button, hide others
+    // Keep fields editable so tech can adjust before confirming
+    var addBtn = document.getElementById('ts-add-row-btn');
+    if (addBtn) addBtn.style.display = 'inline-flex';
+    // Show confirm button only, hide draft/submit
     if (confirmBtn)  { confirmBtn.style.display = 'inline-flex'; confirmBtn.setAttribute('data-ts-id', tsId); }
     if (cancelBtn)   cancelBtn.style.display = 'inline-flex';
     var draftBtn   = document.getElementById('ts-draft-btn');
     var submitBtn  = document.getElementById('ts-submit-btn');
     if (draftBtn)  draftBtn.style.display  = 'none';
     if (submitBtn) submitBtn.style.display = 'none';
-    // Confirmation banner
+    // Amber banner — editable until confirmed
     var existing = document.getElementById('ts-confirm-banner');
     if (!existing) {
       var banner = document.createElement('div');
       banner.id = 'ts-confirm-banner';
       banner.style.cssText = 'background:rgba(201,134,10,.1);border:1px solid rgba(201,134,10,.3);border-left:4px solid #C9860A;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#FCD34D;margin-bottom:.75rem;font-weight:600';
-      banner.textContent = '⏳ Please review your hours below and confirm they are accurate.';
+      banner.textContent = '⏳ Your hours from this work order are shown below. Adjust if needed, then confirm.';
       var body = document.querySelector('#ts-modal .modal-body');
       if (body) body.insertBefore(banner, body.firstChild);
     }
