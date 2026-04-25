@@ -2367,19 +2367,11 @@ async function handleWOImportFile(input) {
 
     // Send to Claude API (uses same proxy as rate sheet import)
     if (btn) btn.textContent = '\u23F3 Extracting data\u2026';
-    var apiKey = getApiKey ? getApiKey() : null;
-    if (!apiKey) { throw new Error('Claude API key not available. Make sure you are logged in to Claude.ai.'); }
-
-    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    var resp = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 2000,
         messages: [{
           role: 'user',
@@ -3153,8 +3145,8 @@ async function loadDemoData() {
 
   // ── WO 2: SUBMITTED — awaiting admin approval, techs need to confirm TSes ─
   var wo2labourRows = [
-    { technician: t1, date: d2, category: 'UT Inspection', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
-    { technician: t2, date: d2, category: 'UT Inspection', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
+    { technician: t1, date: d2, category: 'Manual UT Level 2', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
+    { technician: t2, date: d2, category: 'Manual UT Level 2', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
   ];
   var wo2 = {
     id: wo2id, _demo: true,
@@ -3173,7 +3165,7 @@ async function loadDemoData() {
 
   // ── WO 3: APPROVED — ready to invoice ─────────────────────────────────────
   var wo3labourRows = [
-    { technician: t2, date: d3, category: 'MPI Inspection', regHrs: 8, otHrs: 4, dtHrs: 0, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true },
+    { technician: t2, date: d3, category: 'Magnetic Particle Testing (MT)', regHrs: 8, otHrs: 4, dtHrs: 0, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true },
   ];
   var wo3 = {
     id: wo3id, _demo: true,
@@ -3195,7 +3187,7 @@ async function loadDemoData() {
 
   // ── WO 4: INVOICED — full cycle complete ───────────────────────────────────
   var wo4labourRows = [
-    { technician: t1, date: d4, category: 'RT Inspection', regHrs: 8, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '07:00', endTime: '15:00', billable: true },
+    { technician: t1, date: d4, category: 'Radiographic Testing (RT) — 2 person', regHrs: 8, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '07:00', endTime: '15:00', billable: true },
   ];
   var wo4 = {
     id: wo4id, _demo: true,
@@ -3224,7 +3216,7 @@ async function loadDemoData() {
     technician: t1,
     client: wo2.client, site: wo2.site, province: wo2.province,
     date: d2, po: wo2.po, jobNum: wo2.jobNum,
-    rows: [{ technician: t1, date: d2, category: 'UT Inspection', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
+    rows: [{ technician: t1, date: d2, category: 'Manual UT Level 2', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
     notes: '', status: 'pending', confirmed: false, created: d2, modified: d2,
   };
 
@@ -3235,7 +3227,7 @@ async function loadDemoData() {
     technician: t2,
     client: wo2.client, site: wo2.site, province: wo2.province,
     date: d2, po: wo2.po, jobNum: wo2.jobNum,
-    rows: [{ technician: t2, date: d2, category: 'UT Inspection', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
+    rows: [{ technician: t2, date: d2, category: 'Manual UT Level 2', regHrs: 10, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true }],
     notes: '', status: 'pending', confirmed: false, created: d2, modified: d2,
   };
 
@@ -3246,7 +3238,7 @@ async function loadDemoData() {
     technician: t2,
     client: wo3.client, site: wo3.site, province: wo3.province,
     date: d3, po: wo3.po, jobNum: wo3.jobNum,
-    rows: [{ technician: t2, date: d3, category: 'MPI Inspection', regHrs: 8, otHrs: 4, dtHrs: 0, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true }],
+    rows: [{ technician: t2, date: d3, category: 'Magnetic Particle Testing (MT)', regHrs: 8, otHrs: 4, dtHrs: 0, nightHrs: 2, startTime: '06:00', endTime: '20:00', billable: true }],
     notes: 'Night shift differential applies.', status: 'submitted', confirmed: true, confirmedDate: d3, created: d3, modified: d3,
   };
 
@@ -3257,7 +3249,7 @@ async function loadDemoData() {
     technician: t1,
     client: wo4.client, site: wo4.site, province: wo4.province,
     date: d4, po: wo4.po, jobNum: wo4.jobNum,
-    rows: [{ technician: t1, date: d4, category: 'RT Inspection', regHrs: 8, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '07:00', endTime: '15:00', billable: true }],
+    rows: [{ technician: t1, date: d4, category: 'Radiographic Testing (RT) — 2 person', regHrs: 8, otHrs: 0, dtHrs: 0, nightHrs: 0, startTime: '07:00', endTime: '15:00', billable: true }],
     notes: '8 welds shot, all accepted. Processed same-day.', status: 'submitted', confirmed: true, confirmedDate: d4, created: d4, modified: d4,
   };
 
@@ -3275,6 +3267,49 @@ async function loadDemoData() {
     renderAll();
     toast('Demo data loaded \u2713  \u2014  4 WOs, 4 timesheets across 2 weeks', 'success');
   } catch(e) { toast('Error loading demo: ' + e.message, 'error'); }
+}
+
+
+// ── Collect labour rows from WO modal ────────────────────────────────────────
+function collectLabourRows() {
+  // Uses exact field IDs from addLabourRow: cs-lb-st- (reg), cs-lb-ns- (night)
+  var rows = [];
+  for (var i = 1; i <= _csLabourRowCount; i++) {
+    var techEl  = document.getElementById('cs-lb-tech-'  + i);
+    var catEl   = document.getElementById('cs-lb-cat-'   + i);
+    var dateEl  = document.getElementById('cs-lb-date-'  + i);
+    var regEl   = document.getElementById('cs-lb-st-'    + i);  // ST = standard/reg
+    var otEl    = document.getElementById('cs-lb-ot-'    + i);
+    var dtEl    = document.getElementById('cs-lb-dt-'    + i);
+    var nightEl = document.getElementById('cs-lb-ns-'    + i);  // NS = night shift
+    var startEl = document.getElementById('cs-lb-start-' + i);
+    var endEl   = document.getElementById('cs-lb-end-'   + i);
+    if (!techEl) continue;
+    rows.push({
+      technician: techEl  ? techEl.value  : '',
+      category:   catEl   ? catEl.value   : '',
+      date:       dateEl  ? dateEl.value  : today(),
+      regHrs:     parseFloat(regEl   ? regEl.value   : 0) || 0,
+      otHrs:      parseFloat(otEl    ? otEl.value    : 0) || 0,
+      dtHrs:      parseFloat(dtEl    ? dtEl.value    : 0) || 0,
+      nightHrs:   parseFloat(nightEl ? nightEl.value : 0) || 0,
+      startTime:  startEl ? startEl.value : '',
+      endTime:    endEl   ? endEl.value   : '',
+      billable: true,
+    });
+  }
+  return rows;
+}
+
+// ── Tech: back to WO from TS modal ────────────────────────────────────────────
+function techBackToWO() {
+  closeModal('ts-modal');
+  showView('jobs', document.getElementById('nav-jobs'));
+}
+
+// ── Tech: submit WO + timesheet together ──────────────────────────────────────
+function techSubmitBoth() {
+  techSaveWO();
 }
 
 function renderAll(){
@@ -4183,7 +4218,8 @@ function techHasPendingOnWO(woId) {
 
 // ── Invoices ──────────────────────────────────────────────────────────────────
 
-// ── Invoice: Import from PDF ──────────────────────────────────────────────────
+
+// ── Invoice: Import from PDF (via Cloudflare proxy) ───────────────────────────
 function triggerInvoiceImport() {
   document.getElementById('inv-import-file').click();
 }
@@ -4200,31 +4236,34 @@ async function handleInvoiceImportFile(input) {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-    var apiKey = getApiKey ? getApiKey() : null;
-    if (!apiKey) throw new Error('Claude API key not available.');
-    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    if (btn) btn.textContent = '\u23F3 Extracting\u2026';
+    var resp = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
       method: 'POST',
-      headers: { 'Content-Type':'application/json','x-api-key':apiKey,
-        'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1500,
-        messages:[{ role:'user', content:[
-          { type:'document', source:{type:'base64',media_type:'application/pdf',data:base64} },
-          { type:'text', text:'Extract invoice data from this PDF and return ONLY JSON with these keys (null if not found):\n{"client":"","invNum":"","date":"YYYY-MM-DD","dueDate":"YYYY-MM-DD","po":"","notes":"","lineItems":[{"description":"","qty":1,"unit":"","unitPrice":0,"amount":0}],"subtotal":0,"tax":0,"total":0}\nReturn ONLY the JSON.' }
-        ]}] })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500,
+        messages: [{ role: 'user', content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          { type: 'text', text: 'Extract invoice data from this PDF and return ONLY JSON with these keys (null if not found):\n{"client":"","invNum":"","date":"YYYY-MM-DD","dueDate":"YYYY-MM-DD","po":"","notes":"","lineItems":[{"description":"","qty":1,"unit":"","unitPrice":0,"amount":0}],"subtotal":0,"tax":0,"total":0}\nReturn ONLY the JSON.' }
+        ]}]
+      })
     });
-    var d2 = await resp.json();
-    var text = (d2.content&&d2.content[0]?d2.content[0].text:'').replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-    var inv = JSON.parse(text);
-    // Populate invoice fields
-    if (inv.client) { var sel=document.getElementById('inv-client'); if(sel){ var opt=Array.from(sel.options).find(function(o){return o.value===inv.client;}); if(!opt){sel.add(new Option(inv.client,inv.client));} sel.value=inv.client; } }
-    if (inv.date)    { var el=document.getElementById('inv-date');  if(el) el.value=inv.date; }
-    if (inv.po)      { var el=document.getElementById('inv-po');    if(el) el.value=inv.po; }
-    if (inv.notes)   { var el=document.getElementById('inv-notes'); if(el) el.value=inv.notes; }
-    // Add line items as manual lines
+    if (!resp.ok) throw new Error('API error ' + resp.status);
+    var data = await resp.json();
+    var text = (data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+    text = text.replace(/```json|```/g,'').trim();
+    var matchJ = text.match(/\{[\s\S]*\}/);
+    if (!matchJ) throw new Error('No JSON in response');
+    var inv = JSON.parse(matchJ[0]);
+    // Populate fields
+    if (inv.client) {
+      var sel = document.getElementById('inv-client');
+      if (sel) { var opt=Array.from(sel.options).find(function(o){return o.value===inv.client;}); if(!opt){sel.add(new Option(inv.client,inv.client));} sel.value=inv.client; loadApprovedCS(); }
+    }
+    if (inv.date)  { var el=document.getElementById('inv-date');  if(el) el.value=inv.date; }
+    if (inv.po)    { var el=document.getElementById('inv-po');    if(el) el.value=inv.po; }
+    if (inv.notes) { var el=document.getElementById('inv-notes'); if(el) el.value=inv.notes; }
     if (inv.lineItems && inv.lineItems.length) {
-      inv.lineItems.forEach(function(item){
-        addManualLine(item.description, item.qty||1, item.unitPrice||item.amount||0);
-      });
+      inv.lineItems.forEach(function(item){ addManualLine(item.description, item.qty||1, item.unitPrice||item.amount||0); });
     }
     updateInvTotals();
     if (btn) { btn.textContent = '\u2713 Imported'; btn.style.color='var(--green)'; }
@@ -4993,7 +5032,17 @@ function addLabourRow(dayLabel, labOpts, prefill) {
   });
   if (p.category) {
     var catEl = document.getElementById('cs-lb-cat-' + idx);
-    if (catEl) catEl.value = p.category;
+    if (catEl) {
+      // Try exact match first
+      catEl.value = p.category;
+      // If no match, add as custom option and select it
+      if (catEl.value !== p.category) {
+        var opt = document.createElement('option');
+        opt.value = p.category; opt.textContent = p.category;
+        catEl.appendChild(opt);
+        catEl.value = p.category;
+      }
+    }
   }
   if (p.technician) {
     var techEl2 = document.getElementById('cs-lb-tech-' + idx);
@@ -5190,10 +5239,53 @@ async function saveWO(status) {
     await sbUpsert('jobs', id, data);
     if (_editWOId) { _jobs = _jobs.map(function(j){ return j.id === id ? data : j; }); }
     else { _jobs.unshift(data); }
+
+    // Sync header fields to any linked timesheets that are still pending/unconfirmed
+    if (_editWOId) {
+      var linkedTS = _timesheets.filter(function(t){ return t.woId === id; });
+      for (var ti = 0; ti < linkedTS.length; ti++) {
+        var ts = linkedTS[ti];
+        if (ts.confirmed) continue; // don't touch confirmed TSes
+        var updated = false;
+        // Update header fields that came from the WO
+        ['client','site','province','po','jobNum','date','woNum'].forEach(function(field) {
+          if (data[field] !== undefined && ts[field] !== data[field]) {
+            ts[field] = data[field]; updated = true;
+          }
+        });
+        // Sync labour rows for this tech from updated WO
+        var techName = ts.technician;
+        var techRows = (data.labourRows||[]).filter(function(r){
+          return !techName || (r.technician||'').toLowerCase().includes(techName.split(' ')[0].toLowerCase());
+        });
+        if (techRows.length && !ts.confirmed) {
+          ts.rows = techRows.map(function(r){
+            return {
+              technician: r.technician || techName,
+              date: r.date || data.date,
+              category: r.category || '',
+              regHrs: r.regHrs||0, otHrs: r.otHrs||0, dtHrs: r.dtHrs||0, nightHrs: r.nightHrs||0,
+              startTime: r.startTime||'', endTime: r.endTime||'', billable: true
+            };
+          });
+          updated = true;
+        }
+        if (updated) {
+          ts.modified = today();
+          saveTimesheetToStorage(ts);
+          try { await sbUpsert('timesheets', ts.id, ts); } catch(e) { console.warn('TS sync error:', e); }
+        }
+      }
+      _timesheets = _timesheets.map(function(t){
+        var upd = linkedTS.find(function(u){ return u.id === t.id; });
+        return upd || t;
+      });
+    }
+
     closeModal('job-modal');
     renderJobs(); renderDashboard(); updatePendingBadge();
-    // Auto-create timesheet when WO is submitted
-    if (status === 'submitted') {
+    // Auto-create timesheets when WO is first submitted
+    if (status === 'submitted' && !_editWOId) {
       await createTimesheetFromWO(data);
       renderTimesheets();
     }
@@ -5201,8 +5293,9 @@ async function saveWO(status) {
       toast('Work order submitted — technicians will be prompted to confirm their hours', 'success');
       renderJobs();
     } else {
-      toast('Draft saved', 'success');
+      toast('Saved ✓', 'success');
     }
+    renderTimesheets();
   } catch(e) { toast('Save failed: ' + e.message, 'error'); }
 }
 
@@ -7094,10 +7187,11 @@ async function createTimesheetFromWO(wo) {
       category:  r.category  || '',
       regHrs:    r.regHrs    || 0,
       otHrs:     r.otHrs     || 0,
+      dtHrs:     r.dtHrs     || 0,
       nightHrs:  r.nightHrs  || 0,
       startTime: r.startTime || '',
       endTime:   r.endTime   || '',
-      billable:  true,
+      billable:  r.billable !== false,
     });
   });
 
@@ -7111,14 +7205,18 @@ async function createTimesheetFromWO(wo) {
       woId:         wo.id,
       woNum:        wo.woNum || wo.number || '—',
       technician:   techName,
-      client:       wo.client   || '',
-      date:         wo.date     || today(),
-      site:         wo.site     || '',
-      province:     wo.province || '',
-      po:           wo.po       || '',
+      client:       wo.client      || '',
+      site:         wo.site        || '',
+      province:     wo.province    || '',
+      date:         wo.date        || today(),
+      po:           wo.po          || '',
+      jobNum:       wo.jobNum      || '',
+      afe:          wo.afe         || '',
+      rig:          wo.rig         || '',
+      equipOwner:   wo.equipOwner  || '',
       rows:         byTech[techName],
       notes:        '',
-      status:       'pending',    // awaiting tech confirmation
+      status:       'pending',
       confirmed:    false,
       confirmedDate: null,
       created:      today(),
@@ -8071,14 +8169,13 @@ async function exportMarginReport() {
     // AI executive summary
     var aiSummary = '';
     try {
-      var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      var resp2 = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:350,
+        body: JSON.stringify({ model:'claude-sonnet-4-5', max_tokens:350,
           messages:[{ role:'user', content:'Write a 3-4 sentence executive summary for this margin report. Be specific, use actual $ and % values. Reply with ONLY the paragraph. Period: '+periodDisplay+' Filters: '+(filtersDisplay||'None')+' KPIs: '+kpis.map(function(k){return k.lbl+': '+k.val;}).join(', ')+' WOs: '+woRows.length+', Low margin (<30%): '+woRows.filter(function(r){return pctNum(r.pct)<30;}).length }]
         })
       });
-      var d2 = await resp.json();
-      if (d2.content && d2.content[0]) aiSummary = d2.content[0].text || '';
+      if (resp2.ok) { var d2 = await resp2.json(); var blk=(d2.content||[]).find(function(b){return b.type==='text';}); if(blk) aiSummary=blk.text||''; }
     } catch(e) { console.warn('AI summary:', e); }
 
     var logoSrc = _LOGO_HTML || '<b style="color:#1D4A8A;font-size:1.1rem">NORTECH ADVANCED NDT</b>';
