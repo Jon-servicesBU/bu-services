@@ -1051,6 +1051,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="modal-body" style="padding:1rem 1.25rem">
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.65rem .9rem;margin-bottom:1rem;font-size:.78rem;display:flex;gap:1.5rem;flex-wrap:wrap">
           <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Work Order</div><strong id="ts-wo-ref">—</strong></div>
+          <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Technician</div><span id="ts-wo-tech">—</span></div>
           <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Client</div><span id="ts-wo-client">—</span></div>
           <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Date</div><span id="ts-wo-date">—</span></div>
           <div><div style="color:var(--muted);font-size:.6rem;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.15rem">Site</div><span id="ts-wo-site">—</span></div>
@@ -6412,10 +6413,11 @@ function openTSModal(tsId) {
 
   // WO reference bar
   document.getElementById('ts-wo-ref').textContent    = ts.woNum || wo.woNum || wo.number || '—';
+  document.getElementById('ts-wo-tech').textContent   = ts.technician || '—';
   document.getElementById('ts-wo-client').textContent = ts.client || wo.client || '—';
   document.getElementById('ts-wo-date').textContent   = fmtDate(ts.date || wo.date) || '—';
   document.getElementById('ts-wo-site').textContent   = (ts.site || wo.site || '').slice(0, 40) || '—';
-  document.getElementById('ts-modal-title').textContent = 'Timesheet — WO ' + (ts.woNum || wo.woNum || wo.number || '—') + ' · ' + (ts.client || wo.client || '');
+  document.getElementById('ts-modal-title').textContent = 'Timesheet — WO ' + (ts.woNum || wo.woNum || wo.number || '—') + ' · ' + (ts.technician || ts.client || wo.client || '');
   document.getElementById('ts-notes').value = ts.notes || '';
 
   // ── Determine confirmation state BEFORE populating rows ─────────────────
@@ -6449,16 +6451,27 @@ function openTSModal(tsId) {
   document.getElementById('ts-rows-body').innerHTML = '';
   _tsRowCount = 0;
 
-  if (isConfirmView) {
-    // All rows in this TS belong to this tech — show them all, pre-filled from TS
-    var srcRows = (ts.rows && ts.rows.length) ? ts.rows
-      : (((_jobs.find(function(j){return j.id===ts.woId;})||{}).labourRows)||[]);
-    if (srcRows.length) { srcRows.forEach(function(r){ addTSRow(r); }); }
-    else { addTSRow(); }
-  } else {
-    var allRows = (ts.rows && ts.rows.length) ? ts.rows : (((_jobs.find(function(j){return j.id===ts.woId;})||{}).labourRows)||[]);
-    if (allRows.length) { allRows.forEach(function(r){ addTSRow(r); }); } else { addTSRow(); }
-  }
+  // Source rows — ts.rows first, fall back to WO labour rows
+  var srcRows = (ts.rows && ts.rows.length)
+    ? ts.rows
+    : (((_jobs.find(function(j){ return j.id === ts.woId; }) || {}).labourRows) || []);
+
+  // Non-admins only ever see their own rows
+  var visibleRows = isAdmin()
+    ? srcRows
+    : srcRows.filter(function(r) {
+        // Row has explicit technician — match exactly or fuzzy
+        var rt = (r.technician || '').trim();
+        if (!rt) return true; // no tech on row → show it (e.g. new per-tech TSes)
+        if (rt === myName) return true;
+        var fn = myName.split(' ')[0].toLowerCase();
+        var ln = myName.split(' ').pop().toLowerCase();
+        return fn.length > 1 && ln.length > 1
+          && rt.toLowerCase().includes(fn) && rt.toLowerCase().includes(ln);
+      });
+
+  if (visibleRows.length) { visibleRows.forEach(function(r){ addTSRow(r); }); }
+  else { addTSRow(); }
 
   // ── Button visibility ───────────────────────────────────────────────────
   var showExport    = !!tsId && isAdmin();
