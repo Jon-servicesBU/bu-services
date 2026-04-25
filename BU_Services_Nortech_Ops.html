@@ -4184,12 +4184,7 @@ function addLabourRow(dayLabel, labOpts, prefill) {
     + '<td style="padding:.2rem .25rem">'
     + '<input class="cs-input" id="cs-lb-tech-' + idx + '" list="tech-datalist-' + idx + '" placeholder="Type name…" autocomplete="off" style="width:140px">'
     + '<datalist id="tech-datalist-' + idx + '">'
-    + NORTECH_EMPLOYEES.filter(function(e){ return e.status === "Active"; }).map(function(e){
-        return '<option value="' + e.name + '">';
-      }).join('')
-    + NORTECH_EMPLOYEES.filter(function(e){ return e.status !== "Active"; }).map(function(e){
-        return '<option value="' + e.name + ' (' + e.status + ')">';
-      }).join('')
+    + NORTECH_EMPLOYEES.map(function(e){ return '<option value="' + e.name + '">'; }).join('')
     + '</datalist>'
     + '</td>'
     + '<td style="padding:.2rem .25rem"><select class="cs-input cs-lb-cat" id="cs-lb-cat-' + idx + '" style="width:170px">' + lo + '</select></td>'
@@ -6932,7 +6927,15 @@ function renderTimesheets() {
       if (!text.toLowerCase().includes(q.toLowerCase())) return false;
     }
     if (!isAdmin() && myName) {
-      if ((ts.technician || '').trim() !== myName) return false;
+      var tsTech = (ts.technician || '').trim();
+      if (!tsTech) return false;  // no owner set — admin only
+      if (tsTech === myName) return true;
+      // fuzzy fallback for TSes created before canonical names were enforced
+      var fn = myName.split(' ')[0].toLowerCase();
+      var ln = myName.split(' ').pop().toLowerCase();
+      if (fn.length > 1 && ln.length > 1 &&
+          tsTech.toLowerCase().includes(fn) && tsTech.toLowerCase().includes(ln)) return true;
+      return false;
     }
     return true;
   });
