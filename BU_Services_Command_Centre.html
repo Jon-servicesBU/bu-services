@@ -1768,6 +1768,8 @@ body{font-family:var(--fb);background:#F4F7FB;color:#1A2A4A;-webkit-font-smoothi
 </head>
 <body>
 
+
+
 <!-- TOP BAR -->
 <nav class="topbar">
   <div class="topbar-brand">BU Services</div>
@@ -4242,7 +4244,182 @@ ${CONFIG.regions.map(function(reg) {
   BU Services &nbsp;·&nbsp; Ekoscan Integrity Group &nbsp;·&nbsp; Jon Eustace, CEO North America<br>
   Confidential — Internal use only. Updated ${CONFIG.lastUpdated} by ${CONFIG.updatedBy}.
 </div>
-</div></body></html>`;
+</div>
+
+<script>
+// BU SERVICES — VIEWER IDENTITY
+// Reads from: 1) URL param ?viewer=X  2) localStorage hub_viewer  3) login screen
+// ══════════════════════════════════════════════════════════════════════════════
+
+var VIEWER_PEOPLE = [
+  { id: 'jon',     name: 'Jon Eustace',               role: 'CEO North America · EIG',           initials: 'JE', color: '#00AEEF', pin: '0626' },
+  { id: 'olivier', name: 'Olivier Marcotte',           role: 'CRO · Nuclear',                     initials: 'OM', color: '#7C3AED', pin: '0001' },
+  { id: 'mathieu', name: 'Mathieu Beauchesne',         role: 'EVP · Powerline',                   initials: 'MB', color: '#E97132', pin: '0002' },
+  { id: 'max',     name: 'Emmanuel Aggrey',            role: 'Commercial Director — West',        initials: 'EA', color: '#C9860A', pin: '0003' },
+  { id: 'vinoth',  name: 'Vinoth Tharma',              role: 'Commercial Director — East',        initials: 'VT', color: '#22882F', pin: '0004' },
+  { id: 'alex',    name: 'Alex Cyr',                   role: 'Sr. Operations Director',          initials: 'AC', color: '#0891B2', pin: '0005' },
+  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',      initials: 'JI', color: '#38BDF8', pin: '0006' },
+  { id: 'renee',   name: 'Renée Lachance',             role: 'Sr. Director Finance & Controller', initials: 'RL', color: '#BE185D', pin: '0007' },
+  { id: 'rick',    name: 'Rick Carlton',               role: 'Pipeline Integrity Lead',           initials: 'RC', color: '#368CD9', pin: '0008' },
+  { id: 'joel_c',  name: 'Joel Carlton',               role: 'PI Operations Manager',             initials: 'JC', color: '#B45309', pin: '0009' },
+  { id: 'eric_r',  name: 'Eric Rodrigue',              role: 'Ops Director — Quebec',            initials: 'ER', color: '#1A5CA8', pin: '0010' },
+  { id: 'joel_dj', name: 'Joel Djordjevic',            role: 'Ops Director — Central',           initials: 'JD', color: '#2D5A8E', pin: '0011' },
+  { id: 'keith',   name: 'Keith Reichenbach',          role: 'Ops Director — Western',           initials: 'KR', color: '#4B5563', pin: '0012' },
+  { id: 'jason',   name: 'Jason Borza',                role: 'Ops Director — Nortech',           initials: 'JB', color: '#DC2626', pin: '0013' },
+  { id: 'brook',   name: 'Brook Althouse',             role: 'Northern Ops Manager',             initials: 'BA', color: '#6B7280', pin: '0014' },
+  { id: 'louisp',  name: 'Louis-Pier Théberge',        role: 'Ops Director — Nuclear',           initials: 'LT', color: '#059669', pin: '0015' },
+  { id: 'francis', name: 'Francis Boudreault-Leclerc', role: 'Engineering & Technical Manager',  initials: 'FB', color: '#6D28D9', pin: '0016' },
+  { id: 'eric_c',  name: 'Éric Carmichael',            role: 'Commercial Systems Manager',       initials: 'ÉC', color: '#0A1F5C', pin: '0017' },
+  { id: 'maud',    name: 'Maud Leivin Capuano',        role: 'HR Lead',                          initials: 'ML', color: '#9D174D', pin: '0018' },
+];
+
+var _urlViewer = new URLSearchParams(window.location.search).get('viewer');
+var _lsViewer  = localStorage.getItem('hub_viewer');
+var CURRENT_VIEWER = _urlViewer || _lsViewer || null;
+
+if (_urlViewer) localStorage.setItem('hub_viewer', _urlViewer);
+
+function getCurrentViewer() { return CURRENT_VIEWER; }
+function isJon() { return CURRENT_VIEWER === 'jon'; }
+
+
+function setViewer(id) {
+  var person = VIEWER_PEOPLE.find(function(p){ return p.id === id; });
+  if (!person) return;
+  var lo = document.getElementById('login-overlay');
+  if (lo) lo.style.display = 'none';
+  showPinScreen(person, function() {
+    CURRENT_VIEWER = id;
+    localStorage.setItem('hub_viewer', id);
+    window.location.href = window.location.pathname;
+  });
+}
+
+function showPinScreen(person, onSuccess) {
+  var existing = document.getElementById('pin-overlay');
+  if (existing) existing.remove();
+
+  var overlay = document.createElement('div');
+  overlay.id = 'pin-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(6,14,28,.97);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#0d1b2e;border:1px solid rgba(0,174,239,.25);border-radius:14px;padding:2rem 2.25rem;width:min(340px,92vw);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6)';
+  box.innerHTML =
+    '<div style="width:48px;height:48px;border-radius:50%;background:'+person.color+';display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#fff;margin:0 auto .75rem">'+person.initials+'</div>' +
+    '<div style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:.2rem">'+person.name+'</div>' +
+    '<div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-bottom:1.5rem">'+person.role+'</div>' +
+    '<div style="font-size:.7rem;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:.6rem">Enter your PIN</div>' +
+    '<input id="pin-input" type="password" maxlength="10" inputmode="numeric" autocomplete="off" ' +
+      'style="width:100%;text-align:center;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:1.4rem;letter-spacing:.4em;padding:.6rem .75rem;outline:none;font-family:inherit;transition:border-color .15s" ' +
+      'placeholder="••••" />' +
+    '<div id="pin-error" style="color:#F87171;font-size:.7rem;margin-top:.5rem;min-height:1rem;display:none">Incorrect PIN — try again</div>' +
+    '<div style="display:flex;gap:.6rem;margin-top:1.1rem">' +
+      '<button id="pin-cancel" style="flex:1;padding:.55rem;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.45);font-size:.78rem;font-weight:600;cursor:pointer;font-family:inherit">Back</button>' +
+      '<button id="pin-submit" style="flex:2;padding:.55rem;border-radius:7px;background:rgba(0,174,239,.2);border:1px solid rgba(0,174,239,.4);color:#00AEEF;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit">Confirm</button>' +
+    '</div>';
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  var input = document.getElementById('pin-input');
+  var errorEl = document.getElementById('pin-error');
+  input.focus();
+
+  function attempt() {
+    if (input.value === person.pin) {
+      overlay.remove();
+      onSuccess();
+    } else {
+      errorEl.style.display = 'block';
+      input.value = '';
+      input.style.borderColor = 'rgba(248,113,113,.6)';
+      setTimeout(function(){ input.style.borderColor = 'rgba(255,255,255,.15)'; }, 600);
+      input.focus();
+    }
+  }
+  document.getElementById('pin-submit').onclick = attempt;
+  document.getElementById('pin-cancel').onclick = function() {
+    overlay.remove();
+    var lo = document.getElementById('login-overlay');
+    if (lo) { lo.remove(); }
+    showLoginScreen();
+  };
+  input.addEventListener('keydown', function(e){ if(e.key==='Enter') attempt(); });
+}
+
+function showLoginScreen() {
+  var overlay = document.createElement('div');
+  overlay.id = 'login-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(6,14,28,.97);display:flex;align-items:center;justify-content:center;overflow:hidden;backdrop-filter:blur(8px)';
+
+  var inner = document.createElement('div');
+  inner.style.cssText = 'width:min(700px,95vw);max-height:90vh;display:flex;flex-direction:column;text-align:center';
+
+  var header = document.createElement('div');
+  header.style.cssText = 'flex-shrink:0;padding-bottom:.75rem';
+  header.innerHTML = '<div style="font-family:Barlow Condensed,sans-serif;font-size:.65rem;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(0,174,239,.7);margin-bottom:.4rem">Ekoscan Integrity Group</div>' +
+    '<h1 style="font-family:Barlow Condensed,sans-serif;font-size:2rem;font-weight:900;color:#fff;margin:0 0 .25rem">BU Services</h1>' +
+    '<p style="font-size:.8rem;color:rgba(255,255,255,.4);margin:0">Select your name to continue</p>';
+  inner.appendChild(header);
+
+  var grid = document.createElement('div');
+  grid.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:.25rem .1rem';
+  var gridInner = document.createElement('div');
+  gridInner.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem';
+
+  VIEWER_PEOPLE.forEach(function(p) {
+    var btn = document.createElement('button');
+    btn.style.cssText = 'display:flex;align-items:center;gap:.45rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.45rem .6rem;cursor:pointer;text-align:left;font-family:inherit;width:100%;min-width:0;transition:background .15s,border-color .15s';
+    btn.onmouseover = function(){this.style.background='rgba(255,255,255,.09)';this.style.borderColor='rgba(255,255,255,.25)'};
+    btn.onmouseout  = function(){this.style.background='rgba(255,255,255,.04)';this.style.borderColor='rgba(255,255,255,.1)'};
+    btn.onclick = function(){ setViewer(p.id); };
+    btn.innerHTML =
+      '<span style="width:28px;height:28px;border-radius:50%;background:'+p.color+';display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;flex-shrink:0">'+p.initials+'</span>' +
+      '<span style="min-width:0;overflow:hidden">' +
+        '<div style="font-size:.72rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>' +
+        '<div style="font-size:.58rem;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.05rem">'+p.role+'</div>' +
+      '</span>';
+    gridInner.appendChild(btn);
+  });
+
+  grid.appendChild(gridInner);
+  inner.appendChild(grid);
+
+  var footer = document.createElement('div');
+  footer.style.cssText = 'flex-shrink:0;padding-top:.6rem;font-size:.63rem;color:rgba(255,255,255,.2)';
+  footer.textContent = 'BU Services Commercial Management System · Confidential';
+  inner.appendChild(footer);
+
+  overlay.appendChild(inner);
+  document.body.appendChild(overlay);
+}
+
+if (!CURRENT_VIEWER) {
+  document.addEventListener('DOMContentLoaded', function() { showLoginScreen(); });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (!CURRENT_VIEWER) return;
+  var person = VIEWER_PEOPLE.find(function(p) { return p.id === CURRENT_VIEWER; });
+  if (!person) return;
+
+  var sysbar = document.querySelector('.sysbar') || document.querySelector('.topbar') || document.querySelector('.top-nav') || document.querySelector('.unav');
+  if (!sysbar) return;
+
+  var badge = document.createElement('div');
+  badge.style.cssText = 'margin-left:auto;display:flex;align-items:center;gap:.5rem;flex-shrink:0;padding-right:.5rem';
+  badge.innerHTML =
+    '<span style="width:24px;height:24px;border-radius:50%;background:'+person.color+';display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;flex-shrink:0">'+person.initials+'</span>' +
+    '<span style="font-size:.68rem;color:rgba(255,255,255,.5);font-weight:600">'+person.name.split(' ')[0]+'</span>' +
+    '<button onclick="localStorage.removeItem('hub_viewer');window.location.reload()" ' +
+    'style="font-size:.6rem;color:rgba(255,255,255,.3);background:none;border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:.1rem .35rem;cursor:pointer;font-family:inherit;transition:all .15s" ' +
+    'onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,.4)'" ' +
+    'onmouseout="this.style.color='rgba(255,255,255,.3)';this.style.borderColor='rgba(255,255,255,.1)'">Switch</button>';
+  sysbar.appendChild(badge);
+});
+</script>
+</body></html>`;
 }
 
 // Render preview (stripped version for display)
