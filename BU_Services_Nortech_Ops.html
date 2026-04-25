@@ -3054,27 +3054,15 @@ function renderJobs() {
           +(j.fieldReports?'<div style="font-size:.74rem;color:var(--muted)">Field Reports: '+j.fieldReports+'</div>':'')
         +'</div>'
       +'</div>'
-      // Action buttons
+      // Action buttons — status-specific
       +'<div style="padding:.55rem 1.1rem;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">'
-        +(isAdmin()?'<button class="btn btn-primary btn-sm" data-open-wo="'+j.id+'">✏ Edit / Add Work</button>':'')
-        +(isAdmin()?'<button class="btn btn-secondary btn-sm" data-export-wo="'+j.id+'">⬇ WO</button>':'')
-        +(isAdmin()?'<button class="btn btn-secondary btn-sm" data-export-pkg="'+j.id+'">⬇ WO + TS</button>':'')
-        +(j.status==='submitted'&&isAdmin()?'<button class="btn btn-success btn-sm" data-approve-wo="'+j.id+'">✓ Approve</button>':'')
-        +(j.status==='approved'&&isAdmin()?'<button class="btn btn-secondary btn-sm" data-invoice-wo="'+j.id+'">🧾 Invoice</button>':'')
-        +(j.status==='approved'&&isAdmin()?'<button class="btn btn-ghost btn-sm" data-reverse-cs-approved="'+j.id+'">↩ Unapprove</button>':'')
-        +(j.status==='submitted'?'<button class="btn btn-ghost btn-sm" data-unapprove-wo="'+j.id+'">↩ Back to Draft</button>':'')
-        +(j.status==='invoiced'&&isAdmin()?'<button class="btn btn-ghost btn-sm" data-reverse-cs-invoiced="'+j.id+'">↩ Back to Approved</button>':'')
-        +(function(){
-            var ts = _timesheets.find(function(t){ return t.woId === j.id; });
-            var lbl = ts ? '⏱ Timesheet' : '⏱ Create Timesheet';
-            var col = ts ? 'color:var(--sky)' : '';
-            return '<button class="btn btn-ghost btn-sm" data-ts-for-wo="'+j.id+'" style="'+col+'">'+lbl+'</button>';
-          })()
-        +(isAdmin()&&j.status!=='invoiced'&&j.status!=='paid'
-          ?'<button class="btn btn-ghost btn-sm" data-delete-wo="'+j.id+'" style="color:#EF4444;border-color:rgba(185,28,28,.3);margin-left:auto">🗑 Delete</button>'
-          :'')
+        +(isAdmin()
+          ? '<button class="btn btn-ghost btn-sm" data-open-wo="'+j.id+'">&#128065; View</button>'
+            +(j.status==='submitted'?'<button class="btn btn-success btn-sm" data-approve-wo="'+j.id+'">&#10003; Approve</button>':'')
+            +(j.status==='approved'?'<button class="btn btn-primary btn-sm" data-invoice-wo="'+j.id+'">&#129534; Invoice</button>':'')
+            +(j.status!=='invoiced'&&j.status!=='paid'?'<button class="btn btn-ghost btn-sm" data-delete-wo="'+j.id+'" style="color:#EF4444;border-color:rgba(185,28,28,.3);margin-left:auto">&#128465; Delete</button>':'')
+          : '')
       +'</div>'
-    +'</div>';
   }).join('');
 }
 
