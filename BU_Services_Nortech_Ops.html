@@ -1945,15 +1945,32 @@ document.addEventListener('DOMContentLoaded',function(){
 var _importedRateData = null;
 
 function openImportRateModal() {
-  var status = document.getElementById('import-status');
+  var status  = document.getElementById('import-status');
   var preview = document.getElementById('import-preview');
-  var btn = document.getElementById('import-confirm-btn');
-  var fi = document.getElementById('import-file-input');
-  if (status) { status.style.display = 'none'; }
-  if (preview) { preview.style.display = 'none'; }
-  if (btn) { btn.style.display = 'none'; }
-  if (fi) { fi.value = ''; }
+  var btn     = document.getElementById('import-confirm-btn');
+  var fi      = document.getElementById('import-file-input');
+  var labEl   = document.getElementById('import-labour-preview');
+  var eqEl    = document.getElementById('import-equipment-preview');
+  var nameEl  = document.getElementById('import-rs-name');
+  var custEl  = document.getElementById('import-rs-customer');
+  if (status)  status.style.display  = 'none';
+  if (preview) preview.style.display = 'none';
+  if (btn)     btn.style.display     = 'none';
+  if (fi)      fi.value = '';
+  if (labEl)   labEl.innerHTML = '';
+  if (eqEl)    eqEl.innerHTML  = '';
+  if (nameEl)  nameEl.value    = '';
+  if (custEl)  custEl.value    = '';
   _importedRateData = null;
+  // Reset to T&M mode
+  var modal = document.getElementById('import-rate-modal');
+  if (modal) {
+    modal.setAttribute('data-import-type', 'tm');
+    var title = modal.querySelector('.modal-title');
+    if (title) title.textContent = 'Import T&M Rate Sheet';
+    var hint = document.getElementById('import-rate-hint');
+    if (hint) hint.textContent = 'Upload a PDF or Word rate sheet. Claude will extract all labour categories, hourly rates, and equipment charges automatically.';
+  }
   document.getElementById('import-rate-modal').classList.add('open');
 }
 
@@ -2031,7 +2048,9 @@ async function extractDocxText(file) {
   });
 }
 
-var RATE_PROMPT = 'This is a rate sheet for a field NDT / inspection services company. Extract all pricing and return ONLY valid JSON in this exact format: {"name":"<sheet name>","customer":"<client name or empty>","effective":"<YYYY-MM-DD or today>","currency":"CAD","labour":[{"name":"<category>","stRate":<number>,"otRate":<number>,"dtRate":<number>}],"equipment":[{"name":"<item>","rate":<number>,"unit":"<day/trip/km>"}]} Rules: (1) Labour rates are always per HOUR — stRate, otRate, dtRate are all hourly rates. (2) Extract ALL labour categories. (3) If only one rate listed, set OT=ST*1.5, DT=ST*2. (4) Equipment/materials use per day, per trip, or per km as appropriate. (5) Return ONLY the JSON object.';
+var PW_PROMPT = 'This is a PIECEWORK / PIECE-RATE pricing sheet for a field NDT / inspection services company. Extract ALL pricing data and return ONLY valid JSON in this exact format:\n{\n  "name": "<sheet name, e.g. IFC Valve Inspection Rates>",\n  "customer": "<client/company name>",\n  "effective": "<YYYY-MM-DD or today>",\n  "currency": "CAD",\n  "type": "piecework",\n  "piecework": [\n    {"size": "<size, e.g. Under 2\", 2\", 3\", 4\", 6\", 8\", 10\", 12\", 14\", 16\" & Over>", "type": "<service type, e.g. MT of B.W. End, PT of B.W. End, RT of B.W. End, MT Only, PT Only, Spot RT, Full RT>", "rate": <number>, "unit": "<per valve, per reading, per visit, x inches, per hr, per crate>"},\n    ...\n  ],\n  "notes": "<all bullet point conditions, surcharges, minimums as a single string>"\n}\nRULES:\n(1) Extract EVERY row and column from the pricing table — each size+type combination is a separate entry.\n(2) For multiplier rates like \"$4.00 x Inches\" set rate=4.00 and unit=\"x inches\".\n(3) For flat-rate items (PMI, HT, OES, pickup/delivery, cleaning, crates) add them with size=\"Flat Rate\" and type=<item name>.\n(4) Capture ALL bullet point notes in the notes field.\n(5) Return ONLY the JSON object — no explanation, no markdown.';
+
+var RATE_PROMPT = 'This is a T&M (Time and Materials) rate sheet for a field NDT / inspection services company. Extract ALL pricing sections and return ONLY valid JSON with these keys: name (string), customer (string), effective (YYYY-MM-DD), currency (CAD), type (tm), labour (array of {name, stRate, otRate, dtRate} - all per hour), equipment (array of {name, rate, unit} - per hr/day/shift), consumables (array of {name, rate, unit} - per liter/can/disc/each), filmPerWeld (array of {size, scheduleUpTo80, schedule100Over, unit, notes}), sheetFilm (array of {size, rate}), filmDigitizing (array of {item, rate, unit}), specialRates (array of {name, rate, unit, notes} for callout minimums, flat fees, PAUT bond etc), notes (string - ALL bullet point conditions concatenated). RULES: Labour dtRate = stRate*2 if not listed. Equipment per HOUR unless stated. Consumables are NOT hourly. Capture every film size. Capture every bullet point in notes. Return ONLY the JSON object, no markdown, no explanation.';
 
 async function parseRateSheetText(text) {
   var res = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
@@ -2040,7 +2059,7 @@ async function parseRateSheetText(text) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
       max_tokens: 4000,
-      messages: [{ role: 'user', content: RATE_PROMPT + '\n\nDocument text:\n' + text.slice(0, 8000) }]
+      messages: [{ role: 'user', content: (function(){ var m=document.getElementById('import-rate-modal'); return m&&m.getAttribute('data-import-type')==='piecework' ? PW_PROMPT : RATE_PROMPT; })() + '\n\nDocument text:\n' + text.slice(0, 8000) }]
     })
   });
   if (!res.ok) throw new Error('API error ' + res.status);
@@ -2069,7 +2088,7 @@ async function parseRateSheetPDF(file) {
         role: 'user',
         content: [
           { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-          { type: 'text', text: RATE_PROMPT }
+          { type: 'text', text: (function(){ var m=document.getElementById('import-rate-modal'); return m&&m.getAttribute('data-import-type')==='piecework' ? PW_PROMPT : RATE_PROMPT; })() }
         ]
       }]
     })
@@ -2114,19 +2133,22 @@ async function confirmImport() {
   if (!_importedRateData) return;
   var name = document.getElementById('import-rs-name').value.trim();
   if (!name) { toast('Enter a name for this rate sheet', 'error'); return; }
+  var modal = document.getElementById('import-rate-modal');
+  var importType = modal ? (modal.getAttribute('data-import-type') || 'tm') : 'tm';
   var data = Object.assign({}, _importedRateData, {
     id: uid(), name: name,
     customer: document.getElementById('import-rs-customer').value.trim(),
     created: today(), modified: today(),
     effective: _importedRateData.effective || today(),
     currency: _importedRateData.currency || 'CAD',
+    type: _importedRateData.type || importType,
   });
   try {
     await sbUpsert('rate_sheets', data.id, data);
     _rateSheets.unshift(data);
     closeModal('import-rate-modal');
     renderRateSheets();
-    toast('Imported: ' + (data.labour||[]).length + ' labour categories, ' + (data.equipment||[]).length + ' equipment items', 'success');
+    toast('Imported: ' + (data.labour||[]).length + ' labour categories, ' + (data.equipment||[]).length + ' equipment, ' + (data.consumables||[]).length + ' consumables' + ((data.filmPerWeld||[]).length ? ', film rates' : ''), 'success');
   } catch(e) { toast('Import failed: ' + e.message, 'error'); }
 }
 
@@ -3084,23 +3106,42 @@ async function clearAllData() {
 }
 
 async function clearDemoData() {
-  if (!confirm('Clear demo data?\n\nAll records tagged as demo will be removed.')) return;
-  try {
-    var tables = [['jobs',_jobs],['timesheets',_timesheets],['invoices',_invoices]];
-    for (var t = 0; t < tables.length; t++) {
-      var name = tables[t][0]; var arr = tables[t][1];
-      var demos = arr.filter(function(r){ return r._demo; });
-      for (var r = 0; r < demos.length; r++) {
-        await sbDelete(name, demos[r].id);
-      }
+  if (!confirm('Clear demo data?\n\nAll demo records will be permanently removed.')) return;
+
+  // Fixed demo IDs — always delete these regardless of edits or _demo flag
+  var demoWoIds  = ['demo-wo-001','demo-wo-002','demo-wo-003','demo-wo-004'];
+  var demoTsIds  = ['demo-ts-001','demo-ts-002','demo-ts-003','demo-ts-004'];
+
+  // Also find any invoices linked to demo WOs or flagged _demo
+  var demoInvIds = [];
+  _invoices.forEach(function(inv) {
+    var linked = (inv.chargeSheetIds||[]).some(function(id){ return demoWoIds.indexOf(id) > -1; });
+    if (linked || inv._demo) { if (demoInvIds.indexOf(inv.id) === -1) demoInvIds.push(inv.id); }
+  });
+
+  // Delete from Supabase — non-fatal if already gone
+  var toDelete = [['jobs',demoWoIds],['timesheets',demoTsIds],['invoices',demoInvIds]];
+  for (var t = 0; t < toDelete.length; t++) {
+    for (var i = 0; i < toDelete[t][1].length; i++) {
+      try { await sbDelete(toDelete[t][0], toDelete[t][1][i]); } catch(e) {}
     }
-    _jobs        = _jobs.filter(function(r){ return !r._demo; });
-    _timesheets  = _timesheets.filter(function(r){ return !r._demo; });
-    _invoices    = _invoices.filter(function(r){ return !r._demo; });
-    _tsCacheWrite(_timesheets);
-    renderAll();
-    toast('Demo data cleared ✓', 'success');
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
+  }
+
+  // Also catch any in-memory _demo flagged records not in fixed ID list
+  var extraJobs = _jobs.filter(function(r){ return r._demo && demoWoIds.indexOf(r.id)===-1; });
+  var extraTs   = _timesheets.filter(function(r){ return r._demo && demoTsIds.indexOf(r.id)===-1; });
+  for (var j=0;j<extraJobs.length;j++){ try{await sbDelete('jobs',extraJobs[j].id);}catch(e){} }
+  for (var j=0;j<extraTs.length;j++){   try{await sbDelete('timesheets',extraTs[j].id);}catch(e){} }
+
+  // Remove from all in-memory arrays
+  var allDemo = demoWoIds.concat(demoTsIds).concat(demoInvIds);
+  _jobs       = _jobs.filter(function(r){ return allDemo.indexOf(r.id)===-1 && !r._demo; });
+  _timesheets = _timesheets.filter(function(r){ return allDemo.indexOf(r.id)===-1 && !r._demo; });
+  _invoices   = _invoices.filter(function(r){ return allDemo.indexOf(r.id)===-1 && !r._demo; });
+
+  _tsCacheWrite(_timesheets);
+  renderAll();
+  toast('Demo data cleared \u2713', 'success');
 }
 
 async function loadDemoData() {
@@ -4090,7 +4131,12 @@ function renderRateSheets(){
                     +'<span>'+l.name+'</span><span style="font-family:var(--mono);color:var(--muted)">'+fmtMoney(l.stRate)+' ST · '+fmtMoney(l.otRate)+' OT</span></div>';
                 }).join('')
               + (labour.length>6?'<div style="font-size:.62rem;color:var(--muted);margin-top:.25rem">+'+(labour.length-6)+' more</div>':'')
-              + ((r.equipment&&r.equipment.length)?'<div style="font-size:.62rem;color:var(--muted);margin-top:.4rem">'+r.equipment.length+' equipment item'+(r.equipment.length!==1?'s':'')+'</div>':'')
+              + ((r.equipment&&r.equipment.length)?'<div style="font-size:.62rem;color:var(--muted);margin-top:.25rem">'+r.equipment.length+' equipment item'+(r.equipment.length!==1?'s':'')+'</div>':'')
+              + ((r.consumables&&r.consumables.length)?'<div style="font-size:.62rem;color:var(--muted);margin-top:.1rem">'+r.consumables.length+' consumable'+(r.consumables.length!==1?'s':'')+'</div>':'')
+              + ((r.filmPerWeld&&r.filmPerWeld.length)?'<div style="font-size:.62rem;color:var(--muted);margin-top:.1rem">Film per weld: '+r.filmPerWeld.length+' sizes</div>':'')
+              + ((r.sheetFilm&&r.sheetFilm.length)?'<div style="font-size:.62rem;color:var(--muted);margin-top:.1rem">Sheet film: '+r.sheetFilm.length+' sizes</div>':'')
+              + ((r.specialRates&&r.specialRates.length)?'<div style="font-size:.62rem;color:var(--muted);margin-top:.1rem">'+r.specialRates.length+' special rate'+(r.specialRates.length!==1?'s':'')+'</div>':'')
+              + (r.notes?'<div style="font-size:.62rem;color:var(--muted);margin-top:.35rem;line-height:1.4;border-top:1px solid var(--border);padding-top:.3rem">'+r.notes.slice(0,200)+(r.notes.length>200?'\u2026':'')+'</div>':'')
               +'</div>';
           })();
 
@@ -4195,13 +4241,32 @@ function viewPWRateSheet(id) {
 }
 
 function openImportPieceworkModal() {
+  // Clear all previous import state — same as openImportRateModal
+  var status  = document.getElementById('import-status');
+  var preview = document.getElementById('import-preview');
+  var btn     = document.getElementById('import-confirm-btn');
+  var fi      = document.getElementById('import-file-input');
+  var labEl   = document.getElementById('import-labour-preview');
+  var eqEl    = document.getElementById('import-equipment-preview');
+  var nameEl  = document.getElementById('import-rs-name');
+  var custEl  = document.getElementById('import-rs-customer');
+  if (status)  status.style.display  = 'none';
+  if (preview) preview.style.display = 'none';
+  if (btn)     btn.style.display     = 'none';
+  if (fi)      fi.value = '';
+  if (labEl)   labEl.innerHTML = '';
+  if (eqEl)    eqEl.innerHTML  = '';
+  if (nameEl)  nameEl.value    = '';
+  if (custEl)  custEl.value    = '';
+  _importedRateData = null;
+
   var modal = document.getElementById('import-rate-modal');
   if (modal) {
     modal.setAttribute('data-import-type', 'piecework');
     var title = modal.querySelector('.modal-title');
     if (title) title.textContent = 'Import Piece Work Rate Sheet';
     var hint = document.getElementById('import-rate-hint');
-    if (hint) hint.textContent = 'Upload a PDF piece work rate sheet. Claude will extract all size/type combinations and unit rates automatically.';
+    if (hint) hint.textContent = 'Upload a piecework PDF (e.g. valve inspection rates by size and service type). Claude will extract the full size × service matrix automatically.';
   }
   document.getElementById('import-rate-modal').classList.add('open');
 }
