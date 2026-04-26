@@ -2048,7 +2048,7 @@ async function extractDocxText(file) {
 
 var PW_PROMPT = 'This is a PIECEWORK / PIECE-RATE pricing sheet for a field NDT / inspection services company. Extract ALL pricing data and return ONLY valid JSON in this exact format:\n{\n  "name": "<sheet name, e.g. IFC Valve Inspection Rates>",\n  "customer": "<client/company name>",\n  "effective": "<YYYY-MM-DD or today>",\n  "currency": "CAD",\n  "type": "piecework",\n  "piecework": [\n    {"size": "<size, e.g. Under 2\", 2\", 3\", 4\", 6\", 8\", 10\", 12\", 14\", 16\" & Over>", "type": "<service type, e.g. MT of B.W. End, PT of B.W. End, RT of B.W. End, MT Only, PT Only, Spot RT, Full RT>", "rate": <number>, "unit": "<per valve, per reading, per visit, x inches, per hr, per crate>"},\n    ...\n  ],\n  "notes": "<all bullet point conditions, surcharges, minimums as a single string>"\n}\nRULES:\n(1) Extract EVERY row and column from the pricing table — each size+type combination is a separate entry.\n(2) For multiplier rates like \"$4.00 x Inches\" set rate=4.00 and unit=\"x inches\".\n(3) For flat-rate items (PMI, HT, OES, pickup/delivery, cleaning, crates) add them with size=\"Flat Rate\" and type=<item name>.\n(4) Capture ALL bullet point notes in the notes field.\n(5) Return ONLY the JSON object — no explanation, no markdown.';
 
-var RATE_PROMPT = 'This is a T&M (Time and Materials) rate sheet for a field NDT / inspection services company. Extract ALL pricing sections and return ONLY valid JSON with these keys: name (string), customer (string), effective (YYYY-MM-DD), currency (CAD), type (tm), labour (array of {name, stRate, otRate, dtRate} - all per hour), equipment (array of {name, rate, unit} - per hr/day/shift), consumables (array of {name, rate, unit} - per liter/can/disc/each), filmPerWeld (array of {size, scheduleUpTo80, schedule100Over, unit, notes}), sheetFilm (array of {size, rate}), filmDigitizing (array of {item, rate, unit}), specialRates (array of {name, rate, unit, notes} for callout minimums, flat fees, PAUT bond etc), notes (string - ALL bullet point conditions concatenated). RULES: Labour dtRate = stRate*2 if not listed. Equipment per HOUR unless stated. Consumables are NOT hourly. Capture every film size. Capture every bullet point in notes. Return ONLY the JSON object, no markdown, no explanation.';
+var RATE_PROMPT = 'This is a T&M (Time and Materials) rate sheet for a field NDT / inspection services company. Extract ALL pricing sections and return ONLY valid JSON with these keys: name (string), customer (string), effective (YYYY-MM-DD), currency (CAD), type (tm), labour (array of {name, stRate, otRate, dtRate} - all per hour), equipment (array of {name, rate, unit} where unit must be exactly hr for per-hour rates, shift for per-shift, km for per-km, ea for each), consumables (array of {name, rate, unit} - per liter/can/disc/each), filmPerWeld (array of {size, scheduleUpTo80, schedule100Over, unit, notes}), sheetFilm (array of {size, rate}), filmDigitizing (array of {item, rate, unit}), specialRates (array of {name, rate, unit, notes} for callout minimums, flat fees, PAUT bond etc), notes (string - ALL bullet point conditions concatenated). RULES: Labour dtRate = stRate*2 if not listed. Equipment per HOUR unless stated. Consumables are NOT hourly. Capture every film size. Capture every bullet point in notes. Return ONLY the JSON object, no markdown, no explanation.';
 
 
 // ── JSON repair: handles truncated responses from AI ─────────────────────────
@@ -2200,6 +2200,23 @@ async function confirmImport() {
     currency: _importedRateData.currency || 'CAD',
     type: _importedRateData.type || importType,
   });
+  // Normalize equipment units: anything meaning per-hour → 'hr'
+  var _hrWords = ['hour','hour','hr','/hr','per hr','per hour','hourly','h'];
+  if (data.equipment) {
+    data.equipment = data.equipment.map(function(e) {
+      var u = (e.unit||'').toLowerCase().trim();
+      if (_hrWords.indexOf(u) > -1 || u.includes('hour') || u.includes('/hr')) {
+        return Object.assign({}, e, {unit:'hr'});
+      }
+      return e;
+    });
+  }
+  if (data.labour) {
+    // Labour rates are always per-hour — ensure no unit confusion
+    data.labour = data.labour.map(function(l) {
+      return Object.assign({unit:'hr'}, l);
+    });
+  }
   try {
     await sbUpsert('rate_sheets', data.id, data);
     _rateSheets.unshift(data);
@@ -3245,7 +3262,7 @@ async function loadDemoData() {
       { technician: t1, date: d1, category: 'MT Inspection', regHrs: 8, otHrs: 2, dtHrs: 0, nightHrs: 0, startTime: '06:00', endTime: '16:00', billable: true },
     ],
     consumables: [{ type: 'MPI/LPI Consumables', qty: 2, unit: 'can', notes: 'White contrast paint + MPI ink' }],
-    equipRows:   [{ item: 'Magnetic Particle Yoke + calibration block', qty: 1, unit: 'day', notes: '' }],
+    equipRows:   [{ item: 'Magnetic Particle Yoke + calibration block', qty: 1, unit: 'hr', notes: '' }],
     film: [], travel: { km: 740, kmRate: 1.20, hotels: 0, camp: 0, flights: 0, loaTechs: 1, loaDays: 1, loaRate: 70, misc: 0, miscDesc: '' },
     created: d1, modified: d1,
   };
@@ -3265,7 +3282,7 @@ async function loadDemoData() {
     notes: 'Manual UT thickness measurements on pump casings and suction/discharge headers. Two-technician crew.',
     labourRows: wo2labourRows,
     consumables: [{ type: 'Ultrasonic Couplant', qty: 1, unit: 'litre', notes: '' }],
-    equipRows:   [{ item: 'UT Unit + probes + calibration blocks', qty: 1, unit: 'day', notes: '' }],
+    equipRows:   [{ item: 'UT Unit + probes + calibration blocks', qty: 1, unit: 'hr', notes: '' }],
     film: [], travel: { km: 430, kmRate: 1.20, hotels: 185, camp: 0, flights: 0, loaTechs: 2, loaDays: 1, loaRate: 70, misc: 0, miscDesc: '' },
     created: d2, modified: d2,
   };
@@ -4105,7 +4122,7 @@ async function saveRateSheet(){
     var nameEl=document.getElementById('rate-eq-name-'+idx);
     var rateEl=document.getElementById('rate-eq-rate-'+idx);
     if(nameEl&&nameEl.value){
-      equipment.push({name:nameEl.value,rate:parseFloat(rateEl.value)||0,unit:(document.getElementById('rate-eq-unit-'+idx)||{}).value||'day'});
+      equipment.push({name:nameEl.value,rate:parseFloat(rateEl.value)||0,unit:(document.getElementById('rate-eq-unit-'+idx)||{}).value||'hr'});
     }
   });
   var id=_editRateId||uid();
@@ -4367,13 +4384,18 @@ function openInvoiceModal(preClient){
       +merged.map(function(cl){return'<option value="'+cl+'">'+cl+'</option>';}).join('');
     if(preClient) sel.value=preClient;
   }
-  // Populate rate sheet dropdown
+  // Populate rate sheet dropdown and auto-select first T&M
   var rsSel=document.getElementById('inv-rate-sheet');
   if(rsSel) {
     rsSel.innerHTML='<option value="">— Select rate sheet —</option>'
       +_rateSheets.map(function(r){
         return '<option value="'+r.id+'">'+r.name+(r.customer?' ('+r.customer+')':'')+'</option>';
       }).join('');
+    // Auto-select first T&M rate sheet
+    var firstTM = _rateSheets.find(function(r){ return (r.type||'tm') === 'tm'; }) || _rateSheets[0];
+    if (firstTM && rsSel.querySelector('option[value="'+firstTM.id+'"]')) {
+      rsSel.value = firstTM.id;
+    }
   }
   // Populate province (default AB)
   var provSel=document.getElementById('inv-province');
@@ -4611,56 +4633,111 @@ function viewInvoice(id) {
     return inv.chargeSheetIds && inv.chargeSheetIds.indexOf(j.id) > -1;
   }) || {};
 
-  // Build line items from WOs
+  // Build line items from WOs — one WO header per WO, work items indented below
   var lineItems = '';
+  var DEFAULT_RATES_INV = { st: 105, ot: 157.5, dt: 210 };
   (inv.chargeSheetIds || []).forEach(function(woId) {
-    var wo = _jobs.find(function(j){ return j.id === woId; }) || (inv.chargeSheets||[]).find(function(c){ return c.id === woId; }) || {};
+    var wo = _jobs.find(function(j){ return j.id === woId; })
+          || (inv.chargeSheets||[]).find(function(c){ return c.id === woId; }) || {};
     var woNum = wo.woNum || wo.number || wo.csNum || '—';
-    (wo.labourRows || []).forEach(function(row) {
-      var reg = row.regHrs || 0, ot = row.otHrs || 0, dt = row.dtHrs || 0;
-      if (!reg && !ot && !dt) return;
+
+    // Pull hours: WO labourRows first, fall back to confirmed timesheet rows
+    var sourceRows = (wo.labourRows||[]).slice();
+    var totalHrs = sourceRows.reduce(function(s,r){
+      return s+(r.regHrs||0)+(r.otHrs||0)+(r.dtHrs||0)+(r.nightHrs||0);
+    }, 0);
+    if (totalHrs === 0 && wo.id) {
+      var tsRows = [];
+      (_timesheets||[]).filter(function(t){ return t.woId === wo.id; })
+        .forEach(function(t){ (t.rows||[]).forEach(function(r){ tsRows.push(r); }); });
+      if (tsRows.length) sourceRows = tsRows;
+    }
+
+    // WO header row (blue band)
+    lineItems += '<tr style="background:#e8edf7;border-top:2px solid #1D4A8A">'
+      + '<td colspan="6" style="padding:.35rem .6rem;font-size:10px;font-weight:700;color:#1D4A8A">'
+        + 'WO# ' + woNum
+        + (wo.client ? ' &nbsp;&middot;&nbsp; ' + wo.client : '')
+        + (wo.site   ? ' &nbsp;&middot;&nbsp; ' + wo.site.slice(0,45) : '')
+        + (wo.date   ? ' &nbsp;&middot;&nbsp; ' + fmtDate(wo.date) : '')
+        + (wo.po     ? '&nbsp;<span style="font-weight:400;color:#555">PO: ' + wo.po + '</span>' : '')
+      + '</td></tr>';
+
+    // Labour rows
+    var hasAnyLabour = false;
+    sourceRows.forEach(function(row) {
+      var reg = row.regHrs||0, ot = row.otHrs||0, dt = row.dtHrs||0, ns = row.nightHrs||0;
+      if (!reg && !ot && !dt && !ns) return;
+      hasAnyLabour = true;
       var cat = _findRateEntry(row.category, invRS.labour) || {};
-      var stRate = cat.stRate || cat.rate || 0;
+      var stRate = cat.stRate || cat.rate || DEFAULT_RATES_INV.st;
       var otRate = cat.otRate || stRate * 1.5;
       var dtRate = cat.dtRate || stRate * 2;
-      var amt = reg * stRate + ot * otRate + dt * dtRate;
-      var hrs = [];
-      if (reg) hrs.push(reg + ' Reg');
-      if (ot)  hrs.push(ot + ' OT');
-      if (dt)  hrs.push(dt + ' DT');
+      var nsRate = stRate * 1.15;
+      var amt = reg*stRate + ot*otRate + dt*dtRate + ns*nsRate;
+      var hrsDetail = [];
+      if (reg) hrsDetail.push(reg + ' Reg');
+      if (ot)  hrsDetail.push(ot  + ' OT');
+      if (dt)  hrsDetail.push(dt  + ' DT');
+      if (ns)  hrsDetail.push(ns  + ' Night');
       lineItems += '<tr>'
-        + '<td style="padding:.3rem .5rem;font-size:10px">' + (row.category||'Labour')
-          + '<br><span style="color:#888;font-size:9px">' + (row.technician||'') + (row.date ? ' · ' + row.date : '') + '</span></td>'
-        + '<td style="padding:.3rem .5rem;text-align:center;font-size:10px">@</td>'
-        + '<td style="padding:.3rem .5rem;text-align:center;font-size:10px">1</td>'
-        + '<td style="padding:.3rem .5rem;text-align:center;font-size:10px">' + hrs.join(', ') + '</td>'
-        + '<td style="padding:.3rem .5rem;text-align:right;font-size:10px;font-family:monospace">' + _fmtMoneyImpl(stRate) + '</td>'
-        + '<td style="padding:.3rem .5rem;text-align:right;font-size:10px;font-family:monospace">' + _fmtMoneyImpl(amt) + '</td>'
+        + '<td style="padding:.25rem .5rem .25rem 1.2rem;font-size:10px">'
+            + (row.category||'Labour')
+            + (row.technician ? '<br><span style="color:#888;font-size:9px">' + row.technician
+               + (row.date ? ' &middot; ' + fmtDate(row.date) : '') + '</span>' : '')
+        + '</td>'
+        + '<td style="padding:.25rem .5rem;text-align:center;font-size:9px;color:#888">hr</td>'
+        + '<td style="padding:.25rem .5rem;text-align:center;font-size:10px">' + (reg+ot+dt+ns) + '</td>'
+        + '<td style="padding:.25rem .5rem;font-size:9px;color:#555">' + hrsDetail.join(' + ') + '</td>'
+        + '<td style="padding:.25rem .5rem;text-align:right;font-size:10px;font-family:monospace">' + _fmtMoneyImpl(stRate) + '</td>'
+        + '<td style="padding:.25rem .5rem;text-align:right;font-size:10px;font-family:monospace;font-weight:700">' + _fmtMoneyImpl(amt) + '</td>'
       + '</tr>';
     });
+
     // Consumables
     (wo.consumables || []).forEach(function(con) {
-      if (!con.item) return;
-      var item = (invRS.equipment||[]).find(function(e){ return e.name === con.item; }) || {};
-      var amt = (con.qty||0) * (item.rate||0);
+      var item = (invRS.equipment||[]).find(function(e){ return e.name === (con.item||con.type||''); }) || {};
+      var rate = item.rate || 0;
+      var amt = (con.qty||0) * rate;
+      if (!con.item && !con.type) return;
       lineItems += '<tr>'
-        + '<td style="padding:.3rem .5rem;font-size:10px">' + con.item + '</td>'
-        + '<td style="padding:.3rem .5rem;text-align:center;font-size:10px">@</td>'
-        + '<td style="padding:.3rem .5rem;text-align:center;font-size:10px">' + (con.qty||1) + '</td>'
-        + '<td style="padding:.3rem .5rem;text-align:center;font-size:10px">' + (con.unit||'') + '</td>'
-        + '<td style="padding:.3rem .5rem;text-align:right;font-size:10px;font-family:monospace">' + _fmtMoneyImpl(item.rate||0) + '</td>'
-        + '<td style="padding:.3rem .5rem;text-align:right;font-size:10px;font-family:monospace">' + _fmtMoneyImpl(amt) + '</td>'
+        + '<td style="padding:.25rem .5rem .25rem 1.2rem;font-size:10px">' + (con.item||con.type||'Consumable') + '</td>'
+        + '<td style="padding:.25rem .5rem;text-align:center;font-size:9px;color:#888">' + (con.unit||'ea') + '</td>'
+        + '<td style="padding:.25rem .5rem;text-align:center;font-size:10px">' + (con.qty||1) + '</td>'
+        + '<td></td>'
+        + '<td style="padding:.25rem .5rem;text-align:right;font-size:10px;font-family:monospace">' + _fmtMoneyImpl(rate) + '</td>'
+        + '<td style="padding:.25rem .5rem;text-align:right;font-size:10px;font-family:monospace;font-weight:700">' + _fmtMoneyImpl(amt) + '</td>'
       + '</tr>';
     });
-    // If no detailed rows, show summary line
-    if (!wo.labourRows || !wo.labourRows.length) {
+
+    // Travel
+    var tv = wo.travel || {};
+    var tvAmt = (tv.km||0)*(tv.kmRate||1.20)
+              + (tv.loaTechs||0)*(tv.loaDays||0)*(tv.loaRate||70)
+              + (tv.flights||0) + (tv.hotels||0) + (tv.camp||0) + (tv.misc||0);
+    if (tvAmt > 0) {
+      var tvParts = [];
+      if (tv.km)                       tvParts.push(tv.km + ' km');
+      if (tv.hotels)                   tvParts.push('Hotels ' + _fmtMoneyImpl(tv.hotels));
+      if (tv.flights)                  tvParts.push('Flights ' + _fmtMoneyImpl(tv.flights));
+      if (tv.loaTechs && tv.loaDays)   tvParts.push('LOA ' + tv.loaTechs + 'x' + tv.loaDays + ' days');
+      if (tv.misc && tv.miscDesc)      tvParts.push(tv.miscDesc + ' ' + _fmtMoneyImpl(tv.misc));
+      else if (tv.misc)                tvParts.push('Misc ' + _fmtMoneyImpl(tv.misc));
+      lineItems += '<tr>'
+        + '<td style="padding:.25rem .5rem .25rem 1.2rem;font-size:10px">Travel &amp; Expenses</td>'
+        + '<td colspan="3" style="padding:.25rem .5rem;font-size:9px;color:#555">' + tvParts.join(' &middot; ') + '</td>'
+        + '<td></td>'
+        + '<td style="padding:.25rem .5rem;text-align:right;font-size:10px;font-family:monospace;font-weight:700">' + _fmtMoneyImpl(tvAmt) + '</td>'
+      + '</tr>';
+    }
+
+    // Fallback if nothing priced
+    if (!hasAnyLabour && tvAmt === 0) {
       var fallbackAmt = priceChargeSheet(wo, invRS) || wo.total || 0;
       lineItems += '<tr>'
-        + '<td style="padding:.3rem .5rem;font-size:10px">' + woNum + ' · ' + (wo.site||wo.location||wo.client||'NDT Services')
-          + (wo.date ? ' · ' + wo.date : '') + '</td>'
-        + '<td colspan="3"></td>'
-        + '<td></td>'
-        + '<td style="padding:.3rem .5rem;text-align:right;font-size:10px;font-family:monospace">' + _fmtMoneyImpl(fallbackAmt) + '</td>'
+        + '<td style="padding:.25rem .5rem .25rem 1.2rem;font-size:10px">NDT Services</td>'
+        + '<td colspan="4"></td>'
+        + '<td style="padding:.25rem .5rem;text-align:right;font-size:10px;font-family:monospace;font-weight:700">' + _fmtMoneyImpl(fallbackAmt) + '</td>'
       + '</tr>';
     }
   });
@@ -4928,20 +5005,34 @@ function priceChargeSheet(cs, rs) {
   var hasNewFormat = cs.labourRows && cs.labourRows.length > 0;
   var hasOldFormat = cs.days && cs.days.length > 0;
 
+  // Default fallback rates when no rate sheet entry matches
+  var DEFAULT_RATES = { st: 105, ot: 157.5, dt: 210 };
+
   if (hasNewFormat) {
-    if (rs && rs.labour) {
-      (cs.labourRows || []).forEach(function(row) {
-        var cat = _findRateEntry(row.category, rs.labour) || {};
-        var stRate = cat.stRate || cat.rate || 0;
-        var otRate = cat.otRate || stRate * 1.5;
-        var dtRate = cat.dtRate || stRate * 2;
-        var nsRate = stRate * 1.15;
-        var reg = row.regHrs   !== undefined ? row.regHrs   : (row.st||0);
-        var ot  = row.otHrs    !== undefined ? row.otHrs    : (row.ot||0);
-        var dt  = row.dtHrs    !== undefined ? row.dtHrs    : (row.dt||0);
-        var ns  = row.nightHrs !== undefined ? row.nightHrs : (row.ns||0);
-        total += reg*stRate + ot*otRate + dt*dtRate + ns*nsRate;
+    // If WO labour rows have no hours, pull from confirmed timesheets
+    var sourceRows = cs.labourRows;
+    var totalHrsOnWO = sourceRows.reduce(function(s,r){ return s+(r.regHrs||0)+(r.otHrs||0)+(r.dtHrs||0)+(r.nightHrs||0); }, 0);
+    if (totalHrsOnWO === 0 && cs.id) {
+      var tsRows = [];
+      (_timesheets || []).filter(function(t){ return t.woId === cs.id; }).forEach(function(t){
+        (t.rows||[]).forEach(function(r){ tsRows.push(r); });
       });
+      if (tsRows.length) sourceRows = tsRows;
+    }
+
+    sourceRows.forEach(function(row) {
+      var cat = (rs && rs.labour) ? (_findRateEntry(row.category, rs.labour) || {}) : {};
+      var stRate = cat.stRate || cat.rate || DEFAULT_RATES.st;
+      var otRate = cat.otRate || stRate * 1.5;
+      var dtRate = cat.dtRate || stRate * 2;
+      var nsRate = stRate * 1.15;
+      var reg = row.regHrs   !== undefined ? row.regHrs   : (row.st||0);
+      var ot  = row.otHrs    !== undefined ? row.otHrs    : (row.ot||0);
+      var dt  = row.dtHrs    !== undefined ? row.dtHrs    : (row.dt||0);
+      var ns  = row.nightHrs !== undefined ? row.nightHrs : (row.ns||0);
+      total += reg*stRate + ot*otRate + dt*dtRate + ns*nsRate;
+    });
+    if (rs && rs.labour) {
       (cs.equipRows || []).forEach(function(row) {
         var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
         total += (row.qty||0) * (item.rate||0);
@@ -4969,7 +5060,7 @@ function priceChargeSheet(cs, rs) {
     if (rs && rs.labour && hasCategories) {
       (cs.days || []).forEach(function(day) {
         var cat = (rs.labour || []).find(function(l){ return l.name === (day.category||day.description); }) || {};
-        var stRate = cat.stRate || day.stRate || 0;
+        var stRate = cat.stRate || day.stRate || DEFAULT_RATES.st;
         var otRate = cat.otRate || day.otRate || stRate * 1.5;
         var dtRate = cat.dtRate || day.dtRate || stRate * 2;
         total += (day.st||0)*stRate + (day.ot||0)*otRate + (day.dt||0)*dtRate;
