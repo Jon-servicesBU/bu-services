@@ -5414,6 +5414,20 @@ async function saveWO(status) {
   var date   = (document.getElementById('wo-date')    || {}).value || today();
   if (!client.trim() || !site.trim()) { toast('Client and location are required', 'error'); return; }
 
+  // Duplicate WO number check — prevent submitting the same WO # twice
+  var woNumInput = (document.getElementById('job-number') || {}).value || '';
+  if (woNumInput.trim() && status === 'submitted') {
+    var duplicate = _jobs.find(function(j) {
+      return j.id !== _editWOId
+          && (j.woNum || j.number || '').trim().toLowerCase() === woNumInput.trim().toLowerCase()
+          && j.status !== 'draft';
+    });
+    if (duplicate) {
+      toast('WO # ' + woNumInput.trim() + ' has already been submitted. Use a unique work order number.', 'error');
+      return;
+    }
+  }
+
   var labourRows = [];
   for (var i = 1; i <= _csLabourRowCount; i++) {
     var techEl  = document.getElementById('cs-lb-tech-' + i);
@@ -7446,15 +7460,13 @@ function calcRowCost(techName, regHrs, otHrs, nightHrs) {
 
 // ── Auto-create timesheet when WO is submitted ───────────────────────────────
 async function createTimesheetFromWO(wo) {
-  // ONE timesheet PER TECHNICIAN — each tech owns their own TS, sees only their rows.
+  // ONE timesheet PER TECHNICIAN per WO — WO uniqueness is enforced at submission
+  // so no duplicate-prevention logic needed here.
   if (!wo || !wo.id) return;
   var labourRows = wo.labourRows || [];
-  if (!labourRows.length) return;
-
-  // Current viewer's canonical name (used as fallback when rows have no technician)
   var currentTechName = getCurrentTechName ? getCurrentTechName() : '';
 
-  // Fuzzy-resolve raw dropdown name → canonical VIEWER_PEOPLE name
+  // Fuzzy-resolve raw name → canonical VIEWER_PEOPLE name
   function _canonical(raw) {
     if (!raw || !raw.trim()) return '';
     var r = raw.toLowerCase().trim();
@@ -7467,21 +7479,14 @@ async function createTimesheetFromWO(wo) {
     return m ? m.name : raw.trim();
   }
 
-  // Group rows by canonical tech name
+  // Group rows by canonical tech name; unrecognised names → logged-in tech
   var byTech = {};
-
   labourRows.forEach(function(r) {
-    var rawName = (r.technician && r.technician.trim()) ? r.technician : '';
-    var name = rawName ? _canonical(rawName) : '';
-
-    // If no name resolved, or it resolved to something that doesn't match any
-    // VIEWER_PEOPLE entry (e.g. a company name from the PDF), fall back to the
-    // logged-in tech so we never produce a phantom TS for an unknown person
+    var name = (r.technician && r.technician.trim()) ? _canonical(r.technician) : '';
     if (!name || !(VIEWER_PEOPLE||[]).find(function(p){ return p.name === name; })) {
       name = currentTechName;
     }
-    if (!name) return; // no tech at all — skip
-
+    if (!name) return;
     if (!byTech[name]) byTech[name] = [];
     byTech[name].push({
       date:      r.date      || wo.date || today(),
@@ -7496,19 +7501,13 @@ async function createTimesheetFromWO(wo) {
     });
   });
 
+  // If no labour rows, create a blank TS for the logged-in tech
+  if (!Object.keys(byTech).length && currentTechName) {
+    byTech[currentTechName] = [];
+  }
+
   var created = 0;
-  // Read freshest TS list — union of in-memory and localStorage to catch stale entries
-  var freshTS = _timesheets.concat(_tsCacheRead().filter(function(c){
-    return !_timesheets.find(function(m){ return m.id === c.id; });
-  }));
-
   Object.keys(byTech).forEach(function(techName) {
-    // Skip if TS already exists for this tech+WO (check both memory and cache)
-    if (freshTS.find(function(t){ return t.woId === wo.id && t.technician === techName; })) return;
-    // Skip if techName doesn't match any known employee (prevents phantom TSes)
-    var knownPerson = (VIEWER_PEOPLE||[]).find(function(p){ return p.name === techName; });
-    if (!knownPerson) return;
-
     var ts = {
       id:           uid(),
       woId:         wo.id,
@@ -7532,7 +7531,6 @@ async function createTimesheetFromWO(wo) {
       modified:     today(),
     };
     saveTimesheetToStorage(ts);
-    // Re-read _timesheets from storage after write to stay in sync
     _timesheets = _tsCacheRead();
     created++;
   });
