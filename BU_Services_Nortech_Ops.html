@@ -8748,7 +8748,7 @@ function renderMarginReport() {
   try { _renderMarginReportImpl(); } catch(e) {
     console.error('[margin]', e);
     var b = document.getElementById('margin-wo-body');
-    if (b) b.innerHTML = '<tr><td colspan="12" style="color:#E84040;padding:1rem">Error: ' + e.message + '</td></tr>';
+    if (b) b.innerHTML = '<tr><td colspan="12" style="color:#E84040;padding:1rem">Error: ' + e.message + '<br><pre style="font-size:.65rem;white-space:pre-wrap">' + e.stack + '</pre></td></tr>';
   }
 }
 function _renderMarginReportImpl() {
