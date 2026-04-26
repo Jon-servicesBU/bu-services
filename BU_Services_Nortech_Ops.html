@@ -2017,10 +2017,17 @@ async function handleImportFile(file) {
     }
     _importedRateData = payload;
     showImportPreview(payload);
-    showImportStatus('✓ Rate sheet extracted — review and confirm below', 'success');
+    var itemCount = (payload.labour||[]).length + (payload.equipment||[]).length
+      + (payload.consumables||[]).length + (payload.piecework||[]).length;
+    showImportStatus('✓ Rate sheet extracted (' + itemCount + ' items) — review and confirm below', 'success');
     document.getElementById('import-confirm-btn') && (document.getElementById('import-confirm-btn').style.display = 'inline-flex');
   } catch(e) {
-    showImportStatus('Error: ' + e.message, 'error');
+    var msg = e.message || 'Unknown error';
+    if (msg.includes('parse') || msg.includes('JSON') || msg.includes('token')) {
+      showImportStatus('⚠ JSON parse error — rate sheet may be too large. Try: (1) Import as .docx instead of PDF, or (2) Split into two separate imports (labour+equipment first, then film+consumables).', 'error');
+    } else {
+      showImportStatus('Error: ' + msg, 'error');
+    }
   }
 }
 
@@ -2046,9 +2053,9 @@ async function extractDocxText(file) {
   });
 }
 
-var PW_PROMPT = 'This is a PIECEWORK / PIECE-RATE pricing sheet for a field NDT / inspection services company. Extract ALL pricing data and return ONLY valid JSON in this exact format:\n{\n  "name": "<sheet name, e.g. IFC Valve Inspection Rates>",\n  "customer": "<client/company name>",\n  "effective": "<YYYY-MM-DD or today>",\n  "currency": "CAD",\n  "type": "piecework",\n  "piecework": [\n    {"size": "<size, e.g. Under 2\", 2\", 3\", 4\", 6\", 8\", 10\", 12\", 14\", 16\" & Over>", "type": "<service type, e.g. MT of B.W. End, PT of B.W. End, RT of B.W. End, MT Only, PT Only, Spot RT, Full RT>", "rate": <number>, "unit": "<per valve, per reading, per visit, x inches, per hr, per crate>"},\n    ...\n  ],\n  "notes": "<all bullet point conditions, surcharges, minimums as a single string>"\n}\nRULES:\n(1) Extract EVERY row and column from the pricing table — each size+type combination is a separate entry.\n(2) For multiplier rates like \"$4.00 x Inches\" set rate=4.00 and unit=\"x inches\".\n(3) For flat-rate items (PMI, HT, OES, pickup/delivery, cleaning, crates) add them with size=\"Flat Rate\" and type=<item name>.\n(4) Capture ALL bullet point notes in the notes field.\n(5) Return ONLY the JSON object — no explanation, no markdown.';
+var PW_PROMPT = 'This is a PIECEWORK / PIECE-RATE pricing sheet for a field NDT / inspection services company. Extract ALL pricing data and return ONLY valid JSON in this exact format:\n{\n  "name": "<sheet name, e.g. IFC Valve Inspection Rates>",\n  "customer": "<client/company name>",\n  "effective": "<YYYY-MM-DD or today>",\n  "currency": "CAD",\n  "type": "piecework",\n  "piecework": [\n    {"size": "<size, e.g. Under 2\", 2\", 3\", 4\", 6\", 8\", 10\", 12\", 14\", 16\" & Over>", "type": "<service type, e.g. MT of B.W. End, PT of B.W. End, RT of B.W. End, MT Only, PT Only, Spot RT, Full RT>", "rate": <number>, "unit": "<per valve, per reading, per visit, x inches, per hr, per crate>"},\n    ...\n  ],\n  "notes": "<all bullet point conditions, surcharges, minimums as a single string>"\n}\nRULES:\n(1) Extract EVERY row and column from the pricing table — each size+type combination is a separate entry.\n(2) For multiplier rates like \"$4.00 x Inches\" set rate=4.00 and unit=\"x inches\".\n(3) For flat-rate items (PMI, HT, OES, pickup/delivery, cleaning, crates) add them with size=\"Flat Rate\" and type=<item name>.\n(4) Capture ALL bullet point notes in the notes field.\n(5) Return ONLY the JSON object — no explanation, no markdown, NO indentation or whitespace.';
 
-var RATE_PROMPT = 'This is a T&M (Time and Materials) rate sheet for a field NDT / inspection services company. Extract ALL pricing sections and return ONLY valid JSON with these keys: name (string), customer (string), effective (YYYY-MM-DD), currency (CAD), type (tm), labour (array of {name, stRate, otRate, dtRate} - all per hour), equipment (array of {name, rate, unit} where unit must be exactly hr for per-hour rates, shift for per-shift, km for per-km, ea for each), consumables (array of {name, rate, unit} - per liter/can/disc/each), filmPerWeld (array of {size, scheduleUpTo80, schedule100Over, unit, notes}), sheetFilm (array of {size, rate}), filmDigitizing (array of {item, rate, unit}), specialRates (array of {name, rate, unit, notes} for callout minimums, flat fees, PAUT bond etc), notes (string - ALL bullet point conditions concatenated). RULES: Labour dtRate = stRate*2 if not listed. Equipment per HOUR unless stated. Consumables are NOT hourly. Capture every film size. Capture every bullet point in notes. Return ONLY the JSON object, no markdown, no explanation.';
+var RATE_PROMPT = 'This is a T&M (Time and Materials) rate sheet for a field NDT / inspection services company. Extract ALL pricing sections and return ONLY valid JSON with these keys: name (string), customer (string), effective (YYYY-MM-DD), currency (CAD), type (tm), labour (array of {name, stRate, otRate, dtRate} - all per hour), equipment (array of {name, rate, unit} where unit must be exactly hr for per-hour rates, shift for per-shift, km for per-km, ea for each), consumables (array of {name, rate, unit} - per liter/can/disc/each), filmPerWeld (array of {size, scheduleUpTo80, schedule100Over, unit, notes}), sheetFilm (array of {size, rate}), filmDigitizing (array of {item, rate, unit}), specialRates (array of {name, rate, unit, notes} for callout minimums, flat fees, PAUT bond etc), notes (string - ALL bullet point conditions concatenated). RULES: Labour dtRate = stRate*2 if not listed. Equipment per HOUR unless stated. Consumables are NOT hourly. Capture every film size. Capture every bullet point in notes. Return ONLY the JSON object, no markdown, no explanation, NO indentation or extra whitespace.';
 
 
 // ── JSON repair: handles truncated responses from AI ─────────────────────────
@@ -2080,7 +2087,7 @@ function _repairAndParseJSON(str) {
   while (depth.length) s += depth.pop();
 
   try { return JSON.parse(s); } catch(e) {
-    throw new Error('Could not parse rate sheet response: ' + e.message);
+    throw new Error('Rate sheet parse failed (' + e.message + '). Try a simpler rate sheet or contact support.');
   }
 }
 
@@ -2090,7 +2097,7 @@ async function parseRateSheetText(text) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 8000,
+      max_tokens: 8192,
       messages: [{ role: 'user', content: (function(){ var m=document.getElementById('import-rate-modal'); return m&&m.getAttribute('data-import-type')==='piecework' ? PW_PROMPT : RATE_PROMPT; })() + '\n\nDocument text:\n' + text.slice(0, 8000) }]
     })
   });
@@ -2099,7 +2106,7 @@ async function parseRateSheetText(text) {
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
   var clean = txt.replace(/```json|```/g,'').trim();
   var match = clean.match(/\{[\s\S]*/);
-  if (!match) throw new Error('No JSON in response');
+  if (!match) throw new Error('No JSON found. Response started with: ' + clean.slice(0,80));
   return _repairAndParseJSON(match[0]);
 }
 
@@ -2115,7 +2122,7 @@ async function parseRateSheetPDF(file) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 8000,
+      max_tokens: 8192,
       messages: [{
         role: 'user',
         content: [
@@ -2130,7 +2137,7 @@ async function parseRateSheetPDF(file) {
   var txt = (data.content || []).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
   var clean = txt.replace(/```json|```/g,'').trim();
   var match = clean.match(/\{[\s\S]*/);
-  if (!match) throw new Error('No JSON in response');
+  if (!match) throw new Error('No JSON found. Response started with: ' + clean.slice(0,80));
   return _repairAndParseJSON(match[0]);
 }
 function showImportPreview(data) {
@@ -4697,8 +4704,7 @@ function viewInvoice(id) {
     // Consumables
     (wo.consumables || []).forEach(function(con) {
       var conName = con.item||con.type||con.name||'';
-      var item = (invRS.consumables||[]).find(function(e){ return e.name === conName; })
-               || (invRS.equipment||[]).find(function(e){ return e.name === conName; }) || {};
+      var item = _findConsumableRate(conName, invRS) || {};
       var rate = item.rate || 0;
       var amt = (con.qty||0) * rate;
       if (!con.item && !con.type) return;
@@ -5001,6 +5007,35 @@ function _findRateEntry(category, rsLabour) {
   return null;
 }
 
+// ── Fuzzy consumable/equipment rate lookup ────────────────────────────────────
+function _findConsumableRate(name, rs) {
+  if (!name || !rs) return null;
+  var norm = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,' ').replace(/\s+/g,' ').trim(); };
+  var n = norm(name);
+  var lists = (rs.consumables||[]).concat(rs.equipment||[]);
+  // 1. Exact
+  var m = lists.find(function(e){ return e.name === name; });
+  if (m) return m;
+  // 2. Normalised exact
+  m = lists.find(function(e){ return norm(e.name) === n; });
+  if (m) return m;
+  // 3. Either contains the other
+  m = lists.find(function(e){
+    var en = norm(e.name);
+    return en && n && (en.indexOf(n) > -1 || n.indexOf(en) > -1);
+  });
+  if (m) return m;
+  // 4. Word overlap — match if 2+ significant words in common
+  var words = n.split(' ').filter(function(w){ return w.length > 2; });
+  m = lists.find(function(e){
+    var en = norm(e.name);
+    var hits = words.filter(function(w){ return en.indexOf(w) > -1; });
+    return hits.length >= Math.min(2, words.length);
+  });
+  return m || null;
+}
+
+
 function priceChargeSheet(cs, rs) {
   if (!cs) return 0;
   var total = 0;
@@ -5036,13 +5071,12 @@ function priceChargeSheet(cs, rs) {
     });
     if (rs && rs.labour) {
       (cs.equipRows || []).forEach(function(row) {
-        var item = (rs.equipment || []).find(function(e){ return e.name === row.item; }) || {};
+        var item = _findConsumableRate(row.item, rs) || {};
         total += (row.qty||0) * (item.rate||0);
       });
       (cs.conRows || cs.consumables || []).forEach(function(row) {
         var conName = row.item || row.type || row.name || '';
-        var item = (rs.consumables || []).find(function(e){ return e.name === conName; })
-                || (rs.equipment  || []).find(function(e){ return e.name === conName; }) || {};
+        var item = _findConsumableRate(conName, rs) || {};
         total += (row.qty||0) * (item.rate||0);
       });
       (cs.filmRows || cs.film || []).forEach(function(row) {
@@ -8659,7 +8693,7 @@ function renderMarginReport() {
     var totalOT    = rows.reduce(function(s,r){ return s+(r.otHrs||0); }, 0);
     var totalNight = rows.reduce(function(s,r){ return s+(r.nightHrs||0); }, 0);
     var margin = billed - cost;
-    var marginPct = cost > 0 ? margin / cost * 100 : (billed > 0 ? 100 : 0);
+    var marginPct = billed > 0 ? margin / billed * 100 : 0;
 
     var techs = [...new Set(rows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
 
@@ -8681,7 +8715,7 @@ function renderMarginReport() {
   var totBilled = woRows.reduce(function(s,r){ return s+r.billed; }, 0);
   var totCost   = woRows.reduce(function(s,r){ return s+r.cost; }, 0);
   var totMargin = totBilled - totCost;
-  var totPct    = totCost > 0 ? totMargin/totCost*100 : 0;
+  var totPct    = totBilled > 0 ? totMargin/totBilled*100 : 0;
   var kpiEl = document.getElementById('margin-kpis');
   if (kpiEl) kpiEl.innerHTML = [
     {v: fmtMoney(totBilled), l: 'Total Billed', c: ''},
@@ -8738,7 +8772,7 @@ function renderMarginReport() {
     var techRows = Object.keys(techMap).sort().map(function(tech) {
       var t = techMap[tech];
       var margin = t.billed - t.cost;
-      var pct = t.cost > 0 ? margin/t.cost*100 : 0;
+      var pct = t.billed > 0 ? margin/t.billed*100 : 0;
       var pctCls = pct>=40?'sc-green':pct>=30?'sc-amber':'sc-red';
       var totalHrs = t.reg + t.ot + t.night;
       return '<tr>'+
