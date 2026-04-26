@@ -314,274 +314,6 @@ body.tech-view .cs-lb-tot           { display: none !important; }
 .status-chip.sc-amber { background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.3); color:#F59E0B; padding:.15rem .55rem; border-radius:999px; font-size:.72rem; font-weight:700; font-family:var(--mono); white-space:nowrap; display:inline-block; }
 .status-chip.sc-red   { background:rgba(239,68,68,.12);  border:1px solid rgba(239,68,68,.3);  color:#EF4444; padding:.15rem .55rem; border-radius:999px; font-size:.72rem; font-weight:700; font-family:var(--mono); white-space:nowrap; display:inline-block; }
 
-
-/* ═══════════════════════════════════════════════════════
-   MOBILE VIEW — landscape-optimized for phones (all roles)
-   Target: phone in landscape = ~667-932px wide, 375-430px tall
-   ═══════════════════════════════════════════════════════ */
-
-/* ── Trigger: phone landscape OR narrow portrait ── */
-@media (max-width: 932px) and (max-height: 500px),
-       (max-width: 600px) {
-
-  body.mobile-view {
-    padding-bottom: env(safe-area-inset-bottom, 0);
-  }
-
-  /* ── Nav: slimmer, tighter ── */
-  body.mobile-view .unav {
-    height: 38px !important;
-    padding: 0 .75rem !important;
-  }
-
-  body.mobile-view .unav-brand-name {
-    font-size: .85rem !important;
-  }
-
-  body.mobile-view .unav-links button,
-  body.mobile-view .unav-links a {
-    font-size: .68rem !important;
-    padding: .2rem .45rem !important;
-  }
-
-  body.mobile-view .unav-right {
-    gap: .4rem !important;
-  }
-
-  /* ── View body: tight padding to preserve vertical space ── */
-  body.mobile-view .view-body {
-    padding: .4rem .65rem !important;
-  }
-
-  /* ── Section header: compact row ── */
-  body.mobile-view .sec-hdr {
-    margin-bottom: .4rem !important;
-    padding-bottom: .3rem !important;
-  }
-
-  body.mobile-view .sec-hdr h2 {
-    font-size: .95rem !important;
-    margin: 0 !important;
-  }
-
-  body.mobile-view .sec-sub {
-    font-size: .62rem !important;
-  }
-
-  /* ── Filter bar: single scrollable row, no wrapping ── */
-  body.mobile-view .filter-bar {
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-    gap: .35rem !important;
-    padding-bottom: .2rem;
-    scrollbar-width: none;
-  }
-
-  body.mobile-view .filter-bar::-webkit-scrollbar { display: none; }
-
-  body.mobile-view .filter-bar .form-input,
-  body.mobile-view .filter-bar .form-select {
-    flex-shrink: 0;
-    font-size: .75rem !important;
-    height: 32px !important;
-    padding: 0 .5rem !important;
-    min-width: 110px;
-  }
-
-  body.mobile-view .filter-bar .btn {
-    flex-shrink: 0;
-    height: 32px !important;
-    font-size: .72rem !important;
-    padding: 0 .6rem !important;
-    white-space: nowrap;
-  }
-
-  /* ── Cards: compact, touch-friendly ── */
-  body.mobile-view .card {
-    border-radius: 8px;
-    margin-bottom: .45rem;
-  }
-
-  /* ── WO cards: reduced padding, still tappable ── */
-  body.mobile-view [data-toggle-job] {
-    padding: .65rem .9rem !important;
-    min-height: 52px;
-  }
-
-  body.mobile-view [data-toggle-job] h3,
-  body.mobile-view [data-toggle-job] .wo-client {
-    font-size: .85rem !important;
-  }
-
-  body.mobile-view [data-toggle-job] .wo-meta {
-    font-size: .68rem !important;
-  }
-
-  /* ── Confirmation cards: compact but prominent ── */
-  body.mobile-view .pending-conf-card {
-    padding: .65rem .9rem !important;
-    margin-bottom: .45rem !important;
-    border-radius: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: .75rem !important;
-  }
-
-  body.mobile-view .pending-conf-card > div:first-child {
-    flex: 1;
-    min-width: 0;
-  }
-
-  body.mobile-view .pending-conf-card button {
-    flex-shrink: 0;
-    width: auto !important;
-    padding: .45rem .9rem !important;
-    font-size: .78rem !important;
-    margin-top: 0 !important;
-    white-space: nowrap;
-  }
-
-  /* ── Modals: full viewport, flex column ── */
-  body.mobile-view .modal-overlay .modal {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    height: 100dvh !important;
-    max-height: 100dvh !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-    display: flex;
-    flex-direction: column;
-  }
-
-  body.mobile-view .modal-overlay .modal-hdr {
-    flex-shrink: 0;
-    padding: .5rem .9rem !important;
-    min-height: 40px;
-  }
-
-  body.mobile-view .modal-overlay .modal-title {
-    font-size: .85rem !important;
-  }
-
-  body.mobile-view .modal-overlay .modal-body {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: .6rem .9rem !important;
-  }
-
-  /* ── Modal footer: compact row ── */
-  body.mobile-view .modal-footer {
-    flex-shrink: 0;
-    padding: .5rem .9rem !important;
-    gap: .4rem !important;
-    border-top: 1px solid var(--border);
-  }
-
-  body.mobile-view .modal-footer button {
-    flex: 1;
-    padding: .5rem .6rem !important;
-    font-size: .78rem !important;
-    height: 36px !important;
-  }
-
-  /* ── Tabbed sections in WO modal ── */
-  body.mobile-view .cs-tab {
-    font-size: .7rem !important;
-    padding: .3rem .5rem !important;
-  }
-
-  /* ── Labour table: horizontal scroll ── */
-  body.mobile-view .cs-labour-wrap,
-  body.mobile-view #job-modal table {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-    display: block !important;
-  }
-
-  body.mobile-view .cs-input {
-    font-size: .72rem !important;
-    padding: .2rem .3rem !important;
-  }
-
-  /* ── Form grids: 2-col in landscape (enough horizontal space) ── */
-  @media (max-width: 932px) and (max-height: 500px) {
-    body.mobile-view .form-grid-2 {
-      grid-template-columns: 1fr 1fr !important;
-    }
-  }
-
-  /* ── TS cards: compact ── */
-  body.mobile-view #ts-grid .card {
-    padding: .6rem .9rem;
-  }
-
-  /* ── KPI cards: 4-across in landscape ── */
-  @media (max-width: 932px) and (max-height: 500px) {
-    body.mobile-view .kpi-row {
-      grid-template-columns: repeat(4, 1fr) !important;
-    }
-  }
-
-  /* ── Status chips ── */
-  body.mobile-view .status-chip {
-    font-size: .6rem !important;
-    padding: .15rem .4rem !important;
-  }
-
-  /* ── TS col hide ── */
-  body.mobile-view .ts-col-hide { display: none !important; }
-
-  /* ── Pager: compact ── */
-  body.mobile-view .pager {
-    padding: .35rem 0 !important;
-    font-size: .72rem !important;
-  }
-
-  body.mobile-view .pager button {
-    padding: .25rem .55rem !important;
-    font-size: .72rem !important;
-  }
-
-  /* ── WO section subtitle inline with heading ── */
-  body.mobile-view #view-jobs .sec-hdr > div:first-child {
-    display: flex;
-    align-items: baseline;
-    gap: .5rem;
-    flex-wrap: nowrap;
-    min-width: 0;
-  }
-
-  body.mobile-view #wo-sec-sub {
-    margin-top: 0 !important;
-    font-size: .6rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex-shrink: 1;
-    min-width: 0;
-  }
-}
-
-/* Admin bottom nav — 5 tabs, slightly smaller */
-@media (max-width: 768px) {
-  /* Admin: show dashboard in top area, not bottom nav */
-  /* Admin margin table: horizontal scroll */
-  body.mobile-view #margin-wo-body tr td:nth-child(n+5):nth-child(-n+7) {
-    display: none; /* hide reg/ot/night hrs cols on mobile */
-  }
-  body.mobile-view #margin-wo-body tr th:nth-child(n+5):nth-child(-n+7) {
-    display: none;
-  }
-}
-
-/* WO import: show camera/photo on mobile, PDF on desktop */
-@media (max-width: 932px) and (max-height: 500px),
-       (max-width: 600px) {
-  body.mobile-view #wo-import-pdf-btn    { display: none !important; }
-  body.mobile-view .wo-mobile-import     { display: inline-flex !important; }
-}
 </style>
 </head>
 <script>// ══════════════════════════════════════════════════════════════════════════════
@@ -933,7 +665,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <!-- ══ WORK ORDERS VIEW ══════════════════════════════════════════════════════ -->
   <div id="view-jobs" class="view" style="display:none">
     <div class="sec-hdr">
-      <div><h2>Work Orders</h2><div class="sec-sub" id="wo-sec-sub">Tap a work order to view details or log more work</div></div>
+      <div><h2>Work Orders</h2><div class="sec-sub">Tap a work order to view details or log more work</div></div>
       <div class="sec-actions">
         <input class="form-input" style="width:160px" placeholder="WO # / Site / PO…" id="job-search" oninput="_jobsPage=1;renderJobs()">
         <input class="form-input" style="width:150px" placeholder="Customer…" id="job-client-search" oninput="_jobsPage=1;renderJobs()">
@@ -1166,15 +898,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
-      <!-- Desktop: PDF import -->
-      <button class="btn btn-ghost" id="wo-import-pdf-btn" onclick="document.getElementById('wo-import-file').click()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">⬆ Import PDF</button>
-      <!-- Mobile: camera + photo library (shown via CSS on mobile) -->
-      <button class="btn btn-ghost wo-mobile-import" id="wo-import-camera-btn" onclick="document.getElementById('wo-import-camera').click()" style="display:none;border-color:rgba(0,174,239,.3);color:var(--sky)">📷 Camera</button>
-      <button class="btn btn-ghost wo-mobile-import" id="wo-import-photo-btn" onclick="document.getElementById('wo-import-photo').click()" style="display:none;border-color:rgba(0,174,239,.3);color:var(--sky)">🖼 Photo / Doc</button>
-      <!-- Hidden inputs -->
-      <input type="file" id="wo-import-file"   accept=".pdf,.PDF,.docx,.doc" style="display:none" onchange="handleWOImportFile(this,'pdf')">
-      <input type="file" id="wo-import-camera" accept="image/*" capture="environment" style="display:none" onchange="handleWOImportFile(this,'image')">
-      <input type="file" id="wo-import-photo"  accept="image/*,.pdf,.PDF" style="display:none" onchange="handleWOImportFile(this,'image')">
+      <button class="btn btn-ghost" id="wo-import-pdf-btn" onclick="triggerWOImport()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">⬆ Import from PDF</button>
+      <input type="file" id="wo-import-file" accept=".pdf,.PDF" style="display:none" onchange="handleWOImportFile(this)">
       <div style="flex:1"></div>
       <!-- Shown/hidden by openWOModal based on status -->
       <button class="btn btn-ghost"     id="wo-btn-edit-unlock"  onclick="adminUnlockWO()"      style="display:none">✏ Edit</button>
@@ -2123,9 +1848,10 @@ function saveTimesheetToStorage(ts) {
   if (idx > -1) all[idx] = ts; else all.unshift(ts);
   _tsCacheWrite(all);
   _timesheets = all;
-  // Fire-and-forget Supabase write — non-blocking, doesn't need await
+  // Write to Supabase — non-blocking but log failures so we can diagnose
   sbUpsert('timesheets', ts.id, ts).catch(function(e) {
-    console.warn('[TS] Supabase write failed, cached locally:', e.message);
+    console.error('[TS] Supabase write failed (cached locally):', e.message);
+    toast('⚠ Timesheet saved locally — sync pending', 'info');
   });
 }
 
@@ -2730,7 +2456,7 @@ function triggerWOImport() {
   document.getElementById('wo-import-file').click();
 }
 
-async function handleWOImportFile(input, mode) {
+async function handleWOImportFile(input) {
   var file = input.files[0];
   if (!file) return;
   input.value = '';
@@ -2741,46 +2467,22 @@ async function handleWOImportFile(input, mode) {
     return;
   }
 
-  // Determine content type
-  var isImage = mode === 'image' || file.type.startsWith('image/');
-  var isPDF   = !isImage;
-
-  // Show loading state on whichever button triggered this
-  var allBtns = ['wo-import-pdf-btn','wo-import-camera-btn','wo-import-photo-btn'];
-  allBtns.forEach(function(id){
-    var b = document.getElementById(id);
-    if (b) { b._origText = b.textContent; b.disabled = true; }
-  });
-  var statusMsg = isImage ? '⏳ Reading image…' : '⏳ Reading PDF…';
-  allBtns.forEach(function(id){
-    var b = document.getElementById(id);
-    if (b && b.style.display !== 'none') b.textContent = statusMsg;
-  });
+  var btn = document.getElementById('wo-import-pdf-btn');
+  if (btn) { btn.textContent = '⏳ Reading PDF…'; btn.disabled = true; }
 
   try {
-    // Read file as base64
-    var dataUrl = await new Promise(function(resolve, reject) {
+    // Convert PDF to base64
+    var base64 = await new Promise(function(resolve, reject) {
       var reader = new FileReader();
-      reader.onload = function(e) { resolve(e.target.result); };
+      reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-    var base64 = dataUrl.split(',')[1];
-    var mediaType = file.type || (isPDF ? 'application/pdf' : 'image/jpeg');
 
-    // Update status
-    allBtns.forEach(function(id){
-      var b = document.getElementById(id);
-      if (b && b.style.display !== 'none') b.textContent = '⏳ Extracting data…';
-    });
+    if (btn) btn.textContent = '⏳ Extracting data…';
 
-    var WO_PROMPT = 'Extract all work order data from this document/image and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nIMPORTANT: If no technician name appears, leave technician as empty string. Extract ALL labour rows even with no technician. Return ONLY the JSON, no markdown.';
-
-    // Build content block — image vs PDF
-    var contentBlock = isImage
-      ? { type: 'image',    source: { type: 'base64', media_type: mediaType, data: base64 } }
-      : { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } };
-
+    // Send to Claude API (uses same proxy as rate sheet import)
+    if (btn) btn.textContent = '\u23F3 Extracting data\u2026';
     var resp = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2789,31 +2491,30 @@ async function handleWOImportFile(input, mode) {
         max_tokens: 2000,
         messages: [{
           role: 'user',
-          content: [ contentBlock, { type: 'text', text: WO_PROMPT } ]
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+            { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nIMPORTANT: If no technician name appears, leave technician as empty string. Extract ALL labour rows even with no technician. Return ONLY the JSON.' }
+          ]
         }]
       })
     });
 
     var data = await resp.json();
-    var text = (data.content || []).filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join('');
-    text = text.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
-    var wo = _repairAndParseJSON(text);
+    var text = data.content && data.content[0] ? data.content[0].text : '';
+    text = text.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+    var wo = JSON.parse(text);
 
+    // Populate all WO modal fields
     populateWOFromImport(wo);
 
-    allBtns.forEach(function(id){
-      var b = document.getElementById(id);
-      if (b) { b.textContent = b._origText; b.disabled = false; }
-    });
-    toast('Work order imported ✓ — review and save', 'success');
+    if (btn) { btn.textContent = '✓ Import done'; btn.style.color = 'var(--green)'; }
+    setTimeout(function(){ if(btn){ btn.textContent = '⬆ Import from PDF'; btn.style.color = ''; btn.disabled = false; } }, 3000);
+    toast('Work order imported — review and save', 'success');
 
   } catch(e) {
     console.error('WO import error:', e);
-    allBtns.forEach(function(id){
-      var b = document.getElementById(id);
-      if (b) { b.textContent = b._origText || '⬆ Import'; b.disabled = false; }
-    });
-    toast('Import failed: ' + (e.message || 'Unknown error'), 'error');
+    if (btn) { btn.textContent = '⬆ Import from PDF'; btn.disabled = false; }
+    toast('Import failed: ' + (e.message||'Unknown error'), 'error');
   }
 }
 
@@ -3381,16 +3082,20 @@ async function loadAll(){
     if(results[3].status==='fulfilled') _rateSheets   = results[3].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[4].status==='fulfilled') {
       var sbTS = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
-      if (sbTS.length > 0) {
-        // Supabase has data — use it as source of truth
-        _timesheets = sbTS;
-        _tsCacheWrite(sbTS);
-        var panel = document.getElementById('ts-migrate-panel');
-        if (panel) panel.style.display = 'none';
-      } else {
-        // Supabase is empty — use local cache and keep migration panel visible
-        _timesheets = loadTimesheetsFromStorage();
-      }
+      var localTS = _tsCacheRead();
+      // Merge: Supabase is source of truth, but include any local-only TSes not yet synced
+      var merged = sbTS.slice();
+      localTS.forEach(function(lt){
+        if (!merged.find(function(s){ return s.id === lt.id; })) {
+          merged.unshift(lt);
+          // Push missing local TS up to Supabase
+          sbUpsert('timesheets', lt.id, lt).catch(function(e){ console.warn('[TS sync]', e.message); });
+        }
+      });
+      _timesheets = merged;
+      _tsCacheWrite(merged);
+      var panel = document.getElementById('ts-migrate-panel');
+      if (panel) panel.style.display = 'none';
     } else {
       _timesheets = loadTimesheetsFromStorage(); // fallback to cache
     }
@@ -3418,7 +3123,6 @@ function showView(view, btn){
     document.querySelectorAll('.unav-links button').forEach(function(b){
       if(b.textContent.toLowerCase().includes(view.replace('-',' '))) b.classList.add('active');
     });
-
   }
   renderForView(view);
 }
@@ -3750,18 +3454,7 @@ function techSubmitBoth() {
   techSaveWO();
 }
 
-function setMobileView() {
-  if (window.innerWidth <= 768) {
-    document.body.classList.add('mobile-view');
-  } else {
-    document.body.classList.remove('mobile-view');
-
-  }
-}
-window.addEventListener('resize', setMobileView);
-
 function renderAll(){
-  setMobileView();
   applyAdminVisibility();   // redirect techs away from dashboard, hide admin tabs
   renderDashboard();
   updatePendingBadge();
@@ -3862,7 +3555,6 @@ function updatePendingBadge(){
   var pending = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
   var badge = document.getElementById('pending-badge');
   if (badge){ badge.textContent = pending + ' Pending'; badge.style.display = pending ? 'inline' : 'none'; }
-
 }
 
 // ── Jobs ──────────────────────────────────────────────────────────────────────
@@ -5727,6 +5419,20 @@ async function saveWO(status) {
   var date   = (document.getElementById('wo-date')    || {}).value || today();
   if (!client.trim() || !site.trim()) { toast('Client and location are required', 'error'); return; }
 
+  // Duplicate WO number check — prevent submitting the same WO # twice
+  var woNumInput = (document.getElementById('job-number') || {}).value || '';
+  if (woNumInput.trim() && status === 'submitted') {
+    var duplicate = _jobs.find(function(j) {
+      return j.id !== _editWOId
+          && (j.woNum || j.number || '').trim().toLowerCase() === woNumInput.trim().toLowerCase()
+          && j.status !== 'draft';
+    });
+    if (duplicate) {
+      toast('WO # ' + woNumInput.trim() + ' has already been submitted. Use a unique work order number.', 'error');
+      return;
+    }
+  }
+
   var labourRows = [];
   for (var i = 1; i <= _csLabourRowCount; i++) {
     var techEl  = document.getElementById('cs-lb-tech-' + i);
@@ -5882,6 +5588,16 @@ async function saveWO(status) {
     // Auto-create timesheets on first submit — applies to BOTH manual entry AND PDF import
     // _editWOId is null for new WOs regardless of how data was entered
     if (status === 'submitted' && !_editWOId) {
+      // Ensure the logged-in tech is represented in labourRows so their TS is always created
+      var techForTS = getCurrentTechName();
+      if (techForTS && !(data.labourRows||[]).some(function(r){ return (r.technician||'').trim(); })) {
+        // No technician assigned on any row — stamp the logged-in tech on all rows
+        (data.labourRows||[]).forEach(function(r){ if (!r.technician) r.technician = techForTS; });
+        // If still no rows at all, add a placeholder so the TS gets created
+        if (!(data.labourRows||[]).length) {
+          data.labourRows = [{ technician: techForTS, category: '', regHrs: 0, otHrs: 0, dtHrs: 0, nightHrs: 0 }];
+        }
+      }
       await createTimesheetFromWO(data);
       renderTimesheets();
     }
@@ -7759,15 +7475,13 @@ function calcRowCost(techName, regHrs, otHrs, nightHrs) {
 
 // ── Auto-create timesheet when WO is submitted ───────────────────────────────
 async function createTimesheetFromWO(wo) {
-  // ONE timesheet PER TECHNICIAN — each tech owns their own TS, sees only their rows.
+  // ONE timesheet PER TECHNICIAN per WO — WO uniqueness is enforced at submission
+  // so no duplicate-prevention logic needed here.
   if (!wo || !wo.id) return;
   var labourRows = wo.labourRows || [];
-  if (!labourRows.length) return;
-
-  // Current viewer's canonical name (used as fallback when rows have no technician)
   var currentTechName = getCurrentTechName ? getCurrentTechName() : '';
 
-  // Fuzzy-resolve raw dropdown name → canonical VIEWER_PEOPLE name
+  // Fuzzy-resolve raw name → canonical VIEWER_PEOPLE name
   function _canonical(raw) {
     if (!raw || !raw.trim()) return '';
     var r = raw.toLowerCase().trim();
@@ -7780,21 +7494,14 @@ async function createTimesheetFromWO(wo) {
     return m ? m.name : raw.trim();
   }
 
-  // Group rows by canonical tech name
+  // Group rows by canonical tech name; unrecognised names → logged-in tech
   var byTech = {};
-
   labourRows.forEach(function(r) {
-    var rawName = (r.technician && r.technician.trim()) ? r.technician : '';
-    var name = rawName ? _canonical(rawName) : '';
-
-    // If no name resolved, or it resolved to something that doesn't match any
-    // VIEWER_PEOPLE entry (e.g. a company name from the PDF), fall back to the
-    // logged-in tech so we never produce a phantom TS for an unknown person
+    var name = (r.technician && r.technician.trim()) ? _canonical(r.technician) : '';
     if (!name || !(VIEWER_PEOPLE||[]).find(function(p){ return p.name === name; })) {
       name = currentTechName;
     }
-    if (!name) return; // no tech at all — skip
-
+    if (!name) return;
     if (!byTech[name]) byTech[name] = [];
     byTech[name].push({
       date:      r.date      || wo.date || today(),
@@ -7809,19 +7516,15 @@ async function createTimesheetFromWO(wo) {
     });
   });
 
+  // If no labour rows, create a blank TS for the logged-in tech
+  if (!Object.keys(byTech).length) {
+    if (!currentTechName) return 0; // no tech logged in — nothing to do
+    byTech[currentTechName] = [];
+  }
+
   var created = 0;
-  // Read freshest TS list — union of in-memory and localStorage to catch stale entries
-  var freshTS = _timesheets.concat(_tsCacheRead().filter(function(c){
-    return !_timesheets.find(function(m){ return m.id === c.id; });
-  }));
-
   Object.keys(byTech).forEach(function(techName) {
-    // Skip if TS already exists for this tech+WO (check both memory and cache)
-    if (freshTS.find(function(t){ return t.woId === wo.id && t.technician === techName; })) return;
-    // Skip if techName doesn't match any known employee (prevents phantom TSes)
-    var knownPerson = (VIEWER_PEOPLE||[]).find(function(p){ return p.name === techName; });
-    if (!knownPerson) return;
-
+    if (!techName) return; // skip empty names
     var ts = {
       id:           uid(),
       woId:         wo.id,
@@ -7844,9 +7547,14 @@ async function createTimesheetFromWO(wo) {
       created:      today(),
       modified:     today(),
     };
-    saveTimesheetToStorage(ts);
-    // Re-read _timesheets from storage after write to stay in sync
-    _timesheets = _tsCacheRead();
+    // Write to localStorage + Supabase
+    var all = _tsCacheRead();
+    all.unshift(ts);
+    _tsCacheWrite(all);
+    _timesheets = all;
+    sbUpsert('timesheets', ts.id, ts).catch(function(e){
+      console.warn('[TS] Supabase write failed, cached locally:', e.message);
+    });
     created++;
   });
   return created;
@@ -8476,16 +8184,18 @@ function renderTimesheets() {
     if (tsDateTo   && ts.date && ts.date > tsDateTo)   return false;
     if (qWO  && !(ts.woNum||'').toLowerCase().includes(qWO.toLowerCase())) return false;
     if (qEmp && !(ts.technician||'').toLowerCase().includes(qEmp.toLowerCase())) return false;
-    if (!isAdmin() && myName) {
+    // Techs see ONLY their own timesheets — never other techs'
+    if (!isAdmin()) {
+      if (!myName) return false; // unknown viewer — show nothing
       var tsTech = (ts.technician || '').trim();
-      if (!tsTech) return false;  // no owner set — admin only
+      if (!tsTech) return false; // unowned TS — admin only
       if (tsTech === myName) return true;
-      // fuzzy fallback for TSes created before canonical names were enforced
+      // fuzzy fallback (first + last name match)
       var fn = myName.split(' ')[0].toLowerCase();
       var ln = myName.split(' ').pop().toLowerCase();
       if (fn.length > 1 && ln.length > 1 &&
           tsTech.toLowerCase().includes(fn) && tsTech.toLowerCase().includes(ln)) return true;
-      return false;
+      return false; // not this tech's TS
     }
     return true;
   });
@@ -9165,6 +8875,5 @@ document.addEventListener('click', function(e) {
 
 
 </script>
-
 </body>
 </html>
