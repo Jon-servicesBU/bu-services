@@ -1070,6 +1070,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <th>WO #</th><th>Client</th><th>Technician</th><th>Date</th>
             <th style="text-align:right">Reg</th><th style="text-align:right">OT</th><th style="text-align:right">Night</th>
             <th style="text-align:right">Billed $</th>
+            <th style="text-align:right">Cost Rate</th>
             <th style="text-align:right">Cost $</th>
             <th style="text-align:right">Margin $</th>
             <th style="text-align:right">Margin %</th>
@@ -8824,10 +8825,19 @@ function renderMarginReport() {
     if (techFilter) rows = rows.filter(function(r){ return (r.technician||'').toLowerCase().includes(techFilter.toLowerCase()); });
     if (!rows.length && techFilter) return;
 
+    var costDetails = [];
     var cost = rows.reduce(function(s, r) {
-      var stR = getRate(rs, r.category, 'st') || DEFAULT_COST.st;
-      var otR = getRate(rs, r.category, 'ot') || DEFAULT_COST.ot;
-      var dtR = getRate(rs, r.category, 'dt') || DEFAULT_COST.dt;
+      var stR = getRate(rs, r.category, 'st');
+      var otR = getRate(rs, r.category, 'ot');
+      var dtR = getRate(rs, r.category, 'dt');
+      if (!stR) {
+        var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
+          return e.name && r.technician && e.name.toLowerCase() === (r.technician||'').toLowerCase();
+        });
+        stR = emp ? emp.rate : DEFAULT_COST.st;
+        otR = stR * 1.5; dtR = stR * 2;
+      }
+      costDetails.push({ tech: r.technician||'', stR: stR });
       return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
     }, 0);
 
@@ -8837,12 +8847,16 @@ function renderMarginReport() {
     var margin = billed - cost;
     var marginPct = billed > 0 ? margin / billed * 100 : 0;
     var techs = [...new Set(rows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
+    var rateMap = {};
+    costDetails.forEach(function(d){ if(d.tech) rateMap[d.tech] = d.stR; });
+    var costRateStr = Object.keys(rateMap).map(function(t){ return t.split(' ')[0]+': $'+rateMap[t].toFixed(2); }).join(', ') || '$'+DEFAULT_COST.st.toFixed(2);
 
     woRows.push({
       woNum: woNum, client: j.client||'—', tech: techs,
       date: j.date || j.created || '',
       reg: totalReg, ot: totalOT, night: totalNight,
-      billed: billed, cost: cost, margin: margin, marginPct: marginPct
+      billed: billed, cost: cost, margin: margin, marginPct: marginPct,
+      costRate: costRateStr
     });
   });
 
@@ -8877,9 +8891,16 @@ function renderMarginReport() {
     if (techFilter) allRows = allRows.filter(function(r){ return (r.technician||'').toLowerCase().includes(techFilter.toLowerCase()); });
 
     var cost = allRows.reduce(function(s, r) {
-      var stR = getRate(rs, r.category, 'st') || DEFAULT_COST.st;
-      var otR = getRate(rs, r.category, 'ot') || DEFAULT_COST.ot;
-      var dtR = getRate(rs, r.category, 'dt') || DEFAULT_COST.dt;
+      var stR = getRate(rs, r.category, 'st');
+      var otR = getRate(rs, r.category, 'ot');
+      var dtR = getRate(rs, r.category, 'dt');
+      if (!stR) {
+        var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
+          return e.name && r.technician && e.name.toLowerCase() === (r.technician||'').toLowerCase();
+        });
+        stR = emp ? emp.rate : DEFAULT_COST.st;
+        otR = stR * 1.5; dtR = stR * 2;
+      }
       return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
     }, 0);
 
@@ -8901,7 +8922,7 @@ function renderMarginReport() {
       date: inv.invDate || j.date || '',
       reg: totalReg, ot: totalOT, night: totalNight,
       billed: billed, cost: cost, margin: margin, marginPct: marginPct,
-      combined: true
+      costRate: '—', combined: true
     });
   })
 
@@ -8930,7 +8951,7 @@ function renderMarginReport() {
   var woBody = document.getElementById('margin-wo-body');
   if (woBody) {
     if (!woRows.length) {
-      woBody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:1.5rem;color:var(--muted)">No data — add invoices to work orders to see margin</td></tr>';
+      woBody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:1.5rem;color:var(--muted)">No data — add invoices to work orders to see margin</td></tr>';
     } else {
       woBody.innerHTML = woRows.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); }).map(function(r){
         var pctCls = r.marginPct>=40?'sc-green':r.marginPct>=30?'sc-amber':'sc-red';
@@ -8943,6 +8964,7 @@ function renderMarginReport() {
           '<td style="text-align:right">'+r.ot.toFixed(1)+'</td>'+
           '<td style="text-align:right">'+r.night.toFixed(1)+'</td>'+
           '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(r.billed)+'</td>'+
+          '<td style="text-align:right;font-size:.7rem;color:var(--color-text-secondary)">'+( r.costRate||'—')+'</td>'+
           '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(r.cost)+'</td>'+
           '<td style="text-align:right;font-family:var(--mono);font-weight:700">'+fmtMoney(r.margin)+'</td>'+
           '<td style="text-align:right"><span class="status-chip '+pctCls+'">'+r.marginPct.toFixed(1)+'%</span></td>'+
