@@ -8775,7 +8775,7 @@ function _renderMarginReportImpl() {
     var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
       return e.name && techName && e.name.toLowerCase() === (techName||'').toLowerCase();
     });
-    return emp ? emp.rate : 55;
+    return (emp && emp.rate) ? emp.rate : 55;
   }
 
   function billRows(rows, rs) {
@@ -8861,7 +8861,7 @@ function _renderMarginReportImpl() {
     var techs      = [...new Set(rows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
     var rateMap    = {};
     rows.forEach(function(r){ if(r.technician) rateMap[r.technician] = getCostRate(r.technician); });
-    var costRateStr = Object.keys(rateMap).map(function(t){ return t.split(' ')[0]+': $'+rateMap[t].toFixed(2); }).join(', ') || '$55.00';
+    var costRateStr = Object.keys(rateMap).map(function(t){ return t.split(' ')[0]+': $'+(rateMap[t]||0).toFixed(2); }).join(', ') || '$55.00';
 
     woRows.push({ woNum: woNum, client: j.client||'—', tech: techs,
       date: j.date||j.created||'', reg: totalReg||0, ot: totalOT||0, night: totalNight||0,
