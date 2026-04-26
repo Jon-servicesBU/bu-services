@@ -7502,12 +7502,14 @@ async function createTimesheetFromWO(wo) {
   });
 
   // If no labour rows, create a blank TS for the logged-in tech
-  if (!Object.keys(byTech).length && currentTechName) {
+  if (!Object.keys(byTech).length) {
+    if (!currentTechName) return 0; // no tech logged in — nothing to do
     byTech[currentTechName] = [];
   }
 
   var created = 0;
   Object.keys(byTech).forEach(function(techName) {
+    if (!techName) return; // skip empty names
     var ts = {
       id:           uid(),
       woId:         wo.id,
@@ -7530,8 +7532,14 @@ async function createTimesheetFromWO(wo) {
       created:      today(),
       modified:     today(),
     };
-    saveTimesheetToStorage(ts);
-    _timesheets = _tsCacheRead();
+    // Write to localStorage + Supabase
+    var all = _tsCacheRead();
+    all.unshift(ts);
+    _tsCacheWrite(all);
+    _timesheets = all;
+    sbUpsert('timesheets', ts.id, ts).catch(function(e){
+      console.warn('[TS] Supabase write failed, cached locally:', e.message);
+    });
     created++;
   });
   return created;
@@ -8161,16 +8169,18 @@ function renderTimesheets() {
     if (tsDateTo   && ts.date && ts.date > tsDateTo)   return false;
     if (qWO  && !(ts.woNum||'').toLowerCase().includes(qWO.toLowerCase())) return false;
     if (qEmp && !(ts.technician||'').toLowerCase().includes(qEmp.toLowerCase())) return false;
-    if (!isAdmin() && myName) {
+    // Techs see ONLY their own timesheets — never other techs'
+    if (!isAdmin()) {
+      if (!myName) return false; // unknown viewer — show nothing
       var tsTech = (ts.technician || '').trim();
-      if (!tsTech) return false;  // no owner set — admin only
+      if (!tsTech) return false; // unowned TS — admin only
       if (tsTech === myName) return true;
-      // fuzzy fallback for TSes created before canonical names were enforced
+      // fuzzy fallback (first + last name match)
       var fn = myName.split(' ')[0].toLowerCase();
       var ln = myName.split(' ').pop().toLowerCase();
       if (fn.length > 1 && ln.length > 1 &&
           tsTech.toLowerCase().includes(fn) && tsTech.toLowerCase().includes(ln)) return true;
-      return false;
+      return false; // not this tech's TS
     }
     return true;
   });
