@@ -8745,6 +8745,13 @@ function exportWeeklySummary() {
 
 function renderMarginReport() {
   if (!isAdmin()) return;
+  try { _renderMarginReportImpl(); } catch(e) {
+    console.error('[margin]', e);
+    var b = document.getElementById('margin-wo-body');
+    if (b) b.innerHTML = '<tr><td colspan="12" style="color:#E84040;padding:1rem">Error: ' + e.message + '</td></tr>';
+  }
+}
+function _renderMarginReportImpl() {
 
   var techFilter   = (document.getElementById('margin-filter-tech-text')||{}).value || '';
   var dateFrom     = (document.getElementById('margin-date-from')||{}).value || '';
