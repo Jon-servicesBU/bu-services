@@ -2506,12 +2506,12 @@ async function handleWOImportFile(input) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: 2000,
+        max_tokens: 8192,
         messages: [{
           role: 'user',
           content: [
             { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-            { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nIMPORTANT: If no technician name appears, leave technician as empty string. Extract ALL labour rows even with no technician. Return ONLY the JSON.' }
+            { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nIMPORTANT: If no technician name appears, leave technician as empty string. Extract ALL labour rows even with no technician. Rules: times as 24hr HH:MM format. Compact JSON, no whitespace. Return ONLY the JSON object.' }
           ]
         }]
       })
@@ -2520,7 +2520,22 @@ async function handleWOImportFile(input) {
     var data = await resp.json();
     var text = data.content && data.content[0] ? data.content[0].text : '';
     text = text.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-    var wo = JSON.parse(text);
+    var wo = _repairAndParseJSON(text);
+
+    // Normalize 12hr time strings to HH:mm
+    function _normTime(t) {
+      if (!t) return '';
+      var m = String(t).match(/^(\d{1,2}):(\d{2})(?::\d+)?\s*(AM|PM)?$/i);
+      if (!m) return t;
+      var h = parseInt(m[1]), min = m[2], ampm = (m[3]||'').toUpperCase();
+      if (ampm === 'PM' && h < 12) h += 12;
+      if (ampm === 'AM' && h === 12) h = 0;
+      return String(h).padStart(2,'0') + ':' + min;
+    }
+    (wo.labourRows||[]).forEach(function(r){
+      if (r.startTime) r.startTime = _normTime(r.startTime);
+      if (r.endTime)   r.endTime   = _normTime(r.endTime);
+    });
 
     // Populate all WO modal fields
     populateWOFromImport(wo);
@@ -5549,12 +5564,12 @@ async function handleBatchWOImport(input) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'claude-sonnet-4-5',
-          max_tokens: 2000,
+          max_tokens: 8192,
           messages: [{
             role: 'user',
             content: [
               { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
-              { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nIMPORTANT: Return ONLY the JSON.' }
+              { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a compact JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"HH:MM","endTime":"HH:MM"}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nRules: times as 24hr HH:MM. No extra whitespace. Return ONLY the JSON object, no explanation.' }
             ]
           }]
         })
@@ -5562,7 +5577,22 @@ async function handleBatchWOImport(input) {
 
       var data = await resp.json();
       var text = (data.content && data.content[0] ? data.content[0].text : '').replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-      var wo = JSON.parse(text);
+      var wo = _repairAndParseJSON(text);
+
+      // Normalize time strings from 12hr to HH:mm (e.g. "8:00:00AM" → "08:00")
+      function _normTime(t) {
+        if (!t) return '';
+        var m = String(t).match(/^(\d{1,2}):(\d{2})(?::\d+)?\s*(AM|PM)?$/i);
+        if (!m) return t;
+        var h = parseInt(m[1]), min = m[2], ampm = (m[3]||'').toUpperCase();
+        if (ampm === 'PM' && h < 12) h += 12;
+        if (ampm === 'AM' && h === 12) h = 0;
+        return String(h).padStart(2,'0') + ':' + min;
+      }
+      (wo.labourRows||[]).forEach(function(r){
+        if (r.startTime) r.startTime = _normTime(r.startTime);
+        if (r.endTime)   r.endTime   = _normTime(r.endTime);
+      });
 
       // Check for duplicate WO number
       var woNum = (wo.woNum || '').trim();
