@@ -682,6 +682,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <button class="btn btn-ghost btn-sm" onclick="document.getElementById('job-search').value='';document.getElementById('job-client-search').value='';document.getElementById('job-date-from').value='';document.getElementById('job-date-to').value='';_jobsPage=1;renderJobs()">Clear</button>
         <select class="form-select" style="width:120px;font-size:.72rem" id="job-filter-status" onchange="renderJobs()">
           <option value="">All</option>
+          <option value="quoted">Quote</option>
+          <option value="quote-accepted">Quote Accepted</option>
           <option value="draft">Draft</option>
           <option value="submitted">Submitted</option>
           <option value="approved">Approved</option>
@@ -743,6 +745,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="form-group">
           <label class="form-label">P.O. #</label>
           <input class="form-input" id="job-po" placeholder="e.g. PO200231COC2510">
+        </div>
+        <div class="form-group" id="wo-linked-quote-group" style="display:none">
+          <label class="form-label">Linked Quote</label>
+          <select class="form-select" id="wo-linked-quote">
+            <option value="">— None —</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label">Job #</label>
@@ -903,11 +911,16 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
       <button class="btn btn-ghost" id="wo-import-pdf-btn" onclick="triggerWOImport()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">⬆ Import from PDF</button>
       <input type="file" id="wo-import-file" accept=".pdf,.PDF" style="display:none" onchange="handleWOImportFile(this)">
+      <button class="btn btn-ghost" id="wo-batch-import-btn" onclick="triggerBatchWOImport()" style="border-color:rgba(0,174,239,.3);color:var(--sky)" data-admin-only>⬆ Batch Import PDFs</button>
+      <input type="file" id="wo-batch-import-file" accept=".pdf,.PDF" multiple style="display:none" onchange="handleBatchWOImport(this)">
       <div style="flex:1"></div>
       <!-- Shown/hidden by openWOModal based on status -->
       <button class="btn btn-ghost"     id="wo-btn-edit-unlock"  onclick="adminUnlockWO()"      style="display:none">✏ Edit</button>
+      <button class="btn btn-secondary" id="wo-btn-quote"        onclick="saveWO('quoted')"     style="display:none;border-color:rgba(168,85,247,.4);color:#C084FC" data-admin-only>📋 Save as Quote</button>
       <button class="btn btn-success"   id="wo-btn-approve"      onclick="approveWOFromModal()"  style="display:none">✓ Approve</button>
       <button class="btn btn-primary"   id="wo-btn-save"         onclick="saveWO('approved')"    style="display:none">💾 Save</button>
+      <button class="btn btn-secondary" id="wo-btn-accept-quote" onclick="acceptQuote()"        style="display:none;border-color:rgba(34,197,94,.4);color:#22C55E">✓ Accept Quote</button>
+      <button class="btn btn-ghost"     id="wo-btn-view-quote"   onclick="viewQuote()"          style="display:none;color:#C084FC">📋 View Quote</button>
       <button class="btn btn-secondary" id="wo-btn-invoice"      onclick="invoiceWOFromModal()"  style="display:none">🧾 Invoice</button>
       <!-- Tech only -->
       <button class="btn btn-primary"   id="wo-btn-tech-save"    onclick="techSaveWO()"          style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">Save Work Order →</button>
@@ -1777,6 +1790,8 @@ function toast(msg, type) {
 }
 function chipHtml(status) {
   var map = {
+    quoted:         {bg:'rgba(168,85,247,.15)',   color:'#C084FC',  label:'Quote'},
+    'quote-accepted':{bg:'rgba(168,85,247,.08)',   color:'#9CA3AF',  label:'Quote Accepted'},
     draft:     {bg:'rgba(107,114,128,.15)', color:'#9CA3AF',  label:'Draft'},
     pending:   {bg:'rgba(201,134,10,.15)', color:'#FCD34D',  label:'Confirm Needed'},
     approved:  {bg:'rgba(59,130,246,.15)',  color:'#60A5FA',  label:'Approved'},
@@ -2644,6 +2659,7 @@ function openWOModal(editId) {
     'wo-travel-misc':     (wo.travel && wo.travel.misc)    || '',
     'wo-travel-misc-desc':(wo.travel && wo.travel.miscDesc)|| '',
     'wo-customer-contact':(wo.travel && wo.travel.customerContact) || '',
+    'wo-linked-quote':    wo.linkedQuoteId || '',
   };
   Object.keys(fields).forEach(function(id) {
     var el = document.getElementById(id);
@@ -2697,7 +2713,7 @@ function openWOModal(editId) {
   if (importBtn) importBtn.style.display = !editId ? 'inline-flex' : 'none';
 
   // Hide all action buttons first
-  ['wo-btn-edit-unlock','wo-btn-approve','wo-btn-save','wo-btn-invoice','wo-btn-tech-save'].forEach(function(id){
+  ['wo-btn-edit-unlock','wo-btn-approve','wo-btn-save','wo-btn-invoice','wo-btn-tech-save','wo-btn-quote','wo-btn-accept-quote','wo-btn-view-quote'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.style.display = 'none';
   });
 
@@ -2742,13 +2758,37 @@ function openWOModal(editId) {
       },20);
     } else if (woStatus==='invoiced'||woStatus==='paid') {
       _lockInputs();
+    } else if (woStatus === 'quote-accepted') {
+      _showBtn('wo-btn-view-quote');
+      _lockInputs();
+      setTimeout(function(){
+        var wo = _jobs.find(function(j){ return j.id === _editWOId; });
+        var linkedNum = wo && wo.linkedWOId ? ((_jobs.find(function(j){ return j.id===wo.linkedWOId; })||{}).woNum||'') : '';
+        _addBanner('wo-approved-banner',
+          'background:rgba(107,114,128,.1);border:1px solid rgba(107,114,128,.3);border-left:4px solid #9CA3AF;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#D1D5DB;margin-bottom:.75rem;font-weight:600',
+          '✓ Quote accepted' + (linkedNum ? ' — Live WO: ' + linkedNum : '') + '. This record is read-only.');
+      },20);
+    } else if (woStatus === 'quoted') {
+      _showBtn('wo-btn-accept-quote');
+      _showBtn('wo-btn-view-quote');
+      _showBtn('wo-btn-save');
+      _lockInputs();
+      setTimeout(function(){
+        _addBanner('wo-approved-banner',
+          'background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-left:4px solid #A855F7;border-radius:0 6px 6px 0;padding:.6rem 1rem;font-size:.78rem;color:#C084FC;margin-bottom:.75rem;font-weight:600',
+          '📋 Quote — click Accept Quote to convert to a live work order, or Edit to revise.');
+      },20);
     } else {
-      // New or draft
+      // New or draft — show Save as Quote + Save
+      _showBtn('wo-btn-quote');
       _showBtn('wo-btn-save');
     }
   }
 
   document.getElementById('job-modal').classList.add('open');
+  setTimeout(function(){ _attachVoiceBtns('job-modal'); }, 50);
+  // Populate linked quote dropdown
+  _populateLinkedQuoteDropdown(editId);
 }
 
 // ── Admin WO modal helpers ────────────────────────────────────────────────────
@@ -3627,7 +3667,7 @@ function renderJobs() {
   var sortOrder  = (document.getElementById('job-sort-order')    || {}).value || 'date_desc';
   var filter     = (document.getElementById('job-filter-status') || {}).value || '';
 
-  var validStatuses = ['draft','submitted','approved','invoiced','paid'];
+  var validStatuses = ['draft','quoted','quote-accepted','submitted','approved','invoiced','paid'];
   var _viewJobs = isAdmin() ? _jobs : _jobs.filter(function(j){
     var vp=(VIEWER_PEOPLE||[]).find(function(p){return p.id===CURRENT_VIEWER;});
     if(!vp) return true;
@@ -5459,6 +5499,467 @@ function addFilmRow(prefill) {
 }
 
 // ── WO: Save ──────────────────────────────────────────────────────────────────
+// ── Batch WO Import ───────────────────────────────────────────────────────────
+function triggerBatchWOImport() {
+  document.getElementById('wo-batch-import-file').click();
+}
+
+async function handleBatchWOImport(input) {
+  var files = Array.from(input.files);
+  input.value = '';
+  if (!files.length) return;
+
+  // Show progress modal
+  var modal = document.getElementById('batch-import-modal');
+  var prog  = document.getElementById('batch-import-progress');
+  modal.classList.add('open');
+  prog.innerHTML = '<div style="font-size:.82rem;color:var(--color-text-secondary);margin-bottom:1rem">Processing ' + files.length + ' file' + (files.length>1?'s':'') + '…</div>'
+    + '<div id="batch-import-list" style="display:flex;flex-direction:column;gap:.4rem"></div>';
+
+  var list = document.getElementById('batch-import-list');
+  var results = { imported: 0, skipped: 0, failed: 0, rows: [] };
+
+  for (var fi = 0; fi < files.length; fi++) {
+    var file = files[fi];
+    var rowId = 'brow-' + fi;
+    list.innerHTML += '<div id="' + rowId + '" style="display:flex;align-items:center;gap:.6rem;font-size:.78rem;padding:.4rem .6rem;background:var(--color-background-secondary);border-radius:6px">'
+      + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + file.name + '</span>'
+      + '<span id="' + rowId + '-status" style="flex-shrink:0;color:var(--color-text-secondary)">⏳ Queued</span>'
+      + '</div>';
+  }
+
+  for (var i = 0; i < files.length; i++) {
+    var f = files[i];
+    var rid = 'brow-' + i;
+    var statusEl = document.getElementById(rid + '-status');
+    if (statusEl) statusEl.textContent = '⏳ Extracting…';
+
+    try {
+      // Read as base64
+      var b64 = await new Promise(function(res, rej) {
+        var r = new FileReader();
+        r.onload = function(e) { res(e.target.result.split(',')[1]); };
+        r.onerror = rej;
+        r.readAsDataURL(f);
+      });
+
+      // Call AI
+      var resp = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-5',
+          max_tokens: 2000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
+              { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nIMPORTANT: Return ONLY the JSON.' }
+            ]
+          }]
+        })
+      });
+
+      var data = await resp.json();
+      var text = (data.content && data.content[0] ? data.content[0].text : '').replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+      var wo = JSON.parse(text);
+
+      // Check for duplicate WO number
+      var woNum = (wo.woNum || '').trim();
+      if (woNum) {
+        var dupe = _jobs.find(function(j) {
+          return (j.woNum || j.number || '').trim().toLowerCase() === woNum.toLowerCase();
+        });
+        if (dupe) {
+          results.skipped++;
+          results.rows.push({ name: f.name, woNum: woNum, status: 'skipped', reason: 'WO # already exists' });
+          if (statusEl) { statusEl.textContent = '⏭ Skipped'; statusEl.style.color = 'var(--color-text-warning,#F59E0B)'; }
+          continue;
+        }
+      }
+
+      // Auto-save the WO as approved
+      if (statusEl) statusEl.textContent = '💾 Saving…';
+      var id = uid();
+      var date = wo.date || today();
+      var labourRows = wo.labourRows || [];
+      var saveData = {
+        id: id,
+        woNum: woNum || nextNum('W-', _jobs, 'woNum'),
+        number: woNum || nextNum('W-', _jobs, 'woNum'),
+        client: (wo.client || '').trim(),
+        site: (wo.site || wo.location || '').trim(),
+        date: date,
+        location: (wo.site || '').trim(),
+        equipOwner: wo.equipOwner || '',
+        province: wo.province || 'AB',
+        po: wo.po || '',
+        jobNum: wo.jobNum || '',
+        afe: wo.afe || '',
+        rig: wo.rig || '',
+        customerContact: wo.customerContact || '',
+        fieldReports: wo.fieldReports || '',
+        notes: wo.notes || '',
+        labourRows: labourRows,
+        equipRows: wo.equipment || [],
+        consumables: wo.consumables || [],
+        film: wo.film || [],
+        travel: wo.travel || {},
+        status: 'approved',
+        rateSheetId: (_rateSheets[0] || {}).id || '',
+        created: today(),
+        modified: today(),
+      };
+
+      await sbUpsert('jobs', id, saveData);
+      _jobs.unshift(saveData);
+
+      // Create timesheets for each tech in labourRows
+      await createTimesheetFromWO(saveData);
+
+      results.imported++;
+      results.rows.push({ name: f.name, woNum: saveData.woNum, status: 'imported' });
+      if (statusEl) { statusEl.textContent = '✓ Imported (' + saveData.woNum + ')'; statusEl.style.color = 'var(--color-text-success,#22C55E)'; }
+
+    } catch(e) {
+      results.failed++;
+      results.rows.push({ name: f.name, woNum: '—', status: 'failed', reason: e.message });
+      if (statusEl) { statusEl.textContent = '✗ Failed'; statusEl.style.color = 'var(--color-text-danger,#E84040)'; }
+      console.error('Batch import error:', f.name, e);
+    }
+  }
+
+  // Summary
+  var summary = document.createElement('div');
+  summary.style.cssText = 'margin-top:1rem;padding:.75rem 1rem;background:var(--color-background-secondary);border-radius:8px;font-size:.8rem;border-left:4px solid ' + (results.failed ? '#E84040' : '#22C55E');
+  summary.innerHTML = '<strong>Done</strong> — '
+    + '<span style="color:#22C55E">' + results.imported + ' imported</span>, '
+    + '<span style="color:#F59E0B">' + results.skipped + ' skipped</span>, '
+    + '<span style="color:#E84040">' + results.failed + ' failed</span>';
+  prog.appendChild(summary);
+
+  renderJobs();
+  renderDashboard();
+  updatePendingBadge();
+}
+
+
+// ── Voice-to-text input ───────────────────────────────────────────────────────
+var _voiceRecog = null;
+var _voiceTarget = null;
+var _voiceBtn    = null;
+
+function _initVoice() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  var r = new SR();
+  r.continuous      = false;
+  r.interimResults  = true;
+  r.lang            = 'en-CA';
+  r.onresult = function(e) {
+    var interim = '', final = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    if (_voiceTarget) {
+      var cur = _voiceTarget._voiceBase || '';
+      _voiceTarget.value = cur + (final || interim);
+    }
+  };
+  r.onspeechend = function() { r.stop(); };
+  r.onend = function() {
+    if (_voiceTarget) {
+      _voiceTarget._voiceBase = _voiceTarget.value;
+      delete _voiceTarget._voiceBase;
+    }
+    if (_voiceBtn) {
+      _voiceBtn.textContent = '🎤';
+      _voiceBtn.style.color = '';
+      _voiceBtn.style.background = '';
+    }
+    _voiceTarget = null;
+    _voiceBtn    = null;
+  };
+  r.onerror = function(e) {
+    if (e.error !== 'no-speech') toast('Voice error: ' + e.error, 'error');
+  };
+  return r;
+}
+
+function _startVoice(btn, input) {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Voice input not supported in this browser. Use Chrome or Edge.', 'error'); return; }
+
+  // If already recording this field — stop
+  if (_voiceTarget === input && _voiceRecog) {
+    _voiceRecog.stop();
+    return;
+  }
+
+  // Stop any previous recording
+  if (_voiceRecog) { try { _voiceRecog.stop(); } catch(e) {} }
+
+  _voiceRecog = _initVoice();
+  _voiceTarget = input;
+  _voiceBtn    = btn;
+  input._voiceBase = input.value ? input.value + ' ' : '';
+
+  btn.textContent = '🔴';
+  btn.style.color = '#E84040';
+  btn.style.background = 'rgba(232,64,64,.1)';
+
+  try { _voiceRecog.start(); }
+  catch(e) { toast('Could not start voice: ' + e.message, 'error'); }
+}
+
+function _attachVoiceBtns(modalId) {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return; // silently skip if browser doesn't support
+
+  var modal = document.getElementById(modalId);
+  if (!modal) return;
+
+  // Target text inputs and textareas — skip numeric, date, hidden
+  var els = modal.querySelectorAll('input[type="text"], input:not([type]), textarea');
+  els.forEach(function(el) {
+    // Skip if already has a mic button, or if it's a search/number/date field
+    if (el.dataset.voiceAttached) return;
+    if (['number','date','email','password','hidden','file','range','checkbox','radio'].indexOf(el.type) > -1) return;
+    if (el.id && ['job-number','cs-travel-km','cs-travel-km-rate','cs-travel-hotels',
+                  'wo-travel-camp','cs-travel-flights','cs-travel-loa-techs',
+                  'cs-travel-loa-days','cs-travel-loa-rate','wo-travel-misc'].indexOf(el.id) > -1) return;
+
+    el.dataset.voiceAttached = '1';
+
+    var wrap = el.parentNode;
+    var container = document.createElement('div');
+    container.style.cssText = 'position:relative;display:flex;align-items:center;gap:4px';
+
+    // Insert container before el
+    wrap.insertBefore(container, el);
+    container.appendChild(el);
+
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '🎤';
+    btn.title = 'Voice input';
+    btn.style.cssText = 'flex-shrink:0;width:28px;height:28px;border-radius:6px;border:1px solid var(--color-border-secondary);background:var(--color-background-secondary);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0;transition:all .15s;color:var(--color-text-secondary)';
+    btn.onmouseenter = function(){ this.style.borderColor='var(--color-border-primary)'; };
+    btn.onmouseleave = function(){ if(_voiceTarget!==el) this.style.borderColor=''; };
+    btn.onclick = function(e){ e.preventDefault(); _startVoice(btn, el); };
+    container.appendChild(btn);
+
+    // Make input fill remaining space
+    el.style.flex = '1';
+    el.style.minWidth = '0';
+  });
+}
+
+
+// ── Quote functions ───────────────────────────────────────────────────────────
+
+// Convert a quoted WO to approved (live work order)
+async function acceptQuote() {
+  var quote = _editWOId ? _jobs.find(function(j){ return j.id === _editWOId; }) : null;
+  if (!quote) return;
+  if (!confirm('Accept this quote?\n\nA new Work Order will be created pre-filled from the quote. The tech can edit on site before submitting.')) return;
+  // Create a NEW WO from the quote — quote stays as read-only reference
+  var newId  = uid();
+  var newNum = nextNum('W-', _jobs, 'woNum');
+  var newWO  = Object.assign({}, quote, {
+    id:             newId,
+    woNum:          newNum,
+    number:         newNum,
+    status:         'approved',
+    linkedQuoteId:  quote.id,
+    linkedQuoteNum: quote.woNum || quote.number || '',
+    created:        today(),
+    modified:       today(),
+    invoiceId:      null,
+  });
+  // Mark quote as accepted
+  quote.status       = 'quote-accepted';
+  quote.linkedWOId   = newId;
+  quote.modified     = today();
+  try {
+    await sbUpsert('jobs', newId, newWO);
+    await sbUpsert('jobs', quote.id, quote);
+    _jobs = _jobs.map(function(j){ return j.id === quote.id ? quote : j; });
+    _jobs.unshift(newWO);
+    await createTimesheetFromWO(newWO);
+    closeModal('job-modal');
+    renderJobs(); renderDashboard(); renderTimesheets(); updatePendingBadge();
+    toast('Quote accepted — WO ' + newNum + ' created and ready for the tech', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// Print/view a quote document (like invoice but labelled QUOTATION)
+function viewQuote() {
+  var wo = _editWOId ? _jobs.find(function(j){ return j.id === _editWOId; }) : null;
+  if (!wo) { toast('No work order selected', 'error'); return; }
+  var rs = wo.rateSheetId ? _rateSheets.find(function(r){ return r.id === wo.rateSheetId; })
+         : _rateSheets.find(function(r){ return (r.type||'tm')==='tm'; }) || _rateSheets[0] || null;
+  _withPrintGuard(function() {
+    var html = buildQuoteHTML(wo, rs);
+    var win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(function(){ win.print(); }, 600);
+  });
+}
+
+function buildQuoteHTML(wo, rs) {
+  var woNum   = wo.woNum || wo.number || '—';
+  var today_  = today();
+  // Expiry: 30 days from quote date
+  var quoteDate = wo.modified || wo.created || today_;
+  var expDate   = new Date(quoteDate); expDate.setDate(expDate.getDate()+30);
+  var expStr    = expDate.toISOString().slice(0,10);
+
+  var DEFAULT_RATES = { st: 105, ot: 157.5, dt: 210 };
+  var lineItems = [];
+  var subtotal = 0;
+
+  // Labour lines
+  (wo.labourRows || []).forEach(function(r) {
+    var cat = (rs && rs.labour) ? (rs.labour.find(function(l){
+      return l.name && r.category && l.name.toLowerCase().split('(')[0].trim() === r.category.toLowerCase().split('(')[0].trim();
+    }) || {}) : {};
+    var stR = cat.stRate || DEFAULT_RATES.st;
+    var otR = cat.otRate || stR * 1.5;
+    var dtR = cat.dtRate || stR * 2;
+    if (r.regHrs > 0) { var amt = r.regHrs * stR; subtotal += amt; lineItems.push({ desc: (r.category||'Labour') + ' — Regular', qty: r.regHrs, unit: 'hr', rate: stR, amt: amt }); }
+    if (r.otHrs  > 0) { var amt = r.otHrs  * otR; subtotal += amt; lineItems.push({ desc: (r.category||'Labour') + ' — Overtime', qty: r.otHrs, unit: 'hr', rate: otR, amt: amt }); }
+    if (r.dtHrs  > 0) { var amt = r.dtHrs  * dtR; subtotal += amt; lineItems.push({ desc: (r.category||'Labour') + ' — Double Time', qty: r.dtHrs, unit: 'hr', rate: dtR, amt: amt }); }
+    if (r.nightHrs > 0) { var nsR = stR*1.15; var amt = r.nightHrs * nsR; subtotal += amt; lineItems.push({ desc: (r.category||'Labour') + ' — Night Shift', qty: r.nightHrs, unit: 'hr', rate: nsR, amt: amt }); }
+  });
+
+  // Consumables
+  (wo.consumables || []).forEach(function(r) {
+    var item = _findConsumableRate(r.item||r.type||'', rs) || {};
+    var rate = item.rate || 0;
+    if (rate && r.qty > 0) { var amt = r.qty * rate; subtotal += amt; lineItems.push({ desc: r.item||r.type||'Consumable', qty: r.qty, unit: r.unit||'ea', rate: rate, amt: amt }); }
+  });
+
+  // Equipment
+  (wo.equipRows || []).forEach(function(r) {
+    var item = _findConsumableRate(r.item||'', rs) || {};
+    var rate = item.rate || 0;
+    if (rate && r.qty > 0) { var amt = r.qty * rate; subtotal += amt; lineItems.push({ desc: r.item||'Equipment', qty: r.qty, unit: r.unit||'hr', rate: rate, amt: amt }); }
+  });
+
+  // Travel
+  var t = wo.travel || {};
+  if (t.km > 0 && t.kmRate > 0) { var amt = t.km * t.kmRate; subtotal += amt; lineItems.push({ desc: 'Travel — Mileage', qty: t.km, unit: 'km', rate: t.kmRate, amt: amt }); }
+  if (t.loaTechs > 0 && t.loaDays > 0 && t.loaRate > 0) { var amt = t.loaTechs * t.loaDays * t.loaRate; subtotal += amt; lineItems.push({ desc: 'Living Out Allowance (' + t.loaTechs + ' tech × ' + t.loaDays + ' days)', qty: 1, unit: 'ea', rate: amt, amt: amt }); }
+  if (t.hotels > 0) { subtotal += t.hotels; lineItems.push({ desc: 'Accommodation', qty: 1, unit: 'ea', rate: t.hotels, amt: t.hotels }); }
+  if (t.flights > 0) { subtotal += t.flights; lineItems.push({ desc: 'Flights', qty: 1, unit: 'ea', rate: t.flights, amt: t.flights }); }
+  if (t.misc > 0) { subtotal += t.misc; lineItems.push({ desc: t.miscDesc || 'Miscellaneous', qty: 1, unit: 'ea', rate: t.misc, amt: t.misc }); }
+
+  var taxRate = 5; // GST
+  var tax = subtotal * taxRate / 100;
+  var total = subtotal + tax;
+
+  var fmt = function(n) { return '$' + Number(n||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+
+  var rows = lineItems.map(function(l) {
+    return '<tr style="border-bottom:1px solid #eee">'
+      + '<td style="padding:5px 8px">' + l.desc + '</td>'
+      + '<td style="padding:5px 8px;text-align:center">' + l.qty + '</td>'
+      + '<td style="padding:5px 8px;text-align:center">' + l.unit + '</td>'
+      + '<td style="padding:5px 8px;text-align:right">' + fmt(l.rate) + '</td>'
+      + '<td style="padding:5px 8px;text-align:right;font-weight:600">' + fmt(l.amt) + '</td>'
+      + '</tr>';
+  }).join('');
+
+  var rsName = rs ? (rs.name || 'Standard T&M Rates') : 'Standard T&M Rates';
+
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Quote ' + woNum + '</title>'
+    + '<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111;padding:24px;max-width:800px;margin:0 auto}'
+    + 'table{width:100%;border-collapse:collapse}th{background:#1D4A8A;color:#fff;padding:6px 8px;text-align:left;font-size:10px;letter-spacing:.5px}'
+    + '.total-row td{font-weight:700;border-top:2px solid #111}'
+    + '@media print{body{padding:0}}</style></head><body>'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">'
+      + '<div>' + (_LOGO_HTML || '<div style="font-size:20px;font-weight:900;color:#1D4A8A">NORTECH<br><span style="font-size:11px">ADVANCED NDT</span></div>')
+        + '<div style="font-size:9px;color:#666;margin-top:4px">' + NORTECH.address + '<br>Ph: ' + NORTECH.phone + ' · GST: ' + NORTECH.gst + '</div>'
+      + '</div>'
+      + '<div style="text-align:right">'
+        + '<div style="font-size:28px;font-weight:900;letter-spacing:4px;color:#1D4A8A">QUOTATION</div>'
+        + '<div style="font-size:9px;color:#555;margin-top:4px">Quote #: <strong>' + woNum + '</strong></div>'
+        + '<div style="font-size:9px;color:#555">Date: <strong>' + quoteDate + '</strong></div>'
+        + '<div style="font-size:9px;color:#E84040">Valid Until: <strong>' + expStr + '</strong></div>'
+      + '</div>'
+    + '</div>'
+    + '<div style="border:1px solid #ddd;border-radius:6px;padding:12px;margin-bottom:16px;display:flex;gap:32px">'
+      + '<div><div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px">Bill To</div>'
+        + '<div style="font-weight:700;margin-top:2px">' + (wo.client||'—') + '</div>'
+        + (wo.site ? '<div style="color:#555">' + wo.site + '</div>' : '')
+        + (wo.province ? '<div style="color:#555">' + (wo.province) + '</div>' : '')
+      + '</div>'
+      + '<div><div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:1px">Details</div>'
+        + '<div style="margin-top:2px"><span style="color:#888">WO #:</span> <strong>' + woNum + '</strong></div>'
+        + (wo.po ? '<div><span style="color:#888">PO #:</span> ' + wo.po + '</div>' : '')
+        + (wo.date ? '<div><span style="color:#888">Date:</span> ' + wo.date + '</div>' : '')
+        + '<div><span style="color:#888">Rate Sheet:</span> ' + rsName + '</div>'
+      + '</div>'
+    + '</div>'
+    + '<table><thead><tr><th>Description</th><th style="text-align:center">Qty</th><th style="text-align:center">Unit</th><th style="text-align:right">Rate</th><th style="text-align:right">Amount</th></tr></thead>'
+    + '<tbody>' + (rows || '<tr><td colspan="5" style="padding:8px;color:#888;text-align:center">No line items</td></tr>') + '</tbody>'
+    + '<tfoot>'
+      + '<tr><td colspan="4" style="text-align:right;padding:5px 8px">Subtotal:</td><td style="text-align:right;padding:5px 8px">' + fmt(subtotal) + '</td></tr>'
+      + '<tr><td colspan="4" style="text-align:right;padding:5px 8px">GST (5%):</td><td style="text-align:right;padding:5px 8px">' + fmt(tax) + '</td></tr>'
+      + '<tr class="total-row"><td colspan="4" style="text-align:right;padding:6px 8px;font-size:12px">TOTAL:</td><td style="text-align:right;padding:6px 8px;font-size:12px">' + fmt(total) + '</td></tr>'
+    + '</tfoot></table>'
+    + '<div style="margin-top:20px;padding:12px;background:#f9f9f9;border-radius:6px;font-size:9px;color:#666">'
+      + '<strong>Terms & Conditions:</strong> This quotation is valid for 30 days from the date above. Prices are estimates based on expected scope of work and may vary with actual conditions. '
+      + 'Work to be performed on a Time & Materials basis unless otherwise agreed. All prices in CAD. GST extra where applicable.'
+    + '</div>'
+    + '</body></html>';
+}
+
+
+// ── Linked quote dropdown + WO card quote reference ──────────────────────────
+function _populateLinkedQuoteDropdown(editId) {
+  var group = document.getElementById('wo-linked-quote-group');
+  var sel   = document.getElementById('wo-linked-quote');
+  if (!group || !sel) return;
+  // Only show for new WOs (no editId) or existing WOs that already have a linkedQuoteId
+  var wo = editId ? (_jobs.find(function(j){ return j.id===editId; })||{}) : {};
+  var quotes = _jobs.filter(function(j){ return j.status==='quoted' || j.status==='quote-accepted'; });
+  if (!quotes.length && !wo.linkedQuoteId) { group.style.display='none'; return; }
+  group.style.display = '';
+  sel.innerHTML = '<option value="">— None —</option>'
+    + quotes.map(function(q){
+        var num = q.woNum||q.number||q.id;
+        var lbl = num + (q.client?' · '+q.client:'') + (q.status==='quote-accepted'?' (accepted)':'');
+        return '<option value="'+q.id+'"'+( wo.linkedQuoteId===q.id?' selected':'')+'>'+lbl+'</option>';
+      }).join('');
+  // If linked quote selected, pre-fill WO fields from it
+  sel.onchange = function() {
+    var qId = sel.value;
+    if (!qId) return;
+    var q = _jobs.find(function(j){ return j.id===qId; });
+    if (!q) return;
+    if (confirm('Pre-fill this WO from quote '+( q.woNum||q.number||'')+'?\n\nYou can edit any fields before saving.')) {
+      var setV = function(id,v){ var el=document.getElementById(id); if(el&&v!=null&&v!=='') el.value=v; };
+      setV('job-client',q.client); setV('job-site',q.site); setV('job-po',q.po);
+      setV('job-province',q.province); setV('wo-afe',q.afe); setV('wo-rig',q.rig);
+      setV('wo-equip-owner',q.equipOwner); setV('job-client-wo',q.jobNum);
+      setV('cs-notes',q.notes);
+      // Rebuild labour rows from quote
+      var lb = document.getElementById('cs-labour-body');
+      if (lb && q.labourRows && q.labourRows.length) {
+        lb.innerHTML=''; _csLabourRowCount=0;
+        q.labourRows.forEach(function(r){ addLabourRow(null,null,r); });
+      }
+      toast('Pre-filled from quote — edit actual hours and conditions before saving', 'info');
+    }
+  };
+}
+
+
 // ── Live WO number duplicate check ───────────────────────────────────────────
 function checkWONumDupe(el) {
   var val = (el.value || '').trim().toLowerCase();
@@ -5595,6 +6096,7 @@ async function saveWO(status) {
     status: (existing.status === 'approved' || existing.status === 'invoiced' || existing.status === 'paid')
       ? existing.status : status,
     rateSheetId: existing.rateSheetId || '',
+    linkedQuoteId: (document.getElementById('wo-linked-quote') || {}).value || existing.linkedQuoteId || '',
     created:  existing.created || today(),
     modified: today(),
   };
@@ -5650,9 +6152,12 @@ async function saveWO(status) {
     renderJobs(); renderDashboard(); updatePendingBadge();
     // Auto-create timesheets on first submit — applies to BOTH manual entry AND PDF import
     // _editWOId is null for new WOs regardless of how data was entered
-    if (status === 'submitted' && !_editWOId) {
+    if ((status === 'submitted' || status === 'approved') && !_editWOId) {
       await createTimesheetFromWO(data);
       renderTimesheets();
+    }
+    if (status === 'quoted') {
+      toast('Quote saved — open it to view, print, or accept when client approves', 'success');
     }
     if (status === 'submitted') {
       toast('Work order submitted — technicians will be prompted to confirm their hours', 'success');
@@ -7824,6 +8329,7 @@ function openTSModal(tsId) {
   }
 
   document.getElementById('ts-modal').classList.add('open');
+  setTimeout(function(){ _attachVoiceBtns('ts-modal'); }, 50);
 }
 
 // ── Add Timesheet Row ─────────────────────────────────────────────────────────
@@ -8824,6 +9330,7 @@ function _renderMarginReportImpl() {
     if (dateFrom && j.date && j.date < dateFrom) return;
     if (dateTo   && j.date && j.date > dateTo)   return;
 
+    if (j.status === 'quoted') return; // Quotes are estimates — exclude from margin
     var inv = j.invoiceId ? _invoices.find(function(i){ return i.id === j.invoiceId; }) : null;
     if (inv && combinedInvIds[inv.id]) return;
 
@@ -9023,5 +9530,21 @@ document.addEventListener('click', function(e) {
 
 
 </script>
+
+<!-- Batch WO Import Modal -->
+<div class="modal-overlay" id="batch-import-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-hdr">
+      <span class="modal-title">Batch Import Work Orders</span>
+      <button class="modal-close" onclick="closeModal('batch-import-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="batch-import-body" style="padding:1rem">
+      <div id="batch-import-progress"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('batch-import-modal')">Close</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
