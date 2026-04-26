@@ -8769,31 +8769,46 @@ function renderMarginReport() {
 
   // Build per-WO margin rows
   var woRows = [];
+  // Invoices with manual lines are shown as one combined row — collect those invoice IDs first
+  var combinedInvIds = {};
+  _invoices.forEach(function(inv) {
+    if ((inv.manualLines||[]).length > 0 && (inv.chargeSheetIds||[]).length > 0) {
+      combinedInvIds[inv.id] = true;
+    }
+  });
+
   _jobs.forEach(function(j) {
     var woNum = j.woNum || j.number || j.id;
     if (woFilter && !woNum.toLowerCase().includes(woFilter)) return;
     if (dateFrom && j.date && j.date < dateFrom) return;
     if (dateTo   && j.date && j.date > dateTo)   return;
 
-    // Get billed amount for THIS WO from the invoice's saved per-WO breakdown
+    // Get rate sheet and invoice
     var inv = j.invoiceId ? _invoices.find(function(i){ return i.id === j.invoiceId; }) : null;
+    var rs = (inv && inv.rateSheetId ? _rateSheets.find(function(r){ return r.id === inv.rateSheetId; }) : null)
+          || (j.rateSheetId ? _rateSheets.find(function(r){ return r.id === j.rateSheetId; }) : null)
+          || _rateSheets.find(function(r){ return (r.type||'tm')==='tm'; })
+          || _rateSheets[0] || null;
+
+    // Skip WOs that belong to a combined invoice — they'll be added as one row below
+    if (inv && combinedInvIds[inv.id]) return;
+
+    // Billed: single-WO = full subtotal; multi-WO = proportional share
     var billed = 0;
     if (inv) {
-      // chargeSheets stores per-WO priced totals saved at invoice creation time
-      var csEntry = (inv.chargeSheets||[]).find(function(c){ return c.id === j.id; });
-      if (csEntry && csEntry.total) {
-        billed = csEntry.total;
+      var invWoIds = inv.chargeSheetIds || [];
+      var invSubtotal = inv.subtotal || inv.total || 0;
+      if (invWoIds.length <= 1) {
+        billed = invSubtotal;
       } else {
-        // Fallback: divide invoice subtotal equally among WOs
-        var invWoCount = (inv.chargeSheetIds||[]).length || 1;
-        billed = (inv.subtotal || 0) / invWoCount;
+        var thisWOPrice = priceChargeSheet(j, rs || {});
+        var allWOsTotal = invWoIds.reduce(function(s, wid) {
+          var wo2 = _jobs.find(function(x){ return x.id === wid; });
+          return s + (wo2 ? priceChargeSheet(wo2, rs || {}) : 0);
+        }, 0);
+        billed = allWOsTotal > 0 ? invSubtotal * (thisWOPrice / allWOsTotal) : invSubtotal / invWoIds.length;
       }
     }
-    // Get rate sheet for cost calculation
-    var rs = j.rateSheetId ? _rateSheets.find(function(r){ return r.id === j.rateSheetId; })
-           : (inv && inv.rateSheetId ? _rateSheets.find(function(r){ return r.id === inv.rateSheetId; }) : null)
-           || _rateSheets.find(function(r){ return (r.type||'tm')==='tm'; })
-           || _rateSheets[0] || null;
 
     // Compute cost from labourRows — use TS rows only if WO has no hours (avoid double-counting)
     var rows = (j.labourRows || []).slice();
@@ -8821,7 +8836,6 @@ function renderMarginReport() {
     var totalNight = rows.reduce(function(s,r){ return s+(r.nightHrs||0); }, 0);
     var margin = billed - cost;
     var marginPct = billed > 0 ? margin / billed * 100 : 0;
-
     var techs = [...new Set(rows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
 
     woRows.push({
@@ -8831,6 +8845,65 @@ function renderMarginReport() {
       billed: billed, cost: cost, margin: margin, marginPct: marginPct
     });
   });
+
+  // Add combined rows for invoices with manual lines (one row per invoice)
+  var seenCombinedInv = {};
+  _jobs.forEach(function(j) {
+    var inv = j.invoiceId ? _invoices.find(function(i){ return i.id === j.invoiceId; }) : null;
+    if (!inv || !combinedInvIds[inv.id] || seenCombinedInv[inv.id]) return;
+    seenCombinedInv[inv.id] = true;
+
+    var invWoIds = inv.chargeSheetIds || [];
+    var invSubtotal = inv.subtotal || inv.total || 0;
+    var rs = inv.rateSheetId ? _rateSheets.find(function(r){ return r.id === inv.rateSheetId; })
+           : _rateSheets.find(function(r){ return (r.type||'tm')==='tm'; }) || _rateSheets[0] || null;
+
+    // Combine all WO rows for cost calculation
+    var allRows = [];
+    invWoIds.forEach(function(wid) {
+      var wo2 = _jobs.find(function(x){ return x.id === wid; });
+      if (!wo2) return;
+      var wrows = (wo2.labourRows||[]).slice();
+      var hrs = wrows.reduce(function(s,r){ return s+(r.regHrs||0)+(r.otHrs||0)+(r.dtHrs||0); },0);
+      if (hrs === 0) {
+        _timesheets.filter(function(t){ return t.woId === wid; }).forEach(function(t){
+          (t.rows||[]).forEach(function(r){ allRows.push(r); });
+        });
+      } else {
+        wrows.forEach(function(r){ allRows.push(r); });
+      }
+    });
+
+    if (techFilter) allRows = allRows.filter(function(r){ return (r.technician||'').toLowerCase().includes(techFilter.toLowerCase()); });
+
+    var cost = allRows.reduce(function(s, r) {
+      var stR = getRate(rs, r.category, 'st') || DEFAULT_COST.st;
+      var otR = getRate(rs, r.category, 'ot') || DEFAULT_COST.ot;
+      var dtR = getRate(rs, r.category, 'dt') || DEFAULT_COST.dt;
+      return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
+    }, 0);
+
+    var totalReg   = allRows.reduce(function(s,r){ return s+(r.regHrs||0); },0);
+    var totalOT    = allRows.reduce(function(s,r){ return s+(r.otHrs||0); },0);
+    var totalNight = allRows.reduce(function(s,r){ return s+(r.nightHrs||0); },0);
+    var billed = invSubtotal;
+    var margin = billed - cost;
+    var marginPct = billed > 0 ? margin / billed * 100 : 0;
+    var techs = [...new Set(allRows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
+    var woNums = invWoIds.map(function(wid){
+      var wo2=_jobs.find(function(x){return x.id===wid;});
+      return wo2 ? (wo2.woNum||wo2.number||wid) : wid;
+    }).join(' + ');
+    var client = j.client || '—';
+
+    woRows.push({
+      woNum: woNums, client: client, tech: techs,
+      date: inv.invDate || j.date || '',
+      reg: totalReg, ot: totalOT, night: totalNight,
+      billed: billed, cost: cost, margin: margin, marginPct: marginPct,
+      combined: true
+    });
+  })
 
   // Apply client and margin% filters post-build
   if (clientFilter) woRows = woRows.filter(function(r){ return r.client.toLowerCase().includes(clientFilter); });
