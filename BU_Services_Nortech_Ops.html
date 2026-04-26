@@ -908,7 +908,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-primary"   id="wo-btn-save"         onclick="saveWO('approved')"    style="display:none">💾 Save</button>
       <button class="btn btn-secondary" id="wo-btn-invoice"      onclick="invoiceWOFromModal()"  style="display:none">🧾 Invoice</button>
       <!-- Tech only -->
-      <button class="btn btn-primary"   id="wo-btn-tech-save"    onclick="techSaveWO()"          style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">Save Work Order →</button>
+      <button class="btn btn-primary"   id="wo-btn-tech-save"    onclick="techSaveWO()"          style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">Submit Work Order</button>
     </div>
   </div>
 </div>
@@ -5637,7 +5637,16 @@ async function techSaveWO() {
   var site   = (document.getElementById('job-site')||{}).value||'';
   if (!client.trim()||!site.trim()) { toast('Client and site / location are required', 'error'); return; }
   await saveWO('submitted');
-  // TS is created automatically by saveWO — each tech will be prompted to confirm their hours
+  // Navigate to timesheets tab and open the newly created TS for this tech
+  showView('timesheets', document.getElementById('nav-timesheets'));
+  var myName = getCurrentTechName();
+  // Give renderTimesheets a moment to run, then find and open the pending TS
+  setTimeout(function() {
+    var ts = _timesheets.find(function(t){
+      return t.technician === myName && t.status === 'pending' && !t.confirmed;
+    });
+    if (ts) openTSModal(ts.id);
+  }, 150);
 }
 
 // ── Legacy flow functions removed — new flow: each tech confirms individually
