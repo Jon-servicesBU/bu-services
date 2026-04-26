@@ -8753,8 +8753,7 @@ function renderMarginReport() {
   var clientFilter = ((document.getElementById('margin-filter-client')||{}).value || '').toLowerCase();
   var pctFilter    = (document.getElementById('margin-filter-pct')||{}).value || '';
 
-  // Helper: find best labour rate for a category from a rate sheet
-  function getRate(rs, category, type) {
+  function getBillRate(rs, category, type) {
     if (!rs || !rs.labour) return 0;
     var cat = rs.labour.find(function(l){
       return l.name && category && l.name.toLowerCase().split('(')[0].trim() === category.toLowerCase().split('(')[0].trim();
@@ -8765,12 +8764,46 @@ function renderMarginReport() {
     return type === 'ot' ? (cat.otRate||0) : type === 'dt' ? (cat.dtRate||0) : (cat.stRate||0);
   }
 
-  // Default fallback cost rates (internal cost estimate)
-  var DEFAULT_COST = { st: 55, ot: 82.5, dt: 110 };
+  function getCostRate(techName) {
+    var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
+      return e.name && techName && e.name.toLowerCase() === (techName||'').toLowerCase();
+    });
+    return emp ? emp.rate : 55;
+  }
 
-  // Build per-WO margin rows
+  function billRows(rows, rs) {
+    var DEF = { st: 105, ot: 157.5, dt: 210 };
+    return rows.reduce(function(s, r) {
+      var stR = getBillRate(rs, r.category, 'st') || DEF.st;
+      var otR = getBillRate(rs, r.category, 'ot') || stR * 1.5;
+      var dtR = getBillRate(rs, r.category, 'dt') || stR * 2;
+      return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
+    }, 0);
+  }
+
+  function costRows(rows) {
+    return rows.reduce(function(s, r) {
+      var stR = getCostRate(r.technician);
+      return s + (r.regHrs||0)*stR + (r.otHrs||0)*stR*1.5 + (r.dtHrs||0)*stR*2;
+    }, 0);
+  }
+
+  function getWORows(wo) {
+    var rows = (wo.labourRows || []).slice();
+    var hrs = rows.reduce(function(s,r){ return s+(r.regHrs||0)+(r.otHrs||0)+(r.dtHrs||0)+(r.nightHrs||0); }, 0);
+    if (hrs === 0) {
+      _timesheets.filter(function(t){ return t.woId === wo.id; }).forEach(function(t){
+        (t.rows||[]).forEach(function(r){
+          rows.push({ category: r.category, regHrs: r.regHrs||0, otHrs: r.otHrs||0,
+                      dtHrs: r.dtHrs||0, nightHrs: r.nightHrs||0, technician: r.technician||t.technician||'' });
+        });
+      });
+    }
+    return rows;
+  }
+
   var woRows = [];
-  // Invoices with manual lines are shown as one combined row — collect those invoice IDs first
+
   var combinedInvIds = {};
   _invoices.forEach(function(inv) {
     if ((inv.manualLines||[]).length > 0 && (inv.chargeSheetIds||[]).length > 0) {
@@ -8784,139 +8817,83 @@ function renderMarginReport() {
     if (dateFrom && j.date && j.date < dateFrom) return;
     if (dateTo   && j.date && j.date > dateTo)   return;
 
-    // Get rate sheet and invoice
     var inv = j.invoiceId ? _invoices.find(function(i){ return i.id === j.invoiceId; }) : null;
+    if (inv && combinedInvIds[inv.id]) return;
+
     var rs = (inv && inv.rateSheetId ? _rateSheets.find(function(r){ return r.id === inv.rateSheetId; }) : null)
           || (j.rateSheetId ? _rateSheets.find(function(r){ return r.id === j.rateSheetId; }) : null)
           || _rateSheets.find(function(r){ return (r.type||'tm')==='tm'; })
           || _rateSheets[0] || null;
 
-    // Skip WOs that belong to a combined invoice — they'll be added as one row below
-    if (inv && combinedInvIds[inv.id]) return;
-
-    // Billed: single-WO = full subtotal; multi-WO = proportional share
     var billed = 0;
     if (inv) {
-      var invWoIds = inv.chargeSheetIds || [];
+      var invWoIds   = inv.chargeSheetIds || [];
       var invSubtotal = inv.subtotal || inv.total || 0;
       if (invWoIds.length <= 1) {
         billed = invSubtotal;
       } else {
-        var thisWOPrice = priceChargeSheet(j, rs || {});
-        var allWOsTotal = invWoIds.reduce(function(s, wid) {
+        var thisPrice = billRows(getWORows(j), rs);
+        var allPrice  = invWoIds.reduce(function(s, wid) {
           var wo2 = _jobs.find(function(x){ return x.id === wid; });
-          return s + (wo2 ? priceChargeSheet(wo2, rs || {}) : 0);
+          return s + (wo2 ? billRows(getWORows(wo2), rs) : 0);
         }, 0);
-        billed = allWOsTotal > 0 ? invSubtotal * (thisWOPrice / allWOsTotal) : invSubtotal / invWoIds.length;
+        billed = allPrice > 0 ? invSubtotal * (thisPrice / allPrice) : invSubtotal / invWoIds.length;
       }
     }
 
-    // Compute cost from labourRows — use TS rows only if WO has no hours (avoid double-counting)
-    var rows = (j.labourRows || []).slice();
-    var woHrs = rows.reduce(function(s,r){ return s+(r.regHrs||0)+(r.otHrs||0)+(r.dtHrs||0)+(r.nightHrs||0); }, 0);
-    if (woHrs === 0) {
-      _timesheets.filter(function(t){ return t.woId === j.id; }).forEach(function(t){
-        (t.rows||[]).forEach(function(r){
-          rows.push({category: r.category, regHrs: r.regHrs||0, otHrs: r.otHrs||0, dtHrs: r.dtHrs||0, nightHrs: r.nightHrs||0, technician: r.technician||t.technician||''});
-        });
-      });
-    }
-
+    var rows = getWORows(j);
     if (techFilter) rows = rows.filter(function(r){ return (r.technician||'').toLowerCase().includes(techFilter.toLowerCase()); });
     if (!rows.length && techFilter) return;
 
-    var costDetails = [];
-    var cost = rows.reduce(function(s, r) {
-      // Cost = payroll rate, always. Rate sheet is for billing only.
-      var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
-        return e.name && r.technician && e.name.toLowerCase() === (r.technician||'').toLowerCase();
-      });
-      var stR = emp ? emp.rate : DEFAULT_COST.st;
-      var otR = stR * 1.5;
-      var dtR = stR * 2;
-      costDetails.push({ tech: r.technician||'', stR: stR });
-      return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
-    }, 0);
-
+    var cost       = costRows(rows);
     var totalReg   = rows.reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
     var totalOT    = rows.reduce(function(s,r){ return s+(r.otHrs||0); }, 0);
     var totalNight = rows.reduce(function(s,r){ return s+(r.nightHrs||0); }, 0);
-    var margin = billed - cost;
-    var marginPct = billed > 0 ? margin / billed * 100 : 0;
-    var techs = [...new Set(rows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
-    var rateMap = {};
-    costDetails.forEach(function(d){ if(d.tech) rateMap[d.tech] = d.stR; });
-    var costRateStr = Object.keys(rateMap).map(function(t){ return t.split(' ')[0]+': $'+rateMap[t].toFixed(2); }).join(', ') || '$'+DEFAULT_COST.st.toFixed(2);
+    var margin     = billed - cost;
+    var marginPct  = billed > 0 ? margin / billed * 100 : 0;
+    var techs      = [...new Set(rows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
+    var rateMap    = {};
+    rows.forEach(function(r){ if(r.technician) rateMap[r.technician] = getCostRate(r.technician); });
+    var costRateStr = Object.keys(rateMap).map(function(t){ return t.split(' ')[0]+': $'+rateMap[t].toFixed(2); }).join(', ') || '$55.00';
 
-    woRows.push({
-      woNum: woNum, client: j.client||'—', tech: techs,
-      date: j.date || j.created || '',
-      reg: totalReg, ot: totalOT, night: totalNight,
-      billed: billed, cost: cost, margin: margin, marginPct: marginPct,
-      costRate: costRateStr
-    });
+    woRows.push({ woNum: woNum, client: j.client||'—', tech: techs,
+      date: j.date||j.created||'', reg: totalReg, ot: totalOT, night: totalNight,
+      billed: billed, cost: cost, margin: margin, marginPct: marginPct, costRate: costRateStr });
   });
 
-  // Add combined rows for invoices with manual lines (one row per invoice)
   var seenCombinedInv = {};
   _jobs.forEach(function(j) {
     var inv = j.invoiceId ? _invoices.find(function(i){ return i.id === j.invoiceId; }) : null;
     if (!inv || !combinedInvIds[inv.id] || seenCombinedInv[inv.id]) return;
     seenCombinedInv[inv.id] = true;
 
-    var invWoIds = inv.chargeSheetIds || [];
+    var invWoIds    = inv.chargeSheetIds || [];
     var invSubtotal = inv.subtotal || inv.total || 0;
-    var rs = inv.rateSheetId ? _rateSheets.find(function(r){ return r.id === inv.rateSheetId; })
-           : _rateSheets.find(function(r){ return (r.type||'tm')==='tm'; }) || _rateSheets[0] || null;
-
-    // Combine all WO rows for cost calculation
-    var allRows = [];
+    var allRows     = [];
     invWoIds.forEach(function(wid) {
       var wo2 = _jobs.find(function(x){ return x.id === wid; });
-      if (!wo2) return;
-      var wrows = (wo2.labourRows||[]).slice();
-      var hrs = wrows.reduce(function(s,r){ return s+(r.regHrs||0)+(r.otHrs||0)+(r.dtHrs||0); },0);
-      if (hrs === 0) {
-        _timesheets.filter(function(t){ return t.woId === wid; }).forEach(function(t){
-          (t.rows||[]).forEach(function(r){ allRows.push(r); });
-        });
-      } else {
-        wrows.forEach(function(r){ allRows.push(r); });
-      }
+      if (wo2) getWORows(wo2).forEach(function(r){ allRows.push(r); });
     });
 
     if (techFilter) allRows = allRows.filter(function(r){ return (r.technician||'').toLowerCase().includes(techFilter.toLowerCase()); });
 
-    var cost = allRows.reduce(function(s, r) {
-      var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
-        return e.name && r.technician && e.name.toLowerCase() === (r.technician||'').toLowerCase();
-      });
-      var stR = emp ? emp.rate : DEFAULT_COST.st;
-      var otR = stR * 1.5; dtR = stR * 2;
-      return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
-    }, 0);
-
-    var totalReg   = allRows.reduce(function(s,r){ return s+(r.regHrs||0); },0);
-    var totalOT    = allRows.reduce(function(s,r){ return s+(r.otHrs||0); },0);
-    var totalNight = allRows.reduce(function(s,r){ return s+(r.nightHrs||0); },0);
-    var billed = invSubtotal;
-    var margin = billed - cost;
-    var marginPct = billed > 0 ? margin / billed * 100 : 0;
-    var techs = [...new Set(allRows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
-    var woNums = invWoIds.map(function(wid){
-      var wo2=_jobs.find(function(x){return x.id===wid;});
+    var cost       = costRows(allRows);
+    var totalReg   = allRows.reduce(function(s,r){ return s+(r.regHrs||0); }, 0);
+    var totalOT    = allRows.reduce(function(s,r){ return s+(r.otHrs||0); }, 0);
+    var totalNight = allRows.reduce(function(s,r){ return s+(r.nightHrs||0); }, 0);
+    var billed     = invSubtotal;
+    var margin     = billed - cost;
+    var marginPct  = billed > 0 ? margin / billed * 100 : 0;
+    var techs      = [...new Set(allRows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
+    var woNums     = invWoIds.map(function(wid){
+      var wo2 = _jobs.find(function(x){ return x.id === wid; });
       return wo2 ? (wo2.woNum||wo2.number||wid) : wid;
     }).join(' + ');
-    var client = j.client || '—';
 
-    woRows.push({
-      woNum: woNums, client: client, tech: techs,
-      date: inv.invDate || j.date || '',
-      reg: totalReg, ot: totalOT, night: totalNight,
-      billed: billed, cost: cost, margin: margin, marginPct: marginPct,
-      costRate: '—', combined: true
-    });
-  })
+    woRows.push({ woNum: woNums, client: j.client||'—', tech: techs,
+      date: inv.invDate||j.date||'', reg: totalReg, ot: totalOT, night: totalNight,
+      billed: billed, cost: cost, margin: margin, marginPct: marginPct, costRate: '—', combined: true });
+  });
 
   // Apply client and margin% filters post-build
   if (clientFilter) woRows = woRows.filter(function(r){ return r.client.toLowerCase().includes(clientFilter); });
