@@ -719,7 +719,8 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="form-group">
           <label class="form-label">WO # (auto if blank)</label>
-          <input class="form-input" id="job-number" placeholder="W-99001">
+          <input class="form-input" id="job-number" placeholder="W-99001" oninput="checkWONumDupe(this)">
+          <div id="wo-num-dupe-hint" style="display:none;color:var(--color-text-danger, #E84040);font-size:.7rem;margin-top:.2rem">⚠ WO # already exists — change before saving</div>
         </div>
         <div class="form-group">
           <label class="form-label">Date of Work <span style="color:var(--nor-accent)">*</span></label>
@@ -2521,6 +2522,12 @@ async function handleWOImportFile(input) {
 function populateWOFromImport(wo) {
   function setVal(id, val) { var el = document.getElementById(id); if (el && val != null && val !== '') el.value = val; }
 
+  // Always clear all tabbed sections first — prevents stale rows from previous import or pre-filled tech name
+  ['cs-labour-body','cs-equipment-body','cs-consumables-body','cs-film-body'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.innerHTML = '';
+  });
+  _csLabourRowCount = 0; _csEquipmentRowCount = 0; _csConsumableRowCount = 0; _csFilmRowCount = 0;
+
   // Header fields
   setVal('job-client',      wo.client);
   setVal('job-number',      wo.woNum);
@@ -2546,11 +2553,11 @@ function populateWOFromImport(wo) {
     }
   }
 
-  // Labour rows
+  // Labour rows — always rebuild; fall back to a pre-filled tech row if AI returned none
   if (wo.labourRows && wo.labourRows.length) {
-    document.getElementById('cs-labour-body').innerHTML = '';
-    _csLabourRowCount = 0;
     wo.labourRows.forEach(function(r){ addLabourRow(null, null, r); });
+  } else {
+    addLabourRow(null, null, !isAdmin() ? { technician: getCurrentTechName() } : null);
   }
 
   // Consumables — AI may return {type, qty, unit} or {item, qty, unit}
@@ -2597,6 +2604,11 @@ function populateWOFromImport(wo) {
 }
 
 function openWOModal(editId) {
+  // Reset any previous dupe warning state
+  var numEl = document.getElementById('job-number');
+  if (numEl) { numEl.style.borderColor = ''; numEl.style.background = ''; }
+  var hint = document.getElementById('wo-num-dupe-hint');
+  if (hint) hint.style.display = 'none';
   _editWOId = editId || null;
   _csLabourRowCount = 0;
   _csEquipmentRowCount = 0;
@@ -5413,22 +5425,40 @@ function addFilmRow(prefill) {
 }
 
 // ── WO: Save ──────────────────────────────────────────────────────────────────
+// ── Live WO number duplicate check ───────────────────────────────────────────
+function checkWONumDupe(el) {
+  var val = (el.value || '').trim().toLowerCase();
+  var isDupe = val && _jobs.some(function(j) {
+    return j.id !== _editWOId
+        && (j.woNum || j.number || '').trim().toLowerCase() === val;
+  });
+  el.style.borderColor = isDupe ? 'var(--color-danger, #E84040)' : '';
+  el.style.background  = isDupe ? 'rgba(232,64,64,.08)' : '';
+  var hint = document.getElementById('wo-num-dupe-hint');
+  if (hint) hint.style.display = isDupe ? 'block' : 'none';
+  // Disable all save buttons when dupe
+  ['wo-btn-save','wo-btn-tech-save','wo-btn-approve'].forEach(function(id){
+    var b = document.getElementById(id);
+    if (b) b.disabled = isDupe;
+  });
+}
+
+
 async function saveWO(status) {
   var client = (document.getElementById('job-client') || {}).value || '';
   var site   = (document.getElementById('job-site')   || {}).value || '';
   var date   = (document.getElementById('wo-date')    || {}).value || today();
   if (!client.trim() || !site.trim()) { toast('Client and location are required', 'error'); return; }
 
-  // Duplicate WO number check — prevent submitting the same WO # twice
-  var woNumInput = (document.getElementById('job-number') || {}).value || '';
-  if (woNumInput.trim() && status === 'submitted') {
+  // Duplicate WO number check — blocks ALL saves, not just submit
+  var woNumInput = ((document.getElementById('job-number') || {}).value || '').trim();
+  if (woNumInput) {
     var duplicate = _jobs.find(function(j) {
       return j.id !== _editWOId
-          && (j.woNum || j.number || '').trim().toLowerCase() === woNumInput.trim().toLowerCase()
-          && j.status !== 'draft';
+          && (j.woNum || j.number || '').trim().toLowerCase() === woNumInput.toLowerCase();
     });
     if (duplicate) {
-      toast('WO # ' + woNumInput.trim() + ' has already been submitted. Use a unique work order number.', 'error');
+      toast('WO # ' + woNumInput + ' already exists (' + (duplicate.client||'') + ' · ' + (duplicate.status||'') + '). Use a unique number.', 'error');
       return;
     }
   }
