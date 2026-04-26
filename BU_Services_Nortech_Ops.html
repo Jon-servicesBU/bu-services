@@ -2112,7 +2112,7 @@ function _repairAndParseJSON(str) {
   while (depth.length) s += depth.pop();
 
   try { return JSON.parse(s); } catch(e) {
-    throw new Error('Rate sheet parse failed (' + e.message + '). Try a simpler rate sheet or contact support.');
+    throw new Error('JSON parse failed (' + e.message + '). Response may be truncated or malformed.');
   }
 }
 
@@ -5576,7 +5576,15 @@ async function handleBatchWOImport(input) {
       });
 
       var data = await resp.json();
-      var text = (data.content && data.content[0] ? data.content[0].text : '').replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+      // Check for API-level errors
+      if (data.error) throw new Error('API error: ' + (data.error.message || JSON.stringify(data.error)));
+      var rawText = (data.content && data.content[0] ? data.content[0].text : '');
+      console.log('[Batch import] Raw response for', f.name, ':', rawText.slice(0,200));
+      // Check stop reason — if max_tokens hit, response is truncated
+      if (data.stop_reason === 'max_tokens') {
+        console.warn('[Batch import] Response truncated (max_tokens) for', f.name);
+      }
+      var text = rawText.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
       var wo = _repairAndParseJSON(text);
 
       // Normalize time strings from 12hr to HH:mm (e.g. "8:00:00AM" → "08:00")
@@ -5653,8 +5661,9 @@ async function handleBatchWOImport(input) {
 
     } catch(e) {
       results.failed++;
+      var shortErr = e.message ? e.message.slice(0,80) : 'Unknown error';
       results.rows.push({ name: f.name, woNum: '—', status: 'failed', reason: e.message });
-      if (statusEl) { statusEl.textContent = '✗ Failed'; statusEl.style.color = 'var(--color-text-danger,#E84040)'; }
+      if (statusEl) { statusEl.innerHTML = '✗ ' + shortErr; statusEl.style.color = 'var(--color-text-danger,#E84040)'; }
       console.error('Batch import error:', f.name, e);
     }
   }
