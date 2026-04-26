@@ -323,7 +323,7 @@ body.tech-view .cs-lb-tot           { display: none !important; }
 
 var VIEWER_PEOPLE = [
   { id: 'jon',     name: 'Jon Eustace',               role: 'CEO North America \u00b7 EIG',           initials: 'JE', color: '#00AEEF', pin: '0626' },
-  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',             initials: 'JI', color: '#38BDF8', pin: '0006' },
+  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',             initials: 'JI', color: '#38BDF8', pin: '0525' },
   { id: 'joel_c',  name: 'Joel Carlton',               role: 'PI Operations Manager',                   initials: 'JC', color: '#B45309', pin: '0009' },
   { id: 'jason',   name: 'Jason Borza',                role: 'Ops Director \u2014 Nortech',            initials: 'JB', color: '#DC2626', pin: '0013' },
   // ── Nortech Field Staff ───────────────────────────────────────────────────
@@ -1415,7 +1415,7 @@ var _SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 var CURRENT_VIEWER = localStorage.getItem('hub_viewer') || '';
 var VIEWER_PEOPLE = [
   { id: 'jon',     name: 'Jon Eustace',               role: 'CEO North America \u00b7 EIG',           initials: 'JE', color: '#00AEEF', pin: '0626' },
-  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',             initials: 'JI', color: '#38BDF8', pin: '0006' },
+  { id: 'jeremy',  name: 'Jeremy Irwin',               role: 'Director of Finance, EIG NA',             initials: 'JI', color: '#38BDF8', pin: '0525' },
   { id: 'joel_c',  name: 'Joel Carlton',               role: 'PI Operations Manager',                   initials: 'JC', color: '#B45309', pin: '0009' },
   { id: 'jason',   name: 'Jason Borza',                role: 'Ops Director \u2014 Nortech',            initials: 'JB', color: '#DC2626', pin: '0013' },
   // ── Nortech Field Staff ───────────────────────────────────────────────────
@@ -4996,9 +4996,8 @@ async function markPaid(id){
 function printInvoice(){
   _withPrintGuard(function() {
     var content = document.getElementById('inv-view-body').innerHTML;
-    var logoHdr = _LOGO_HTML ? '<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1D4A8A">' + _LOGO_HTML.replace('height:56px','height:44px') + '</div>' : '';
     var win = window.open('', '_blank');
-    win.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:24px;font-size:12px}@media print{body{padding:12px}}</style></head><body>' + logoHdr + content + '</body></html>');
+    win.document.write('<html><head><title>Invoice</title><style>body{font-family:Arial,sans-serif;padding:24px;font-size:12px}@media print{body{padding:12px}}</style></head><body>' + content + '</body></html>');
     win.document.close();
     win.focus();
     setTimeout(function(){ win.print(); }, 500);
