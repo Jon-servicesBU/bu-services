@@ -316,218 +316,257 @@ body.tech-view .cs-lb-tot           { display: none !important; }
 
 
 /* ═══════════════════════════════════════════════════════
-   MOBILE VIEW — optimized for phones (all roles)
+   MOBILE VIEW — landscape-optimized for phones (all roles)
+   Target: phone in landscape = ~667-932px wide, 375-430px tall
    ═══════════════════════════════════════════════════════ */
 
-/* Only apply when tech-view AND narrow screen */
-@media (max-width: 600px) {
+/* ── Trigger: phone landscape OR narrow portrait ── */
+@media (max-width: 932px) and (max-height: 500px),
+       (max-width: 600px) {
 
-  /* ── Bottom tab bar replaces top nav for techs ── */
+  body.mobile-view {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  /* ── Nav: slimmer, tighter ── */
   body.mobile-view .unav {
-    display: none !important;
+    height: 38px !important;
+    padding: 0 .75rem !important;
   }
 
-  body.mobile-view .view-body {
-    padding-bottom: 72px !important; /* room for bottom tab bar */
-  }
-
-  body.mobile-view #tech-bottom-nav {
-    display: flex !important;
-  }
-
-  #tech-bottom-nav {
-    display: none;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    height: 64px;
-    background: rgba(12,14,20,.97);
-    backdrop-filter: blur(16px);
-    border-top: 1px solid var(--border);
-    z-index: 300;
-    padding: 0 env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
-  }
-
-  #tech-bottom-nav button {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: .6rem;
-    font-weight: 600;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 8px 4px;
-    transition: color .15s;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  #tech-bottom-nav button .tab-icon {
-    font-size: 1.4rem;
-    line-height: 1;
-  }
-
-  #tech-bottom-nav button.active {
-    color: var(--nor-accent);
-  }
-
-  #tech-bottom-nav button .tab-badge {
-    position: absolute;
-    top: 6px;
-    right: calc(50% - 18px);
-    background: #E84040;
-    color: #fff;
-    border-radius: 10px;
-    font-size: .55rem;
-    font-weight: 800;
-    padding: 1px 5px;
-    line-height: 1.4;
-    min-width: 16px;
-    text-align: center;
-  }
-
-  #tech-bottom-nav button { position: relative; }
-
-  /* ── View padding ── */
-  body.mobile-view .view-body {
-    padding: .75rem !important;
-  }
-
-  /* ── Cards: full-width, larger touch targets ── */
-  body.mobile-view .card {
-    border-radius: 10px;
-    margin-bottom: .6rem;
-  }
-
-  /* ── WO cards: bigger tap area ── */
-  body.mobile-view [data-toggle-job] {
-    padding: 1rem !important;
-    min-height: 64px;
-  }
-
-  /* ── Confirmation cards: prominent ── */
-  body.mobile-view .pending-conf-card {
-    border-radius: 12px !important;
-    padding: 1rem 1.1rem !important;
-    margin-bottom: .75rem !important;
-  }
-
-  body.mobile-view .pending-conf-card button {
-    width: 100%;
-    padding: .75rem !important;
+  body.mobile-view .unav-brand-name {
     font-size: .85rem !important;
-    border-radius: 8px !important;
-    margin-top: .5rem;
   }
 
-  /* ── Search bar ── */
-  body.mobile-view .filter-bar {
-    flex-wrap: wrap;
-    gap: .4rem;
+  body.mobile-view .unav-links button,
+  body.mobile-view .unav-links a {
+    font-size: .68rem !important;
+    padding: .2rem .45rem !important;
   }
+
+  body.mobile-view .unav-right {
+    gap: .4rem !important;
+  }
+
+  /* ── View body: tight padding to preserve vertical space ── */
+  body.mobile-view .view-body {
+    padding: .4rem .65rem !important;
+  }
+
+  /* ── Section header: compact row ── */
+  body.mobile-view .sec-hdr {
+    margin-bottom: .4rem !important;
+    padding-bottom: .3rem !important;
+  }
+
+  body.mobile-view .sec-hdr h2 {
+    font-size: .95rem !important;
+    margin: 0 !important;
+  }
+
+  body.mobile-view .sec-sub {
+    font-size: .62rem !important;
+  }
+
+  /* ── Filter bar: single scrollable row, no wrapping ── */
+  body.mobile-view .filter-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    gap: .35rem !important;
+    padding-bottom: .2rem;
+    scrollbar-width: none;
+  }
+
+  body.mobile-view .filter-bar::-webkit-scrollbar { display: none; }
 
   body.mobile-view .filter-bar .form-input,
   body.mobile-view .filter-bar .form-select {
-    flex: 1 1 140px;
-    font-size: .85rem;
-    height: 38px;
+    flex-shrink: 0;
+    font-size: .75rem !important;
+    height: 32px !important;
+    padding: 0 .5rem !important;
+    min-width: 110px;
   }
 
-  /* ── Modals: full screen on mobile ── */
+  body.mobile-view .filter-bar .btn {
+    flex-shrink: 0;
+    height: 32px !important;
+    font-size: .72rem !important;
+    padding: 0 .6rem !important;
+    white-space: nowrap;
+  }
+
+  /* ── Cards: compact, touch-friendly ── */
+  body.mobile-view .card {
+    border-radius: 8px;
+    margin-bottom: .45rem;
+  }
+
+  /* ── WO cards: reduced padding, still tappable ── */
+  body.mobile-view [data-toggle-job] {
+    padding: .65rem .9rem !important;
+    min-height: 52px;
+  }
+
+  body.mobile-view [data-toggle-job] h3,
+  body.mobile-view [data-toggle-job] .wo-client {
+    font-size: .85rem !important;
+  }
+
+  body.mobile-view [data-toggle-job] .wo-meta {
+    font-size: .68rem !important;
+  }
+
+  /* ── Confirmation cards: compact but prominent ── */
+  body.mobile-view .pending-conf-card {
+    padding: .65rem .9rem !important;
+    margin-bottom: .45rem !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: .75rem !important;
+  }
+
+  body.mobile-view .pending-conf-card > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  body.mobile-view .pending-conf-card button {
+    flex-shrink: 0;
+    width: auto !important;
+    padding: .45rem .9rem !important;
+    font-size: .78rem !important;
+    margin-top: 0 !important;
+    white-space: nowrap;
+  }
+
+  /* ── Modals: full viewport, flex column ── */
   body.mobile-view .modal-overlay .modal {
     width: 100vw !important;
     max-width: 100vw !important;
-    min-height: 100dvh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
     border-radius: 0 !important;
     margin: 0 !important;
     display: flex;
     flex-direction: column;
   }
 
+  body.mobile-view .modal-overlay .modal-hdr {
+    flex-shrink: 0;
+    padding: .5rem .9rem !important;
+    min-height: 40px;
+  }
+
+  body.mobile-view .modal-overlay .modal-title {
+    font-size: .85rem !important;
+  }
+
   body.mobile-view .modal-overlay .modal-body {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    padding: .6rem .9rem !important;
   }
 
-  /* ── WO modal: simplify labour table on mobile ── */
-  body.mobile-view #job-modal .cs-labour-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* ── Buttons: full-width CTAs ── */
+  /* ── Modal footer: compact row ── */
   body.mobile-view .modal-footer {
-    padding: .75rem 1rem !important;
-    gap: .5rem;
+    flex-shrink: 0;
+    padding: .5rem .9rem !important;
+    gap: .4rem !important;
+    border-top: 1px solid var(--border);
   }
 
   body.mobile-view .modal-footer button {
     flex: 1;
-    padding: .75rem !important;
-    font-size: .85rem !important;
+    padding: .5rem .6rem !important;
+    font-size: .78rem !important;
+    height: 36px !important;
   }
 
-  /* ── TS grid: full width cards ── */
+  /* ── Tabbed sections in WO modal ── */
+  body.mobile-view .cs-tab {
+    font-size: .7rem !important;
+    padding: .3rem .5rem !important;
+  }
+
+  /* ── Labour table: horizontal scroll ── */
+  body.mobile-view .cs-labour-wrap,
+  body.mobile-view #job-modal table {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    display: block !important;
+  }
+
+  body.mobile-view .cs-input {
+    font-size: .72rem !important;
+    padding: .2rem .3rem !important;
+  }
+
+  /* ── Form grids: 2-col in landscape (enough horizontal space) ── */
+  @media (max-width: 932px) and (max-height: 500px) {
+    body.mobile-view .form-grid-2 {
+      grid-template-columns: 1fr 1fr !important;
+    }
+  }
+
+  /* ── TS cards: compact ── */
   body.mobile-view #ts-grid .card {
-    padding: .9rem 1rem;
+    padding: .6rem .9rem;
   }
 
-  /* ── Typography bumps for readability ── */
-  body.mobile-view .card .wo-num,
-  body.mobile-view .card [style*="font-family:var(--mono)"] {
-    font-size: .85rem !important;
+  /* ── KPI cards: 4-across in landscape ── */
+  @media (max-width: 932px) and (max-height: 500px) {
+    body.mobile-view .kpi-row {
+      grid-template-columns: repeat(4, 1fr) !important;
+    }
   }
 
-  /* ── Hide non-essential columns on TS table ── */
+  /* ── Status chips ── */
+  body.mobile-view .status-chip {
+    font-size: .6rem !important;
+    padding: .15rem .4rem !important;
+  }
+
+  /* ── TS col hide ── */
   body.mobile-view .ts-col-hide { display: none !important; }
 
-  /* ── Status chips: bigger ── */
-  body.mobile-view .status-chip {
-    font-size: .65rem !important;
-    padding: .2rem .5rem !important;
+  /* ── Pager: compact ── */
+  body.mobile-view .pager {
+    padding: .35rem 0 !important;
+    font-size: .72rem !important;
   }
 
-  /* ── Page title ── */
-  body.mobile-view .sec-hdr {
-    font-size: .9rem !important;
+  body.mobile-view .pager button {
+    padding: .25rem .55rem !important;
+    font-size: .72rem !important;
   }
 
-  /* ── Safe area for notched phones ── */
-  body.mobile-view {
-    padding-bottom: env(safe-area-inset-bottom, 0);
+  /* ── WO section subtitle inline with heading ── */
+  body.mobile-view #view-jobs .sec-hdr > div:first-child {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    flex-wrap: nowrap;
+    min-width: 0;
   }
-}
 
-/* Medium phones (601-768) — lighter touch */
-@media (min-width: 601px) and (max-width: 768px) {
-  body.mobile-view #tech-bottom-nav { display: flex !important; }
-  body.mobile-view .unav { display: none !important; }
-  body.mobile-view .view-body { padding-bottom: 72px !important; }
-  body.mobile-view .modal-overlay .modal {
-    width: 96vw !important;
-    max-width: 96vw !important;
-    border-radius: 12px !important;
+  body.mobile-view #wo-sec-sub {
+    margin-top: 0 !important;
+    font-size: .6rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+    min-width: 0;
   }
 }
 
 /* Admin bottom nav — 5 tabs, slightly smaller */
 @media (max-width: 768px) {
-  body.mobile-view #tech-bottom-nav button {
-    font-size: .55rem;
-  }
-  body.mobile-view #tech-bottom-nav .tab-icon {
-    font-size: 1.25rem;
-  }
   /* Admin: show dashboard in top area, not bottom nav */
-  body.mobile-view:not(.tech-view) .view-body {
-    padding-bottom: 72px !important;
-  }
   /* Admin margin table: horizontal scroll */
   body.mobile-view #margin-wo-body tr td:nth-child(n+5):nth-child(-n+7) {
     display: none; /* hide reg/ot/night hrs cols on mobile */
@@ -887,7 +926,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <!-- ══ WORK ORDERS VIEW ══════════════════════════════════════════════════════ -->
   <div id="view-jobs" class="view" style="display:none">
     <div class="sec-hdr">
-      <div><h2>Work Orders</h2><div class="sec-sub">Tap a work order to view details or log more work</div></div>
+      <div><h2>Work Orders</h2><div class="sec-sub" id="wo-sec-sub">Tap a work order to view details or log more work</div></div>
       <div class="sec-actions">
         <input class="form-input" style="width:160px" placeholder="WO # / Site / PO…" id="job-search" oninput="_jobsPage=1;renderJobs()">
         <input class="form-input" style="width:150px" placeholder="Customer…" id="job-client-search" oninput="_jobsPage=1;renderJobs()">
@@ -2621,8 +2660,6 @@ function applyAdminVisibility() {
     }
   } else {
     document.body.classList.remove('tech-view');
-    // Show admin tabs in bottom nav
-    document.querySelectorAll('#tech-bottom-nav .admin-tab').forEach(function(b){ b.style.display = 'flex'; });
     ['nav-dashboard','nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.style.display = '';
@@ -3342,11 +3379,7 @@ function showView(view, btn){
     document.querySelectorAll('.unav-links button').forEach(function(b){
       if(b.textContent.toLowerCase().includes(view.replace('-',' '))) b.classList.add('active');
     });
-  // Sync bottom nav tabs
-  ['jobs','timesheets','invoices','margin','rates'].forEach(function(v){
-    var tb = document.getElementById('tab-'+v);
-    if (tb) tb.classList.toggle('active', v === view || (v==='rates' && view==='rate-sheets'));
-  });
+
   }
   renderForView(view);
 }
@@ -3683,8 +3716,7 @@ function setMobileView() {
     document.body.classList.add('mobile-view');
   } else {
     document.body.classList.remove('mobile-view');
-    // Reset bottom nav when going back to desktop
-    document.querySelectorAll('#tech-bottom-nav button').forEach(function(b){ b.classList.remove('active'); });
+
   }
 }
 window.addEventListener('resize', setMobileView);
@@ -3791,16 +3823,7 @@ function updatePendingBadge(){
   var pending = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
   var badge = document.getElementById('pending-badge');
   if (badge){ badge.textContent = pending + ' Pending'; badge.style.display = pending ? 'inline' : 'none'; }
-  // Update mobile bottom nav tab badge for techs
-  var tabBadge = document.getElementById('tech-tab-badge');
-  if (tabBadge) {
-    var myPending = !isAdmin() ? (_timesheets||[]).filter(function(t){
-      var vp=(VIEWER_PEOPLE||[]).find(function(p){return p.id===CURRENT_VIEWER;});
-      return t.status==='pending' && vp && t.technician===vp.name;
-    }).length : 0;
-    tabBadge.style.display = myPending ? 'block' : 'none';
-    tabBadge.textContent = myPending || '';
-  }
+
 }
 
 // ── Jobs ──────────────────────────────────────────────────────────────────────
@@ -9104,29 +9127,5 @@ document.addEventListener('click', function(e) {
 
 </script>
 
-<!-- Tech mobile bottom nav — shown by CSS on mobile only -->
-<div id="tech-bottom-nav">
-  <button onclick="showView('jobs',this)" id="tab-jobs">
-    <span class="tab-icon">🔧</span>
-    <span>Work Orders</span>
-  </button>
-  <button onclick="showView('timesheets',this)" id="tab-timesheets">
-    <span class="tab-icon">⏱</span>
-    <span>Timesheets</span>
-    <span class="tab-badge" id="tech-tab-badge" style="display:none"></span>
-  </button>
-  <button onclick="showView('invoices',this)" id="tab-invoices" class="admin-tab" style="display:none">
-    <span class="tab-icon">🧾</span>
-    <span>Invoices</span>
-  </button>
-  <button onclick="showView('margin',this)" id="tab-margin" class="admin-tab" style="display:none">
-    <span class="tab-icon">📈</span>
-    <span>Margins</span>
-  </button>
-  <button onclick="showView('rate-sheets',this)" id="tab-rates" class="admin-tab" style="display:none">
-    <span class="tab-icon">📋</span>
-    <span>Rates</span>
-  </button>
-</div>
 </body>
 </html>
