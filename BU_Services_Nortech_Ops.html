@@ -4696,7 +4696,9 @@ function viewInvoice(id) {
 
     // Consumables
     (wo.consumables || []).forEach(function(con) {
-      var item = (invRS.equipment||[]).find(function(e){ return e.name === (con.item||con.type||''); }) || {};
+      var conName = con.item||con.type||con.name||'';
+      var item = (invRS.consumables||[]).find(function(e){ return e.name === conName; })
+               || (invRS.equipment||[]).find(function(e){ return e.name === conName; }) || {};
       var rate = item.rate || 0;
       var amt = (con.qty||0) * rate;
       if (!con.item && !con.type) return;
@@ -5038,7 +5040,9 @@ function priceChargeSheet(cs, rs) {
         total += (row.qty||0) * (item.rate||0);
       });
       (cs.conRows || cs.consumables || []).forEach(function(row) {
-        var item = (rs.equipment || []).find(function(e){ return e.name === (row.item||row.name); }) || {};
+        var conName = row.item || row.type || row.name || '';
+        var item = (rs.consumables || []).find(function(e){ return e.name === conName; })
+                || (rs.equipment  || []).find(function(e){ return e.name === conName; }) || {};
         total += (row.qty||0) * (item.rate||0);
       });
       (cs.filmRows || cs.film || []).forEach(function(row) {
@@ -8630,14 +8634,16 @@ function renderMarginReport() {
     // Get rate sheet
     var rs = j.rateSheetId ? _rateSheets.find(function(r){ return r.id === j.rateSheetId; }) : (_rateSheets[0] || null);
 
-    // Compute cost from labourRows on the WO — use slice() to avoid mutating the live array
+    // Compute cost from labourRows — use TS rows only if WO has no hours (avoid double-counting)
     var rows = (j.labourRows || []).slice();
-    // Also pull from linked timesheets (TS rows are the confirmed source of truth)
-    _timesheets.filter(function(t){ return t.woId === j.id; }).forEach(function(t){
-      (t.rows||[]).forEach(function(r){
-        rows.push({category: r.category, regHrs: r.regHrs||0, otHrs: r.otHrs||0, dtHrs: r.dtHrs||0, nightHrs: r.nightHrs||0, technician: r.technician||t.technician||''});
+    var woHrs = rows.reduce(function(s,r){ return s+(r.regHrs||0)+(r.otHrs||0)+(r.dtHrs||0)+(r.nightHrs||0); }, 0);
+    if (woHrs === 0) {
+      _timesheets.filter(function(t){ return t.woId === j.id; }).forEach(function(t){
+        (t.rows||[]).forEach(function(r){
+          rows.push({category: r.category, regHrs: r.regHrs||0, otHrs: r.otHrs||0, dtHrs: r.dtHrs||0, nightHrs: r.nightHrs||0, technician: r.technician||t.technician||''});
+        });
       });
-    });
+    }
 
     if (techFilter) rows = rows.filter(function(r){ return (r.technician||'').toLowerCase().includes(techFilter.toLowerCase()); });
     if (!rows.length && techFilter) return;
@@ -8750,43 +8756,9 @@ function renderMarginReport() {
   }
 }
 
-// ── Event delegation for timesheets ──────────────────────────────────────────
-document.addEventListener('click', function(e) {
-  var el;
-  el = e.target.closest('[data-open-ts]');
-  if (el) { openTSModal(el.getAttribute('data-open-ts')); return; }
-  el = e.target.closest('[data-ts-for-wo]');
-  if (el) { createOrOpenTS(el.getAttribute('data-ts-for-wo')); return; }
-  el = e.target.closest('[data-export-ts]');
-  if (el) { _editTSId = el.getAttribute('data-export-ts'); exportTimesheet(); return; }
-  el = e.target.closest('[data-export-pkg]');
-  if (el) { exportPackage(el.getAttribute('data-export-pkg')); return; }
-  el = e.target.closest('[data-revert-ts]');
-  if (el) {
-    _editTSId = el.getAttribute('data-revert-ts');
-    revertTS();
-    return;
-  }
-});
 
-// ── Event delegation for timesheets ──────────────────────────────────────────
-document.addEventListener('click', function(e) {
-  var el;
-  el = e.target.closest('[data-open-ts]');
-  if (el) { openTSModal(el.getAttribute('data-open-ts')); return; }
-  el = e.target.closest('[data-ts-for-wo]');
-  if (el) { createOrOpenTS(el.getAttribute('data-ts-for-wo')); return; }
-  el = e.target.closest('[data-export-ts]');
-  if (el) { _editTSId = el.getAttribute('data-export-ts'); exportTimesheet(); return; }
-  el = e.target.closest('[data-export-pkg]');
-  if (el) { exportPackage(el.getAttribute('data-export-pkg')); return; }
-  el = e.target.closest('[data-revert-ts]');
-  if (el) {
-    _editTSId = el.getAttribute('data-revert-ts');
-    revertTS();
-    return;
-  }
-});
+
+
 
 
 
@@ -8796,24 +8768,7 @@ document.addEventListener('click', function(e) {
 
 
 
-// ── Event delegation for timesheets ──────────────────────────────────────────
-document.addEventListener('click', function(e) {
-  var el;
-  el = e.target.closest('[data-open-ts]');
-  if (el) { openTSModal(el.getAttribute('data-open-ts')); return; }
-  el = e.target.closest('[data-ts-for-wo]');
-  if (el) { createOrOpenTS(el.getAttribute('data-ts-for-wo')); return; }
-  el = e.target.closest('[data-export-ts]');
-  if (el) { _editTSId = el.getAttribute('data-export-ts'); exportTimesheet(); return; }
-  el = e.target.closest('[data-export-pkg]');
-  if (el) { exportPackage(el.getAttribute('data-export-pkg')); return; }
-  el = e.target.closest('[data-revert-ts]');
-  if (el) {
-    _editTSId = el.getAttribute('data-revert-ts');
-    revertTS();
-    return;
-  }
-});
+
 
 // ── Event delegation for timesheets ──────────────────────────────────────────
 document.addEventListener('click', function(e) {
