@@ -2946,7 +2946,9 @@ function openWOModal(editId) {
   if (editId && wo.labourRows && wo.labourRows.length) {
     wo.labourRows.forEach(function(row) { addLabourRow(null, null, row); });
   } else {
-    addLabourRow(); // Start with one empty row
+    // Pre-fill tech name on the default empty row for non-admins
+    var _defTech = !isAdmin() ? getCurrentTechName() : '';
+    addLabourRow(null, null, _defTech ? { technician: _defTech } : null);
   }
   if (editId && wo.equipRows && wo.equipRows.length) {
     wo.equipRows.forEach(function(row) { addEquipmentRow(row); });
@@ -3770,10 +3772,16 @@ function renderDashboard(){
   var _myJobs = isAdmin() ? _jobs : _jobs.filter(function(j){
     var vp=(VIEWER_PEOPLE||[]).find(function(p){return p.id===CURRENT_VIEWER;});
     if(!vp) return true;
-    return (j.labourRows||[]).some(function(r){
+    // Show WO if any labour row matches this tech's name
+    var techMatch = (j.labourRows||[]).some(function(r){
       return (r.technician||'').toLowerCase().includes(vp.name.split(' ')[0].toLowerCase())||
              (r.technician||'').toLowerCase().includes(vp.name.split(' ').pop().toLowerCase());
     });
+    if (techMatch) return true;
+    // Also show WOs with no technician assigned (imported/new WOs not yet attributed)
+    var hasAnyTech = (j.labourRows||[]).some(function(r){ return (r.technician||'').trim(); });
+    if (!hasAnyTech && (j.status === 'draft' || j.status === 'submitted')) return true;
+    return false;
   });
   var activeWOs = _myJobs.filter(function(j){
     return j.status==='draft'||j.status==='submitted'||j.status==='approved';
