@@ -1848,9 +1848,10 @@ function saveTimesheetToStorage(ts) {
   if (idx > -1) all[idx] = ts; else all.unshift(ts);
   _tsCacheWrite(all);
   _timesheets = all;
-  // Fire-and-forget Supabase write — non-blocking, doesn't need await
+  // Write to Supabase — non-blocking but log failures so we can diagnose
   sbUpsert('timesheets', ts.id, ts).catch(function(e) {
-    console.warn('[TS] Supabase write failed, cached locally:', e.message);
+    console.error('[TS] Supabase write failed (cached locally):', e.message);
+    toast('⚠ Timesheet saved locally — sync pending', 'info');
   });
 }
 
@@ -3081,16 +3082,20 @@ async function loadAll(){
     if(results[3].status==='fulfilled') _rateSheets   = results[3].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[4].status==='fulfilled') {
       var sbTS = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
-      if (sbTS.length > 0) {
-        // Supabase has data — use it as source of truth
-        _timesheets = sbTS;
-        _tsCacheWrite(sbTS);
-        var panel = document.getElementById('ts-migrate-panel');
-        if (panel) panel.style.display = 'none';
-      } else {
-        // Supabase is empty — use local cache and keep migration panel visible
-        _timesheets = loadTimesheetsFromStorage();
-      }
+      var localTS = _tsCacheRead();
+      // Merge: Supabase is source of truth, but include any local-only TSes not yet synced
+      var merged = sbTS.slice();
+      localTS.forEach(function(lt){
+        if (!merged.find(function(s){ return s.id === lt.id; })) {
+          merged.unshift(lt);
+          // Push missing local TS up to Supabase
+          sbUpsert('timesheets', lt.id, lt).catch(function(e){ console.warn('[TS sync]', e.message); });
+        }
+      });
+      _timesheets = merged;
+      _tsCacheWrite(merged);
+      var panel = document.getElementById('ts-migrate-panel');
+      if (panel) panel.style.display = 'none';
     } else {
       _timesheets = loadTimesheetsFromStorage(); // fallback to cache
     }
