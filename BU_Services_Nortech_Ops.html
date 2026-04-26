@@ -8775,22 +8775,25 @@ function renderMarginReport() {
     if (dateFrom && j.date && j.date < dateFrom) return;
     if (dateTo   && j.date && j.date > dateTo)   return;
 
-    // Get billed amount for THIS WO specifically (not the full invoice total)
-    // Using priceChargeSheet avoids counting other WOs on the same invoice
-    var rs = j.rateSheetId ? _rateSheets.find(function(r){ return r.id === j.rateSheetId; })
-           : (_rateSheets.find(function(r){ return (r.type||'tm')==='tm'; }) || _rateSheets[0] || null);
-    // If WO has an invoice, also try the invoice's rate sheet
+    // Get billed amount for THIS WO from the invoice's saved per-WO breakdown
     var inv = j.invoiceId ? _invoices.find(function(i){ return i.id === j.invoiceId; }) : null;
-    if (inv && inv.rateSheetId && !j.rateSheetId) {
-      rs = _rateSheets.find(function(r){ return r.id === inv.rateSheetId; }) || rs;
+    var billed = 0;
+    if (inv) {
+      // chargeSheets stores per-WO priced totals saved at invoice creation time
+      var csEntry = (inv.chargeSheets||[]).find(function(c){ return c.id === j.id; });
+      if (csEntry && csEntry.total) {
+        billed = csEntry.total;
+      } else {
+        // Fallback: divide invoice subtotal equally among WOs
+        var invWoCount = (inv.chargeSheetIds||[]).length || 1;
+        billed = (inv.subtotal || 0) / invWoCount;
+      }
     }
-    var billed = priceChargeSheet(j, rs || {});
-    // If WO is invoiced and priceChargeSheet returns 0, fall back to saved WO total
-    if (!billed && j.status === 'invoiced' && inv) {
-      // Divide invoice total proportionally among its WOs
-      var invWoCount = (inv.chargeSheetIds || []).length || 1;
-      billed = (inv.subtotal || inv.total || 0) / invWoCount;
-    }
+    // Get rate sheet for cost calculation
+    var rs = j.rateSheetId ? _rateSheets.find(function(r){ return r.id === j.rateSheetId; })
+           : (inv && inv.rateSheetId ? _rateSheets.find(function(r){ return r.id === inv.rateSheetId; }) : null)
+           || _rateSheets.find(function(r){ return (r.type||'tm')==='tm'; })
+           || _rateSheets[0] || null;
 
     // Compute cost from labourRows — use TS rows only if WO has no hours (avoid double-counting)
     var rows = (j.labourRows || []).slice();
