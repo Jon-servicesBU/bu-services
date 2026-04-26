@@ -1,15 +1,4 @@
-
-  // Update bottom nav tab badge
-  var tabBadge = document.getElementById('tech-tab-badge');
-  if (tabBadge) {
-    var pending = !isAdmin() ? (_timesheets||[]).filter(function(t){
-      var vp=(VIEWER_PEOPLE||[]).find(function(p){return p.id===CURRENT_VIEWER;});
-      return t.status==='pending' && vp && t.technician===vp.name;
-    }).length : 0;
-    tabBadge.style.display = pending ? 'block' : 'none';
-    tabBadge.textContent = pending || '';
-  }
-}<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -3802,6 +3791,16 @@ function updatePendingBadge(){
   var pending = _jobs.filter(function(j){ return j.status==='submitted'; }).length;
   var badge = document.getElementById('pending-badge');
   if (badge){ badge.textContent = pending + ' Pending'; badge.style.display = pending ? 'inline' : 'none'; }
+  // Update mobile bottom nav tab badge for techs
+  var tabBadge = document.getElementById('tech-tab-badge');
+  if (tabBadge) {
+    var myPending = !isAdmin() ? (_timesheets||[]).filter(function(t){
+      var vp=(VIEWER_PEOPLE||[]).find(function(p){return p.id===CURRENT_VIEWER;});
+      return t.status==='pending' && vp && t.technician===vp.name;
+    }).length : 0;
+    tabBadge.style.display = myPending ? 'block' : 'none';
+    tabBadge.textContent = myPending || '';
+  }
 }
 
 // ── Jobs ──────────────────────────────────────────────────────────────────────
