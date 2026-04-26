@@ -2649,7 +2649,7 @@ function openWOModal(editId) {
   if (editId && wo.labourRows && wo.labourRows.length) {
     wo.labourRows.forEach(function(row) { addLabourRow(null, null, row); });
   } else {
-    addLabourRow(); // Start with one empty row
+    addLabourRow(null, null, !isAdmin() ? { technician: getCurrentTechName() } : null); // Start with one row, tech name pre-filled for techs
   }
   if (editId && wo.equipRows && wo.equipRows.length) {
     wo.equipRows.forEach(function(row) { addEquipmentRow(row); });
@@ -5449,7 +5449,7 @@ async function saveWO(status) {
     var ot  = parseFloat(otEl  ? otEl.value  : 0) || 0;
     var dt  = parseFloat(dtEl  ? dtEl.value  : 0) || 0;
     var ns  = parseFloat(nsEl  ? nsEl.value  : 0) || 0;
-    if (!techEl.value && !reg && !ot && !dt && !ns) continue;
+    if (!techEl.value && !reg && !ot && !dt && !ns) continue; // skip completely empty rows
     labourRows.push({
       technician: techEl.value || '',
       category:   catEl ? catEl.value : '',
@@ -5585,19 +5585,8 @@ async function saveWO(status) {
 
     closeModal('job-modal');
     renderJobs(); renderDashboard(); updatePendingBadge();
-    // Auto-create timesheets on first submit — applies to BOTH manual entry AND PDF import
-    // _editWOId is null for new WOs regardless of how data was entered
-    if (status === 'submitted' && !_editWOId) {
-      // Ensure the logged-in tech is represented in labourRows so their TS is always created
-      var techForTS = getCurrentTechName();
-      if (techForTS && !(data.labourRows||[]).some(function(r){ return (r.technician||'').trim(); })) {
-        // No technician assigned on any row — stamp the logged-in tech on all rows
-        (data.labourRows||[]).forEach(function(r){ if (!r.technician) r.technician = techForTS; });
-        // If still no rows at all, add a placeholder so the TS gets created
-        if (!(data.labourRows||[]).length) {
-          data.labourRows = [{ technician: techForTS, category: '', regHrs: 0, otHrs: 0, dtHrs: 0, nightHrs: 0 }];
-        }
-      }
+    // Auto-create timesheets on first submit/save — new WOs only (_editWOId is null)
+    if ((status === 'submitted' || status === 'approved') && !_editWOId) {
       await createTimesheetFromWO(data);
       renderTimesheets();
     }
@@ -7475,13 +7464,15 @@ function calcRowCost(techName, regHrs, otHrs, nightHrs) {
 
 // ── Auto-create timesheet when WO is submitted ───────────────────────────────
 async function createTimesheetFromWO(wo) {
-  // ONE timesheet PER TECHNICIAN per WO — WO uniqueness is enforced at submission
-  // so no duplicate-prevention logic needed here.
+  // ONE timesheet PER TECHNICIAN — each tech owns their own TS, sees only their rows.
   if (!wo || !wo.id) return;
   var labourRows = wo.labourRows || [];
+  if (!labourRows.length) return;
+
+  // Current viewer's canonical name (used as fallback when rows have no technician)
   var currentTechName = getCurrentTechName ? getCurrentTechName() : '';
 
-  // Fuzzy-resolve raw name → canonical VIEWER_PEOPLE name
+  // Fuzzy-resolve raw dropdown name → canonical VIEWER_PEOPLE name
   function _canonical(raw) {
     if (!raw || !raw.trim()) return '';
     var r = raw.toLowerCase().trim();
@@ -7494,14 +7485,21 @@ async function createTimesheetFromWO(wo) {
     return m ? m.name : raw.trim();
   }
 
-  // Group rows by canonical tech name; unrecognised names → logged-in tech
+  // Group rows by canonical tech name
   var byTech = {};
+
   labourRows.forEach(function(r) {
-    var name = (r.technician && r.technician.trim()) ? _canonical(r.technician) : '';
+    var rawName = (r.technician && r.technician.trim()) ? r.technician : '';
+    var name = rawName ? _canonical(rawName) : '';
+
+    // If no name resolved, or it resolved to something that doesn't match any
+    // VIEWER_PEOPLE entry (e.g. a company name from the PDF), fall back to the
+    // logged-in tech so we never produce a phantom TS for an unknown person
     if (!name || !(VIEWER_PEOPLE||[]).find(function(p){ return p.name === name; })) {
       name = currentTechName;
     }
-    if (!name) return;
+    if (!name) return; // no tech at all — skip
+
     if (!byTech[name]) byTech[name] = [];
     byTech[name].push({
       date:      r.date      || wo.date || today(),
@@ -7516,15 +7514,19 @@ async function createTimesheetFromWO(wo) {
     });
   });
 
-  // If no labour rows, create a blank TS for the logged-in tech
-  if (!Object.keys(byTech).length) {
-    if (!currentTechName) return 0; // no tech logged in — nothing to do
-    byTech[currentTechName] = [];
-  }
-
   var created = 0;
+  // Read freshest TS list — union of in-memory and localStorage to catch stale entries
+  var freshTS = _timesheets.concat(_tsCacheRead().filter(function(c){
+    return !_timesheets.find(function(m){ return m.id === c.id; });
+  }));
+
   Object.keys(byTech).forEach(function(techName) {
-    if (!techName) return; // skip empty names
+    // Skip if TS already exists for this tech+WO (check both memory and cache)
+    if (freshTS.find(function(t){ return t.woId === wo.id && t.technician === techName; })) return;
+    // Skip if techName doesn't match any known employee (prevents phantom TSes)
+    var knownPerson = (VIEWER_PEOPLE||[]).find(function(p){ return p.name === techName; });
+    if (!knownPerson) return;
+
     var ts = {
       id:           uid(),
       woId:         wo.id,
@@ -7547,14 +7549,9 @@ async function createTimesheetFromWO(wo) {
       created:      today(),
       modified:     today(),
     };
-    // Write to localStorage + Supabase
-    var all = _tsCacheRead();
-    all.unshift(ts);
-    _tsCacheWrite(all);
-    _timesheets = all;
-    sbUpsert('timesheets', ts.id, ts).catch(function(e){
-      console.warn('[TS] Supabase write failed, cached locally:', e.message);
-    });
+    saveTimesheetToStorage(ts);
+    // Re-read _timesheets from storage after write to stay in sync
+    _timesheets = _tsCacheRead();
     created++;
   });
   return created;
