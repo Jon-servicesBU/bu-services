@@ -8864,8 +8864,8 @@ function _renderMarginReportImpl() {
     var costRateStr = Object.keys(rateMap).map(function(t){ return t.split(' ')[0]+': $'+rateMap[t].toFixed(2); }).join(', ') || '$55.00';
 
     woRows.push({ woNum: woNum, client: j.client||'—', tech: techs,
-      date: j.date||j.created||'', reg: totalReg, ot: totalOT, night: totalNight,
-      billed: billed, cost: cost, margin: margin, marginPct: marginPct, costRate: costRateStr });
+      date: j.date||j.created||'', reg: totalReg||0, ot: totalOT||0, night: totalNight||0,
+      billed: billed||0, cost: cost||0, margin: margin||0, marginPct: marginPct||0, costRate: costRateStr });
   });
 
   var seenCombinedInv = {};
@@ -8898,8 +8898,8 @@ function _renderMarginReportImpl() {
     }).join(' + ');
 
     woRows.push({ woNum: woNums, client: j.client||'—', tech: techs,
-      date: inv.invDate||j.date||'', reg: totalReg, ot: totalOT, night: totalNight,
-      billed: billed, cost: cost, margin: margin, marginPct: marginPct, costRate: '—', combined: true });
+      date: inv.invDate||j.date||'', reg: totalReg||0, ot: totalOT||0, night: totalNight||0,
+      billed: billed||0, cost: cost||0, margin: margin||0, marginPct: marginPct||0, costRate: '—', combined: true });
   });
 
   // Apply client and margin% filters post-build
