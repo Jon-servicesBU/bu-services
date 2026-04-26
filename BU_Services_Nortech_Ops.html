@@ -4764,42 +4764,59 @@ function viewInvoice(id) {
   });
 
   var html = '<div class="inv-preview">'
-    // Header
+    // Header: logo left, INVOICE + numbers right
     + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem">'
       + '<div>'
-        + '<div style="font-size:22px;font-weight:900;color:#C0392B;line-height:1">N<span style="border-radius:50%;background:#C0392B;color:#fff;padding:0 3px;font-size:16px">O</span>RTECH</div>'
-        + '<div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#333;margin-bottom:.15rem">ADVANCED NDT</div>'
-        + '<div style="font-size:9px;color:#666">' + NORTECH.address + '</div>'
-        + '<div style="font-size:9px;color:#666">Ph: ' + NORTECH.phone + ' · Fx: ' + (NORTECH.fax||'') + '</div>'
+        + (_LOGO_HTML || '<div style="font-size:22px;font-weight:900;color:#1D4A8A">NORTECH<br><span style="font-size:11px;font-weight:700;letter-spacing:2px">ADVANCED NDT</span></div>')
+        + '<div style="margin-top:.4rem;font-size:9px;color:#666">' + NORTECH.address + '</div>'
+        + '<div style="font-size:9px;color:#666">Ph: ' + NORTECH.phone + ' &middot; Fx: ' + (NORTECH.fax||'') + '</div>'
         + '<div style="font-size:9px;color:#666">GST/HST: ' + NORTECH.gst + '</div>'
       + '</div>'
       + '<div style="text-align:right">'
-        + '<div style="font-size:22px;font-weight:900;letter-spacing:2px">INVOICE</div>'
+        + '<div style="font-size:26px;font-weight:900;letter-spacing:3px">INVOICE</div>'
         + '<div style="font-size:9px;color:#666;margin-top:.3rem">Page: 1</div>'
         + '<div style="font-size:10px;margin-top:.4rem"><span style="color:#666">Invoice Number: </span><strong>' + inv.invNum + '</strong></div>'
         + '<div style="font-size:10px"><span style="color:#666">Invoice Date: </span>' + inv.invDate + '</div>'
         + '<div style="font-size:10px"><span style="color:#666">Due Date: </span>' + fmtDate(dueDate) + '</div>'
-        + '<div style="font-size:10px"><span style="color:#666">Terms: </span>' + ({net30:'NET30 Days',net15:'NET15 Days',net60:'NET60 Days',due_receipt:'Due on Receipt'}[inv.terms]||inv.terms) + '</div>'
+        + '<div style="font-size:10px"><span style="color:#666">Terms: </span>' + ({net30:'NET30 Jours/Days',net15:'NET15 Days',net60:'NET60 Days',due_receipt:'Due on Receipt'}[inv.terms]||inv.terms) + '</div>'
       + '</div>'
     + '</div>'
     // Bill To / Ship To
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;font-size:10px">'
-      + '<div><div style="font-size:9px;color:#666;font-weight:700;margin-bottom:.2rem">Bill To:</div><strong>' + inv.client + '</strong><br>' + (invJob.site||'') + '</div>'
-      + '<div><div style="font-size:9px;color:#666;font-weight:700;margin-bottom:.2rem">Ship To:</div><strong>' + inv.client + '</strong><br>' + (invJob.site||'') + '</div>'
+      + '<div>'
+        + '<div style="font-size:8px;color:#666;font-weight:700;margin-bottom:.2rem;text-transform:uppercase">Bill To:</div>'
+        + '<strong>' + inv.client + '</strong>'
+        + (invJob.site ? '<br>' + invJob.site : '')
+        + (invJob.province ? '<br>' + ((CANADA_TAX_RATES[invJob.province]||{}).name || invJob.province) : '')
+        + '<br>Canada'
+      + '</div>'
+      + '<div>'
+        + '<div style="font-size:8px;color:#666;font-weight:700;margin-bottom:.2rem;text-transform:uppercase">Ship To:</div>'
+        + '<strong>' + inv.client + '</strong>'
+        + (invJob.site ? '<br>' + invJob.site : '')
+        + (invJob.province ? '<br>' + ((CANADA_TAX_RATES[invJob.province]||{}).name || invJob.province) : '')
+        + '<br>Canada'
+      + '</div>'
     + '</div>'
-    // Reference grid
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.3rem .75rem;font-size:9px;border:1px solid #ddd;padding:.5rem;margin-bottom:1rem">'
-      + '<div><span style="color:#666">GST/HST Reg:</span><br><strong>' + NORTECH.gst + '</strong></div>'
+    // Reference grid — matches actual invoice layout
+    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.25rem .5rem;font-size:9px;border:1px solid #ccc;padding:.5rem .75rem;margin-bottom:1rem;background:#fafafa">'
+      + '<div><span style="color:#666">Tax Ident. Type</span><br><strong>Legal Entity</strong></div>'
       + '<div><span style="color:#666">Customer ID</span><br><strong>' + (invJob.customerId||'—') + '</strong></div>'
       + '<div><span style="color:#666">P.O. Number</span><br><strong>' + (invJob.po||'—') + '</strong></div>'
-      + '<div><span style="color:#666">Nortech WO #</span><br><strong>' + (invJob.woNum||invJob.number||'—') + '</strong></div>'
-      + '<div><span style="color:#666">Job #</span><br><strong>' + (invJob.jobNum||'—') + '</strong></div>'
-      + '<div><span style="color:#666">Salesperson</span><br><strong>' + (inv.salesperson||'—') + '</strong></div>'
+      + '<div><span style="color:#666">GST/HST Registration No.</span><br><strong>' + NORTECH.gst + '</strong></div>'
+      + '<div><span style="color:#666">P.O. Date</span><br><strong>' + (inv.invDate||'—') + '</strong></div>'
+      + '<div><span style="color:#666">Our Order No.</span><br><strong>' + (invJob.woNum||invJob.number||'—') + '</strong></div>'
+      + '<div><span style="color:#666">Ship Via</span><br><strong>—</strong></div>'
+      + '<div><span style="color:#666">Ship Date</span><br><strong>' + inv.invDate + '</strong></div>'
+      + '<div><span style="color:#666">SalesPerson</span><br><strong>' + (inv.salesperson||'—') + '</strong></div>'
+      + '<div><span style="color:#666">Due Date</span><br><strong>' + fmtDate(dueDate) + '</strong></div>'
+      + '<div><span style="color:#666">Client WO No./Job No.</span><br><strong>' + (invJob.jobNum||'—') + '</strong></div>'
+      + '<div><span style="color:#666">Nortech WO No.</span><br><strong>' + (invJob.woNum||invJob.number||'—') + '</strong></div>'
+      + '<div><span style="color:#666">Terms</span><br><strong>' + ({net30:'NET30 Jours/Days',net15:'NET15 Days',net60:'NET60 Days',due_receipt:'Due on Receipt'}[inv.terms]||inv.terms) + '</strong></div>'
+      + '<div><span style="color:#666">Your Reference</span><br><strong>' + inv.client + '</strong></div>'
       + '<div><span style="color:#666">Rate Sheet</span><br><strong>' + (inv.rateSheetName||invRS.name||'—') + '</strong></div>'
-      + '<div><span style="color:#666">Province</span><br><strong>' + ((CANADA_TAX_RATES[inv.province]||{}).name||inv.province||'AB') + '</strong></div>'
-      + '<div><span style="color:#666">Your Reference</span><br><strong>' + (inv.client||'—') + '</strong></div>'
     + '</div>'
-    // Line items table
+        // Line items table
     + '<table style="width:100%;border-collapse:collapse;margin-bottom:.75rem">'
     + '<thead><tr style="background:#f4f4f4;border-bottom:2px solid #ddd">'
       + '<th style="padding:.3rem .5rem;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:1px">Item / Description</th>'
