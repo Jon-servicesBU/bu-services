@@ -8936,14 +8936,14 @@ function _renderMarginReportImpl() {
           '<td>'+r.client+'</td>'+
           '<td style="font-size:.72rem">'+r.tech+'</td>'+
           '<td style="font-size:.72rem">'+r.date+'</td>'+
-          '<td style="text-align:right">'+r.reg.toFixed(1)+'</td>'+
-          '<td style="text-align:right">'+r.ot.toFixed(1)+'</td>'+
-          '<td style="text-align:right">'+r.night.toFixed(1)+'</td>'+
+          '<td style="text-align:right">'+((r.reg||0).toFixed(1))+'</td>'+
+          '<td style="text-align:right">'+((r.ot||0).toFixed(1))+'</td>'+
+          '<td style="text-align:right">'+((r.night||0).toFixed(1))+'</td>'+
           '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(r.billed)+'</td>'+
           '<td style="text-align:right;font-size:.7rem;color:var(--color-text-secondary)">'+( r.costRate||'—')+'</td>'+
           '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(r.cost)+'</td>'+
           '<td style="text-align:right;font-family:var(--mono);font-weight:700">'+fmtMoney(r.margin)+'</td>'+
-          '<td style="text-align:right"><span class="status-chip '+pctCls+'">'+r.marginPct.toFixed(1)+'%</span></td>'+
+          '<td style="text-align:right"><span class="status-chip '+pctCls+'">'+(r.marginPct||0).toFixed(1)+'%</span></td>'+
         '</tr>';
       }).join('');
     }
@@ -8977,11 +8977,11 @@ function _renderMarginReportImpl() {
         '<td><strong>'+tech+'</strong></td>'+
         '<td style="font-size:.72rem;color:var(--muted)">Field Tech</td>'+
         '<td style="text-align:right">'+t.wos+'</td>'+
-        '<td style="text-align:right">'+totalHrs.toFixed(1)+'</td>'+
+        '<td style="text-align:right">'+((totalHrs||0).toFixed(1))+'</td>'+
         '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(t.billed)+'</td>'+
         '<td style="text-align:right;font-family:var(--mono)">'+fmtMoney(t.cost)+'</td>'+
         '<td style="text-align:right;font-family:var(--mono);font-weight:700">'+fmtMoney(margin)+'</td>'+
-        '<td style="text-align:right"><span class="status-chip '+pctCls+'">'+pct.toFixed(1)+'%</span></td>'+
+        '<td style="text-align:right"><span class="status-chip '+pctCls+'">'+(pct||0).toFixed(1)+'%</span></td>'+
       '</tr>';
     });
     techBody.innerHTML = techRows.length ? techRows.join('') : '<tr><td colspan="8" style="text-align:center;padding:1.5rem;color:var(--muted)">No data</td></tr>';
