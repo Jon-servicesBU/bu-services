@@ -7760,10 +7760,16 @@ async function createTimesheetFromWO(wo) {
   // ONE timesheet PER TECHNICIAN — each tech owns their own TS, sees only their rows.
   if (!wo || !wo.id) return;
   var labourRows = wo.labourRows || [];
-  if (!labourRows.length) return;
 
   // Current viewer's canonical name (used as fallback when rows have no technician)
   var currentTechName = getCurrentTechName ? getCurrentTechName() : '';
+
+  // If no labour rows at all but we have a logged-in tech, create a minimal TS
+  // so the tech is prompted to confirm their hours (they'll fill them in on the TS)
+  if (!labourRows.length) {
+    if (!currentTechName) return; // nothing to do
+    labourRows = [{ technician: currentTechName, category: '', regHrs: 0, otHrs: 0, dtHrs: 0, nightHrs: 0 }];
+  }
 
   // Fuzzy-resolve raw dropdown name → canonical VIEWER_PEOPLE name
   function _canonical(raw) {
