@@ -437,8 +437,8 @@ function showPinScreen(person, onSuccess) {
     <div style="width:48px;height:48px;border-radius:50%;background:${person.color};display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;color:#fff;margin:0 auto .75rem">${person.initials}</div>
     <div style="font-size:1rem;font-weight:700;color:#fff;margin-bottom:.2rem">${person.name}</div>
     <div style="font-size:.72rem;color:rgba(255,255,255,.35);margin-bottom:1.5rem">${person.role}</div>
-    <div style="font-size:.7rem;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:.6rem">Enter your PIN</div>
-    <input id="pin-input" type="password" maxlength="10" inputmode="numeric" autocomplete="off"
+    <div style="font-size:.7rem;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:.6rem">Enter your 4-digit PIN</div>
+    <input id="pin-input" type="password" maxlength="4" inputmode="numeric" autocomplete="off"
       style="width:100%;text-align:center;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:1.4rem;letter-spacing:.4em;padding:.6rem .75rem;outline:none;font-family:inherit;transition:border-color .15s"
       placeholder="••••" />
     <div id="pin-error" style="color:#F87171;font-size:.7rem;margin-top:.5rem;min-height:1rem;display:none">Incorrect PIN — try again</div>
@@ -453,7 +453,10 @@ function showPinScreen(person, onSuccess) {
   var errorEl = document.getElementById('pin-error');
   input.focus();
   function attempt() {
-    if (input.value === person.pin) {
+    var entered = input.value.trim();
+    // Normalise: zero-pad to 4 digits so "525" matches "0525"
+    var normalised = entered.padStart(4, '0');
+    if (normalised === person.pin || entered === person.pin) {
       overlay.remove();
       onSuccess();
     } else {
@@ -4915,11 +4918,10 @@ function printInvAll() {
       if (wo) woHtml = buildWOPrintHTML(wo).replace(/^[\s\S]*?<body[^>]*>/i,'').replace(/<\/body>[\s\S]*$/i,'');
     }
     var invHtml = (document.getElementById('inv-view-body')||{}).innerHTML || '';
-    var logoHdr = _LOGO_HTML ? '<div style="margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1D4A8A">' + _LOGO_HTML.replace('height:56px','height:44px') + '</div>' : '';
     var win = window.open('', '_blank');
-    win.document.write('<html><head><title>WO + Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px}.page-break{page-break-before:always;margin-top:40px;padding-top:20px;border-top:2px solid #ccc}</style></head><body>'
+    win.document.write('<html><head><title>WO + Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px}@media print{body{padding:12px}}.page-break{page-break-before:always;margin-top:40px;padding-top:20px;border-top:2px solid #ccc}</style></head><body>'
       + (woHtml ? woHtml + '<div class="page-break"></div>' : '')
-      + logoHdr + invHtml
+      + invHtml
       + '</body></html>');
     win.document.close();
     win.focus();
