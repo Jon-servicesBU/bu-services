@@ -3081,10 +3081,19 @@ async function sbDelete(table, id){
 // ── Data load ─────────────────────────────────────────────────────────────────
 // ── Remove ghost/duplicate timesheets (same technician + same WO#) ───────────
 function deduplicateTimesheets() {
-  var seen = {}; // key: technician|woNum
   var toDelete = [];
-  // Sort newest first so we keep the most recent TS per tech+WO#
-  var sorted = _timesheets.slice().sort(function(a,b){
+
+  // 1. Remove orphaned TSes — woId points to a WO that no longer exists
+  _timesheets.forEach(function(ts) {
+    if (ts.woId && !_jobs.find(function(j){ return j.id === ts.woId; })) {
+      toDelete.push(ts.id);
+    }
+  });
+
+  // 2. Remove duplicates — same technician + same WO#, keep newest
+  var seen = {};
+  var survivors = _timesheets.filter(function(t){ return toDelete.indexOf(t.id) === -1; });
+  var sorted = survivors.slice().sort(function(a,b){
     return (b.modified||b.created||'').localeCompare(a.modified||a.created||'');
   });
   sorted.forEach(function(ts) {
@@ -3095,8 +3104,9 @@ function deduplicateTimesheets() {
       seen[key] = true;
     }
   });
+
   if (!toDelete.length) return;
-  console.log('[TS dedup] Removing', toDelete.length, 'duplicate timesheets');
+  console.log('[TS cleanup] Removing', toDelete.length, 'orphaned/duplicate timesheets');
   _timesheets = _timesheets.filter(function(t){ return toDelete.indexOf(t.id) === -1; });
   _tsCacheWrite(_timesheets);
   toDelete.forEach(function(id){
