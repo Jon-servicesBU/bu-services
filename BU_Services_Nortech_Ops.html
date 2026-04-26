@@ -8827,16 +8827,13 @@ function renderMarginReport() {
 
     var costDetails = [];
     var cost = rows.reduce(function(s, r) {
-      var stR = getRate(rs, r.category, 'st');
-      var otR = getRate(rs, r.category, 'ot');
-      var dtR = getRate(rs, r.category, 'dt');
-      if (!stR) {
-        var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
-          return e.name && r.technician && e.name.toLowerCase() === (r.technician||'').toLowerCase();
-        });
-        stR = emp ? emp.rate : DEFAULT_COST.st;
-        otR = stR * 1.5; dtR = stR * 2;
-      }
+      // Cost = payroll rate, always. Rate sheet is for billing only.
+      var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
+        return e.name && r.technician && e.name.toLowerCase() === (r.technician||'').toLowerCase();
+      });
+      var stR = emp ? emp.rate : DEFAULT_COST.st;
+      var otR = stR * 1.5;
+      var dtR = stR * 2;
       costDetails.push({ tech: r.technician||'', stR: stR });
       return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
     }, 0);
@@ -8891,16 +8888,11 @@ function renderMarginReport() {
     if (techFilter) allRows = allRows.filter(function(r){ return (r.technician||'').toLowerCase().includes(techFilter.toLowerCase()); });
 
     var cost = allRows.reduce(function(s, r) {
-      var stR = getRate(rs, r.category, 'st');
-      var otR = getRate(rs, r.category, 'ot');
-      var dtR = getRate(rs, r.category, 'dt');
-      if (!stR) {
-        var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
-          return e.name && r.technician && e.name.toLowerCase() === (r.technician||'').toLowerCase();
-        });
-        stR = emp ? emp.rate : DEFAULT_COST.st;
-        otR = stR * 1.5; dtR = stR * 2;
-      }
+      var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
+        return e.name && r.technician && e.name.toLowerCase() === (r.technician||'').toLowerCase();
+      });
+      var stR = emp ? emp.rate : DEFAULT_COST.st;
+      var otR = stR * 1.5; dtR = stR * 2;
       return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
     }, 0);
 
