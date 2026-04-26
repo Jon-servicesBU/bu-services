@@ -575,6 +575,13 @@ body.tech-view .cs-lb-tot           { display: none !important; }
     display: none;
   }
 }
+
+/* WO import: show camera/photo on mobile, PDF on desktop */
+@media (max-width: 932px) and (max-height: 500px),
+       (max-width: 600px) {
+  body.mobile-view #wo-import-pdf-btn    { display: none !important; }
+  body.mobile-view .wo-mobile-import     { display: inline-flex !important; }
+}
 </style>
 </head>
 <script>// ══════════════════════════════════════════════════════════════════════════════
@@ -1159,8 +1166,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     <div class="modal-footer" style="flex-wrap:wrap;gap:.4rem">
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
-      <button class="btn btn-ghost" id="wo-import-pdf-btn" onclick="triggerWOImport()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">⬆ Import from PDF</button>
-      <input type="file" id="wo-import-file" accept=".pdf,.PDF" style="display:none" onchange="handleWOImportFile(this)">
+      <!-- Desktop: PDF import -->
+      <button class="btn btn-ghost" id="wo-import-pdf-btn" onclick="document.getElementById('wo-import-file').click()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">⬆ Import PDF</button>
+      <!-- Mobile: camera + photo library (shown via CSS on mobile) -->
+      <button class="btn btn-ghost wo-mobile-import" id="wo-import-camera-btn" onclick="document.getElementById('wo-import-camera').click()" style="display:none;border-color:rgba(0,174,239,.3);color:var(--sky)">📷 Camera</button>
+      <button class="btn btn-ghost wo-mobile-import" id="wo-import-photo-btn" onclick="document.getElementById('wo-import-photo').click()" style="display:none;border-color:rgba(0,174,239,.3);color:var(--sky)">🖼 Photo / Doc</button>
+      <!-- Hidden inputs -->
+      <input type="file" id="wo-import-file"   accept=".pdf,.PDF,.docx,.doc" style="display:none" onchange="handleWOImportFile(this,'pdf')">
+      <input type="file" id="wo-import-camera" accept="image/*" capture="environment" style="display:none" onchange="handleWOImportFile(this,'image')">
+      <input type="file" id="wo-import-photo"  accept="image/*,.pdf,.PDF" style="display:none" onchange="handleWOImportFile(this,'image')">
       <div style="flex:1"></div>
       <!-- Shown/hidden by openWOModal based on status -->
       <button class="btn btn-ghost"     id="wo-btn-edit-unlock"  onclick="adminUnlockWO()"      style="display:none">✏ Edit</button>
@@ -2716,7 +2730,7 @@ function triggerWOImport() {
   document.getElementById('wo-import-file').click();
 }
 
-async function handleWOImportFile(input) {
+async function handleWOImportFile(input, mode) {
   var file = input.files[0];
   if (!file) return;
   input.value = '';
@@ -2727,22 +2741,46 @@ async function handleWOImportFile(input) {
     return;
   }
 
-  var btn = document.getElementById('wo-import-pdf-btn');
-  if (btn) { btn.textContent = '⏳ Reading PDF…'; btn.disabled = true; }
+  // Determine content type
+  var isImage = mode === 'image' || file.type.startsWith('image/');
+  var isPDF   = !isImage;
+
+  // Show loading state on whichever button triggered this
+  var allBtns = ['wo-import-pdf-btn','wo-import-camera-btn','wo-import-photo-btn'];
+  allBtns.forEach(function(id){
+    var b = document.getElementById(id);
+    if (b) { b._origText = b.textContent; b.disabled = true; }
+  });
+  var statusMsg = isImage ? '⏳ Reading image…' : '⏳ Reading PDF…';
+  allBtns.forEach(function(id){
+    var b = document.getElementById(id);
+    if (b && b.style.display !== 'none') b.textContent = statusMsg;
+  });
 
   try {
-    // Convert PDF to base64
-    var base64 = await new Promise(function(resolve, reject) {
+    // Read file as base64
+    var dataUrl = await new Promise(function(resolve, reject) {
       var reader = new FileReader();
-      reader.onload = function(e) { resolve(e.target.result.split(',')[1]); };
+      reader.onload = function(e) { resolve(e.target.result); };
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+    var base64 = dataUrl.split(',')[1];
+    var mediaType = file.type || (isPDF ? 'application/pdf' : 'image/jpeg');
 
-    if (btn) btn.textContent = '⏳ Extracting data…';
+    // Update status
+    allBtns.forEach(function(id){
+      var b = document.getElementById(id);
+      if (b && b.style.display !== 'none') b.textContent = '⏳ Extracting data…';
+    });
 
-    // Send to Claude API (uses same proxy as rate sheet import)
-    if (btn) btn.textContent = '\u23F3 Extracting data\u2026';
+    var WO_PROMPT = 'Extract all work order data from this document/image and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nIMPORTANT: If no technician name appears, leave technician as empty string. Extract ALL labour rows even with no technician. Return ONLY the JSON, no markdown.';
+
+    // Build content block — image vs PDF
+    var contentBlock = isImage
+      ? { type: 'image',    source: { type: 'base64', media_type: mediaType, data: base64 } }
+      : { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } };
+
     var resp = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2751,30 +2789,31 @@ async function handleWOImportFile(input) {
         max_tokens: 2000,
         messages: [{
           role: 'user',
-          content: [
-            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-            { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"","endTime":""}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nIMPORTANT: If no technician name appears, leave technician as empty string. Extract ALL labour rows even with no technician. Return ONLY the JSON.' }
-          ]
+          content: [ contentBlock, { type: 'text', text: WO_PROMPT } ]
         }]
       })
     });
 
     var data = await resp.json();
-    var text = data.content && data.content[0] ? data.content[0].text : '';
-    text = text.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-    var wo = JSON.parse(text);
+    var text = (data.content || []).filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join('');
+    text = text.replace(/```json\s*/gi,'').replace(/```\s*/gi,'').trim();
+    var wo = _repairAndParseJSON(text);
 
-    // Populate all WO modal fields
     populateWOFromImport(wo);
 
-    if (btn) { btn.textContent = '✓ Import done'; btn.style.color = 'var(--green)'; }
-    setTimeout(function(){ if(btn){ btn.textContent = '⬆ Import from PDF'; btn.style.color = ''; btn.disabled = false; } }, 3000);
-    toast('Work order imported — review and save', 'success');
+    allBtns.forEach(function(id){
+      var b = document.getElementById(id);
+      if (b) { b.textContent = b._origText; b.disabled = false; }
+    });
+    toast('Work order imported ✓ — review and save', 'success');
 
   } catch(e) {
     console.error('WO import error:', e);
-    if (btn) { btn.textContent = '⬆ Import from PDF'; btn.disabled = false; }
-    toast('Import failed: ' + (e.message||'Unknown error'), 'error');
+    allBtns.forEach(function(id){
+      var b = document.getElementById(id);
+      if (b) { b.textContent = b._origText || '⬆ Import'; b.disabled = false; }
+    });
+    toast('Import failed: ' + (e.message || 'Unknown error'), 'error');
   }
 }
 
