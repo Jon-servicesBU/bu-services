@@ -1168,13 +1168,11 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-ghost" onclick="closeModal('job-modal')">Cancel</button>
       <!-- Desktop: PDF import -->
       <button class="btn btn-ghost" id="wo-import-pdf-btn" onclick="document.getElementById('wo-import-file').click()" style="border-color:rgba(0,174,239,.3);color:var(--sky)">⬆ Import PDF</button>
-      <!-- Mobile: camera + photo library (shown via CSS on mobile) -->
-      <button class="btn btn-ghost wo-mobile-import" id="wo-import-camera-btn" onclick="document.getElementById('wo-import-camera').click()" style="display:none;border-color:rgba(0,174,239,.3);color:var(--sky)">📷 Camera</button>
+      <!-- Mobile: photo/doc picker (shown via CSS on mobile) -->
       <button class="btn btn-ghost wo-mobile-import" id="wo-import-photo-btn" onclick="document.getElementById('wo-import-photo').click()" style="display:none;border-color:rgba(0,174,239,.3);color:var(--sky)">🖼 Photo / Doc</button>
       <!-- Hidden inputs -->
-      <input type="file" id="wo-import-file"   accept=".pdf,.PDF,.docx,.doc" style="display:none" onchange="handleWOImportFile(this,'pdf')">
-      <input type="file" id="wo-import-camera" accept="image/*" capture="environment" style="display:none" onchange="handleWOImportFile(this,'image')">
-      <input type="file" id="wo-import-photo"  accept="image/*,.pdf,.PDF" style="display:none" onchange="handleWOImportFile(this,'image')">
+      <input type="file" id="wo-import-file"  accept=".pdf,.PDF,.docx,.doc" style="display:none" onchange="handleWOImportFile(this,'pdf')">
+      <input type="file" id="wo-import-photo" accept="image/*,.pdf,.PDF" style="display:none" onchange="handleWOImportFile(this,'image')">
       <div style="flex:1"></div>
       <!-- Shown/hidden by openWOModal based on status -->
       <button class="btn btn-ghost"     id="wo-btn-edit-unlock"  onclick="adminUnlockWO()"      style="display:none">✏ Edit</button>
@@ -2746,7 +2744,7 @@ async function handleWOImportFile(input, mode) {
   var isPDF   = !isImage;
 
   // Show loading state on whichever button triggered this
-  var allBtns = ['wo-import-pdf-btn','wo-import-camera-btn','wo-import-photo-btn'];
+  var allBtns = ['wo-import-pdf-btn','wo-import-photo-btn'];
   allBtns.forEach(function(id){
     var b = document.getElementById(id);
     if (b) { b._origText = b.textContent; b.disabled = true; }
