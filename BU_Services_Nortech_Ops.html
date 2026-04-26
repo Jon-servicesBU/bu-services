@@ -1,4 +1,15 @@
-<!DOCTYPE html>
+
+  // Update bottom nav tab badge
+  var tabBadge = document.getElementById('tech-tab-badge');
+  if (tabBadge) {
+    var pending = !isAdmin() ? (_timesheets||[]).filter(function(t){
+      var vp=(VIEWER_PEOPLE||[]).find(function(p){return p.id===CURRENT_VIEWER;});
+      return t.status==='pending' && vp && t.technician===vp.name;
+    }).length : 0;
+    tabBadge.style.display = pending ? 'block' : 'none';
+    tabBadge.textContent = pending || '';
+  }
+}<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -314,6 +325,228 @@ body.tech-view .cs-lb-tot           { display: none !important; }
 .status-chip.sc-amber { background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.3); color:#F59E0B; padding:.15rem .55rem; border-radius:999px; font-size:.72rem; font-weight:700; font-family:var(--mono); white-space:nowrap; display:inline-block; }
 .status-chip.sc-red   { background:rgba(239,68,68,.12);  border:1px solid rgba(239,68,68,.3);  color:#EF4444; padding:.15rem .55rem; border-radius:999px; font-size:.72rem; font-weight:700; font-family:var(--mono); white-space:nowrap; display:inline-block; }
 
+
+/* ═══════════════════════════════════════════════════════
+   MOBILE VIEW — optimized for phones (all roles)
+   ═══════════════════════════════════════════════════════ */
+
+/* Only apply when tech-view AND narrow screen */
+@media (max-width: 600px) {
+
+  /* ── Bottom tab bar replaces top nav for techs ── */
+  body.mobile-view .unav {
+    display: none !important;
+  }
+
+  body.mobile-view .view-body {
+    padding-bottom: 72px !important; /* room for bottom tab bar */
+  }
+
+  body.mobile-view #tech-bottom-nav {
+    display: flex !important;
+  }
+
+  #tech-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 64px;
+    background: rgba(12,14,20,.97);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    z-index: 300;
+    padding: 0 env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  }
+
+  #tech-bottom-nav button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: .6rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 8px 4px;
+    transition: color .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #tech-bottom-nav button .tab-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  #tech-bottom-nav button.active {
+    color: var(--nor-accent);
+  }
+
+  #tech-bottom-nav button .tab-badge {
+    position: absolute;
+    top: 6px;
+    right: calc(50% - 18px);
+    background: #E84040;
+    color: #fff;
+    border-radius: 10px;
+    font-size: .55rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    line-height: 1.4;
+    min-width: 16px;
+    text-align: center;
+  }
+
+  #tech-bottom-nav button { position: relative; }
+
+  /* ── View padding ── */
+  body.mobile-view .view-body {
+    padding: .75rem !important;
+  }
+
+  /* ── Cards: full-width, larger touch targets ── */
+  body.mobile-view .card {
+    border-radius: 10px;
+    margin-bottom: .6rem;
+  }
+
+  /* ── WO cards: bigger tap area ── */
+  body.mobile-view [data-toggle-job] {
+    padding: 1rem !important;
+    min-height: 64px;
+  }
+
+  /* ── Confirmation cards: prominent ── */
+  body.mobile-view .pending-conf-card {
+    border-radius: 12px !important;
+    padding: 1rem 1.1rem !important;
+    margin-bottom: .75rem !important;
+  }
+
+  body.mobile-view .pending-conf-card button {
+    width: 100%;
+    padding: .75rem !important;
+    font-size: .85rem !important;
+    border-radius: 8px !important;
+    margin-top: .5rem;
+  }
+
+  /* ── Search bar ── */
+  body.mobile-view .filter-bar {
+    flex-wrap: wrap;
+    gap: .4rem;
+  }
+
+  body.mobile-view .filter-bar .form-input,
+  body.mobile-view .filter-bar .form-select {
+    flex: 1 1 140px;
+    font-size: .85rem;
+    height: 38px;
+  }
+
+  /* ── Modals: full screen on mobile ── */
+  body.mobile-view .modal-overlay .modal {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-height: 100dvh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body.mobile-view .modal-overlay .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── WO modal: simplify labour table on mobile ── */
+  body.mobile-view #job-modal .cs-labour-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── Buttons: full-width CTAs ── */
+  body.mobile-view .modal-footer {
+    padding: .75rem 1rem !important;
+    gap: .5rem;
+  }
+
+  body.mobile-view .modal-footer button {
+    flex: 1;
+    padding: .75rem !important;
+    font-size: .85rem !important;
+  }
+
+  /* ── TS grid: full width cards ── */
+  body.mobile-view #ts-grid .card {
+    padding: .9rem 1rem;
+  }
+
+  /* ── Typography bumps for readability ── */
+  body.mobile-view .card .wo-num,
+  body.mobile-view .card [style*="font-family:var(--mono)"] {
+    font-size: .85rem !important;
+  }
+
+  /* ── Hide non-essential columns on TS table ── */
+  body.mobile-view .ts-col-hide { display: none !important; }
+
+  /* ── Status chips: bigger ── */
+  body.mobile-view .status-chip {
+    font-size: .65rem !important;
+    padding: .2rem .5rem !important;
+  }
+
+  /* ── Page title ── */
+  body.mobile-view .sec-hdr {
+    font-size: .9rem !important;
+  }
+
+  /* ── Safe area for notched phones ── */
+  body.mobile-view {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+
+/* Medium phones (601-768) — lighter touch */
+@media (min-width: 601px) and (max-width: 768px) {
+  body.mobile-view #tech-bottom-nav { display: flex !important; }
+  body.mobile-view .unav { display: none !important; }
+  body.mobile-view .view-body { padding-bottom: 72px !important; }
+  body.mobile-view .modal-overlay .modal {
+    width: 96vw !important;
+    max-width: 96vw !important;
+    border-radius: 12px !important;
+  }
+}
+
+/* Admin bottom nav — 5 tabs, slightly smaller */
+@media (max-width: 768px) {
+  body.mobile-view #tech-bottom-nav button {
+    font-size: .55rem;
+  }
+  body.mobile-view #tech-bottom-nav .tab-icon {
+    font-size: 1.25rem;
+  }
+  /* Admin: show dashboard in top area, not bottom nav */
+  body.mobile-view:not(.tech-view) .view-body {
+    padding-bottom: 72px !important;
+  }
+  /* Admin margin table: horizontal scroll */
+  body.mobile-view #margin-wo-body tr td:nth-child(n+5):nth-child(-n+7) {
+    display: none; /* hide reg/ot/night hrs cols on mobile */
+  }
+  body.mobile-view #margin-wo-body tr th:nth-child(n+5):nth-child(-n+7) {
+    display: none;
+  }
+}
 </style>
 </head>
 <script>// ══════════════════════════════════════════════════════════════════════════════
@@ -2399,6 +2632,8 @@ function applyAdminVisibility() {
     }
   } else {
     document.body.classList.remove('tech-view');
+    // Show admin tabs in bottom nav
+    document.querySelectorAll('#tech-bottom-nav .admin-tab').forEach(function(b){ b.style.display = 'flex'; });
     ['nav-dashboard','nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.style.display = '';
@@ -3118,6 +3353,11 @@ function showView(view, btn){
     document.querySelectorAll('.unav-links button').forEach(function(b){
       if(b.textContent.toLowerCase().includes(view.replace('-',' '))) b.classList.add('active');
     });
+  // Sync bottom nav tabs
+  ['jobs','timesheets','invoices','margin','rates'].forEach(function(v){
+    var tb = document.getElementById('tab-'+v);
+    if (tb) tb.classList.toggle('active', v === view || (v==='rates' && view==='rate-sheets'));
+  });
   }
   renderForView(view);
 }
@@ -3449,7 +3689,19 @@ function techSubmitBoth() {
   techSaveWO();
 }
 
+function setMobileView() {
+  if (window.innerWidth <= 768) {
+    document.body.classList.add('mobile-view');
+  } else {
+    document.body.classList.remove('mobile-view');
+    // Reset bottom nav when going back to desktop
+    document.querySelectorAll('#tech-bottom-nav button').forEach(function(b){ b.classList.remove('active'); });
+  }
+}
+window.addEventListener('resize', setMobileView);
+
 function renderAll(){
+  setMobileView();
   applyAdminVisibility();   // redirect techs away from dashboard, hide admin tabs
   renderDashboard();
   updatePendingBadge();
@@ -8852,5 +9104,30 @@ document.addEventListener('click', function(e) {
 
 
 </script>
+
+<!-- Tech mobile bottom nav — shown by CSS on mobile only -->
+<div id="tech-bottom-nav">
+  <button onclick="showView('jobs',this)" id="tab-jobs">
+    <span class="tab-icon">🔧</span>
+    <span>Work Orders</span>
+  </button>
+  <button onclick="showView('timesheets',this)" id="tab-timesheets">
+    <span class="tab-icon">⏱</span>
+    <span>Timesheets</span>
+    <span class="tab-badge" id="tech-tab-badge" style="display:none"></span>
+  </button>
+  <button onclick="showView('invoices',this)" id="tab-invoices" class="admin-tab" style="display:none">
+    <span class="tab-icon">🧾</span>
+    <span>Invoices</span>
+  </button>
+  <button onclick="showView('margin',this)" id="tab-margin" class="admin-tab" style="display:none">
+    <span class="tab-icon">📈</span>
+    <span>Margins</span>
+  </button>
+  <button onclick="showView('rate-sheets',this)" id="tab-rates" class="admin-tab" style="display:none">
+    <span class="tab-icon">📋</span>
+    <span>Rates</span>
+  </button>
+</div>
 </body>
 </html>
