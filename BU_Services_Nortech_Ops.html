@@ -454,7 +454,6 @@ function showPinScreen(person, onSuccess) {
   input.focus();
   function attempt() {
     var entered = input.value.trim();
-    // Normalise: zero-pad to 4 digits so "525" matches "0525"
     var normalised = entered.padStart(4, '0');
     if (normalised === person.pin || entered === person.pin) {
       overlay.remove();
@@ -723,7 +722,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="form-group">
           <label class="form-label">WO # (auto if blank)</label>
           <input class="form-input" id="job-number" placeholder="W-99001" oninput="checkWONumDupe(this)">
-          <div id="wo-num-dupe-hint" style="display:none;color:var(--color-text-danger, #E84040);font-size:.7rem;margin-top:.2rem">⚠ WO # already exists — change before saving</div>
+          <div id="wo-num-dupe-hint" style="display:none;color:var(--color-text-danger,#E84040);font-size:.7rem;margin-top:.2rem">⚠ WO # already exists — change before saving</div>
         </div>
         <div class="form-group">
           <label class="form-label">Date of Work <span style="color:var(--nor-accent)">*</span></label>
@@ -911,7 +910,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-primary"   id="wo-btn-save"         onclick="saveWO('approved')"    style="display:none">💾 Save</button>
       <button class="btn btn-secondary" id="wo-btn-invoice"      onclick="invoiceWOFromModal()"  style="display:none">🧾 Invoice</button>
       <!-- Tech only -->
-      <button class="btn btn-primary"   id="wo-btn-tech-save"    onclick="techSaveWO()"          style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">Submit Work Order</button>
+      <button class="btn btn-primary"   id="wo-btn-tech-save"    onclick="techSaveWO()"          style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">Save Work Order →</button>
     </div>
   </div>
 </div>
@@ -1852,10 +1851,9 @@ function saveTimesheetToStorage(ts) {
   if (idx > -1) all[idx] = ts; else all.unshift(ts);
   _tsCacheWrite(all);
   _timesheets = all;
-  // Write to Supabase — non-blocking but log failures so we can diagnose
+  // Fire-and-forget Supabase write — non-blocking, doesn't need await
   sbUpsert('timesheets', ts.id, ts).catch(function(e) {
-    console.error('[TS] Supabase write failed (cached locally):', e.message);
-    toast('⚠ Timesheet saved locally — sync pending', 'info');
+    console.warn('[TS] Supabase write failed, cached locally:', e.message);
   });
 }
 
@@ -2525,12 +2523,6 @@ async function handleWOImportFile(input) {
 function populateWOFromImport(wo) {
   function setVal(id, val) { var el = document.getElementById(id); if (el && val != null && val !== '') el.value = val; }
 
-  // Always clear all tabbed sections first — prevents stale rows from previous import or pre-filled tech name
-  ['cs-labour-body','cs-equipment-body','cs-consumables-body','cs-film-body'].forEach(function(id){
-    var el = document.getElementById(id); if (el) el.innerHTML = '';
-  });
-  _csLabourRowCount = 0; _csEquipmentRowCount = 0; _csConsumableRowCount = 0; _csFilmRowCount = 0;
-
   // Header fields
   setVal('job-client',      wo.client);
   setVal('job-number',      wo.woNum);
@@ -2556,11 +2548,11 @@ function populateWOFromImport(wo) {
     }
   }
 
-  // Labour rows — always rebuild; fall back to a pre-filled tech row if AI returned none
+  // Labour rows
   if (wo.labourRows && wo.labourRows.length) {
+    document.getElementById('cs-labour-body').innerHTML = '';
+    _csLabourRowCount = 0;
     wo.labourRows.forEach(function(r){ addLabourRow(null, null, r); });
-  } else {
-    addLabourRow(null, null, !isAdmin() ? { technician: getCurrentTechName() } : null);
   }
 
   // Consumables — AI may return {type, qty, unit} or {item, qty, unit}
@@ -2607,11 +2599,13 @@ function populateWOFromImport(wo) {
 }
 
 function openWOModal(editId) {
-  // Reset any previous dupe warning state
   var numEl = document.getElementById('job-number');
   if (numEl) { numEl.style.borderColor = ''; numEl.style.background = ''; }
   var hint = document.getElementById('wo-num-dupe-hint');
   if (hint) hint.style.display = 'none';
+  ['wo-btn-save','wo-btn-tech-save','wo-btn-approve'].forEach(function(id){
+    var b=document.getElementById(id); if(b) b.disabled=false;
+  });
   _editWOId = editId || null;
   _csLabourRowCount = 0;
   _csEquipmentRowCount = 0;
@@ -2664,7 +2658,7 @@ function openWOModal(editId) {
   if (editId && wo.labourRows && wo.labourRows.length) {
     wo.labourRows.forEach(function(row) { addLabourRow(null, null, row); });
   } else {
-    addLabourRow(null, null, !isAdmin() ? { technician: getCurrentTechName() } : null); // Start with one row, tech name pre-filled for techs
+    addLabourRow(); // Start with one empty row
   }
   if (editId && wo.equipRows && wo.equipRows.length) {
     wo.equipRows.forEach(function(row) { addEquipmentRow(row); });
@@ -2874,7 +2868,7 @@ function exportPackage(woId) {
     tsHtml = '<div style="page-break-before:always"></div>'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">'
         +'<div>'
-          +'<div style="font-size:20px;font-weight:900;color:#C0392B;line-height:1">N<span style="border-radius:50%;background:#C0392B;color:#fff;padding:0 3px;font-size:14px">O</span>RTECH</div>'
+          +(_LOGO_HTML || '<div style="font-size:20px;font-weight:900;color:#1D4A8A;line-height:1">NORTECH<br><span style="font-size:11px;font-weight:700;letter-spacing:2px">ADVANCED NDT</span></div>')
           +'<div style="font-size:11px;font-weight:700;letter-spacing:2px">ADVANCED NDT</div>'
           +'<div style="font-size:9px;color:#666;margin-top:3px">'+NORTECH.address+'</div>'
         +'</div>'
@@ -2979,7 +2973,7 @@ function buildWOPrintHTML(wo) {
   return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Work Order ' + woNum + '</title>'
     + '<style>'
     + 'body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px;color:#111}'
-    + 'h1{font-size:22px;font-weight:900;color:#C0392B;margin:0}'
+    + 'h1{font-size:22px;font-weight:900;color:#1D4A8A;margin:0}'
     + 'h2{font-size:13px;font-weight:700;margin:0}'
     + '.header{display:flex;justify-content:space-between;margin-bottom:16px}'
     + '.company{font-size:9px;color:#666;margin-top:4px;line-height:1.4}'
@@ -3085,6 +3079,32 @@ async function sbDelete(table, id){
 }
 
 // ── Data load ─────────────────────────────────────────────────────────────────
+// ── Remove ghost/duplicate timesheets (same technician + same WO#) ───────────
+function deduplicateTimesheets() {
+  var seen = {}; // key: technician|woNum
+  var toDelete = [];
+  // Sort newest first so we keep the most recent TS per tech+WO#
+  var sorted = _timesheets.slice().sort(function(a,b){
+    return (b.modified||b.created||'').localeCompare(a.modified||a.created||'');
+  });
+  sorted.forEach(function(ts) {
+    var key = (ts.technician||'') + '|' + (ts.woNum||ts.woId||'');
+    if (seen[key]) {
+      toDelete.push(ts.id);
+    } else {
+      seen[key] = true;
+    }
+  });
+  if (!toDelete.length) return;
+  console.log('[TS dedup] Removing', toDelete.length, 'duplicate timesheets');
+  _timesheets = _timesheets.filter(function(t){ return toDelete.indexOf(t.id) === -1; });
+  _tsCacheWrite(_timesheets);
+  toDelete.forEach(function(id){
+    sbDelete('timesheets', id).catch(function(){});
+  });
+}
+
+
 async function loadAll(){
   try{
     var results=await Promise.allSettled([
@@ -3097,23 +3117,20 @@ async function loadAll(){
     if(results[3].status==='fulfilled') _rateSheets   = results[3].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[4].status==='fulfilled') {
       var sbTS = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
-      var localTS = _tsCacheRead();
-      // Merge: Supabase is source of truth, but include any local-only TSes not yet synced
-      var merged = sbTS.slice();
-      localTS.forEach(function(lt){
-        if (!merged.find(function(s){ return s.id === lt.id; })) {
-          merged.unshift(lt);
-          // Push missing local TS up to Supabase
-          sbUpsert('timesheets', lt.id, lt).catch(function(e){ console.warn('[TS sync]', e.message); });
-        }
-      });
-      _timesheets = merged;
-      _tsCacheWrite(merged);
-      var panel = document.getElementById('ts-migrate-panel');
-      if (panel) panel.style.display = 'none';
+      if (sbTS.length > 0) {
+        // Supabase has data — use it as source of truth
+        _timesheets = sbTS;
+        _tsCacheWrite(sbTS);
+        var panel = document.getElementById('ts-migrate-panel');
+        if (panel) panel.style.display = 'none';
+      } else {
+        // Supabase is empty — use local cache and keep migration panel visible
+        _timesheets = loadTimesheetsFromStorage();
+      }
     } else {
       _timesheets = loadTimesheetsFromStorage(); // fallback to cache
     }
+    deduplicateTimesheets();
     repairInvoiceTotals();
     pushActualsToCC();
     renderAll();
@@ -4885,10 +4902,11 @@ function viewInvoice(id) {
   setBtn('inv-return-draft-btn', st === 'sent');
   setBtn('inv-release-wo-btn',   st === 'draft');
   setBtn('inv-delete-btn',       st === 'draft');
-  // Show TS print button only if a linked timesheet exists
-  var invWoId = (inv.chargeSheetIds||[])[0];
-  var invTs   = invWoId ? _timesheets.find(function(t){ return t.woId === invWoId; }) : null;
-  setBtn('inv-print-ts-btn', !!invTs);
+  // Show TS print button if any linked WO has a timesheet
+  var hasTS = (inv.chargeSheetIds||[]).some(function(woId){
+    return _timesheets.some(function(t){ return t.woId === woId; });
+  });
+  setBtn('inv-print-ts-btn', hasTS);
 
   document.getElementById('inv-view-modal').classList.add('open');
 }
@@ -4902,11 +4920,15 @@ function _currentInvWoId() {
 }
 
 function printInvTS() {
-  var woId = _currentInvWoId();
-  if (!woId) { toast('No timesheet linked to this invoice', 'error'); return; }
-  var ts = _timesheets.find(function(t){ return t.woId === woId; });
-  if (!ts) { toast('No timesheet found', 'error'); return; }
-  toast('Timesheet export — coming soon', 'info');
+  var inv = _invoices.find(function(i){ return i.id === _currentInvId; });
+  if (!inv) { toast('No invoice selected', 'error'); return; }
+  var woIds = inv.chargeSheetIds || [];
+  var tsList = [];
+  woIds.forEach(function(woId) {
+    _timesheets.filter(function(t){ return t.woId === woId; }).forEach(function(t){ tsList.push(t); });
+  });
+  if (!tsList.length) { toast('No timesheets linked to this invoice', 'error'); return; }
+  tsList.forEach(function(ts) { exportTimesheet(ts.id); });
 }
 
 function printInvAll() {
@@ -5433,11 +5455,10 @@ function checkWONumDupe(el) {
     return j.id !== _editWOId
         && (j.woNum || j.number || '').trim().toLowerCase() === val;
   });
-  el.style.borderColor = isDupe ? 'var(--color-danger, #E84040)' : '';
+  el.style.borderColor = isDupe ? 'var(--color-danger,#E84040)' : '';
   el.style.background  = isDupe ? 'rgba(232,64,64,.08)' : '';
   var hint = document.getElementById('wo-num-dupe-hint');
   if (hint) hint.style.display = isDupe ? 'block' : 'none';
-  // Disable all save buttons when dupe
   ['wo-btn-save','wo-btn-tech-save','wo-btn-approve'].forEach(function(id){
     var b = document.getElementById(id);
     if (b) b.disabled = isDupe;
@@ -5451,7 +5472,7 @@ async function saveWO(status) {
   var date   = (document.getElementById('wo-date')    || {}).value || today();
   if (!client.trim() || !site.trim()) { toast('Client and location are required', 'error'); return; }
 
-  // Duplicate WO number check — blocks ALL saves, not just submit
+  // Block duplicate WO numbers on any save
   var woNumInput = ((document.getElementById('job-number') || {}).value || '').trim();
   if (woNumInput) {
     var duplicate = _jobs.find(function(j) {
@@ -5480,7 +5501,7 @@ async function saveWO(status) {
     var ot  = parseFloat(otEl  ? otEl.value  : 0) || 0;
     var dt  = parseFloat(dtEl  ? dtEl.value  : 0) || 0;
     var ns  = parseFloat(nsEl  ? nsEl.value  : 0) || 0;
-    if (!techEl.value && !reg && !ot && !dt && !ns) continue; // skip completely empty rows
+    if (!techEl.value && !reg && !ot && !dt && !ns) continue;
     labourRows.push({
       technician: techEl.value || '',
       category:   catEl ? catEl.value : '',
@@ -5616,8 +5637,9 @@ async function saveWO(status) {
 
     closeModal('job-modal');
     renderJobs(); renderDashboard(); updatePendingBadge();
-    // Auto-create timesheets on first submit/save — new WOs only (_editWOId is null)
-    if ((status === 'submitted' || status === 'approved') && !_editWOId) {
+    // Auto-create timesheets on first submit — applies to BOTH manual entry AND PDF import
+    // _editWOId is null for new WOs regardless of how data was entered
+    if (status === 'submitted' && !_editWOId) {
       await createTimesheetFromWO(data);
       renderTimesheets();
     }
@@ -5638,16 +5660,7 @@ async function techSaveWO() {
   var site   = (document.getElementById('job-site')||{}).value||'';
   if (!client.trim()||!site.trim()) { toast('Client and site / location are required', 'error'); return; }
   await saveWO('submitted');
-  // Navigate to timesheets tab and open the newly created TS for this tech
-  showView('timesheets', document.getElementById('nav-timesheets'));
-  var myName = getCurrentTechName();
-  // Give renderTimesheets a moment to run, then find and open the pending TS
-  setTimeout(function() {
-    var ts = _timesheets.find(function(t){
-      return t.technician === myName && t.status === 'pending' && !t.confirmed;
-    });
-    if (ts) openTSModal(ts.id);
-  }, 150);
+  // TS is created automatically by saveWO — each tech will be prompted to confirm their hours
 }
 
 // ── Legacy flow functions removed — new flow: each tech confirms individually
@@ -7561,8 +7574,14 @@ async function createTimesheetFromWO(wo) {
   }));
 
   Object.keys(byTech).forEach(function(techName) {
-    // Skip if TS already exists for this tech+WO (check both memory and cache)
-    if (freshTS.find(function(t){ return t.woId === wo.id && t.technician === techName; })) return;
+    // Skip if TS already exists for this tech+WO (by ID or by WO number)
+    var woNum = (wo.woNum || wo.number || '').toLowerCase();
+    if (freshTS.find(function(t){
+      return t.technician === techName && (
+        t.woId === wo.id ||
+        (woNum && (t.woNum||'').toLowerCase() === woNum)
+      );
+    })) return;
     // Skip if techName doesn't match any known employee (prevents phantom TSes)
     var knownPerson = (VIEWER_PEOPLE||[]).find(function(p){ return p.name === techName; });
     if (!knownPerson) return;
@@ -7972,7 +7991,7 @@ function exportTimesheet(tsId) {
     + '</style></head><body>'
     + '<div class="hdr">'
       + '<div>'
-        + '<div style="font-size:20px;font-weight:900;color:#C0392B;line-height:1">N<span style="border-radius:50%;background:#C0392B;color:#fff;padding:0 2px;font-size:14px">O</span>RTECH</div>'
+        + (_LOGO_HTML || '<div style="font-size:20px;font-weight:900;color:#1D4A8A;line-height:1">NORTECH<br><span style="font-size:11px;font-weight:700;letter-spacing:2px">ADVANCED NDT</span></div>')
         + '<div style="font-size:11px;font-weight:700;letter-spacing:2px">ADVANCED NDT</div>'
         + '<div style="font-size:9px;color:#666;margin-top:3px">' + NORTECH.address + '</div>'
       + '</div>'
@@ -8221,18 +8240,16 @@ function renderTimesheets() {
     if (tsDateTo   && ts.date && ts.date > tsDateTo)   return false;
     if (qWO  && !(ts.woNum||'').toLowerCase().includes(qWO.toLowerCase())) return false;
     if (qEmp && !(ts.technician||'').toLowerCase().includes(qEmp.toLowerCase())) return false;
-    // Techs see ONLY their own timesheets — never other techs'
-    if (!isAdmin()) {
-      if (!myName) return false; // unknown viewer — show nothing
+    if (!isAdmin() && myName) {
       var tsTech = (ts.technician || '').trim();
-      if (!tsTech) return false; // unowned TS — admin only
+      if (!tsTech) return false;  // no owner set — admin only
       if (tsTech === myName) return true;
-      // fuzzy fallback (first + last name match)
+      // fuzzy fallback for TSes created before canonical names were enforced
       var fn = myName.split(' ')[0].toLowerCase();
       var ln = myName.split(' ').pop().toLowerCase();
       if (fn.length > 1 && ln.length > 1 &&
           tsTech.toLowerCase().includes(fn) && tsTech.toLowerCase().includes(ln)) return true;
-      return false; // not this tech's TS
+      return false;
     }
     return true;
   });
@@ -8548,7 +8565,7 @@ async function exportMarginReport() {
       if (resp2.ok) { var d2 = await resp2.json(); var blk=(d2.content||[]).find(function(b){return b.type==='text';}); if(blk) aiSummary=blk.text||''; }
     } catch(e) { console.warn('AI summary:', e); }
 
-    var logoSrc = _LOGO_HTML || '<b style="color:#1D4A8A;font-size:1.1rem">NORTECH ADVANCED NDT</b>';
+    var logoSrc = _LOGO_HTML || '<div style="font-size:20px;font-weight:900;color:#1D4A8A">NORTECH<br><span style="font-size:11px;font-weight:700;letter-spacing:2px">ADVANCED NDT</span></div>';
 
     var kpiBoxes = kpis.map(function(k){
       var col = k.cls.includes('sc-green')?'#22C55E':k.cls.includes('sc-red')?'#EF4444':k.cls.includes('sc-amber')?'#F59E0B':'#1D4A8A';
@@ -8676,7 +8693,7 @@ function exportWeeklySummary() {
       return hdr + techRows + totRow;
     }).join('');
 
-    var logoSrc = _LOGO_HTML || '<b style="color:#1D4A8A;font-size:1.1rem">NORTECH ADVANCED NDT</b>';
+    var logoSrc = _LOGO_HTML || '<div style="font-size:20px;font-weight:900;color:#1D4A8A">NORTECH<br><span style="font-size:11px;font-weight:700;letter-spacing:2px">ADVANCED NDT</span></div>';
 
     var css = '*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;color:#1a1a2e;padding:2rem;font-size:12px}'
       +'table{width:100%;border-collapse:collapse}'
