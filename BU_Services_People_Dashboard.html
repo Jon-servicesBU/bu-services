@@ -540,7 +540,10 @@ input[type=text]:focus,input[type=search]:focus{border-color:rgba(59,130,246,0.4
 
   <!-- ══ UPLOAD ════════════════════════════════════════════════════════════ -->
   <div id="view-upload" class="view">
-    <div style="font-size:11px;color:#3D5470;margin-bottom:14px">Drop your BC exports here. Data is stored in your browser — upload fresh files anytime to refresh all views instantly.</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+  <div style="font-size:11px;color:#3D5470">Drop your BC exports here. Data is stored in your browser — upload fresh files anytime to refresh all views instantly.</div>
+  <button class="btn btn-red" onclick="clearAllData()" style="font-size:10px;padding:4px 10px">Clear all cached data</button>
+</div>
     <div class="two-col" style="margin-bottom:14px">
       <div class="card">
         <div class="card-title">Nortech personnel <span style="color:#22C55E;font-weight:400">· CSV · weekly</span></div>
@@ -825,6 +828,13 @@ async function sbList(table) {
 }
 
 async function init() {
+  // Auto-clear stale localStorage on version bump
+  const DATA_VER = '3';
+  if (localStorage.getItem('ppl_data_version') !== DATA_VER) {
+    ['ppl_nortech','ppl_hire','ppl_hours','ppl_vac',
+     'ppl_nortech_updated','ppl_hire_updated','ppl_hours_updated','ppl_vac_updated'].forEach(k=>localStorage.removeItem(k));
+    localStorage.setItem('ppl_data_version', DATA_VER);
+  }
   loadStoredData();
   loadExclusions();
   buildFilters();
@@ -1782,6 +1792,17 @@ function _doParseXLSX(file, onSuccess, onError) {
 }
 
 // ── Toast ────────────────────────────────────────────────────────────────────
+
+function clearAllData() {
+  if (!confirm('Clear all uploaded data? You will need to re-upload all files.')) return;
+  ['ppl_nortech','ppl_hire','ppl_hours','ppl_vac',
+   'ppl_nortech_updated','ppl_hire_updated','ppl_hours_updated','ppl_vac_updated',
+   'ppl_excluded','ppl_data_version'].forEach(k=>localStorage.removeItem(k));
+  NORTECH_DATA=[]; NUCLEOM_HIRE=[]; NUCLEOM_HOURS=[]; NUCLEOM_VAC=[];
+  renderView(_view); renderUploadStatus();
+  toast('All data cleared','amber');
+}
+
 function toast(msg, type='blue') {
   const c={green:'#22C55E',blue:'#60A5FA',red:'#EF4444',amber:'#F59E0B'};
   const t=document.createElement('div');
