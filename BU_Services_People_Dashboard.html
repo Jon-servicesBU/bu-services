@@ -148,7 +148,7 @@ input[type=file]{display:none}
 
 /* ── Tooltip ── */
 .tooltip{position:relative;cursor:default}
-.tooltip:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100%+4px);left:50%;transform:translateX(-50%);background:#1D3050;color:#AEBDD4;font-size:10px;white-space:nowrap;padding:4px 8px;border-radius:4px;border:0.5px solid rgba(255,255,255,0.1);pointer-events:none;z-index:300}
+.tooltip{position:relative}.tooltip:hover::after{content:attr(data-tip);position:fixed;background:#1D3050;color:#AEBDD4;font-size:10px;white-space:nowrap;padding:4px 8px;border-radius:4px;border:0.5px solid rgba(255,255,255,0.1);pointer-events:none;z-index:9999;max-width:300px;white-space:normal;word-break:break-word}
 
 /* ── Views ── */
 .view{display:none}.view.active{display:block}
@@ -651,9 +651,10 @@ function getWeekStart(ds) {
   const d=new Date(ds+'T00:00:00'); d.setDate(d.getDate()-(d.getDay()+6)%7); return d.toISOString().slice(0,10);
 }
 function calcTenure(hireDate) {
-  if (!hireDate) return 0;
-  const h = new Date(hireDate); if (isNaN(h)) return 0;
-  return Math.round((Date.now()-h)/(365.25*86400000)*10)/10;
+  if (!hireDate || hireDate==='nan' || hireDate==='undefined') return 0;
+  const h = new Date(hireDate+'T00:00:00'); if (isNaN(h.getTime())) return 0;
+  const yrs = (Date.now()-h)/(365.25*86400000);
+  return yrs > 0 && yrs < 80 ? Math.round(yrs*10)/10 : 0;
 }
 
 // ── Persistence ──────────────────────────────────────────────────────────────
@@ -732,8 +733,8 @@ function getFilteredPeople() {
     if (_filters.status==='active') {
       if (p.source==='nortech') { /* all nortech in CSV are current */ }
     }
-    if (_filters.paytype==='hourly' && p.payType && !p.payType.toLowerCase().includes('hourly')) return false;
-    if (_filters.paytype==='salary' && p.payType && !p.payType.toLowerCase().includes('salary')) return false;
+    if (_filters.paytype==='hourly' && p.source==='nortech' && p.payType && !p.payType.toLowerCase().includes('hourly')) return false;
+    if (_filters.paytype==='salary' && p.source==='nortech' && p.payType && !p.payType.toLowerCase().includes('salary')) return false;
     if (_filters.util!=='all') {
       const u = p.utilLatest||0;
       if (_filters.util==='high' && u<75) return false;
@@ -751,13 +752,17 @@ function getIncludedPeople() {
 }
 
 function normDate(s) {
-  if (!s) return '';
+  if (!s || s==='nan' || s==='undefined') return '';
   if (/\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
   const months={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',
     Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-  const m = s.match(/([A-Za-z]+)-(\d{2})-(\d{4})/);
-  if (m) return `${m[3]}-${months[m[1]]||'01'}-${m[2]}`;
-  return s.slice(0,10);
+  // "May-01-2023" format from BC
+  const m = s.match(/([A-Za-z]+)-(\d{1,2})-(\d{4})/);
+  if (m) return `${m[3]}-${months[m[1]]||'01'}-${m[2].padStart(2,'0')}`;
+  // ISO with time: "2023-05-01T00:00:00"
+  const m2 = s.match(/(\d{4}-\d{2}-\d{2})/);
+  if (m2) return m2[1];
+  return '';
 }
 
 // ── Nortech live util ─────────────────────────────────────────────────────────
@@ -1019,7 +1024,7 @@ function renderOverview() {
     {l:'Total headcount',v:headcount.toString(),s:`<span class="muted">${inclCount} included in calcs</span>`},
     {l:'Nortech active',v:NORTECH_DATA.length.toString(),s:`<span class="muted">${nortechIncl.length} included</span>`},
     {l:'Nucleom active',v:NUCLEOM_HIRE.length.toString(),s:`<span class="muted">${nucleomIncl.length} in hours data</span>`},
-    {l:'Avg utilization',v:fmtPct(avgUtil),s:`<span class="${avgUtil>=75?'up':avgUtil>=50?'amber':'down'}">${_utilMetric.toUpperCase()}</span>`},
+    {l:'Avg utilization',v:fmtPct(avgUtil),s:`<span class="${avgUtil>=75?'up':avgUtil>=50?'amber':'down'}">${_utilMetric==='u1'?'Bill÷Avail':'Bill÷Worked'}</span>`},
     {l:'Nortech payroll/wk',v:fmt$(totalPayroll),s:'<span class="muted">included techs × 40hrs</span>'},
     {l:'Vac liability (Nucleom)',v:fmt$(vacLiability),s:'<span class="muted">active, included</span>'},
   ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('');
@@ -1159,8 +1164,11 @@ function renderUtilization() {
     if (p.source==='nortech') return _nortechTimesheets.length ? getNortechUtil(p.name, tw==='latest'?'latest':tw) : null;
     if (tw==='latest') return p.weeks&&p.weeks[0] ? (p.weeks[0].pct||null) : (p.pct13||null);
     if (tw==='4wk') {
-      const ws=(p.weeks||[]).slice(0,4); const b=ws.reduce((s,w)=>s+(w.bill||0),0); const t=ws.reduce((s,w)=>s+(w.tot||0),0);
-      return metric==='u3'&&t>0?b/t*100:ws.length>0?b/(ws.length*AVAILABLE_HRS)*100:0;
+      const ws=(p.weeks||[]).slice(0,4);
+      if(!ws.length) return null;
+      const b=ws.reduce((s,w)=>s+(w.bill||0),0);
+      const t=ws.reduce((s,w)=>s+(w.tot||0),0);
+      return metric==='u3'&&t>0?b/t*100:b/(ws.length*AVAILABLE_HRS)*100;
     }
     return metric==='u3'&&(p.tot13||0)>0?(p.bill13||0)/(p.tot13||0)*100:p.pct13||0;
   }
@@ -1180,7 +1188,10 @@ function renderUtilization() {
 
   const utils = people.map(p=>getUtil(p)).filter(u=>u!=null&&u>0);
   const avgUtil = utils.length ? utils.reduce((a,b)=>a+b,0)/utils.length : 0;
-  const totalBill = people.reduce((s,p)=>s+(p.bill13||0),0);
+  const totalBill = people.reduce((s,p)=>{
+    if(p.source==='nortech') return s; // nortech uses live timesheets
+    return s+(p.bill13||0);
+  },0);
   const above75 = utils.filter(u=>u>=75).length;
   const below50 = utils.filter(u=>u<50).length;
 
@@ -1313,8 +1324,8 @@ function renderPayroll() {
   const totalCost = nortechIncl.reduce((s,p)=>s+p.rate*AVAILABLE_HRS,0);
   const annualCost = nortechIncl.reduce((s,p)=>s+p.rate*AVAILABLE_HRS*52,0);
   const avgRate = nortechIncl.length ? nortechIncl.reduce((s,p)=>s+p.rate,0)/nortechIncl.length : 0;
-  const hCount = nortechIncl.filter(p=>p.payType.includes('Hourly')).length;
-  const sCount = nortechIncl.filter(p=>p.payType.includes('Salary')).length;
+  const hCount = nortechIncl.filter(p=>(p.payType||'').toLowerCase().includes('hourly')).length;
+  const sCount = nortechIncl.filter(p=>(p.payType||'').toLowerCase().includes('salary')).length;
 
   if (!nortechIncl.length) {
     $('pay-kpis').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:#2E4160;font-size:11px">Upload nortech_personell.csv to see payroll data</div>';
@@ -1542,24 +1553,46 @@ function uploadNortech(input) {
       const empIdx  = headers.findIndex(h=>h.includes('employee'));
       const provIdx = headers.findIndex(h=>h==='province');
       const dayIdx  = headers.findIndex(h=>h.includes('first day worked')&&!h.includes('roe'));
-      const typeIdx = headers.findIndex(h=>h==='pay type');
-      const rateIdx = headers.findIndex(h=>h==='pay rate');
+      const typeIdx = headers.findIndex(h=>h.includes('pay type'));
+      const rateIdx = headers.findIndex(h=>h.includes('pay rate'));
       const data = [];
       lines.slice(1).forEach(line => {
-        const cols = line.split(',').map(c=>c.trim().replace(/"/g,''));
-        const raw = nameIdx>=0 ? cols[nameIdx]||'' : '';
+        // Handle names with commas (Last, First) — they may be quoted
+        // Parse CSV properly: quoted fields may contain commas
+        const cols = [];
+        let cur='', inQ=false;
+        for(let ci=0;ci<line.length;ci++){
+          if(line[ci]==='"'){inQ=!inQ;}
+          else if(line[ci]===','&&!inQ){cols.push(cur.trim());cur='';}
+          else cur+=line[ci];
+        }
+        cols.push(cur.trim());
+
+        const raw = nameIdx>=0 ? (cols[nameIdx]||'').replace(/"/g,'').trim() : '';
         if (!raw || raw==='nan') return;
-        // Name is "Last, First" — flip to "First Last"
-        const parts = raw.split(',');
-        const name = parts.length===2 ? parts[1].trim()+' '+parts[0].trim() : raw;
-        const rate = rateIdx>=0 ? parseFloat(cols[rateIdx])||0 : 0;
-        if (!name || !rate) return;
+        // Name may be "Last, First" or "LAST, FIRST" — flip and title-case
+        const nameParts = raw.split(',');
+        let name;
+        if(nameParts.length>=2){
+          const first = nameParts[1].trim();
+          const last  = nameParts[0].trim();
+          // Title case each part
+          const tc = s => s.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():'').join(' ');
+          name = tc(first)+' '+tc(last);
+        } else {
+          const tc = s => s.split(' ').map(w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():'').join(' ');
+          name = tc(raw);
+        }
+        // Rate: strip $ and spaces before parsing
+        const rateRaw = rateIdx>=0 ? (cols[rateIdx]||'').replace(/[$,\s]/g,'') : '0';
+        const rate = parseFloat(rateRaw)||0;
+        if (!name) return;
+        const payType = typeIdx>=0 ? (cols[typeIdx]||'Hourly EE').trim() : 'Hourly EE';
         data.push({
-          emp: empIdx>=0?(cols[empIdx]||'').replace('.0',''):'',
-          name, province: provIdx>=0?cols[provIdx]:'AB',
-          firstDay: dayIdx>=0?cols[dayIdx]:'',
-          payType: typeIdx>=0?cols[typeIdx]:'Hourly EE',
-          rate
+          emp: empIdx>=0?(cols[empIdx]||'').replace('.0','').trim():'',
+          name, province: provIdx>=0?(cols[provIdx]||'AB').trim():'AB',
+          firstDay: dayIdx>=0?(cols[dayIdx]||'').trim():'',
+          payType, rate
         });
       });
       NORTECH_DATA = data;
