@@ -10,7 +10,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 /* ── Layout ── */
 #app{display:flex;min-height:100vh}
-#sidebar{width:200px;min-height:100vh;background:#0D1F3C;border-right:0.5px solid rgba(255,255,255,0.06);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100}
+#sidebar{width:200px;min-height:100vh;background:#0D1F3C;border-right:0.5px solid rgba(255,255,255,0.06);position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
 #main{margin-left:200px;flex:1;min-height:100vh;background:#0E1E35}
 #topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:0.5px solid rgba(255,255,255,0.06);background:#0D1F3C;position:sticky;top:0;z-index:50;flex-wrap:wrap;gap:8px}
 #content{padding:20px 24px}
@@ -63,11 +63,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* ── Cards ── */
 .card{background:#152035;border:0.5px solid rgba(255,255,255,0.07);border-radius:8px;padding:16px;margin-bottom:16px}
 .card-title{font-size:9px;color:#3D5470;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
 
 /* ── Table ── */
-.tbl-wrap{overflow-x:auto;max-height:480px;overflow-y:auto}
+.tbl-wrap{overflow-x:auto;overflow-y:auto}
 .data-table{width:100%;border-collapse:collapse}
 .data-table th{font-size:9px;color:#2E4160;text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:7px 10px;border-bottom:0.5px solid rgba(255,255,255,0.06);text-align:left;position:sticky;top:0;background:#152035;cursor:pointer;user-select:none;white-space:nowrap}
 .data-table th:hover{color:#AEBDD4}
@@ -104,7 +104,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 /* ── Progress bars ── */
 .prog-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.prog-label{font-size:11px;color:#AEBDD4;width:80px;flex-shrink:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog-label{font-size:11px;color:#AEBDD4;width:90px;flex-shrink:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .prog-track{flex:1;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden}
 .prog-fill{height:100%;border-radius:3px;transition:width .3s}
 .prog-val{font-size:11px;color:#E8F0FA;width:50px;text-align:right;flex-shrink:0}
@@ -120,7 +120,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
 /* ── Metric toggle ── */
-.metric-toggle{display:flex;gap:2px;background:#0A1628;border:0.5px solid rgba(255,255,255,0.08);border-radius:5px;padding:2px}
+.metric-toggle{display:flex;gap:2px;background:#0A1628;border:0.5px solid rgba(255,255,255,0.08);border-radius:5px;padding:2px;flex-shrink:0}
 .metric-btn{padding:3px 9px;border-radius:4px;font-size:10px;color:#4E6480;cursor:pointer;border:none;background:transparent;transition:all .15s}
 .metric-btn.active{background:#152035;color:#E8F0FA}
 
@@ -128,7 +128,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bar-chart{display:flex;align-items:flex-end;gap:4px;position:relative;padding-left:32px}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
 .bar-col-bar{width:100%;border-radius:2px 2px 0 0;transition:height .3s;min-height:2px}
-.bar-lbl{font-size:8px;color:#2E4160;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.bar-lbl{font-size:8px;color:#2E4160;text-align:center;white-space:nowrap;overflow:visible;max-width:100%;padding:0 2px}
 .axis-lines{position:absolute;inset:0;pointer-events:none}
 .axis-line{position:absolute;left:32px;right:0;border-top:0.5px solid rgba(255,255,255,0.04)}
 .axis-lbl{position:absolute;right:calc(100% - 28px);font-size:8px;color:#2E4160;transform:translateY(-50%)}
@@ -336,7 +336,9 @@ input[type=text]:focus,input[type=search]:focus{border-color:rgba(59,130,246,0.4
       </select>
     </div>
     <div class="card">
-      <div class="card-title" id="util-card-title">Billable ÷ available (40hrs) by person — latest week</div>
+      <div class="card-title" id="util-card-title">Billable ÷ available (40hrs) by person — latest week
+    <span id="util-data-note" style="font-size:9px;color:#3D5470;font-weight:400;text-transform:none;letter-spacing:0"></span>
+  </div>
       <div class="tbl-wrap">
         <table class="data-table" id="util-table">
           <thead><tr>
@@ -635,9 +637,9 @@ const $ = id => document.getElementById(id);
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const fmt$ = n => { if (!n) return '—'; const abs=Math.abs(n); if(abs>=1e6) return '$'+(n/1e6).toFixed(1)+'M'; if(abs>=1e3) return '$'+Math.round(n/1e3)+'K'; return '$'+Math.round(n); };
-const fmtPct = n => (n==null||isNaN(n))?'—':n.toFixed(1)+'%';
-const utilColor = n => n>=75?'#22C55E':n>=50?'#F59E0B':'#EF4444';
-const utilChip = n => n>=75?'chip-green':n>=50?'chip-amber':'chip-red';
+const fmtPct = n => (n==null||n===undefined||isNaN(n))?'—':n.toFixed(1)+'%';
+const utilColor = n => (!n&&n!==0)?'#3D5470':n>=75?'#22C55E':n>=50?'#F59E0B':'#EF4444';
+const utilChip = n => (!n&&n!==0)?'chip-gray':n>=75?'chip-green':n>=50?'chip-amber':'chip-red';
 const today = () => new Date().toISOString().slice(0,10);
 const thisYear = () => new Date().getFullYear();
 
@@ -693,12 +695,16 @@ function updateExclBadge() {
 function getAllPeople() {
   const out = [];
   if (_company==='nortech'||_company==='all') {
-    NORTECH_DATA.forEach(e => out.push({
-      ...e, source:'nortech', office:e.province, dept:e.payType,
-      utilLatest: getNortechUtil(e.name,'latest'),
-      util13: getNortechUtil(e.name,'13wk'),
-      tenure: calcTenure(normDate(e.firstDay))
-    }));
+    NORTECH_DATA.forEach(e => {
+      const u1 = _nortechTimesheets.length ? getNortechUtil(e.name,'latest') : null;
+      const u13 = _nortechTimesheets.length ? getNortechUtil(e.name,'13wk') : null;
+      out.push({
+        ...e, source:'nortech', office:e.province, dept:e.payType,
+        utilLatest: u1,
+        util13: u13,
+        tenure: calcTenure(normDate(e.firstDay))
+      });
+    });
   }
   if (_company==='nucleom'||_company==='all') {
     const hrs = NUCLEOM_HOURS;
@@ -711,8 +717,8 @@ function getAllPeople() {
         payType:'Hourly EE', rate:0, province:'QC/FR',
         bill13:e.bill13, non13:e.non13, tot13:e.tot13, pct13:e.pct13,
         weeks:e.weeks||[],
-        utilLatest: e.weeks&&e.weeks[0] ? e.weeks[0].pct : 0,
-        util13: e.pct13||0,
+        utilLatest: (e.weeks&&e.weeks[0]&&e.weeks[0].pct!=null) ? e.weeks[0].pct : null,
+        util13: (e.pct13!=null&&e.pct13!==0) ? e.pct13 : null,
         tenure: h.years||calcTenure(h.hireDate)
       });
     });
@@ -949,16 +955,16 @@ function buildBarChart(data, height=60, fmt=v=>v, colorFn=null) {
       <div class="bar-lbl" style="max-width:${barW+6}px">${d.label}</div>
     </div>`;
   }).join('');
-  return `<div style="position:relative;overflow-x:auto">
-    <div style="position:relative;height:${height+20}px;display:inline-flex;flex-direction:column;min-width:100%">
-      <div class="axis-lines">${lines}</div>
-      <div style="display:flex;gap:${gap}px;align-items:flex-end;height:${height}px;padding-left:28px">${bars}</div>
+  return `<div style="overflow-x:auto;overflow-y:visible">
+    <div style="position:relative;padding-left:32px;padding-bottom:4px;min-width:min-content">
+      <div style="position:absolute;left:32px;right:0;top:0;height:${height}px;pointer-events:none">${lines}</div>
+      <div style="display:flex;gap:${gap}px;align-items:flex-end;height:${height}px;margin-bottom:4px">${bars}</div>
     </div>
   </div>`;
 }
 
 function buildHorizBars(data, fmt=v=>v, colorFn=null) {
-  if (!data.length) return '<div class="empty">No data</div>';
+  if (!data||!data.length) return '<div class="empty">No data</div>';
   const maxV=Math.max(...data.map(d=>d.value||0),1);
   return data.map(d=>{
     const w=(d.value/maxV*100).toFixed(1);
@@ -1005,7 +1011,7 @@ function renderOverview() {
   const inclCount = incl.length;
   const totalPayroll = nortechIncl.reduce((s,p)=>s+p.rate*AVAILABLE_HRS,0);
   const avgRate = nortechIncl.length ? nortechIncl.reduce((s,p)=>s+p.rate,0)/nortechIncl.length : 0;
-  const utils = incl.map(p=>_utilMetric==='u3'?p.utilLatest:p.utilLatest).filter(u=>u>0);
+  const utils = incl.map(p=>p.utilLatest).filter(u=>u!=null&&u>0);
   const avgUtil = utils.length ? utils.reduce((a,b)=>a+b,0)/utils.length : 0;
   const vacLiability = NUCLEOM_VAC.filter(v=>!isExcluded(v.name)).reduce((s,v)=>s+v.balanceDollars,0);
 
@@ -1021,7 +1027,7 @@ function renderOverview() {
   // Util distribution buckets
   const buckets=[{l:'≥75%',lo:75,hi:200,col:'#22C55E'},{l:'50–75%',lo:50,hi:75,col:'#F59E0B'},{l:'25–50%',lo:25,hi:50,col:'#FB923C'},{l:'<25%',lo:0,hi:25,col:'#EF4444'}];
   const utBuckets=buckets.map(b=>{
-    const n=incl.filter(p=>{const u=p.utilLatest||0;return u>=b.lo&&u<b.hi;}).length;
+    const n=incl.filter(p=>{const u=p.utilLatest;return u!=null&&u>=b.lo&&u<b.hi;}).length;
     return {label:b.l,value:n,color:b.col,tip:`${b.l}: ${n} people`};
   });
   $('ov-util-dist').innerHTML=buildBarChart(utBuckets,60,v=>v+'',null)+
@@ -1106,7 +1112,7 @@ function renderRoster() {
       <td>${p.office}</td><td style="font-size:10px">${p.dept||p.payType||'—'}</td>
       <td style="color:#3D5470;font-size:10px">${normDate(p.firstDay||p.hireDate).slice(0,10)||'—'}</td>
       <td class="r">${p.tenure?p.tenure+'yr':'—'}</td>
-      <td class="r" style="color:${utilColor(p.utilLatest||0)}">${fmtPct(p.utilLatest||0)}</td>
+      <td class="r" style="color:${utilColor(p.utilLatest)}">${fmtPct(p.utilLatest)}</td>
       <td class="toggle-cell">${makeToggle(p.name,excl)}</td>
     </tr>`;
     if (cols==='payroll') return `<tr class="${clsRow}">
@@ -1137,7 +1143,7 @@ function renderRoster() {
       <td class="r" style="color:${utilColor(p.util13||0)}">${fmtPct(p.util13||0)}</td>
       <td class="toggle-cell">${makeToggle(p.name,excl)}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="8" class="empty">No people match current filters</td></tr>';
+  }).join('')||`<tr><td colspan="${hdr[cols].length}" class="empty">No people match current filters</td></tr>`;
 }
 
 // ══ RENDER: UTILIZATION ═══════════════════════════════════════════════════════
@@ -1150,8 +1156,8 @@ function renderUtilization() {
 
   // Get util value for a person given window
   function getUtil(p) {
-    if (p.source==='nortech') return getNortechUtil(p.name, tw==='latest'?'latest':tw);
-    if (tw==='latest') return p.weeks&&p.weeks[0] ? p.weeks[0].pct : p.pct13||0;
+    if (p.source==='nortech') return _nortechTimesheets.length ? getNortechUtil(p.name, tw==='latest'?'latest':tw) : null;
+    if (tw==='latest') return p.weeks&&p.weeks[0] ? (p.weeks[0].pct||null) : (p.pct13||null);
     if (tw==='4wk') {
       const ws=(p.weeks||[]).slice(0,4); const b=ws.reduce((s,w)=>s+(w.bill||0),0); const t=ws.reduce((s,w)=>s+(w.tot||0),0);
       return metric==='u3'&&t>0?b/t*100:ws.length>0?b/(ws.length*AVAILABLE_HRS)*100:0;
@@ -1172,7 +1178,7 @@ function renderUtilization() {
     return true;
   });
 
-  const utils = people.map(p=>getUtil(p)).filter(u=>u>0);
+  const utils = people.map(p=>getUtil(p)).filter(u=>u!=null&&u>0);
   const avgUtil = utils.length ? utils.reduce((a,b)=>a+b,0)/utils.length : 0;
   const totalBill = people.reduce((s,p)=>s+(p.bill13||0),0);
   const above75 = utils.filter(u=>u>=75).length;
@@ -1310,6 +1316,11 @@ function renderPayroll() {
   const hCount = nortechIncl.filter(p=>p.payType.includes('Hourly')).length;
   const sCount = nortechIncl.filter(p=>p.payType.includes('Salary')).length;
 
+  if (!nortechIncl.length) {
+    $('pay-kpis').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:#2E4160;font-size:11px">Upload nortech_personell.csv to see payroll data</div>';
+    ['pay-nortech-bars','pay-type-breakdown','pay-province-breakdown','pay-tbody'].forEach(id=>{const el=$(id);if(el)el.innerHTML='<div class="empty">No data — upload Nortech CSV</div>';});
+    return;
+  }
   $('pay-kpis').innerHTML=[
     {l:'Weekly payroll (incl.)',v:fmt$(totalCost),s:'<span class="muted">40hrs × rate</span>'},
     {l:'Annual est. (incl.)',v:fmt$(annualCost),s:'<span class="muted">52 weeks</span>'},
@@ -1370,8 +1381,13 @@ function renderPayroll() {
 
 // ══ RENDER: VACATION ═════════════════════════════════════════════════════════
 function renderVacation() {
-  const excl = Object.keys(_excluded);
+  // excl is handled per-row via isExcluded()
   const vacData = NUCLEOM_VAC.filter(v=>!isExcluded(v.name));
+  if (!NUCLEOM_VAC.length) {
+    $('vac-kpis').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:#2E4160;font-size:11px">Upload Vacances.xlsx to see vacation data</div>';
+    ['vac-top-bars','vac-by-company','vac-tbody'].forEach(id=>{const el=$(id);if(el)el.innerHTML='<div class="empty">No data — upload Vacation file</div>';});
+    return;
+  }
   const totalLiab = vacData.reduce((s,v)=>s+v.balanceDollars,0);
   const highBal = vacData.filter(v=>v.weeks>4).length;
   const avgWks = vacData.length ? vacData.reduce((s,v)=>s+v.weeks,0)/vacData.length : 0;
@@ -1455,7 +1471,8 @@ function renderTenure() {
   // Hire by year
   const hireMap={};
   all.forEach(p=>{
-    const yr=new Date(normDate(p.firstDay||p.hireDate)||'2020').getFullYear();
+    const nd=normDate(p.firstDay||p.hireDate); if(!nd) return;
+    const yr=new Date(nd+'T00:00:00').getFullYear();
     if(yr>2005&&yr<=2027) hireMap[yr]=(hireMap[yr]||0)+1;
   });
   const hireData=Object.entries(hireMap).sort((a,b)=>a[0]-b[0]).map(([yr,n])=>({label:yr,value:n,color:'#60A5FA',tip:`${yr}: ${n} hired`}));
@@ -1519,31 +1536,36 @@ function uploadNortech(input) {
   reader.onload = e => {
     try {
       const lines = e.target.result.split('\n').map(l=>l.trim()).filter(Boolean);
-      const headers = lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/"/g,''));
-      const nameIdx = headers.findIndex(h=>h.includes('name'));
-      const empIdx  = headers.findIndex(h=>h.includes('employee')||h.includes('number'));
-      const provIdx = headers.findIndex(h=>h.includes('province'));
-      const dayIdx  = headers.findIndex(h=>h.includes('first day'));
-      const typeIdx = headers.findIndex(h=>h.includes('pay type'));
-      const rateIdx = headers.findIndex(h=>h.includes('pay rate')||h==='rate');
+      // Row 0 = headers: Employee Number, Name, Province, First Day Worked, ROE First Day Worked, Pay Type, Pay Rate
+      const headers = lines[0].split(',').map(h=>h.trim().replace(/"/g,'').toLowerCase());
+      const nameIdx = headers.findIndex(h=>h==='name');
+      const empIdx  = headers.findIndex(h=>h.includes('employee'));
+      const provIdx = headers.findIndex(h=>h==='province');
+      const dayIdx  = headers.findIndex(h=>h.includes('first day worked')&&!h.includes('roe'));
+      const typeIdx = headers.findIndex(h=>h==='pay type');
+      const rateIdx = headers.findIndex(h=>h==='pay rate');
       const data = [];
       lines.slice(1).forEach(line => {
         const cols = line.split(',').map(c=>c.trim().replace(/"/g,''));
-        const raw = cols[nameIdx]||''; if (!raw||raw==='nan') return;
+        const raw = nameIdx>=0 ? cols[nameIdx]||'' : '';
+        if (!raw || raw==='nan') return;
+        // Name is "Last, First" — flip to "First Last"
         const parts = raw.split(',');
         const name = parts.length===2 ? parts[1].trim()+' '+parts[0].trim() : raw;
+        const rate = rateIdx>=0 ? parseFloat(cols[rateIdx])||0 : 0;
+        if (!name || !rate) return;
         data.push({
-          emp: empIdx>=0 ? (cols[empIdx]||'').replace('.0','') : '',
+          emp: empIdx>=0?(cols[empIdx]||'').replace('.0',''):'',
           name, province: provIdx>=0?cols[provIdx]:'AB',
           firstDay: dayIdx>=0?cols[dayIdx]:'',
           payType: typeIdx>=0?cols[typeIdx]:'Hourly EE',
-          rate: rateIdx>=0?parseFloat(cols[rateIdx])||0:0
+          rate
         });
       });
       NORTECH_DATA = data;
       localStorage.setItem('ppl_nortech', JSON.stringify(data));
       localStorage.setItem('ppl_nortech_updated', new Date().toISOString());
-      statusEl.innerHTML = '<span style="color:#22C55E">✓ '+data.length+' employees loaded · '+new Date().toLocaleDateString()+'</span>';
+      statusEl.innerHTML = '<span style="color:#22C55E">✓ '+data.length+' employees loaded</span>';
       renderView(_view); renderUploadStatus();
     } catch(err) { statusEl.innerHTML = '<span style="color:#EF4444">Error: '+err.message+'</span>'; }
     input.value='';
@@ -1555,56 +1577,66 @@ function uploadHours(input) {
   const file = input.files[0]; if (!file) return;
   const statusEl = $('up-hours-status');
   statusEl.textContent = 'Parsing XLSX…';
-  // Use SheetJS loaded via CDN
   _parseXLSX(file, rows => {
     try {
-      // Same structure as Hours_Rolling_13_Weeks.xlsx
-      // Row 2 = week dates (col 3,9,15,20…), Row 3 = headers, Row 4+ = data
-      // Detect week date columns
-      const weekCols = [];
-      const row2 = rows[2]||[];
-      row2.forEach((val,c) => {
-        if (!val) return;
-        const s = String(val);
-        // Match date strings like "2026-04-12" or "2026-04-12 00:00:00"
-        const m = s.match(/^(20\d{2}-\d{2}-\d{2})/);
-        if (m) weekCols.push({c, date:m[1]});
-      });
-      console.log('[Hours] weekCols found:', weekCols.length, weekCols.slice(0,3));
+      // Structure (0-indexed rows):
+      // Row 0: title
+      // Row 1: blank
+      // Row 2: week end dates at cols 3,9,15,20,25,30,35,40,45,50,55,60,65 (13 weeks)
+      // Row 3: headers — Off, Dpt, Name, Bill., Non, Vac., (blank), Tot, %  repeated per week
+      // Row 4: totals row
+      // Row 5+: data — some rows are office headers (col0), dept headers (col1), employee rows (col2)
+      // Last 4 cols (70,71,72,73): 13-week Bill, Non, Tot, %
 
+      // Hardcode week col positions from known structure
+      const WEEK_COLS = [3,9,15,20,25,30,35,40,45,50,55,60,65];
+      // Extract dates from row 2
+      const weekDates = WEEK_COLS.map(c => {
+        const v = String(rows[2]&&rows[2][c]||'');
+        // v is like "2026-04-12" or "2026-04-12T00:00:00.000Z"
+        const m = v.match(/20\d{2}-\d{2}-\d{2}/);
+        return m ? m[0] : '';
+      }).filter(Boolean);
+
+      const OFFICES = ['EDM','GTE','HQ','HQ/QC 50%','MTL','QUE'];
+      const DEPTS   = ['ADM','OPS','PMG','ENG','HHR','HSE','MRK','HAC'];
       const data = [];
       let curOffice=null, curDept=null;
-      const OFFICES=['EDM','GTE','HQ','HQ/QC 50%','MTL','QUE'];
-      const DEPTS=['ADM','OPS','PMG','ENG','HHR','HSE','MRK','HAC'];
+
       for (let i=4; i<rows.length; i++) {
-        const row=rows[i]||[];
-        const c0=String(row[0]||'').trim(), c1=String(row[1]||'').trim();
+        const row = rows[i]||[];
+        const c0 = String(row[0]||'').trim();
+        const c1 = String(row[1]||'').trim();
+        const c2 = String(row[2]||'').trim();
         if (OFFICES.includes(c0)) { curOffice=c0; continue; }
-        if (DEPTS.includes(c1))   { curDept=c1; continue; }
-        const name=String(row[2]||'').trim();
-        if (!name||name==='nan'||name==='Total') continue;
-        const weeks=[];
-        weekCols.forEach(({c,date},wi) => {
-          // Each week block: Bill=c, Non=c+1, then Tot and % before next week's date
-          const nextC = wi+1<weekCols.length ? weekCols[wi+1].c : (row.length||74);
-          const bill = parseFloat(row[c])||0;
-          const non  = parseFloat(row[c+1])||0;
-          // Tot is 2nd last col before next week, % is last
-          const tot  = parseFloat(row[nextC-2])||0;
-          const pct  = parseFloat(row[nextC-1])||0;
-          weeks.push({date,bill,non,tot,pct:Math.round(pct*100*10)/10});
+        if (DEPTS.includes(c1))   { curDept=c1;   continue; }
+        if (!c2 || c2==='nan' || c2==='Total') continue;
+
+        const weeks = WEEK_COLS.map((wc,wi) => {
+          // Per-week cols: wc=Bill, wc+1=Non, wc+2=Vac (sometimes), then Tot and % just before next week
+          // From headers: col3=Bill,4=Non,5=Vac,7=Tot,8=%  col9=Bill,10=Non,12=Vac,13=Tot,14=%  col15=Bill,16=Non,17=Vac,18=Tot,19=%
+          // Gap between weeks: 3→9=6cols, 9→15=6cols, 15→20=5cols, 20→25=5cols
+          const nextWc = wi+1 < WEEK_COLS.length ? WEEK_COLS[wi+1] : 70;
+          const bill = parseFloat(row[wc])||0;
+          const non  = parseFloat(row[wc+1])||0;
+          const tot  = parseFloat(row[nextWc-2])||0;
+          const pct  = parseFloat(row[nextWc-1])||0;
+          return { date:weekDates[wi]||'', bill, non, tot, pct:Math.round(pct*100*10)/10 };
         });
-        // 13-week totals are in the last 4 columns of the row
-        const rowLen = row.filter(v=>v!=null).length;
-        const lastC = rowLen > 4 ? rowLen - 4 : 70;
-        data.push({name,office:curOffice,dept:curDept,weeks,
-          bill13:parseFloat(row[lastC])||0, non13:parseFloat(row[lastC+1])||0,
-          tot13:parseFloat(row[lastC+2])||0, pct13:Math.round((parseFloat(row[lastC+3])||0)*100*10)/10});
+
+        // 13-week totals: cols 70=Bill, 71=Non, 72=Tot, 73=%
+        const bill13 = parseFloat(row[70])||0;
+        const non13  = parseFloat(row[71])||0;
+        const tot13  = parseFloat(row[72])||0;
+        const pct13  = Math.round((parseFloat(row[73])||0)*100*10)/10;
+
+        data.push({ name:c2, office:curOffice, dept:curDept, weeks, bill13, non13, tot13, pct13 });
       }
+
       NUCLEOM_HOURS = data;
       localStorage.setItem('ppl_hours', JSON.stringify(data));
       localStorage.setItem('ppl_hours_updated', new Date().toISOString());
-      statusEl.innerHTML = '<span style="color:#22C55E">✓ '+data.length+' employees · '+weekCols.length+' weeks · '+new Date().toLocaleDateString()+'</span>';
+      statusEl.innerHTML = '<span style="color:#22C55E">✓ '+data.length+' employees · '+weekDates.length+' weeks</span>';
       renderView(_view); renderUploadStatus();
     } catch(err) { statusEl.innerHTML = '<span style="color:#EF4444">Error: '+err.message+'</span>'; }
   }, err => { statusEl.innerHTML = '<span style="color:#EF4444">XLSX error: '+err+'</span>'; });
@@ -1616,31 +1648,33 @@ function uploadVac(input) {
   statusEl.textContent = 'Parsing XLSX…';
   _parseXLSX(file, rows => {
     try {
-      // Find data rows - skip until we find a row with a number in col 0 (matricule)
-      let dataStart = 0;
-      for (let i=0;i<rows.length;i++) {
-        if (rows[i] && rows[i][0] && !isNaN(parseFloat(rows[i][0])) && rows[i][1]) { dataStart=i; break; }
-      }
-      console.log('[Vac] dataStart:', dataStart);
+      // Structure:
+      // Row 0: blank
+      // Row 1: blank
+      // Row 2: blank
+      // Row 3: headers — col0=Matricule, col1=Nom prénom, col2=Compagnie, col3=Statut, col17=Solde(Mnt), col18=Taux, col21=nbr semaine
+      // Row 4: blank
+      // Row 5+: data
+      const CO_MAP = {'00037991':'Nucleom','00041844':'Nucleom QC','00061843':'Nucleom NB','00062161':'Intact'};
       const data = [];
-      for (let i=dataStart; i<rows.length; i++) {
-        const row=rows[i]||[];
-        const name=String(row[1]||'').trim();
-        if (!name||name==='nan'||name.toLowerCase().includes('prénom')) continue;
-        const status=String(row[3]||'').trim();
-        if (status!=='Actif') continue;
-        data.push({
-          matricule: String(row[0]||'').replace('.0',''),
-          name, company:String(row[2]||''), status,
-          balanceDollars: parseFloat(row[17])||0,
-          rate: parseFloat(row[18])||0,
-          weeks: parseFloat(row[21])||0
-        });
+      for (let i=5; i<rows.length; i++) {
+        const row = rows[i]||[];
+        if (!row[0] || row[0]==='nan') continue;
+        const matricule = String(row[0]).replace('.0','');
+        if (isNaN(parseFloat(matricule))) continue; // skip non-data rows
+        const name   = String(row[1]||'').trim();
+        const co     = String(row[2]||'');
+        const status = String(row[3]||'').trim();
+        if (status !== 'Actif') continue;
+        const balance = parseFloat(row[17])||0;
+        const rate    = parseFloat(row[18])||0;
+        const weeks   = parseFloat(row[21])||0;
+        data.push({ matricule, name, company:CO_MAP[co]||co, status, balanceDollars:balance, rate, weeks });
       }
       NUCLEOM_VAC = data;
       localStorage.setItem('ppl_vac', JSON.stringify(data));
       localStorage.setItem('ppl_vac_updated', new Date().toISOString());
-      statusEl.innerHTML = '<span style="color:#22C55E">✓ '+data.length+' active records · '+new Date().toLocaleDateString()+'</span>';
+      statusEl.innerHTML = '<span style="color:#22C55E">✓ '+data.length+' active records</span>';
       renderView(_view); renderUploadStatus();
     } catch(err) { statusEl.innerHTML = '<span style="color:#EF4444">Error: '+err.message+'</span>'; }
   }, err => { statusEl.innerHTML = '<span style="color:#EF4444">XLSX error: '+err+'</span>'; });
@@ -1652,43 +1686,42 @@ function uploadHire(input) {
   statusEl.textContent = 'Parsing XLSX…';
   _parseXLSX(file, rows => {
     try {
+      // Structure:
+      // Row 0: blank
+      // Row 1: headers — col0=Matricule, col1=Nom, col2=Prénom, col3=Date embauche, col7=Statut, col8=Compagnie, col10=Années
+      // Row 2+: data
       const CO_MAP = {'00037991':'Nucleom','00041844':'Nucleom QC','00061843':'Nucleom NB','00062161':'Intact'};
-      // Find first data row - has a number in col 0 and names in col 1/2
-      let dataStart=1;
-      for(let i=0;i<rows.length;i++){
-        if(rows[i]&&rows[i][0]&&!isNaN(parseFloat(rows[i][0]))&&rows[i][1]){dataStart=i;break;}
+      const data = [];
+      for (let i=2; i<rows.length; i++) {
+        const row = rows[i]||[];
+        if (!row[0] || row[0]==='nan') continue;
+        if (isNaN(parseFloat(String(row[0])))) continue;
+        const nom    = String(row[1]||'').trim();
+        const prenom = String(row[2]||'').trim();
+        if (!nom || nom==='nan') continue;
+        const status = String(row[7]||'').trim();
+        if (status !== 'Actif' && status !== 'Active') continue;
+        const name = (prenom && prenom!=='nan') ? prenom+' '+nom : nom;
+        const co   = String(row[8]||'');
+        // hireDate: comes as "2010-01-01T00:00:00.000Z" or "2010-01-01 00:00:00" or already "2010-01-01"
+        const hdRaw = String(row[3]||'');
+        const hdMatch = hdRaw.match(/20\d{2}-\d{2}-\d{2}/);
+        const hireDate = hdMatch ? hdMatch[0] : '';
+        const years = parseFloat(row[10])||0;
+        data.push({ matricule:String(row[0]), name, company:CO_MAP[co]||co, companyCode:co, status, hireDate, years });
       }
-      console.log('[Hire] dataStart:', dataStart);
-      const data=[];
-      for(let i=dataStart;i<rows.length;i++){
-        const row=rows[i]||[];
-        const nom=String(row[1]||'').trim(), pre=String(row[2]||'').trim();
-        if(!nom||nom==='nan') continue;
-        const status=String(row[7]||'').trim();
-        if(status!=='Actif'&&status!=='Active') continue;
-        const name=pre&&pre!=='nan'?pre+' '+nom:nom;
-        const co=String(row[8]||'');
-        let hireDate='';
-        const hd=row[3];
-        if(hd instanceof Date) hireDate=hd.toISOString().slice(0,10);
-        else if(hd) hireDate=String(hd).slice(0,10);
-        data.push({matricule:String(row[0]||''),name,
-          company:CO_MAP[co]||co, companyCode:co, status,
-          hireDate, years:parseFloat(row[10])||0});
-      }
-      NUCLEOM_HIRE=data;
-      localStorage.setItem('ppl_hire',JSON.stringify(data));
-      localStorage.setItem('ppl_hire_updated',new Date().toISOString());
-      statusEl.innerHTML='<span style="color:#22C55E">✓ '+data.length+' active employees · '+new Date().toLocaleDateString()+'</span>';
+      NUCLEOM_HIRE = data;
+      localStorage.setItem('ppl_hire', JSON.stringify(data));
+      localStorage.setItem('ppl_hire_updated', new Date().toISOString());
+      statusEl.innerHTML = '<span style="color:#22C55E">✓ '+data.length+' active employees</span>';
       renderView(_view); renderUploadStatus();
-    } catch(err){statusEl.innerHTML='<span style="color:#EF4444">Error: '+err.message+'</span>';}
-  }, err=>{statusEl.innerHTML='<span style="color:#EF4444">XLSX error: '+err+'</span>';});
+    } catch(err) { statusEl.innerHTML = '<span style="color:#EF4444">Error: '+err.message+'</span>'; }
+  }, err => { statusEl.innerHTML = '<span style="color:#EF4444">XLSX error: '+err+'</span>'; });
 }
 
 // ── SheetJS XLSX parser helper ────────────────────────────────────────────────
 function _parseXLSX(file, onSuccess, onError) {
   if (typeof XLSX === 'undefined') {
-    // Load SheetJS dynamically
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
     script.onload = () => _doParseXLSX(file, onSuccess, onError);
@@ -1704,14 +1737,12 @@ function _doParseXLSX(file, onSuccess, onError) {
     try {
       const wb = XLSX.read(e.target.result, {type:'array', cellDates:true, dateNF:'yyyy-mm-dd'});
       const ws = wb.Sheets[wb.SheetNames[0]];
-      // raw:true preserves numbers; dates come as JS Date objects via cellDates:true
       const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
-      // Normalise Date objects to ISO strings
-      const normalised = rows.map(row => (row||[]).map(cell => {
-        if (cell instanceof Date) return cell.toISOString().slice(0,10);
-        return cell;
-      }));
-      onSuccess(normalised);
+      // Normalise Date objects → ISO date strings
+      const out = rows.map(row => (row||[]).map(cell =>
+        (cell instanceof Date) ? cell.toISOString().slice(0,10) : cell
+      ));
+      onSuccess(out);
     } catch(err) { onError(err.message); }
   };
   reader.readAsArrayBuffer(file);
