@@ -9338,27 +9338,7 @@ function renderMarginReport() {
     if (b) b.innerHTML = '<tr><td colspan="12" style="color:#E84040;padding:1rem">Error: ' + e.message + '<br><pre style="font-size:.65rem;white-space:pre-wrap">' + e.stack + '</pre></td></tr>';
   }
 }
-function _renderMarginReportImpl() {
-
-  var techFilter   = (document.getElementById('margin-filter-tech-text')||{}).value || '';
-  var dateFrom     = (document.getElementById('margin-date-from')||{}).value || '';
-  var dateTo       = (document.getElementById('margin-date-to')||{}).value || '';
-  var woFilter     = ((document.getElementById('margin-filter-wo')||{}).value || '').toLowerCase();
-  var clientFilter = ((document.getElementById('margin-filter-client')||{}).value || '').toLowerCase();
-  var pctFilter    = (document.getElementById('margin-filter-pct')||{}).value || '';
-
-  function getBillRate(rs, category, type) {
-    if (!rs || !rs.labour) return 0;
-    var cat = rs.labour.find(function(l){
-      return l.name && category && l.name.toLowerCase().split('(')[0].trim() === category.toLowerCase().split('(')[0].trim();
-    }) || rs.labour.find(function(l){
-      return l.name && category && category.toLowerCase().includes(l.name.toLowerCase().split('(')[0].trim().toLowerCase());
-    });
-    if (!cat) return 0;
-    return type === 'ot' ? (cat.otRate||0) : type === 'dt' ? (cat.dtRate||0) : (cat.stRate||0);
-  }
-
-  function getCostRate(techName) {
+function getCostRate(techName) {
     if (!techName) return 55;
     var t = techName.toLowerCase().trim();
     // 1. Exact match
@@ -9384,6 +9364,26 @@ function _renderMarginReportImpl() {
     });
     return (emp && emp.rate) ? emp.rate : 55;
   }
+function _renderMarginReportImpl() {
+
+  var techFilter   = (document.getElementById('margin-filter-tech-text')||{}).value || '';
+  var dateFrom     = (document.getElementById('margin-date-from')||{}).value || '';
+  var dateTo       = (document.getElementById('margin-date-to')||{}).value || '';
+  var woFilter     = ((document.getElementById('margin-filter-wo')||{}).value || '').toLowerCase();
+  var clientFilter = ((document.getElementById('margin-filter-client')||{}).value || '').toLowerCase();
+  var pctFilter    = (document.getElementById('margin-filter-pct')||{}).value || '';
+
+  function getBillRate(rs, category, type) {
+    if (!rs || !rs.labour) return 0;
+    var cat = rs.labour.find(function(l){
+      return l.name && category && l.name.toLowerCase().split('(')[0].trim() === category.toLowerCase().split('(')[0].trim();
+    }) || rs.labour.find(function(l){
+      return l.name && category && category.toLowerCase().includes(l.name.toLowerCase().split('(')[0].trim().toLowerCase());
+    });
+    if (!cat) return 0;
+    return type === 'ot' ? (cat.otRate||0) : type === 'dt' ? (cat.dtRate||0) : (cat.stRate||0);
+  }
+
 
   function billRows(rows, rs) {
     var DEF = { st: 105, ot: 157.5, dt: 210 };
@@ -9470,7 +9470,16 @@ function _renderMarginReportImpl() {
     var marginPct  = billed > 0 ? margin / billed * 100 : 0;
     var techs      = [...new Set(rows.map(function(r){ return r.technician; }).filter(Boolean))].join(', ') || '—';
     var rateMap    = {};
-    rows.forEach(function(r){ if(r.technician) rateMap[r.technician] = getCostRate(r.technician); });
+    rows.forEach(function(r){ 
+      if(r.technician) {
+        var rate = getCostRate(r.technician);
+        var chars = r.technician.split('').map(function(c){return c.charCodeAt(0);}).join(',');
+        console.log('[Margin] tech='+JSON.stringify(r.technician)+' len='+r.technician.length+' rate='+rate+' chars=['+chars+']');
+        rateMap[r.technician] = rate;
+      } else {
+        console.log('[Margin] EMPTY technician on row:', JSON.stringify(r));
+      }
+    });
     var costRateStr = Object.keys(rateMap).map(function(t){ return t.split(' ')[0]+': $'+(rateMap[t]||0).toFixed(2); }).join(', ') || '$55.00';
 
     woRows.push({ woNum: woNum, client: j.client||'—', tech: techs,
