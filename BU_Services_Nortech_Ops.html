@@ -5549,7 +5549,10 @@ function triggerBatchWOImport() {
 
 function _normWoNum(s) {
   if (!s) return '';
-  return String(s).trim().toUpperCase().replace(/[\s-]+/g,'').replace(/^W0+/,'W');
+  // Remove spaces/dashes only — do NOT strip leading zeros
+  // W-99130, W 99130, w-99130 all → W99130
+  // W-001 stays W001 (not W1) to avoid false collisions
+  return String(s).trim().toUpperCase().replace(/[\s-]+/g,'');
 }
 
 var _INTERNAL_CLIENTS = ['nortech','nortech adv','nortech advanced','nortechadv','internal','shop','in-house'];
@@ -5809,11 +5812,16 @@ async function handleBatchWOImport(input) {
         parts.push('<span style="color:#2DD4BF" title="'+mrgdDetail+'">\u21aa '+mrgd.length+' merged</span>');
       }
       if (skip.length){
-        var skipNums=skip.map(function(r){return r.woNum+' — '+r.reason;}).join(' | ');
-        parts.push('<span style="color:#F59E0B" title="'+skipNums+'">\u23ed '+skip.length+' skipped</span>');
+        var skipNums=skip.map(function(r){return (r.woNum||'?')+': '+(r.reason||'unknown');}).join(' | ');
+        parts.push('<span style="color:#F59E0B" title="'+skipNums+'" style="cursor:help">\u23ed '+skip.length+' skipped (?)</span>');
       }
       if (statusEl) statusEl.innerHTML=parts.join(' ');
-      fileResults.forEach(function(r){results.rows.push(Object.assign({name:f.name},r));});
+      fileResults.forEach(function(r){
+        results.rows.push(Object.assign({name:f.name},r));
+        if (r.status==='skipped'||r.status==='failed') {
+          console.warn('[Batch skip/fail]', f.name, '→', r.woNum, ':', r.reason||r.status);
+        }
+      });
     } catch(e){
       results.failed++;
       results.rows.push({name:f.name,woNum:'--',status:'failed',reason:e.message});
@@ -5839,6 +5847,28 @@ async function handleBatchWOImport(input) {
   summary.style.cssText='margin-top:.75rem;padding:.6rem .9rem;background:var(--color-background-secondary);border-radius:6px;font-size:.8rem;border-left:3px solid '+(results.failed?'#E84040':'#22C55E');
   summary.innerHTML=summHtml;
   prog.appendChild(summary);
+
+  // Detailed log — show all skipped/failed rows so nothing is hidden
+  var skipFail=results.rows.filter(function(r){return r.status==='skipped'||r.status==='failed';});
+  if (skipFail.length) {
+    var logDiv=document.createElement('div');
+    logDiv.style.cssText='margin-top:.5rem;font-size:.75rem;';
+    var logHtml='<div style="color:var(--color-text-secondary);margin-bottom:.3rem;font-weight:600">Skipped / Failed detail:</div>';
+    logHtml+='<div style="display:flex;flex-direction:column;gap:.2rem;max-height:180px;overflow-y:auto">';
+    skipFail.forEach(function(r){
+      var col=r.status==='failed'?'#E84040':'#F59E0B';
+      var icon=r.status==='failed'?'✗':'⏭';
+      logHtml+='<div style="display:flex;gap:.5rem;padding:.25rem .4rem;background:rgba(0,0,0,.2);border-radius:3px">'
+        +'<span style="color:'+col+';flex-shrink:0">'+icon+'</span>'
+        +'<span style="color:#AEBDD4;flex-shrink:0;min-width:80px">'+(r.woNum||'—')+'</span>'
+        +'<span style="color:#6B7280;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.name+'">'+(r.name||'')+'</span>'
+        +'<span style="color:'+col+';flex:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r.reason||'')+'">'+(r.reason||'')+'</span>'
+        +'</div>';
+    });
+    logHtml+='</div>';
+    logDiv.innerHTML=logHtml;
+    prog.appendChild(logDiv);
+  }
   renderJobs(); renderDashboard(); updatePendingBadge();
 }
 
