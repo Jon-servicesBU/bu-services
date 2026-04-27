@@ -7737,7 +7737,7 @@ var NORTECH_CUSTOMERS = [
   {id:"CN000001195",name:"ZRP METAL FUSION TECHNOLOGIES",loc:"Sherwood Park, AB"}
 ];
 
-var NORTECH_EMPLOYEES = [
+var _NORTECH_EMPLOYEES_IMPORT = [
   {name:"Adrian Ferg",status:"Active",payType:"hourly",payRate:33.83},
   {name:"Bradley Churchill",status:"Active",payType:"hourly",payRate:42.88},
   {name:"Bradley Shaw",status:"Active",payType:"hourly",payRate:48.0},
@@ -9341,28 +9341,29 @@ function renderMarginReport() {
 function getCostRate(techName) {
     if (!techName) return 55;
     var t = techName.toLowerCase().trim();
+    var getRate = function(e){ return e.rate || e.payRate || 0; };
     // 1. Exact match
     var emp = (NORTECH_EMPLOYEES||[]).find(function(e){ return e.name && e.name.toLowerCase() === t; });
-    if (emp) return emp.rate;
+    if (emp) return getRate(emp);
     // 2. Last name + first initial (e.g. "C. Tondreau" → "Cody Tondreau")
     emp = (NORTECH_EMPLOYEES||[]).find(function(e){
       var parts = e.name.toLowerCase().split(' ');
       var fn = parts[0]; var ln = parts[parts.length-1];
       return ln.length>2 && t.includes(ln) && (t.includes(fn) || t.startsWith(fn[0]+'.')||t.startsWith(fn[0]+' '));
     });
-    if (emp) return emp.rate;
+    if (emp) return getRate(emp);
     // 3. Last name only (if unique enough — >4 chars)
     emp = (NORTECH_EMPLOYEES||[]).find(function(e){
       var ln = e.name.toLowerCase().split(' ').pop();
       return ln.length>4 && t.includes(ln);
     });
-    if (emp) return emp.rate;
+    if (emp) return getRate(emp);
     // 4. First name only (if unique enough)
     emp = (NORTECH_EMPLOYEES||[]).find(function(e){
       var fn = e.name.toLowerCase().split(' ')[0];
       return fn.length>3 && (t===fn || t.startsWith(fn+' ') || t.startsWith(fn+'.'));
     });
-    return (emp && emp.rate) ? emp.rate : 55;
+    return (emp && getRate(emp)) ? getRate(emp) : 55;
   }
 function _renderMarginReportImpl() {
 
