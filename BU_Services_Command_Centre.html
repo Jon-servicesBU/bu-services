@@ -431,7 +431,7 @@ input[type=file]{display:none}
 
     <!-- ══ IMPORT CSV ══════════════════════════════════════════════════ -->
     <div id="view-import" class="view">
-      <div class="three-col">
+      <div class="two-col">
         <div class="card">
           <div class="card-title">Business Central — Nucleom</div>
           <div class="import-drop" onclick="document.getElementById('bc-file').click()">
@@ -452,16 +452,7 @@ input[type=file]{display:none}
           <input type="file" id="sf-file" accept=".csv" onchange="importSF(this)">
           <div id="sf-status" style="margin-top:12px;font-size:11px;color:#3D5470"></div>
         </div>
-        <div class="card">
-          <div class="card-title">People &amp; utilization — BC export</div>
-          <div class="import-drop" onclick="document.getElementById('people-file').click()">
-            <div class="import-drop-text">Drop People Dashboard BC CSV</div>
-            <div class="import-drop-sub">Same format as People Dashboard import</div>
-            <div class="import-btn">Choose file</div>
-          </div>
-          <input type="file" id="people-file" accept=".csv,.json" onchange="importPeople(this)">
-          <div id="people-status" style="margin-top:12px;font-size:11px;color:#3D5470"></div>
-        </div>
+
       </div>
       <div class="card" style="margin-top:0">
         <div class="card-title">Imported data — current values</div>
@@ -486,7 +477,10 @@ input[type=file]{display:none}
           </div>
         </div>
         <div id="budget-editor"></div>
-        <div style="font-size:10px;color:#2E4160;margin-top:10px">Values in CAD thousands (k). Enter 0 for no budget.</div>
+        <div style="font-size:10px;color:#2E4160;margin-top:10px" id="budget-currency-note">
+          Values in <span id="bud-cur-lbl">EUR thousands (k)</span>. Pre-populated from 2026 budget image.
+          <span id="bud-import-note" style="margin-left:8px;color:#3D5470">Use ⬆ Import CSV to update.</span>
+        </div>
       </div>
     </div>
 
@@ -560,10 +554,11 @@ const NORTECH_EMPLOYEES = [
 
 // ══ STATE ════════════════════════════════════════════════════════════════════
 let _jobs = [], _invoices = [], _timesheets = [], _ratesheets = [];
-let _currency = 'CAD';   // 'CAD' | 'EUR'
-let _eurRate = null;      // fetched from frankfurter.app
+let _currency = 'CAD';      // 'CAD' | 'EUR'
+let _eurRate = null;         // fetched from frankfurter.app
+let _budgetCurrency = 'EUR'; // budgets are stored in EUR thousands
 let _crmOpps = [], _crmLeads = [];
-let _bcData = null, _sfData = null, _peopleData = null;
+let _bcData = null, _sfData = null;
 let _budgets = {};
 let _currentView = 'revenue';
 let _refreshTimer = null;
@@ -693,7 +688,19 @@ function loadLocalData() {
   try { _bcData = JSON.parse(localStorage.getItem('cc_bc_data') || 'null'); } catch(e){}
   try { _sfData = JSON.parse(localStorage.getItem('cc_sf_data') || 'null'); } catch(e){}
   try { _peopleData = JSON.parse(localStorage.getItem('cc_people_data') || 'null'); } catch(e){}
-  try { _budgets = JSON.parse(localStorage.getItem('cc_budgets') || '{}'); } catch(e){}
+  try {
+    const stored = localStorage.getItem('cc_budgets');
+    _budgets = stored ? JSON.parse(stored) : {
+"2026": {
+  "nucleom": { "0": 692, "1": 987, "2": 1146, "3": 1532, "4": 2237, "5": 1972, "6": 1864, "7": 1359, "8": 1957, "9": 1930, "10": 1500, "11": 909 },
+  "nortech": { "0": 416, "1": 422, "2": 640, "3": 727, "4": 685, "5": 714, "6": 624, "7": 741, "8": 1000, "9": 907, "10": 541, "11": 488 },
+  "rockx": { "0": 154, "1": 157, "2": 239, "3": 276, "4": 255, "5": 264, "6": 232, "7": 274, "8": 370, "9": 336, "10": 201, "11": 181 },
+  "arcanite": { "0": 93, "1": 0, "2": 105, "3": 82, "4": 75, "5": 170, "6": 144, "7": 138, "8": 178, "9": 199, "10": 110, "11": 182 },
+  "intact": { "0": 40, "1": 214, "2": 487, "3": 1503, "4": 508, "5": 78, "6": 149, "7": 45, "8": 202, "9": 141, "10": 293, "11": 117 },
+}
+};
+    if (!stored) localStorage.setItem('cc_budgets', JSON.stringify(_budgets));
+  } catch(e){ _budgets = {}; }
   // Also check CRM localStorage (bucrm_opps)
   try {
     const raw = localStorage.getItem('bucrm_opps');
@@ -844,7 +851,13 @@ function buildWeeklySummary() {
 
 // ══ BUDGET HELPERS ════════════════════════════════════════════════════════════
 function getBudget(co, year, month) {
-  return (_budgets[year] && _budgets[year][co] && _budgets[year][co][month]) || 0;
+  // Budgets stored in EUR thousands
+  const raw = (_budgets[year] && _budgets[year][co] && _budgets[year][co][month]) || 0;
+  if (_budgetCurrency === 'EUR') {
+    if (_currency === 'CAD' && _eurRate) return raw / _eurRate; // EUR k → CAD k
+    return raw; // display in EUR, already EUR k
+  }
+  return raw; // stored as CAD k
 }
 function setBudget(co, year, month, val) {
   if (!_budgets[year]) _budgets[year] = {};
@@ -854,8 +867,13 @@ function setBudget(co, year, month, val) {
 function getBudgetYTD(co, year) {
   const now = new Date(); const m = now.getMonth();
   let s = 0;
-  for (let i=0; i<=m; i++) s += getBudget(co, year, i);
-  return s * 1000; // budgets stored in k
+  for (let i=0; i<=m; i++) {
+    const raw = (_budgets[year] && _budgets[year][co] && _budgets[year][co][i]) || 0;
+    // Budgets stored in EUR thousands — convert to CAD thousands for comparison with CAD actuals
+    const cadK = (_budgetCurrency === 'EUR' && _eurRate) ? raw / _eurRate : raw;
+    s += cadK;
+  }
+  return s * 1000; // CAD
 }
 
 // ══ REVENUE CALCULATIONS ══════════════════════════════════════════════════════
@@ -1678,42 +1696,7 @@ function importSF(input) {
   input.value = '';
 }
 
-function importPeople(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      let data;
-      if (file.name.endsWith('.json')) {
-        data = JSON.parse(e.target.result);
-      } else {
-        // Simple CSV: name,util_latest,bill_13wk,office
-        const lines = e.target.result.split('\n').map(l=>l.trim()).filter(Boolean);
-        const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
-        const nameIdx = headers.findIndex(h=>h.includes('name'));
-        const utilIdx = headers.findIndex(h=>h.includes('util'));
-        const billIdx = headers.findIndex(h=>h.includes('bill'));
-        data = { employees: [], updated: new Date().toISOString() };
-        lines.slice(1).forEach(line => {
-          const cols = line.split(',').map(c=>c.trim().replace(/"/g,''));
-          data.employees.push({
-            name: nameIdx>=0 ? cols[nameIdx] : '',
-            util_latest: utilIdx>=0 ? parseFloat(cols[utilIdx])||0 : 0,
-            bill_latest: billIdx>=0 ? parseFloat(cols[billIdx])||0 : 0,
-          });
-        });
-      }
-      _peopleData = data;
-      localStorage.setItem('cc_people_data', JSON.stringify(data));
-      $('people-status').innerHTML = `<span style="color:#22C55E">✓ Imported ${(data.employees||[]).length} employees</span>`;
-      renderImportStatus();
-    } catch(err) {
-      $('people-status').innerHTML = `<span style="color:#EF4444">Parse error: ${err.message}</span>`;
-    }
-  };
-  reader.readAsText(file);
-  input.value = '';
-}
+
 
 // ══ TOAST ════════════════════════════════════════════════════════════════════
 // ── Currency toggle ──────────────────────────────────────────────────────────
@@ -1733,6 +1716,8 @@ async function toggleCurrency() {
       btn.style.borderColor = 'rgba(245,158,11,0.3)';
       rateEl.style.display = '';
       rateEl.textContent = '1 CAD = ' + _eurRate.toFixed(4) + ' EUR';
+      const budLbl = document.getElementById('bud-cur-lbl');
+      if (budLbl) budLbl.textContent = 'EUR thousands (k)';
     } catch(e) {
       // Fallback rate if API fails
       _eurRate = 0.68;
@@ -1751,6 +1736,8 @@ async function toggleCurrency() {
     btn.style.color = '#4E6480';
     btn.style.borderColor = 'rgba(255,255,255,0.08)';
     rateEl.style.display = 'none';
+    const budLblC = document.getElementById('bud-cur-lbl');
+    if (budLblC) budLblC.textContent = 'CAD equivalent thousands (k)';
   }
   renderView(_currentView);
 }
