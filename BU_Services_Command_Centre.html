@@ -240,6 +240,8 @@ input[type=file]{display:none}
     <div class="tb-right">
       <span class="live-badge">Live</span>
       <span class="tb-time" id="tb-time">—</span>
+      <button id="cur-toggle" onclick="toggleCurrency()" style="font-size:11px;color:#4E6480;padding:4px 10px;border:0.5px solid rgba(255,255,255,0.08);border-radius:4px;background:transparent;cursor:pointer;transition:all .15s" title="Toggle CAD / EUR">CAD</button>
+      <span id="cur-rate" style="font-size:9px;color:#2E4160;display:none"></span>
       <button class="tb-refresh" onclick="loadAll()">↺ Refresh</button>
     </div>
   </div>
@@ -476,7 +478,11 @@ input[type=file]{display:none}
             <select id="budget-year-sel" style="background:#0A1628;border:0.5px solid rgba(255,255,255,0.1);border-radius:4px;color:#AEBDD4;font-size:11px;padding:4px 8px;outline:none" onchange="renderBudgetEditor()">
               <option>2025</option><option selected>2026</option><option>2027</option>
             </select>
-            <button class="btn btn-green" onclick="saveBudgets()">Save budgets</button>
+            <label style="cursor:pointer">
+              <input type="file" id="budget-csv-file" accept=".csv,.xlsx" style="display:none" onchange="importBudgetCSV(this)">
+              <span class="btn btn-blue" onclick="document.getElementById('budget-csv-file').click()">⬆ Import CSV</span>
+            </label>
+            <button class="btn btn-green" onclick="saveBudgets()">💾 Save budgets</button>
           </div>
         </div>
         <div id="budget-editor"></div>
@@ -489,6 +495,8 @@ input[type=file]{display:none}
 </div><!-- /app -->
 
 <script>
+
+
 // ══ CONFIG ══════════════════════════════════════════════════════════════════
 const SB_URL = 'https://tbcoktkpjwdvnhqtuups.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiY29rdGtwandkdm5ocXR1dXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MDM1OTIsImV4cCI6MjA5MjM3OTU5Mn0.8Zw75YQYmNPXKoLE_bK23Vs2j3ZeqCUwAYUFt5-8YWs';
@@ -552,6 +560,8 @@ const NORTECH_EMPLOYEES = [
 
 // ══ STATE ════════════════════════════════════════════════════════════════════
 let _jobs = [], _invoices = [], _timesheets = [], _ratesheets = [];
+let _currency = 'CAD';   // 'CAD' | 'EUR'
+let _eurRate = null;      // fetched from frankfurter.app
 let _crmOpps = [], _crmLeads = [];
 let _bcData = null, _sfData = null, _peopleData = null;
 let _budgets = {};
@@ -560,13 +570,20 @@ let _refreshTimer = null;
 
 // ══ HELPERS ══════════════════════════════════════════════════════════════════
 const $ = id => document.getElementById(id);
-const fmt$ = (n, dec=0) => {
+function cvt(n) {
+  // Convert CAD value to display currency
+  if (_currency === 'EUR' && _eurRate) return (n||0) * _eurRate;
+  return n||0;
+}
+const _fmtRaw = (n, dec=0) => {
   if (!n && n !== 0) return '—';
   const abs = Math.abs(n);
-  if (abs >= 1e6) return '$' + (n/1e6).toFixed(dec||1) + 'M';
-  if (abs >= 1e3) return '$' + Math.round(n/1e3) + 'K';
-  return '$' + n.toFixed(dec||0);
+  const sym = _currency === 'EUR' ? '€' : '$';
+  if (abs >= 1e6) return sym + (n/1e6).toFixed(dec||1) + 'M';
+  if (abs >= 1e3) return sym + Math.round(n/1e3) + 'K';
+  return sym + n.toFixed(dec||0);
 };
+const fmt$ = (n, dec=0) => _fmtRaw(cvt(n), dec);
 const fmtK = n => n ? '$' + (n/1e3).toFixed(1) + 'K' : '—';
 const fmtPct = n => (n == null || isNaN(n)) ? '—' : n.toFixed(1) + '%';
 const today = () => new Date().toISOString().slice(0,10);
@@ -765,14 +782,22 @@ function calcWOBilled(wo) {
   return allPrice > 0 ? invSub * (thisPrice/allPrice) : invSub/ids.length;
 }
 
+function getBillRate(rs, category, type) {
+  if (!rs || !rs.labour) return 0;
+  const norm = s => (s||'').toLowerCase().split('(')[0].trim();
+  const cat = rs.labour.find(l => l.name && category && norm(l.name) === norm(category))
+           || rs.labour.find(l => l.name && category && norm(category).includes(norm(l.name)))
+           || rs.labour.find(l => l.name && category && norm(l.name).includes(norm(category)));
+  if (!cat) return 0;
+  return type === 'ot' ? (cat.otRate||0) : type === 'dt' ? (cat.dtRate||0) : (cat.stRate||0);
+}
+
 function priceWO(wo, rs) {
   const DEF = {st:105, ot:157.5, dt:210};
   return getWORows(wo).reduce((s,r) => {
-    const cat = (rs.labour||[]).find(l => l.name && r.category &&
-      l.name.toLowerCase().split('(')[0].trim() === r.category.toLowerCase().split('(')[0].trim());
-    const stR = (cat && cat.stRate) || DEF.st;
-    const otR = (cat && cat.otRate) || stR*1.5;
-    const dtR = (cat && cat.dtRate) || stR*2;
+    const stR = getBillRate(rs, r.category, 'st') || DEF.st;
+    const otR = getBillRate(rs, r.category, 'ot') || stR*1.5;
+    const dtR = getBillRate(rs, r.category, 'dt') || stR*2;
     return s + (r.regHrs||0)*stR + (r.otHrs||0)*otR + (r.dtHrs||0)*dtR;
   }, 0);
 }
@@ -857,12 +882,125 @@ function getExtRevYTD(co, year) {
 }
 
 // ══ RENDER: REVENUE ══════════════════════════════════════════════════════════
+
+// ── Chart helpers ─────────────────────────────────────────────────────────
+function buildBarChart(opts) {
+  // opts: { data: [{label,value,color,budget?}], height, maxVal, showBudget, yLabel, fmt }
+  const { data, height=80, showBudget=false, yLabel='', fmt=v=>v } = opts;
+  const maxVal = opts.maxVal || Math.max(...data.map(d=>Math.max(d.value||0,d.budget||0)),1);
+  const axisVals = niceAxis(maxVal, 4);
+  const axisMax = axisVals[axisVals.length-1];
+
+  // Axis lines + labels
+  const axisLines = axisVals.map(v => {
+    const pct = (v/axisMax*100).toFixed(1);
+    return `<div style="position:absolute;bottom:${pct}%;left:0;right:0;border-top:0.5px solid rgba(255,255,255,0.04);pointer-events:none">
+      <span style="position:absolute;right:calc(100% + 4px);top:-7px;font-size:8px;color:#2E4160;white-space:nowrap">${fmt(v)}</span>
+    </div>`;
+  }).join('');
+
+  // Bars
+  const bars = data.map((d,i) => {
+    const h = Math.max((d.value||0)/axisMax*100,0).toFixed(1);
+    const bh = showBudget && d.budget ? Math.max(d.budget/axisMax*100,0).toFixed(1) : 0;
+    const tip = showBudget && d.budget
+      ? `${d.label}: ${fmt(d.value||0)} actual · ${fmt(d.budget)} budget`
+      : `${d.label}: ${fmt(d.value||0)}`;
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0">
+      <div style="width:100%;position:relative;height:${height}px;display:flex;align-items:flex-end">
+        ${showBudget && bh ? `<div style="position:absolute;bottom:0;left:0;right:0;height:${bh}%;border:0.5px dashed rgba(255,255,255,0.18);border-radius:2px 2px 0 0;pointer-events:none"></div>` : ''}
+        <div class="tooltip" data-tip="${tip}" style="width:100%;height:${h}%;background:${d.color||'#60A5FA'};border-radius:2px 2px 0 0;min-height:${(d.value||0)>0?2:0}px;opacity:${d.dim?.8:.85};position:relative;z-index:1;transition:opacity .15s"
+          onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=${d.dim?.8:.85}"></div>
+      </div>
+      <span style="font-size:8px;color:${d.highlight?'#60A5FA':'#2E4160'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center">${d.label}</span>
+    </div>`;
+  }).join('');
+
+  return `<div style="display:flex;gap:0;align-items:stretch">
+    <div style="position:relative;flex:1;display:flex;gap:4px;align-items:flex-end;padding-left:${yLabel?36:28}px">
+      <div style="position:absolute;inset:0;pointer-events:none">${axisLines}</div>
+      ${bars}
+    </div>
+  </div>
+  ${yLabel ? `<div style="font-size:9px;color:#2E4160;margin-top:6px;text-align:right">${yLabel}</div>` : ''}`;
+}
+
+function buildStackedBarChart(opts) {
+  // opts: { months, series:[{label,color,values[]}], height, fmt, showBudget, budgetValues }
+  const { months=[], series=[], height=80, fmt=v=>v, showBudget=false, budgetValues=[] } = opts;
+  const totals = months.map((_,i) => series.reduce((s,sr)=>s+(sr.values[i]||0),0));
+  const maxVal = Math.max(...totals, showBudget ? Math.max(...budgetValues) : 0, 1);
+  const axisVals = niceAxis(maxVal, 4);
+  const axisMax = axisVals[axisVals.length-1];
+
+  const axisLines = axisVals.map(v => {
+    const pct = (v/axisMax*100).toFixed(1);
+    return `<div style="position:absolute;bottom:${pct}%;left:0;right:0;border-top:0.5px solid rgba(255,255,255,0.04);pointer-events:none">
+      <span style="position:absolute;right:calc(100% + 4px);top:-7px;font-size:8px;color:#2E4160;white-space:nowrap">${fmt(v)}</span>
+    </div>`;
+  }).join('');
+
+  const curMo = new Date().getMonth();
+  const bars = months.map((mo,i) => {
+    const total = totals[i];
+    const isFuture = i > curMo;
+    const isCur = i === curMo;
+    const tip = series.filter(sr=>sr.values[i]>0).map(sr=>`${sr.label}: ${fmt(sr.values[i])}`).join(' · ') || mo;
+    const bh = showBudget && budgetValues[i] ? Math.max(budgetValues[i]/axisMax*100,0).toFixed(1) : 0;
+
+    // Stack segments bottom-up
+    let segments = '';
+    let accumulated = 0;
+    series.forEach(sr => {
+      const v = sr.values[i]||0;
+      if (!v) return;
+      const h = (v/axisMax*100).toFixed(2);
+      const bot = (accumulated/axisMax*100).toFixed(2);
+      segments += `<div style="position:absolute;bottom:${bot}%;left:0;right:0;height:${h}%;background:${sr.color};opacity:${isFuture?.35:isCur?.95:.75}"></div>`;
+      accumulated += v;
+    });
+
+    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0">
+      <div class="tooltip" data-tip="${tip}" style="width:100%;position:relative;height:${height}px">
+        ${showBudget && bh ? `<div style="position:absolute;bottom:0;left:0;right:0;height:${bh}%;border:0.5px dashed rgba(255,255,255,0.2);border-radius:2px 2px 0 0"></div>` : ''}
+        ${segments}
+      </div>
+      <span style="font-size:8px;color:${isCur?'#60A5FA':'#2E4160'}">${mo}</span>
+    </div>`;
+  }).join('');
+
+  return `<div style="display:flex;gap:0;align-items:stretch">
+    <div style="position:relative;flex:1;display:flex;gap:3px;align-items:flex-end;padding-left:28px">
+      <div style="position:absolute;inset:0;pointer-events:none">${axisLines}</div>
+      ${bars}
+    </div>
+  </div>`;
+}
+
+function buildLegend(series) {
+  return `<div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap">` +
+    series.map(s => `<div style="display:flex;align-items:center;gap:5px">
+      <div style="width:8px;height:8px;border-radius:50%;background:${s.color}"></div>
+      <span style="font-size:10px;color:#4E6480">${s.label}</span>
+    </div>`).join('') + '</div>';
+}
+
+function niceAxis(max, steps=4) {
+  if (!max) return [0];
+  const raw = max/steps;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const nice = [1,2,2.5,5,10].map(f=>f*mag).find(f=>f>=raw) || mag*10;
+  const out = [];
+  for (let i=1; i<=steps+1; i++) { const v=nice*i; if (v<=max*1.3) out.push(v); }
+  if (!out.length) out.push(max);
+  return out;
+}
+
 function renderRevenue() {
   const yr = YEAR; const mo = new Date().getMonth();
   const norMTD = getNortechRevMonth(yr, mo);
   const norYTD = getNortechRevYTD(yr);
   const norBudYTD = getBudgetYTD('nortech', yr);
-  // External
   const nucYTD = getExtRevYTD('nucleom', yr);
   const intYTD = getExtRevYTD('intact', yr);
   const arcYTD = getExtRevYTD('arcanite', yr);
@@ -881,17 +1019,17 @@ function renderRevenue() {
     { l:'Total YTD (all)', v:fmt$(totalYTD), s:'<span class="muted">All entities</span>' },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('');
 
-  // By company bars
+  // By company horizontal bars
   const companies = [
     { l:'Nucleom', v:nucYTD, col:'#3B82F6' },
-    { l:'Intact', v:intYTD, col:'#F59E0B' },
+    { l:'Intact',  v:intYTD, col:'#F59E0B' },
     { l:'Nortech', v:norYTD, col:'#22C55E' },
-    { l:'Arcanite', v:arcYTD, col:'#A78BFA' },
-    { l:'RockX', v:rkxYTD, col:'#FB923C' },
-  ].filter(c => c.v > 0).sort((a,b) => b.v-a.v);
-  const maxV = Math.max(...companies.map(c=>c.v), 1);
+    { l:'Arcanite',v:arcYTD, col:'#A78BFA' },
+    { l:'RockX',   v:rkxYTD, col:'#FB923C' },
+  ].filter(c=>c.v>0).sort((a,b)=>b.v-a.v);
+  const maxV = Math.max(...companies.map(c=>c.v),1);
   $('rev-by-company').innerHTML = companies.length
-    ? companies.map(c => `
+    ? companies.map(c=>`
       <div class="bar-row">
         <div class="bar-label">${c.l}</div>
         <div class="bar-track"><div class="bar-fill" style="width:${(c.v/maxV*100).toFixed(1)}%;background:${c.col}"></div></div>
@@ -899,18 +1037,18 @@ function renderRevenue() {
       </div>`).join('')
     : '<div class="empty">Import BC data to see company breakdown</div>';
 
-  // By client (Nortech only)
+  // By client (Nortech MTD)
   const clientMap = {};
-  _invoices.filter(i => i.status==='sent'||i.status==='paid').forEach(i => {
-    const cl = i.client || (i.chargeSheets&&i.chargeSheets[0]&&i.chargeSheets[0].client) || '—';
-    const d = i.invDate||i.created||'';
+  _invoices.filter(i=>i.status==='sent'||i.status==='paid').forEach(i=>{
+    const cl=i.client||(i.chargeSheets&&i.chargeSheets[0]&&i.chargeSheets[0].client)||'—';
+    const d=i.invDate||i.created||'';
     if (!d.startsWith(`${yr}-${String(mo+1).padStart(2,'0')}`)) return;
-    clientMap[cl] = (clientMap[cl]||0) + calcInvTotal(i);
+    clientMap[cl]=(clientMap[cl]||0)+calcInvTotal(i);
   });
-  const clients = Object.entries(clientMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const maxC = Math.max(...clients.map(c=>c[1]), 1);
+  const clients=Object.entries(clientMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxC=Math.max(...clients.map(c=>c[1]),1);
   $('rev-by-client').innerHTML = clients.length
-    ? clients.map(([cl,v]) => `
+    ? clients.map(([cl,v])=>`
       <div class="bar-row">
         <div class="bar-label">${cl.slice(0,12)}</div>
         <div class="bar-track"><div class="bar-fill" style="width:${(v/maxC*100).toFixed(1)}%;background:#22C55E"></div></div>
@@ -918,40 +1056,34 @@ function renderRevenue() {
       </div>`).join('')
     : '<div class="empty">No invoiced WOs this month</div>';
 
-  // Monthly chart
+  // Monthly stacked bar chart — each company a different colour stacked
   $('rev-year').textContent = yr;
-  const chartH = 72;
-  const allMonthly = MONTHS.map((_,m) => ({
-    nortech: getNortechRevMonth(yr,m),
-    nucleom: getExtRevMonth('nucleom',yr,m),
-    intact:  getExtRevMonth('intact',yr,m),
-    arcanite:getExtRevMonth('arcanite',yr,m),
-    rockx:   getExtRevMonth('rockx',yr,m),
-  }));
-  const maxM = Math.max(...allMonthly.map(d => d.nortech+d.nucleom+d.intact+d.arcanite+d.rockx), 1);
+  const series = [
+    { label:'Nortech',  color:'#22C55E', values: MONTHS.map((_,m)=>getNortechRevMonth(yr,m)) },
+    { label:'Nucleom',  color:'#3B82F6', values: MONTHS.map((_,m)=>getExtRevMonth('nucleom',yr,m)) },
+    { label:'Intact',   color:'#F59E0B', values: MONTHS.map((_,m)=>getExtRevMonth('intact',yr,m)) },
+    { label:'Arcanite', color:'#A78BFA', values: MONTHS.map((_,m)=>getExtRevMonth('arcanite',yr,m)) },
+    { label:'RockX',    color:'#FB923C', values: MONTHS.map((_,m)=>getExtRevMonth('rockx',yr,m)) },
+  ].filter(s=>s.values.some(v=>v>0));
 
-  $('rev-monthly-chart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:5px;height:${chartH}px">` +
-    allMonthly.map((d,i) => {
-      const total = d.nortech+d.nucleom+d.intact+d.arcanite+d.rockx;
-      const h = Math.max(total/maxM*chartH, total>0?4:0);
-      const isFuture = i > mo;
-      const isCur = i === mo;
-      const cols = ['#22C55E','#3B82F6','#F59E0B','#A78BFA','#FB923C'];
-      const vals = [d.nortech,d.nucleom,d.intact,d.arcanite,d.rockx];
-      const stacks = vals.map((v,ci) => v>0
-        ? `<div style="height:${(v/maxM*chartH).toFixed(1)}px;background:${cols[ci]};opacity:${isFuture?.4:isCur?.95:.7};min-height:2px"></div>` : '').join('');
-      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
-        <div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:${chartH}px;${isFuture?'opacity:0.3':''}">
-          ${total>0 ? stacks : (isFuture?`<div style="height:3px;background:rgba(255,255,255,0.05);width:100%"></div>`:'')}
-        </div>
-        <span style="font-size:8px;color:${isCur?'#60A5FA':'#2E4160'};letter-spacing:.3px">${MONTHS[i]}</span>
-      </div>`;
-    }).join('') + '</div>';
+  // Budget line for Nortech
+  const norBudMonthly = MONTHS.map((_,m)=>getBudget('nortech',yr,m)*1000);
+  const hasBudget = norBudMonthly.some(v=>v>0);
 
-  $('rev-monthly-legend').innerHTML = Object.values(CO).map(c =>
-    `<div style="display:flex;align-items:center;gap:4px"><div style="width:8px;height:8px;border-radius:50%;background:${c.col}"></div><span style="font-size:10px;color:#4E6480">${c.label}</span></div>`
-  ).join('');
+  $('rev-monthly-chart').innerHTML =
+    `<div style="font-size:9px;color:#3D5470;margin-bottom:8px">
+      Revenue by month — ${yr}
+      ${hasBudget ? '<span style="margin-left:10px;color:#4E6480">· · ·  Nortech budget</span>' : ''}
+    </div>` +
+    buildStackedBarChart({ months:MONTHS, series, height:80, fmt:fmt$,
+      showBudget:hasBudget, budgetValues:norBudMonthly }) +
+    buildLegend(series) +
+    (hasBudget ? `<div style="display:flex;align-items:center;gap:5px;margin-top:6px">
+      <div style="width:16px;border-top:1px dashed rgba(255,255,255,0.3)"></div>
+      <span style="font-size:10px;color:#4E6480">Nortech budget target</span>
+    </div>` : '');
 }
+
 
 // ══ RENDER: MARGINS ══════════════════════════════════════════════════════════
 function renderMargins() {
@@ -1010,80 +1142,65 @@ function renderMargins() {
     return { m, billed:mb, margin:mb-mc, pct: mb>0?(mb-mc)/mb*100:0 };
   });
   const maxMar = Math.max(...months12.map(d=>d.margin), 1);
-  $('mar-monthly-chart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:5px;height:60px;margin-top:8px">` +
-    months12.map((d,i) => {
-      const h = Math.max(d.margin/maxMar*60, d.margin>0?3:0);
-      const isCur = i === new Date().getMonth();
-      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
-        <div style="width:100%;height:${h.toFixed(1)}px;background:${pctColor(d.pct)};border-radius:2px 2px 0 0;opacity:${isCur?.95:.7};min-height:${d.margin>0?2:0}px"></div>
-        <span style="font-size:8px;color:${isCur?'#60A5FA':'#2E4160'}">${MONTHS[i]}</span>
-      </div>`;
-    }).join('') + '</div>';
-}
-
-// ══ RENDER: BUDGET VS ACTUAL ══════════════════════════════════════════════════
-function renderBVA() {
-  const yr = YEAR; const mo = new Date().getMonth();
-  const norYTD = getNortechRevYTD(yr);
-  const norBudYTD = getBudgetYTD('nortech', yr);
-  const companies = [
-    { k:'nortech', l:'Nortech', ytd:norYTD, bud:norBudYTD, col:'#22C55E' },
-    { k:'nucleom', l:'Nucleom', ytd:getExtRevYTD('nucleom',yr), bud:getBudgetYTD('nucleom',yr), col:'#3B82F6' },
-    { k:'intact',  l:'Intact',  ytd:getExtRevYTD('intact',yr),  bud:getBudgetYTD('intact',yr),  col:'#F59E0B' },
-    { k:'arcanite',l:'Arcanite',ytd:getExtRevYTD('arcanite',yr),bud:getBudgetYTD('arcanite',yr),col:'#A78BFA'},
-  ];
-  const totalYTD = companies.reduce((s,c)=>s+c.ytd,0);
-  const totalBud = companies.reduce((s,c)=>s+c.bud,0);
-  const overallPct = totalBud > 0 ? totalYTD/totalBud*100 : 0;
+  const marChartData = months12.map((d,i)=>({
+    label:MONTHS[i], value:d.margin, color:pctColor(d.pct),
+    highlight:i===new Date().getMonth(), dim:i>new Date().getMonth()
+  }));
+  $('mar-monthly-chart').innerHTML =
+    `<div style="font-size:9px;color:#3D5470;margin-bottom:8px">
+      Gross margin $ by month — colour indicates margin % (green ≥40% · amber 30–40% · red &lt;30%)
+    </div>` +
+    buildBarChart({ data:marChartData, height:60, fmt:fmt$ });
 
   $('bva-kpis').innerHTML = [
     { l:'Total YTD actual', v:fmt$(totalYTD) },
-    { l:'Total YTD budget', v:fmt$(totalBud), s: totalBud ? '' : '<span class="muted">Set in Edit Budgets</span>' },
-    { l:'Budget attainment', v: totalBud ? fmtPct(overallPct) : '—', s: totalBud ? `<span class="${overallPct>=100?'up':overallPct>=80?'amber':'down'}">${overallPct>=100?'On track':'Below target'}</span>` : '' },
-    { l:'Nortech vs budget', v: norBudYTD ? fmtPct(norBudYTD>0?norYTD/norBudYTD*100:0) : '—' },
+    { l:'Total YTD budget', v:fmt$(totalBud), s:totalBud?'':'<span class="muted">Set in Edit Budgets</span>' },
+    { l:'Budget attainment', v:totalBud?fmtPct(overallPct):'—',
+      s:totalBud?`<span class="${overallPct>=100?'up':overallPct>=80?'amber':'down'}">${overallPct>=100?'On track':'Below target'}</span>`:'' },
+    { l:'Nortech vs budget', v:norBudYTD?fmtPct(norBudYTD>0?norYTD/norBudYTD*100:0):'—' },
   ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-sub">${k.s||''}</div></div>`).join('');
 
-  const maxV = Math.max(...companies.map(c=>Math.max(c.ytd,c.bud)), 1);
-  $('bva-by-company').innerHTML = companies.map(c => {
-    const pct = c.bud > 0 ? c.ytd/c.bud*100 : 0;
-    const budW = (c.bud/maxV*100).toFixed(1);
-    const actW = (c.ytd/maxV*100).toFixed(1);
-    return `<div class="bar-row" style="margin-bottom:14px">
-      <div class="bar-label" style="width:70px">${c.l}</div>
-      <div style="flex:1">
-        <div class="bar-track" style="height:8px;position:relative;margin-bottom:3px">
-          <div class="bar-fill" style="width:${actW}%;background:${c.col}"></div>
-          <div style="position:absolute;top:0;left:${budW}%;width:2px;height:100%;background:rgba(255,255,255,0.3)"></div>
+  const maxV = Math.max(...companies.map(c=>Math.max(c.ytd,c.bud)),1);
+  $('bva-by-company').innerHTML =
+    `<div style="font-size:9px;color:#3D5470;margin-bottom:10px">
+      YTD actual vs budget by company — solid bar = actual · dashed line = budget
+    </div>` +
+    companies.map(c=>{
+      const pct = c.bud>0?c.ytd/c.bud*100:0;
+      const actW = (c.ytd/maxV*100).toFixed(1);
+      const budW = (c.bud/maxV*100).toFixed(1);
+      const tip = `${c.l}: ${fmt$(c.ytd)} actual${c.bud?' · '+fmt$(c.bud)+' budget · '+fmtPct(pct):''}`;
+      return `<div class="bar-row tooltip" data-tip="${tip}" style="margin-bottom:14px">
+        <div class="bar-label" style="width:70px">${c.l}</div>
+        <div style="flex:1;position:relative">
+          <div class="bar-track" style="height:8px;position:relative">
+            <div class="bar-fill" style="width:${actW}%;background:${c.col}"></div>
+            ${c.bud ? `<div style="position:absolute;top:-2px;left:${budW}%;width:2px;height:12px;background:rgba(255,255,255,0.35)"></div>` : ''}
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:3px">
+            <span style="font-size:9px;color:#3D5470">Actual: ${fmt$(c.ytd)}</span>
+            ${c.bud ? `<span style="font-size:9px;color:#3D5470">Budget: ${fmt$(c.bud)} <span style="color:${c.bud?pctColor(pct):'#3D5470'}">(${fmtPct(pct)})</span></span>` : '<span style="font-size:9px;color:#2E4160">No budget set</span>'}
+          </div>
         </div>
-        <div style="font-size:9px;color:#3D5470">
-          Actual: ${fmt$(c.ytd)} · Budget: ${c.bud?fmt$(c.bud):'not set'}
-        </div>
-      </div>
-      <div style="width:46px;text-align:right;font-size:11px;color:${c.bud?pctColor(pct):'#3D5470'}">${c.bud?fmtPct(pct):'—'}</div>
-    </div>`;
-  }).join('');
-
-  // Monthly Nortech only
-  const norMonthly = Array.from({length:12}, (_,m) => ({
-    act: getNortechRevMonth(yr, m),
-    bud: getBudget('nortech', yr, m) * 1000
-  }));
-  const maxMo = Math.max(...norMonthly.map(d=>Math.max(d.act,d.bud)), 1);
-  const chartH = 72;
-  $('bva-monthly-chart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:5px;height:${chartH}px">` +
-    norMonthly.map((d,i) => {
-      const actH = Math.max(d.act/maxMo*chartH, d.act>0?3:0).toFixed(1);
-      const budH = Math.max(d.bud/maxMo*chartH, d.bud>0?3:0).toFixed(1);
-      const isCur = i === mo;
-      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
-        <div style="width:100%;height:${chartH}px;position:relative;display:flex;align-items:flex-end">
-          <div style="position:absolute;bottom:0;left:0;right:0;height:${budH}px;border:0.5px dashed rgba(255,255,255,0.2);border-radius:2px 2px 0 0"></div>
-          <div style="width:100%;height:${actH}px;background:#22C55E;border-radius:2px 2px 0 0;opacity:${isCur?.95:.7};min-height:${d.act>0?2:0}px;position:relative;z-index:1"></div>
-        </div>
-        <span style="font-size:8px;color:${isCur?'#60A5FA':'#2E4160'}">${MONTHS[i]}</span>
       </div>`;
-    }).join('') + '</div>';
+    }).join('');
+
+  // Monthly chart Nortech — side note: both actual and budget bars
+  const norMonthly = MONTHS.map((_,m)=>({act:getNortechRevMonth(yr,m),bud:getBudget('nortech',yr,m)*1000}));
+  const maxMo = Math.max(...norMonthly.map(d=>Math.max(d.act,d.bud)),1);
+
+  $('bva-monthly-chart').innerHTML =
+    `<div style="font-size:9px;color:#3D5470;margin-bottom:8px">
+      Nortech monthly — actual revenue vs budget target
+      <span style="margin-left:10px"><span style="color:#22C55E">■</span> Actual</span>
+      <span style="margin-left:8px;color:#4E6480">· · ·  Budget</span>
+    </div>` +
+    buildBarChart({ data:norMonthly.map((d,i)=>({
+        label:MONTHS[i], value:d.act, budget:d.bud, color:'#22C55E',
+        highlight:i===mo, dim:i>mo
+      })), height:72, showBudget:true, fmt:fmt$ });
 }
+
 
 // ══ RENDER: WORK ORDERS ══════════════════════════════════════════════════════
 function renderWorkOrders() {
@@ -1111,15 +1228,13 @@ function renderWorkOrders() {
   });
   const weeks = Object.keys(weekMap).sort().slice(-12);
   const maxW = Math.max(...weeks.map(w=>weekMap[w]), 1);
-  $('wo-weekly-chart').innerHTML = `<div style="display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:8px">` +
-    weeks.map(wk => {
-      const h = Math.max(weekMap[wk]/maxW*60, 3).toFixed(1);
-      const lbl = wk.slice(-3);
-      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
-        <div style="width:100%;height:${h}px;background:#60A5FA;border-radius:2px 2px 0 0;opacity:.75"></div>
-        <span style="font-size:7px;color:#2E4160;white-space:nowrap">${lbl}</span>
-      </div>`;
-    }).join('') + '</div>';
+  $('wo-weekly-chart').innerHTML =
+    `<div style="font-size:9px;color:#3D5470;margin-bottom:8px">
+      Work orders submitted per ISO week — last 12 weeks
+    </div>` +
+    buildBarChart({ data:weeks.map(wk=>({
+      label:wk.slice(-3), value:weekMap[wk]||0, color:'#60A5FA'
+    })), height:60, fmt:n=>n });
 
   // By client
   const clientW = {};
@@ -1187,24 +1302,15 @@ function renderUtilization() {
 
   // U1 weekly chart
   const maxU = 100;
-  const renderChart = (vals, colors) => `<div style="display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:8px">` +
-    vals.map((v,i) => {
-      const h = Math.max(v/maxU*60,v>0?2:0).toFixed(1);
-      const lbl = weeks[i] ? weeks[i].slice(-3) : '';
-      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">
-        <div class="tooltip" data-tip="${v.toFixed(1)}%" style="width:100%;height:${h}px;background:${colors(v)};border-radius:2px 2px 0 0;opacity:.8;min-height:${v>0?2:0}px"></div>
-        <span style="font-size:7px;color:#2E4160">${lbl}</span>
-      </div>`;
-    }).join('') + '</div>';
+  const buildUtilChart = (vals, label) =>
+    `<div style="font-size:9px;color:#3D5470;margin-bottom:8px">${label}</div>` +
+    buildBarChart({ data:weeks.map((wk,i)=>({
+      label:wk.slice(-3), value:Math.round(vals[i]*10)/10, color:utilColor(vals[i]),
+      highlight:i===weeks.length-1
+    })), height:60, maxVal:100, fmt:n=>n+'%' });
 
-  $('util-weekly-chart').innerHTML = renderChart(wkU1s, utilColor);
-  const wkU3s = weeks.map(wk => {
-    const wr = summary.filter(r=>r.week===wk);
-    const b = wr.reduce((s,r)=>s+r.bill,0);
-    const w = wr.reduce((s,r)=>s+r.reg+r.ot+r.night,0);
-    return w > 0 ? b/w*100 : 0;
-  });
-  $('util-u3-chart').innerHTML = renderChart(wkU3s, utilColor);
+  $('util-weekly-chart').innerHTML = buildUtilChart(wkU1s, 'U1 utilization — billable hours ÷ available hours (40 hrs/week) — last 12 weeks');
+  $('util-u3-chart').innerHTML = buildUtilChart(wkU3s, 'U3 utilization — billable hours ÷ total hours worked — shows efficiency of hours on the job');
 
   // Tech table current week + sparkline
   const techData = techs.map(t => {
@@ -1610,6 +1716,129 @@ function importPeople(input) {
 }
 
 // ══ TOAST ════════════════════════════════════════════════════════════════════
+// ── Currency toggle ──────────────────────────────────────────────────────────
+async function toggleCurrency() {
+  if (_currency === 'CAD') {
+    // Fetch live EUR rate
+    const btn = document.getElementById('cur-toggle');
+    const rateEl = document.getElementById('cur-rate');
+    btn.textContent = '…';
+    try {
+      const resp = await fetch('https://api.frankfurter.app/latest?from=CAD&to=EUR');
+      const data = await resp.json();
+      _eurRate = data.rates && data.rates.EUR ? data.rates.EUR : 0.68;
+      _currency = 'EUR';
+      btn.textContent = 'EUR';
+      btn.style.color = '#F59E0B';
+      btn.style.borderColor = 'rgba(245,158,11,0.3)';
+      rateEl.style.display = '';
+      rateEl.textContent = '1 CAD = ' + _eurRate.toFixed(4) + ' EUR';
+    } catch(e) {
+      // Fallback rate if API fails
+      _eurRate = 0.68;
+      _currency = 'EUR';
+      btn.textContent = 'EUR';
+      btn.style.color = '#F59E0B';
+      rateEl.style.display = '';
+      rateEl.textContent = '≈0.68 EUR (offline)';
+    }
+  } else {
+    _currency = 'CAD';
+    _eurRate = null;
+    const btn = document.getElementById('cur-toggle');
+    const rateEl = document.getElementById('cur-rate');
+    btn.textContent = 'CAD';
+    btn.style.color = '#4E6480';
+    btn.style.borderColor = 'rgba(255,255,255,0.08)';
+    rateEl.style.display = 'none';
+  }
+  renderView(_currentView);
+}
+
+// ── Budget CSV import ─────────────────────────────────────────────────────────
+// Accepts any CSV with company + month + amount columns
+// Also accepts wide format: company, Jan, Feb, Mar... (monthly columns)
+function importBudgetCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const yr = ($('budget-year-sel')||{}).value || YEAR;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const lines = e.target.result.split('\n').map(l=>l.trim()).filter(Boolean);
+      if (!lines.length) { showToast('Empty file', 'red'); return; }
+      const headers = lines[0].split(',').map(h=>h.trim().replace(/"/g,'').toLowerCase());
+
+      let count = 0;
+      // ── Detect format ──────────────────────────────────────────────────────
+      // Format A (long): company, month, amount   e.g. Nortech, Jan, 150000
+      // Format B (wide): company, Jan, Feb, Mar...
+      // Format C (long): company, 2026-01, amount
+      const moIdx   = headers.findIndex(h=>h==='month'||h==='mois'||h==='period');
+      const coIdx   = headers.findIndex(h=>h.includes('compan')||h.includes('entit')||h.includes('bu')||h===('name'));
+      const amtIdx  = headers.findIndex(h=>h.includes('amount')||h.includes('budget')||h.includes('montant')||h.includes('revenue'));
+      const yearIdx = headers.findIndex(h=>h==='year'||h==='année'||h==='yr');
+
+      const MONTHS_LC = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+      const monthColIdxs = MONTHS_LC.map(m => headers.findIndex(h=>h.startsWith(m)));
+      const isWide = monthColIdxs.filter(i=>i>=0).length >= 6; // at least 6 month cols = wide format
+
+      const CO_MAP = {
+        'nortech':'nortech','nortechadv':'nortech','nortech adv':'nortech',
+        'nucleom':'nucleom','intact':'intact','arcanite':'arcanite','rockx':'rockx','rock-x':'rockx',
+      };
+      const normalCo = s => {
+        const k=(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+        return CO_MAP[k] || CO_MAP[Object.keys(CO_MAP).find(c=>k.includes(c))] || k;
+      };
+
+      if (isWide) {
+        // Wide: each row is a company, columns are months
+        lines.slice(1).forEach(line => {
+          const cols = line.split(',').map(c=>c.trim().replace(/"/g,''));
+          const co = coIdx>=0 ? normalCo(cols[coIdx]) : normalCo(cols[0]);
+          if (!co) return;
+          const rowYr = yearIdx>=0 ? cols[yearIdx] : yr;
+          MONTHS_LC.forEach((m,mi) => {
+            const ci = monthColIdxs[mi];
+            if (ci<0) return;
+            const v = parseFloat(cols[ci])||0;
+            if (v) { setBudget(co, rowYr, mi, v/1000); count++; }
+          });
+        });
+      } else if (moIdx>=0 && amtIdx>=0) {
+        // Long format
+        lines.slice(1).forEach(line => {
+          const cols = line.split(',').map(c=>c.trim().replace(/"/g,''));
+          const co = coIdx>=0 ? normalCo(cols[coIdx]) : 'nortech';
+          const moRaw = cols[moIdx]||'';
+          const amt = parseFloat(cols[amtIdx])||0;
+          if (!amt) return;
+          // Parse month
+          let mi = -1;
+          if (/^\d{4}-\d{2}$/.test(moRaw)) mi = parseInt(moRaw.slice(5))-1;
+          else if (/^\d{1,2}$/.test(moRaw)) mi = parseInt(moRaw)-1;
+          else mi = MONTHS_LC.findIndex(m=>moRaw.toLowerCase().startsWith(m));
+          if (mi<0||mi>11) return;
+          const rowYr = yearIdx>=0 ? cols[yearIdx] : yr;
+          setBudget(co, rowYr, mi, amt/1000); count++;
+        });
+      } else {
+        showToast('Could not detect format. Need: company, month, amount OR company + month columns', 'red');
+        input.value=''; return;
+      }
+
+      saveBudgets();
+      renderBudgetEditor();
+      showToast('✓ Imported ' + count + ' budget values for ' + yr, 'green');
+    } catch(err) {
+      showToast('Parse error: ' + err.message, 'red');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+
 function showToast(msg, type='blue') {
   const colors = { green:'#22C55E', blue:'#60A5FA', red:'#EF4444', amber:'#F59E0B' };
   const t = document.createElement('div');
