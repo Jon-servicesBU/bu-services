@@ -9343,8 +9343,28 @@ function _renderMarginReportImpl() {
   }
 
   function getCostRate(techName) {
-    var emp = (NORTECH_EMPLOYEES||[]).find(function(e){
-      return e.name && techName && e.name.toLowerCase() === (techName||'').toLowerCase();
+    if (!techName) return 55;
+    var t = techName.toLowerCase().trim();
+    // 1. Exact match
+    var emp = (NORTECH_EMPLOYEES||[]).find(function(e){ return e.name && e.name.toLowerCase() === t; });
+    if (emp) return emp.rate;
+    // 2. Last name + first initial (e.g. "C. Tondreau" → "Cody Tondreau")
+    emp = (NORTECH_EMPLOYEES||[]).find(function(e){
+      var parts = e.name.toLowerCase().split(' ');
+      var fn = parts[0]; var ln = parts[parts.length-1];
+      return ln.length>2 && t.includes(ln) && (t.includes(fn) || t.startsWith(fn[0]+'.')||t.startsWith(fn[0]+' '));
+    });
+    if (emp) return emp.rate;
+    // 3. Last name only (if unique enough — >4 chars)
+    emp = (NORTECH_EMPLOYEES||[]).find(function(e){
+      var ln = e.name.toLowerCase().split(' ').pop();
+      return ln.length>4 && t.includes(ln);
+    });
+    if (emp) return emp.rate;
+    // 4. First name only (if unique enough)
+    emp = (NORTECH_EMPLOYEES||[]).find(function(e){
+      var fn = e.name.toLowerCase().split(' ')[0];
+      return fn.length>3 && (t===fn || t.startsWith(fn+' ') || t.startsWith(fn+'.'));
     });
     return (emp && emp.rate) ? emp.rate : 55;
   }
