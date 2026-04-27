@@ -9395,7 +9395,9 @@ function _renderMarginReportImpl() {
     if (dateFrom && j.date && j.date < dateFrom) return;
     if (dateTo   && j.date && j.date > dateTo)   return;
 
-    if (j.status === 'quoted') return; // Quotes are estimates — exclude from margin
+    if (j.status === 'quoted' || j.status === 'quote-accepted') return;
+    // Only include invoiced or paid WOs — approved/submitted have no billed amount yet
+    if (j.status !== 'invoiced' && j.status !== 'paid') return;
     var inv = j.invoiceId ? _invoices.find(function(i){ return i.id === j.invoiceId; }) : null;
     if (inv && combinedInvIds[inv.id]) return;
 
