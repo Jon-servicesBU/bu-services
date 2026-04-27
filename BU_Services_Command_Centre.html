@@ -1319,6 +1319,12 @@ function renderUtilization() {
     const a = wr.length * AVAILABLE_HRS;
     return a > 0 ? b/a*100 : 0;
   });
+  const wkU3s = weeks.map(wk => {
+    const wr = summary.filter(r=>r.week===wk);
+    const b = wr.reduce((s,r)=>s+r.bill,0);
+    const w = wr.reduce((s,r)=>s+r.reg+r.ot+r.night,0);
+    return w > 0 ? b/w*100 : 0;
+  });
   const avg12 = wkU1s.length ? wkU1s.reduce((s,n)=>s+n,0)/wkU1s.length : 0;
 
   $('util-kpis').innerHTML = [
