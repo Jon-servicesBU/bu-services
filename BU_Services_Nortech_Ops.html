@@ -1332,7 +1332,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-sm" id="inv-delete-btn" onclick="deleteInvoiceFromView()" style="display:none;color:#EF4444;border-color:rgba(185,28,28,.3)">🗑 Delete</button>
       <div style="flex:1"></div>
       <!-- Print / PDF -->
-      <button class="btn btn-secondary btn-sm" onclick="exportWO('pdf', _currentInvWoId())">🖨 WO</button>
+      <button class="btn btn-secondary btn-sm" onclick="printInvWOs()">🖨 WO</button>
       <button class="btn btn-secondary btn-sm" id="inv-print-ts-btn" onclick="printInvTS()" style="display:none">🖨 TS</button>
       <button class="btn btn-secondary btn-sm" onclick="printInvoice()">🖨 Invoice</button>
       <button class="btn btn-secondary btn-sm" onclick="printInvAll()">🖨 All</button>
@@ -4997,24 +4997,50 @@ function printInvTS() {
   tsList.forEach(function(ts) { exportTimesheet(ts.id); });
 }
 
+// ── Print all WOs on the current invoice ─────────────────────────────────────
+function printInvWOs() {
+  _withPrintGuard(function() {
+    var inv = _invoices.find(function(i){ return i.id === _currentInvId; });
+    var woIds = inv ? (inv.chargeSheetIds || []) : [];
+    if (!woIds.length) { toast('No work orders on this invoice', 'error'); return; }
+    var allWoHtml = woIds.map(function(woId, idx) {
+      var wo = _jobs.find(function(j){ return j.id === woId; });
+      if (!wo) return '';
+      var h = buildWOPrintHTML(wo).replace(/^[\s\S]*?<body[^>]*>/i,'').replace(/<\/body>[\s\S]*$/i,'');
+      return h + (idx < woIds.length - 1 ? '<div style="page-break-before:always;margin-top:40px;padding-top:20px;border-top:2px solid #ccc"></div>' : '');
+    }).filter(Boolean).join('');
+    if (!allWoHtml) { toast('Could not build WO HTML', 'error'); return; }
+    var win = window.open('', '_blank');
+    win.document.write('<html><head><title>Work Orders</title><style>body{font-family:Arial,sans-serif;padding:20px}@media print{body{padding:12px}}</style></head><body>' + allWoHtml + '</body></html>');
+    win.document.close(); win.focus();
+    setTimeout(function(){ win.print(); }, 600);
+    toast('Printing ' + woIds.length + ' WO' + (woIds.length!==1?'s':'') + '\u2026', 'info');
+  });
+}
+
+
 function printInvAll() {
   _withPrintGuard(function() {
-    var woId = _currentInvWoId();
-    var woHtml = '';
-    if (woId) {
+    var inv = _invoices.find(function(i){ return i.id === _currentInvId; });
+    var woIds = inv ? (inv.chargeSheetIds || []) : [];
+    // Build HTML for every WO on this invoice
+    var allWoHtml = woIds.map(function(woId, idx) {
       var wo = _jobs.find(function(j){ return j.id === woId; });
-      if (wo) woHtml = buildWOPrintHTML(wo).replace(/^[\s\S]*?<body[^>]*>/i,'').replace(/<\/body>[\s\S]*$/i,'');
-    }
+      if (!wo) return '';
+      var h = buildWOPrintHTML(wo).replace(/^[\s\S]*?<body[^>]*>/i,'').replace(/<\/body>[\s\S]*$/i,'');
+      return h + (idx < woIds.length - 1 ? '<div class="page-break"></div>' : '');
+    }).filter(Boolean).join('');
+
     var invHtml = (document.getElementById('inv-view-body')||{}).innerHTML || '';
     var win = window.open('', '_blank');
     win.document.write('<html><head><title>WO + Invoice</title><style>body{font-family:Arial,sans-serif;padding:20px}@media print{body{padding:12px}}.page-break{page-break-before:always;margin-top:40px;padding-top:20px;border-top:2px solid #ccc}</style></head><body>'
-      + (woHtml ? woHtml + '<div class="page-break"></div>' : '')
+      + (allWoHtml ? allWoHtml + '<div class="page-break"></div>' : '')
       + invHtml
       + '</body></html>');
     win.document.close();
     win.focus();
     setTimeout(function(){ win.print(); }, 700);
-    toast('Printing WO + Invoice\u2026', 'info');
+    toast('Printing ' + woIds.length + ' WO' + (woIds.length!==1?'s':'') + ' + Invoice\u2026', 'info');
   });
 }
 
