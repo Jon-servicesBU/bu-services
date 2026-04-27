@@ -775,16 +775,18 @@ function getPersonUtil(p, metric, tw) {
     return getNortechUtil(p.name, tw, metric);
   }
   // Nucleom: use pre-computed weeks data
+  // NOTE: weeks[n].pct from BC file = bill/tot (U3). U1 = bill/available must be computed.
   const weeks = p._weeks || p.weeks || [];
-  const pct13 = p._pct13 || p.pct13 || 0;
   const bill13 = p._bill13 || p.bill13 || 0;
   const tot13  = p._tot13  || p.tot13  || 0;
+  const pct13  = p._pct13  || p.pct13  || 0;
   if (tw==='latest') {
-    if (!weeks[0]) return pct13||null;
+    if (!weeks[0]) return null;
     if (metric==='u3') {
       return weeks[0].tot>0 ? weeks[0].bill/weeks[0].tot*100 : null;
     }
-    return weeks[0].pct||null;
+    // U1 = bill / available (40hrs)
+    return weeks[0].bill!=null ? weeks[0].bill/AVAILABLE_HRS*100 : null;
   }
   if (tw==='4wk') {
     const ws=weeks.slice(0,4); if(!ws.length) return null;
@@ -794,7 +796,8 @@ function getPersonUtil(p, metric, tw) {
   }
   // 13wk
   if (metric==='u3') return tot13>0 ? bill13/tot13*100 : null;
-  return pct13||null;
+  // U1 13wk = bill13 / (13 weeks * 40hrs)
+  return bill13 ? bill13/(13*AVAILABLE_HRS)*100 : (pct13||null);
 }
 
 function getNortechUtil(name, window_, metric) {
