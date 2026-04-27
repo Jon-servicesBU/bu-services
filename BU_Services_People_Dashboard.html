@@ -700,12 +700,10 @@ function getAllPeople() {
   const out = [];
   if (_company==='nortech'||_company==='all') {
     NORTECH_DATA.forEach(e => {
-      const u1 = _nortechTimesheets.length ? getNortechUtil(e.name,'latest') : null;
-      const u13 = _nortechTimesheets.length ? getNortechUtil(e.name,'13wk') : null;
       out.push({
         ...e, source:'nortech', office:e.province, dept:e.payType,
-        utilLatest: u1,
-        util13: u13,
+        // utilLatest and util13 computed fresh per-render via getPersonUtil()
+        utilLatest: null, util13: null,
         tenure: calcTenure(normDate(e.firstDay))
       });
     });
@@ -721,8 +719,9 @@ function getAllPeople() {
         payType:'Hourly EE', rate:0, province:'QC/FR',
         bill13:e.bill13, non13:e.non13, tot13:e.tot13, pct13:e.pct13,
         weeks:e.weeks||[],
-        utilLatest: (e.weeks&&e.weeks[0]&&e.weeks[0].pct!=null) ? e.weeks[0].pct : null,
-        util13: (e.pct13!=null&&e.pct13!==0) ? e.pct13 : null,
+        utilLatest: null, util13: null,  // computed per-render via getPersonUtil()
+        _weeks: e.weeks||[], _bill13: e.bill13||0, _non13: e.non13||0,
+        _tot13: e.tot13||0, _pct13: e.pct13||0,
         tenure: h.years||calcTenure(h.hireDate)
       });
     });
@@ -769,8 +768,38 @@ function normDate(s) {
 }
 
 // ── Nortech live util ─────────────────────────────────────────────────────────
-function getNortechUtil(name, window_) {
-  if (!_nortechTimesheets.length) return 0;
+// Compute util for any person given current metric + time window
+function getPersonUtil(p, metric, tw) {
+  if (p.source==='nortech') {
+    if (!_nortechTimesheets.length) return null;
+    return getNortechUtil(p.name, tw, metric);
+  }
+  // Nucleom: use pre-computed weeks data
+  const weeks = p._weeks || p.weeks || [];
+  const pct13 = p._pct13 || p.pct13 || 0;
+  const bill13 = p._bill13 || p.bill13 || 0;
+  const tot13  = p._tot13  || p.tot13  || 0;
+  if (tw==='latest') {
+    if (!weeks[0]) return pct13||null;
+    if (metric==='u3') {
+      return weeks[0].tot>0 ? weeks[0].bill/weeks[0].tot*100 : null;
+    }
+    return weeks[0].pct||null;
+  }
+  if (tw==='4wk') {
+    const ws=weeks.slice(0,4); if(!ws.length) return null;
+    const b=ws.reduce((s,w)=>s+(w.bill||0),0);
+    const t=ws.reduce((s,w)=>s+(w.tot||0),0);
+    return metric==='u3'&&t>0 ? b/t*100 : b/(ws.length*AVAILABLE_HRS)*100;
+  }
+  // 13wk
+  if (metric==='u3') return tot13>0 ? bill13/tot13*100 : null;
+  return pct13||null;
+}
+
+function getNortechUtil(name, window_, metric) {
+  if (!_nortechTimesheets.length) return null;
+  const m = metric || _utilViewMetric;
   const now = new Date(); const curWk = getWeekStart(today());
   let bill=0, avail=0, worked=0;
   if (window_==='latest') {
@@ -785,7 +814,7 @@ function getNortechUtil(name, window_) {
       });
     });
     avail=AVAILABLE_HRS;
-    return _utilViewMetric==='u3' && worked>0 ? bill/worked*100 : avail>0 ? bill/avail*100 : 0;
+    return m==='u3' && worked>0 ? bill/worked*100 : avail>0 ? bill/avail*100 : null;
   }
   const weeks = window_==='4wk' ? 4 : 13;
   const cutoff = new Date(now); cutoff.setDate(now.getDate()-weeks*7);
@@ -800,7 +829,7 @@ function getNortechUtil(name, window_) {
     });
   });
   avail=AVAILABLE_HRS*weeks;
-  return _utilViewMetric==='u3' && worked>0 ? bill/worked*100 : avail>0 ? bill/avail*100 : 0;
+  return m==='u3' && worked>0 ? bill/worked*100 : avail>0 ? bill/avail*100 : null;
 }
 
 function getNortechWeeklySummary(name) {
@@ -1026,7 +1055,8 @@ function renderOverview() {
   const inclCount = incl.length;
   const totalPayroll = nortechIncl.reduce((s,p)=>s+p.rate*AVAILABLE_HRS,0);
   const avgRate = nortechIncl.length ? nortechIncl.reduce((s,p)=>s+p.rate,0)/nortechIncl.length : 0;
-  const utils = incl.map(p=>p.utilLatest).filter(u=>u!=null&&u>0);
+  // Compute utilLatest fresh using current overview metric (_utilMetric)
+  const utils = incl.map(p=>getPersonUtil(p, _utilMetric, 'latest')).filter(u=>u!=null&&u>0);
   const avgUtil = utils.length ? utils.reduce((a,b)=>a+b,0)/utils.length : 0;
   const vacLiability = NUCLEOM_VAC.filter(v=>!isExcluded(v.name)).reduce((s,v)=>s+v.balanceDollars,0);
 
@@ -1042,7 +1072,7 @@ function renderOverview() {
   // Util distribution buckets
   const buckets=[{l:'≥75%',lo:75,hi:200,col:'#22C55E'},{l:'50–75%',lo:50,hi:75,col:'#F59E0B'},{l:'25–50%',lo:25,hi:50,col:'#FB923C'},{l:'<25%',lo:0,hi:25,col:'#EF4444'}];
   const utBuckets=buckets.map(b=>{
-    const n=incl.filter(p=>{const u=p.utilLatest;return u!=null&&u>=b.lo&&u<b.hi;}).length;
+    const n=incl.filter(p=>{const u=getPersonUtil(p,_utilMetric,'latest');return u!=null&&u>=b.lo&&u<b.hi;}).length;
     return {label:b.l,value:n,color:b.col,tip:`${b.l}: ${n} people`};
   });
   $('ov-util-dist').innerHTML=buildBarChart(utBuckets,60,v=>v+'',null)+
@@ -1119,7 +1149,7 @@ function renderRoster() {
 
   $('roster-tbody').innerHTML=people.map(p=>{
     const excl=isExcluded(p.name);
-    const wkly=p.source==='nortech'?getNortechWeeklySummary(p.name):p.weeks||[];
+    const wkly=p.source==='nortech'?getNortechWeeklySummary(p.name):(p._weeks||p.weeks||[]);
     const spark=buildSparkline(wkly.slice(0,8).map(w=>w.pct||0).reverse());
     const clsRow=excl?'excluded':'';
     if (cols==='standard') return `<tr class="${clsRow}">
@@ -1127,7 +1157,7 @@ function renderRoster() {
       <td>${p.office}</td><td style="font-size:10px">${p.dept||p.payType||'—'}</td>
       <td style="color:#3D5470;font-size:10px">${normDate(p.firstDay||p.hireDate).slice(0,10)||'—'}</td>
       <td class="r">${p.tenure?p.tenure+'yr':'—'}</td>
-      <td class="r" style="color:${utilColor(p.utilLatest)}">${fmtPct(p.utilLatest)}</td>
+      <td class="r" style="color:${utilColor(getPersonUtil(p,_utilViewMetric,'latest'))}">${fmtPct(getPersonUtil(p,_utilViewMetric,'latest'))}</td>
       <td class="toggle-cell">${makeToggle(p.name,excl)}</td>
     </tr>`;
     if (cols==='payroll') return `<tr class="${clsRow}">
@@ -1170,24 +1200,23 @@ function renderUtilization() {
   const deptFilter = ($('util-dept-filter')||{}).value||'';
 
   // Get util value for a person given window
-  function getUtil(p) {
-    if (p.source==='nortech') return _nortechTimesheets.length ? getNortechUtil(p.name, tw==='latest'?'latest':tw) : null;
-    if (tw==='latest') return p.weeks&&p.weeks[0] ? (p.weeks[0].pct||null) : (p.pct13||null);
-    if (tw==='4wk') {
-      const ws=(p.weeks||[]).slice(0,4);
-      if(!ws.length) return null;
-      const b=ws.reduce((s,w)=>s+(w.bill||0),0);
-      const t=ws.reduce((s,w)=>s+(w.tot||0),0);
-      return metric==='u3'&&t>0?b/t*100:b/(ws.length*AVAILABLE_HRS)*100;
-    }
-    return metric==='u3'&&(p.tot13||0)>0?(p.bill13||0)/(p.tot13||0)*100:p.pct13||0;
-  }
+  // Use global getPersonUtil with current metric+tw
+  function getUtil(p) { return getPersonUtil(p, metric, tw); }
   function getBill(p) {
-    if (tw==='latest') return p.source==='nortech'?0:((p.weeks&&p.weeks[0])?p.weeks[0].bill:0);
-    return p.bill13||0;
+    const weeks = p._weeks||p.weeks||[];
+    if (tw==='latest') return weeks[0]?weeks[0].bill:0;
+    return p._bill13||p.bill13||0;
   }
-  function getNon(p) { return p.non13||0; }
-  function getTot(p) { return p.tot13||0; }
+  function getNon(p) {
+    const weeks = p._weeks||p.weeks||[];
+    if (tw==='latest') return weeks[0]?weeks[0].non:0;
+    return p._non13||p.non13||0;
+  }
+  function getTot(p) {
+    const weeks = p._weeks||p.weeks||[];
+    if (tw==='latest') return weeks[0]?weeks[0].tot:0;
+    return p._tot13||p.tot13||0;
+  }
 
   // Filter by office/dept
   let people = incl.filter(p => {
@@ -1228,7 +1257,7 @@ function renderUtilization() {
 
   $('util-tbody').innerHTML=people.map(p=>{
     const u=getUtil(p); const excl=isExcluded(p.name);
-    const wkly=p.source==='nortech'?getNortechWeeklySummary(p.name):p.weeks||[];
+    const wkly=p.source==='nortech'?getNortechWeeklySummary(p.name):(p._weeks||p.weeks||[]);
     const spark=buildSparkline(wkly.slice(0,8).map(w=>w.pct||0).reverse());
     return `<tr class="${excl?'excluded':''}">
       <td>${p.name}</td>
@@ -1267,7 +1296,7 @@ function renderUtilTrend() {
   const incl=getIncludedPeople();
   // Get all week dates
   const allWeeks=new Set();
-  incl.forEach(p=>{(p.weeks||[]).forEach(w=>allWeeks.add(w.date));});
+  incl.forEach(p=>{(p._weeks||p.weeks||[]).forEach(w=>allWeeks.add(w.date));});
   const weeks=[...allWeeks].sort().slice(-13);
   const m=_trendMetric;
 
@@ -1307,10 +1336,11 @@ function renderUtilTrend() {
   ].map(k=>`<div class="kpi-card"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div></div>`).join('');
 
   // Sparklines table
-  const people=incl.filter(p=>(p.weeks&&p.weeks.length)||p.source==='nortech').sort((a,b)=>(b.pct13||0)-(a.pct13||0));
+  const people=incl.filter(p=>((p._weeks||p.weeks||[]).length>0)||p.source==='nortech')
+    .sort((a,b)=>(b._pct13||b.pct13||0)-(a._pct13||a.pct13||0));
   $('spark-tbody').innerHTML=people.map(p=>{
     const excl=isExcluded(p.name);
-    const wkly=p.source==='nortech'?getNortechWeeklySummary(p.name):p.weeks||[];
+    const wkly=p.source==='nortech'?getNortechWeeklySummary(p.name):(p._weeks||p.weeks||[]);
     const spark=buildSparkline(wkly.slice(0,13).map(w=>w.pct||0).reverse());
     const bill13=wkly.reduce((s,w)=>s+(w.bill||0),0);
     const avgU=wkly.filter(w=>w.pct>0).length?wkly.reduce((s,w)=>s+(w.pct||0),0)/wkly.filter(w=>w.pct>0).length:0;
