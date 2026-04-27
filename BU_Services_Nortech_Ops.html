@@ -5577,7 +5577,83 @@ async function _importSaveWO(wo, fileName) {
   var normNum = _normWoNum(woNum);
   if (normNum) {
     var dupe = _jobs.find(function(j){ return _normWoNum(j.woNum||j.number||'')===normNum; });
-    if (dupe) return { status:'skipped', woNum:woNum||'--', reason:'WO '+woNum+' already exists' };
+    if (dupe) {
+      // Determine if we should merge or skip
+      // Merge if: same client (or internal WO) AND incoming has labour rows to add
+      var incomingClient = (wo.client||'').trim().toLowerCase();
+      var existingClient = (dupe.client||'').trim().toLowerCase();
+      var clientMatch = incomingClient===existingClient
+        || _isInternalClient(wo.client)
+        || _isInternalClient(dupe.client);
+
+      var incomingRows = (wo.labourRows||[]).filter(function(r){
+        return r.date && ((r.regHrs||0)+(r.otHrs||0)+(r.dtHrs||0)+(r.nightHrs||0))>0;
+      });
+
+      if (!clientMatch) {
+        return { status:'skipped', woNum:woNum||'--',
+          reason:'WO '+woNum+' exists under different client ('+dupe.client+'). Not merged.' };
+      }
+      if (!incomingRows.length) {
+        return { status:'skipped', woNum:woNum||'--', reason:'WO '+woNum+' already exists (no new rows)' };
+      }
+
+      // Merge: append new labour rows, dedup by date+technician+category
+      var existingRows = dupe.labourRows||[];
+      function rowKey(r){ return (r.date||'')+'|'+(r.technician||'').toLowerCase()+'|'+(r.category||'').toLowerCase(); }
+      var existingKeys = {};
+      existingRows.forEach(function(r){ existingKeys[rowKey(r)]=true; });
+
+      var newRows = incomingRows.filter(function(r){ return !existingKeys[rowKey(r)]; });
+      var isInternal = _isInternalClient(wo.client)||dupe.isInternal;
+      if (isInternal) newRows.forEach(function(r){ r.billable=false; });
+
+      if (!newRows.length) {
+        return { status:'skipped', woNum:woNum||'--', reason:'WO '+woNum+' — all rows already exist' };
+      }
+
+      // Normalise tech names on new rows
+      newRows = newRows.map(function(r){
+        var raw=(r.technician||'').trim(); var emp=null;
+        if (raw) {
+          var t=raw.toLowerCase();
+          emp=(NORTECH_EMPLOYEES||[]).find(function(e){return e.name&&e.name.toLowerCase()===t;})
+            ||(NORTECH_EMPLOYEES||[]).find(function(e){
+                 var p=e.name.toLowerCase().split(' ');var fn=p[0];var ln=p[p.length-1];
+                 return ln.length>2&&t.includes(ln)&&(t.includes(fn)||t.startsWith(fn[0]+'.'));
+               })
+            ||(NORTECH_EMPLOYEES||[]).find(function(e){
+                 var ln=e.name.toLowerCase().split(' ').pop();
+                 return ln.length>4&&t.includes(ln);
+               });
+        }
+        return emp?Object.assign({},r,{technician:emp.name}):r;
+      });
+
+      var mergedRows = existingRows.concat(newRows);
+      // Sort all rows by date ascending
+      mergedRows.sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+
+      var updatedWO = Object.assign({}, dupe, {
+        labourRows: mergedRows,
+        modified: today(),
+        // Expand date range if needed
+        date: [dupe.date, wo.date].filter(Boolean).sort()[0], // earliest date
+      });
+      await sbUpsert('jobs', dupe.id, updatedWO);
+      // Update in-memory
+      var jIdx = _jobs.findIndex(function(j){return j.id===dupe.id;});
+      if (jIdx>=0) _jobs[jIdx]=updatedWO;
+      // Create timesheets for the new rows only
+      var tempWO = Object.assign({},updatedWO,{labourRows:newRows});
+      await createTimesheetFromWO(tempWO);
+
+      return {
+        status:'merged',
+        woNum:woNum,
+        reason: newRows.length+' row'+(newRows.length>1?'s':'')+' added to existing WO'
+      };
+    }
   }
   var isInternal = _isInternalClient(wo.client);
   var labourRows = (wo.labourRows||[]).map(function(r){
@@ -5626,7 +5702,7 @@ async function handleBatchWOImport(input) {
   var modal=document.getElementById('batch-import-modal');
   var prog=document.getElementById('batch-import-progress');
   modal.classList.add('open');
-  var results={imported:0,internal:0,skipped:0,failed:0,rows:[]};
+  var results={imported:0,internal:0,merged:0,skipped:0,failed:0,rows:[]};
   prog.innerHTML='<div style="font-size:.82rem;color:var(--color-text-secondary);margin-bottom:.75rem">Processing <strong>'+files.length+'</strong> file'+(files.length>1?'s':'')+'\u2026</div>'
     +'<div id="batch-import-list" style="display:flex;flex-direction:column;gap:.3rem"></div>';
   var list=document.getElementById('batch-import-list');
@@ -5647,24 +5723,69 @@ async function handleBatchWOImport(input) {
         r.onload=function(e){res(e.target.result.split(',')[1]);};
         r.onerror=rej; r.readAsDataURL(f);
       });
-      var resp=await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:8192,
-          messages:[{role:'user',content:[
-            {type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}},
-            {type:'text',text:'This PDF may contain ONE or MULTIPLE work orders. Extract ALL work orders and return ONLY a JSON array (even for one WO). Each element: {"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"HH:MM","endTime":"HH:MM"}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}] Rules: 24hr HH:MM times. Return ONLY the JSON array.'}
-          ]}]})
-      });
-      var data=await resp.json();
-      if (data.error) throw new Error('API: '+(data.error.message||JSON.stringify(data.error)));
-      if (data.stop_reason==='max_tokens') console.warn('[Batch] Truncated:',f.name);
-      var raw=(data.content&&data.content[0]?data.content[0].text:'')
-        .replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-      var wos;
-      try {
-        var parsed=_repairAndParseJSON(raw);
-        wos=Array.isArray(parsed)?parsed:[parsed];
-      } catch(pe){throw new Error('Parse failed: '+pe.message);}
+      // Helper: call AI with PDF
+      async function _callAI(prompt, maxTok) {
+        var r=await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:maxTok||16000,
+            messages:[{role:'user',content:[
+              {type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}},
+              {type:'text',text:prompt}
+            ]}]})
+        });
+        var d=await r.json();
+        if (d.error) throw new Error('API: '+(d.error.message||JSON.stringify(d.error)));
+        return d;
+      }
+
+      var WO_SCHEMA = '{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"HH:MM","endTime":"HH:MM"}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}';
+      var CONSOLIDATE_RULE = 'CRITICAL RULES: (1) If the same WO number appears on multiple pages, treat it as ONE work order — merge ALL labour rows from every page into a single entry, each row keeping its own date field. Do NOT create duplicate entries for the same WO number. (2) Each labour row MUST have its own date (YYYY-MM-DD). (3) Times in 24hr HH:MM format. (4) Return ONLY the JSON array, no explanation.';
+
+      // Pass 1: count WOs in PDF (cheap call)
+      if (statusEl) statusEl.textContent='\u23f3 Scanning\u2026';
+      var countData=await _callAI('How many separate work orders are in this PDF? Reply with ONLY a single integer, nothing else.', 64);
+      var countRaw=(countData.content&&countData.content[0]?countData.content[0].text:'1').trim();
+      var woCount=parseInt(countRaw)||1;
+      console.log('[Batch]',f.name,'— detected',woCount,'WO(s)');
+
+      var wos=[];
+      var BATCH=5; // extract 5 WOs per call
+      var passes=Math.ceil(woCount/BATCH);
+
+      for (var pass=0;pass<passes;pass++) {
+        var from=pass*BATCH+1; var to=Math.min(from+BATCH-1,woCount);
+        var rangeLabel=passes>1?(' (WOs '+from+' to '+to+' of '+woCount+')'):'';
+        if (statusEl) statusEl.textContent='\u23f3 Extracting'+rangeLabel+'\u2026';
+
+        var prompt;
+        if (passes===1) {
+          prompt='Extract ALL work orders from this PDF and return ONLY a JSON array. Each element: '+WO_SCHEMA+' '+CONSOLIDATE_RULE;
+        } else {
+          prompt='Extract work orders NUMBER '+from+' through '+to+' (out of '+woCount+' total) from this PDF. If any of these WO numbers span multiple pages, consolidate all their labour rows into one entry. Return ONLY a JSON array. Each element: '+WO_SCHEMA+' '+CONSOLIDATE_RULE;
+        }
+
+        var data=await _callAI(prompt, 16000);
+        var wasTruncated=(data.stop_reason==='max_tokens');
+        if (wasTruncated) console.warn('[Batch] Pass '+(pass+1)+' truncated for',f.name);
+
+        var raw=(data.content&&data.content[0]?data.content[0].text:'')
+          .replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+        try {
+          var parsed=_repairAndParseJSON(raw);
+          var batch=Array.isArray(parsed)?parsed:[parsed];
+          wos=wos.concat(batch);
+          if (wasTruncated) {
+            console.warn('[Batch] Partial batch recovered:',batch.length,'of expected',to-from+1);
+            break; // stop trying further batches if truncated mid-way
+          }
+        } catch(pe){
+          if (pass===0) throw new Error(wasTruncated?'PDF too large even in batches. Reduce WOs per file.':'Parse failed: '+pe.message);
+          console.warn('[Batch] Pass '+(pass+1)+' parse error, stopping at',wos.length,'WOs:',pe.message);
+          break;
+        }
+      }
+
+      if (!wos.length) throw new Error('No WOs could be extracted from this PDF.');
       if (statusEl) statusEl.textContent='\ud83d\udcbe Saving '+wos.length+' WO'+(wos.length>1?'s\u2026':'\u2026');
       var fileResults=[];
       for (var wi=0;wi<wos.length;wi++){
@@ -5672,18 +5793,24 @@ async function handleBatchWOImport(input) {
         fileResults.push(r);
         if (r.status==='imported') results.imported++;
         else if (r.status==='internal') results.internal++;
-        else if (r.status==='skipped') results.skipped++;
+        else if (r.status==='merged')   results.merged++;
+        else if (r.status==='skipped')  results.skipped++;
       }
       var imp=fileResults.filter(function(r){return r.status==='imported';});
       var intl=fileResults.filter(function(r){return r.status==='internal';});
+      var mrgd=fileResults.filter(function(r){return r.status==='merged';});
       var skip=fileResults.filter(function(r){return r.status==='skipped';});
       var parts=[];
       if (wos.length>1) parts.push('<span style="color:#AEBDD4">'+wos.length+' WOs</span>');
       if (imp.length) parts.push('<span style="color:#22C55E">\u2713 '+imp.length+' imported</span>');
       if (intl.length) parts.push('<span style="color:#60A5FA">\ud83c\udfe0 '+intl.length+' internal</span>');
+      if (mrgd.length){
+        var mrgdDetail=mrgd.map(function(r){return r.woNum+(r.reason?' ('+r.reason+')':'');}).join(', ');
+        parts.push('<span style="color:#2DD4BF" title="'+mrgdDetail+'">\u21aa '+mrgd.length+' merged</span>');
+      }
       if (skip.length){
-        var skipNums=skip.map(function(r){return r.woNum;}).join(', ');
-        parts.push('<span style="color:#F59E0B" title="'+skipNums+'">\u23ed '+skip.length+' dup</span>');
+        var skipNums=skip.map(function(r){return r.woNum+' — '+r.reason;}).join(' | ');
+        parts.push('<span style="color:#F59E0B" title="'+skipNums+'">\u23ed '+skip.length+' skipped</span>');
       }
       if (statusEl) statusEl.innerHTML=parts.join(' ');
       fileResults.forEach(function(r){results.rows.push(Object.assign({name:f.name},r));});
@@ -5702,9 +5829,12 @@ async function handleBatchWOImport(input) {
   var summHtml='<strong>Done</strong> \u2014 '
     +'<span style="color:#22C55E">'+results.imported+' imported</span>, '
     +'<span style="color:#60A5FA">'+results.internal+' internal</span>, '
+    +'<span style="color:#2DD4BF">'+results.merged+' merged</span>, '
     +'<span style="color:#F59E0B">'+results.skipped+' skipped</span>, '
     +'<span style="color:#E84040">'+results.failed+' failed</span>';
-  if (dupeList.length) summHtml+='<div style="margin-top:.4rem;font-size:.75rem;color:#F59E0B">Duplicates: '+dupeList.join(', ')+'</div>';
+  if (dupeList.length) summHtml+='<div style="margin-top:.4rem;font-size:.75rem;color:#F59E0B">Skipped: '+dupeList.join(', ')+'</div>';
+  var mergedList=results.rows.filter(function(r){return r.status==='merged';}).map(function(r){return r.woNum+' ('+r.reason+')';});
+  if (mergedList.length) summHtml+='<div style="margin-top:.3rem;font-size:.75rem;color:#2DD4BF">Merged: '+mergedList.join(' | ')+'</div>';
   var summary=document.createElement('div');
   summary.style.cssText='margin-top:.75rem;padding:.6rem .9rem;background:var(--color-background-secondary);border-radius:6px;font-size:.8rem;border-left:3px solid '+(results.failed?'#E84040':'#22C55E');
   summary.innerHTML=summHtml;
