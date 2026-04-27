@@ -5646,7 +5646,23 @@ async function handleBatchWOImport(input) {
       if (statusEl) statusEl.textContent = '💾 Saving…';
       var id = uid();
       var date = wo.date || today();
-      var labourRows = wo.labourRows || [];
+      // Normalize technician names to canonical NORTECH_EMPLOYEES names
+      var labourRows = (wo.labourRows || []).map(function(r) {
+        var raw = (r.technician || '').trim();
+        if (!raw) return r;
+        var t = raw.toLowerCase();
+        var emp = (NORTECH_EMPLOYEES||[]).find(function(e){ return e.name && e.name.toLowerCase() === t; })
+               || (NORTECH_EMPLOYEES||[]).find(function(e){
+                    var parts=e.name.toLowerCase().split(' ');
+                    var fn=parts[0]; var ln=parts[parts.length-1];
+                    return ln.length>2 && t.includes(ln) && (t.includes(fn)||t.startsWith(fn[0]+'.'));
+                  })
+               || (NORTECH_EMPLOYEES||[]).find(function(e){
+                    var ln=e.name.toLowerCase().split(' ').pop();
+                    return ln.length>4 && t.includes(ln);
+                  });
+        return emp ? Object.assign({}, r, { technician: emp.name }) : r;
+      });
       var saveData = {
         id: id,
         woNum: woNum || nextNum('W-', _jobs, 'woNum'),
