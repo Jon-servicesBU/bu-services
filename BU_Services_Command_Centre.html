@@ -903,13 +903,15 @@ function getExtRevYTD(co, year) {
 
 // ── Chart helpers ─────────────────────────────────────────────────────────
 function buildBarChart(opts) {
-  // opts: { data: [{label,value,color,budget?}], height, maxVal, showBudget, yLabel, fmt }
   const { data, height=80, showBudget=false, yLabel='', fmt=v=>v } = opts;
+  if (!data || !data.length) return '<div class="empty">No data</div>';
   const maxVal = opts.maxVal || Math.max(...data.map(d=>Math.max(d.value||0,d.budget||0)),1);
   const axisVals = niceAxis(maxVal, 4);
   const axisMax = axisVals[axisVals.length-1];
+  // Cap bar width — fewer bars = narrower, don't stretch to fill
+  const barW = Math.min(48, Math.max(12, Math.floor(360 / data.length)));
+  const gap = data.length > 20 ? 2 : data.length > 10 ? 3 : 5;
 
-  // Axis lines + labels
   const axisLines = axisVals.map(v => {
     const pct = (v/axisMax*100).toFixed(1);
     return `<div style="position:absolute;bottom:${pct}%;left:0;right:0;border-top:0.5px solid rgba(255,255,255,0.04);pointer-events:none">
@@ -917,25 +919,24 @@ function buildBarChart(opts) {
     </div>`;
   }).join('');
 
-  // Bars
   const bars = data.map((d,i) => {
     const h = Math.max((d.value||0)/axisMax*100,0).toFixed(1);
     const bh = showBudget && d.budget ? Math.max(d.budget/axisMax*100,0).toFixed(1) : 0;
     const tip = showBudget && d.budget
       ? `${d.label}: ${fmt(d.value||0)} actual · ${fmt(d.budget)} budget`
       : `${d.label}: ${fmt(d.value||0)}`;
-    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0">
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;width:${barW}px;flex-shrink:0">
       <div style="width:100%;position:relative;height:${height}px;display:flex;align-items:flex-end">
         ${showBudget && bh ? `<div style="position:absolute;bottom:0;left:0;right:0;height:${bh}%;border:0.5px dashed rgba(255,255,255,0.18);border-radius:2px 2px 0 0;pointer-events:none"></div>` : ''}
         <div class="tooltip" data-tip="${tip}" style="width:100%;height:${h}%;background:${d.color||'#60A5FA'};border-radius:2px 2px 0 0;min-height:${(d.value||0)>0?2:0}px;opacity:${d.dim?.8:.85};position:relative;z-index:1;transition:opacity .15s"
           onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=${d.dim?.8:.85}"></div>
       </div>
-      <span style="font-size:8px;color:${d.highlight?'#60A5FA':'#2E4160'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center">${d.label}</span>
+      <span style="font-size:8px;color:${d.highlight?'#60A5FA':'#2E4160'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:${barW+8}px;text-align:center">${d.label}</span>
     </div>`;
   }).join('');
 
-  return `<div style="display:flex;gap:0;align-items:stretch">
-    <div style="position:relative;flex:1;display:flex;gap:4px;align-items:flex-end;padding-left:${yLabel?36:28}px">
+  return `<div style="display:flex;gap:0;align-items:stretch;overflow-x:auto">
+    <div style="position:relative;display:flex;gap:${gap}px;align-items:flex-end;padding-left:32px;padding-bottom:2px;min-width:min-content">
       <div style="position:absolute;inset:0;pointer-events:none">${axisLines}</div>
       ${bars}
     </div>
@@ -944,12 +945,14 @@ function buildBarChart(opts) {
 }
 
 function buildStackedBarChart(opts) {
-  // opts: { months, series:[{label,color,values[]}], height, fmt, showBudget, budgetValues }
   const { months=[], series=[], height=80, fmt=v=>v, showBudget=false, budgetValues=[] } = opts;
+  if (!months.length) return '<div class="empty">No data</div>';
   const totals = months.map((_,i) => series.reduce((s,sr)=>s+(sr.values[i]||0),0));
   const maxVal = Math.max(...totals, showBudget ? Math.max(...budgetValues) : 0, 1);
   const axisVals = niceAxis(maxVal, 4);
   const axisMax = axisVals[axisVals.length-1];
+  // Fixed bar width — 12 months should always look clean
+  const barW = Math.min(40, Math.max(14, Math.floor(480 / months.length)));
 
   const axisLines = axisVals.map(v => {
     const pct = (v/axisMax*100).toFixed(1);
@@ -966,7 +969,6 @@ function buildStackedBarChart(opts) {
     const tip = series.filter(sr=>sr.values[i]>0).map(sr=>`${sr.label}: ${fmt(sr.values[i])}`).join(' · ') || mo;
     const bh = showBudget && budgetValues[i] ? Math.max(budgetValues[i]/axisMax*100,0).toFixed(1) : 0;
 
-    // Stack segments bottom-up
     let segments = '';
     let accumulated = 0;
     series.forEach(sr => {
@@ -978,7 +980,7 @@ function buildStackedBarChart(opts) {
       accumulated += v;
     });
 
-    return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0">
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;width:${barW}px;flex-shrink:0">
       <div class="tooltip" data-tip="${tip}" style="width:100%;position:relative;height:${height}px">
         ${showBudget && bh ? `<div style="position:absolute;bottom:0;left:0;right:0;height:${bh}%;border:0.5px dashed rgba(255,255,255,0.2);border-radius:2px 2px 0 0"></div>` : ''}
         ${segments}
@@ -987,8 +989,8 @@ function buildStackedBarChart(opts) {
     </div>`;
   }).join('');
 
-  return `<div style="display:flex;gap:0;align-items:stretch">
-    <div style="position:relative;flex:1;display:flex;gap:3px;align-items:flex-end;padding-left:28px">
+  return `<div style="display:flex;gap:0;overflow-x:auto">
+    <div style="position:relative;display:flex;gap:3px;align-items:flex-end;padding-left:32px;min-width:min-content">
       <div style="position:absolute;inset:0;pointer-events:none">${axisLines}</div>
       ${bars}
     </div>
