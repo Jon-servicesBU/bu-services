@@ -1122,7 +1122,6 @@ function renderMargins() {
     { l:'Avg margin / WO', v:wosInv?fmt$(totalMargin/wosInv):'—' },
   ].map(k => `<div class="kpi-card"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div><div class="kpi-sub">${k.s||''}</div></div>`).join('');
 
-  // WO table (top 20)
   $('mar-wo-body').innerHTML = mrows.slice(0,20).map(r => `
     <tr>
       <td>${r.woNum}</td>
@@ -1134,7 +1133,6 @@ function renderMargins() {
       <td class="r"><span style="color:${pctColor(r.marginPct)}">${fmtPct(r.marginPct)}</span></td>
     </tr>`).join('') || '<tr><td colspan="7" class="empty">No invoiced work orders</td></tr>';
 
-  // By client
   const clientM = {};
   mrows.forEach(r => {
     if (!clientM[r.client]) clientM[r.client] = {billed:0, margin:0};
@@ -1153,7 +1151,6 @@ function renderMargins() {
     </div>`;
   }).join('') || '<div class="empty">No data</div>';
 
-  // Monthly margin chart
   const months12 = Array.from({length:12}, (_,m) => {
     const prefix = `${YEAR}-${String(m+1).padStart(2,'0')}`;
     const mJobs = _jobs.filter(j => (j.status==='invoiced'||j.status==='paid') && (j.date||'').startsWith(prefix));
@@ -1161,7 +1158,6 @@ function renderMargins() {
     const mc = mJobs.reduce((s,j)=>s+calcWOCost(j),0);
     return { m, billed:mb, margin:mb-mc, pct: mb>0?(mb-mc)/mb*100:0 };
   });
-  const maxMar = Math.max(...months12.map(d=>d.margin), 1);
   const marChartData = months12.map((d,i)=>({
     label:MONTHS[i], value:d.margin, color:pctColor(d.pct),
     highlight:i===new Date().getMonth(), dim:i>new Date().getMonth()
@@ -1171,6 +1167,22 @@ function renderMargins() {
       Gross margin $ by month — colour indicates margin % (green ≥40% · amber 30–40% · red &lt;30%)
     </div>` +
     buildBarChart({ data:marChartData, height:60, fmt:fmt$ });
+}
+
+// ══ RENDER: BUDGET VS ACTUAL ══════════════════════════════════════════════════
+function renderBVA() {
+  const yr = YEAR; const mo = new Date().getMonth();
+  const norYTD = getNortechRevYTD(yr);
+  const norBudYTD = getBudgetYTD('nortech', yr);
+  const companies = [
+    { k:'nortech', l:'Nortech', ytd:norYTD,                    bud:norBudYTD,                   col:'#22C55E' },
+    { k:'nucleom', l:'Nucleom', ytd:getExtRevYTD('nucleom',yr), bud:getBudgetYTD('nucleom',yr),  col:'#3B82F6' },
+    { k:'intact',  l:'Intact',  ytd:getExtRevYTD('intact',yr),  bud:getBudgetYTD('intact',yr),   col:'#F59E0B' },
+    { k:'arcanite',l:'Arcanite',ytd:getExtRevYTD('arcanite',yr),bud:getBudgetYTD('arcanite',yr), col:'#A78BFA' },
+  ];
+  const totalYTD = companies.reduce((s,c)=>s+c.ytd,0);
+  const totalBud = companies.reduce((s,c)=>s+c.bud,0);
+  const overallPct = totalBud > 0 ? totalYTD/totalBud*100 : 0;
 
   $('bva-kpis').innerHTML = [
     { l:'Total YTD actual', v:fmt$(totalYTD) },
@@ -1199,16 +1211,13 @@ function renderMargins() {
           </div>
           <div style="display:flex;justify-content:space-between;margin-top:3px">
             <span style="font-size:9px;color:#3D5470">Actual: ${fmt$(c.ytd)}</span>
-            ${c.bud ? `<span style="font-size:9px;color:#3D5470">Budget: ${fmt$(c.bud)} <span style="color:${c.bud?pctColor(pct):'#3D5470'}">(${fmtPct(pct)})</span></span>` : '<span style="font-size:9px;color:#2E4160">No budget set</span>'}
+            ${c.bud ? `<span style="font-size:9px;color:#3D5470">Budget: ${fmt$(c.bud)} <span style="color:${pctColor(pct)}">(${fmtPct(pct)})</span></span>` : '<span style="font-size:9px;color:#2E4160">No budget set</span>'}
           </div>
         </div>
       </div>`;
     }).join('');
 
-  // Monthly chart Nortech — side note: both actual and budget bars
   const norMonthly = MONTHS.map((_,m)=>({act:getNortechRevMonth(yr,m),bud:getBudget('nortech',yr,m)*1000}));
-  const maxMo = Math.max(...norMonthly.map(d=>Math.max(d.act,d.bud)),1);
-
   $('bva-monthly-chart').innerHTML =
     `<div style="font-size:9px;color:#3D5470;margin-bottom:8px">
       Nortech monthly — actual revenue vs budget target
