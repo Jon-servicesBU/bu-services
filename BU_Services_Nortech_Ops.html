@@ -5741,51 +5741,100 @@ async function handleBatchWOImport(input) {
         return d;
       }
 
+      // Get PDF page count from binary (no API call needed)
+      function _getPDFPageCount(b64) {
+        try {
+          var binary = atob(b64);
+          var count = 0;
+          var search = '/Type /Page';
+          for (var i=0; i<binary.length-search.length; i++) {
+            if (binary.slice(i,i+search.length)===search) count++;
+          }
+          // Also try /Type/Page (no space)
+          if (!count) {
+            search='/Type/Page';
+            for (var i=0; i<binary.length-search.length; i++) {
+              if (binary.slice(i,i+search.length)===search) count++;
+            }
+          }
+          return count || 1;
+        } catch(e) { return 1; }
+      }
+
+      var pageCount = _getPDFPageCount(b64);
+      console.log('[Batch]',f.name,'— PDF has',pageCount,'page(s)');
+      if (statusEl) statusEl.textContent='\u23f3 Extracting ('+pageCount+'pg)\u2026';
+
       var WO_SCHEMA = '{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"HH:MM","endTime":"HH:MM"}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}';
       var CONSOLIDATE_RULE = 'CRITICAL RULES: (1) If the same WO number appears on multiple pages, treat it as ONE work order — merge ALL labour rows from every page into a single entry, each row keeping its own date field. Do NOT create duplicate entries for the same WO number. (2) Each labour row MUST have its own date (YYYY-MM-DD). (3) Times in 24hr HH:MM format. (4) Return ONLY the JSON array, no explanation.';
 
-      // Pass 1: count WOs in PDF (cheap call)
-      if (statusEl) statusEl.textContent='\u23f3 Scanning\u2026';
-      var countData=await _callAI('How many separate work orders are in this PDF? Reply with ONLY a single integer, nothing else.', 64);
-      var countRaw=(countData.content&&countData.content[0]?countData.content[0].text:'1').trim();
-      var woCount=parseInt(countRaw)||1;
-      console.log('[Batch]',f.name,'— detected',woCount,'WO(s)');
+      // Single-pass extract — ask for all WOs at once
+      // If truncated, retry in page-range chunks using actual page count
+      var PAGES_PER_CHUNK = 5;
+      var wos = [];
+      var chunks = pageCount <= PAGES_PER_CHUNK
+        ? [null] // one pass for whole doc
+        : Array.from({length:Math.ceil(pageCount/PAGES_PER_CHUNK)}, function(_,i){
+            return {from:i*PAGES_PER_CHUNK+1, to:Math.min((i+1)*PAGES_PER_CHUNK, pageCount)};
+          });
 
-      var wos=[];
-      var BATCH=5; // extract 5 WOs per call
-      var passes=Math.ceil(woCount/BATCH);
-
-      for (var pass=0;pass<passes;pass++) {
-        var from=pass*BATCH+1; var to=Math.min(from+BATCH-1,woCount);
-        var rangeLabel=passes>1?(' (WOs '+from+' to '+to+' of '+woCount+')'):'';
+      for (var ci=0; ci<chunks.length; ci++) {
+        var chunk = chunks[ci];
+        var rangeLabel = chunk ? ' (pages '+chunk.from+'–'+chunk.to+' of '+pageCount+')' : '';
         if (statusEl) statusEl.textContent='\u23f3 Extracting'+rangeLabel+'\u2026';
 
         var prompt;
-        if (passes===1) {
-          prompt='Extract ALL work orders from this PDF and return ONLY a JSON array. Each element: '+WO_SCHEMA+' '+CONSOLIDATE_RULE;
+        if (!chunk) {
+          prompt = 'Extract ALL work orders from this PDF and return ONLY a JSON array. Each element: '+WO_SCHEMA+' '+CONSOLIDATE_RULE;
         } else {
-          prompt='Extract work orders NUMBER '+from+' through '+to+' (out of '+woCount+' total) from this PDF. If any of these WO numbers span multiple pages, consolidate all their labour rows into one entry. Return ONLY a JSON array. Each element: '+WO_SCHEMA+' '+CONSOLIDATE_RULE;
+          prompt = 'Extract ALL work orders from pages '+chunk.from+' to '+chunk.to+' of this PDF and return ONLY a JSON array. Each element: '+WO_SCHEMA+' '+CONSOLIDATE_RULE;
         }
 
-        var data=await _callAI(prompt, 16000);
-        var wasTruncated=(data.stop_reason==='max_tokens');
-        if (wasTruncated) console.warn('[Batch] Pass '+(pass+1)+' truncated for',f.name);
-
-        var raw=(data.content&&data.content[0]?data.content[0].text:'')
-          .replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-        try {
-          var parsed=_repairAndParseJSON(raw);
-          var batch=Array.isArray(parsed)?parsed:[parsed];
-          wos=wos.concat(batch);
-          if (wasTruncated) {
-            console.warn('[Batch] Partial batch recovered:',batch.length,'of expected',to-from+1);
-            break; // stop trying further batches if truncated mid-way
+        var data = await _callAI(prompt, 16000);
+        var wasTruncated = (data.stop_reason==='max_tokens');
+        if (wasTruncated) {
+          console.warn('[Batch] Truncated on chunk',ci+1,'for',f.name);
+          // If we were already chunking, this chunk is too dense — try halving
+          if (chunk && (chunk.to - chunk.from) > 1) {
+            var mid = Math.floor((chunk.from + chunk.to) / 2);
+            chunks.splice(ci+1, 0,
+              {from:chunk.from, to:mid},
+              {from:mid+1, to:chunk.to}
+            );
+            chunks.splice(ci, 1);
+            ci--; continue; // retry this position with the split chunks
           }
-        } catch(pe){
-          if (pass===0) throw new Error(wasTruncated?'PDF too large even in batches. Reduce WOs per file.':'Parse failed: '+pe.message);
-          console.warn('[Batch] Pass '+(pass+1)+' parse error, stopping at',wos.length,'WOs:',pe.message);
-          break;
         }
+
+        var raw = (data.content&&data.content[0]?data.content[0].text:'')
+          .replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+
+        var batchWos;
+        try {
+          var parsed = _repairAndParseJSON(raw);
+          batchWos = Array.isArray(parsed) ? parsed : [parsed];
+        } catch(pe) {
+          if (wasTruncated) {
+            console.warn('[Batch] Could not recover truncated chunk',ci+1,'for',f.name);
+            continue; // skip this chunk, try the next
+          }
+          throw new Error('Parse failed: '+pe.message);
+        }
+
+        // Merge batchWos into wos — consolidate by WO number across chunks
+        batchWos.forEach(function(wo) {
+          var norm = _normWoNum(wo.woNum||'');
+          if (!norm) { wos.push(wo); return; }
+          var existing = wos.find(function(w){ return _normWoNum(w.woNum||'')===norm; });
+          if (existing) {
+            // Same WO appeared in a previous chunk (multi-page WO spanning chunk boundary)
+            var combined = (existing.labourRows||[]).concat(wo.labourRows||[]);
+            combined.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+            existing.labourRows = combined;
+          } else {
+            wos.push(wo);
+          }
+        });
       }
 
       if (!wos.length) throw new Error('No WOs could be extracted from this PDF.');
