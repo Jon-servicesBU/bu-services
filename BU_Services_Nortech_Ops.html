@@ -1795,6 +1795,7 @@ function chipHtml(status) {
     draft:     {bg:'rgba(107,114,128,.15)', color:'#9CA3AF',  label:'Draft'},
     pending:   {bg:'rgba(201,134,10,.15)', color:'#FCD34D',  label:'Confirm Needed'},
     approved:  {bg:'rgba(59,130,246,.15)',  color:'#60A5FA',  label:'Approved'},
+    internal:  {bg:'rgba(107,114,128,.15)', color:'#9CA3AF',  label:'Internal'},
     invoiced:  {bg:'rgba(139,92,246,.15)',  color:'#A78BFA',  label:'Invoiced'},
     paid:      {bg:'rgba(22,163,74,.15)',   color:'#22C55E',  label:'Paid'},
     sent:      {bg:'rgba(59,130,246,.15)',  color:'#60A5FA',  label:'Sent'},
@@ -5545,183 +5546,170 @@ function triggerBatchWOImport() {
   document.getElementById('wo-batch-import-file').click();
 }
 
-async function handleBatchWOImport(input) {
-  var files = Array.from(input.files);
-  input.value = '';
-  if (!files.length) return;
 
-  // Show progress modal
-  var modal = document.getElementById('batch-import-modal');
-  var prog  = document.getElementById('batch-import-progress');
-  modal.classList.add('open');
-  prog.innerHTML = '<div style="font-size:.82rem;color:var(--color-text-secondary);margin-bottom:1rem">Processing ' + files.length + ' file' + (files.length>1?'s':'') + '…</div>'
-    + '<div id="batch-import-list" style="display:flex;flex-direction:column;gap:.4rem"></div>';
+function _normWoNum(s) {
+  if (!s) return '';
+  return String(s).trim().toUpperCase().replace(/[\s-]+/g,'').replace(/^W0+/,'W');
+}
 
-  var list = document.getElementById('batch-import-list');
-  var results = { imported: 0, skipped: 0, failed: 0, rows: [] };
+var _INTERNAL_CLIENTS = ['nortech','nortech adv','nortech advanced','nortechadv','internal','shop','in-house'];
+function _isInternalClient(client) {
+  if (!client) return false;
+  var c = client.toLowerCase().trim();
+  return _INTERNAL_CLIENTS.some(function(k){ return c.includes(k); });
+}
 
-  for (var fi = 0; fi < files.length; fi++) {
-    var file = files[fi];
-    var rowId = 'brow-' + fi;
-    list.innerHTML += '<div id="' + rowId + '" style="display:flex;align-items:center;gap:.6rem;font-size:.78rem;padding:.4rem .6rem;background:var(--color-background-secondary);border-radius:6px">'
-      + '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + file.name + '</span>'
-      + '<span id="' + rowId + '-status" style="flex-shrink:0;color:var(--color-text-secondary)">⏳ Queued</span>'
-      + '</div>';
+async function _importSaveWO(wo, fileName) {
+  function _normTime(t) {
+    if (!t) return '';
+    var m = String(t).match(/^(\d{1,2}):(\d{2})(?::\d+)?\s*(AM|PM)?$/i);
+    if (!m) return t;
+    var h = parseInt(m[1]), min = m[2], ampm = (m[3]||'').toUpperCase();
+    if (ampm === 'PM' && h < 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return String(h).padStart(2,'0') + ':' + min;
   }
-
-  for (var i = 0; i < files.length; i++) {
-    var f = files[i];
-    var rid = 'brow-' + i;
-    var statusEl = document.getElementById(rid + '-status');
-    if (statusEl) statusEl.textContent = '⏳ Extracting…';
-
-    try {
-      // Read as base64
-      var b64 = await new Promise(function(res, rej) {
-        var r = new FileReader();
-        r.onload = function(e) { res(e.target.result.split(',')[1]); };
-        r.onerror = rej;
-        r.readAsDataURL(f);
-      });
-
-      // Call AI
-      var resp = await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 8192,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
-              { type: 'text', text: 'Extract all work order data from this PDF and return ONLY a compact JSON object with these exact keys (use null if not found):\n{"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"HH:MM","endTime":"HH:MM"}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}\nRules: times as 24hr HH:MM. No extra whitespace. Return ONLY the JSON object, no explanation.' }
-            ]
-          }]
-        })
-      });
-
-      var data = await resp.json();
-      // Check for API-level errors
-      if (data.error) throw new Error('API error: ' + (data.error.message || JSON.stringify(data.error)));
-      var rawText = (data.content && data.content[0] ? data.content[0].text : '');
-      console.log('[Batch import] Raw response for', f.name, ':', rawText.slice(0,200));
-      // Check stop reason — if max_tokens hit, response is truncated
-      if (data.stop_reason === 'max_tokens') {
-        console.warn('[Batch import] Response truncated (max_tokens) for', f.name);
-      }
-      var text = rawText.replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
-      var wo = _repairAndParseJSON(text);
-
-      // Normalize time strings from 12hr to HH:mm (e.g. "8:00:00AM" → "08:00")
-      function _normTime(t) {
-        if (!t) return '';
-        var m = String(t).match(/^(\d{1,2}):(\d{2})(?::\d+)?\s*(AM|PM)?$/i);
-        if (!m) return t;
-        var h = parseInt(m[1]), min = m[2], ampm = (m[3]||'').toUpperCase();
-        if (ampm === 'PM' && h < 12) h += 12;
-        if (ampm === 'AM' && h === 12) h = 0;
-        return String(h).padStart(2,'0') + ':' + min;
-      }
-      (wo.labourRows||[]).forEach(function(r){
-        if (r.startTime) r.startTime = _normTime(r.startTime);
-        if (r.endTime)   r.endTime   = _normTime(r.endTime);
-      });
-
-      // Check for duplicate WO number
-      var woNum = (wo.woNum || '').trim();
-      if (woNum) {
-        var dupe = _jobs.find(function(j) {
-          return (j.woNum || j.number || '').trim().toLowerCase() === woNum.toLowerCase();
-        });
-        if (dupe) {
-          results.skipped++;
-          results.rows.push({ name: f.name, woNum: woNum, status: 'skipped', reason: 'WO # already exists' });
-          if (statusEl) { statusEl.textContent = '⏭ Skipped'; statusEl.style.color = 'var(--color-text-warning,#F59E0B)'; }
-          continue;
-        }
-      }
-
-      // Auto-save the WO as approved
-      if (statusEl) statusEl.textContent = '💾 Saving…';
-      var id = uid();
-      var date = wo.date || today();
-      // Normalize technician names to canonical NORTECH_EMPLOYEES names
-      var labourRows = (wo.labourRows || []).map(function(r) {
-        var raw = (r.technician || '').trim();
-        if (!raw) return r;
-        var t = raw.toLowerCase();
-        var emp = (NORTECH_EMPLOYEES||[]).find(function(e){ return e.name && e.name.toLowerCase() === t; })
-               || (NORTECH_EMPLOYEES||[]).find(function(e){
-                    var parts=e.name.toLowerCase().split(' ');
-                    var fn=parts[0]; var ln=parts[parts.length-1];
-                    return ln.length>2 && t.includes(ln) && (t.includes(fn)||t.startsWith(fn[0]+'.'));
-                  })
-               || (NORTECH_EMPLOYEES||[]).find(function(e){
-                    var ln=e.name.toLowerCase().split(' ').pop();
-                    return ln.length>4 && t.includes(ln);
-                  });
-        return emp ? Object.assign({}, r, { technician: emp.name }) : r;
-      });
-      var saveData = {
-        id: id,
-        woNum: woNum || nextNum('W-', _jobs, 'woNum'),
-        number: woNum || nextNum('W-', _jobs, 'woNum'),
-        client: (wo.client || '').trim(),
-        site: (wo.site || wo.location || '').trim(),
-        date: date,
-        location: (wo.site || '').trim(),
-        equipOwner: wo.equipOwner || '',
-        province: wo.province || 'AB',
-        po: wo.po || '',
-        jobNum: wo.jobNum || '',
-        afe: wo.afe || '',
-        rig: wo.rig || '',
-        customerContact: wo.customerContact || '',
-        fieldReports: wo.fieldReports || '',
-        notes: wo.notes || '',
-        labourRows: labourRows,
-        equipRows: wo.equipment || [],
-        consumables: wo.consumables || [],
-        film: wo.film || [],
-        travel: wo.travel || {},
-        status: 'approved',
-        rateSheetId: (_rateSheets[0] || {}).id || '',
-        created: today(),
-        modified: today(),
-      };
-
-      await sbUpsert('jobs', id, saveData);
-      _jobs.unshift(saveData);
-
-      // Create timesheets for each tech in labourRows
-      await createTimesheetFromWO(saveData);
-
-      results.imported++;
-      results.rows.push({ name: f.name, woNum: saveData.woNum, status: 'imported' });
-      if (statusEl) { statusEl.textContent = '✓ Imported (' + saveData.woNum + ')'; statusEl.style.color = 'var(--color-text-success,#22C55E)'; }
-
-    } catch(e) {
-      results.failed++;
-      var shortErr = e.message ? e.message.slice(0,80) : 'Unknown error';
-      results.rows.push({ name: f.name, woNum: '—', status: 'failed', reason: e.message });
-      if (statusEl) { statusEl.innerHTML = '✗ ' + shortErr; statusEl.style.color = 'var(--color-text-danger,#E84040)'; }
-      console.error('Batch import error:', f.name, e);
+  (wo.labourRows||[]).forEach(function(r){
+    if (r.startTime) r.startTime = _normTime(r.startTime);
+    if (r.endTime)   r.endTime   = _normTime(r.endTime);
+  });
+  var woNum = (wo.woNum||'').trim();
+  var normNum = _normWoNum(woNum);
+  if (normNum) {
+    var dupe = _jobs.find(function(j){ return _normWoNum(j.woNum||j.number||'')===normNum; });
+    if (dupe) return { status:'skipped', woNum:woNum||'--', reason:'WO '+woNum+' already exists' };
+  }
+  var isInternal = _isInternalClient(wo.client);
+  var labourRows = (wo.labourRows||[]).map(function(r){
+    var raw=(r.technician||'').trim(); var emp=null;
+    if (raw) {
+      var t=raw.toLowerCase();
+      emp=(NORTECH_EMPLOYEES||[]).find(function(e){return e.name&&e.name.toLowerCase()===t;})
+        ||(NORTECH_EMPLOYEES||[]).find(function(e){
+             var p=e.name.toLowerCase().split(' ');var fn=p[0];var ln=p[p.length-1];
+             return ln.length>2&&t.includes(ln)&&(t.includes(fn)||t.startsWith(fn[0]+'.'));
+           })
+        ||(NORTECH_EMPLOYEES||[]).find(function(e){
+             var ln=e.name.toLowerCase().split(' ').pop();
+             return ln.length>4&&t.includes(ln);
+           });
     }
+    var row=emp?Object.assign({},r,{technician:emp.name}):r;
+    if (isInternal) row.billable=false;
+    return row;
+  });
+  var id=uid();
+  var assignedNum=woNum||nextNum('W-',_jobs,'woNum');
+  var saveData={
+    id:id, woNum:assignedNum, number:assignedNum,
+    client:(wo.client||'').trim(), site:(wo.site||wo.location||'').trim(),
+    date:wo.date||today(), location:(wo.site||'').trim(),
+    equipOwner:wo.equipOwner||'', province:wo.province||'AB',
+    po:wo.po||'', jobNum:wo.jobNum||'', afe:wo.afe||'', rig:wo.rig||'',
+    customerContact:wo.customerContact||'', fieldReports:wo.fieldReports||'',
+    notes:wo.notes||'', labourRows:labourRows,
+    equipRows:wo.equipment||[], consumables:wo.consumables||[],
+    film:wo.film||[], travel:wo.travel||{},
+    status:isInternal?'internal':'approved',
+    isInternal:isInternal,
+    rateSheetId:(_rateSheets[0]||{}).id||'',
+    created:today(), modified:today(), importedFrom:fileName||'',
+  };
+  await sbUpsert('jobs',id,saveData);
+  _jobs.unshift(saveData);
+  await createTimesheetFromWO(saveData);
+  return {status:isInternal?'internal':'imported', woNum:assignedNum, reason:''};
+}
+async function handleBatchWOImport(input) {
+  var files=Array.from(input.files); input.value='';
+  if (!files.length) return;
+  var modal=document.getElementById('batch-import-modal');
+  var prog=document.getElementById('batch-import-progress');
+  modal.classList.add('open');
+  var results={imported:0,internal:0,skipped:0,failed:0,rows:[]};
+  prog.innerHTML='<div style="font-size:.82rem;color:var(--color-text-secondary);margin-bottom:.75rem">Processing <strong>'+files.length+'</strong> file'+(files.length>1?'s':'')+'\u2026</div>'
+    +'<div id="batch-import-list" style="display:flex;flex-direction:column;gap:.3rem"></div>';
+  var list=document.getElementById('batch-import-list');
+  files.forEach(function(f,fi){
+    list.innerHTML+='<div id="brow-'+fi+'" style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;padding:.35rem .6rem;background:var(--color-background-secondary);border-radius:5px">'
+      +'<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+f.name+'</span>'
+      +'<span id="brow-'+fi+'-status" style="flex-shrink:0;color:var(--color-text-secondary)">\u23f3 Queued</span></div>';
+  });
+  var CONCURRENCY=3; var fi=0;
+  async function processNext() {
+    if (fi>=files.length) return;
+    var myIdx=fi++; var f=files[myIdx];
+    var statusEl=document.getElementById('brow-'+myIdx+'-status');
+    if (statusEl){statusEl.textContent='\u23f3 Extracting\u2026';statusEl.style.color='';}
+    try {
+      var b64=await new Promise(function(res,rej){
+        var r=new FileReader();
+        r.onload=function(e){res(e.target.result.split(',')[1]);};
+        r.onerror=rej; r.readAsDataURL(f);
+      });
+      var resp=await fetch('https://nortech-ai-proxy.jon-eustace.workers.dev',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:8192,
+          messages:[{role:'user',content:[
+            {type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}},
+            {type:'text',text:'This PDF may contain ONE or MULTIPLE work orders. Extract ALL work orders and return ONLY a JSON array (even for one WO). Each element: {"client":"","woNum":"","date":"YYYY-MM-DD","site":"","equipOwner":"","province":"AB","po":"","jobNum":"","afe":"","rig":"","customerContact":"","fieldReports":"","notes":"","labourRows":[{"technician":"","category":"","date":"YYYY-MM-DD","regHrs":0,"otHrs":0,"dtHrs":0,"nightHrs":0,"startTime":"HH:MM","endTime":"HH:MM"}],"consumables":[{"type":"","qty":0,"unit":"","notes":""}],"equipment":[{"item":"","qty":0,"unit":"","notes":""}],"film":[{"filmType":"","pipeSize":"","qty":0,"notes":""}],"travel":{"km":0,"kmRate":1.20,"hotels":0,"camp":0,"flights":0,"loaTechs":0,"loaDays":0,"loaRate":70,"misc":0,"miscDesc":""}}] Rules: 24hr HH:MM times. Return ONLY the JSON array.'}
+          ]}]})
+      });
+      var data=await resp.json();
+      if (data.error) throw new Error('API: '+(data.error.message||JSON.stringify(data.error)));
+      if (data.stop_reason==='max_tokens') console.warn('[Batch] Truncated:',f.name);
+      var raw=(data.content&&data.content[0]?data.content[0].text:'')
+        .replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/i,'').trim();
+      var wos;
+      try {
+        var parsed=_repairAndParseJSON(raw);
+        wos=Array.isArray(parsed)?parsed:[parsed];
+      } catch(pe){throw new Error('Parse failed: '+pe.message);}
+      if (statusEl) statusEl.textContent='\ud83d\udcbe Saving '+wos.length+' WO'+(wos.length>1?'s\u2026':'\u2026');
+      var fileResults=[];
+      for (var wi=0;wi<wos.length;wi++){
+        var r=await _importSaveWO(wos[wi],f.name);
+        fileResults.push(r);
+        if (r.status==='imported') results.imported++;
+        else if (r.status==='internal') results.internal++;
+        else if (r.status==='skipped') results.skipped++;
+      }
+      var imp=fileResults.filter(function(r){return r.status==='imported';});
+      var intl=fileResults.filter(function(r){return r.status==='internal';});
+      var skip=fileResults.filter(function(r){return r.status==='skipped';});
+      var parts=[];
+      if (wos.length>1) parts.push('<span style="color:#AEBDD4">'+wos.length+' WOs</span>');
+      if (imp.length) parts.push('<span style="color:#22C55E">\u2713 '+imp.length+' imported</span>');
+      if (intl.length) parts.push('<span style="color:#60A5FA">\ud83c\udfe0 '+intl.length+' internal</span>');
+      if (skip.length){
+        var skipNums=skip.map(function(r){return r.woNum;}).join(', ');
+        parts.push('<span style="color:#F59E0B" title="'+skipNums+'">\u23ed '+skip.length+' dup</span>');
+      }
+      if (statusEl) statusEl.innerHTML=parts.join(' ');
+      fileResults.forEach(function(r){results.rows.push(Object.assign({name:f.name},r));});
+    } catch(e){
+      results.failed++;
+      results.rows.push({name:f.name,woNum:'--',status:'failed',reason:e.message});
+      if (statusEl){statusEl.textContent='\u2717 '+e.message.slice(0,60);statusEl.style.color='var(--color-text-danger,#E84040)';}
+      console.error('[Batch]',f.name,e);
+    }
+    await processNext();
   }
-
-  // Summary
-  var summary = document.createElement('div');
-  summary.style.cssText = 'margin-top:1rem;padding:.75rem 1rem;background:var(--color-background-secondary);border-radius:8px;font-size:.8rem;border-left:4px solid ' + (results.failed ? '#E84040' : '#22C55E');
-  summary.innerHTML = '<strong>Done</strong> — '
-    + '<span style="color:#22C55E">' + results.imported + ' imported</span>, '
-    + '<span style="color:#F59E0B">' + results.skipped + ' skipped</span>, '
-    + '<span style="color:#E84040">' + results.failed + ' failed</span>';
+  var workers=[];
+  for (var w=0;w<Math.min(CONCURRENCY,files.length);w++) workers.push(processNext());
+  await Promise.all(workers);
+  var dupeList=results.rows.filter(function(r){return r.status==='skipped';}).map(function(r){return r.woNum;}).filter(Boolean);
+  var summHtml='<strong>Done</strong> \u2014 '
+    +'<span style="color:#22C55E">'+results.imported+' imported</span>, '
+    +'<span style="color:#60A5FA">'+results.internal+' internal</span>, '
+    +'<span style="color:#F59E0B">'+results.skipped+' skipped</span>, '
+    +'<span style="color:#E84040">'+results.failed+' failed</span>';
+  if (dupeList.length) summHtml+='<div style="margin-top:.4rem;font-size:.75rem;color:#F59E0B">Duplicates: '+dupeList.join(', ')+'</div>';
+  var summary=document.createElement('div');
+  summary.style.cssText='margin-top:.75rem;padding:.6rem .9rem;background:var(--color-background-secondary);border-radius:6px;font-size:.8rem;border-left:3px solid '+(results.failed?'#E84040':'#22C55E');
+  summary.innerHTML=summHtml;
   prog.appendChild(summary);
-
-  renderJobs();
-  renderDashboard();
-  updatePendingBadge();
+  renderJobs(); renderDashboard(); updatePendingBadge();
 }
 
 
@@ -6065,12 +6053,12 @@ async function saveWO(status) {
   var date   = (document.getElementById('wo-date')    || {}).value || today();
   if (!client.trim() || !site.trim()) { toast('Client and location are required', 'error'); return; }
 
-  // Block duplicate WO numbers on any save
+  // Block duplicate WO numbers on any save — normalised match
   var woNumInput = ((document.getElementById('job-number') || {}).value || '').trim();
   if (woNumInput) {
     var duplicate = _jobs.find(function(j) {
       return j.id !== _editWOId
-          && (j.woNum || j.number || '').trim().toLowerCase() === woNumInput.toLowerCase();
+          && _normWoNum(j.woNum || j.number || '') === _normWoNum(woNumInput);rCase();
     });
     if (duplicate) {
       toast('WO # ' + woNumInput + ' already exists (' + (duplicate.client||'') + ' · ' + (duplicate.status||'') + '). Use a unique number.', 'error');
@@ -6174,7 +6162,9 @@ async function saveWO(status) {
     fieldReports: (document.getElementById('wo-field-reports')|| {}).value || '',
     labourRows, equipRows, consumables, film, travel,
     totalReg, totalOT, totalDT,
-    status: (existing.status === 'approved' || existing.status === 'invoiced' || existing.status === 'paid')
+    isInternal: _isInternalClient(client),
+    status: _isInternalClient(client) ? 'internal'
+      : (existing.status === 'approved' || existing.status === 'invoiced' || existing.status === 'paid')
       ? existing.status : status,
     rateSheetId: existing.rateSheetId || '',
     linkedQuoteId: (document.getElementById('wo-linked-quote') || {}).value || existing.linkedQuoteId || '',
