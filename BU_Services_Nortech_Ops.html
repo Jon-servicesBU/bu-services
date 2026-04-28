@@ -607,6 +607,8 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="unav-links">
     <button onclick="showView('dashboard',this)" id="nav-dashboard" data-admin-only>📊 Dashboard</button>
     <button onclick="showView('jobs',this)" id="nav-jobs">🔧 Work Orders</button>
+    <button onclick="showView('dispatch',this)" id="nav-dispatch" data-admin-only>📡 Dispatch</button>
+    <button onclick="showView('myjobs',this)" id="nav-myjobs" data-tech-only style="display:none">📋 My Jobs</button>
     <button onclick="showView('timesheets',this)" id="nav-timesheets">⏱ Timesheets</button>
     <button onclick="showView('invoices',this)" id="nav-invoices" data-admin-only>🧾 Invoices</button>
     <button onclick="showView('margin',this)" id="nav-margin" data-admin-only>📈 Margins</button>
@@ -925,6 +927,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="btn btn-secondary" id="wo-btn-accept-quote" onclick="acceptQuote()"        style="display:none;border-color:rgba(34,197,94,.4);color:#22C55E">✓ Accept Quote</button>
       <button class="btn btn-ghost"     id="wo-btn-view-quote"   onclick="viewQuote()"          style="display:none;color:#C084FC">📋 View Quote</button>
       <button class="btn btn-secondary" id="wo-btn-invoice"      onclick="invoiceWOFromModal()"  style="display:none">🧾 Invoice</button>
+      <button class="btn btn-amber"    id="wo-btn-dispatch"    onclick="openDispatchModal(null,_editWOId)" style="display:none">📡 Dispatch</button>
       <!-- Tech only -->
       <button class="btn btn-primary"   id="wo-btn-tech-save"    onclick="techSaveWO()"          style="display:none;background:var(--nor-accent);border-color:var(--nor-accent)">Save Work Order →</button>
     </div>
@@ -1048,7 +1051,116 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 
   <!-- ══ MARGIN REPORT VIEW ═══════════════════════════════════════════════════ -->
-  <div id="view-clients" class="view" style="display:none">
+  <div id="view-dispatch" class="view" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+    <div>
+      <h2 style="font-size:1.1rem;font-weight:700">📡 Dispatch Board</h2>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:2px">Assign and track field jobs</div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+      <input type="date" id="dispatch-date-filter" class="form-input" style="width:150px" onchange="renderDispatchBoard()">
+      <select id="dispatch-status-filter" class="form-select" style="width:160px" onchange="renderDispatchBoard()">
+        <option value="">All statuses</option>
+        <option value="dispatched">Dispatched</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="enroute">En Route</option>
+        <option value="onsite">On Site</option>
+        <option value="approved">Approved (unassigned)</option>
+      </select>
+      <button class="btn btn-primary btn-sm" onclick="openDispatchModal()">+ Dispatch Job</button>
+    </div>
+  </div>
+
+  <!-- Dispatch stats strip -->
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;margin-bottom:1rem" id="dispatch-stats"></div>
+
+  <!-- Dispatch board -->
+  <div id="dispatch-board"></div>
+</div>
+
+<!-- My Jobs view (tech) -->
+<div id="view-myjobs" class="view" style="display:none">
+  <div style="margin-bottom:1.25rem">
+    <h2 style="font-size:1.1rem;font-weight:700">📋 My Jobs</h2>
+    <div id="myjobs-tech-name" style="font-size:.8rem;color:var(--muted);margin-top:2px"></div>
+  </div>
+
+  <!-- Quick links to other apps -->
+  <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap">
+    <a href="BU_Services_Field_Reports.html" class="btn btn-ghost btn-sm" style="text-decoration:none">📋 Field Reports</a>
+    <a href="BU_Services_Procedures.html" class="btn btn-ghost btn-sm" style="text-decoration:none">📖 Procedures</a>
+    <a href="BU_Services_Certifications.html" class="btn btn-ghost btn-sm" style="text-decoration:none">🏅 My Certifications</a>
+  </div>
+
+  <div id="myjobs-list"></div>
+</div>
+
+<!-- Dispatch Modal -->
+<div id="dispatch-modal" class="modal-overlay">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <span class="modal-title" id="dispatch-modal-title">Dispatch Job</span>
+      <button class="modal-x" onclick="closeModal('dispatch-modal')">✕</button>
+    </div>
+    <div style="padding:1.25rem">
+
+      <!-- Link to WO -->
+      <div class="form-group">
+        <label class="form-label">Work Order / Quote <span style="color:var(--nor-accent)">*</span></label>
+        <select id="dispatch-wo-select" class="form-select" onchange="onDispatchWOSelect(this.value)">
+          <option value="">Select work order or quote…</option>
+        </select>
+        <div id="dispatch-wo-info" style="margin-top:.4rem;font-size:.72rem;color:var(--muted)"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group">
+          <label class="form-label">Date <span style="color:var(--nor-accent)">*</span></label>
+          <input type="date" id="dispatch-date" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobilize Time</label>
+          <input type="time" id="dispatch-time" class="form-input" placeholder="07:00">
+        </div>
+      </div>
+
+      <!-- Crew assignment -->
+      <div class="form-group">
+        <label class="form-label">Assign Crew <span style="color:var(--nor-accent)">*</span></label>
+        <div id="dispatch-crew-rows" style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:.4rem"></div>
+        <button class="btn btn-ghost btn-sm" onclick="addDispatchCrewRow()">+ Add crew member</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Site / Location Details</label>
+        <input type="text" id="dispatch-location" class="form-input" placeholder="Site address or location notes">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Client Contact on Site</label>
+        <input type="text" id="dispatch-client-contact" class="form-input" placeholder="Name and phone number">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Dispatch Notes</label>
+        <textarea id="dispatch-notes" class="form-textarea" style="min-height:60px" placeholder="Equipment to bring, special instructions, mobilization details…"></textarea>
+      </div>
+
+      <!-- Convert quote option -->
+      <div id="dispatch-convert-quote" style="display:none;padding:.6rem .75rem;background:rgba(245,158,11,.08);border:.5px solid rgba(245,158,11,.25);border-radius:5px;font-size:.72rem;color:var(--amber);margin-bottom:.75rem">
+        ⚡ This is a quote — dispatching will convert it to an active Work Order automatically.
+      </div>
+
+      <input type="hidden" id="dispatch-edit-id" value="">
+      <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:.5rem">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('dispatch-modal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="saveDispatch()">Dispatch</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="view-clients" class="view" style="display:none">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
     <div>
       <h2 style="font-size:1.1rem;font-weight:700">Client Directory</h2>
@@ -1539,6 +1651,7 @@ var _rateSheets   = [];
 var _customClients = [];
 var _techRates = {}; // {nameLower: rate} loaded from technicians table
 var _customTechs = []; // techs added via Certifications, not in NORTECH_EMPLOYEES
+var _dispatches = []; // loaded from Supabase dispatches table
 var _timesheets   = [];
 var _currentView  = 'dashboard';
 // ── Pagination state ─────────────────────────────────────────────────────────
@@ -1930,7 +2043,15 @@ function chipHtml(status) {
     'quote-accepted':{bg:'rgba(168,85,247,.08)',   color:'#9CA3AF',  label:'Quote Accepted'},
     draft:     {bg:'rgba(107,114,128,.15)', color:'#9CA3AF',  label:'Draft'},
     pending:   {bg:'rgba(201,134,10,.15)', color:'#FCD34D',  label:'Confirm Needed'},
-    approved:  {bg:'rgba(59,130,246,.15)',  color:'#60A5FA',  label:'Approved'},
+    approved:   {bg:'rgba(59,130,246,.15)',  color:'#60A5FA',  label:'Approved'},
+    dispatched: {bg:'rgba(245,158,11,.15)',  color:'#F59E0B',  label:'Dispatched'},
+    confirmed:  {bg:'rgba(14,165,233,.15)',  color:'#38BDF8',  label:'Confirmed'},
+    enroute:    {bg:'rgba(168,85,247,.15)',  color:'#A855F7',  label:'En Route'},
+    onsite:     {bg:'rgba(45,212,191,.15)',  color:'#2DD4BF',  label:'On Site'},
+    dispatched: {bg:'rgba(245,158,11,.15)',  color:'#F59E0B',  label:'Dispatched'},
+    confirmed:  {bg:'rgba(14,165,233,.15)',  color:'#38BDF8',  label:'Confirmed'},
+    enroute:    {bg:'rgba(168,85,247,.15)',  color:'#A855F7',  label:'En Route'},
+    onsite:     {bg:'rgba(45,212,191,.15)',  color:'#2DD4BF',  label:'On Site'},
     internal:  {bg:'rgba(107,114,128,.15)', color:'#9CA3AF',  label:'Internal'},
     invoiced:  {bg:'rgba(139,92,246,.15)',  color:'#A78BFA',  label:'Invoiced'},
     paid:      {bg:'rgba(22,163,74,.15)',   color:'#22C55E',  label:'Paid'},
@@ -2527,7 +2648,7 @@ async function markInvoiceVoid(){ if(!_currentInvId)return; await markVoid(_curr
 
 
 // ── Price visibility guard ─────────────────────────────────────────────────────
-var _ADMIN_IDS = ['jon','jason','joel_c','jeremy','e502','e536','e511'];
+var _ADMIN_IDS = ['jon','jason','joel_c','jeremy','e502','e536','e511','e6'];
 
 function isAdmin() {
   var viewer = (window.CURRENT_VIEWER || localStorage.getItem('hub_viewer') || 'tech');
@@ -2541,26 +2662,22 @@ function applyAdminVisibility() {
   var admin = isAdmin();
   if (!admin) {
     document.body.classList.add('tech-view');
-    // Hide dashboard and all admin-only tabs
-    ['nav-dashboard','nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.style.display = 'none';
+    ['nav-dashboard','nav-invoices','nav-rates','nav-margin','nav-clients','nav-technicians','nav-dispatch'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.style.display = 'none';
     });
-    var mlSec = document.getElementById('manual-lines-section');
-    if (mlSec) mlSec.style.display = 'none';
-    // Land techs on Work Orders — never dashboard
-    var hiddenViews = ['dashboard','invoices','rate-sheets','margin'];
+    var navMJ = document.getElementById('nav-myjobs'); if (navMJ) navMJ.style.display = '';
+    var mlSec = document.getElementById('manual-lines-section'); if (mlSec) mlSec.style.display = 'none';
+    var hiddenViews = ['dashboard','invoices','rate-sheets','margin','clients','technicians','dispatch'];
     if (hiddenViews.indexOf(_currentView) > -1) {
-      showView('jobs', document.getElementById('nav-jobs'));
+      showView('myjobs', document.getElementById('nav-myjobs'));
     }
   } else {
     document.body.classList.remove('tech-view');
-    ['nav-dashboard','nav-invoices','nav-rates','nav-margin'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.style.display = '';
+    ['nav-dashboard','nav-invoices','nav-rates','nav-margin','nav-clients','nav-technicians','nav-dispatch'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.style.display = '';
     });
-    var mlSec = document.getElementById('manual-lines-section');
-    if (mlSec) mlSec.style.display = '';
+    var navMJ = document.getElementById('nav-myjobs'); if (navMJ) navMJ.style.display = 'none';
+    var mlSec = document.getElementById('manual-lines-section'); if (mlSec) mlSec.style.display = '';
   }
 }
 
@@ -3312,7 +3429,7 @@ async function loadAll(){
   try{
     var results=await Promise.allSettled([
       sbList('jobs'), sbList('charge_sheets'),
-      sbList('invoices'), sbList('rate_sheets'), sbList('timesheets'), sbList('clients')
+      sbList('invoices'), sbList('rate_sheets'), sbList('timesheets'), sbList('clients'), sbList('dispatches')
     ]);
     if(results[0].status==='fulfilled') _jobs         = results[0].value.map(function(r){return Object.assign({id:r.id},r.data);});
     if(results[1].status==='fulfilled') _chargeSheets = results[1].value.map(function(r){return Object.assign({id:r.id},r.data);});
@@ -3328,6 +3445,9 @@ async function loadAll(){
         }
       });
       NORTECH_CUSTOMERS.sort(function(a,b){return a.name.localeCompare(b.name);});
+    }
+    if(results[6]&&results[6].status==='fulfilled') {
+      _dispatches = (results[6].value||[]).map(function(r){ return Object.assign({id:r.id},r.data||r); });
     }
     // Sync NORTECH_EMPLOYEES to technicians table (background, non-blocking)
     syncEmployeesToTechnicians();
@@ -3402,6 +3522,8 @@ function renderForView(v){
   if(v==='margin')      renderMarginReport();
   if(v==='clients')     renderClientList();
   if(v==='technicians') renderTechList();
+  if(v==='dispatch')    { renderDispatchBoard(); populateDispatchWOSelect(); }
+  if(v==='myjobs')      renderMyJobs();
 }
 // ── One-time migration: push all localStorage timesheets to Supabase ──────────
 async function migrateTimesheetsToSupabase() {
@@ -8256,6 +8378,432 @@ var _NORTECH_EMPLOYEES_IMPORT = [
 ];
 
 // ── Customer searchable dropdown ──────────────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DISPATCH SYSTEM
+// ══════════════════════════════════════════════════════════════════════════════
+
+var _dispatchCrewCount = 0;
+
+// ── Populate WO select in dispatch modal ─────────────────────────────────────
+function populateDispatchWOSelect() {
+  var sel = document.getElementById('dispatch-wo-select');
+  if (!sel) return;
+  var cur = sel.value;
+  // Show all active WOs and quotes not yet dispatched
+  var eligible = _jobs.filter(function(j) {
+    return ['draft','quoted','quote-accepted','approved'].indexOf(j.status||'') > -1;
+  }).sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
+  sel.innerHTML = '<option value="">Select work order or quote…</option>'
+    + eligible.map(function(j){
+      var label = (j.woNum||j.number||j.id.slice(0,8))
+        + ' · ' + (j.client||'Unknown')
+        + ' · ' + (j.date||'')
+        + (j.status==='quoted'||j.status==='quote-accepted' ? ' [QUOTE]' : '');
+      return '<option value="'+j.id+'">'+label+'</option>';
+    }).join('');
+  if (cur) sel.value = cur;
+}
+
+function onDispatchWOSelect(woId) {
+  var info = document.getElementById('dispatch-wo-info');
+  var convertNote = document.getElementById('dispatch-convert-quote');
+  if (!woId) { if(info) info.textContent=''; if(convertNote) convertNote.style.display='none'; return; }
+  var j = _jobs.find(function(x){ return x.id===woId; });
+  if (!j) return;
+  if (info) info.textContent = (j.client||'') + (j.site||j.location ? ' · '+(j.site||j.location) : '') + (j.po ? ' · PO: '+j.po : '');
+  if (convertNote) convertNote.style.display = (j.status==='quoted'||j.status==='quote-accepted') ? '' : 'none';
+  // Pre-fill location
+  var locEl = document.getElementById('dispatch-location');
+  if (locEl && !locEl.value) locEl.value = j.site||j.location||'';
+  var ccEl = document.getElementById('dispatch-client-contact');
+  if (ccEl && !ccEl.value) ccEl.value = j.customerContact||'';
+}
+
+// ── Add crew row to dispatch modal ───────────────────────────────────────────
+function addDispatchCrewRow(data) {
+  var container = document.getElementById('dispatch-crew-rows');
+  if (!container) return;
+  var idx = _dispatchCrewCount++;
+  var d = data || {};
+  var techOpts = '<option value="">Select technician…</option>'
+    + NORTECH_EMPLOYEES.map(function(e){
+        return '<option value="'+e.id+'" '+(d.techId===e.id?'selected':'')+'>'+e.name+'</option>';
+      }).join('')
+    + (_customTechs||[]).filter(function(t){return t.active!==false;}).map(function(t){
+        return '<option value="'+t.id+'" '+(d.techId===t.id?'selected':'')+'>'+t.name+'</option>';
+      }).join('');
+  var div = document.createElement('div');
+  div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 28px;gap:.4rem;align-items:center';
+  div.innerHTML = '<select class="form-select" id="dcrew-tech-'+idx+'" style="font-size:.75rem">'+techOpts+'</select>'
+    + '<select class="form-select" id="dcrew-role-'+idx+'" style="font-size:.75rem">'
+    + '<option'+(d.role==='Primary'?' selected':'')+'>Primary</option>'
+    + '<option'+(d.role==='Assistant'?' selected':'')+'>Assistant</option>'
+    + '<option'+(d.role==='Level 3'?' selected':'')+'>Level 3</option>'
+    + '</select>'
+    + '<button style="width:28px;height:28px;border-radius:5px;border:.5px solid rgba(239,68,68,.3);background:transparent;cursor:pointer;color:#E84040;font-size:14px" onclick="this.closest(\'div\').remove()">×</button>';
+  container.appendChild(div);
+}
+
+// ── Open dispatch modal ───────────────────────────────────────────────────────
+function openDispatchModal(editId, prefillWoId) {
+  _dispatchCrewCount = 0;
+  document.getElementById('dispatch-edit-id').value = editId||'';
+  document.getElementById('dispatch-modal-title').textContent = editId ? 'Edit Dispatch' : 'Dispatch Job';
+  document.getElementById('dispatch-date').value = editId ? '' : new Date().toISOString().slice(0,10);
+  document.getElementById('dispatch-time').value = '';
+  document.getElementById('dispatch-location').value = '';
+  document.getElementById('dispatch-client-contact').value = '';
+  document.getElementById('dispatch-notes').value = '';
+  document.getElementById('dispatch-crew-rows').innerHTML = '';
+  document.getElementById('dispatch-convert-quote').style.display = 'none';
+  populateDispatchWOSelect();
+
+  if (editId) {
+    var d = _dispatches.find(function(x){ return x.id===editId; });
+    if (d) {
+      document.getElementById('dispatch-wo-select').value = d.woId||'';
+      document.getElementById('dispatch-date').value = d.date||'';
+      document.getElementById('dispatch-time').value = d.time||'';
+      document.getElementById('dispatch-location').value = d.location||'';
+      document.getElementById('dispatch-client-contact').value = d.clientContact||'';
+      document.getElementById('dispatch-notes').value = d.notes||'';
+      (d.crew||[]).forEach(function(c){ addDispatchCrewRow(c); });
+      onDispatchWOSelect(d.woId||'');
+    }
+  } else {
+    if (prefillWoId) {
+      setTimeout(function(){
+        document.getElementById('dispatch-wo-select').value = prefillWoId;
+        onDispatchWOSelect(prefillWoId);
+      }, 50);
+    }
+    addDispatchCrewRow();
+  }
+  document.getElementById('dispatch-modal').classList.add('open');
+}
+
+// ── Save dispatch ─────────────────────────────────────────────────────────────
+async function saveDispatch() {
+  var woId = document.getElementById('dispatch-wo-select').value;
+  var date = document.getElementById('dispatch-date').value;
+  if (!woId) { toast('Select a work order','warning'); return; }
+  if (!date) { toast('Date is required','warning'); return; }
+
+  // Collect crew
+  var crew = [];
+  document.getElementById('dispatch-crew-rows').querySelectorAll('div[style]').forEach(function(row, i) {
+    var tSel = row.querySelector('select[id^="dcrew-tech-"]');
+    var rSel = row.querySelector('select[id^="dcrew-role-"]');
+    if (tSel && tSel.value) {
+      var emp = NORTECH_EMPLOYEES.find(function(e){ return e.id===tSel.value; })
+             || (_customTechs||[]).find(function(t){ return t.id===tSel.value; });
+      crew.push({
+        techId: tSel.value,
+        techName: emp ? emp.name : tSel.options[tSel.selectedIndex].text,
+        role: rSel ? rSel.value : 'Primary',
+      });
+    }
+  });
+  if (!crew.length) { toast('Assign at least one technician','warning'); return; }
+
+  var editId = document.getElementById('dispatch-edit-id').value || '';
+  var id = editId || ('disp_' + Date.now().toString(36));
+
+  // Check if WO is a quote — convert to dispatched
+  var wo = _jobs.find(function(j){ return j.id===woId; });
+  var convertingQuote = wo && (wo.status==='quoted'||wo.status==='quote-accepted');
+
+  var data = {
+    id, woId, date,
+    time: document.getElementById('dispatch-time').value||'',
+    location: document.getElementById('dispatch-location').value||'',
+    clientContact: document.getElementById('dispatch-client-contact').value||'',
+    notes: document.getElementById('dispatch-notes').value||'',
+    crew: crew,
+    status: 'dispatched',
+    createdBy: CURRENT_VIEWER||'',
+    created: editId ? ((_dispatches.find(function(d){return d.id===editId;})||{}).created||new Date().toISOString()) : new Date().toISOString(),
+    modified: new Date().toISOString(),
+  };
+
+  try {
+    await sbUpsert('dispatches', id, data);
+    var idx = _dispatches.findIndex(function(d){ return d.id===id; });
+    if (idx>=0) _dispatches[idx]=data; else _dispatches.push(data);
+
+    // Convert quote to active WO if needed
+    if (convertingQuote && wo) {
+      wo.status = 'dispatched';
+      await sbUpsert('jobs', wo.id, wo);
+      var ji = _jobs.findIndex(function(j){ return j.id===wo.id; });
+      if (ji>=0) _jobs[ji]=wo;
+    } else if (wo && wo.status==='approved') {
+      wo.status = 'dispatched';
+      await sbUpsert('jobs', wo.id, wo);
+      var ji2 = _jobs.findIndex(function(j){ return j.id===wo.id; });
+      if (ji2>=0) _jobs[ji2]=wo;
+    }
+
+    toast('Job dispatched to '+(crew.map(function(c){return c.techName;}).join(', ')), 'success');
+    closeModal('dispatch-modal');
+    renderDispatchBoard();
+    renderJobs();
+    updatePendingBadge();
+  } catch(e) { toast('Save failed: '+e.message, 'error'); }
+}
+
+// ── Render dispatch board ─────────────────────────────────────────────────────
+function renderDispatchBoard() {
+  var board = document.getElementById('dispatch-board');
+  var statsEl = document.getElementById('dispatch-stats');
+  if (!board) return;
+
+  var dateFilter = (document.getElementById('dispatch-date-filter')||{}).value||'';
+  var statFilter = (document.getElementById('dispatch-status-filter')||{}).value||'';
+
+  var rows = _dispatches.slice();
+  if (dateFilter) rows = rows.filter(function(d){ return d.date===dateFilter; });
+  if (statFilter) {
+    if (statFilter==='approved') {
+      // Show approved WOs without a dispatch record
+      var dispatchedWoIds = new Set(_dispatches.map(function(d){ return d.woId; }));
+      var unassigned = _jobs.filter(function(j){
+        return j.status==='approved' && !dispatchedWoIds.has(j.id);
+      });
+      board.innerHTML = unassigned.length ? unassigned.map(function(j){
+        return '<div class="card" style="margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">'
+          +'<div><div style="font-size:.85rem;font-weight:700">'+(j.woNum||j.number||'')+'</div>'
+          +'<div style="font-size:.75rem;color:var(--muted)">'+(j.client||'')+'</div></div>'
+          +'<button class="btn btn-amber btn-sm" onclick="openDispatchModal(null,\''+j.id+'\')">📡 Dispatch</button>'
+          +'</div>';
+      }).join('') : '<div style="padding:2rem;text-align:center;color:var(--muted)">No unassigned approved WOs</div>';
+      return;
+    }
+    rows = rows.filter(function(d){ return d.status===statFilter; });
+  }
+
+  rows.sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+
+  // Stats
+  if (statsEl) {
+    var today2 = new Date().toISOString().slice(0,10);
+    var todayJobs = _dispatches.filter(function(d){ return d.date===today2; }).length;
+    var dispatched2 = _dispatches.filter(function(d){ return d.status==='dispatched'; }).length;
+    var onsite2 = _dispatches.filter(function(d){ return d.status==='onsite'; }).length;
+    var confirmed2 = _dispatches.filter(function(d){ return d.status==='confirmed'; }).length;
+    var undisp = _jobs.filter(function(j){
+      var ids = new Set(_dispatches.map(function(d){return d.woId;}));
+      return j.status==='approved'&&!ids.has(j.id);
+    }).length;
+    statsEl.innerHTML = [
+      ['Today', todayJobs, '#60A5FA'],
+      ['Dispatched', dispatched2, '#F59E0B'],
+      ['Confirmed', confirmed2, '#38BDF8'],
+      ['On Site', onsite2, '#2DD4BF'],
+      ['Unassigned', undisp, '#E84040'],
+    ].map(function(s){
+      return '<div class="card" style="padding:.6rem .75rem;text-align:center">'
+        +'<div style="font-size:1.4rem;font-weight:800;color:'+s[2]+'">'+s[1]+'</div>'
+        +'<div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">'+s[0]+'</div>'
+        +'</div>';
+    }).join('');
+  }
+
+  if (!rows.length) {
+    board.innerHTML = '<div style="padding:3rem;text-align:center;color:var(--muted)">'
+      + (dateFilter||statFilter ? 'No dispatch records match these filters' : 'No dispatches yet — click + Dispatch Job to get started')
+      + '</div>';
+    return;
+  }
+
+  var statusColors = {dispatched:'#F59E0B',confirmed:'#38BDF8',enroute:'#A855F7',onsite:'#2DD4BF',complete:'#22C55E'};
+
+  board.innerHTML = rows.map(function(d) {
+    var wo = _jobs.find(function(j){ return j.id===d.woId; });
+    var col = statusColors[d.status]||'#6B7280';
+    var crew = (d.crew||[]).map(function(c){ return c.techName; }).join(', ');
+    var isToday = d.date===new Date().toISOString().slice(0,10);
+    return '<div class="card" style="margin-bottom:.5rem;border-left:3px solid '+col+';padding:.75rem 1rem">'
+      +'<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.5rem">'
+        +'<div>'
+          +'<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem">'
+            +'<span style="font-size:.85rem;font-weight:700">'+(wo?wo.woNum||wo.number:'WO not found')+'</span>'
+            +'<span style="font-size:.68rem;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,.06);color:'+col+'">'+d.status+'</span>'
+            +(isToday?'<span style="font-size:.68rem;padding:1px 6px;border-radius:3px;background:rgba(45,212,191,.1);color:#2DD4BF">TODAY</span>':'')
+          +'</div>'
+          +'<div style="font-size:.78rem;color:var(--text)">'+(wo?wo.client:'')+'</div>'
+          +'<div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">'
+            +d.date+(d.time?' @ '+d.time:'')+(d.location?' · '+d.location:'')
+          +'</div>'
+          +'<div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">👷 '+crew+'</div>'
+          +(d.notes?'<div style="font-size:.7rem;color:var(--muted);margin-top:.25rem;font-style:italic">'+d.notes+'</div>':'')
+        +'</div>'
+        +'<div style="display:flex;gap:.4rem;flex-wrap:wrap">'
+          +'<button class="btn btn-ghost btn-sm" onclick="openDispatchModal(\''+d.id+'\')">✏ Edit</button>'
+          +'<button class="btn btn-ghost btn-sm" onclick="cancelDispatch(\''+d.id+'\')">Cancel</button>'
+        +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ── Cancel dispatch ───────────────────────────────────────────────────────────
+async function cancelDispatch(id) {
+  if (!confirm('Cancel this dispatch?')) return;
+  var d = _dispatches.find(function(x){ return x.id===id; });
+  if (!d) return;
+  d.status = 'cancelled';
+  await sbUpsert('dispatches', id, d);
+  // Revert WO status to approved
+  var wo = _jobs.find(function(j){ return j.id===d.woId; });
+  if (wo && wo.status==='dispatched') {
+    wo.status = 'approved';
+    await sbUpsert('jobs', wo.id, wo);
+    var ji = _jobs.findIndex(function(j){ return j.id===wo.id; });
+    if (ji>=0) _jobs[ji]=wo;
+  }
+  _dispatches = _dispatches.filter(function(x){ return x.id!==id; });
+  renderDispatchBoard(); renderJobs();
+  toast('Dispatch cancelled','info');
+}
+
+// ── Render My Jobs (tech view) ────────────────────────────────────────────────
+function renderMyJobs() {
+  var list = document.getElementById('myjobs-list');
+  var techNameEl = document.getElementById('myjobs-tech-name');
+  if (!list) return;
+
+  var viewer = VIEWER_PEOPLE.find(function(p){ return p.id===CURRENT_VIEWER; });
+  if (!viewer) {
+    list.innerHTML = '<div style="padding:2rem;text-align:center;color:var(--muted)">Please log in to see your jobs</div>';
+    return;
+  }
+
+  if (techNameEl) techNameEl.textContent = 'Showing jobs for ' + viewer.name;
+
+  // Find dispatches assigned to this tech
+  var myDispatches = _dispatches.filter(function(d) {
+    if (d.status==='cancelled') return false;
+    return (d.crew||[]).some(function(c){
+      return c.techId===CURRENT_VIEWER
+        || (c.techName||'').toLowerCase()===(viewer.name||'').toLowerCase();
+    });
+  }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+
+  // Also find approved WOs with this tech in labour rows (field-created WOs)
+  var myWOs = _jobs.filter(function(j) {
+    if (['invoiced','paid','void','internal'].indexOf(j.status||'')>-1) return false;
+    return (j.labourRows||[]).some(function(r){
+      return (r.technician||'').toLowerCase()===(viewer.name||'').toLowerCase();
+    });
+  });
+
+  if (!myDispatches.length && !myWOs.length) {
+    list.innerHTML = '<div style="padding:3rem;text-align:center;color:var(--muted)">'
+      +'<div style="font-size:2rem;margin-bottom:.75rem">📋</div>'
+      +'<div style="font-weight:600;margin-bottom:.4rem">No jobs assigned</div>'
+      +'<div style="font-size:.8rem">Dispatched jobs will appear here. You can also create a new WO on arrival.</div>'
+      +'<div style="margin-top:1rem"><button class="btn btn-primary btn-sm" onclick="openNewWOModal()">+ Create Work Order</button></div>'
+      +'</div>';
+    return;
+  }
+
+  var statusColors = {dispatched:'#F59E0B',confirmed:'#38BDF8',enroute:'#A855F7',onsite:'#2DD4BF',approved:'#60A5FA'};
+  var today3 = new Date().toISOString().slice(0,10);
+
+  var dispatchedHtml = myDispatches.map(function(d) {
+    var wo = _jobs.find(function(j){ return j.id===d.woId; });
+    var col = statusColors[d.status]||'#6B7280';
+    var isToday = d.date===today3;
+    var myRole = (d.crew||[]).find(function(c){ return c.techId===CURRENT_VIEWER; });
+    return '<div class="card" style="margin-bottom:.75rem;border-left:3px solid '+col+'">'
+      +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;flex-wrap:wrap">'
+        +'<div style="flex:1">'
+          +'<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;flex-wrap:wrap">'
+            +(isToday?'<span style="font-size:.7rem;padding:2px 7px;border-radius:3px;background:rgba(45,212,191,.15);color:#2DD4BF;font-weight:700">TODAY</span>':'')
+            +'<span style="font-size:.85rem;font-weight:700">'+(wo?wo.woNum||wo.number:'')+'</span>'
+            +'<span style="font-size:.68rem;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,.06);color:'+col+'">'+d.status+'</span>'
+            +(myRole?'<span style="font-size:.68rem;color:var(--muted)">'+myRole.role+'</span>':'')
+          +'</div>'
+          +'<div style="font-size:.82rem;font-weight:600">'+(wo?wo.client:'')+'</div>'
+          +'<div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">'
+            +d.date+(d.time?' @ '+d.time:'')
+          +'</div>'
+          +(d.location?'<div style="font-size:.72rem;color:var(--muted)">📍 '+d.location+'</div>':'')
+          +(d.clientContact?'<div style="font-size:.72rem;color:var(--muted)">📞 '+d.clientContact+'</div>':'')
+          +(d.notes?'<div style="font-size:.72rem;color:var(--muted);margin-top:.25rem;padding:.3rem .5rem;background:rgba(255,255,255,.03);border-radius:4px">'+d.notes+'</div>':'')
+        +'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:.4rem;margin-top:.75rem;flex-wrap:wrap">'
+        +statusButtons(d)
+        +(wo?'<button class="btn btn-ghost btn-sm" onclick="openWO(\''+wo.id+'\')">📂 Open WO</button>':'')
+        +'<button class="btn btn-ghost btn-sm" onclick="openNewWOModal()">+ New WO</button>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+
+  // Field-created WOs (no dispatch record)
+  var woHtml = myWOs.length ? '<div style="font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin:.75rem 0 .4rem">My Work Orders</div>'
+    + myWOs.map(function(j){
+      var col2 = statusColors[j.status]||'#6B7280';
+      return '<div class="card" style="margin-bottom:.5rem;border-left:3px solid '+col2+';display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem">'
+        +'<div>'
+          +'<div style="font-size:.85rem;font-weight:700">'+(j.woNum||j.number||'')+'</div>'
+          +'<div style="font-size:.75rem;color:var(--muted)">'+(j.client||'')+(j.date?' · '+j.date:'')+'</div>'
+        +'</div>'
+        +'<button class="btn btn-ghost btn-sm" onclick="openWO(\''+j.id+'\')">📂 Open WO</button>'
+        +'</div>';
+    }).join('') : '';
+
+  list.innerHTML = (myDispatches.length?'<div style="font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.4rem">Dispatched Jobs</div>':'')
+    + dispatchedHtml + woHtml;
+}
+
+// ── Status action buttons for tech ───────────────────────────────────────────
+function statusButtons(d) {
+  var next = {dispatched:'confirmed', confirmed:'enroute', enroute:'onsite', onsite:'complete'};
+  var labels = {confirmed:'✓ Confirm', enroute:'🚗 En Route', onsite:'📍 On Site', complete:'✅ Complete'};
+  var nextStatus = next[d.status];
+  if (!nextStatus) return '';
+  return '<button class="btn btn-primary btn-sm" onclick="advanceDispatchStatus(\''+d.id+'\',\''+nextStatus+'\')">'+(labels[nextStatus]||nextStatus)+'</button>';
+}
+
+async function advanceDispatchStatus(id, newStatus) {
+  var d = _dispatches.find(function(x){ return x.id===id; });
+  if (!d) return;
+  d.status = newStatus;
+  d.modified = new Date().toISOString();
+  // Update WO status to mirror
+  if (newStatus==='onsite') {
+    var wo = _jobs.find(function(j){ return j.id===d.woId; });
+    if (wo && wo.status==='dispatched') {
+      wo.status = 'onsite'; await sbUpsert('jobs', wo.id, wo);
+      var ji = _jobs.findIndex(function(j){ return j.id===wo.id; }); if(ji>=0) _jobs[ji]=wo;
+    }
+  }
+  if (newStatus==='complete') {
+    var wo2 = _jobs.find(function(j){ return j.id===d.woId; });
+    if (wo2) { wo2.status='approved'; await sbUpsert('jobs',wo2.id,wo2);
+      var ji2=_jobs.findIndex(function(j){return j.id===wo2.id;}); if(ji2>=0) _jobs[ji2]=wo2; }
+  }
+  try {
+    await sbUpsert('dispatches', id, d);
+    var di = _dispatches.findIndex(function(x){ return x.id===id; }); if(di>=0) _dispatches[di]=d;
+    renderMyJobs();
+    if (isAdmin()) renderDispatchBoard();
+    toast('Status updated: '+newStatus, 'success');
+  } catch(e) { toast('Update failed: '+e.message,'error'); }
+}
+
+// ── Helper: open WO modal ─────────────────────────────────────────────────────
+function openWO(id) {
+  var j = _jobs.find(function(x){ return x.id===id; });
+  if (!j) return;
+  showView('jobs', document.getElementById('nav-jobs'));
+  setTimeout(function(){ editWO(id); }, 200);
+}
+
 function renderClientList(){
   var search=(document.getElementById('client-search')||{}).value||'';
   var body=document.getElementById('client-list-body');
