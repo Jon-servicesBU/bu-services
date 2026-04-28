@@ -540,10 +540,12 @@ async function sbList(table) {
   return r.json();
 }
 async function sbUpsert(table, id, data) {
+  // Wrap in data field to match Nortech Ops schema {id, data:{...}, updated_at}
+  const payload = {id, data: Object.assign({}, data, {id}), updated_at: new Date().toISOString()};
   const r=await fetch(`${SB_URL}/rest/v1/${table}`,{
     method:'POST',
     headers:{...sbH,'Prefer':'resolution=merge-duplicates,return=representation'},
-    body:JSON.stringify({id,...data})
+    body:JSON.stringify(payload)
   });
   if(!r.ok){const e=await r.text();throw new Error(e);}
   return r.json();
@@ -557,13 +559,25 @@ async function sbDelete(table, id) {
 async function init() {
   try {
     const [ts, cs] = await Promise.allSettled([sbList('technicians'), sbList('certifications')]);
-    if(ts.status==='fulfilled') _techs = ts.value || [];
-    if(cs.status==='fulfilled') _certs = cs.value || [];
+    if(ts.status==='fulfilled') {
+      _techs = (ts.value||[]).map(function(r){
+        return Object.assign({id:r.id}, r.data||r);
+      });
+    }
+    if(cs.status==='fulfilled') {
+      _certs = (cs.value||[]).map(function(r){
+        return Object.assign({id:r.id}, r.data||r);
+      });
+    }
   } catch(e) {
     const tc=localStorage.getItem('cert_techs');
     const cc=localStorage.getItem('cert_certs');
-    if(tc) _techs=JSON.parse(tc);
-    if(cc) _certs=JSON.parse(cc);
+    if(tc) {
+      _techs=JSON.parse(tc).map(function(r){return Object.assign({id:r.id},r.data||r);});
+    }
+    if(cc) {
+      _certs=JSON.parse(cc).map(function(r){return Object.assign({id:r.id},r.data||r);});
+    }
     if(!tc&&!cc) toast('Could not connect to database — showing cached data','amber');
   }
 

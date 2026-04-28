@@ -677,7 +677,9 @@ async function init() {
       _procedures = procs.value;
     }
     if(techs.status==='fulfilled') {
-      _technicians = (techs.value||[]).sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
+      _technicians = (techs.value||[]).map(function(r){
+        return Object.assign({id:r.id}, r.data||r);
+      }).sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
     }
   } catch(e){ console.warn('Load error:', e); }
   renderList();
@@ -992,7 +994,8 @@ async function fetchTechCerts(techId, rowIdx) {
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
     });
     if(!r.ok) return;
-    const certs=await r.json();
+    const raw=await r.json();
+    const certs=(raw||[]).map(function(r){return Object.assign({id:r.id},r.data||r);});
     const ndtCerts=(certs||[]).filter(function(c){return c.category==='ndt';});
     const cgsbCert=ndtCerts.find(function(c){return c.body==='CGSB';});
     const sntCert=ndtCerts.find(function(c){return c.body==='SNT-TC-1A';});
