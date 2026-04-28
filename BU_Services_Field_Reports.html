@@ -504,6 +504,7 @@ let _jobs    = [];     // WOs from Supabase
 let _procedures = [];  // from procedures table
 let _technicians = []; // from technicians table
 let _currentReport = null;  // report being edited
+let _viewingReport = null; // report currently being viewed
 let _selectedWO    = null;
 let _selectedTypes = [];
 let _photos = [];      // base64 array for current report
@@ -636,6 +637,7 @@ function toast(msg, type='green') {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   const s=$('screen-'+name); if(s) s.classList.add('active');
+  if(name!=='view') _viewingReport=null;
   window.scrollTo(0,0);
 }
 
@@ -1241,6 +1243,7 @@ async function submitReport(){
 // ══ VIEW ══════════════════════════════════════════════════════════════════════
 function viewReport(id){
   const r=_reports.find(r=>r.id===id); if(!r) return;
+  _viewingReport=r;
   const t=REPORT_TYPES[r.reportType]||{};
   $('view-title').textContent=(r.reportType||'')+(t.name?' — '+t.name:'');
   $('view-subtitle').textContent=`Report #${r.reportNumber||r.id} · ${r.client||'—'} · ${r.date||'—'} · ${getBadge(r.status||'Draft')}`;
@@ -1346,8 +1349,16 @@ async function deleteReport(){
 
 // ══ PRINT / PDF ═══════════════════════════════════════════════════════════════
 function printReport(){
-  const data=_currentReport?{..._currentReport,...collectFormData()}:null;
-  if(!data){toast('No report to print','amber');return;}
+  // If on the view screen, use the stored report directly
+  const activeScreen=document.querySelector('.screen.active');
+  const onViewScreen=activeScreen&&activeScreen.id==='screen-view';
+  let data=null;
+  if(onViewScreen&&_viewingReport){
+    data=_viewingReport;
+  } else if(_currentReport){
+    data={..._currentReport,...collectFormData()};
+  }
+  if(!data){toast('No report to print — open a report first','amber');return;}
   buildPDFPreview(data);
   setTimeout(()=>window.print(),300);
 }
