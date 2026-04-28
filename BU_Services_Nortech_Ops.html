@@ -1070,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <!-- Add/Edit Client Modal -->
-<div id="add-client-modal" class="modal-overlay" style="display:none">
+<div id="add-client-modal" class="modal-overlay">
   <div class="modal" style="max-width:480px">
     <div class="modal-header">
       <span class="modal-title" id="add-client-title">Add Client</span>
@@ -3965,7 +3965,7 @@ async function saveJob(){
     renderJobs();
     renderDashboard();
     toast('Job saved','success');
-  }catch(e){ toast('Save failed: '+e.message,'error'); }
+  }catch(e){ toast('Save failed: '+e.message,'warning'); }
 }
 
 // ── Work Orders ─────────────────────────────────────────────────────────────
@@ -4153,7 +4153,7 @@ async function saveCS(status){
     closeModal('cs-modal');
     renderCSList(); renderDashboard(); updatePendingBadge();
     toast(status==='pending'?'Charge sheet submitted for approval':'Draft saved','success');
-  }catch(e){toast('Save failed: '+e.message,'error');}
+  }catch(e){toast('Save failed: '+e.message,'warning');}
 }
 
 function renderCSList(){
@@ -4325,7 +4325,7 @@ async function saveRateSheet(){
     closeModal('rate-modal');
     renderRateSheets();
     toast('Rate sheet saved','success');
-  }catch(e){toast('Save failed: '+e.message,'error');}
+  }catch(e){toast('Save failed: '+e.message,'warning');}
 }
 
 function renderRateSheets(){
@@ -4707,7 +4707,7 @@ async function saveInvoice(status){
     pushActualsToCC();
     // Auto-open the invoice view
     if(status==='sent') viewInvoice(id);
-  }catch(e){toast('Save failed: '+e.message,'error');}
+  }catch(e){toast('Save failed: '+e.message,'warning');}
 }
 
 function renderInvoices(){
@@ -8165,7 +8165,7 @@ function openAddClientModal(){
   document.getElementById('new-client-location').value='';
   document.getElementById('edit-client-id').value='';
   document.getElementById('add-client-title').textContent='Add Client';
-  openModal('add-client-modal');
+  document.getElementById('add-client-modal').classList.add('open');
 }
 
 function editClientModal(id){
@@ -8175,14 +8175,14 @@ function editClientModal(id){
   document.getElementById('new-client-location').value=c.location||'';
   document.getElementById('edit-client-id').value=id;
   document.getElementById('add-client-title').textContent='Edit Client';
-  openModal('add-client-modal');
+  document.getElementById('add-client-modal').classList.add('open');
 }
 
 async function saveNewClient(){
   var name=(document.getElementById('new-client-name').value||'').trim();
   var location=(document.getElementById('new-client-location').value||'').trim();
   var editId=document.getElementById('edit-client-id').value||'';
-  if(!name){toast('Client name is required','error');return;}
+  if(!name){toast('Client name is required','warning');return;}
 
   if(editId){
     // Update existing
@@ -8195,16 +8195,16 @@ async function saveNewClient(){
         var nc=NORTECH_CUSTOMERS.find(function(x){return x.id===editId;});
         if(nc){nc.name=name;nc.loc=location;}
         NORTECH_CUSTOMERS.sort(function(a,b){return a.name.localeCompare(b.name);});
-        toast('Client updated','success');
+        toast('Client updated ✓','success');
         closeModal('add-client-modal');
         renderClientList();
-      }catch(e){toast('Save failed: '+e.message,'error');}
+      }catch(e){toast('Save failed: '+e.message,'warning');}
     }
   } else {
     // Check for duplicate
     var norm=name.toLowerCase();
     if(NORTECH_CUSTOMERS.some(function(c){return c.name.trim().toLowerCase()===norm;})){
-      toast('This client already exists in the directory','info'); return;
+      toast('Client already exists in the directory','info'); return;
     }
     var nc={id:'CL_'+Date.now().toString(36),name:name,location:location,created:new Date().toISOString()};
     try{
@@ -8212,10 +8212,10 @@ async function saveNewClient(){
       _customClients.push(nc);
       NORTECH_CUSTOMERS.push({id:nc.id,name:nc.name,loc:nc.location});
       NORTECH_CUSTOMERS.sort(function(a,b){return a.name.localeCompare(b.name);});
-      toast('Client added','success');
+      toast('Client added ✓','success');
       closeModal('add-client-modal');
       renderClientList();
-    }catch(e){toast('Save failed: '+e.message,'error');}
+    }catch(e){toast('Save failed: '+e.message,'warning');}
   }
 }
 
