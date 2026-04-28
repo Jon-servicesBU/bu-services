@@ -3247,6 +3247,8 @@ async function loadAll(){
       });
       NORTECH_CUSTOMERS.sort(function(a,b){return a.name.localeCompare(b.name);});
     }
+    // Sync NORTECH_EMPLOYEES to technicians table (background, non-blocking)
+    syncEmployeesToTechnicians();
     if(results[4].status==='fulfilled') {
       var sbTS = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
       if (sbTS.length > 0) {
@@ -3741,6 +3743,56 @@ function renderTSPager(page, totalPages, totalItems) {
   var el = document.getElementById('ts-pager');
   if (el) el.innerHTML = _pagerHTML(page, totalPages, totalItems,
     '_tsPage--;renderTimesheets()', '_tsPage++;renderTimesheets()');
+}
+
+
+// Sync embedded NORTECH_EMPLOYEES to Supabase technicians table
+// Only adds missing employees — never overwrites existing records (preserves cert data)
+// Does NOT sync rates — rates stay in NORTECH_EMPLOYEES only
+async function syncEmployeesToTechnicians() {
+  try {
+    var existing = await sbList('technicians');
+    var existingIds = new Set(existing.map(function(t){ return t.id; }));
+    var existingNames = new Set(existing.map(function(t){
+      return (t.name||'').trim().toLowerCase();
+    }));
+    var toAdd = [];
+    NORTECH_EMPLOYEES.forEach(function(e) {
+      var techId = 'tech_' + e.id;
+      // Skip if already in table by ID or name
+      if (existingIds.has(techId)) return;
+      if (existingNames.has((e.name||'').trim().toLowerCase())) return;
+      toAdd.push({
+        id: techId,
+        name: e.name,
+        empNum: e.emp,
+        province: e.province || 'AB',
+        role: e.type || 'NDT Technician',
+        email: '', phone: '', notes: '',
+        source: 'nortech_employees',
+        created: new Date().toISOString(),
+        modified: new Date().toISOString(),
+      });
+    });
+    if (!toAdd.length) {
+      console.log('[Sync] Technicians up to date —', existing.length, 'in table');
+      return;
+    }
+    // Batch upsert — 10 at a time to avoid request size limits
+    var batches = [];
+    for (var i=0; i<toAdd.length; i+=10) batches.push(toAdd.slice(i,i+10));
+    var added = 0;
+    for (var b=0; b<batches.length; b++) {
+      await Promise.all(batches[b].map(function(tech){
+        return sbUpsert('technicians', tech.id, tech);
+      }));
+      added += batches[b].length;
+    }
+    console.log('[Sync] Added', added, 'employees to technicians table');
+  } catch(e) {
+    console.warn('[Sync] Technicians sync failed:', e.message);
+    // Non-fatal — app continues normally
+  }
 }
 
 function renderJobs() {

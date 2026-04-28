@@ -221,6 +221,9 @@ select option{background:var(--surface);color:var(--text)}
     </div>
   </div>
   <div class="tb-actions">
+    <a href="BU_Services_Nortech_Ops.html" class="btn btn-ghost btn-sm" style="text-decoration:none" title="Back to Nortech Ops">← Nortech Ops</a>
+    <a href="BU_Services_Procedures.html" class="btn btn-ghost btn-sm" style="text-decoration:none" title="Open Procedure Library">📋 Procedures ↗</a>
+    <a href="BU_Services_Certifications.html" class="btn btn-ghost btn-sm" style="text-decoration:none" title="Technician Certifications">🏅 Certifications ↗</a>
     <button class="btn btn-ghost btn-sm" onclick="showScreen('list')">All Reports</button>
     <button class="btn btn-primary btn-sm" onclick="startNewReport()">+ New Report</button>
   </div>
@@ -500,6 +503,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let _reports = [];     // all from Supabase
 let _jobs    = [];     // WOs from Supabase
 let _procedures = [];  // from procedures table
+let _technicians = []; // from technicians table
 let _currentReport = null;  // report being edited
 let _selectedWO    = null;
 let _selectedTypes = [];
@@ -662,7 +666,7 @@ async function init() {
   buildTypeGrid();
   // Load data
   try {
-    const [rpts, jobs, procs] = await Promise.allSettled([sbList('field_reports'), sbList('jobs'), sbList('procedures')]);
+    const [rpts, jobs, procs, techs] = await Promise.allSettled([sbList('field_reports'), sbList('jobs'), sbList('procedures'), sbList('technicians')]);
     if(rpts.status==='fulfilled') {
       _reports = rpts.value.map(r=>({id:r.id,...(r.data||r)}));
     }
@@ -671,6 +675,9 @@ async function init() {
     }
     if(procs.status==='fulfilled') {
       _procedures = procs.value;
+    }
+    if(techs.status==='fulfilled') {
+      _technicians = (techs.value||[]).sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
     }
   } catch(e){ console.warn('Load error:', e); }
   renderList();
@@ -920,8 +927,23 @@ function addTechRow(data){
   const roleLabel=idx===0?'Technician':idx===1?'Assistant':'Personnel';
   const div=document.createElement('div');
   div.style.cssText='display:grid;grid-template-columns:1.5fr 1fr 0.7fr 0.7fr 0.7fr 28px;gap:8px;align-items:end;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid rgba(255,255,255,0.04)';
+
+  // Build technician dropdown from _technicians table
+  const techOptions=_technicians.map(function(t){
+    return '<option value="'+t.id+'" data-name="'+(t.name||'')+'">'+(t.name||'')+'</option>';
+  }).join('');
+  const selectedId=d.techId||'';
+  const techDropdown='<select class="form-select" id="tech-select-'+idx+'" onchange="onTechSelect('+idx+',this)">'
+    +'<option value="">Select or type below…</option>'
+    +techOptions
+    +'</select>';
+
   div.innerHTML=`
-    <div><label class="form-label">${roleLabel} Name</label><input type="text" class="form-input" id="tech-name-${idx}" value="${d.name||''}" placeholder="Full name"></div>
+    <div>
+      <label class="form-label">${roleLabel}</label>
+      ${techDropdown}
+      <input type="text" class="form-input" id="tech-name-${idx}" value="${d.name||''}" placeholder="Or type name manually" style="margin-top:5px">
+    </div>
     <div><label class="form-label">Role</label>
       <select class="form-select" id="tech-role-${idx}">
         <option${d.role==='Technician'?' selected':''}>Technician</option>
@@ -932,8 +954,59 @@ function addTechRow(data){
     <div><label class="form-label">CGSB Level</label><input type="text" class="form-input" id="tech-cgsb-${idx}" value="${d.cgsb||''}" placeholder="e.g. 2"></div>
     <div><label class="form-label">CGSB Reg#</label><input type="text" class="form-input" id="tech-reg-${idx}" value="${d.cgsbReg||''}"></div>
     <div><label class="form-label">SNT-TC-1A</label><input type="text" class="form-input" id="tech-snt-${idx}" value="${d.snt||''}" placeholder="e.g. II"></div>
-    <div style="display:flex;align-items:flex-end">${idx>0?`<button class="del-row" onclick="this.closest('div').parentElement.remove()">×</button>`:'<div></div>'}</div>`;
+    <div style="display:flex;align-items:flex-end">${idx>0?'<button class="del-row" onclick="this.closest(\'div\').parentElement.remove()">×</button>':'<div></div>'}</div>`;
+
+  // Pre-select if techId provided
+  if(selectedId) {
+    setTimeout(function(){ const sel=document.getElementById('tech-select-'+idx); if(sel) sel.value=selectedId; },0);
+  }
   container.appendChild(div);
+}
+
+function onTechSelect(idx, sel) {
+  const techId=sel.value; if(!techId) return;
+  const tech=_technicians.find(function(t){return t.id===techId;});
+  if(!tech) return;
+  // Fill name field
+  const nameEl=document.getElementById('tech-name-'+idx);
+  if(nameEl) nameEl.value=tech.name||'';
+  // Auto-populate CGSB/SNT from certifications if available
+  if(window.getCertsByTechName) {
+    const certs=window.getCertsByTechName(tech.name);
+    if(certs) {
+      const cgsbEl=document.getElementById('tech-cgsb-'+idx);
+      const regEl=document.getElementById('tech-reg-'+idx);
+      const sntEl=document.getElementById('tech-snt-'+idx);
+      if(cgsbEl&&certs.cgsb) cgsbEl.value=certs.cgsb;
+      if(regEl&&certs.cgsbReg) regEl.value=certs.cgsbReg;
+      if(sntEl&&certs.snt) sntEl.value=certs.snt;
+    }
+  }
+  // Also try fetching from Supabase certifications for this tech
+  fetchTechCerts(techId, idx);
+}
+
+async function fetchTechCerts(techId, rowIdx) {
+  try {
+    const r=await fetch(SB_URL+'/rest/v1/certifications?techId=eq.'+techId+'&select=*&limit=20',{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    });
+    if(!r.ok) return;
+    const certs=await r.json();
+    const ndtCerts=(certs||[]).filter(function(c){return c.category==='ndt';});
+    const cgsbCert=ndtCerts.find(function(c){return c.body==='CGSB';});
+    const sntCert=ndtCerts.find(function(c){return c.body==='SNT-TC-1A';});
+    if(cgsbCert) {
+      const cgsbEl=document.getElementById('tech-cgsb-'+rowIdx);
+      const regEl=document.getElementById('tech-reg-'+rowIdx);
+      if(cgsbEl&&!cgsbEl.value) cgsbEl.value=String(cgsbCert.level||'');
+      if(regEl&&!regEl.value)   regEl.value=cgsbCert.num||'';
+    }
+    if(sntCert) {
+      const sntEl=document.getElementById('tech-snt-'+rowIdx);
+      if(sntEl&&!sntEl.value) sntEl.value=['','I','II','III'][sntCert.level||0]||'';
+    }
+  } catch(e){ /* silent fail */ }
 }
 
 // ══ PHOTOS ════════════════════════════════════════════════════════════════════
@@ -1045,9 +1118,13 @@ function collectFormData(){
   // Technicians
   const technicians=[];
   document.querySelectorAll('#tech-rows > div').forEach((_,i)=>{
-    const name=($('tech-name-'+i)||{}).value||'';
-    if(name) technicians.push({
-      name,
+    const nameEl=$('tech-name-'+i);
+    const selEl=$('tech-select-'+i);
+    const name=(nameEl?nameEl.value:'')||'';
+    const techId=selEl?selEl.value:'';
+    if(name||techId) technicians.push({
+      name: name||(techId&&_technicians.find(function(t){return t.id===techId;})?(_technicians.find(function(t){return t.id===techId;}).name):''),
+      techId,
       role:($('tech-role-'+i)||{}).value||'Technician',
       cgsb:($('tech-cgsb-'+i)||{}).value||'',
       cgsbReg:($('tech-reg-'+i)||{}).value||'',
