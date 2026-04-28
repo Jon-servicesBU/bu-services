@@ -8447,7 +8447,7 @@ function openAddTechModalOps(editId) {
       document.getElementById('ops-tech-active').value=t.active===false?'false':'true';
     }
   }
-  openModal('add-tech-ops-modal');
+  document.getElementById('add-tech-ops-modal').classList.add('open');
 }
 
 function editOpsTech(id){ openAddTechModalOps(id); }
