@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nortech — Certifications</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04080F;--bg2:#080D17;--surface:#0F1828;--surface2:#131E30;--surface3:#172036;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#E8F0FA;--text2:#7A96B8;--text3:#2E4160;
+  --green:#22C55E;--green-dim:rgba(34,197,94,0.1);
+  --blue:#60A5FA;--blue-dim:rgba(96,165,250,0.1);
+  --amber:#F59E0B;--amber-dim:rgba(245,158,11,0.1);
+  --red:#EF4444;--red-dim:rgba(239,68,68,0.1);
+  --teal:#2DD4BF;--teal-dim:rgba(45,212,191,0.1);
+  --purple:#A78BFA;--purple-dim:rgba(167,139,250,0.1);
+  --coral:#F87171;--coral-dim:rgba(248,113,113,0.1);
+  --radius:8px;--radius-lg:12px;
+  --font:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:13px}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 800px 500px at 15% 15%,rgba(245,158,11,0.04),transparent 70%),
+  radial-gradient(ellipse 600px 800px at 85% 80%,rgba(34,197,94,0.03),transparent 70%);
+  pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+#app{position:relative;z-index:1;min-height:100vh}
+
+/* ── Topbar ── */
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(8,13,23,0.95);border-bottom:0.5px solid var(--border);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
+.tb-brand{display:flex;align-items:center;gap:12px}
+.tb-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--amber),var(--coral));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff}
+.tb-name{font-size:13px;font-weight:700}
+.tb-sub{font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-family:var(--mono)}
+.tb-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ── Layout ── */
+#main{max-width:1300px;margin:0 auto;padding:24px 20px 80px}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;border:0.5px solid;transition:all .15s;font-family:var(--font);white-space:nowrap;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,var(--amber),var(--coral));border-color:transparent;color:#fff}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-ghost{background:transparent;border-color:var(--border2);color:var(--text2)}
+.btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
+.btn-green{background:var(--green-dim);border-color:rgba(34,197,94,0.25);color:var(--green)}
+.btn-red{background:var(--red-dim);border-color:rgba(239,68,68,0.25);color:var(--red)}
+.btn-amber{background:var(--amber-dim);border-color:rgba(245,158,11,0.25);color:var(--amber)}
+.btn-teal{background:var(--teal-dim);border-color:rgba(45,212,191,0.25);color:var(--teal)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px}
+.card-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;font-family:var(--mono);display:flex;align-items:center;justify-content:space-between}
+
+/* ── Forms ── */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;font-family:var(--mono)}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:8px 12px;outline:none;transition:border-color .15s;font-family:var(--font)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(245,158,11,0.4);box-shadow:0 0 0 3px rgba(245,158,11,0.06)}
+.form-select{appearance:none;cursor:pointer}
+.form-textarea{resize:vertical;min-height:70px;line-height:1.6}
+.form-row{display:grid;gap:12px}
+.form-row.c2{grid-template-columns:1fr 1fr}
+.form-row.c3{grid-template-columns:1fr 1fr 1fr}
+.form-row.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:640px){.form-row.c2,.form-row.c3,.form-row.c4{grid-template-columns:1fr}}
+select option{background:var(--surface)}
+.req::after{content:' *';color:var(--red)}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:4px;padding:4px;background:var(--bg2);border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:24px;flex-wrap:wrap}
+.tab{padding:7px 18px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text2);transition:all .15s;font-family:var(--font)}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+.tab:hover:not(.active){color:var(--text)}
+
+/* ── Stats ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.stat-val{font-size:26px;font-weight:800;font-family:var(--mono);line-height:1}
+.stat-label{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:4px;font-family:var(--mono)}
+
+/* ── Tech cards grid ── */
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.tech-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .2s;cursor:pointer}
+.tech-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+.tech-card-header{padding:14px 16px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.tech-name{font-size:14px;font-weight:700}
+.tech-role{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.cert-summary{padding:12px 16px;display:flex;flex-direction:column;gap:6px}
+.cert-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.cert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cert-name{flex:1;color:var(--text2)}
+.cert-expiry{font-family:var(--mono);font-size:10px}
+.cert-count-row{padding:8px 16px 12px;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── Expiry indicator ── */
+.exp-valid{color:var(--green)}
+.exp-soon{color:var(--amber)}
+.exp-expired{color:var(--red)}
+.exp-none{color:var(--text3)}
+
+/* ── Badge ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:0.5px;font-family:var(--mono)}
+.badge-valid{background:var(--green-dim);color:var(--green)}
+.badge-soon{background:var(--amber-dim);color:var(--amber)}
+.badge-expired{background:var(--red-dim);color:var(--red)}
+.badge-none{background:rgba(255,255,255,0.04);color:var(--text3)}
+.badge-l1{background:var(--blue-dim);color:var(--blue)}
+.badge-l2{background:var(--teal-dim);color:var(--teal)}
+.badge-l3{background:var(--purple-dim);color:var(--purple)}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:20px;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s;overflow-y:auto}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:680px;box-shadow:0 24px 64px rgba(0,0,0,0.5);margin:auto}
+.modal-header{padding:18px 24px 14px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface2);z-index:1;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.modal-title{font-size:15px;font-weight:700}
+.modal-close{width:28px;height:28px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{border-color:var(--border2);color:var(--text)}
+.modal-body{padding:20px 24px;max-height:80vh;overflow-y:auto}
+.modal-footer{padding:14px 24px;border-top:0.5px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* ── Cert detail ── */
+.cert-detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:16px}
+.cert-block{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;position:relative}
+.cert-block-type{font-size:9px;font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.cert-block-name{font-size:13px;font-weight:700;margin-bottom:8px}
+.cert-block-fields{display:flex;flex-direction:column;gap:4px;font-size:11px}
+.cert-field{display:flex;gap:8px}
+.cert-field .lbl{color:var(--text3);font-family:var(--mono);font-size:10px;min-width:80px;flex-shrink:0}
+.cert-field .val{color:var(--text)}
+.cert-block-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px}
+
+/* ── Cert type sections ── */
+.cert-section{margin-bottom:20px}
+.cert-section-title{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cert-section-bar{flex:1;height:0.5px;background:var(--border)}
+.cert-section-label{font-size:9px;font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--text3);white-space:nowrap}
+
+/* ── Add cert form ── */
+.cert-type-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.cert-type-tab{padding:6px 14px;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer;border:0.5px solid var(--border);background:transparent;color:var(--text2);transition:all .15s;font-family:var(--font)}
+.cert-type-tab.active{border-color:rgba(245,158,11,0.4);background:var(--amber-dim);color:var(--amber)}
+
+/* ── Expiry warning banner ── */
+.expiry-banner{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:var(--radius);margin-bottom:8px;font-size:12px}
+.expiry-banner.warning{background:var(--amber-dim);border:0.5px solid rgba(245,158,11,0.25);color:var(--amber)}
+.expiry-banner.expired{background:var(--red-dim);border:0.5px solid rgba(239,68,68,0.25);color:var(--red)}
+
+/* ── Search/filter ── */
+.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.filter-bar .form-input{max-width:220px}
+.filter-bar .form-select{max-width:160px}
+
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.35}
+.empty-title{font-size:14px;color:var(--text2);font-weight:600;margin-bottom:6px}
+.empty-sub{font-size:12px;max-width:360px;margin:0 auto;line-height:1.6}
+
+/* ── Toast ── */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 16px;border-radius:var(--radius);border:0.5px solid rgba(255,255,255,0.1);font-size:12px;animation:slideIn .2s ease;max-width:320px;backdrop-filter:blur(8px)}
+.toast-green{background:rgba(15,24,40,0.95);border-left:3px solid var(--green)}
+.toast-amber{background:rgba(15,24,40,0.95);border-left:3px solid var(--amber)}
+.toast-red{background:rgba(15,24,40,0.95);border-left:3px solid var(--red)}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+hr.div{border:none;border-top:0.5px solid var(--border);margin:16px 0}
+input[type=file]{display:none}
+.tbl-wrap{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:11px}
+table.t th{font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:8px 12px;border-bottom:0.5px solid var(--border);text-align:left;white-space:nowrap}
+table.t td{padding:8px 12px;border-bottom:0.5px solid rgba(255,255,255,0.03);vertical-align:middle}
+table.t tr:hover td{background:rgba(255,255,255,0.015)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">🏅</div>
+    <div>
+      <div class="tb-name">Certifications</div>
+      <div class="tb-sub">Nortech Advanced NDT</div>
+    </div>
+  </div>
+  <div class="tb-actions">
+    <a href="BU_Services_Field_Reports.html" class="btn btn-ghost btn-sm">← Field Reports</a>
+    <a href="BU_Services_Procedures.html" class="btn btn-ghost btn-sm">📋 Procedures ↗</a>
+    <button class="btn btn-ghost btn-sm" onclick="openAddTechModal()">+ Add Technician</button>
+    <button class="btn btn-primary btn-sm" onclick="openAddCertModal()">+ Add Certification</button>
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- Expiry warnings banner area -->
+  <div id="expiry-banners"></div>
+
+  <!-- Stats -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-val" id="stat-techs" style="color:var(--teal)">0</div><div class="stat-label">Technicians</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-total-certs" style="color:var(--amber)">0</div><div class="stat-label">Total Certs</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-ndt" style="color:var(--blue)">0</div><div class="stat-label">NDT Certs</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-safety" style="color:var(--green)">0</div><div class="stat-label">Safety Certs</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-site" style="color:var(--purple)">0</div><div class="stat-label">Site Certs</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-expiring" style="color:var(--amber)">0</div><div class="stat-label">Expiring 60d</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-expired" style="color:var(--red)">0</div><div class="stat-label">Expired</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tab-all" onclick="setTab('all')">All Technicians</button>
+    <button class="tab" id="tab-ndt" onclick="setTab('ndt')">NDT (ISO 9712)</button>
+    <button class="tab" id="tab-safety" onclick="setTab('safety')">General Safety</button>
+    <button class="tab" id="tab-site" onclick="setTab('site')">Site Specific</button>
+    <button class="tab" id="tab-expiring" onclick="setTab('expiring')">⚠ Expiring / Expired</button>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <input type="text" id="search-input" class="form-input" placeholder="Search technicians…" oninput="renderTechs()">
+    <select id="filter-method" class="form-select" onchange="renderTechs()" style="display:none" id="filter-ndt-method">
+      <option value="">All NDT methods</option>
+      <option>MT</option><option>HT</option><option>PT</option><option>UT</option>
+      <option>AUT</option><option>RT</option><option>ET</option><option>VT</option>
+      <option>PMI</option><option>FT</option><option>NACE</option><option>OES</option>
+    </select>
+  </div>
+
+  <!-- Technician grid -->
+  <div id="tech-grid" class="tech-grid"></div>
+
+</div><!-- /main -->
+
+<!-- ══ MODAL: ADD TECHNICIAN ══ -->
+<div class="modal-overlay" id="modal-add-tech">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="add-tech-title">Add Technician</div>
+      <button class="modal-close" onclick="closeModal('modal-add-tech')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row c2">
+        <div class="form-group"><label class="form-label req">Full Name</label><input type="text" id="t-name" class="form-input" placeholder="e.g. Ethan Sarafinchan"></div>
+        <div class="form-group"><label class="form-label">Employee #</label><input type="text" id="t-emp" class="form-input" placeholder="e.g. E404"></div>
+      </div>
+      <div class="form-row c2">
+        <div class="form-group"><label class="form-label">Title / Role</label><input type="text" id="t-role" class="form-input" placeholder="e.g. NDT Technician Level II"></div>
+        <div class="form-group"><label class="form-label">Province</label>
+          <select id="t-province" class="form-select">
+            <option value="">Select…</option>
+            <option>AB</option><option>BC</option><option>SK</option><option>MB</option>
+            <option>ON</option><option>QC</option><option>NS</option><option>NB</option>
+            <option>NL</option><option>PE</option><option>YT</option><option>NT</option><option>NU</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row c2">
+        <div class="form-group"><label class="form-label">Email</label><input type="email" id="t-email" class="form-input" placeholder="tech@nortechadvanced.com"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input type="text" id="t-phone" class="form-input" placeholder="780-xxx-xxxx"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea id="t-notes" class="form-textarea" placeholder="Any relevant notes…"></textarea></div>
+      <input type="hidden" id="t-edit-id" value="">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-add-tech')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveTech()">Save Technician</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: ADD CERTIFICATION ══ -->
+<div class="modal-overlay" id="modal-add-cert">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div class="modal-title" id="add-cert-title">Add Certification</div>
+      <button class="modal-close" onclick="closeModal('modal-add-cert')">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Cert category tabs -->
+      <div class="cert-type-tabs" id="cert-type-tabs">
+        <button class="cert-type-tab active" onclick="setCertType('ndt',this)">🔬 NDT (ISO 9712)</button>
+        <button class="cert-type-tab" onclick="setCertType('safety',this)">🦺 General Safety</button>
+        <button class="cert-type-tab" onclick="setCertType('site',this)">🏗 Site Specific</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label req">Technician</label>
+        <select id="c-tech" class="form-select">
+          <option value="">Select technician…</option>
+        </select>
+      </div>
+
+      <!-- NDT fields -->
+      <div id="cert-ndt-fields">
+        <div class="form-row c2">
+          <div class="form-group">
+            <label class="form-label req">NDT Method</label>
+            <select id="c-ndt-method" class="form-select">
+              <option value="">Select method…</option>
+              <option>MT — Magnetic Particle</option>
+              <option>HT — Hardness Testing</option>
+              <option>PT — Liquid Penetrant</option>
+              <option>UT — Ultrasonic Testing</option>
+              <option>AUT — Phased Array UT</option>
+              <option>RT — Radiographic Testing</option>
+              <option>ET — Eddy Current</option>
+              <option>VT — Visual Inspection</option>
+              <option>PMI — Positive Material ID</option>
+              <option>FT — Ferrite Testing</option>
+              <option>NACE — NACE Testing</option>
+              <option>OES — Optical Emission Spec.</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label req">Certification Level</label>
+            <select id="c-ndt-level" class="form-select">
+              <option value="">Select level…</option>
+              <option value="1">Level I</option>
+              <option value="2">Level II</option>
+              <option value="3">Level III</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row c3">
+          <div class="form-group"><label class="form-label">Certifying Body</label>
+            <select id="c-ndt-body" class="form-select">
+              <option>CGSB</option><option>SNT-TC-1A</option><option>PCN</option><option>ISO 9712</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Certificate #</label><input type="text" id="c-ndt-num" class="form-input" placeholder="e.g. CGSB REG# 9638"></div>
+          <div class="form-group"><label class="form-label">Scope / Sector</label><input type="text" id="c-ndt-scope" class="form-input" placeholder="e.g. Welds, Castings"></div>
+        </div>
+        <div class="form-row c3">
+          <div class="form-group"><label class="form-label">Issue Date</label><input type="date" id="c-ndt-issued" class="form-input"></div>
+          <div class="form-group"><label class="form-label req">Expiry Date</label><input type="date" id="c-ndt-expiry" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Exam Score (%)</label><input type="number" id="c-ndt-score" class="form-input" min="0" max="100"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea id="c-ndt-notes" class="form-textarea" style="min-height:60px" placeholder="Any restrictions, endorsements, or notes…"></textarea></div>
+      </div>
+
+      <!-- Safety fields -->
+      <div id="cert-safety-fields" style="display:none">
+        <div class="form-group">
+          <label class="form-label req">Certification Type</label>
+          <select id="c-safety-type" class="form-select">
+            <option value="">Select…</option>
+            <option>H2S Alive</option>
+            <option>Standard First Aid / CPR</option>
+            <option>Emergency First Aid</option>
+            <option>WHMIS 2015</option>
+            <option>Fall Protection</option>
+            <option>Confined Space Entry</option>
+            <option>Ground Disturbance Level II</option>
+            <option>TDG (Transportation of Dangerous Goods)</option>
+            <option>Elevated Work Platform</option>
+            <option>Forklift / Elevated Platform</option>
+            <option>Radiation Safety</option>
+            <option>Industrial Fire Safety</option>
+            <option>CAPP Basic Safety Orientation</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group" id="c-safety-other-group" style="display:none">
+          <label class="form-label req">Specify</label>
+          <input type="text" id="c-safety-other" class="form-input" placeholder="Certification name">
+        </div>
+        <div class="form-row c2">
+          <div class="form-group"><label class="form-label">Issuing Organization</label><input type="text" id="c-safety-org" class="form-input" placeholder="e.g. Red Cross, Enform"></div>
+          <div class="form-group"><label class="form-label">Certificate #</label><input type="text" id="c-safety-num" class="form-input" placeholder="Optional"></div>
+        </div>
+        <div class="form-row c2">
+          <div class="form-group"><label class="form-label">Issue Date</label><input type="date" id="c-safety-issued" class="form-input"></div>
+          <div class="form-group"><label class="form-label req">Expiry Date</label><input type="date" id="c-safety-expiry" class="form-input"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea id="c-safety-notes" class="form-textarea" style="min-height:60px"></textarea></div>
+      </div>
+
+      <!-- Site specific fields -->
+      <div id="cert-site-fields" style="display:none">
+        <div class="form-row c2">
+          <div class="form-group"><label class="form-label req">Site / Client Name</label><input type="text" id="c-site-name" class="form-input" placeholder="e.g. YANDA CANADA LTD"></div>
+          <div class="form-group"><label class="form-label req">Orientation / Cert Type</label><input type="text" id="c-site-type" class="form-input" placeholder="e.g. Site Safety Orientation"></div>
+        </div>
+        <div class="form-row c2">
+          <div class="form-group"><label class="form-label">Location</label><input type="text" id="c-site-location" class="form-input" placeholder="e.g. Fort Saskatchewan, AB"></div>
+          <div class="form-group"><label class="form-label">Certificate / Badge #</label><input type="text" id="c-site-num" class="form-input" placeholder="Optional"></div>
+        </div>
+        <div class="form-row c2">
+          <div class="form-group"><label class="form-label">Issue Date</label><input type="date" id="c-site-issued" class="form-input"></div>
+          <div class="form-group"><label class="form-label">Expiry Date</label><input type="date" id="c-site-expiry" class="form-input"><div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:var(--mono)">Leave blank if no expiry</div></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea id="c-site-notes" class="form-textarea" style="min-height:60px"></textarea></div>
+      </div>
+
+      <!-- PDF upload -->
+      <hr class="div">
+      <div class="form-group">
+        <label class="form-label">Certificate Document (PDF or image)</label>
+        <div id="cert-doc-area">
+          <div class="cert-doc-zone" id="cert-doc-zone" onclick="document.getElementById('cert-doc-input').click()"
+            style="border:1.5px dashed var(--border2);border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;transition:all .2s"
+            ondragover="event.preventDefault();this.style.background='var(--amber-dim)'"
+            ondragleave="this.style.background=''"
+            ondrop="handleCertDocDrop(event)">
+            <div style="font-size:20px;margin-bottom:6px;opacity:.4">📎</div>
+            <div style="font-size:12px;color:var(--text2)">Drop certificate or click to upload</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:var(--mono)">PDF, JPG, PNG accepted</div>
+          </div>
+        </div>
+        <input type="file" id="cert-doc-input" accept=".pdf,.jpg,.jpeg,.png" onchange="handleCertDocSelect(this)">
+      </div>
+      <input type="hidden" id="c-edit-id" value="">
+      <input type="hidden" id="c-edit-tech-id" value="">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-add-cert')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="saveCert()">Save Certification</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: TECHNICIAN DETAIL ══ -->
+<div class="modal-overlay" id="modal-tech-detail">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="detail-tech-name">Technician</div>
+        <div id="detail-tech-sub" style="font-size:11px;color:var(--text2);margin-top:2px"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-tech-detail')">×</button>
+    </div>
+    <div class="modal-body" id="detail-tech-body"></div>
+    <div class="modal-footer" id="detail-tech-footer"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<script>
+// ══ CONFIG ════════════════════════════════════════════════════════════════════
+const SB_URL = 'https://tbcoktkpjwdvnhqtuups.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiY29rdGtwandkdm5ocXR1dXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MDM1OTIsImV4cCI6MjA5MjM3OTU5Mn0.8Zw75YQYmNPXKoLE_bK23Vs2j3ZeqCUwAYUFt5-8YWs';
+
+// ══ STATE ══════════════════════════════════════════════════════════════════════
+let _techs = [];   // {id, name, empNum, role, province, email, phone, notes}
+let _certs = [];   // {id, techId, category, ...fields, docData, docName, expiry}
+let _tab = 'all';
+let _certType = 'ndt';
+let _pendingDoc = null; // {data, name} for cert being added
+let _editTechId = null;
+let _editCertId = null;
+
+// ══ CERT CATEGORIES ═══════════════════════════════════════════════════════════
+const CERT_CATS = {
+  ndt:    { label:'NDT Method',     color:'var(--blue)',   icon:'🔬' },
+  safety: { label:'General Safety', color:'var(--green)',  icon:'🦺' },
+  site:   { label:'Site Specific',  color:'var(--purple)', icon:'🏗' },
+};
+
+// NDT methods short codes
+const NDT_METHODS = ['MT','HT','PT','UT','AUT','RT','ET','VT','PMI','FT','NACE','OES'];
+
+// ══ HELPERS ═══════════════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const uid = () => 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const today = () => new Date().toISOString().slice(0,10);
+
+function toast(msg, type='green') {
+  const c=$('toast-container'); const t=document.createElement('div');
+  t.className='toast toast-'+type; t.textContent=msg; c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},2800);
+}
+
+function closeModal(id) {
+  const el=$(id); if(el) el.classList.remove('open');
+}
+
+function daysUntilExpiry(expiry) {
+  if(!expiry) return null;
+  return Math.ceil((new Date(expiry)-new Date())/86400000);
+}
+
+function expiryBadge(expiry) {
+  const d=daysUntilExpiry(expiry);
+  if(d===null) return '<span class="badge badge-none">No expiry</span>';
+  if(d<0) return '<span class="badge badge-expired">Expired '+Math.abs(d)+'d ago</span>';
+  if(d<=30) return '<span class="badge badge-soon">Expires in '+d+'d</span>';
+  if(d<=60) return '<span class="badge badge-soon">'+d+'d remaining</span>';
+  return '<span class="badge badge-valid">Valid · '+expiry+'</span>';
+}
+
+function expiryColor(expiry) {
+  const d=daysUntilExpiry(expiry);
+  if(d===null) return 'var(--text3)';
+  if(d<0) return 'var(--red)';
+  if(d<=60) return 'var(--amber)';
+  return 'var(--green)';
+}
+
+function levelBadge(level) {
+  const m={1:'badge-l1',2:'badge-l2',3:'badge-l3'};
+  const l={1:'Level I',2:'Level II',3:'Level III'};
+  return `<span class="badge ${m[level]||'badge-none'}">${l[level]||'Level '+level}</span>`;
+}
+
+function getTechCerts(techId) {
+  return _certs.filter(c=>c.techId===techId);
+}
+
+function getCertDisplay(c) {
+  if(c.category==='ndt') {
+    const method=(c.method||'').split(' ')[0];
+    return {label:method+' L'+(c.level||'?'), sub:(c.body||'')+(c.num?' #'+c.num:''), expiry:c.expiry};
+  }
+  if(c.category==='safety') {
+    return {label:c.safetyType||c.otherType||'Safety', sub:c.org||'', expiry:c.expiry};
+  }
+  return {label:c.siteName||'Site', sub:c.siteType||'', expiry:c.expiry};
+}
+
+// ══ SUPABASE ══════════════════════════════════════════════════════════════════
+const sbH = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+
+async function sbList(table) {
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&limit=10000`,{headers:sbH});
+  if(!r.ok) throw new Error(table+' '+r.status);
+  return r.json();
+}
+async function sbUpsert(table, id, data) {
+  const r=await fetch(`${SB_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{...sbH,'Prefer':'resolution=merge-duplicates,return=representation'},
+    body:JSON.stringify({id,...data})
+  });
+  if(!r.ok){const e=await r.text();throw new Error(e);}
+  return r.json();
+}
+async function sbDelete(table, id) {
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`,{method:'DELETE',headers:sbH});
+  return r.ok;
+}
+
+// ══ INIT ══════════════════════════════════════════════════════════════════════
+async function init() {
+  try {
+    const [ts, cs] = await Promise.allSettled([sbList('technicians'), sbList('certifications')]);
+    if(ts.status==='fulfilled') _techs = ts.value || [];
+    if(cs.status==='fulfilled') _certs = cs.value || [];
+  } catch(e) {
+    const tc=localStorage.getItem('cert_techs');
+    const cc=localStorage.getItem('cert_certs');
+    if(tc) _techs=JSON.parse(tc);
+    if(cc) _certs=JSON.parse(cc);
+    if(!tc&&!cc) toast('Could not connect to database — showing cached data','amber');
+  }
+
+  // Seed from NORTECH_EMPLOYEES if available (when embedded in Nortech Ops context)
+  // Otherwise load from Supabase only
+
+  renderStats();
+  renderExpiryBanners();
+  renderTechs();
+  populateTechDropdown();
+}
+
+// ══ STATS ══════════════════════════════════════════════════════════════════════
+function renderStats() {
+  const now=new Date();
+  const in60=new Date(now); in60.setDate(now.getDate()+60);
+  $('stat-techs').textContent=_techs.length;
+  $('stat-total-certs').textContent=_certs.length;
+  $('stat-ndt').textContent=_certs.filter(c=>c.category==='ndt').length;
+  $('stat-safety').textContent=_certs.filter(c=>c.category==='safety').length;
+  $('stat-site').textContent=_certs.filter(c=>c.category==='site').length;
+  $('stat-expiring').textContent=_certs.filter(c=>{
+    const d=daysUntilExpiry(c.expiry); return d!==null&&d>=0&&d<=60;
+  }).length;
+  $('stat-expired').textContent=_certs.filter(c=>{
+    const d=daysUntilExpiry(c.expiry); return d!==null&&d<0;
+  }).length;
+}
+
+// ══ EXPIRY BANNERS ════════════════════════════════════════════════════════════
+function renderExpiryBanners() {
+  const banners=$('expiry-banners'); if(!banners) return;
+  const expired=_certs.filter(c=>{const d=daysUntilExpiry(c.expiry);return d!==null&&d<0;});
+  const expiring=_certs.filter(c=>{const d=daysUntilExpiry(c.expiry);return d!==null&&d>=0&&d<=30;});
+
+  let html='';
+  if(expired.length) {
+    const names=[...new Set(expired.map(c=>{const t=_techs.find(x=>x.id===c.techId);return t?t.name:'Unknown';}))];
+    html+=`<div class="expiry-banner expired">⚠ ${expired.length} certification${expired.length>1?'s':''} expired — ${names.join(', ')}</div>`;
+  }
+  if(expiring.length) {
+    const names=[...new Set(expiring.map(c=>{const t=_techs.find(x=>x.id===c.techId);return t?t.name:'Unknown';}))];
+    html+=`<div class="expiry-banner warning">⏰ ${expiring.length} certification${expiring.length>1?'s':''} expiring within 30 days — ${names.join(', ')}</div>`;
+  }
+  banners.innerHTML=html;
+}
+
+// ══ TABS ══════════════════════════════════════════════════════════════════════
+function setTab(tab) {
+  _tab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  $('tab-'+tab).classList.add('active');
+  const methodFilter=$('filter-method');
+  if(methodFilter) methodFilter.style.display=tab==='ndt'?'':'none';
+  renderTechs();
+}
+
+// ══ RENDER TECH GRID ══════════════════════════════════════════════════════════
+function renderTechs() {
+  const search=($('search-input')||{}).value||'';
+  const grid=$('tech-grid'); if(!grid) return;
+
+  let techs=_techs.slice();
+  if(search) techs=techs.filter(t=>(t.name||'').toLowerCase().includes(search.toLowerCase()));
+
+  // Filter by tab
+  if(_tab!=='all') {
+    techs=techs.filter(t=>{
+      const certs=getTechCerts(t.id);
+      if(_tab==='expiring') return certs.some(c=>{const d=daysUntilExpiry(c.expiry);return d!==null&&d<=60;});
+      return certs.some(c=>c.category===_tab);
+    });
+  }
+
+  techs.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+
+  if(!techs.length) {
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">👷</div>
+      <div class="empty-title">No technicians found</div>
+      <div class="empty-sub">Add technicians and their certifications to get started. Certification data will auto-populate on field reports.</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML=techs.map(t=>{
+    const certs=getTechCerts(t.id);
+    const ndtCerts=certs.filter(c=>c.category==='ndt');
+    const safetyCerts=certs.filter(c=>c.category==='safety');
+    const siteCerts=certs.filter(c=>c.category==='site');
+    const expired=certs.filter(c=>{const d=daysUntilExpiry(c.expiry);return d!==null&&d<0;});
+    const expiring=certs.filter(c=>{const d=daysUntilExpiry(c.expiry);return d!==null&&d>=0&&d<=60;});
+
+    // Status indicator
+    let statusDot=expired.length?'var(--red)':expiring.length?'var(--amber)':'var(--green)';
+    let statusLabel=expired.length?expired.length+' expired':expiring.length?expiring.length+' expiring':'All valid';
+    if(!certs.length){statusDot='var(--text3)';statusLabel='No certs';}
+
+    // Show top NDT certs
+    const topNDT=ndtCerts.slice(0,3);
+    const certRows=topNDT.map(c=>{
+      const method=(c.method||'').split(' ')[0];
+      const col=expiryColor(c.expiry);
+      return `<div class="cert-row">
+        <div class="cert-dot" style="background:${col}"></div>
+        <div class="cert-name">${method} ${levelBadge(c.level)}</div>
+        <div class="cert-expiry" style="color:${col}">${c.expiry||'—'}</div>
+      </div>`;
+    }).join('');
+
+    return `<div class="tech-card" onclick="showTechDetail('${t.id}')">
+      <div class="tech-card-header">
+        <div>
+          <div class="tech-name">${t.name||'—'}</div>
+          <div class="tech-role">${t.role||''} ${t.province?'· '+t.province:''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px">
+            <div style="width:8px;height:8px;border-radius:50%;background:${statusDot}"></div>
+            <span style="color:${statusDot};font-family:var(--mono)">${statusLabel}</span>
+          </div>
+        </div>
+      </div>
+      ${certRows?`<div class="cert-summary">${certRows}</div>`:''}
+      <div class="cert-count-row">
+        ${ndtCerts.length?`<span class="badge badge-l2">🔬 ${ndtCerts.length} NDT</span>`:''}
+        ${safetyCerts.length?`<span class="badge badge-valid">🦺 ${safetyCerts.length} Safety</span>`:''}
+        ${siteCerts.length?`<span class="badge" style="background:var(--purple-dim);color:var(--purple)">🏗 ${siteCerts.length} Site</span>`:''}
+        ${!certs.length?`<span class="badge badge-none">No certifications</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══ TECH DETAIL MODAL ════════════════════════════════════════════════════════
+function showTechDetail(id) {
+  const t=_techs.find(x=>x.id===id); if(!t) return;
+  const certs=getTechCerts(id);
+  const ndtCerts=certs.filter(c=>c.category==='ndt');
+  const safetyCerts=certs.filter(c=>c.category==='safety');
+  const siteCerts=certs.filter(c=>c.category==='site');
+
+  $('detail-tech-name').textContent=t.name||'—';
+  $('detail-tech-sub').innerHTML=`${t.role||''} ${t.empNum?'· Emp# '+t.empNum:''} ${t.province?'· '+t.province:''} ${t.email?'· <a href="mailto:'+t.email+'" style="color:var(--teal)">'+t.email+'</a>':''}`;
+
+  function certSection(title, certList, color) {
+    if(!certList.length) return '';
+    const rows=certList.map(c=>{
+      const disp=getCertDisplay(c);
+      const d=daysUntilExpiry(c.expiry);
+      const col=expiryColor(c.expiry);
+      return `<div class="cert-block">
+        <div class="cert-block-type">${CERT_CATS[c.category]?CERT_CATS[c.category].icon+' '+CERT_CATS[c.category].label:c.category}</div>
+        <div class="cert-block-name">${disp.label}${c.level?` ${levelBadge(c.level)}`:''}</div>
+        <div class="cert-block-fields">
+          ${disp.sub?`<div class="cert-field"><span class="lbl">Body</span><span class="val">${disp.sub}</span></div>`:''}
+          ${c.num?`<div class="cert-field"><span class="lbl">Cert #</span><span class="val">${c.num||c.safetyNum||c.siteNum||''}</span></div>`:''}
+          ${c.scope?`<div class="cert-field"><span class="lbl">Scope</span><span class="val">${c.scope}</span></div>`:''}
+          ${c.issued?`<div class="cert-field"><span class="lbl">Issued</span><span class="val">${c.issued}</span></div>`:''}
+          <div class="cert-field"><span class="lbl">Expiry</span><span class="val" style="color:${col}">${c.expiry||'No expiry'} ${expiryBadge(c.expiry)}</span></div>
+          ${c.notes?`<div class="cert-field"><span class="lbl">Notes</span><span class="val" style="color:var(--text2)">${c.notes}</span></div>`:''}
+        </div>
+        <div class="cert-block-actions">
+          ${c.docData?`<button class="btn btn-ghost btn-sm" onclick="viewCertDoc('${c.id}')" title="View certificate">📄</button>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="editCert('${c.id}')" title="Edit">✏</button>
+          <button class="btn btn-red btn-sm" onclick="deleteCert('${c.id}')" title="Delete">×</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="cert-section">
+      <div class="cert-section-title">
+        <span class="cert-section-label" style="color:${color}">${title}</span>
+        <div class="cert-section-bar"></div>
+      </div>
+      <div class="cert-detail-grid">${rows}</div>
+    </div>`;
+  }
+
+  $('detail-tech-body').innerHTML=
+    `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;font-size:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:0.5px solid var(--border)">
+      <div><div class="form-label">Province</div>${t.province||'—'}</div>
+      <div><div class="form-label">Email</div>${t.email||'—'}</div>
+      <div><div class="form-label">Phone</div>${t.phone||'—'}</div>
+      ${t.notes?`<div style="grid-column:1/-1"><div class="form-label">Notes</div><span style="color:var(--text2)">${t.notes}</span></div>`:''}
+    </div>`
+    +certSection('NDT Method Certifications (ISO 9712 / CGSB)', ndtCerts, 'var(--blue)')
+    +certSection('General Safety', safetyCerts, 'var(--green)')
+    +certSection('Site Specific', siteCerts, 'var(--purple)')
+    +(certs.length===0?`<div class="empty-state" style="padding:32px"><div class="empty-icon">📋</div><div class="empty-title">No certifications recorded</div><div class="empty-sub">Add certifications using the button below</div></div>`:'');
+
+  $('detail-tech-footer').innerHTML=`
+    <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-tech-detail')">Close</button>
+    <button class="btn btn-ghost btn-sm" onclick="editTech('${id}')">✏ Edit</button>
+    <button class="btn btn-teal btn-sm" onclick="addCertForTech('${id}')">+ Add Cert</button>
+    <button class="btn btn-red btn-sm" onclick="deleteTech('${id}')">Delete Technician</button>`;
+
+  $('modal-tech-detail').classList.add('open');
+}
+
+// ══ ADD/EDIT TECHNICIAN ═══════════════════════════════════════════════════════
+function openAddTechModal(editId) {
+  _editTechId=editId||null;
+  $('add-tech-title').textContent=editId?'Edit Technician':'Add Technician';
+  ['t-name','t-emp','t-role','t-email','t-phone','t-notes'].forEach(k=>{const el=$(k);if(el)el.value='';});
+  $('t-province').value='';
+  $('t-edit-id').value=editId||'';
+  if(editId) {
+    const t=_techs.find(x=>x.id===editId); if(!t) return;
+    $('t-name').value=t.name||'';
+    $('t-emp').value=t.empNum||'';
+    $('t-role').value=t.role||'';
+    $('t-province').value=t.province||'';
+    $('t-email').value=t.email||'';
+    $('t-phone').value=t.phone||'';
+    $('t-notes').value=t.notes||'';
+  }
+  $('modal-add-tech').classList.add('open');
+}
+
+function editTech(id) {
+  closeModal('modal-tech-detail');
+  openAddTechModal(id);
+}
+
+async function saveTech() {
+  const name=($('t-name').value||'').trim();
+  if(!name){toast('Name is required','amber');return;}
+  const editId=$('t-edit-id').value||'';
+  const id=editId||uid();
+  const data={
+    id, name,
+    empNum:$('t-emp').value||'',
+    role:$('t-role').value||'',
+    province:$('t-province').value||'',
+    email:$('t-email').value||'',
+    phone:$('t-phone').value||'',
+    notes:$('t-notes').value||'',
+    created:editId?(_techs.find(t=>t.id===editId)||{}).created||today():today(),
+    modified:today(),
+  };
+  try {
+    await sbUpsert('technicians',id,data);
+    const idx=_techs.findIndex(t=>t.id===id);
+    if(idx>=0) _techs[idx]=data; else _techs.push(data);
+    localStorage.setItem('cert_techs',JSON.stringify(_techs));
+    toast((editId?'Updated':'Added')+': '+name,'green');
+    closeModal('modal-add-tech');
+    populateTechDropdown();
+    renderStats();
+    renderTechs();
+  } catch(e){ toast('Save failed: '+e.message,'red'); }
+}
+
+async function deleteTech(id) {
+  const t=_techs.find(x=>x.id===id); if(!t) return;
+  if(!confirm('Delete '+t.name+' and all their certifications?')) return;
+  await sbDelete('technicians',id);
+  const techCerts=_certs.filter(c=>c.techId===id);
+  for(const c of techCerts) await sbDelete('certifications',c.id);
+  _techs=_techs.filter(x=>x.id!==id);
+  _certs=_certs.filter(c=>c.techId!==id);
+  localStorage.setItem('cert_techs',JSON.stringify(_techs));
+  localStorage.setItem('cert_certs',JSON.stringify(_certs));
+  closeModal('modal-tech-detail');
+  renderStats(); renderExpiryBanners(); renderTechs(); populateTechDropdown();
+  toast('Deleted','amber');
+}
+
+// ══ ADD/EDIT CERTIFICATION ════════════════════════════════════════════════════
+function openAddCertModal(editId, prefillTechId) {
+  _editCertId=editId||null;
+  _pendingDoc=null;
+  $('add-cert-title').textContent=editId?'Edit Certification':'Add Certification';
+  $('c-edit-id').value=editId||'';
+  resetCertDocZone();
+
+  // Reset all fields
+  ['c-ndt-num','c-ndt-scope','c-ndt-notes','c-ndt-score',
+   'c-safety-org','c-safety-num','c-safety-notes',
+   'c-site-name','c-site-type','c-site-location','c-site-num','c-site-notes'].forEach(k=>{const el=$(k);if(el)el.value='';});
+  ['c-ndt-issued','c-ndt-expiry','c-safety-issued','c-safety-expiry','c-site-issued','c-site-expiry'].forEach(k=>{const el=$(k);if(el)el.value='';});
+  $('c-ndt-method').value=''; $('c-ndt-level').value=''; $('c-ndt-body').value='CGSB';
+  $('c-safety-type').value=''; $('c-safety-other-group').style.display='none';
+  $('c-tech').value=prefillTechId||'';
+
+  if(editId) {
+    const c=_certs.find(x=>x.id===editId); if(!c) return;
+    $('c-tech').value=c.techId||'';
+    setCertType(c.category, null);
+    if(c.category==='ndt'){
+      $('c-ndt-method').value=c.method||'';
+      $('c-ndt-level').value=c.level||'';
+      $('c-ndt-body').value=c.body||'CGSB';
+      $('c-ndt-num').value=c.num||'';
+      $('c-ndt-scope').value=c.scope||'';
+      $('c-ndt-issued').value=c.issued||'';
+      $('c-ndt-expiry').value=c.expiry||'';
+      $('c-ndt-score').value=c.score||'';
+      $('c-ndt-notes').value=c.notes||'';
+    } else if(c.category==='safety'){
+      $('c-safety-type').value=c.safetyType||'';
+      if(c.safetyType==='Other'){$('c-safety-other').value=c.otherType||'';$('c-safety-other-group').style.display='';}
+      $('c-safety-org').value=c.org||'';
+      $('c-safety-num').value=c.safetyNum||'';
+      $('c-safety-issued').value=c.issued||'';
+      $('c-safety-expiry').value=c.expiry||'';
+      $('c-safety-notes').value=c.notes||'';
+    } else {
+      $('c-site-name').value=c.siteName||'';
+      $('c-site-type').value=c.siteType||'';
+      $('c-site-location').value=c.siteLocation||'';
+      $('c-site-num').value=c.siteNum||'';
+      $('c-site-issued').value=c.issued||'';
+      $('c-site-expiry').value=c.expiry||'';
+      $('c-site-notes').value=c.notes||'';
+    }
+    if(c.docData) showCertDocAttached(c.docName||'certificate');
+  } else {
+    setCertType('ndt',null);
+  }
+  $('modal-add-cert').classList.add('open');
+}
+
+function addCertForTech(techId) {
+  closeModal('modal-tech-detail');
+  openAddCertModal(null, techId);
+}
+
+function editCert(id) {
+  closeModal('modal-tech-detail');
+  openAddCertModal(id);
+}
+
+function setCertType(type, btn) {
+  _certType=type;
+  document.querySelectorAll('.cert-type-tab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.cert-type-tab').forEach((t,i)=>{
+      if((i===0&&type==='ndt')||(i===1&&type==='safety')||(i===2&&type==='site')) t.classList.add('active');
+    });
+  }
+  $('cert-ndt-fields').style.display=type==='ndt'?'':'none';
+  $('cert-safety-fields').style.display=type==='safety'?'':'none';
+  $('cert-site-fields').style.display=type==='site'?'':'none';
+}
+
+// Show/hide "Other" field for safety type
+document.addEventListener('change', function(e){
+  if(e.target && e.target.id==='c-safety-type'){
+    $('c-safety-other-group').style.display=e.target.value==='Other'?'':'none';
+  }
+});
+
+async function saveCert() {
+  const techId=$('c-tech').value;
+  if(!techId){toast('Select a technician','amber');return;}
+
+  const editId=$('c-edit-id').value||'';
+  const id=editId||uid();
+  let data={id, techId, category:_certType, created:editId?(_certs.find(c=>c.id===editId)||{}).created||today():today(), modified:today()};
+
+  if(_certType==='ndt'){
+    const method=$('c-ndt-method').value;
+    const level=$('c-ndt-level').value;
+    if(!method){toast('Select NDT method','amber');return;}
+    if(!level){toast('Select certification level','amber');return;}
+    const expiry=$('c-ndt-expiry').value;
+    if(!expiry){toast('Expiry date is required','amber');return;}
+    data={...data, method, level:parseInt(level), body:$('c-ndt-body').value,
+      num:$('c-ndt-num').value, scope:$('c-ndt-scope').value,
+      issued:$('c-ndt-issued').value, expiry,
+      score:$('c-ndt-score').value||null, notes:$('c-ndt-notes').value};
+  } else if(_certType==='safety'){
+    const st=$('c-safety-type').value;
+    if(!st){toast('Select safety certification type','amber');return;}
+    const expiry=$('c-safety-expiry').value;
+    if(!expiry){toast('Expiry date is required','amber');return;}
+    data={...data, safetyType:st, otherType:st==='Other'?$('c-safety-other').value:'',
+      org:$('c-safety-org').value, safetyNum:$('c-safety-num').value,
+      issued:$('c-safety-issued').value, expiry, notes:$('c-safety-notes').value};
+  } else {
+    const sn=$('c-site-name').value.trim();
+    const st=$('c-site-type').value.trim();
+    if(!sn||!st){toast('Site name and cert type are required','amber');return;}
+    data={...data, siteName:sn, siteType:st, siteLocation:$('c-site-location').value,
+      siteNum:$('c-site-num').value, issued:$('c-site-issued').value,
+      expiry:$('c-site-expiry').value||null, notes:$('c-site-notes').value};
+  }
+
+  // Attach pending document
+  if(_pendingDoc){data.docData=_pendingDoc.data;data.docName=_pendingDoc.name;}
+  else if(editId){const ex=_certs.find(c=>c.id===editId);if(ex){data.docData=ex.docData;data.docName=ex.docName;}}
+
+  try {
+    await sbUpsert('certifications',id,data);
+    const idx=_certs.findIndex(c=>c.id===id);
+    if(idx>=0) _certs[idx]=data; else _certs.push(data);
+    localStorage.setItem('cert_certs',JSON.stringify(_certs));
+    toast((editId?'Updated':'Added')+' certification','green');
+    closeModal('modal-add-cert');
+    renderStats(); renderExpiryBanners(); renderTechs();
+  } catch(e){ toast('Save failed: '+e.message,'red'); }
+}
+
+async function deleteCert(id) {
+  const c=_certs.find(x=>x.id===id); if(!c) return;
+  if(!confirm('Delete this certification?')) return;
+  const techId=c.techId;
+  await sbDelete('certifications',id);
+  _certs=_certs.filter(x=>x.id!==id);
+  localStorage.setItem('cert_certs',JSON.stringify(_certs));
+  closeModal('modal-tech-detail');
+  renderStats(); renderExpiryBanners(); renderTechs();
+  setTimeout(()=>showTechDetail(techId),100);
+  toast('Deleted','amber');
+}
+
+// ══ DOCUMENT HANDLING ════════════════════════════════════════════════════════
+function handleCertDocSelect(input){
+  if(!input.files||!input.files[0]) return;
+  readCertDoc(input.files[0]); input.value='';
+}
+function handleCertDocDrop(e){
+  e.preventDefault(); e.currentTarget.style.background='';
+  const file=e.dataTransfer.files[0]; if(file) readCertDoc(file);
+}
+function readCertDoc(file){
+  const reader=new FileReader();
+  reader.onload=e=>{_pendingDoc={data:e.target.result,name:file.name};showCertDocAttached(file.name);};
+  reader.readAsDataURL(file);
+}
+function showCertDocAttached(name){
+  $('cert-doc-area').innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--green-dim);border:0.5px solid rgba(34,197,94,0.25);border-radius:var(--radius)">
+    <span style="font-size:18px">📎</span>
+    <span style="font-size:12px;color:var(--green);font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>
+    <button class="btn btn-ghost btn-sm" onclick="resetCertDocZone()">Remove</button>
+  </div>`;
+}
+function resetCertDocZone(){
+  _pendingDoc=null;
+  $('cert-doc-area').innerHTML=`<div class="cert-doc-zone" id="cert-doc-zone" onclick="document.getElementById('cert-doc-input').click()"
+    style="border:1.5px dashed var(--border2);border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;transition:all .2s"
+    ondragover="event.preventDefault();this.style.background='var(--amber-dim)'"
+    ondragleave="this.style.background=''"
+    ondrop="handleCertDocDrop(event)">
+    <div style="font-size:20px;margin-bottom:6px;opacity:.4">📎</div>
+    <div style="font-size:12px;color:var(--text2)">Drop certificate or click to upload</div>
+    <div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:var(--mono)">PDF, JPG, PNG accepted</div>
+  </div>`;
+}
+function viewCertDoc(id){
+  const c=_certs.find(x=>x.id===id); if(!c||!c.docData) return;
+  const w=window.open('');
+  if(c.docName&&c.docName.match(/\.(jpg|jpeg|png)$/i)){
+    w.document.write(`<html><body style="margin:0;background:#000"><img src="${c.docData}" style="max-width:100%;display:block;margin:auto"></body></html>`);
+  } else {
+    w.document.write(`<iframe src="${c.docData}" style="width:100%;height:100vh;border:none"></iframe>`);
+  }
+}
+
+// ══ POPULATE TECH DROPDOWN ════════════════════════════════════════════════════
+function populateTechDropdown(){
+  const sel=$('c-tech'); if(!sel) return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Select technician…</option>'
+    +_techs.slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+  if(cur) sel.value=cur;
+}
+
+// ══ EXPORT: get tech certs for Field Reports ══════════════════════════════════
+// This function is called by Field Reports when a technician name is entered
+// Returns their NDT credentials for auto-populating the signatures block
+window.getCertsByTechName = function(name) {
+  const norm=name.trim().toLowerCase();
+  const tech=_techs.find(t=>(t.name||'').toLowerCase()===norm
+    || (t.name||'').toLowerCase().includes(norm.split(' ').pop().toLowerCase()));
+  if(!tech) return null;
+  const certs=getTechCerts(tech.id);
+  const ndt=certs.filter(c=>c.category==='ndt');
+  const cgsbCert=ndt.find(c=>c.body==='CGSB');
+  const sntCert=ndt.find(c=>c.body==='SNT-TC-1A');
+  return {
+    name:tech.name,
+    cgsb:cgsbCert?String(cgsbCert.level):'',
+    cgsbReg:cgsbCert?cgsbCert.num:'',
+    snt:sntCert?'Level '+['','I','II','III'][sntCert.level||0]:'',
+    allNDT:ndt,
+  };
+};
+
+// ══ BOOT ══════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
