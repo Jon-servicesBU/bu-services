@@ -269,7 +269,21 @@ table.t tr:hover td{background:rgba(255,255,255,0.015)}
         <div class="form-group"><label class="form-label">Email</label><input type="email" id="t-email" class="form-input" placeholder="tech@nortechadvanced.com"></div>
         <div class="form-group"><label class="form-label">Phone</label><input type="text" id="t-phone" class="form-input" placeholder="780-xxx-xxxx"></div>
       </div>
+      <div class="form-group">
+        <label class="form-label">Pay Rate ($/hr) <span style="font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:none;letter-spacing:0">— admin only · used for margin calculations in Nortech Ops</span></label>
+        <input type="number" id="t-payrate" class="form-input" placeholder="e.g. 40.20" step="0.01" min="0" style="max-width:200px">
+      </div>
       <div class="form-group"><label class="form-label">Notes</label><textarea id="t-notes" class="form-textarea" placeholder="Any relevant notes…"></textarea></div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+            <input type="checkbox" id="t-active" checked style="width:16px;height:16px;accent-color:var(--green);cursor:pointer">
+            <span>Active — appears in all dropdowns</span>
+          </label>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono)">Uncheck to mark as inactive (departed staff). Historical data is preserved.</div>
+      </div>
       <input type="hidden" id="t-edit-id" value="">
     </div>
     <div class="modal-footer">
@@ -561,13 +575,21 @@ async function init() {
     const [ts, cs] = await Promise.allSettled([sbList('technicians'), sbList('certifications')]);
     if(ts.status==='fulfilled') {
       _techs = (ts.value||[]).map(function(r){
-        return Object.assign({id:r.id}, r.data||r);
-      });
+        // Handle both flat {id,name,...} and wrapped {id, data:{name,...}} formats
+        var flat = r.data && typeof r.data === 'object' ? Object.assign({id:r.id}, r.data) : Object.assign({}, r);
+        return flat;
+      }).filter(function(t){ return t.name; }); // only include rows with a name
     }
     if(cs.status==='fulfilled') {
       _certs = (cs.value||[]).map(function(r){
-        return Object.assign({id:r.id}, r.data||r);
+        return r.data && typeof r.data === 'object' ? Object.assign({id:r.id}, r.data) : Object.assign({}, r);
       });
+    }
+    // If no technicians found, offer to sync from Nortech Ops
+    if(!_techs.length) {
+      console.warn('[Certs] No technicians — auto-syncing from embedded list');
+      syncFromNortechOps();
+      return;
     }
   } catch(e) {
     const tc=localStorage.getItem('cert_techs');
@@ -584,6 +606,8 @@ async function init() {
   // Seed from NORTECH_EMPLOYEES if available (when embedded in Nortech Ops context)
   // Otherwise load from Supabase only
 
+  console.log('[Certs] Loaded', _techs.length, 'technicians, first:', _techs[0]||'none');
+  console.log('[Certs] Loaded', _certs.length, 'certifications');
   renderStats();
   renderExpiryBanners();
   renderTechs();
@@ -658,7 +682,11 @@ function renderTechs() {
     grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1">
       <div class="empty-icon">👷</div>
       <div class="empty-title">No technicians found</div>
-      <div class="empty-sub">Add technicians and their certifications to get started. Certification data will auto-populate on field reports.</div>
+      <div class="empty-sub">Open Nortech Ops once to sync the employee list, or add technicians manually below.</div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="openAddTechModal()">+ Add Technician Manually</button>
+        <button class="btn btn-ghost btn-sm" onclick="syncFromNortechOps()">↻ Sync from Nortech Ops</button>
+      </div>
     </div>`;
     return;
   }
@@ -675,6 +703,7 @@ function renderTechs() {
     let statusDot=expired.length?'var(--red)':expiring.length?'var(--amber)':'var(--green)';
     let statusLabel=expired.length?expired.length+' expired':expiring.length?expiring.length+' expiring':'All valid';
     if(!certs.length){statusDot='var(--text3)';statusLabel='No certs';}
+    if(t.active===false){statusDot='var(--text3)';statusLabel='Inactive';}
 
     // Show top NDT certs
     const topNDT=ndtCerts.slice(0,3);
@@ -761,6 +790,8 @@ function showTechDetail(id) {
       <div><div class="form-label">Province</div>${t.province||'—'}</div>
       <div><div class="form-label">Email</div>${t.email||'—'}</div>
       <div><div class="form-label">Phone</div>${t.phone||'—'}</div>
+      ${t.payRate?'<div><div class="form-label" style="color:var(--amber)">Pay Rate (admin)</div><span style="font-family:var(--mono);color:var(--amber)">$'+parseFloat(t.payRate).toFixed(2)+'/hr</span></div>':''}
+      ${t.active===false?'<div style="grid-column:1/-1"><span class="badge badge-none">⚫ Inactive — not shown in dropdowns</span></div>':''}
       ${t.notes?`<div style="grid-column:1/-1"><div class="form-label">Notes</div><span style="color:var(--text2)">${t.notes}</span></div>`:''}
     </div>`
     +certSection('NDT Method Certifications (ISO 9712 / CGSB)', ndtCerts, 'var(--blue)')
@@ -781,8 +812,9 @@ function showTechDetail(id) {
 function openAddTechModal(editId) {
   _editTechId=editId||null;
   $('add-tech-title').textContent=editId?'Edit Technician':'Add Technician';
-  ['t-name','t-emp','t-role','t-email','t-phone','t-notes'].forEach(k=>{const el=$(k);if(el)el.value='';});
+  ['t-name','t-emp','t-role','t-email','t-phone','t-notes','t-payrate'].forEach(k=>{const el=$(k);if(el)el.value='';});
   $('t-province').value='';
+  const tActiveEl=$('t-active'); if(tActiveEl) tActiveEl.checked=true;
   $('t-edit-id').value=editId||'';
   if(editId) {
     const t=_techs.find(x=>x.id===editId); if(!t) return;
@@ -793,6 +825,8 @@ function openAddTechModal(editId) {
     $('t-email').value=t.email||'';
     $('t-phone').value=t.phone||'';
     $('t-notes').value=t.notes||'';
+    $('t-payrate').value=t.payRate||'';
+    const _tAct=$('t-active'); if(_tAct) _tAct.checked=(t.active!==false);
   }
   $('modal-add-tech').classList.add('open');
 }
@@ -815,6 +849,8 @@ async function saveTech() {
     email:$('t-email').value||'',
     phone:$('t-phone').value||'',
     notes:$('t-notes').value||'',
+    payRate:parseFloat($('t-payrate').value)||null,
+    active:($('t-active')||{}).checked!==false,
     created:editId?(_techs.find(t=>t.id===editId)||{}).created||today():today(),
     modified:today(),
   };
@@ -1040,11 +1076,75 @@ function viewCertDoc(id){
 }
 
 // ══ POPULATE TECH DROPDOWN ════════════════════════════════════════════════════
+
+// Embedded employee list (no rates) — used as fallback if Supabase table is empty
+var _EMBEDDED_EMPLOYEES = [{"id": "e499", "emp": "499", "name": "Cailyn Larison", "province": "AB", "type": "Hourly EE"}, {"id": "e469", "emp": "469", "name": "Cole Mcgowan", "province": "AB", "type": "Hourly EE"}, {"id": "e510", "emp": "510", "name": "Jessica Saunders", "province": "AB", "type": "Hourly EE"}, {"id": "e467", "emp": "467", "name": "Jordan Mancini", "province": "AB", "type": "Hourly EE"}, {"id": "e534", "emp": "534", "name": "Maxx Taylor", "province": "AB", "type": "Hourly EE"}, {"id": "e398", "emp": "398", "name": "Scott Saunders", "province": "AB", "type": "Hourly EE"}, {"id": "e425", "emp": "425", "name": "Matthew Isnor", "province": "BC", "type": "Hourly EE"}, {"id": "e497", "emp": "497", "name": "Amanda Murphy", "province": "AB", "type": "Hourly EE"}, {"id": "e470", "emp": "470", "name": "Fasil Teffera", "province": "AB", "type": "Hourly EE"}, {"id": "e537", "emp": "537", "name": "Torin Keoughan", "province": "AB", "type": "Hourly EE"}, {"id": "e506", "emp": "506", "name": "Natasha Bayrack", "province": "BC", "type": "Hourly EE"}, {"id": "e234", "emp": "234", "name": "Sheldon Schwer", "province": "AB", "type": "Hourly EE"}, {"id": "e359", "emp": "359", "name": "Peter Dutka", "province": "AB", "type": "Hourly EE"}, {"id": "e508", "emp": "508", "name": "Kortney Adam", "province": "AB", "type": "Hourly EE"}, {"id": "e509", "emp": "509", "name": "Caitlin Borza", "province": "AB", "type": "Hourly EE"}, {"id": "e538", "emp": "538", "name": "Taylor Bertoia", "province": "AB", "type": "Hourly EE"}, {"id": "e242", "emp": "242", "name": "Nicholas Cunningham", "province": "AB", "type": "Hourly EE"}, {"id": "e384", "emp": "384", "name": "Adrian Ferg", "province": "AB", "type": "Hourly EE"}, {"id": "e438", "emp": "438", "name": "Nolan Leduc", "province": "AB", "type": "Hourly EE"}, {"id": "e450", "emp": "450", "name": "Tanner Gilpin", "province": "AB", "type": "Hourly EE"}, {"id": "e468", "emp": "468", "name": "Brody Markin", "province": "AB", "type": "Hourly EE"}, {"id": "e222", "emp": "222", "name": "Noel Patterson", "province": "BC", "type": "Hourly EE"}, {"id": "e532", "emp": "532", "name": "Corey O\\", "province": "BC", "type": "Hourly EE"}, {"id": "e427", "emp": "427", "name": "Steven Jones", "province": "BC", "type": "Hourly EE"}, {"id": "e530", "emp": "530", "name": "Cole Wiebe", "province": "BC", "type": "Hourly EE"}, {"id": "e389", "emp": "389", "name": "Justin Ford", "province": "BC", "type": "Hourly EE"}, {"id": "e207", "emp": "207", "name": "Charles (Cj) Holst", "province": "AB", "type": "Hourly EE"}, {"id": "e28", "emp": "28", "name": "Lyonal Struthers", "province": "AB", "type": "Hourly EE"}, {"id": "e437", "emp": "437", "name": "Clint Hickey", "province": "AB", "type": "Hourly EE"}, {"id": "e496", "emp": "496", "name": "Randy (Evan) Chislett", "province": "BC", "type": "Hourly EE"}, {"id": "e186", "emp": "186", "name": "Cody Tondreau", "province": "AB", "type": "Hourly EE"}, {"id": "e251", "emp": "251", "name": "Bryce Schram", "province": "AB", "type": "Hourly EE"}, {"id": "e282", "emp": "282", "name": "Shannon Russell", "province": "AB", "type": "Hourly EE"}, {"id": "e404", "emp": "404", "name": "Ethan Sarafinchan", "province": "AB", "type": "Hourly EE"}, {"id": "e238", "emp": "238", "name": "Steven Lomond", "province": "AB", "type": "Hourly EE"}, {"id": "e10", "emp": "10", "name": "Kelly Leitch", "province": "AB", "type": "Hourly EE"}, {"id": "e21", "emp": "21", "name": "Michael Carreiro", "province": "AB", "type": "Hourly EE"}, {"id": "e372", "emp": "372", "name": "Marc Ropivia", "province": "AB", "type": "Hourly EE"}, {"id": "e376", "emp": "376", "name": "Bradley Churchill", "province": "AB", "type": "Hourly EE"}, {"id": "e445", "emp": "445", "name": "Taylor Wright", "province": "AB", "type": "Hourly EE"}, {"id": "e452", "emp": "452", "name": "Frank Ouellette", "province": "AB", "type": "Hourly EE"}, {"id": "e430", "emp": "430", "name": "Kyle Farmer", "province": "AB", "type": "Hourly EE"}, {"id": "e453", "emp": "453", "name": "Jeongho (Sam) Shin", "province": "AB", "type": "Hourly EE"}, {"id": "e441", "emp": "441", "name": "Bradley Shaw", "province": "BC", "type": "Hourly EE"}, {"id": "e505", "emp": "505", "name": "Nancy Gullberg", "province": "AB", "type": "Hourly EE"}, {"id": "e313", "emp": "313", "name": "Cole Feschuk", "province": "AB", "type": "Hourly EE"}, {"id": "e347", "emp": "347", "name": "Michel Cadieux", "province": "AB", "type": "Hourly EE"}, {"id": "e431", "emp": "431", "name": "Mike Parsons", "province": "AB", "type": "Hourly EE"}, {"id": "e426", "emp": "426", "name": "Ian Kerfoot", "province": "AB", "type": "Hourly EE"}, {"id": "e516", "emp": "516", "name": "Tyler Hotte", "province": "BC", "type": "Hourly EE"}, {"id": "e531", "emp": "531", "name": "Colton Sinclair", "province": "AB", "type": "Hourly EE"}, {"id": "e33", "emp": "33", "name": "Raelene Beaudoin", "province": "AB", "type": "Hourly EE"}, {"id": "e49", "emp": "49", "name": "Samho Ngai", "province": "AB", "type": "Hourly EE"}, {"id": "e268", "emp": "268", "name": "Chantal Chesterman", "province": "AB", "type": "Hourly EE"}, {"id": "e273", "emp": "273", "name": "Samuel Plowright", "province": "AB", "type": "Hourly EE"}, {"id": "e296", "emp": "296", "name": "Francis Audet", "province": "AB", "type": "Hourly EE"}, {"id": "e301", "emp": "301", "name": "Matthew Chwyl", "province": "AB", "type": "Hourly EE"}, {"id": "e348", "emp": "348", "name": "Christopher Moses", "province": "AB", "type": "Hourly EE"}, {"id": "e501", "emp": "501", "name": "Ryan Borza", "province": "AB", "type": "Hourly EE"}, {"id": "e73", "emp": "73", "name": "Tyson Skinner", "province": "AB", "type": "Hourly EE"}, {"id": "e5", "emp": "5", "name": "Ryan S Cherwoniak", "province": "AB", "type": "Hourly EE"}, {"id": "e502", "emp": "502", "name": "Dana R Draper", "province": "AB", "type": "Hourly EE"}, {"id": "e280", "emp": "280", "name": "Ken Brunlees", "province": "AB", "type": "Hourly EE"}, {"id": "e12", "emp": "12", "name": "Murray Nethery", "province": "AB", "type": "Hourly EE"}, {"id": "e188", "emp": "188", "name": "Leo Novak", "province": "AB", "type": "Hourly EE"}, {"id": "e14", "emp": "14", "name": "Ryan Ouellette", "province": "AB", "type": "Hourly EE"}, {"id": "e55", "emp": "55", "name": "Dalton Mabbutt", "province": "AB", "type": "Hourly EE"}, {"id": "e225", "emp": "225", "name": "Kyle Stevenson", "province": "AB", "type": "Hourly EE"}, {"id": "e528", "emp": "528", "name": "Teena Brown", "province": "AB", "type": "Hourly EE"}, {"id": "e529", "emp": "529", "name": "David Jolivette", "province": "AB", "type": "Hourly EE"}, {"id": "e503", "emp": "503", "name": "Denise Saunders", "province": "AB", "type": "Salary EE"}, {"id": "e536", "emp": "536", "name": "Rose Fedoruk", "province": "AB", "type": "Salary EE"}, {"id": "e511", "emp": "511", "name": "Shan Switzer", "province": "AB", "type": "Salary EE"}, {"id": "joel_c", "emp": "535", "name": "Joel Carlton", "province": "AB", "type": "Salary EE"}, {"id": "jason", "emp": "500", "name": "Jason Borza", "province": "AB", "type": "Salary EE"}, {"id": "jeremy", "emp": "525", "name": "Jeremy Irwin", "province": "AB", "type": "Salary EE"}];
+
+async function syncFromNortechOps() {
+  toast('Syncing technicians…', 'amber');
+  try {
+    // First check if table already has data
+    const rows = await sbList('technicians');
+    const existing = rows.map(function(r){
+      return r.data && typeof r.data === 'object' ? Object.assign({id:r.id}, r.data) : Object.assign({}, r);
+    }).filter(function(t){ return t.name; });
+
+    if(existing.length) {
+      _techs = existing;
+      toast('Loaded ' + _techs.length + ' technicians ✓', 'green');
+      populateTechDropdown(); renderStats(); renderTechs();
+      return;
+    }
+
+    // Table empty — seed from embedded list and push to Supabase
+    var existingNames = new Set(existing.map(function(t){ return (t.name||'').toLowerCase(); }));
+    var toAdd = _EMBEDDED_EMPLOYEES.filter(function(e){
+      return !existingNames.has((e.name||'').toLowerCase());
+    });
+
+    var added = 0;
+    for(var i=0; i<toAdd.length; i+=10) {
+      var batch = toAdd.slice(i,i+10);
+      await Promise.all(batch.map(function(e){
+        var tech = {
+          id: 'tech_' + e.id,
+          name: e.name,
+          empNum: e.emp,
+          province: e.province,
+          role: e.type || 'NDT Technician',
+          email:'', phone:'', notes:'',
+          source:'nortech_employees',
+          created: new Date().toISOString(),
+          modified: new Date().toISOString(),
+        };
+        return sbUpsert('technicians', tech.id, tech);
+      }));
+      added += batch.length;
+    }
+
+    // Reload from Supabase after seeding
+    const fresh = await sbList('technicians');
+    _techs = fresh.map(function(r){
+      return r.data && typeof r.data === 'object' ? Object.assign({id:r.id}, r.data) : Object.assign({}, r);
+    }).filter(function(t){ return t.name; });
+
+    toast('Synced ' + added + ' technicians ✓', 'green');
+    populateTechDropdown(); renderStats(); renderTechs();
+  } catch(e) {
+    // Fallback — use embedded list locally without Supabase
+    _techs = _EMBEDDED_EMPLOYEES.map(function(e){
+      return { id:'tech_'+e.id, name:e.name, empNum:e.emp, province:e.province, role:e.type||'NDT Technician' };
+    });
+    toast('Using local list (' + _techs.length + ' techs) — Supabase unavailable', 'amber');
+    populateTechDropdown(); renderStats(); renderTechs();
+  }
+}
+
 function populateTechDropdown(){
   const sel=$('c-tech'); if(!sel) return;
   const cur=sel.value;
   sel.innerHTML='<option value="">Select technician…</option>'
-    +_techs.slice().sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+    +_techs.slice().filter(function(t){return t.active!==false;}).sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
   if(cur) sel.value=cur;
 }
 

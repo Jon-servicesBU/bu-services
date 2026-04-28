@@ -1457,6 +1457,7 @@ var _chargeSheets = [];
 var _invoices     = [];
 var _rateSheets   = [];
 var _customClients = [];
+var _techRates = {}; // {nameLower: rate} loaded from technicians table
 var _timesheets   = [];
 var _currentView  = 'dashboard';
 // ── Pagination state ─────────────────────────────────────────────────────────
@@ -3249,6 +3250,18 @@ async function loadAll(){
     }
     // Sync NORTECH_EMPLOYEES to technicians table (background, non-blocking)
     syncEmployeesToTechnicians();
+
+    // Load pay rates from technicians table into cache (for new hires not in NORTECH_EMPLOYEES)
+    sbList('technicians').then(function(rows){
+      _techRates={};
+      (rows||[]).forEach(function(r){
+        var tech=Object.assign({id:r.id},r.data||r);
+        if(tech.name&&tech.payRate){
+          _techRates[tech.name.toLowerCase().trim()]=parseFloat(tech.payRate)||0;
+        }
+      });
+      console.log('[Rates] Loaded',Object.keys(_techRates).length,'tech rates from technicians table');
+    }).catch(function(e){console.warn('[Rates] Load failed:',e.message);});
     if(results[4].status==='fulfilled') {
       var sbTS = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
       if (sbTS.length > 0) {
@@ -9799,7 +9812,14 @@ function getCostRate(techName) {
     if (!techName) return 55;
     var t = techName.toLowerCase().trim();
     var getRate = function(e){ return e.rate || e.payRate || 0; };
-    // 1. Exact match
+    // 0. Check Supabase technicians table first (new hires added via Certifications app)
+    if (_techRates && _techRates[t]) return _techRates[t];
+    // Also try partial match against techRates keys
+    var rateKey = Object.keys(_techRates||{}).find(function(k){
+      return k===t || (t.length>4 && k.includes(t.split(' ').pop().toLowerCase()));
+    });
+    if (rateKey && _techRates[rateKey]) return _techRates[rateKey];
+    // 1. Exact match in embedded NORTECH_EMPLOYEES (existing staff — unchanged)
     var emp = (NORTECH_EMPLOYEES||[]).find(function(e){ return e.name && e.name.toLowerCase() === t; });
     if (emp) return getRate(emp);
     // 2. Last name + first initial (e.g. "C. Tondreau" → "Cody Tondreau")

@@ -931,7 +931,7 @@ function addTechRow(data){
   div.style.cssText='display:grid;grid-template-columns:1.5fr 1fr 0.7fr 0.7fr 0.7fr 28px;gap:8px;align-items:end;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid rgba(255,255,255,0.04)';
 
   // Build technician dropdown from _technicians table
-  const techOptions=_technicians.map(function(t){
+  const techOptions=_technicians.filter(function(t){return t.active!==false;}).map(function(t){
     return '<option value="'+t.id+'" data-name="'+(t.name||'')+'">'+(t.name||'')+'</option>';
   }).join('');
   const selectedId=d.techId||'';
