@@ -1458,6 +1458,7 @@ var _invoices     = [];
 var _rateSheets   = [];
 var _customClients = [];
 var _techRates = {}; // {nameLower: rate} loaded from technicians table
+var _customTechs = []; // techs added via Certifications, not in NORTECH_EMPLOYEES
 var _timesheets   = [];
 var _currentView  = 'dashboard';
 // ── Pagination state ─────────────────────────────────────────────────────────
@@ -3251,16 +3252,22 @@ async function loadAll(){
     // Sync NORTECH_EMPLOYEES to technicians table (background, non-blocking)
     syncEmployeesToTechnicians();
 
-    // Load pay rates from technicians table into cache (for new hires not in NORTECH_EMPLOYEES)
+    // Load pay rates + custom techs from technicians table
     sbList('technicians').then(function(rows){
       _techRates={};
+      _customTechs=[];
+      var empNames=new Set(NORTECH_EMPLOYEES.map(function(e){return e.name.toLowerCase();}));
       (rows||[]).forEach(function(r){
         var tech=Object.assign({id:r.id},r.data||r);
-        if(tech.name&&tech.payRate){
-          _techRates[tech.name.toLowerCase().trim()]=parseFloat(tech.payRate)||0;
+        if(!tech.name) return;
+        // Build rate cache for ALL techs (embedded + custom)
+        if(tech.payRate) _techRates[tech.name.toLowerCase().trim()]=parseFloat(tech.payRate)||0;
+        // Track techs NOT in embedded list so we can add them to dropdowns
+        if(!empNames.has(tech.name.toLowerCase().trim()) && tech.active!==false){
+          _customTechs.push(tech);
         }
       });
-      console.log('[Rates] Loaded',Object.keys(_techRates).length,'tech rates from technicians table');
+      console.log('[Rates] Loaded',Object.keys(_techRates).length,'rates,',_customTechs.length,'custom techs');
     }).catch(function(e){console.warn('[Rates] Load failed:',e.message);});
     if(results[4].status==='fulfilled') {
       var sbTS = results[4].value.map(function(r){return Object.assign({id:r.id},r.data);});
@@ -5536,6 +5543,7 @@ function addLabourRow(dayLabel, labOpts, prefill) {
     + '<input class="cs-input" id="cs-lb-tech-' + idx + '" list="tech-datalist-' + idx + '" placeholder="Type name…" autocomplete="off" style="width:140px">'
     + '<datalist id="tech-datalist-' + idx + '">'
     + NORTECH_EMPLOYEES.map(function(e){ return '<option value="' + e.name + '">'; }).join('')
+    + (_customTechs||[]).map(function(t){ return '<option value="' + t.name + '">'; }).join('')
     + '</datalist>'
     + '</td>'
     + '<td style="padding:.2rem .25rem"><select class="cs-input cs-lb-cat" id="cs-lb-cat-' + idx + '" style="width:170px">' + lo + '</select></td>'
@@ -8330,6 +8338,13 @@ function getTechOptions() {
     opts += NORTECH_EMPLOYEES.map(function(e){
       return '<option value="' + e.name + '" data-rate="' + e.rate + '">' + e.name + '</option>';
     }).join('');
+    // Append techs added via Certifications app (not in embedded NORTECH_EMPLOYEES)
+    var _empNames = new Set(NORTECH_EMPLOYEES.map(function(e){return e.name.toLowerCase();}));
+    opts += (_customTechs||[])
+      .filter(function(t){return t.active!==false && !_empNames.has((t.name||'').toLowerCase());})
+      .map(function(t){
+        return '<option value="' + t.name + '" data-rate="' + (t.payRate||55) + '">' + t.name + '</option>';
+      }).join('');
   } else {
     opts += (VIEWER_PEOPLE || [])
       .filter(function(p){ return _ADMIN_IDS.indexOf(p.id) === -1; })
