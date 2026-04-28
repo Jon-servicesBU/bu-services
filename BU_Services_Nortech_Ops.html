@@ -612,6 +612,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <button onclick="showView('margin',this)" id="nav-margin" data-admin-only>📈 Margins</button>
     <button onclick="showView('rate-sheets',this)" id="nav-rates" data-admin-only>💲 Rate Sheets</button>
     <button onclick="showView('clients',this)" id="nav-clients" data-admin-only>👥 Clients</button>
+    <button onclick="showView('technicians',this)" id="nav-technicians" data-admin-only>👷 Technicians</button>
   </div>
   <div class="unav-right">
     <a href="BU_Services_Field_Reports.html" class="btn btn-ghost btn-sm" style="text-decoration:none;margin-right:.5rem" title="Open Field Reports">📋 Field Reports ↗</a>
@@ -1093,6 +1094,85 @@ document.addEventListener('DOMContentLoaded', function() {
       <div style="display:flex;gap:.5rem;justify-content:flex-end">
         <button class="btn btn-ghost btn-sm" onclick="closeModal('add-client-modal')">Cancel</button>
         <button class="btn btn-primary btn-sm" onclick="saveNewClient()">Save Client</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="view-technicians" class="view" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+    <div>
+      <h2 style="font-size:1.1rem;font-weight:700">Technician Directory</h2>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:2px">Manage technicians — pay rate required for margin calculations</div>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <input type="text" id="tech-list-search" class="form-input" style="width:200px" placeholder="Search technicians…" oninput="renderTechList()">
+      <button class="btn btn-primary btn-sm" onclick="openAddTechModalOps()">+ Add Technician</button>
+    </div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:1rem;padding:.6rem 1rem;border-bottom:.5px solid var(--border)">
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Name</div>
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Emp #</div>
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Province</div>
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);color:var(--nor-accent)">Pay Rate</div>
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)">Actions</div>
+    </div>
+    <div id="tech-list-body" style="max-height:65vh;overflow-y:auto"></div>
+  </div>
+  <div id="tech-list-stats" style="margin-top:.75rem;font-size:.75rem;color:var(--muted)"></div>
+</div>
+
+<!-- Add/Edit Technician Modal -->
+<div id="add-tech-ops-modal" class="modal-overlay">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <span class="modal-title" id="add-tech-ops-title">Add Technician</span>
+      <button class="modal-x" onclick="closeModal('add-tech-ops-modal')">✕</button>
+    </div>
+    <div style="padding:1.25rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Full Name <span style="color:var(--nor-accent)">*</span></label>
+          <input type="text" id="ops-tech-name" class="form-input" placeholder="e.g. Jon Eustace">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pay Rate ($/hr) <span style="color:var(--nor-accent)">*</span></label>
+          <input type="number" id="ops-tech-rate" class="form-input" placeholder="e.g. 45.00" step="0.01" min="0">
+          <div style="font-size:.7rem;color:var(--muted);margin-top:3px">Required — used for margin calculations</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Employee #</label>
+          <input type="text" id="ops-tech-emp" class="form-input" placeholder="e.g. E501">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Province</label>
+          <select id="ops-tech-province" class="form-select">
+            <option value="">Select…</option>
+            <option>AB</option><option>BC</option><option>SK</option><option>MB</option>
+            <option>ON</option><option>QC</option><option>NS</option><option>NB</option>
+            <option>NL</option><option>PE</option><option>YT</option><option>NT</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role / Title</label>
+          <input type="text" id="ops-tech-role" class="form-input" placeholder="e.g. NDT Technician Level II">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="ops-tech-active" class="form-select">
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div style="padding:.6rem .75rem;background:rgba(255,255,255,.03);border:.5px solid var(--border);border-radius:5px;font-size:.72rem;color:var(--muted);margin-bottom:.75rem">
+        Full profile — certifications, email, phone — managed in the Certifications app.
+      </div>
+      <input type="hidden" id="ops-tech-edit-id" value="">
+      <div style="display:flex;gap:.5rem;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('add-tech-ops-modal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="saveOpsTech()">Save Technician</button>
       </div>
     </div>
   </div>
@@ -3321,6 +3401,7 @@ function renderForView(v){
   if(v==='timesheets')  renderTimesheets();
   if(v==='margin')      renderMarginReport();
   if(v==='clients')     renderClientList();
+  if(v==='technicians') renderTechList();
 }
 // ── One-time migration: push all localStorage timesheets to Supabase ──────────
 async function migrateTimesheetsToSupabase() {
@@ -8291,6 +8372,122 @@ async function saveNewClient(){
       renderClientList();
     }catch(e){toast('Save failed: '+e.message,'warning');}
   }
+}
+
+
+// ══ TECHNICIAN MANAGEMENT ════════════════════════════════════════════════════
+
+function renderTechList() {
+  var search=(document.getElementById('tech-list-search')||{}).value||'';
+  var body=document.getElementById('tech-list-body');
+  var stats=document.getElementById('tech-list-stats');
+  if(!body) return;
+  var q=search.toLowerCase().trim();
+
+  // All techs: embedded NORTECH_EMPLOYEES + custom from Supabase
+  var empRows=NORTECH_EMPLOYEES.map(function(e){
+    return {id:e.id,name:e.name,empNum:e.emp,province:e.province||'AB',
+      payRate:e.rate||e.payRate||0,role:e.type||'',active:true,source:'embedded'};
+  });
+  var customNames=new Set(_customTechs.map(function(t){return t.name.toLowerCase();}));
+  var combined=empRows.concat(_customTechs.map(function(t){return Object.assign({},t,{source:'custom'});}));
+
+  if(q) combined=combined.filter(function(t){
+    return (t.name||'').toLowerCase().includes(q)||(t.empNum||'').includes(q);
+  });
+  combined.sort(function(a,b){return (a.name||'').localeCompare(b.name||'');});
+
+  if(!combined.length){
+    body.innerHTML='<div style="padding:2rem;text-align:center;color:var(--muted);font-size:.8rem">No technicians found</div>';
+    return;
+  }
+
+  body.innerHTML=combined.map(function(t){
+    var rateColor=t.payRate?'var(--green)':'var(--nor-accent)';
+    var rateStr=t.payRate?('$'+parseFloat(t.payRate).toFixed(2)+'/hr'):'MISSING';
+    var srcBadge=t.source==='embedded'
+      ?'<span style="font-size:.68rem;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,.06);color:var(--muted)">System</span>'
+      :'<span style="font-size:.68rem;padding:1px 6px;border-radius:3px;background:rgba(34,197,94,.1);color:#22C55E">Custom</span>';
+    var statusStr=t.active===false?'<span style="font-size:.68rem;color:var(--muted)">(Inactive)</span>':'';
+    var editBtn=t.source==='custom'
+      ?'<button class="btn btn-ghost btn-sm" style="font-size:.7rem;padding:3px 8px" onclick="editOpsTech(&quot;"+t.id+"&quot;)">Edit</button>'
+      :'<span style="font-size:.7rem;color:var(--muted)">System</span>';
+    return '<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 100px;gap:1rem;align-items:center;padding:.6rem 1rem;border-bottom:.5px solid rgba(255,255,255,.03)">'
+      +'<div style="font-size:.8rem;font-weight:600">'+t.name+' '+srcBadge+' '+statusStr+'</div>'
+      +'<div style="font-size:.75rem;color:var(--muted)">'+( t.empNum||'—')+'</div>'
+      +'<div style="font-size:.75rem;color:var(--muted)">'+(t.province||'—')+'</div>'
+      +'<div style="font-size:.75rem;font-weight:700;color:'+rateColor+'">'+rateStr+'</div>'
+      +'<div>'+editBtn+'</div>'
+      +'</div>';
+  }).join('');
+
+  if(stats){
+    var missing=combined.filter(function(t){return !t.payRate;}).length;
+    stats.textContent=combined.length+' technicians'+(missing?' · ⚠ '+missing+' missing pay rate':'');
+    if(missing) stats.style.color='var(--nor-accent)';
+  }
+}
+
+function openAddTechModalOps(editId) {
+  document.getElementById('ops-tech-edit-id').value=editId||'';
+  document.getElementById('add-tech-ops-title').textContent=editId?'Edit Technician':'Add Technician';
+  ['ops-tech-name','ops-tech-rate','ops-tech-emp','ops-tech-role'].forEach(function(k){
+    var el=document.getElementById(k); if(el) el.value='';
+  });
+  document.getElementById('ops-tech-province').value='';
+  document.getElementById('ops-tech-active').value='true';
+  if(editId) {
+    var t=_customTechs.find(function(x){return x.id===editId;});
+    if(t) {
+      document.getElementById('ops-tech-name').value=t.name||'';
+      document.getElementById('ops-tech-rate').value=t.payRate||'';
+      document.getElementById('ops-tech-emp').value=t.empNum||'';
+      document.getElementById('ops-tech-province').value=t.province||'';
+      document.getElementById('ops-tech-role').value=t.role||'';
+      document.getElementById('ops-tech-active').value=t.active===false?'false':'true';
+    }
+  }
+  openModal('add-tech-ops-modal');
+}
+
+function editOpsTech(id){ openAddTechModalOps(id); }
+
+async function saveOpsTech() {
+  var name=(document.getElementById('ops-tech-name').value||'').trim();
+  var rateStr=(document.getElementById('ops-tech-rate').value||'').trim();
+  var rate=parseFloat(rateStr)||0;
+  if(!name){ toast('Name is required','warning'); return; }
+  if(!rate){ toast('Pay rate is required — needed for margin calculations','warning'); return; }
+
+  var editId=document.getElementById('ops-tech-edit-id').value||'';
+  var id=editId||('tech_ops_'+Date.now().toString(36));
+  var isActive=document.getElementById('ops-tech-active').value!=='false';
+
+  var data={
+    id:id, name:name, payRate:rate,
+    empNum:document.getElementById('ops-tech-emp').value||'',
+    province:document.getElementById('ops-tech-province').value||'',
+    role:document.getElementById('ops-tech-role').value||'',
+    active:isActive,
+    source:'nortech_ops',
+    created:editId?((_customTechs.find(function(t){return t.id===editId;})||{}).created||new Date().toISOString()):new Date().toISOString(),
+    modified:new Date().toISOString(),
+  };
+
+  try {
+    await sbUpsert('technicians',id,data);
+    // Update _customTechs
+    var empNames=new Set(NORTECH_EMPLOYEES.map(function(e){return e.name.toLowerCase();}));
+    if(!empNames.has(name.toLowerCase())) {
+      var idx=_customTechs.findIndex(function(t){return t.id===id;});
+      if(idx>=0) _customTechs[idx]=data; else _customTechs.push(data);
+    }
+    // Update _techRates cache immediately
+    _techRates[name.toLowerCase().trim()]=rate;
+    toast((editId?'Updated':'Added')+': '+name,'success');
+    closeModal('add-tech-ops-modal');
+    renderTechList();
+  } catch(e){ toast('Save failed: '+e.message,'error'); }
 }
 
 function filterCustomers(q) {

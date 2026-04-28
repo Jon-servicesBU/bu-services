@@ -269,7 +269,7 @@ table.t tr:hover td{background:rgba(255,255,255,0.015)}
         <div class="form-group"><label class="form-label">Phone</label><input type="text" id="t-phone" class="form-input" placeholder="780-xxx-xxxx"></div>
       </div>
       <div class="form-group">
-        <label class="form-label">Pay Rate ($/hr) <span style="font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:none;letter-spacing:0">— admin only · used for margin calculations in Nortech Ops</span></label>
+        <label class="form-label">Pay Rate ($/hr) <span style="color:var(--red)">*</span> <span style="font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:none;letter-spacing:0">— required · used for margin calculations in Nortech Ops</span></label>
         <input type="number" id="t-payrate" class="form-input" placeholder="e.g. 40.20" step="0.01" min="0" style="max-width:200px">
       </div>
       <div class="form-group"><label class="form-label">Notes</label><textarea id="t-notes" class="form-textarea" placeholder="Any relevant notes…"></textarea></div>
@@ -838,6 +838,8 @@ function editTech(id) {
 async function saveTech() {
   const name=($('t-name').value||'').trim();
   if(!name){toast('Name is required','amber');return;}
+  const payRateVal=parseFloat(($('t-payrate').value||''))||0;
+  if(!payRateVal){toast('Pay rate is required — needed for margin calculations','amber');return;}
   const editId=$('t-edit-id').value||'';
   const id=editId||uid();
   const data={
@@ -848,7 +850,7 @@ async function saveTech() {
     email:$('t-email').value||'',
     phone:$('t-phone').value||'',
     notes:$('t-notes').value||'',
-    payRate:parseFloat($('t-payrate').value)||null,
+    payRate:payRateVal,
     active:($('t-active')||{}).checked!==false,
     created:editId?(_techs.find(t=>t.id===editId)||{}).created||today():today(),
     modified:today(),
