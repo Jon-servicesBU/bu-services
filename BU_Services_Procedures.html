@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nortech — Procedure Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04080F;--bg2:#080D17;--surface:#0F1828;--surface2:#131E30;--surface3:#172036;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#E8F0FA;--text2:#7A96B8;--text3:#2E4160;
+  --green:#22C55E;--green-dim:rgba(34,197,94,0.1);
+  --blue:#60A5FA;--blue-dim:rgba(96,165,250,0.1);
+  --amber:#F59E0B;--amber-dim:rgba(245,158,11,0.1);
+  --red:#EF4444;--red-dim:rgba(239,68,68,0.1);
+  --teal:#2DD4BF;--teal-dim:rgba(45,212,191,0.1);
+  --purple:#A78BFA;--purple-dim:rgba(167,139,250,0.1);
+  --radius:8px;--radius-lg:12px;
+  --font:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:13px}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 800px 500px at 10% 20%,rgba(45,212,191,0.04),transparent 70%),radial-gradient(ellipse 600px 800px at 90% 80%,rgba(167,139,250,0.03),transparent 70%);pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+#app{position:relative;z-index:1;min-height:100vh}
+
+/* ── Topbar ── */
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(8,13,23,0.95);border-bottom:0.5px solid var(--border);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
+.tb-brand{display:flex;align-items:center;gap:12px}
+.tb-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--purple),var(--teal));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;letter-spacing:-0.5px;font-family:var(--mono)}
+.tb-name{font-size:13px;font-weight:700}
+.tb-sub{font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-family:var(--mono)}
+
+/* ── Layout ── */
+#main{max-width:1200px;margin:0 auto;padding:24px 20px 80px}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;border:0.5px solid;transition:all .15s;font-family:var(--font);white-space:nowrap}
+.btn-primary{background:linear-gradient(135deg,var(--teal),var(--blue));border-color:transparent;color:#fff}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-ghost{background:transparent;border-color:var(--border2);color:var(--text2)}
+.btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
+.btn-green{background:var(--green-dim);border-color:rgba(34,197,94,0.25);color:var(--green)}
+.btn-red{background:var(--red-dim);border-color:rgba(239,68,68,0.25);color:var(--red)}
+.btn-amber{background:var(--amber-dim);border-color:rgba(245,158,11,0.25);color:var(--amber)}
+.btn-purple{background:var(--purple-dim);border-color:rgba(167,139,250,0.25);color:var(--purple)}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px}
+.card-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;font-family:var(--mono);display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+/* ── Forms ── */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:5px;font-family:var(--mono)}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:8px 12px;outline:none;transition:border-color .15s;font-family:var(--font)}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:rgba(45,212,191,0.4);box-shadow:0 0 0 3px rgba(45,212,191,0.06)}
+.form-select{appearance:none;cursor:pointer}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.6}
+.form-row{display:grid;gap:12px}
+.form-row.cols-2{grid-template-columns:1fr 1fr}
+.form-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+.form-row.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:640px){.form-row.cols-2,.form-row.cols-3,.form-row.cols-4{grid-template-columns:1fr}}
+select option{background:var(--surface)}
+.required::after{content:' *';color:var(--red)}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:4px;padding:4px;background:var(--bg2);border-radius:var(--radius);border:0.5px solid var(--border);margin-bottom:24px}
+.tab{padding:7px 20px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--text2);transition:all .15s;font-family:var(--font)}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+.tab:hover:not(.active){color:var(--text)}
+
+/* ── Procedure cards grid ── */
+.proc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.proc-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.proc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.proc-card.nortech::before{background:linear-gradient(90deg,var(--teal),transparent)}
+.proc-card.client::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.proc-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+.proc-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px}
+.proc-code{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--teal)}
+.proc-card.client .proc-code{color:var(--purple)}
+.proc-rev{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:1px}
+.proc-name{font-size:12px;color:var(--text);font-weight:600;margin-bottom:6px}
+.proc-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.proc-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;letter-spacing:0.5px}
+.tag-type{background:var(--blue-dim);color:var(--blue)}
+.tag-active{background:var(--green-dim);color:var(--green)}
+.tag-superseded{background:rgba(107,114,128,0.1);color:#6B7280}
+.tag-draft{background:var(--amber-dim);color:var(--amber)}
+.tag-client{background:var(--purple-dim);color:var(--purple)}
+.proc-fields{font-size:10px;color:var(--text2);margin-top:8px;line-height:1.6;font-family:var(--mono)}
+.proc-pdf-badge{display:flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:4px;margin-top:8px;font-family:var(--mono)}
+.has-pdf{background:var(--green-dim);color:var(--green)}
+.no-pdf{background:rgba(255,255,255,0.04);color:var(--text3)}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:640px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.5)}
+.modal-header{padding:20px 24px 16px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface2);z-index:1}
+.modal-title{font-size:15px;font-weight:700}
+.modal-close{width:28px;height:28px;border-radius:6px;border:0.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{border-color:var(--border2);color:var(--text)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:14px 24px;border-top:0.5px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* ── Detail panel ── */
+.detail-panel{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:24px}
+.detail-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.detail-code{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--teal)}
+.detail-name{font-size:16px;font-weight:700;color:var(--text);margin-top:2px}
+.detail-rev{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:4px}
+.detail-section{margin-bottom:20px}
+.detail-section-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:var(--mono);margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid var(--border)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.detail-field{font-size:11px}
+.detail-field .label{font-size:9px;color:var(--text3);font-family:var(--mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.detail-field .value{color:var(--text);font-family:var(--mono)}
+.rev-history{display:flex;flex-direction:column;gap:8px}
+.rev-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:var(--radius);border:0.5px solid var(--border)}
+.rev-num{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text)}
+.rev-date{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.rev-note{font-size:11px;color:var(--text2);flex:1}
+
+/* ── PDF upload zone ── */
+.pdf-drop-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:24px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.pdf-drop-zone:hover,.pdf-drop-zone.drag-over{border-color:rgba(45,212,191,0.5);background:var(--teal-dim)}
+.pdf-drop-zone .drop-icon{font-size:28px;margin-bottom:8px;opacity:.5}
+.pdf-drop-zone .drop-text{font-size:12px;color:var(--text2)}
+.pdf-drop-zone .drop-sub{font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono)}
+.pdf-attached{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--green-dim);border:0.5px solid rgba(34,197,94,0.25);border-radius:var(--radius)}
+.pdf-attached .pdf-icon{font-size:20px}
+.pdf-attached .pdf-name{font-size:12px;color:var(--green);font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Search/filter bar ── */
+.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.filter-bar .form-input{max-width:240px}
+.filter-bar .form-select{max-width:160px}
+
+/* ── Empty state ── */
+.empty-state{text-align:center;padding:56px 24px;color:var(--text3)}
+.empty-icon{font-size:44px;margin-bottom:12px;opacity:.35}
+.empty-title{font-size:14px;color:var(--text2);font-weight:600;margin-bottom:6px}
+.empty-sub{font-size:12px;max-width:360px;margin:0 auto;line-height:1.6}
+
+/* ── Stats row ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.stat-val{font-size:24px;font-weight:800;font-family:var(--mono);line-height:1}
+.stat-label{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:4px;font-family:var(--mono)}
+
+/* ── Toast ── */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 16px;border-radius:var(--radius);border:0.5px solid rgba(255,255,255,0.1);font-size:12px;animation:slideIn .2s ease;max-width:300px;backdrop-filter:blur(8px)}
+.toast-green{background:rgba(15,24,40,0.95);border-left:3px solid var(--green)}
+.toast-amber{background:rgba(15,24,40,0.95);border-left:3px solid var(--amber)}
+.toast-red{background:rgba(15,24,40,0.95);border-left:3px solid var(--red)}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── Divider ── */
+hr.divider{border:none;border-top:0.5px solid var(--border);margin:16px 0}
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">PRO</div>
+    <div>
+      <div class="tb-name">Procedure Library</div>
+      <div class="tb-sub">Nortech Advanced NDT</div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost btn-sm" onclick="openModal('nortech')">+ Nortech Procedure</button>
+    <button class="btn btn-purple btn-sm" onclick="openModal('client')">+ Client Procedure</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- Stats -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-val" id="stat-total" style="color:var(--teal)">0</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-active" style="color:var(--green)">0</div><div class="stat-label">Active</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-nortech" style="color:var(--teal)">0</div><div class="stat-label">Nortech</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-client" style="color:var(--purple)">0</div><div class="stat-label">Client</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-pdf" style="color:var(--amber)">0</div><div class="stat-label">With PDF</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-super" style="color:#6B7280">0</div><div class="stat-label">Superseded</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tab-all" onclick="setTab('all')">All Procedures</button>
+    <button class="tab" id="tab-nortech" onclick="setTab('nortech')">Nortech</button>
+    <button class="tab" id="tab-client" onclick="setTab('client')">Client</button>
+    <button class="tab" id="tab-superseded" onclick="setTab('superseded')">Superseded</button>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <input type="text" id="search-input" class="form-input" placeholder="Search procedures…" oninput="renderProcs()">
+    <select id="filter-type" class="form-select" onchange="renderProcs()">
+      <option value="">All report types</option>
+      <option>HT</option><option>MT</option><option>PT</option><option>UT</option>
+      <option>AUT</option><option>RT</option><option>ET</option><option>VT</option>
+      <option>PMI</option><option>FT</option><option>NACE</option><option>OES</option>
+    </select>
+    <select id="filter-status" class="form-select" onchange="renderProcs()">
+      <option value="">All statuses</option>
+      <option>Active</option><option>Draft</option><option>Superseded</option>
+    </select>
+  </div>
+
+  <!-- Procedure grid -->
+  <div id="proc-grid" class="proc-grid"></div>
+
+</div><!-- /main -->
+
+<!-- ══ MODAL: ADD / EDIT PROCEDURE ══ -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">New Procedure</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Owner type (hidden, set by button) -->
+      <input type="hidden" id="m-owner-type" value="nortech">
+
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label class="form-label required">Procedure Code</label>
+          <input type="text" id="m-code" class="form-input" placeholder="e.g. MTP-01">
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;font-family:var(--mono)">Without revision — e.g. MTP-01</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Current Revision</label>
+          <input type="text" id="m-rev" class="form-input" placeholder="e.g. REV.10">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label required">Procedure Name</label>
+        <input type="text" id="m-name" class="form-input" placeholder="e.g. Magnetic Particle Testing Procedure">
+      </div>
+
+      <div class="form-row cols-2" id="m-type-row">
+        <div class="form-group">
+          <label class="form-label required">Report Type</label>
+          <select id="m-report-type" class="form-select">
+            <option value="">Select type…</option>
+            <option>HT</option><option>MT</option><option>PT</option><option>UT</option>
+            <option>AUT</option><option>RT</option><option>ET</option><option>VT</option>
+            <option>PMI</option><option>FT</option><option>NACE</option><option>OES</option>
+            <option value="MULTI">Multiple</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Status</label>
+          <select id="m-status" class="form-select">
+            <option>Active</option><option>Draft</option><option>Superseded</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Client-only field -->
+      <div class="form-group" id="m-client-name-group" style="display:none">
+        <label class="form-label">Client Name</label>
+        <input type="text" id="m-client-name" class="form-input" placeholder="e.g. YANDA CANADA LTD">
+      </div>
+
+      <!-- Nortech auto-populate fields -->
+      <div id="m-autopopulate-section">
+        <hr class="divider">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Auto-populate fields (filled into reports when this procedure is selected)</div>
+
+        <div class="form-group">
+          <label class="form-label">Test Method</label>
+          <input type="text" id="m-method" class="form-input" placeholder="e.g. ASTM E-709 (2021)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Acceptance Standard</label>
+          <input type="text" id="m-standard" class="form-input" placeholder="e.g. ASME B31.3 N (2024)">
+        </div>
+
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label class="form-label">Default Surface Condition</label>
+            <input type="text" id="m-surface" class="form-input" placeholder="e.g. Bare Metal, Welded">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Default Material Type</label>
+            <input type="text" id="m-mattype" class="form-input" placeholder="e.g. CS, SS, As Listed">
+          </div>
+        </div>
+
+        <!-- Method-specific defaults -->
+        <div id="m-method-defaults"></div>
+      </div>
+
+      <hr class="divider">
+      <div class="form-group">
+        <label class="form-label">Notes / Description</label>
+        <textarea id="m-notes" class="form-textarea" placeholder="Optional notes, scope, or description…"></textarea>
+      </div>
+
+      <!-- PDF attachment -->
+      <div class="form-group">
+        <label class="form-label">Procedure Document (PDF)</label>
+        <div id="pdf-drop-area">
+          <div class="pdf-drop-zone" id="pdf-zone" onclick="document.getElementById('pdf-file-input').click()"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handlePDFDrop(event)">
+            <div class="drop-icon">📄</div>
+            <div class="drop-text">Drop PDF here or click to upload</div>
+            <div class="drop-sub">Will be attached when you save</div>
+          </div>
+        </div>
+        <input type="file" id="pdf-file-input" accept=".pdf" onchange="handlePDFSelect(this)">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Revision Notes</label>
+        <input type="text" id="m-rev-notes" class="form-input" placeholder="e.g. Updated acceptance criteria section 4.3">
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveProc()">Save Procedure</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: PROCEDURE DETAIL ══ -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="detail-title">Procedure Detail</div>
+        <div id="detail-subtitle" style="font-size:11px;color:var(--text2);margin-top:2px"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-detail').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer" id="detail-footer"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-container"></div>
+
+<script>
+// ══ CONFIG ════════════════════════════════════════════════════════════════════
+const SB_URL = 'https://tbcoktkpjwdvnhqtuups.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiY29rdGtwandkdm5ocXR1dXBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MDM1OTIsImV4cCI6MjA5MjM3OTU5Mn0.8Zw75YQYmNPXKoLE_bK23Vs2j3ZeqCUwAYUFt5-8YWs';
+
+// ══ STATE ══════════════════════════════════════════════════════════════════════
+let _procs = [];
+let _editId = null;
+let _pdfData = null; // base64 of pending PDF
+let _pdfName = '';
+let _currentTab = 'all';
+
+// ══ PROCEDURE DEFAULTS (seeded on first load) ══════════════════════════════════
+const NORTECH_DEFAULTS = [
+  { code:'MTP-01',  rev:'REV.10', name:'Magnetic Particle Testing Procedure',      reportType:'MT',   method:'ASTM E-709 (2021)',       standard:'CSA W59 Clause 11',         matType:'As Listed', ownerType:'nortech', status:'Active' },
+  { code:'HTP-01',  rev:'REV.2',  name:'Hardness Testing Procedure',               reportType:'HT',   method:'ASTM A1038 (2019)',       standard:'ASME B31.3 N (2022)',       matType:'As Listed', ownerType:'nortech', status:'Active' },
+  { code:'AUTP-01', rev:'REV.10', name:'AUT / Phased Array Testing Procedure',     reportType:'AUT',  method:'ASME BPVC. V (2023), ARTICLE 4', standard:'ASME B31.3 N (2024)', matType:'CS',        ownerType:'nortech', status:'Active' },
+  { code:'RTP-01',  rev:'REV.10', name:'Radiographic Testing Procedure',           reportType:'RT',   method:'ASME SEC V, ART 2',       standard:'ASME B31.3N 2022',          matType:'CS',        ownerType:'nortech', status:'Active' },
+  { code:'UTP-03',  rev:'REV.05', name:'Ultrasonic Testing Procedure',             reportType:'UT',   method:'AWS D1.5, SEC 8 (2025)',  standard:'AWS D1.5 sec.8 (2025)',     matType:'As Listed', ownerType:'nortech', status:'Active' },
+  { code:'PTP-01',  rev:'REV.8',  name:'Liquid Penetrant Testing Procedure',       reportType:'PT',   method:'QS-1008 REV. H',          standard:'QS-1008 REV. H / API 6A PSL 3 (2018)', matType:'As Listed', ownerType:'nortech', status:'Active' },
+  { code:'VTP-01',  rev:'REV.03', name:'Visual Inspection Procedure',              reportType:'VT',   method:'DIRECT VISUAL COATING INSPECTION', standard:'SSPC-SP10/NACE No.2', matType:'Carbon Steel', ownerType:'nortech', status:'Active' },
+  { code:'PMI-01',  rev:'REV.1',  name:'Positive Material Identification Procedure', reportType:'PMI', method:'X-RAY FLUORESCENCE',     standard:'CLIENT INFORMATION ONLY',   matType:'As Listed', ownerType:'nortech', status:'Active' },
+  { code:'FTP-01',  rev:'REV.0',  name:'Ferrite Testing Procedure',                reportType:'FT',   method:'ASTM E562',               standard:'As Per Client',             matType:'Stainless Steel', ownerType:'nortech', status:'Active' },
+  { code:'OESP-01', rev:'REV.0',  name:'Optical Emission Spectrometry Procedure',  reportType:'OES',  method:'OPTICAL EMISSION SPECTROMETRY', standard:'NACE MR 0175 (2021)', matType:'CS',        ownerType:'nortech', status:'Active' },
+];
+
+const CLIENT_DEFAULTS = [
+  { code:'YCQE-PS-042', rev:'REV.0', name:'YANDA Weld Inspection Procedure',      reportType:'MT',  clientName:'YANDA CANADA LTD',  ownerType:'client', status:'Active', method:'', standard:'' },
+  { code:'QS-1020',     rev:'REV.0', name:'Penn United ET Surface Scan Procedure', reportType:'ET', clientName:'PENN UNITED TECHNOLOGIES', ownerType:'client', status:'Active', method:'ET Surface Scan', standard:'QS-1020 Rev.0' },
+  { code:'QS-1008',     rev:'REV.H', name:'Master Flo LP Testing Procedure',      reportType:'PT',  clientName:'MASTER FLO VALVE INC.', ownerType:'client', status:'Active', method:'', standard:'QS-1008 REV. H / API 6A PSL 3 (2018)' },
+];
+
+// Method-specific default fields shown in edit modal
+const METHOD_DEFAULTS = {
+  MT: `<div class="form-row cols-2" style="margin-top:12px">
+    <div class="form-group"><label class="form-label">Default Magnetizing Method</label><input type="text" id="md-mag-method" class="form-input" placeholder="e.g. AC Yoke Continuous"></div>
+    <div class="form-group"><label class="form-label">Default Particle Type</label><input type="text" id="md-particles" class="form-input" placeholder="e.g. Wet Non-Fluorescent"></div>
+  </div>`,
+  PT: `<div class="form-row cols-2" style="margin-top:12px">
+    <div class="form-group"><label class="form-label">Default Penetrant Method</label><input type="text" id="md-pt-method" class="form-input" placeholder="e.g. Fluorescent Water Washable"></div>
+    <div class="form-group"><label class="form-label">Default Developer</label><input type="text" id="md-pt-dev" class="form-input" placeholder="e.g. Form D Dry"></div>
+  </div>`,
+  AUT: `<div class="form-row cols-2" style="margin-top:12px">
+    <div class="form-group"><label class="form-label">Default Couplant</label><input type="text" id="md-couplant" class="form-input" placeholder="e.g. Water / Sonatech UT-X"></div>
+    <div class="form-group"><label class="form-label">Scan Standard</label><input type="text" id="md-scan-std" class="form-input"></div>
+  </div>`,
+  RT: `<div class="form-row cols-2" style="margin-top:12px">
+    <div class="form-group"><label class="form-label">Default Isotope</label><input type="text" id="md-isotope" class="form-input" placeholder="e.g. Iridium 192"></div>
+    <div class="form-group"><label class="form-label">Default Film</label><input type="text" id="md-film" class="form-input" placeholder="e.g. AGFA D4,D5,D7"></div>
+  </div>`,
+};
+
+// ══ HELPERS ═══════════════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+const uid = () => 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const today = () => new Date().toISOString().slice(0,10);
+
+function toast(msg, type='green') {
+  const c=$('toast-container'); const t=document.createElement('div');
+  t.className='toast toast-'+type; t.textContent=msg; c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},2800);
+}
+
+// ══ SUPABASE ══════════════════════════════════════════════════════════════════
+const sbH = {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+
+async function sbList(table) {
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?select=*&limit=10000`,{headers:sbH});
+  if(!r.ok) throw new Error(table+' '+r.status);
+  return r.json();
+}
+async function sbUpsert(table, id, data) {
+  const r=await fetch(`${SB_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{...sbH,'Prefer':'resolution=merge-duplicates,return=representation'},
+    body:JSON.stringify({id,...data})
+  });
+  if(!r.ok){const e=await r.text();throw new Error(e);}
+  return r.json();
+}
+async function sbDelete(table, id) {
+  const r=await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`,{method:'DELETE',headers:sbH});
+  return r.ok;
+}
+
+// ══ INIT ══════════════════════════════════════════════════════════════════════
+async function init() {
+  try {
+    _procs = await sbList('procedures');
+  } catch(e) {
+    // Load from localStorage fallback
+    _procs = JSON.parse(localStorage.getItem('proc_cache')||'[]');
+    toast('Offline mode — showing cached data','amber');
+  }
+
+  // Seed defaults if empty
+  if(!_procs.length) await seedDefaults();
+
+  renderStats();
+  renderProcs();
+}
+
+async function seedDefaults() {
+  const all = [...NORTECH_DEFAULTS, ...CLIENT_DEFAULTS];
+  for(const p of all) {
+    const full = {id:uid(), ...p,
+      created:today(), modified:today(),
+      revisionHistory:[{rev:p.rev, date:today(), notes:'Initial entry', status:'Active'}],
+      pdfData:null, pdfName:null,
+      methodDefaults:{},
+    };
+    try { await sbUpsert('procedures', full.id, full); } catch(e) { /* ignore */ }
+    _procs.push(full);
+  }
+  toast('Default procedures loaded','green');
+  localStorage.setItem('proc_cache', JSON.stringify(_procs));
+}
+
+// ══ TABS ══════════════════════════════════════════════════════════════════════
+function setTab(tab) {
+  _currentTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  $('tab-'+tab).classList.add('active');
+  renderProcs();
+}
+
+// ══ RENDER ════════════════════════════════════════════════════════════════════
+function renderStats() {
+  $('stat-total').textContent=_procs.length;
+  $('stat-active').textContent=_procs.filter(p=>p.status==='Active').length;
+  $('stat-nortech').textContent=_procs.filter(p=>p.ownerType==='nortech').length;
+  $('stat-client').textContent=_procs.filter(p=>p.ownerType==='client').length;
+  $('stat-pdf').textContent=_procs.filter(p=>p.pdfData||p.pdfName).length;
+  $('stat-super').textContent=_procs.filter(p=>p.status==='Superseded').length;
+}
+
+function getStatusTag(status) {
+  const m={Active:'tag-active',Draft:'tag-draft',Superseded:'tag-superseded'};
+  return `<span class="proc-tag ${m[status]||'tag-active'}">${status}</span>`;
+}
+
+function renderProcs() {
+  const search=($('search-input')||{}).value||'';
+  const typeF=($('filter-type')||{}).value||'';
+  const statF=($('filter-status')||{}).value||'';
+  let rows=_procs.slice();
+
+  // Tab filter
+  if(_currentTab==='nortech') rows=rows.filter(p=>p.ownerType==='nortech');
+  else if(_currentTab==='client') rows=rows.filter(p=>p.ownerType==='client');
+  else if(_currentTab==='superseded') rows=rows.filter(p=>p.status==='Superseded');
+  else rows=rows.filter(p=>p.status!=='Superseded');
+
+  // Search
+  if(search) rows=rows.filter(p=>{
+    const q=search.toLowerCase();
+    return (p.code||'').toLowerCase().includes(q)
+      ||(p.name||'').toLowerCase().includes(q)
+      ||(p.clientName||'').toLowerCase().includes(q)
+      ||(p.method||'').toLowerCase().includes(q);
+  });
+  if(typeF) rows=rows.filter(p=>p.reportType===typeF||p.reportType==='MULTI');
+  if(statF) rows=rows.filter(p=>p.status===statF);
+
+  // Sort: Nortech first, then by code
+  rows.sort((a,b)=>{
+    if(a.ownerType!==b.ownerType) return a.ownerType==='nortech'?-1:1;
+    return (a.code||'').localeCompare(b.code||'');
+  });
+
+  const grid=$('proc-grid');
+  if(!rows.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📋</div><div class="empty-title">No procedures found</div><div class="empty-sub">Add your first procedure or adjust the filters</div></div>`;
+    return;
+  }
+
+  grid.innerHTML=rows.map(p=>`
+    <div class="proc-card ${p.ownerType}" onclick="showDetail('${p.id}')">
+      <div class="proc-card-header">
+        <div>
+          <div class="proc-code">${p.code||'—'}</div>
+          <div class="proc-rev">${p.rev||''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          ${getStatusTag(p.status||'Active')}
+          ${p.ownerType==='client'?`<span class="proc-tag tag-client">CLIENT</span>`:''}
+        </div>
+      </div>
+      <div class="proc-name">${p.name||'—'}</div>
+      <div class="proc-meta">
+        ${p.reportType?`<span class="proc-tag tag-type">${p.reportType}</span>`:''}
+        ${p.clientName?`<span class="proc-tag" style="background:rgba(255,255,255,0.04);color:var(--text2)">${p.clientName}</span>`:''}
+      </div>
+      ${p.method||p.standard?`<div class="proc-fields">${p.method?p.method+'<br>':''}${p.standard||''}</div>`:''}
+      <div class="proc-pdf-badge ${p.pdfData||p.pdfName?'has-pdf':'no-pdf'}">
+        ${p.pdfData||p.pdfName?'📄 PDF attached':'📄 No PDF yet'}
+      </div>
+    </div>`).join('');
+}
+
+// ══ DETAIL VIEW ══════════════════════════════════════════════════════════════
+function showDetail(id) {
+  const p=_procs.find(x=>x.id===id); if(!p) return;
+  const isNortech=p.ownerType==='nortech';
+  $('detail-title').textContent=p.code+(p.rev?' '+p.rev:'');
+  $('detail-subtitle').textContent=p.name+(p.clientName?' · '+p.clientName:'');
+
+  const revHtml=(p.revisionHistory||[]).slice().reverse().map(r=>`
+    <div class="rev-item">
+      <div class="rev-num">${r.rev}</div>
+      <div class="rev-date">${r.date||''}</div>
+      <div class="rev-note">${r.notes||'—'}</div>
+      ${r.status?`<span class="proc-tag ${r.status==='Active'?'tag-active':'tag-superseded'}">${r.status}</span>`:''}
+    </div>`).join('');
+
+  const mdFields=p.methodDefaults||{};
+  const mdHtml=Object.keys(mdFields).length?`
+    <div class="detail-section">
+      <div class="detail-section-title">Method Defaults</div>
+      <div class="detail-grid">${Object.entries(mdFields).map(([k,v])=>`<div class="detail-field"><div class="label">${k}</div><div class="value">${v}</div></div>`).join('')}</div>
+    </div>`:'';
+
+  $('detail-body').innerHTML=`
+    <div class="detail-grid" style="margin-bottom:16px">
+      <div class="detail-field"><div class="label">Type</div><div class="value">${p.ownerType==='nortech'?'Nortech Procedure':'Client Procedure'}</div></div>
+      <div class="detail-field"><div class="label">Report Type</div><div class="value">${p.reportType||'—'}</div></div>
+      ${p.clientName?`<div class="detail-field"><div class="label">Client</div><div class="value">${p.clientName}</div></div>`:''}
+      <div class="detail-field"><div class="label">Status</div><div class="value">${getStatusTag(p.status||'Active')}</div></div>
+    </div>
+
+    ${p.method||p.standard?`<div class="detail-section">
+      <div class="detail-section-title">Auto-populate fields</div>
+      <div class="detail-grid">
+        ${p.method?`<div class="detail-field"><div class="label">Test Method</div><div class="value">${p.method}</div></div>`:''}
+        ${p.standard?`<div class="detail-field"><div class="label">Acceptance Standard</div><div class="value">${p.standard}</div></div>`:''}
+        ${p.surface?`<div class="detail-field"><div class="label">Surface Condition</div><div class="value">${p.surface}</div></div>`:''}
+        ${p.matType?`<div class="detail-field"><div class="label">Material Type</div><div class="value">${p.matType}</div></div>`:''}
+      </div>
+    </div>`:''}
+
+    ${mdHtml}
+
+    ${p.notes?`<div class="detail-section"><div class="detail-section-title">Notes</div><div style="font-size:12px;color:var(--text2);line-height:1.7">${p.notes}</div></div>`:''}
+
+    <div class="detail-section">
+      <div class="detail-section-title">Revision History</div>
+      <div class="rev-history">${revHtml||'<div style="font-size:11px;color:var(--text3)">No revision history</div>'}</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Procedure Document</div>
+      ${p.pdfData?`
+        <div class="pdf-attached">
+          <span class="pdf-icon">📄</span>
+          <span class="pdf-name">${p.pdfName||'procedure.pdf'}</span>
+          <button class="btn btn-ghost btn-sm" onclick="viewPDF('${p.id}')">View</button>
+          <button class="btn btn-ghost btn-sm" onclick="downloadPDF('${p.id}')">⬇ Download</button>
+        </div>`:`
+        <div class="pdf-drop-zone" onclick="triggerPDFUploadForExisting('${p.id}')"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handlePDFDropExisting(event,'${p.id}')">
+          <div class="drop-icon">📄</div>
+          <div class="drop-text">Drop PDF here to attach</div>
+          <div class="drop-sub">Upload when document is available</div>
+        </div>
+        <input type="file" id="existing-pdf-input-${p.id}" accept=".pdf" onchange="attachPDFToExisting(this,'${p.id}')">`
+      }
+    </div>`;
+
+  $('detail-footer').innerHTML=`
+    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('modal-detail').classList.remove('open')">Close</button>
+    ${isNortech?`<button class="btn btn-amber btn-sm" onclick="promoteRevision('${p.id}')">↑ New Revision</button>`:''}
+    <button class="btn btn-ghost btn-sm" onclick="editProc('${p.id}')">✏ Edit</button>
+    <button class="btn btn-red btn-sm" onclick="deleteProc('${p.id}')">Delete</button>`;
+
+  $('modal-detail').classList.add('open');
+}
+
+// ══ MODAL ════════════════════════════════════════════════════════════════════
+function openModal(ownerType, existingId) {
+  _editId=existingId||null;
+  _pdfData=null; _pdfName='';
+  $('m-owner-type').value=ownerType||'nortech';
+  $('modal-title').textContent=existingId?'Edit Procedure':(ownerType==='client'?'New Client Procedure':'New Nortech Procedure');
+  $('m-client-name-group').style.display=ownerType==='client'?'':'none';
+  $('m-autopopulate-section').style.display=ownerType==='nortech'?'':'none';
+
+  // Clear form
+  ['m-code','m-rev','m-name','m-method','m-standard','m-surface','m-mattype','m-notes','m-rev-notes','m-client-name'].forEach(k=>{const el=$(k);if(el)el.value='';});
+  $('m-report-type').value='';
+  $('m-status').value='Active';
+  $('m-method-defaults').innerHTML='';
+  resetPDFZone();
+
+  // Fill if editing
+  if(existingId) {
+    const p=_procs.find(x=>x.id===existingId); if(!p) return;
+    $('m-code').value=p.code||'';
+    $('m-rev').value=p.rev||'';
+    $('m-name').value=p.name||'';
+    $('m-report-type').value=p.reportType||'';
+    $('m-status').value=p.status||'Active';
+    $('m-method').value=p.method||'';
+    $('m-standard').value=p.standard||'';
+    $('m-surface').value=p.surface||'';
+    $('m-mattype').value=p.matType||'';
+    $('m-notes').value=p.notes||'';
+    $('m-client-name').value=p.clientName||'';
+    if(p.pdfData) showPDFAttached(p.pdfName||'procedure.pdf');
+    updateMethodDefaults(p.reportType, p.methodDefaults||{});
+    $('m-client-name-group').style.display=p.ownerType==='client'?'':'none';
+    $('m-autopopulate-section').style.display=p.ownerType==='nortech'?'':'none';
+  }
+
+  $('m-report-type').onchange=function(){ updateMethodDefaults(this.value,{}); };
+  $('modal-edit').classList.add('open');
+}
+
+function editProc(id) {
+  document.getElementById('modal-detail').classList.remove('open');
+  const p=_procs.find(x=>x.id===id); if(!p) return;
+  openModal(p.ownerType, id);
+}
+
+function closeModal() { $('modal-edit').classList.remove('open'); }
+
+function updateMethodDefaults(type, existing) {
+  const container=$('m-method-defaults');
+  container.innerHTML=METHOD_DEFAULTS[type]||'';
+  if(existing && Object.keys(existing).length) {
+    Object.entries(existing).forEach(([k,v])=>{ const el=$(k); if(el) el.value=v; });
+  }
+}
+
+// ══ SAVE ══════════════════════════════════════════════════════════════════════
+async function saveProc() {
+  const code=($('m-code').value||'').trim().toUpperCase();
+  const rev=($('m-rev').value||'').trim().toUpperCase();
+  const name=($('m-name').value||'').trim();
+  const ownerType=$('m-owner-type').value;
+  if(!code||!rev||!name){ toast('Code, revision and name are required','red'); return; }
+
+  // Collect method defaults
+  const md={};
+  $('m-method-defaults').querySelectorAll('input[id],select[id]').forEach(el=>{ if(el.value) md[el.id]=el.value; });
+
+  const existing=_editId?_procs.find(p=>p.id===_editId):null;
+  const id=_editId||uid();
+  const revHistory=existing?[...existing.revisionHistory||[]]:[]; 
+  const isNewRev=existing && existing.rev!==rev;
+  if(!existing||isNewRev){
+    // Archive old revision in history
+    if(isNewRev && existing) {
+      revHistory.forEach(r=>{ if(r.status==='Active') r.status='Superseded'; });
+    }
+    revHistory.push({rev, date:today(), notes:($('m-rev-notes').value||'').trim()||'', status:'Active'});
+  }
+
+  const proc = {
+    id, code, rev, name,
+    ownerType,
+    reportType: $('m-report-type').value||'',
+    status: $('m-status').value||'Active',
+    method: ($('m-method').value||'').trim(),
+    standard: ($('m-standard').value||'').trim(),
+    surface: ($('m-surface').value||'').trim(),
+    matType: ($('m-mattype').value||'').trim(),
+    notes: ($('m-notes').value||'').trim(),
+    clientName: ($('m-client-name').value||'').trim(),
+    methodDefaults: md,
+    pdfData: _pdfData||(existing?existing.pdfData:null),
+    pdfName: _pdfName||(existing?existing.pdfName:null),
+    revisionHistory: revHistory,
+    created: existing?existing.created:today(),
+    modified: today(),
+  };
+
+  const btn=$('modal-save-btn');
+  btn.textContent='Saving…'; btn.disabled=true;
+
+  try {
+    await sbUpsert('procedures', id, proc);
+    const idx=_procs.findIndex(p=>p.id===id);
+    if(idx>=0) _procs[idx]=proc; else _procs.push(proc);
+    localStorage.setItem('proc_cache', JSON.stringify(_procs));
+    toast((_editId?'Updated':'Added')+': '+code+' '+rev,'green');
+    closeModal();
+    renderStats();
+    renderProcs();
+  } catch(e) {
+    toast('Save failed: '+e.message,'red');
+  } finally {
+    btn.textContent='Save Procedure'; btn.disabled=false;
+  }
+}
+
+// ══ DELETE ════════════════════════════════════════════════════════════════════
+async function deleteProc(id) {
+  const p=_procs.find(x=>x.id===id); if(!p) return;
+  if(!confirm('Delete '+p.code+' '+p.rev+'? This cannot be undone.')) return;
+  await sbDelete('procedures', id);
+  _procs=_procs.filter(x=>x.id!==id);
+  localStorage.setItem('proc_cache',JSON.stringify(_procs));
+  document.getElementById('modal-detail').classList.remove('open');
+  renderStats(); renderProcs();
+  toast('Deleted','amber');
+}
+
+// ══ PROMOTE REVISION ══════════════════════════════════════════════════════════
+function promoteRevision(id) {
+  document.getElementById('modal-detail').classList.remove('open');
+  const p=_procs.find(x=>x.id===id); if(!p) return;
+  openModal(p.ownerType, id);
+  // Pre-fill next rev hint
+  const curRev=p.rev||'REV.0';
+  const m=curRev.match(/(\d+)$/);
+  if(m) $('m-rev').value='REV.'+(parseInt(m[1])+1);
+  toast('Update the revision number and save to create new revision','amber');
+}
+
+// ══ PDF HANDLING ══════════════════════════════════════════════════════════════
+function handlePDFSelect(input) {
+  if(!input.files||!input.files[0]) return;
+  readPDF(input.files[0]);
+  input.value='';
+}
+function handlePDFDrop(e) {
+  e.preventDefault();
+  $('pdf-zone').classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];
+  if(file&&file.type==='application/pdf') readPDF(file);
+  else toast('Please drop a PDF file','red');
+}
+function readPDF(file) {
+  const reader=new FileReader();
+  reader.onload=e=>{ _pdfData=e.target.result; _pdfName=file.name; showPDFAttached(file.name); };
+  reader.readAsDataURL(file);
+}
+function showPDFAttached(name) {
+  $('pdf-drop-area').innerHTML=`<div class="pdf-attached"><span class="pdf-icon">📄</span><span class="pdf-name">${name}</span><button class="btn btn-ghost btn-sm" onclick="resetPDFZone()">Remove</button></div>`;
+}
+function resetPDFZone() {
+  _pdfData=null; _pdfName='';
+  $('pdf-drop-area').innerHTML=`<div class="pdf-drop-zone" id="pdf-zone" onclick="document.getElementById('pdf-file-input').click()"
+    ondragover="event.preventDefault();this.classList.add('drag-over')"
+    ondragleave="this.classList.remove('drag-over')"
+    ondrop="handlePDFDrop(event)">
+    <div class="drop-icon">📄</div>
+    <div class="drop-text">Drop PDF here or click to upload</div>
+    <div class="drop-sub">Will be attached when you save</div>
+  </div>`;
+}
+
+function viewPDF(id) {
+  const p=_procs.find(x=>x.id===id); if(!p||!p.pdfData) return;
+  const w=window.open(''); w.document.write(`<iframe src="${p.pdfData}" style="width:100%;height:100vh;border:none"></iframe>`);
+}
+function downloadPDF(id) {
+  const p=_procs.find(x=>x.id===id); if(!p||!p.pdfData) return;
+  const a=document.createElement('a'); a.href=p.pdfData;
+  a.download=p.pdfName||p.code+'_'+p.rev+'.pdf'; a.click();
+}
+
+function triggerPDFUploadForExisting(id) {
+  document.getElementById('existing-pdf-input-'+id).click();
+}
+function handlePDFDropExisting(e, id) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];
+  if(file&&file.type==='application/pdf') attachFile(file, id);
+  else toast('Please drop a PDF file','red');
+}
+async function attachPDFToExisting(input, id) {
+  if(!input.files||!input.files[0]) return;
+  attachFile(input.files[0], id);
+}
+async function attachFile(file, id) {
+  const p=_procs.find(x=>x.id===id); if(!p) return;
+  toast('Attaching PDF…','amber');
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    p.pdfData=e.target.result; p.pdfName=file.name; p.modified=today();
+    try {
+      await sbUpsert('procedures', p.id, p);
+      localStorage.setItem('proc_cache',JSON.stringify(_procs));
+      toast('PDF attached to '+p.code,'green');
+      document.getElementById('modal-detail').classList.remove('open');
+      renderProcs();
+    } catch(err){ toast('Failed to save PDF: '+err.message,'red'); }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══ BOOT ══════════════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
