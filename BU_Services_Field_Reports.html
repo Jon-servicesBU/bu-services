@@ -170,8 +170,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 /* ── Print / PDF ── */
 #pdf-preview{display:none}
 @media print{
-  body>*:not(#pdf-preview){display:none!important}
-  #pdf-preview{display:block!important;background:#fff;color:#000;font-family:Arial,sans-serif;font-size:10pt;padding:0;margin:0}
+  #app,#topbar,#main,#toast-container{display:none!important}
+  #pdf-preview{display:block!important;position:fixed;inset:0;background:#fff;color:#000;font-family:Arial,sans-serif;font-size:10pt;padding:0;margin:0;z-index:9999}
   .pdf-page{padding:15mm;border:none;margin:0;page-break-after:always}
   .pdf-page:last-child{page-break-after:avoid}
   .pdf-header{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:10px}
